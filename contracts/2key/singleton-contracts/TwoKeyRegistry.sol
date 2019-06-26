@@ -16,12 +16,8 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
 
-    /// mapping user's address to user's name
-    mapping(address => string) public address2username;
     /// mapping user's name to user's address
     mapping(bytes32 => address) public username2currentAddress;
-    /// mapping username to array of addresses he is using/used
-    mapping(bytes32 => address[]) public username2AddressHistory;
 
 
     /// @notice Event is emitted when a user's name is changed
@@ -69,14 +65,14 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
             revert();
         }
         // remove previous name
-        bytes memory last_name = bytes(address2username[_sender]);
+        string memory username = PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _sender));
+        bytes memory last_name = bytes(username);
         if (last_name.length != 0) {
             username2currentAddress[name] = 0;
         }
-        address2username[_sender] = _name;
+        PROXY_STORAGE_CONTRACT.setString(keccak256("address2username", _sender), _name);
         username2currentAddress[name] = _sender;
-        // Add history of changes
-        username2AddressHistory[name].push(_sender);
+
         emit UserNameChanged(_sender, _name);
     }
 
@@ -264,7 +260,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     view
     returns (string)
     {
-        return address2username[_sender];
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _sender));
     }
 
 //    /**
@@ -276,7 +272,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 //    {
 //        require(isMaintainer(msg.sender));
 //        bytes32 userNameHex = stringToBytes32(userName);
-//        username2AddressHistory[userNameHex] = new address[](0);
 //        address _ethereumAddress = username2currentAddress[userNameHex];
 //        username2currentAddress[userNameHex] = address(0);
 //
@@ -354,7 +349,8 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     view
     returns (bool)
     {
-        bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]);
+        string memory username = PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _userAddress));
+        bytes memory tempEmptyStringTest = bytes(username);
         bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", _userAddress);
         address plasma = PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma);
         //notes[_userAddress].length == 0
@@ -414,5 +410,15 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     returns (address)
     {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256("walletTag2address", walletTag));
+    }
+
+    function address2username(
+        address keyAddress
+    )
+    public
+    view
+    returns (string)
+    {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", keyAddress));
     }
 }
