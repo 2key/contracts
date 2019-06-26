@@ -9,14 +9,12 @@ contract ITwoKeySingletonUtils {
 
     // Modifier to restrict method calls only to maintainers
     modifier onlyMaintainer {
-        address twoKeyMaintainersRegistry =
-        ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        .getContractProxyAddress("TwoKeyMaintainersRegistry");
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
         require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         _;
     }
 
-    // Internal function to fetch address from TwoKeyRegistry
+    // Internal function to fetch address from TwoKeyRegTwoistry
     function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);

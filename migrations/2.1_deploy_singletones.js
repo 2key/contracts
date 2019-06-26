@@ -760,7 +760,8 @@ module.exports = function deploy(deployer) {
                         console.log('Setting initial parameters in contract TwoKeyRegistry');
                         let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams
                         (
-                            TwoKeySingletonesRegistry.address
+                            TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyRegistrySTORAGE
                         );
 
                         resolve(txHash);

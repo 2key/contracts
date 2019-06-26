@@ -12,29 +12,34 @@ const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoo
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 
 module.exports = function deploy(deployer) {
-    deployer.deploy(TwoKeyCampaignValidatorStorage)
-    .then(() => TwoKeyCampaignValidatorStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyUpgradableExchangeStorage))
-    .then(() => TwoKeyUpgradableExchangeStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyEventSourceStorage))
-    .then(() => TwoKeyEventSourceStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyAdminStorage))
-    .then(() => TwoKeyAdminStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyFactoryStorage))
-    .then(() => TwoKeyFactoryStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyMaintainersRegistryStorage))
-    .then(() => TwoKeyMaintainersRegistryStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyExchangeRateStorage))
-    .then(() => TwoKeyExchangeRateStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyBaseReputationRegistryStorage))
-    .then(() => TwoKeyBaseReputationRegistryStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyCommunityTokenPoolStorage))
-    .then(() => TwoKeyCommunityTokenPoolStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyDeepFreezeTokenPoolStorage))
-    .then(() => TwoKeyDeepFreezeTokenPoolStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyLongTermTokenPoolStorage))
-    .then(() => TwoKeyLongTermTokenPoolStorage.deployed())
-    .then(() => deployer.deploy(TwoKeyRegistryStorage))
-    .then(() => TwoKeyRegistryStorage.deployed())
-    .then(() => true);
+    if(deployer.network.startsWith('public') || deployer.network.startsWith('dev')) {
+        deployer.deploy(TwoKeyCampaignValidatorStorage)
+            .then(() => TwoKeyCampaignValidatorStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyUpgradableExchangeStorage))
+            .then(() => TwoKeyUpgradableExchangeStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyEventSourceStorage))
+            .then(() => TwoKeyEventSourceStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyAdminStorage))
+            .then(() => TwoKeyAdminStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyFactoryStorage))
+            .then(() => TwoKeyFactoryStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyMaintainersRegistryStorage))
+            .then(() => TwoKeyMaintainersRegistryStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyExchangeRateStorage))
+            .then(() => TwoKeyExchangeRateStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyBaseReputationRegistryStorage))
+            .then(() => TwoKeyBaseReputationRegistryStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyCommunityTokenPoolStorage))
+            .then(() => TwoKeyCommunityTokenPoolStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyDeepFreezeTokenPoolStorage))
+            .then(() => TwoKeyDeepFreezeTokenPoolStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyLongTermTokenPoolStorage))
+            .then(() => TwoKeyLongTermTokenPoolStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyRegistryStorage))
+            .then(() => TwoKeyRegistryStorage.deployed())
+            .then(() => true);
+    } else {
+        console.log('This contracts are never going to be deployed to this network.');
+    }
+
 };

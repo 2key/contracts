@@ -114,9 +114,9 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyValidator
     {
-        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-        ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
-        ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
+//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+//        ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
+//        ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
     }
 
@@ -135,8 +135,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyAllowedContracts
     {
-        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-        ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
+//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+//        ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
         emit Joined(_campaign, _from, _to);
     }
 
@@ -155,8 +155,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyAllowedContracts
     {
-        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
+//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+//        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
         emit Converted(_campaign, _converter, _amountETHWei);
     }
 

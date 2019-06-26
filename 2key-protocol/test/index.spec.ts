@@ -542,14 +542,6 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(10000);
 
-    it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
-        console.log(from);
-        const addressesWhereUserIsContractor = await twoKeyProtocol.Registry.getCampaignsWhereUserIsContractor(from);
-        const addressesWhereUserIsModerator = await twoKeyProtocol.Registry.getCampaignsWhereUserIsModerator(from);
-
-        console.log("Contractor: " + addressesWhereUserIsContractor);
-        console.log("Moderator: " + addressesWhereUserIsModerator);
-    }).timeout(60000);
 
     // it('should save contractor link as the private meta hash', async() => {
     //     console.log(links.deployer);

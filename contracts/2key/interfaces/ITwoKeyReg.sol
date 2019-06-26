@@ -13,7 +13,6 @@ contract ITwoKeyReg {
     function getContractsWhereUserIsRefferer(address _userAddress) public view returns (address[]);
     function getContractsWhereUserIsConverter(address _userAddress) public view returns (address[]);
     function getTwoKeyEventSourceAddress() public view returns (address);
-    function addNameInternal(string _name, address _sender) private;
     function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public;
     function addNameByUser(string _name) public;
     function getName2Owner(string _name) public view returns (address);
