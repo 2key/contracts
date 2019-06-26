@@ -16,10 +16,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
 
-    /// mapping user's name to user's address
-    mapping(bytes32 => address) public username2currentAddress;
-
-
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
 
@@ -60,18 +56,17 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     internal
     {
         bytes32 name = stringToBytes32(_name);
+
+        bytes32 keyHashUserNameToAddress = keccak256("username2currentAddress", name);
+        bytes32 keyHashAddressToUserName = keccak256("address2username", _sender);
+
         // check if name is taken
-        if (username2currentAddress[name] != 0) {
+        if (PROXY_STORAGE_CONTRACT.getAddress(keyHashUserNameToAddress) != address(0)) {
             revert();
         }
-        // remove previous name
-        string memory username = PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _sender));
-        bytes memory last_name = bytes(username);
-        if (last_name.length != 0) {
-            username2currentAddress[name] = 0;
-        }
-        PROXY_STORAGE_CONTRACT.setString(keccak256("address2username", _sender), _name);
-        username2currentAddress[name] = _sender;
+
+        PROXY_STORAGE_CONTRACT.setString(keyHashAddressToUserName, _name);
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashUserNameToAddress, _sender);
 
         emit UserNameChanged(_sender, _name);
     }
@@ -176,15 +171,17 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         require(isMaintainer(msg.sender) == true || msg.sender == address(this));
         require(_address != address(0));
         bytes32 usernameHex = stringToBytes32(username);
-        require(username2currentAddress[usernameHex] == _address); // validating that username exists
+        address usersAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", usernameHex));
+        require(usersAddress == _address); // validating that username exists
 
         string memory concatenatedValues = strConcat(username,_username_walletName,"");
+
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
         require(message_signer == _address);
-        bytes32 walletTag = stringToBytes32(_username_walletName);
 
+        bytes32 walletTag = stringToBytes32(_username_walletName);
         bytes32 keyHashAddress2WalletTag = keccak256("address2walletTag", _address);
         PROXY_STORAGE_CONTRACT.setBytes32(keyHashAddress2WalletTag, walletTag);
 
@@ -246,7 +243,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     returns (address)
     {
         bytes32 name = stringToBytes32(_name);
-        return username2currentAddress[name];
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", _name));
     }
 
     /// View function - doesn't cost any gas to be executed
@@ -420,5 +417,15 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     returns (string)
     {
         return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", keyAddress));
+    }
+
+    function username2currentAddress(
+        bytes32 _username
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", _username));
     }
 }
