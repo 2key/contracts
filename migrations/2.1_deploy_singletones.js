@@ -686,7 +686,8 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
                         let txHash = await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams(
-                            TwoKeySingletonesRegistry.address
+                            TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeyReputationRegistrySTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {

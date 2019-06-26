@@ -9,36 +9,35 @@ import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../libraries/SafeMath.sol";
+import "./ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyBaseReputationRegistryStorage.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 1/31/19
  */
-contract TwoKeyBaseReputationRegistry is Upgradeable {
+contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
     using SafeMath for uint;
 
     bool initialized;
 
-    address twoKeySingletoneRegistry;
-    address twoKeyCampaignValidator;
-    address twoKeyMaintainersRegistry;
+    ITwoKeyBaseReputationRegistryStorage public PROXY_STORAGE_CONTRACT;
+
     /**
      * @notice Since using singletone pattern, this is replacement for the constructor
      * @param _twoKeySingletoneRegistry is the address of registry of all singleton contracts
      */
     function setInitialParams(
-        address _twoKeySingletoneRegistry
+        address _twoKeySingletoneRegistry,
+        address _proxyStorage
     )
     public
     {
         require(initialized == false);
 
-        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        twoKeyCampaignValidator =
-            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyCampaignValidator");
-        twoKeyMaintainersRegistry =
-            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletoneRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyBaseReputationRegistryStorage(_proxyStorage);
 
         initialized = true;
     }
@@ -206,6 +205,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     {
         address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
         require(msg.sender == conversionHandler);
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(acquisitionCampaign) == true);
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isConversionHandlerCodeValid(conversionHandler) == true);
     }
@@ -240,7 +240,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable {
     view
     returns (bytes)
     {
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress("TwoKeyRegistry");
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
 
         ReputationScore memory reputationAsContractor = address2contractorGlobalReputationScoreWei[_address];
