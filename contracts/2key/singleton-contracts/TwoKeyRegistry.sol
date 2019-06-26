@@ -15,12 +15,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     bool initialized;
 
     ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
-    /*
-        mapping address to wallet tag
-        wallet tag = username + '_' + walletname
-    */
-    // reverse mapping from walletTag to address
-    mapping(bytes32 => address) public walletTag2address;
+
     /// mapping user's address to user's name
     mapping(address => string) public address2username;
     /// mapping user's name to user's address
@@ -197,7 +192,8 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         bytes32 keyHashAddress2WalletTag = keccak256("address2walletTag", _address);
         PROXY_STORAGE_CONTRACT.setBytes32(keyHashAddress2WalletTag, walletTag);
 
-        walletTag2address[walletTag] = _address;
+        bytes32 keyHashWalletTag2Address = keccak256("walletTag2address", walletTag);
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashWalletTag2Address, _address);
     }
 
     function addPlasma2EthereumInternal(
@@ -410,4 +406,13 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return PROXY_STORAGE_CONTRACT.getBytes32(keccak256("address2walletTag", keyAddress));
     }
 
+    function walletTag2address(
+        bytes32 walletTag
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("walletTag2address", walletTag));
+    }
 }
