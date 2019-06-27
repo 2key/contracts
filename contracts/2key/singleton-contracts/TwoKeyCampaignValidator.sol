@@ -278,6 +278,9 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         return getBoolean(hashKey);
     }
 
+    function campaign2NonSingletonHash(address campaign) public view returns (string) {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("campaign2NonSingletonHash", campaign));
+    }
 
 
     function emitCreatedEvent(address campaign) internal {
