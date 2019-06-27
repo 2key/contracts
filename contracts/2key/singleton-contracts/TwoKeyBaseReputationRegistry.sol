@@ -42,15 +42,9 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
-    mapping(address => ReputationScore) public address2contractorGlobalReputationScoreWei;
-    mapping(address => ReputationScore) public address2converterGlobalReputationScoreWei;
-    mapping(address => ReputationScore) public plasmaAddress2referrerGlobalReputationScoreWei;
-
-    // Struct to represent reputation score
-    struct ReputationScore {
-        uint points; //number of points
-        bool isPositive; //are points negative/positive
-    }
+    mapping(address => int) public address2contractorGlobalReputationScoreWei;
+    mapping(address => int) public address2converterGlobalReputationScoreWei;
+    mapping(address => int) public plasmaAddress2referrerGlobalReputationScoreWei;
 
 
     /**
@@ -68,18 +62,18 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     public
     {
         validateCall(acquisitionCampaign);
-        uint d = 1;
-        uint initialRewardWei = 10*(10**18);
+        int d = 1;
+        int initialRewardWei = 10*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
 
-        address2contractorGlobalReputationScoreWei[contractor] = addToReputationScore(initialRewardWei, address2contractorGlobalReputationScoreWei[contractor]);
-        address2converterGlobalReputationScoreWei[converter] = addToReputationScore(initialRewardWei, address2converterGlobalReputationScoreWei[converter]);
+        address2contractorGlobalReputationScoreWei[contractor] = initialRewardWei + address2contractorGlobalReputationScoreWei[contractor];
+        address2converterGlobalReputationScoreWei[converter] = initialRewardWei + address2converterGlobalReputationScoreWei[converter];
 
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
 
         for(uint i=0; i<referrers.length; i++) {
-            plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] = addToReputationScore(initialRewardWei/d,plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]]);
+            plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] = initialRewardWei/d + plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]];
             d = d + 1;
         }
     }
@@ -99,75 +93,17 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     public
     {
         validateCall(acquisitionCampaign);
-        uint d = 1;
-        uint initialPenaltyWei = 5*(10**18);
+        int d = 1;
+        int initialPenaltyWei = 5*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
 
-        address2contractorGlobalReputationScoreWei[contractor] = subFromReputationScore(initialPenaltyWei, address2contractorGlobalReputationScoreWei[contractor]);
-        address2converterGlobalReputationScoreWei[converter] = subFromReputationScore(initialPenaltyWei, address2converterGlobalReputationScoreWei[converter]);
+        address2contractorGlobalReputationScoreWei[contractor] = address2contractorGlobalReputationScoreWei[contractor] - initialPenaltyWei;
+        address2converterGlobalReputationScoreWei[converter] = address2converterGlobalReputationScoreWei[converter] - initialPenaltyWei;
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
-        plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]] = subFromReputationScore(initialPenaltyWei,plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]]);
+        plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]] = plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]] - initialPenaltyWei;
     }
 
-    /**
-     * @notice Function to handle additions to reputation scores
-     * @param value is value we want to add
-     * @param score is the reputation score we want to modify
-     */
-    function addToReputationScore(
-        uint value,
-        ReputationScore score
-    )
-    internal
-    view
-    returns (ReputationScore)
-    {
-        if(score.points == 0) {
-            score.points = value;
-            score.isPositive = true;
-        }
-        if(score.isPositive) {
-            score.points = score.points.add(value);
-        } else {
-            if(score.points > value) {
-                score.points = score.points.sub(value);
-            } else {
-                score.points = value.sub(score.points);
-                score.isPositive = true;
-            }
-        }
-        return score;
-    }
-
-    /**
-     * @notice Function to handle substract operations on reputation scores
-     * @param value is the value we want to substract
-     * @param score is the score we want to modify
-     */
-    function subFromReputationScore(
-        uint value,
-        ReputationScore score
-    )
-    internal
-    view
-    returns (ReputationScore)
-    {
-        if(score.points == 0) {
-            score.points = value;
-            score.isPositive = false;
-        } else if(score.isPositive) {
-            if(score.points > value) {
-                score.points = score.points.sub(value);
-            } else {
-                score.points = value.sub(score.points);
-                score.isPositive = false;
-            }
-        } else {
-            score.points = score.points.add(value);
-        }
-        return score;
-    }
 
     /**
      * @notice Internal getter from Acquisition campaign to fetch logic handler address
@@ -243,17 +179,18 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress("TwoKeyRegistry");
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
 
-        ReputationScore memory reputationAsContractor = address2contractorGlobalReputationScoreWei[_address];
-        ReputationScore memory reputationAsConverter = address2converterGlobalReputationScoreWei[_address];
-        ReputationScore memory reputationAsReferrer = plasmaAddress2referrerGlobalReputationScoreWei[plasma];
+        int reputationAsContractor = address2contractorGlobalReputationScoreWei[_address];
+        int reputationAsConverter = address2converterGlobalReputationScoreWei[_address];
+        int reputationAsReferrer = plasmaAddress2referrerGlobalReputationScoreWei[plasma];
+
 
         return abi.encodePacked(
-            reputationAsContractor.points,
-            reputationAsContractor.isPositive,
-            reputationAsConverter.points,
-            reputationAsConverter.isPositive,
-            reputationAsReferrer.points,
-            reputationAsReferrer.isPositive
+            reputationAsContractor,
+            true,
+            reputationAsConverter,
+            true,
+            reputationAsReferrer,
+            true
         );
 
     }
