@@ -175,6 +175,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         address logicProxy = deployProxy(contractName, version, msg.sender);
         address storageProxy = deployProxy(contractNameStorage, version, msg.sender);
 
+        IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
         emit ProxiesDeployed(logicProxy, storageProxy);
     }
 

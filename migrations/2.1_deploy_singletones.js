@@ -180,6 +180,7 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses,
                         };
 
+
                         proxyAddressTwoKeyRegistrySTORAGE = storageProxy;
                         proxyAddressTwoKeyRegistry = logicProxy;
                         fileObject['TwoKeyRegistry'] = twoKeyReg;
@@ -272,9 +273,7 @@ module.exports = function deploy(deployer) {
                             'Version': "1.0",
                             maintainer_address: maintainerAddresses,
                         };
-                        txHash = await TwoKeyCampaignValidatorStorage.at(storageProxy).setProxyLogicContractAndDeployer(
-                            logicProxy
-                        );
+
                         proxyAddressTwoKeyCampaignValidatorSTORAGE = storageProxy;
 
                         fileObject['TwoKeyCampaignValidator'] = twoKeyValidator;
@@ -505,9 +504,7 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses
                         };
 
-                        txHash = await TwoKeyAdminStorage.at(storageProxy).setProxyLogicContractAndDeployer(
-                            logicProxy
-                        );
+
                         proxyAddressTwoKeyAdminSTORAGE = storageProxy;
                         proxyAddressTwoKeyAdmin = logicProxy;
 
@@ -541,9 +538,7 @@ module.exports = function deploy(deployer) {
                             maintainer_address: maintainerAddresses
                         };
 
-                        txHash = await TwoKeyUpgradableExchangeStorage.at(storageProxy).setProxyLogicContractAndDeployer(
-                            logicProxy
-                        );
+
                         proxyAddressTwoKeyUpgradableExchangeSTORAGE = storageProxy;
                         proxyAddressTwoKeyUpgradableExchange = logicProxy;
 

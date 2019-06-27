@@ -6,8 +6,8 @@ contract StructuredStorage is Upgradeable {
 
     bool initialized;
 
-    address proxyLogicContract;
-    address deployer;
+    address public PROXY_LOGIC_CONTRACT;
+    address public DEPLOYER;
 
     mapping(bytes32 => bytes32) bytes32Storage;
     mapping(bytes32 => uint) uIntStorage;
@@ -20,114 +20,114 @@ contract StructuredStorage is Upgradeable {
 
 
     modifier onlyDeployer {
-        require(msg.sender == deployer);
+        require(msg.sender == DEPLOYER);
         _;
     }
 
     modifier onlyProxyLogicContract {
-        require(msg.sender == proxyLogicContract);
+        require(msg.sender == PROXY_LOGIC_CONTRACT);
         _;
     }
 
     // *** Setter for Contract which holds all the logic ***
-    function setProxyLogicContractAndDeployer(address _proxyLogicContract) external {
+    function setProxyLogicContractAndDeployer(address _proxyLogicContract, address deployer) external {
         require(initialized == false);
 
-        deployer = msg.sender;
-        proxyLogicContract = _proxyLogicContract;
+        PROXY_LOGIC_CONTRACT = _proxyLogicContract;
+        DEPLOYER = deployer;
 
         initialized = true;
     }
 
     function setProxyLogicContract(address _proxyLogicContract) external onlyDeployer {
         //TODO this is done on upgrades of the logic? perhaps it would be better to mark only registry and have the registry do this from a single call to update the logic for a singleton
-        proxyLogicContract = _proxyLogicContract;
+        PROXY_LOGIC_CONTRACT = _proxyLogicContract;
     }
 
     // *** Getter Methods ***
-    function getUint(bytes32 _key) external view returns(uint) {
+    function getUint(bytes32 _key) onlyProxyLogicContract external view returns (uint) {
         return uIntStorage[_key];
     }
 
-    function getString(bytes32 _key) external view returns(string) {
+    function getString(bytes32 _key) onlyProxyLogicContract external view returns(string) {
         return stringStorage[_key];
     }
 
-    function getAddress(bytes32 _key) external view returns(address) {
+    function getAddress(bytes32 _key) onlyProxyLogicContract external view returns(address) {
         return addressStorage[_key];
     }
 
-    function getBytes(bytes32 _key) external view returns(bytes) {
+    function getBytes(bytes32 _key) onlyProxyLogicContract external view returns(bytes) {
         return bytesStorage[_key];
     }
 
-    function getBool(bytes32 _key) external view returns(bool) {
+    function getBool(bytes32 _key) onlyProxyLogicContract external view returns(bool) {
         return boolStorage[_key];
     }
 
-    function getInt(bytes32 _key) external view returns(int) {
+    function getInt(bytes32 _key) onlyProxyLogicContract external view returns(int) {
         return intStorage[_key];
     }
 
-    function getBytes32(bytes32 _key) external view returns (bytes32) {
+    function getBytes32(bytes32 _key) onlyProxyLogicContract external view returns (bytes32) {
         return bytes32Storage[_key];
     }
 
     // *** Setter Methods ***
-    function setUint(bytes32 _key, uint _value) external {
+    function setUint(bytes32 _key, uint _value) onlyProxyLogicContract external {
         uIntStorage[_key] = _value;
     }
 
-    function setString(bytes32 _key, string _value) external {
+    function setString(bytes32 _key, string _value) onlyProxyLogicContract external {
         stringStorage[_key] = _value;
     }
 
-    function setAddress(bytes32 _key, address _value) external {
+    function setAddress(bytes32 _key, address _value) onlyProxyLogicContract external {
         addressStorage[_key] = _value;
     }
 
-    function setBytes(bytes32 _key, bytes _value) external {
+    function setBytes(bytes32 _key, bytes _value) onlyProxyLogicContract external {
         bytesStorage[_key] = _value;
     }
 
-    function setBool(bytes32 _key, bool _value) external {
+    function setBool(bytes32 _key, bool _value) onlyProxyLogicContract external {
         boolStorage[_key] = _value;
     }
 
-    function setInt(bytes32 _key, int _value) external {
+    function setInt(bytes32 _key, int _value) onlyProxyLogicContract external {
         intStorage[_key] = _value;
     }
 
-    function setBytes32(bytes32 _key, bytes32 _value) external {
+    function setBytes32(bytes32 _key, bytes32 _value) onlyProxyLogicContract external {
         bytes32Storage[_key] = _value;
     }
 
     // *** Delete Methods ***
-    function deleteUint(bytes32 _key) external {
+    function deleteUint(bytes32 _key) onlyProxyLogicContract external {
         delete uIntStorage[_key];
     }
 
-    function deleteString(bytes32 _key) external {
+    function deleteString(bytes32 _key) onlyProxyLogicContract external {
         delete stringStorage[_key];
     }
 
-    function deleteAddress(bytes32 _key) external {
+    function deleteAddress(bytes32 _key) onlyProxyLogicContract external {
         delete addressStorage[_key];
     }
 
-    function deleteBytes(bytes32 _key) external {
+    function deleteBytes(bytes32 _key) onlyProxyLogicContract external {
         delete bytesStorage[_key];
     }
 
-    function deleteBool(bytes32 _key) external {
+    function deleteBool(bytes32 _key) onlyProxyLogicContract external {
         delete boolStorage[_key];
     }
 
-    function deleteInt(bytes32 _key) external {
+    function deleteInt(bytes32 _key) onlyProxyLogicContract external {
         delete intStorage[_key];
     }
 
-    function deleteBytes32(bytes32 _key) external {
+    function deleteBytes32(bytes32 _key) onlyProxyLogicContract external {
         delete bytes32Storage[_key];
     }
 }
