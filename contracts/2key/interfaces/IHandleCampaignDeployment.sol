@@ -82,11 +82,10 @@ contract IHandleCampaignDeployment {
         address _moderator,
         address _twoKeySingletonRegistry,
         address _twoKeyDonationConversionHandler,
+        address _twoKeyDonationLogicHandler,
         uint [] numberValues,
-        bool [] booleanValues,
-        string _campaignName
+        bool [] booleanValues
     ) public;
-
 
     /**
      * @notice Function which will be used as simulation for constructor under TwoKeyDonationConversionHandler contract
@@ -101,6 +100,17 @@ contract IHandleCampaignDeployment {
         address _twoKeyDonationCampaign,
         address _twoKeyEventSource,
         address _twoKeyBaseReputationRegistry
+    ) public;
+
+
+    function setInitialParamsDonationLogicHandler(
+        uint[] numberValues,
+        string currency,
+        address contractor,
+        address moderator,
+        address twoKeySingletonRegistry,
+        address twoKeyDonationCampaign,
+        address twoKeyDonationLogicHandler
     ) public;
 }
 

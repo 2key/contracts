@@ -1077,7 +1077,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress, false ,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
     }).timeout(60000);

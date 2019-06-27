@@ -29,6 +29,19 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     address twoKeyBaseReputationRegistry;
     address contractor;
     uint numberOfConversions;
+    /**
+     * This array will represent counter values where position will be index (which counter) and value will be actual counter value
+     * counters[0] = PENDING_CONVERSIONS
+     * counters[1] = APPROVED_CONVERSIONS
+     * counters[2] = REJECTED_CONVERSIONS
+     * counters[3] = EXECUTED_CONVERSIONS
+     * counters[4] = CANCELLED_CONVERSIONS
+     * counters[5] = UNIQUE_CONVERTERS
+     * counters[6] = RAISED_FUNDS_ETH_WEI
+     * counters[7] = TOKENS_SOLD
+     * counters[8] = TOTAL_BOUNTY
+     * counters[9] = RAISED_FUNDS_FIAT_WEI
+     */
     uint [] counters; //Metrics counter
 
 
@@ -170,15 +183,15 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         require(converterToState[conversion.converter] == ConverterState.APPROVED);
         require(conversion.state == ConversionState.APPROVED);
 
-        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[1]--; //Decrease number of approved conversions
 
 //         Buy tokens from campaign and distribute rewards between referrers
-        uint totalReward2keys = twoKeyDonationCampaign.distributeReferrerRewards(
-            conversion.converter,
+        uint totalReward2keys = twoKeyDonationCampaign.buyTokensAndDistributeReferrerRewards(
             conversion.maxReferralRewardETHWei,
+            conversion.converter,
             _conversionId
         );
+
 
         // Update reputation points in registry for conversion executed event
 //        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
@@ -188,10 +201,10 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 //        );
 
 
-
+        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[8] = counters[8].add(totalReward2keys);
         twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-        twoKeyDonationCampaign.updateContractorBalanceAndConverterDonations;
+        twoKeyDonationCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
 
         counters[6] = counters[6].add(conversion.conversionAmount);
 
@@ -273,6 +286,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         moveFromPendingOrRejectedToApprovedState(_converter);
     }
 
+
+
     /**
      * @notice Function to get all conversion ids for the converter
      * @param _converter is the address of the converter
@@ -337,6 +352,21 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         return numberOfConversions;
     }
 
+    /**
+     * @notice Function to get converter state
+     * @param _converter is the address of the requested converter
+     * @return hexed string of the state
+     */
+    function getStateForConverter(
+        address _converter
+    )
+    external
+    view
+    returns (bytes32)
+    {
+        return convertConverterStateToBytes(converterToState[_converter]);
+    }
+
 
     function getAllConvertersPerState(
         bytes32 state
@@ -361,6 +391,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     returns (bytes)
     {
         Conversion memory conversion = conversions[conversionId];
+
         address converter; // Defaults to 0x0
 
         if(isConverterAnonymous[conversion.converter] == false) {
@@ -377,6 +408,15 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             conversion.moderatorFeeETHWei,
             conversion.state
         );
+    }
+
+    function getAmountConverterSpent(
+        address converter
+    )
+    public
+    view
+    returns (uint) {
+        return amountConverterSpentEthWEI[converter];
     }
 
 }

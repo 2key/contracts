@@ -1,24 +1,24 @@
 pragma solidity ^0.4.0;
 
 contract ITwoKeyDonationCampaign {
-    function distributeReferrerRewards(
-        address converter,
-        uint referrer_rewards,
-        uint donationId
-    )
-    public
-    returns (uint);
-
 
     function buyTokensForModeratorRewards(
         uint moderatorFee
     )
     public;
 
-
-    function updateContractorBalanceAndConverterDonations(
+    function buyTokensAndDistributeReferrerRewards(
+        uint256 _maxReferralRewardETHWei,
         address _converter,
-        uint earningsContractor,
-        uint donationsConverter
-    ) public;
+        uint _conversionId
+    )
+    public
+    returns (uint);
+
+    function getReferrerPlasmaBalance(address _influencer) public view returns (uint);
+    function updateReferrerPlasmaBalance(address _influencer, uint _balance) public;
+    function getReferrerCut(address me) public view returns (uint256);
+    function updateContractorProceeds(uint value) public;
+    function getReceivedFrom(address _receiver) public view returns (address);
+    function balanceOf(address _owner) public view returns (uint256);
 }

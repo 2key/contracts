@@ -309,32 +309,38 @@ contract TwoKeyCampaign is ArcERC20 {
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
 	function referrerWithdraw(
-		address _address
+		address _address,
+		bool _withdrawAsStable
 	)
 	public
 	{
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		address twoKeyAdminAddress;
 		address twoKeyUpgradableExchangeContract;
-		uint balance;
 
+		uint balance;
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
+
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
-			twoKeyAdminAddress =  getContractProxyAddress("TwoKeyAdmin");
+			twoKeyAdminAddress = getContractProxyAddress("TwoKeyAdmin");
 			twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
 
 			balance = referrerPlasma2Balances2key[_referrer];
 			referrerPlasma2Balances2key[_referrer] = 0;
 
-			if(now >= ITwoKeyAdmin(twoKeyAdminAddress).getUint("rewardReleaseAfter")){
-				IERC20(twoKeyEconomy).transfer(_address,balance);
-			}
-			else {
-				//In case 2Key rewards still locked;
+			if(_withdrawAsStable == true) {
 				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
 			}
-			reservedAmount2keyForRewards -= balance;
+			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
+				IERC20(twoKeyEconomy).transfer(_address, balance);
+			}
+			else {
+				revert();
+			}
+
 		}
+        reservedAmount2keyForRewards -= balance;
 	}
 }
+

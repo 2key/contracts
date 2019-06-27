@@ -55,9 +55,9 @@ let conversionQuota = 5;
 let isKYCRequired = true;
 let shouldConvertToRefer = false;
 let acceptsFiat = false;
-let incentiveModel = "MANUAL";
+let incentiveModel = "VANILLA_AVERAGE";
 let conversionAmountEth = 1;
-
+let currency = "ETH";
 
 let campaignAddress: string;
 let invoiceTokenAddress: string;
@@ -75,7 +75,6 @@ let moderator = env.AYDNEP_ADDRESS;
 
 let campaignData: ICreateCampaign = {
     moderator,
-    campaignName,
     invoiceToken,
     maxReferralRewardPercent,
     campaignStartTime,
@@ -87,7 +86,8 @@ let campaignData: ICreateCampaign = {
     isKYCRequired,
     shouldConvertToRefer,
     acceptsFiat,
-    incentiveModel
+    incentiveModel,
+    currency
 };
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
@@ -103,7 +103,7 @@ const printTestNumber = (): void => {
 describe('TwoKeyDonationCampaign', () => {
 
    it('should create a donation campaign', async() => {
-        printTestNumber();
+       printTestNumber();
        const {web3, address} = web3switcher.deployer();
        from = address;
        twoKeyProtocol = new TwoKeyProtocol({
@@ -122,6 +122,8 @@ describe('TwoKeyDonationCampaign', () => {
             interval: 500,
             timeout: 600000
         });
+
+        console.log(result);
 
 
         campaignAddress = result.campaignAddress;
@@ -143,11 +145,22 @@ describe('TwoKeyDonationCampaign', () => {
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.DonationCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
+    it('should get incentive model', async() => {
+        printTestNumber();
+        const model = await twoKeyProtocol.DonationCampaign.getIncentiveModel(campaignAddress);
+        expect(model).to.be.equal(incentiveModel);
+    }).timeout(60000);
+
     it('should save campaign to IPFS', async () => {
         printTestNumber();
         const campaignMeta = await twoKeyProtocol.DonationCampaign.getPublicMeta(campaignAddress,from);
-        expect(campaignMeta.meta.campaignName).to.be.equal(campaignData.campaignName);
+        expect(campaignMeta.meta.currency).to.be.equal(campaignData.currency);
     }).timeout(120000);
+
+    it('should make sure all args are properly set', async() => {
+        let obj = await twoKeyProtocol.DonationCampaign.getConstantInfo(campaignAddress);
+        console.log(obj);
+    }).timeout(60000);
 
     it('should get user public link', async () => {
         printTestNumber();
@@ -238,9 +251,8 @@ describe('TwoKeyDonationCampaign', () => {
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
-    it('should approve converter and execute conversion if KYC == TRUE', async() => {
+    it('should get all pending converters in case KYC is required', async() => {
         printTestNumber();
-
         const {web3, address} = web3switcher.deployer();
         from = address;
         twoKeyProtocol = new TwoKeyProtocol({
@@ -252,6 +264,17 @@ describe('TwoKeyDonationCampaign', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
+
+        if(isKYCRequired == true) {
+            let pendingConverters = await twoKeyProtocol.DonationCampaign.getAllPendingConverters(campaignAddress, from);
+            expect(pendingConverters.length).to.be.equal(1);
+        }
+
+    }).timeout(60000);
+
+
+    it('should approve converter and execute conversion if KYC == TRUE', async() => {
+        printTestNumber();
 
         if(isKYCRequired == true) {
             let txHash = await twoKeyProtocol.DonationCampaign.approveConverter(campaignAddress,env.TEST4_ADDRESS,from);
@@ -288,6 +311,75 @@ describe('TwoKeyDonationCampaign', () => {
     it('should get referrer earnings', async() => {
         printTestNumber();
         let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, env.GMAIL_ADDRESS, from);
-        console.log(referrerBalance);
-    })
+        expect(referrerBalance).to.be.equal(50);
+    }).timeout(60000);
+
+    it('should get reserved amount for referrers', async() => {
+        printTestNumber();
+        let referrerReservedAmount = await twoKeyProtocol.DonationCampaign.getReservedAmount2keyForRewards(campaignAddress);
+        expect(referrerReservedAmount).to.be.equal(50);
+    }).timeout(60000);
+
+    it('should check is address contractor', async() => {
+        printTestNumber();
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+        let isAddressContractor = await twoKeyProtocol.DonationCampaign.isAddressContractor(campaignAddress, from);
+        expect(isAddressContractor).to.be.equal(true);
+    }).timeout(60000);
+
+    it('should get contractor balance and total earnings', async() => {
+        printTestNumber();
+        let earnings = await twoKeyProtocol.DonationCampaign.getContractorBalanceAndTotalProceeds(campaignAddress, from);
+        console.log(earnings);
+    }).timeout(60000);
+
+    it('should test if address is joined', async() => {
+        printTestNumber();
+        let isJoined = await twoKeyProtocol.DonationCampaign.isAddressJoined(campaignAddress,from);
+        console.log(isJoined);
+    }).timeout(60000);
+
+    it('should get how much user have spent', async() => {
+        printTestNumber();
+        let amountSpent = await twoKeyProtocol.DonationCampaign.getAmountConverterSpent(campaignAddress, env.TEST4_ADDRESS);
+        expect(amountSpent).to.be.equal(1);
+    }).timeout(60000);
+
+    it('should show how much user can donate', async() => {
+        printTestNumber();
+        let leftToDonate = await twoKeyProtocol.DonationCampaign.howMuchUserCanContribute(campaignAddress, env.TEST4_ADDRESS, from);
+        console.log(leftToDonate);
+        expect(leftToDonate).to.be.equal(maxDonationAmount-conversionAmountEth);
+    }).timeout(60000);
+
+    it('should show address statistic', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
+        });
+
+        let stats = await twoKeyProtocol.DonationCampaign.getAddressStatistic(campaignAddress,env.TEST4_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
+        console.log(stats);
+    }).timeout(60000);
+
+
 });

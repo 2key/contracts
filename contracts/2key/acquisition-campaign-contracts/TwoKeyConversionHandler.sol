@@ -274,12 +274,13 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         // Add total rewards
         counters[8] = counters[8].add(totalReward2keys);
 
+        // update reserved amount of tokens on acquisition contract
+        twoKeyAcquisitionCampaignERC20.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
+
         //Update total raised funds
         if(conversion.isConversionFiat == false) {
             // update moderator balances
             twoKeyAcquisitionCampaignERC20.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-            // update reserved amount of tokens on acquisition contract
-            twoKeyAcquisitionCampaignERC20.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
             // update contractor proceeds
             twoKeyAcquisitionCampaignERC20.updateContractorProceeds(conversion.contractorProceedsETHWei);
             // add conversion amount to counter
