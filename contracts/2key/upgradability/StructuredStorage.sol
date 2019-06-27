@@ -40,7 +40,6 @@ contract StructuredStorage is Upgradeable {
     }
 
     function setProxyLogicContract(address _proxyLogicContract) external onlyDeployer {
-        //TODO this is done on upgrades of the logic? perhaps it would be better to mark only registry and have the registry do this from a single call to update the logic for a singleton
         PROXY_LOGIC_CONTRACT = _proxyLogicContract;
     }
 

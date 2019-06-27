@@ -731,7 +731,6 @@ module.exports = function deploy(deployer) {
                             TwoKeyEconomy.address,
                             deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                         );
-
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
