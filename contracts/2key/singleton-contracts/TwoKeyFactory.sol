@@ -36,6 +36,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
     event ProxyForDonationCampaign(
         address proxyDonationCampaign,
         address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
         address contractor
     );
 
@@ -188,7 +189,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         address _moderator,
         uint [] numberValues,
         bool [] booleanValues,
-        string _campaignName,
+        string _currency,
         string tokenName,
         string tokenSymbol,
         string nonSingletonHash
@@ -200,14 +201,31 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
             "TwoKeyDonationCampaign",
             getLatestContractVersion("TwoKeyDonationCampaign"),
-            address(TWO_KEY_SINGLETON_REGISTRY)
+            TWO_KEY_SINGLETON_REGISTRY
         );
 
         //Deploying a proxy contract for donation conversion handler
         ProxyCampaign proxyDonationConversionHandler = new ProxyCampaign(
             "TwoKeyDonationConversionHandler",
             getLatestContractVersion("TwoKeyDonationConversionHandler"),
-            address(TWO_KEY_SINGLETON_REGISTRY)
+            TWO_KEY_SINGLETON_REGISTRY
+        );
+
+        //Deploying a proxy contract for donation logic handler
+        ProxyCampaign proxyDonationLogicHandler = new ProxyCampaign(
+            "TwoKeyDonationLogicHandler",
+            getLatestContractVersion("TwoKeyDonationLogicHandler"),
+            TWO_KEY_SINGLETON_REGISTRY
+        );
+
+        IHandleCampaignDeployment(proxyDonationLogicHandler).setInitialParamsDonationLogicHandler(
+            numberValues,
+            _currency,
+            msg.sender,
+            _moderator,
+            TWO_KEY_SINGLETON_REGISTRY,
+            proxyDonationCampaign,
+            proxyDonationConversionHandler
         );
 
         // Set initial parameters under Donation conversion handler
@@ -224,11 +242,11 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
             msg.sender, //contractor
             _moderator, //moderator address
-            address(TWO_KEY_SINGLETON_REGISTRY),
+            TWO_KEY_SINGLETON_REGISTRY,
             proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
             numberValues,
-            booleanValues,
-            _campaignName
+            booleanValues
         );
 
         // Validate campaign
@@ -245,9 +263,9 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         emit ProxyForDonationCampaign(
             proxyDonationCampaign,
             proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
             msg.sender
         );
-
     }
 
     /**

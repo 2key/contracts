@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 //Libraries
 import "../libraries/SafeMath.sol";
@@ -27,6 +28,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     address public twoKeyDonationConversionHandler;
     address ownerPlasma;
 
+    address twoKeyMaintainersRegistry;
     address twoKeyRegistry;
     address twoKeyEventSource;
     address contractor;
@@ -73,10 +75,15 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         contractor = _contractor;
         moderator = _moderator;
         currency = _currency;
+
         twoKeySingletoneRegistry = twoKeySingletonRegistry;
         twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
-        .getContractProxyAddress("TwoKeyEventSource");
-        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+            .getContractProxyAddress("TwoKeyEventSource");
+        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
+            .getContractProxyAddress("TwoKeyMaintainersRegistry");
+        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
+            .getContractProxyAddress("TwoKeyRegistry");
+
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
     }
@@ -254,7 +261,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     returns (uint,uint,uint,uint[])
     {
         if(_referrer != address(0)) {
-            require(msg.sender == _referrer || msg.sender == contractor || ITwoKeyReg(twoKeyRegistry).isMaintainer(msg.sender));
+            require(msg.sender == _referrer || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
             _referrer = plasmaOf(_referrer);
         } else {
             bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),

@@ -332,7 +332,7 @@ contract TwoKeyCampaign is ArcERC20 {
 				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
 			}
-			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
+			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getUint("rewardsReleaseAfter")) {
 				IERC20(twoKeyEconomy).transfer(_address, balance);
 			}
 			else {
