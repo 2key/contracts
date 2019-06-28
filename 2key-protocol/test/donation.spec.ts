@@ -381,5 +381,23 @@ describe('TwoKeyDonationCampaign', () => {
         console.log(stats);
     }).timeout(60000);
 
+    it('should show stats for referrer', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.gmail();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
+        });
+
+        let signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
+        let stats = await twoKeyProtocol.DonationCampaign.getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaignAddress, signature);
+        console.log(stats);
+    }).timeout(60000);
 
 });

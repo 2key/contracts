@@ -43,8 +43,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
 
     string public currency;
 
-    mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
-    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
+    mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
 
@@ -281,6 +281,33 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     }
 
     /**
+     * @notice Function to get balance and total earnings for all referrer addresses passed in arg
+     * @param _referrerPlasmaList is the array of plasma addresses of referrer
+     * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
+     */
+    function getReferrersBalancesAndTotalEarnings(
+        address[] _referrerPlasmaList
+    )
+    public
+    view
+    returns (uint256[], uint256[])
+    {
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+
+        uint numberOfAddresses = _referrerPlasmaList.length;
+        uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
+        uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
+
+        for (uint i=0; i<numberOfAddresses; i++){
+            referrersPendingPlasmaBalance[i] = ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
+        }
+
+        return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
+    }
+
+
+    /**
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
      */
@@ -459,5 +486,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     {
         return (campaignStartTime,campaignEndTime, minDonationAmountWei, maxDonationAmountWei, campaignGoal);
     }
+
+
 
 }
