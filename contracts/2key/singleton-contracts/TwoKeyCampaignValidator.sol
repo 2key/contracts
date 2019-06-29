@@ -81,7 +81,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     {
         bytes32 hashIsCampaignValidated = keccak256("isCampaignValidated",campaign);
 
-        require(getBoolean(hashIsCampaignValidated) == false);
+        require(PROXY_STORAGE_CONTRACT.getBool(hashIsCampaignValidated) == false);
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
 
         //Validating that the bytecode of the campaign and campaign helper contracts are eligible
@@ -96,25 +96,17 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         bytes memory codeHandler = GetCode.at(conversionHandlerImplementation);
         bytes memory codeLogicHandler = GetCode.at(logicHandlerImplementation);
 
-        bytes32 hashIsValidCodeAcquisition = keccak256("isCodeValid", codeAcquisition);
-        bytes32 hashIsValidCodeHandler = keccak256("isCodeValid", codeHandler);
-        bytes32 hashIsValidCodeLogicHandler = keccak256("isCodeValid", codeLogicHandler);
-
-
-        require(getBoolean(hashIsValidCodeAcquisition) == true);
-        require(getBoolean(hashIsValidCodeHandler) == true);
-        require(getBoolean(hashIsValidCodeLogicHandler) == true);
+        require(PROXY_STORAGE_CONTRACT.getBool(keccak256("isCodeValid", codeAcquisition)) == true);
+        require(PROXY_STORAGE_CONTRACT.getBool(keccak256("isCodeValid", codeHandler)) == true);
+        require(PROXY_STORAGE_CONTRACT.getBool(keccak256("isCodeValid", codeLogicHandler)) == true);
 
 
         //If the campaign passes all this validation steps means it's valid one, and it can be proceeded forward
-        setBoolean(hashIsCampaignValidated, true);
+        PROXY_STORAGE_CONTRACT.setBool(hashIsCampaignValidated, true);
 
         //Adding campaign 2 non singleton hash at the moment
-        bytes32 hashCampaignToNonSingletonHash = keccak256("campaign2NonSingletonHash",campaign);
-        setString(hashCampaignToNonSingletonHash, nonSingletonHash);
-
+        PROXY_STORAGE_CONTRACT.setString(keccak256("campaign2NonSingletonHash",campaign), nonSingletonHash);
         emitCreatedEvent(campaign);
-
     }
 
     /**
@@ -130,7 +122,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     public
     {
         bytes32 hashIsCampaignValidated = keccak256("isCampaignValidated",campaign);
-        require(getBoolean(hashIsCampaignValidated) == false);
+        require(PROXY_STORAGE_CONTRACT.getBool(hashIsCampaignValidated) == false);
 
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
 
@@ -144,13 +136,13 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         bytes32 hashIsValidCodeHandler = keccak256("isCodeValid", donationConversionHandlerCode);
 
         //Validate that this bytecode is validated and added
-        require(getBoolean(hashIsValidCodeDonation) == true);
-        require(getBoolean(hashIsValidCodeHandler) == true);
+        require(PROXY_STORAGE_CONTRACT.getBool(hashIsValidCodeDonation) == true);
+        require(PROXY_STORAGE_CONTRACT.getBool(hashIsValidCodeHandler) == true);
 
-        setBoolean(hashIsCampaignValidated, true);
+        PROXY_STORAGE_CONTRACT.setBool(hashIsCampaignValidated, true);
 
         bytes32 hashCampaignToNonSingletonHash = keccak256("campaign2NonSingletonHash",campaign);
-        setString(hashCampaignToNonSingletonHash, nonSingletonHash);
+        PROXY_STORAGE_CONTRACT.setString(hashCampaignToNonSingletonHash, nonSingletonHash);
 
         emitCreatedEvent(campaign);
     }
@@ -176,8 +168,8 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
             bytes32 hashIsCodeValid = keccak256("isCodeValid", contractCode);
             bytes32 hashCodeToName = keccak256("contractCodeToName",names[i]);
 
-            setBoolean(hashIsCodeValid, true);
-            setBytes32(hashCodeToName, names[i]);
+            PROXY_STORAGE_CONTRACT.setBool(hashIsCodeValid, true);
+            PROXY_STORAGE_CONTRACT.setBytes32(hashCodeToName, names[i]);
         }
     }
 
@@ -191,7 +183,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     onlyMaintainer
     {
         bytes32 hashIsCodeValid = keccak256("isCodeValid", _bytecode);
-        setBoolean(hashIsCodeValid, false);
+        PROXY_STORAGE_CONTRACT.setBool(hashIsCodeValid, false);
     }
 
     /**
@@ -209,12 +201,12 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         address implementation = IGetImplementation(_conversionHandler).implementation();
         bytes memory contractCode = GetCode.at(implementation);
         bytes32 hashIsCodeValid = keccak256("isCodeValid", contractCode);
-        require(getBoolean(hashIsCodeValid) == true);
+        require(PROXY_STORAGE_CONTRACT.getBool(hashIsCodeValid) == true);
 
         bytes32 name = stringToBytes32("TwoKeyConversionHandler");
         bytes32 hashContractCodeToName = keccak256("contractCodeToName",name);
 
-        require(getBytes32(hashContractCodeToName) == name);
+        require(PROXY_STORAGE_CONTRACT.getBytes32(hashContractCodeToName) == name);
 
         return true;
     }
@@ -229,7 +221,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         address implementation = IGetImplementation(_contract).implementation();
         bytes memory contractCode = GetCode.at(implementation);
         bytes32 hashIsCodeValid = keccak256("isCodeValid", contractCode);
-        return getBoolean(hashIsCodeValid);
+        return PROXY_STORAGE_CONTRACT.getBool(hashIsCodeValid);
     }
 
     /**
@@ -252,30 +244,9 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         }
     }
 
-    // Internal wrapper methods
-    function getBoolean(bytes32 key) internal view returns (bool) {
-        return PROXY_STORAGE_CONTRACT.getBool(key);
-    }
-
-    function getBytes32(bytes32 key) internal view returns (bytes32) {
-        return PROXY_STORAGE_CONTRACT.getBytes32(key);
-    }
-
-    function setBoolean(bytes32 key, bool value) internal {
-        PROXY_STORAGE_CONTRACT.setBool(key,value);
-    }
-
-    function setString(bytes32 key, string value) internal {
-        PROXY_STORAGE_CONTRACT.setString(key,value);
-    }
-
-    function setBytes32(bytes32 key, bytes32 value) internal {
-        PROXY_STORAGE_CONTRACT.setBytes32(key, value);
-    }
-
     function isCampaignValidated(address campaign) public view returns (bool) {
         bytes32 hashKey = keccak256("isCampaignValidated", campaign);
-        return getBoolean(hashKey);
+        return PROXY_STORAGE_CONTRACT.getBool(hashKey);
     }
 
     function campaign2NonSingletonHash(address campaign) public view returns (string) {
