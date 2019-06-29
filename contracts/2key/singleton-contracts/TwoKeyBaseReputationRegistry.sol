@@ -42,11 +42,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
-    mapping(address => int) public address2contractorGlobalReputationScoreWei;
-    mapping(address => int) public address2converterGlobalReputationScoreWei;
-    mapping(address => int) public plasmaAddress2referrerGlobalReputationScoreWei;
-
-
     /**
      * @notice If the conversion executed event occured, 10 points for the converter and contractor + 10/distance to referrer
      * @dev This function can only be called by TwoKeyConversionHandler contract assigned to the Acquisition from method param
