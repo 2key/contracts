@@ -8,7 +8,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     bool initialized = false;
     mapping(address => uint) public campaign2numberOfVisits;
     mapping(address => uint) public campaign2numberOfJoins;
-
     mapping(address => mapping(address => bool)) campaignToReferrerToCounted;
     mapping(address => uint) public campaign2numberOfForwarders;
 
@@ -42,20 +41,9 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     mapping(address => string) addressToUsername;
     mapping(string => address) usernameToAddress;
 
-    function linkUsernameAndAddress(bytes signature, address plasma_address, string username) public {
-        require(msg.sender == plasma_address || isMaintainer[msg.sender]);
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
-        require (signature.length == 65, 'bad plasma signature length');
-        address plasma = Call.recoverHash(hash,signature,0);
-        require(plasma == plasma_address);
-        addressToUsername[plasma_address] = username;
-        usernameToAddress[username] = plasma_address;
-    }
-
     // campaign,contractor eth-addr=>from eth-addr=>to eth or plasma address=>true/false
     // not that the "to" addrss in an edge of the graph can be either a plasma or an ethereum address
     // the from address is always an ethereum address
-    //TODO check with Udi whether the second address in the mapping is superfluous and can be removed (will it always be the contractor? we always have just 1 contractor per contract
     mapping(address => mapping(address => mapping(address => mapping(address => bool)))) public visits;
     // campaign,contractor eth-addr=>to eth or plasma-addr=>from eth-addr=>true/false
     mapping(address => mapping(address => mapping(address => address))) public visited_from;
@@ -101,6 +89,17 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         ethereum2plasma[eth_address] = plasma_address;
 
         emit Plasma2Ethereum(plasma_address, eth_address);
+    }
+
+
+    function linkUsernameAndAddress(bytes signature, address plasma_address, string username) public {
+        require(msg.sender == plasma_address || isMaintainer[msg.sender]);
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
+        require (signature.length == 65, 'bad plasma signature length');
+        address plasma = Call.recoverHash(hash,signature,0);
+        require(plasma == plasma_address);
+        addressToUsername[plasma_address] = username;
+        usernameToAddress[username] = plasma_address;
     }
 
 
@@ -245,9 +244,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     }
 
 
-    /**
-    Udi -> Andri ->Eitan ->Nikola
-     */
     function visited(address c, address contractor, bytes sig) public {
         // c - addresss of the contract on ethereum
         // contractor - is the ethereum address of the contractor who created c. a dApp can read this information for free from ethereum.
@@ -260,6 +256,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             old_address := mload(add(sig, 21))
         }
         old_address = plasmaOf(old_address);
+
         // validate an existing visit path from contractor address to the old_address
         require(test_path(c, contractor, old_address), 'no path to contractor');
 

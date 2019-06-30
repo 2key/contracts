@@ -26,10 +26,11 @@ module.exports = function deploy(deployer) {
     let isEventSource = false;
     let isTwoKeyExchangeContract = false;
     let isTwoKeyAdmin = false;
-    let isTwoKeyCongress = false;
     let isTwoKeyPlasmaEvents = false;
     let isTwoKeyUpgradableExchange = false;
     let isTwoKeyFactory = false;
+    let isTwoKeyCampaignValidator = false;
+    let isTwoKeyMaintainersRegistry = false;
 
     /**
      * Determining which contract we want to update
@@ -58,6 +59,12 @@ module.exports = function deploy(deployer) {
         }
         else if (argument == 'TwoKeyPlasmaEvents') {
             isTwoKeyPlasmaEvents = true;
+        }
+        else if (argument == 'TwoKeyCampaignValidator') {
+            isTwoKeyCampaignValidator = true;
+        }
+        else if (argument == 'TwoKeyMaintainersRegistry') {
+            isTwoKeyMaintainersRegistry = true;
         }
     });
 

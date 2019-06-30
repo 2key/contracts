@@ -9,6 +9,7 @@ contract StructuredStorage is Upgradeable {
     address public PROXY_LOGIC_CONTRACT;
     address public DEPLOYER;
 
+    // Single
     mapping(bytes32 => bytes32) bytes32Storage;
     mapping(bytes32 => uint) uIntStorage;
     mapping(bytes32 => string) stringStorage;
@@ -16,8 +17,13 @@ contract StructuredStorage is Upgradeable {
     mapping(bytes32 => bytes) bytesStorage;
     mapping(bytes32 => bool) boolStorage;
     mapping(bytes32 => int) intStorage;
-    //TODO I would add also arrays of everything by default, with default accessors specialising in fetching arrays or subarrays etc..
 
+    // Arrays
+    mapping(bytes32 => bytes32[]) bytes32ArrayStorage;
+    mapping(bytes32 => address[]) addressArrayStorage;
+    mapping(bytes32 => uint[]) uintArrayStorage;
+    mapping(bytes32 => bool[]) boolArrayStorage;
+    mapping(bytes32 => int[]) intArrayStorage;
 
     modifier onlyDeployer {
         require(msg.sender == DEPLOYER);
@@ -72,6 +78,28 @@ contract StructuredStorage is Upgradeable {
         return bytes32Storage[_key];
     }
 
+    function getBytes32Array(bytes32 _key) onlyProxyLogicContract external view returns (bytes32[]) {
+        return bytes32ArrayStorage[_key];
+    }
+
+    function getAddressArray(bytes32 _key) onlyProxyLogicContract external view returns (address[]) {
+        return addressArrayStorage[_key];
+    }
+
+    function getUintArray(bytes32 _key) onlyProxyLogicContract external view returns (uint[]) {
+        return uintArrayStorage[_key];
+    }
+
+    function getIntArray(bytes32 _key) onlyProxyLogicContract external view returns (int[]) {
+        return intArrayStorage[_key];
+    }
+
+    function getBoolArray(bytes32 _key) onlyProxyLogicContract external view returns (bool[]) {
+        return boolArrayStorage[_key];
+    }
+
+
+
     // *** Setter Methods ***
     function setUint(bytes32 _key, uint _value) onlyProxyLogicContract external {
         uIntStorage[_key] = _value;
@@ -99,6 +127,26 @@ contract StructuredStorage is Upgradeable {
 
     function setBytes32(bytes32 _key, bytes32 _value) onlyProxyLogicContract external {
         bytes32Storage[_key] = _value;
+    }
+
+    function setBytes32Array(bytes32 _key, bytes32[] _value) onlyProxyLogicContract external {
+        bytes32ArrayStorage[_key] = _value;
+    }
+
+    function setAddressArray(bytes32 _key, address[] _value) onlyProxyLogicContract external {
+        addressArrayStorage[_key] = _value;
+    }
+
+    function setUintArray(bytes32 _key, uint[] _value) onlyProxyLogicContract external {
+        uintArrayStorage[_key] = _value;
+    }
+
+    function setIntArray(bytes32 _key, int[] _value) onlyProxyLogicContract external {
+        intArrayStorage[_key] = _value;
+    }
+
+    function setBoolArray(bytes32 _key, bool[] _value) onlyProxyLogicContract external {
+        boolArrayStorage[_key] = _value;
     }
 
     // *** Delete Methods ***

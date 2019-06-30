@@ -14,6 +14,13 @@ contract IStructuredStorage {
     function getInt(bytes32 _key) external view returns(int);
     function getBytes32(bytes32 _key) external view returns(bytes32);
 
+    // *** Getter Methods For Arrays ***
+    function getBytes32Array(bytes32 _key) external view returns (bytes32[]);
+    function getAddressArray(bytes32 _key) external view returns (address[]);
+    function getUintArray(bytes32 _key) external view returns (uint[]);
+    function getIntArray(bytes32 _key) external view returns (int[]);
+    function getBoolArray(bytes32 _key) external view returns (bool[]);
+
     // *** Setter Methods ***
     function setUint(bytes32 _key, uint _value) external;
     function setString(bytes32 _key, string _value) external;
@@ -22,6 +29,13 @@ contract IStructuredStorage {
     function setBool(bytes32 _key, bool _value) external;
     function setInt(bytes32 _key, int _value) external;
     function setBytes32(bytes32 _key, bytes32 _value) external;
+
+    // *** Setter Methods For Arrays ***
+    function setBytes32Array(bytes32 _key, bytes32[] _value) external;
+    function setAddressArray(bytes32 _key, address[] _value) external;
+    function setUintArray(bytes32 _key, uint[] _value) external;
+    function setIntArray(bytes32 _key, int[] _value) external;
+    function setBoolArray(bytes32 _key, bool[] _value) external;
 
     // *** Delete Methods ***
     function deleteUint(bytes32 _key) external;
