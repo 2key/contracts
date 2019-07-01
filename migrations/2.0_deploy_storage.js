@@ -10,6 +10,7 @@ const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenP
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
+const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 
 module.exports = function deploy(deployer) {
     if(deployer.network.startsWith('public') || deployer.network.startsWith('dev')) {
@@ -38,8 +39,12 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyRegistryStorage))
             .then(() => TwoKeyRegistryStorage.deployed())
             .then(() => true);
+    } else if (eployer.network.startsWith('plasma') || deployer.network.startsWith('private') {
+        deployer.deploy(TwoKeyPlasmaEventsStorage)
+            .then(() => TwoKeyPlasmaEventsStorage.deployed())
+            .then(() => true);
     } else {
-        console.log('This contracts are never going to be deployed to this network.');
+        console.log('No deployment configuration for selected network');
     }
 
 };
