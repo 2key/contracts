@@ -458,7 +458,10 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
                 c.state = ConversionState.REJECTED;
 //                conversions[conversionId] = c;
                 reservedAmount += c.baseTokenUnits + c.bonusTokenUnits;
-                refundAmount += c.conversionAmount; //TODO: Handle FIAT/ETH cases
+                if(c.isConversionFiat == false) {
+                    refundAmount += c.conversionAmount;
+                }
+                 //TODO: Handle FIAT/ETH cases
             }
         }
         //If there's an amount to be returned and reserved tokens, update state and execute cashback

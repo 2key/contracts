@@ -394,7 +394,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             PROXY_STORAGE_CONTRACT.getUint(keccak256("campaign2numberOfForwarders", campaignAddress))
         );
     }
-Tw
+
 
     function plasma2ethereum(
         address _plasma
