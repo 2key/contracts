@@ -423,6 +423,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == false) {
+                //TODO: Here should be APPROVED if it is not fiat
                 counters[0]--; //Reduce number of pending conversions
                 counters[1]++; //Increase number of approved conversions
                 c.state = ConversionState.APPROVED;
@@ -457,7 +458,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
                 c.state = ConversionState.REJECTED;
 //                conversions[conversionId] = c;
                 reservedAmount += c.baseTokenUnits + c.bonusTokenUnits;
-                refundAmount += c.conversionAmount;
+                refundAmount += c.conversionAmount; //TODO: Handle FIAT/ETH cases
             }
         }
         //If there's an amount to be returned and reserved tokens, update state and execute cashback

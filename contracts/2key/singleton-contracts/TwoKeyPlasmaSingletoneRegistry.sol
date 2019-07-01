@@ -1,6 +1,8 @@
 pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeySingletonesRegistry.sol";
+import "../interfaces/IStructuredStorage.sol";
+
 import "../upgradability/UpgradabilityProxy.sol";
 import "../upgradability/Upgradeable.sol";
 
@@ -12,12 +14,18 @@ import "../upgradability/Upgradeable.sol";
  */
 contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
 
-    mapping(address => bool) public isMaintainer;
+    address public deployer;
 
     mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractToProxy;
     mapping (string => string) contractNameToLatestVersionName;
 
+    event ProxiesDeployed(
+        address logicProxy,
+        address storageProxy
+    );
+
+    mapping (address => bool) public isMaintainer;
 
     constructor(address [] _maintainers, address _twoKeyAdmin) public {
         isMaintainer[msg.sender] = true; //for truffle deployment
@@ -70,17 +78,36 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
         return contractToProxy[_contractName];
     }
 
-    /**
-     * @dev Creates an upgradeable proxy
-     * @param version representing the first version to be set for the proxy
-     * @return address of the new proxy created
-     */
-    function createProxy(string contractName, string version) public onlyMaintainer payable returns (UpgradeabilityProxy) {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, msg.sender);
-        Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
+    function deployProxy(
+        string contractName,
+        string version,
+        address deployer
+    )
+    internal
+    returns (address)
+    {
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, deployer);
         contractToProxy[contractName] = proxy;
-        emit ProxyCreated(proxy);
-        return proxy;
+        return address(proxy);
+    }
+
+    /**
+     * @dev Creates an upgradeable proxy for both Storage and Logic
+     * @param version representing the first version to be set for the proxy
+     */
+    function createProxy(
+        string contractName,
+        string contractNameStorage,
+        string version
+    )
+    public
+    onlyMaintainer
+    {
+        address logicProxy = deployProxy(contractName, version, msg.sender);
+        address storageProxy = deployProxy(contractNameStorage, version, msg.sender);
+
+        IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
+        emit ProxiesDeployed(logicProxy, storageProxy);
     }
 
     function addMaintainers(

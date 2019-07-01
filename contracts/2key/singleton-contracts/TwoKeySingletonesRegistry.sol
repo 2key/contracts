@@ -80,7 +80,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
-//        require(versionsLogic[contractName][version] == 0x0);
+        require(versionsLogic[contractName][version] == 0x0);
         versionsLogic[contractName][version] = implementation;
         contractNameToLatestVersion[contractName] = version;
         emit VersionAdded(version, implementation);
@@ -149,12 +149,12 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     function deployProxy(
         string contractName,
         string version,
-        address deployer
+        address _deployer
     )
     internal
     returns (address)
     {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, deployer);
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, _deployer);
         contractNameToProxyAddress[contractName] = proxy;
         emit ProxyCreated(proxy);
         return address(proxy);

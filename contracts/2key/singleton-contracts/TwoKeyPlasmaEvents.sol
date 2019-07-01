@@ -1,15 +1,20 @@
 pragma solidity ^0.4.24; //We have to specify what version of compiler this code will use
 import '../libraries/Call.sol';
 import "../upgradability/Upgradeable.sol";
+import "../interfaces/storage-contracts/ITwoKeyPlasmaEventsStorage.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+
 
 contract TwoKeyPlasmaEvents is Upgradeable {
 
-    address public owner;
-    bool initialized = false;
-    mapping(address => uint) public campaign2numberOfVisits;
-    mapping(address => uint) public campaign2numberOfJoins;
+    ITwoKeyPlasmaEventsStorage public PROXY_STORAGE_CONTRACT;
+
+    address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
+
+    bool initialized;
+
     mapping(address => mapping(address => bool)) campaignToReferrerToCounted;
-    mapping(address => uint) public campaign2numberOfForwarders;
 
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
@@ -35,8 +40,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     // note that more than one plasma address can point to the same ethereum address so it is not critical to use the same plasma address all the time for the same user
     // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
     // the way to know if an address is a plasma address is to look it up in this mapping
-    mapping(address => address) public plasma2ethereum;
-    mapping(address => address) public ethereum2plasma;
 
     mapping(address => string) addressToUsername;
     mapping(string => address) usernameToAddress;
@@ -54,24 +57,36 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     mapping(address => mapping(address => mapping(address => uint[]))) public visits_list_timestamps;
 
     mapping(address => mapping(address => mapping(address => bytes))) public visited_sig;
-    mapping(address => mapping(address => bytes)) public notes;
 
-    mapping(address => mapping(address => uint256)) public voted_yes;
-    mapping(address => mapping(address => uint256)) public weighted_yes;
-    mapping(address => mapping(address => uint256)) public voted_no;
-    mapping(address => mapping(address => uint256)) public weighted_no;
+//    mapping(address => mapping(address => uint256)) public voted_yes;
+//    mapping(address => mapping(address => uint256)) public weighted_yes;
+//    mapping(address => mapping(address => uint256)) public voted_no;
+//    mapping(address => mapping(address => uint256)) public weighted_no;
 
-    mapping(address => bool) public isMaintainer;
 
-    function setInitialParams(address[] maintainers) public {
+    function setInitialParams(
+        address _twoKeyPlasmaSingletonRegistry,
+        address _proxyStorage
+    )
+    public
+    {
         require(initialized == false);
-        initialized = true;
-        owner = msg.sender;
+
+        TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaEventsStorage(_proxyStorage);
         //Adding initial maintainers
-        isMaintainer[msg.sender] = true;
-        for(uint i=0; i<maintainers.length; i++) {
-            isMaintainer[maintainers[i]] = true;
-        }
+        initialized = true;
+    }
+
+    function onlyMaintainer() internal view returns (bool) {
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaMaintainersRegistry");
+        return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).onlyMaintainer(msg.sender);
+    }
+
+    // Internal function to fetch address from TwoKeyRegTwoistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
     }
 
     function add_plasma2ethereum(address plasma_address, bytes sig) public { // , bool with_prefix) public {
@@ -80,22 +95,23 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         // see setup_demo.js on how to generate sig
 //        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(msg.sender))));
         //TODO Nikola add next line logic
-        require(msg.sender == plasma_address || isMaintainer[msg.sender]);
+        require(msg.sender == plasma_address || onlyMaintainer());
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
-        require (sig.length == 65, 'bad plasma signature length');
+        require (sig.length == 65);
         address eth_address = Call.recoverHash(hash,sig,0);
-        require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == eth_address, "cant change plasma=>eth");
-        plasma2ethereum[plasma_address] = eth_address;
-        ethereum2plasma[eth_address] = plasma_address;
+        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keccak256("plasma2ethereum", plasma_address));
+        require(ethereum == address(0) || ethereum == eth_address);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256("plasma2ethereum", plasma_address), eth_address);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256("ethereum2plasma",eth_address), plasma_address);
 
         emit Plasma2Ethereum(plasma_address, eth_address);
     }
 
 
     function linkUsernameAndAddress(bytes signature, address plasma_address, string username) public {
-        require(msg.sender == plasma_address || isMaintainer[msg.sender]);
+        require(msg.sender == plasma_address || onlyMaintainer());
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
-        require (signature.length == 65, 'bad plasma signature length');
+        require (signature.length == 65);
         address plasma = Call.recoverHash(hash,signature,0);
         require(plasma == plasma_address);
         addressToUsername[plasma_address] = username;
@@ -104,16 +120,16 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
 
 
-    function plasmaOf(address me) public view returns (address) {
-        address plasma = ethereum2plasma[me];
+    function plasmaOf(address me) internal view returns (address) {
+        address plasma = PROXY_STORAGE_CONTRACT.getAddress(keccak256("ethereum2plasma",me));
         if (plasma != address(0)) {
             return plasma;
         }
         return me;
     }
 
-    function ethereumOf(address me) public view returns (address) {
-        address ethereum = plasma2ethereum[me];
+    function ethereumOf(address me) internal view returns (address) {
+        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keccak256("plasma2ethereum", me));
         if (ethereum != address(0)) {
             return ethereum;
         }
@@ -129,7 +145,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         if (old_address == address(0)) {
             public_link_key[c][contractor][new_address] = new_public_key;
         } else {
-            require(old_address == new_public_key,'public key can not be modified');
+            require(old_address == new_public_key);
         }
     }
 
@@ -148,16 +164,16 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         address plasma = plasmaOf(me);
-        require(influencer2cut[c][contractor][plasma] == 0 || influencer2cut[c][contractor][plasma] == cut, 'cut already set differently');
-        if (influencer2cut[c][contractor][plasma] == 0) {
-            if (0 < cut && cut <= 101) {
-                voted_yes[c][contractor]++;
-                weighted_yes[c][contractor] += cut-1;
-            } else if (154 < cut && cut < 255) {
-                voted_no[c][contractor]++;
-                weighted_no[c][contractor] += 255-cut;
-            }
-        }
+        require(influencer2cut[c][contractor][plasma] == 0 || influencer2cut[c][contractor][plasma] == cut);
+//        if (influencer2cut[c][contractor][plasma] == 0) {
+//            if (0 < cut && cut <= 101) {
+//                voted_yes[c][contractor]++;
+//                weighted_yes[c][contractor] += cut-1;
+//            } else if (154 < cut && cut < 255) {
+//                voted_no[c][contractor]++;
+//                weighted_no[c][contractor] += 255-cut;
+//            }
+//        }
         influencer2cut[c][contractor][plasma] = cut;
     }
 
@@ -186,9 +202,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     }
 
     function setNoteByUser(address c, bytes note) public {
-        // note is a message you can store with sig. For example it could be the secret you used encrypted by you
-        notes[c][msg.sender] = note;
+        PROXY_STORAGE_CONTRACT.setBytes(keccak256("notes",c,msg.sender), note);
     }
+//
+//    function notes(address c, address _plasma) public view returns (bytes) {
+//        return PROXY_STORAGE_CONTRACT.getBytes(keccak256("notes",c, _plasma));
+//    }
 
     function getVisitedFrom(address c, address contractor, address _address) public view returns (address) {
         return ethereumOf(visited_from[c][contractor][_address]);
@@ -224,7 +243,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         }
         old_address = plasmaOf(old_address);
         // validate an existing visit path from contractor address to the old_address
-        require(test_path(campaignAddress, contractor, old_address), 'no path to contractor');
+        require(test_path(campaignAddress, contractor, old_address));
         address old_key = publicLinkKeyOf(campaignAddress, contractor, old_address);
         address[] memory influencers;
         address[] memory keys;
@@ -232,11 +251,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         address last_address = msg.sender;
         (influencers, keys, weights) = Call.recoverSig(sig, old_key, last_address);
         address referrer = contractor;
-        require(influencers[influencers.length-1] == last_address, 'only the last in the link can call visited');
+        require(influencers[influencers.length-1] == last_address);
         if (influencers.length > 1) {
             referrer = influencers[influencers.length - 2];
         }
-        campaign2numberOfJoins[campaignAddress]+= 1;
+        bytes32 keyJoins = keccak256("campaign2numberOfJoins", campaignAddress);
+        PROXY_STORAGE_CONTRACT.setUint(keyJoins, PROXY_STORAGE_CONTRACT.getUint(keyJoins) + 1);
         joined_from[campaignAddress][contractor][last_address] = referrer;
         visited_from[campaignAddress][contractor][last_address] = referrer;
         visits_list[campaignAddress][contractor][referrer].push(last_address);
@@ -258,7 +278,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         old_address = plasmaOf(old_address);
 
         // validate an existing visit path from contractor address to the old_address
-        require(test_path(c, contractor, old_address), 'no path to contractor');
+        require(test_path(c, contractor, old_address));
 
         address old_key = publicLinkKeyOf(c, contractor, old_address);
 
@@ -271,12 +291,13 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         // check if we exactly reached the end of the signature. this can only happen if the signature
         // was generated with free_join_take and in this case the last part of the signature must have been
         // generated by the caller of this method
-        require(influencers[influencers.length-1] == last_address, 'only the last in the link can call visited');
+        require(influencers[influencers.length-1] == last_address);
         visited_sig[c][contractor][last_address] = sig;
 
         if(influencers.length > 1 && campaignToReferrerToCounted[c][influencers[influencers.length-2]] == false && influencers[influencers.length-2] != contractor) {
             campaignToReferrerToCounted[c][influencers[influencers.length-2]] = true;
-            campaign2numberOfForwarders[c] ++;
+            bytes32 key = keccak256("campaign2numberOfForwarders",c);
+            PROXY_STORAGE_CONTRACT.setUint(key, PROXY_STORAGE_CONTRACT.getUint(key) + 1);
         }
 
         uint i;
@@ -284,12 +305,13 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         // move ARCs based on signature information
         for (i = 0; i < influencers.length; i++) {
             new_address = influencers[i];
-            require(new_address != plasmaOf(contractor), 'contractor can not be an influencer');
+            require(new_address != plasmaOf(contractor));
             // NOTE!!!! for the last user in the sig the  new_address can be a plasma_address
             // as a result the same user with a plasma_address can appear later with an etherum address
             if (!visits[c][contractor][old_address][new_address]) {  // generate event only once for each tripplet
                 //TODO: Review this and test
-                campaign2numberOfVisits[c] += 1;
+                bytes32 key1 = keccak256("campaign2numberOfVisits",c);
+                PROXY_STORAGE_CONTRACT.setUint(key1, PROXY_STORAGE_CONTRACT.getUint(key1) + 1);
                 visits[c][contractor][old_address][new_address] = true;
                 if (joined_from[c][contractor][new_address] == address(0)) {
                     visited_from[c][contractor][new_address] = old_address;
@@ -322,10 +344,10 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
     }
 
-    function visitsList(address c, address contractor, address from) public view returns (address[]) {
-        from = plasmaOf(from);
-        return visits_list[c][contractor][from];
-    }
+//    function visitsList(address c, address contractor, address from) public view returns (address[]) {
+//        from = plasmaOf(from);
+//        return visits_list[c][contractor][from];
+//    }
 
     function visitsListEx(address c, address contractor, address from) public view returns (address[], uint[]) {
         from = plasmaOf(from);
@@ -339,33 +361,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 //        );
 //    }
 
-    function getNumberOfVisitsAndJoinsPerCampaign(address _campaignAddress) public view returns (uint,uint) {
-        return (campaign2numberOfVisits[_campaignAddress], campaign2numberOfJoins[_campaignAddress]);
-    }
-
-//    /**
-//     * @notice Function which can add new maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-//     * @dev only owner contract is eligible to mutate state of maintainers
-//     * @param _maintainers is the array of maintainer addresses
-//     */
-//    function addMaintainers(address [] _maintainers) public {
-//        require(msg.sender == owner || isMaintainer[msg.sender] == true);
-//        for(uint i=0; i<_maintainers.length; i++) {
-//            isMaintainer[_maintainers[i]] = true;
-//        }
-//    }
-//
-//    /**
-//     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-//     * @dev only owner contract is eligible to mutate state of maintainers
-//     * @param _maintainers is the array of maintainer addresses
-//     */
-//    function removeMaintainers(address [] _maintainers) public {
-//        require(msg.sender == owner);
-//        for(uint i=0; i<_maintainers.length; i++) {
-//            isMaintainer[_maintainers[i]] = false;
-//        }
-//    }
 
     /**
      * @notice Function to validate if signature is valid
@@ -383,4 +378,41 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         address recoveredAddress = Call.recoverHash(hash, signature, 0);
         return recoveredAddress;
     }
+
+
+
+    function getNumberOfVisitsAndJoinsAndForwarders(
+        address campaignAddress
+    )
+    public
+    view
+    returns (uint,uint,uint)
+    {
+        return (
+            PROXY_STORAGE_CONTRACT.getUint(keccak256("campaign2numberOfVisits",campaignAddress)),
+            PROXY_STORAGE_CONTRACT.getUint(keccak256("campaign2numberOfJoins",campaignAddress)),
+            PROXY_STORAGE_CONTRACT.getUint(keccak256("campaign2numberOfForwarders", campaignAddress))
+        );
+    }
+Tw
+
+    function plasma2ethereum(
+        address _plasma
+    )
+    public
+    view
+    returns (address) {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("plasma2ethereum", _plasma));
+    }
+
+    function ethereum2plasma(
+        address _ethereum
+    )
+    public
+    view
+    returns (address) {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("ethereum2plasma", _ethereum));
+    }
+
+
 }
