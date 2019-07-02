@@ -396,6 +396,7 @@ describe('TwoKeyDonationCampaign', () => {
         });
 
         let signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
+        console.log(signature);
         let stats = await twoKeyProtocol.DonationCampaign.getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaignAddress, signature);
         console.log(stats);
     }).timeout(60000);

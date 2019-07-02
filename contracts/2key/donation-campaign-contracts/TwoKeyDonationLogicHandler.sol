@@ -247,37 +247,36 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
      * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
      * @dev only referrer by himself, moderator, or contractor can call this
      * @param _referrer is the address of referrer we're checking for
-     * @param signature is the signature if calling functions from FE without ETH address
-     * @param conversionIds are the ids of conversions this referrer participated in
+     * @param _signature is the signature if calling functions from FE without ETH address
+     * @param _conversionIds are the ids of conversions this referrer participated in
      * @return tuple containing this 3 information
      */
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
         address _referrer,
-        bytes signature,
-        uint[] conversionIds
+        bytes _signature,
+        uint[] _conversionIds
     )
     public
     view
-    returns (uint,uint,uint,uint[])
+    returns (uint,uint,uint,uint[],address)
     {
-        if(_referrer != address(0)) {
-            require(msg.sender == _referrer || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-            _referrer = plasmaOf(_referrer);
+        address referrer;
+        if(_signature.length > 0) {
+            referrer= recover(_signature);
         } else {
-            bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-                keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
-            _referrer = Call.recoverHash(hash, signature, 0);
+            require(msg.sender == _referrer || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+            referrer = plasmaOf(_referrer);
         }
 
-        uint len = conversionIds.length;
+        uint len = _conversionIds.length;
         uint[] memory earnings = new uint[](len);
 
         for(uint i=0; i<len; i++) {
-            earnings[i] = referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
+            earnings[i] = referrerPlasma2EarningsPerConversion[referrer][_conversionIds[i]];
         }
 
-        uint referrerBalance = ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReferrerPlasmaBalance(_referrer);
-        return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrer], referrerPlasmaAddressToCounterOfConversions[_referrer], earnings);
+        uint referrerBalance = ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReferrerPlasmaBalance(referrer);
+        return (referrerBalance, referrerPlasma2TotalEarnings2key[referrer], referrerPlasmaAddressToCounterOfConversions[referrer], earnings, referrer);
     }
 
     /**

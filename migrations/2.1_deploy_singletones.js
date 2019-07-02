@@ -4,7 +4,6 @@ const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
-const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
@@ -16,7 +15,6 @@ const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
-const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 /**
  * Upgradable singleton storage contracts
  */
@@ -33,12 +31,13 @@ const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeToke
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 
-/**
- * Upgradable singleton storage contracts on plasma network
- */
-const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
-const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 
+const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
+const TwoKeyPlasmaEventsRegistry = artifacts.require('TwoKeyPlasmaEventsRegistry');
+const TwoKeyPlasmaEventsRegistryStorage = artifacts.require('TwoKeyPlasmaEventsRegistryStorage');
+const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
+const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -778,11 +777,16 @@ module.exports = function deploy(deployer) {
         let proxyAddressTwoKeyPlasmaEventsSTORAGE;
         let proxyAddressTwoKeyPlasmaMaintainersRegistry;
         let proxyAddressTwoKeyPlasmaMaintainersRegistrySTORAGE;
+        let proxyAddressTwoKeyPlasmaEventsRegistry;
+        let proxyAddressTwoKeyPlasmaEventsRegistrySTORAGE;
 
         deployer.link(Call, TwoKeyPlasmaEvents);
+        deployer.link(Call, TwoKeyPlasmaEventsRegistry);
         deployer.deploy(TwoKeyPlasmaEvents)
             .then(() => deployer.deploy(TwoKeyPlasmaMaintainersRegistry))
             .then(() => TwoKeyPlasmaMaintainersRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeyPlasmaEventsRegistry))
+            .then(() => TwoKeyPlasmaEventsRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry, maintainerAddresses, '0x0')) //adding empty admin address
             .then(() => TwoKeyPlasmaSingletoneRegistry.deployed().then(async (registry) => {
                 await new Promise(async(resolve,reject) => {
@@ -807,7 +811,34 @@ module.exports = function deploy(deployer) {
                         proxyAddressTwoKeyPlasmaEventsSTORAGE = storageProxy;
                         fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
 
-                        fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                        resolve(proxyAddressTwoKeyPlasmaEventsSTORAGE);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('... Adding TwoKeyPlasmaEventsRegistry to Plasma Proxy registry as valid implementation');
+
+                        let txHash = await registry.addVersion("TwoKeyPlasmaEventsRegistry", "1.0", TwoKeyPlasmaEventsRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyPlasmaEventsRegistryStorage", "1.0", TwoKeyPlasmaEventsRegistryStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyPlasmaEventsRegistry", "TwoKeyPlasmaEventsRegistryStorage", "1.0");
+
+                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        const twoKeyPlasmaEventsReg = fileObject.TwoKeyPlasmaEventsRegistry || {};
+                        twoKeyPlasmaEventsReg[network_id] = {
+                            'address': TwoKeyPlasmaEventsRegistry.address,
+                            'Proxy': logicProxy,
+                            'StorageProxy' : storageProxy,
+                            'Version': "1.0",
+                            maintainer_address: maintainerAddresses,
+                        };
+
+                        proxyAddressTwoKeyPlasmaEventsRegistry = logicProxy;
+                        proxyAddressTwoKeyPlasmaEventsRegistrySTORAGE = storageProxy;
+                        fileObject['TwoKeyPlasmaEventsRegistry'] = twoKeyPlasmaEventsReg;
+
                         resolve(proxyAddressTwoKeyPlasmaEventsSTORAGE);
                     } catch (e) {
                         reject(e);
@@ -851,6 +882,20 @@ module.exports = function deploy(deployer) {
                         (
                             TwoKeyPlasmaSingletoneRegistry.address,
                             proxyAddressTwoKeyPlasmaEventsSTORAGE,
+                        );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Setting initial params in plasma registry contract on plasma network');
+                        let txHash = await TwoKeyPlasmaEventsRegistry.at(proxyAddressTwoKeyPlasmaEventsRegistry).setInitialParams
+                        (
+                            TwoKeyPlasmaSingletoneRegistry.address,
+                            proxyAddressTwoKeyPlasmaEventsRegistrySTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {
