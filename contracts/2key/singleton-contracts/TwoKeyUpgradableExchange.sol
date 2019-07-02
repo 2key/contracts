@@ -90,7 +90,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setUint(("weiRaised"),0);
         setUint("transactionCounter",0);
 
-        setAddress(("TOKEN"),address(_token));
+        setAddress(("TWO_KEY_TOKEN"),address(_token));
         setAddress(("DAI"), _daiAddress);
         setAddress(("ETH_TOKEN_ADDRESS"), 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
         setAddress(("KYBER_NETWORK_PROXY"), _kyberNetworkProxy);
@@ -136,7 +136,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     internal
     {
         //Take the address of token from storage
-        address tokenAddress = getAddress("TOKEN");
+        address tokenAddress = getAddress("TWO_KEY_TOKEN");
 
         ERC20(tokenAddress).safeTransfer(_beneficiary, _tokenAmount);
     }
@@ -317,7 +317,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         ERC20 dai = ERC20(getAddress("DAI"));
-        ERC20 token = ERC20(getAddress("TOKEN"));
+        ERC20 token = ERC20(getAddress("TWO_KEY_TOKEN"));
 
         uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits);
         uint etherBalanceOnContractBefore = this.balance;
@@ -391,6 +391,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setUint(key, value);
     }
 
+    //TODO: VERY SENSITIVE PROCESS, SHOULD BE DONE BY CONGRESS ONLY
+    function destruct(address newLogicContract) public onlyMaintainer {
+        newLogicContract.transfer(this.balance);
+        ERC20 dai = ERC20(getAddress("DAI"));
+        ERC20 token = ERC20(getAddress("TWO_KEY_TOKEN"));
+        dai.transfer(newLogicContract, dai.balanceOf(address(this)));
+        token.transfer(newLogicContract, token.balanceOf(address(this)));
+    }
 
     /**
      * @notice Fallback function to handle incoming ether
