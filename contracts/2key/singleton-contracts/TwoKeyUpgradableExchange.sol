@@ -52,20 +52,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint256 rate
     );
 
-//
-//    /**
-//     * @notice This event will be fired every time a withdraw is executed
-//     */
-//    event WithdrawExecuted(
-//        address caller,
-//        address beneficiary,
-//        uint stableCoinsReserveBefore,
-//        uint stableCoinsReserveAfter,
-//        uint etherBalanceBefore,
-//        uint etherBalanceAfter,
-//        uint stableCoinsToWithdraw,
-//        uint twoKeyAmount
-//    );
+
+    /**
+     * @notice This event will be fired every time a withdraw is executed
+     */
+    event WithdrawExecuted(
+        address caller,
+        address beneficiary,
+        uint stableCoinsReserveBefore,
+        uint stableCoinsReserveAfter,
+        uint etherBalanceBefore,
+        uint etherBalanceAfter,
+        uint stableCoinsToWithdraw,
+        uint twoKeyAmount
+    );
 
 
     /**
@@ -328,16 +328,36 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         dai.transfer(_beneficiary, stableCoinUnits);
 
-//        emit WithdrawExecuted(
-//            msg.sender,
-//            _beneficiary,
-//            stableCoinsOnContractBefore,
-//            stableCoinsAfter,
-//            etherBalanceOnContractBefore,
-//            this.balance,
-//            stableCoinUnits,
-//            _twoKeyUnits,
-//        );
+        emitEventWithdrawExecuted(
+            _beneficiary,
+            stableCoinsOnContractBefore,
+            stableCoinsAfter,
+            etherBalanceOnContractBefore,
+            stableCoinUnits,
+            _twoKeyUnits
+        );
+    }
+
+    function emitEventWithdrawExecuted(
+        address _beneficiary,
+        uint _stableCoinsOnContractBefore,
+        uint _stableCoinsAfter,
+        uint _etherBalanceOnContractBefore,
+        uint _stableCoinUnits,
+        uint twoKeyUnits
+    )
+    internal
+    {
+        emit WithdrawExecuted(
+            msg.sender,
+            _beneficiary,
+            _stableCoinsOnContractBefore,
+            _stableCoinsAfter,
+            _etherBalanceOnContractBefore,
+            this.balance,
+            _stableCoinUnits,
+            twoKeyUnits
+        );
     }
 
 

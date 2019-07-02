@@ -68,7 +68,6 @@ module.exports = function deploy(deployer) {
         }
     });
 
-
     if(found) {
         let fileObject = {};
         if (fs.existsSync(proxyFile)) {
@@ -91,7 +90,6 @@ module.exports = function deploy(deployer) {
                             try {
                                 console.log('... Adding new version of TwoKeyRegistry to the registry contract');
                                 const twoKeyReg = fileObject.TwoKeyRegistry || {};
-                                //TODO: Instead of numbers use timestamp as version (key)
                                 let v = parseInt(twoKeyReg[network_id].Version.substr(-1)) + 1;
                                 twoKeyReg[network_id].Version = twoKeyReg[network_id].Version.substr(0, twoKeyReg[network_id].Version.length - 1) + v.toString();
 

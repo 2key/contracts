@@ -272,10 +272,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
     }
 
-//    function visitsList(address c, address contractor, address from) public view returns (address[]) {
-//        from = plasmaOf(from);
-//        return visits_list[c][contractor][from];
-//    }
 
     function visitsListEx(address c, address contractor, address from) public view returns (address[], uint[]) {
         from = plasmaOf(from);
