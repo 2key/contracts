@@ -357,4 +357,21 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         return reservedAmount2keyForRewards;
     }
 
+    /**
+     * @notice Function to get balance of influencer for his plasma address
+     * @param _influencer is the plasma address of influencer
+     * @return balance in wei's
+     */
+    function getReferrerPlasmaBalance(
+        address _influencer
+    )
+    public
+    view
+    returns (uint)
+    {
+        require(msg.sender == twoKeyDonationLogicHandler);
+        return (referrerPlasma2Balances2key[_influencer]);
+    }
+
+
 }
