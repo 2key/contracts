@@ -111,6 +111,15 @@ library Call {
         return weight;
     }
 
+    function loadUint256(bytes sig, uint idx) public pure returns (uint256) {
+        uint256 weight;
+        idx += 32;
+        assembly
+        {
+            weight := mload(add(sig, idx))
+        }
+        return weight;
+    }
 
     function recoverHash(bytes32 hash, bytes sig, uint idx) public pure returns (address) {
         // same as recoverHash in utils/sign.js

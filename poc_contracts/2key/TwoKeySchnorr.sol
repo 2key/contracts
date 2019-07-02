@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../../contracts/2key/libraries/Call.sol';
 
 /*
 Taken from https://github.com/HarryR/solcrypto/blob/master/contracts/SECP2561k.sol
@@ -263,8 +264,17 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   function setPi(uint i, uint Px, uint Py) public onlyOwner
   {
     require(Pxs[i] == 0 && Pys[i] == 0,'P already defined for i');
+    require(i == 1 || Pxs[i-1] != 0 || Pys[i-1] != 0,'P not defined for i-1');
     Pxs[i] = Px;
     Pys[i] = Py;
+  }
+
+  function getPi(uint i) public view
+  returns(uint256 x, uint256 y)
+  {
+    x = Pxs[i];
+    y = Pys[i];
+    require(x != 0 || y != 0,'P not defined for i');
   }
 
   function verify1(uint256 s, uint256 Rx, uint256 Ry, uint256 Px, uint256 Py) public pure
@@ -282,22 +292,59 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return publicKeyVerify(s, qx, qy);
   }
 
-  function verify(uint256 s, uint256 Rx, uint256 Ry, uint256 Px, uint256 Py, address a) public pure
+  function verify(uint256 s, uint256 Rx, uint256 Ry, uint256 Px, uint256 Py, bytes32 m) public pure
   returns(bool)
   {
     // gas 39433
     address Ra = point_hash([Rx,Ry]);
-//    address a1 = point_hash([Px,Py]);
-    uint256 h = uint256(keccak256(abi.encodePacked(Ra,a)));
+    uint256 h = uint256(m);
     h = (Q - h) % Q; // TODO we can remove this by negating R and not negating s inside sbmul_add_mul
     return Ra == sbmul_add_mul(s, [Px, Py], h);
   }
 
-  function convertTest(uint n, uint256 s, uint256 Rx, uint256 Ry) public
+  function verifyQ(bytes Rs, bytes Qs) public view
+  returns(bool)
   {
+    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
+    // Qs[i] = h(R[i])*P[i]
+    // and the code will verify that the computation is true
+    require(Rs.length%64 == 0 && Rs.length == Qs.length, 'Rs/Qs bad length');
+    uint i = 1;
+    for(uint idx = 0; idx < Rs.length; idx+=64) {
+      uint256 Rxi = Call.loadUint256(Rs,idx);
+      uint256 Qxi = Call.loadUint256(Qs,idx);
+      uint256 Pxi = Pxs[i];
+      uint256 Ryi = Call.loadUint256(Rs,idx+32);
+      uint256 Qyi = Call.loadUint256(Qs,idx+32);
+      uint256 Pyi = Pys[i];
+
+      // verify that  Qs[i] = h(Rs[i])*P[i]
+      uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi)));
+      if(!ecmulVerify(Pxi,Pyi,h,Qxi,Qyi)) {
+        return false;
+      }
+      i++;
+    }
+    return true;
+  }
+
+  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs) public
+  {
+    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
+    // Qs[i] = h(R[i])*P[i]
+    // and the code will verify that the computation is true
+    uint n = Rs.length / 64 + 1;
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
-    require(Px != 0 || Py != 0,'P not defined for n');
-    require(verify(s, Rx, Ry, Px, Py, msg.sender), 'signature failed');
+    require(Px != 0 || Py != 0, 'P not defined for n');
+    require(verifyQ(Rs, Qs), 'Qs[i] != h(Rs[i])*Ps[i]');
+    bytes32 m = keccak256(abi.encodePacked(Rx,Ry,msg.sender));
+
+    for(uint idx = 0; idx < Rs.length; idx+=64) {
+      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
+      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(Qs,idx), Call.loadUint256(Qs,idx+32));
+    }
+
+    require(verify(s, Rx, Ry, Px, Py, m), 'signature failed');
   }
 }
