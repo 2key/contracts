@@ -260,7 +260,7 @@ contract SECP2561k {
 contract TwoKeySchnorr is SECP2561k, Ownable {
   mapping(uint => uint) private Pxs;
   mapping(uint => uint) private Pys;
-  mapping(address => mapping(uint => int)) private convert;  // address(R) => hope => #converstions
+  mapping(address => mapping(uint => uint)) private convert;  // address(R) => hope => #converstions
   uint N;
 
   function setPi(uint i, uint Px, uint Py) public onlyOwner
@@ -371,10 +371,10 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   }
 
   function getConvertions(uint256[2] R) public view
-  returns(int)
+  returns(uint)
   {
     address R_a = point_hash(R);
-    int cnt = 0;
+    uint cnt = 0;
     for(uint i = 1; i <= N; i++) {
       cnt += convert[R_a][i];
     }
