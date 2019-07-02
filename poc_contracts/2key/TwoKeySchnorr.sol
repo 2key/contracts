@@ -260,6 +260,8 @@ contract SECP2561k {
 contract TwoKeySchnorr is SECP2561k, Ownable {
   mapping(uint => uint) private Pxs;
   mapping(uint => uint) private Pys;
+  mapping(uint256 => mapping(uint => int)) private convert;
+  uint N;
 
   function setPi(uint i, uint Px, uint Py) public onlyOwner
   {
@@ -267,6 +269,9 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(i == 1 || Pxs[i-1] != 0 || Pys[i-1] != 0,'P not defined for i-1');
     Pxs[i] = Px;
     Pys[i] = Py;
+    if (i > N) {
+      N = i;
+    }
   }
 
   function getPi(uint i) public view
@@ -292,14 +297,14 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return publicKeyVerify(s, qx, qy);
   }
 
-  function verify(uint256 s, uint256 Rx, uint256 Ry, uint256 Px, uint256 Py, bytes32 m) public pure
+  function verify(uint256 s, uint256[2] R, uint256[2] P, bytes32 m) public pure
   returns(bool)
   {
     // gas 39433
-    address Ra = point_hash([Rx,Ry]);
+    address Ra = point_hash(R);
     uint256 h = uint256(m);
     h = (Q - h) % Q; // TODO we can remove this by negating R and not negating s inside sbmul_add_mul
-    return Ra == sbmul_add_mul(s, [Px, Py], h);
+    return Ra == sbmul_add_mul(s, P, h);
   }
 
   function verifyQ(bytes Rs, bytes Qs) public view
@@ -323,6 +328,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
       if(!ecmulVerify(Pxi,Pyi,h,Qxi,Qyi)) {
         return false;
       }
+      convert[h][i]++;  // record that Ri contributed to a convertion at hope i
       i++;
     }
     return true;
@@ -345,6 +351,26 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
       (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(Qs,idx), Call.loadUint256(Qs,idx+32));
     }
 
-    require(verify(s, Rx, Ry, Px, Py, m), 'signature failed');
+    require(verify(s, [Rx, Ry], [Px, Py], m), 'signature failed');
+  }
+
+  function getConvertions(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, address a) public view
+  returns(int)
+  {
+    uint256 h = uint256(keccak256(abi.encodePacked(R_bar[0],R_bar[1],P_bar[0],P_bar[1],a)));
+    if(!ecmulVerify(P_bar[0],P_bar[1],h,Q[0],Q[1])) {
+      return -1;
+    }
+    (R_bar[0], R_bar[1]) = ecadd(R_bar[0], R_bar[1], Q[0], Q[1]);
+    if (R_bar[0] != R[0] || R_bar[1] != R[1]) {
+      return -2;
+    }
+
+    uint256 R_h = uint256(keccak256(abi.encodePacked(R[0],R[1])));
+    int cnt = 0;
+    for(uint i = 1; i <= N; i++) {
+      cnt += convert[R_h][i];
+    }
+    return cnt;
   }
 }
