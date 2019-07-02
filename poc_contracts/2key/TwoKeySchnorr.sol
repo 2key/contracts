@@ -260,7 +260,7 @@ contract SECP2561k {
 contract TwoKeySchnorr is SECP2561k, Ownable {
   mapping(uint => uint) private Pxs;
   mapping(uint => uint) private Pys;
-  mapping(uint256 => mapping(uint => int)) private convert;
+  mapping(address => mapping(uint => int)) private convert;  // address(R) => hope => #converstions
   uint N;
 
   function setPi(uint i, uint Px, uint Py) public onlyOwner
@@ -328,7 +328,8 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
       if(!ecmulVerify(Pxi,Pyi,h,Qxi,Qyi)) {
         return false;
       }
-      convert[h][i]++;  // record that Ri contributed to a convertion at hope i
+
+      convert[address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)][i]++;  // record that Ri contributed to a convertion at hope i
       i++;
     }
     return true;
@@ -354,22 +355,28 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(verify(s, [Rx, Ry], [Px, Py], m), 'signature failed');
   }
 
-  function getConvertions(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, address a) public view
-  returns(int)
+  function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, bytes a) public view
+  returns(bool)
   {
+    // a can be anything that identifies the influencer. address or the ecdsa made by the influencer
     uint256 h = uint256(keccak256(abi.encodePacked(R_bar[0],R_bar[1],P_bar[0],P_bar[1],a)));
     if(!ecmulVerify(P_bar[0],P_bar[1],h,Q[0],Q[1])) {
-      return -1;
+      return false;
     }
     (R_bar[0], R_bar[1]) = ecadd(R_bar[0], R_bar[1], Q[0], Q[1]);
     if (R_bar[0] != R[0] || R_bar[1] != R[1]) {
-      return -2;
+      return false;
     }
+    return true;
+  }
 
-    uint256 R_h = uint256(keccak256(abi.encodePacked(R[0],R[1])));
+  function getConvertions(uint256[2] R) public view
+  returns(int)
+  {
+    address R_a = point_hash(R);
     int cnt = 0;
     for(uint i = 1; i <= N; i++) {
-      cnt += convert[R_h][i];
+      cnt += convert[R_a][i];
     }
     return cnt;
   }
