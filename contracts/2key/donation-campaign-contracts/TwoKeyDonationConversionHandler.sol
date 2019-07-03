@@ -10,7 +10,7 @@ import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
-
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
@@ -25,8 +25,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
     ITwoKeyDonationCampaign twoKeyDonationCampaign;
 
-    address twoKeyEventSource;
-    address twoKeyBaseReputationRegistry;
+    address twoKeySingletonRegistry;
+    string currency;
     address contractor;
     uint numberOfConversions;
     /**
@@ -73,7 +73,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     event ConversionCreated(uint conversionId);
 
     modifier onlyContractorOrMaintainer {
-        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         _;
     }
 
@@ -81,10 +82,10 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     function setInitialParamsDonationConversionHandler(
         string tokenName,
         string tokenSymbol,
+        string _currency,
         address _contractor,
         address _twoKeyDonationCampaign,
-        address _twoKeyEventSource,
-        address _twoKeyBaseReputationRegistry
+        address _twoKeySingletonRegistry
     )
     public
     {
@@ -92,16 +93,21 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
         counters = new uint[](10);
         twoKeyDonationCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
-
-        twoKeyEventSource = _twoKeyEventSource;
-        twoKeyBaseReputationRegistry = _twoKeyBaseReputationRegistry;
-
+        twoKeySingletonRegistry = _twoKeySingletonRegistry;
         contractor = _contractor;
+        currency = _currency;
         // Deploy an ERC20 token which will be used as the Invoice
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
         // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(address(erc20InvoiceToken), tokenName, tokenSymbol);
         isCampaignInitialized = true;
+    }
+
+
+    // Internal function to fetch address from TwoKeyRegTwoistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry)
+        .getContractProxyAddress(contractName);
     }
 
     /**
@@ -116,6 +122,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     view
     returns (uint256)
     {
+        address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).getContractProxyAddress("TwoKeyEventSource");
         uint256 fee = _conversionAmountETHWei.mul(ITwoKeyEventSource(twoKeyEventSource).getTwoKeyDefaultIntegratorFeeFromAdmin()).div(100);
         return fee;
     }
@@ -219,6 +226,15 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
         //TODO: Add tokens transfer
         erc20InvoiceToken.transfer(conversion.converter, conversion.conversionAmount);
+    }
+
+    function transferInvoiceToken(
+        address _converter,
+        uint _conversionAmountETHWei
+    )
+    internal
+    {
+
     }
 
     /// @notice Function to move converter address from stateA to stateB

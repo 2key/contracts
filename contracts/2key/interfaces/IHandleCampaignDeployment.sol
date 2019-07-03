@@ -96,10 +96,10 @@ contract IHandleCampaignDeployment {
     function setInitialParamsDonationConversionHandler(
         string tokenName,
         string tokenSymbol,
+        string _currency,
         address _contractor,
         address _twoKeyDonationCampaign,
-        address _twoKeyEventSource,
-        address _twoKeyBaseReputationRegistry
+        address _twoKeySingletonRegistry
     ) public;
 
 

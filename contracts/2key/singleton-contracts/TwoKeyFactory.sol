@@ -232,10 +232,10 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         IHandleCampaignDeployment(proxyDonationConversionHandler).setInitialParamsDonationConversionHandler(
             tokenName,
             tokenSymbol,
+            _currency,
             msg.sender, //contractor
             proxyDonationCampaign,
-            getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"),
-            getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")
+            address(TWO_KEY_SINGLETON_REGISTRY)
         );
 
         // Set initial parameters under Donation campaign contract

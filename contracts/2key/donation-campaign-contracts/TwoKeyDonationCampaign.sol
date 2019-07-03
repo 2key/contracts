@@ -353,6 +353,9 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         super.withdrawContractor();
     }
 
+    /**
+     * @notice Function to get reserved amount of rewards
+     */
     function getReservedAmount2keyForRewards() public view returns (uint) {
         return reservedAmount2keyForRewards;
     }
