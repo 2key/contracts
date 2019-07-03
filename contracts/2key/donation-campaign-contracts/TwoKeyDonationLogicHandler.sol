@@ -374,17 +374,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         }
     }
 
-    function testerHelper(
-        bytes sig
-    )
-    public
-    view
-    returns(uint)
-    {
-        address x = recover(sig);
-        return referrerPlasma2TotalEarnings2key[x];
-    }
-
 
     /**
      * @notice Internal helper function
@@ -392,7 +381,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     function recover(
         bytes signature
     )
-    public
+    internal
     view
     returns (address)
     {
