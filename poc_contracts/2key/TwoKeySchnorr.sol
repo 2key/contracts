@@ -265,7 +265,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
 
   function setPi(uint i, uint Px, uint Py) public onlyOwner
   {
-    require(Pxs[i] == 0 && Pys[i] == 0,'P already defined for i');
+//    require(Pxs[i] == 0 && Pys[i] == 0,'P already defined for i');
     require(i == 1 || Pxs[i-1] != 0 || Pys[i-1] != 0,'P not defined for i-1');
     Pxs[i] = Px;
     Pys[i] = Py;
@@ -307,7 +307,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return Ra == sbmul_add_mul(s, P, h);
   }
 
-  function verifyQ(bytes Rs, bytes Qs) public view
+  function verifyQ(bytes Rs, bytes Qs) public
   returns(bool)
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
@@ -335,7 +335,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return true;
   }
 
-  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs) public
+  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, address a) public
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i])*P[i]
@@ -345,7 +345,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     uint256 Py = Pys[n];
     require(Px != 0 || Py != 0, 'P not defined for n');
     require(verifyQ(Rs, Qs), 'Qs[i] != h(Rs[i])*Ps[i]');
-    bytes32 m = keccak256(abi.encodePacked(Rx,Ry,msg.sender));
+    bytes32 m = keccak256(abi.encodePacked(Rx,Ry,a));
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
       (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
@@ -355,19 +355,13 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(verify(s, [Rx, Ry], [Px, Py], m), 'signature failed');
   }
 
-  function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, bytes a) public view
-  returns(bool)
+  function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, bytes a) public
   {
     // a can be anything that identifies the influencer. address or the ecdsa made by the influencer
-    uint256 h = uint256(keccak256(abi.encodePacked(R_bar[0],R_bar[1],P_bar[0],P_bar[1],a)));
-    if(!ecmulVerify(P_bar[0],P_bar[1],h,Q[0],Q[1])) {
-      return false;
-    }
+    uint256 h = uint256(keccak256(abi.encodePacked(R_bar,P_bar,a))); // same as abi.encodePacked(R_bar[0],R_bar[1],P_bar[0],P_bar[1],a)
+    require(ecmulVerify(P_bar[0],P_bar[1],h,Q[0],Q[1]),'Q != h(R_bar,P_bar,a)*P_bar');
     (R_bar[0], R_bar[1]) = ecadd(R_bar[0], R_bar[1], Q[0], Q[1]);
-    if (R_bar[0] != R[0] || R_bar[1] != R[1]) {
-      return false;
-    }
-    return true;
+    require(R_bar[0] == R[0] && R_bar[1] == R[1], 'R!=R_bar+Q');
   }
 
   function getConvertions(uint256[2] R) public view
