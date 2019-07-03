@@ -11,7 +11,7 @@ import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 
@@ -225,7 +225,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         counters[3]++; //Increase number of executed conversions
 
         //TODO: Add tokens transfer
-        erc20InvoiceToken.transfer(conversion.converter, conversion.conversionAmount);
+        transferInvoiceToken(conversion.converter, conversion.conversionAmount);
     }
 
     function transferInvoiceToken(
@@ -234,7 +234,16 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     )
     internal
     {
+        if(keccak256(currency) == keccak256('ETH')) {
+            erc20InvoiceToken.transfer(_converter, _conversionAmountETHWei);
+        } else {
+            address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
+            uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate(currency);
 
+            uint conversionAmountInFIAT = (_conversionAmountETHWei*rate).div(10**18);
+
+            erc20InvoiceToken.transfer(_converter, conversionAmountInFIAT);
+        }
     }
 
     /// @notice Function to move converter address from stateA to stateB
