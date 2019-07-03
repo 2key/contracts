@@ -364,10 +364,10 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(R_bar[0] == R[0] && R_bar[1] == R[1], 'R!=R_bar+Q');
   }
 
-  function getConvertions(uint256[2] R) public view
+  function getConvertions(address R_a) public view
   returns(uint)
   {
-    address R_a = point_hash(R);
+//    address R_a = point_hash(R);
     uint cnt = 0;
     for(uint i = 1; i <= N; i++) {
       cnt += convert[R_a][i];
