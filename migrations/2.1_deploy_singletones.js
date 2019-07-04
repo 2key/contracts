@@ -15,6 +15,8 @@ const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
+const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
+
 /**
  * Upgradable singleton storage contracts
  */
@@ -30,7 +32,7 @@ const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenP
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
-
+const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
@@ -81,7 +83,7 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyCampaignValidator;
     let proxyAddressTwoKeyFactory;
     let proxyAddressTwoKeyMaintainersRegistry;
-
+    let proxyAddressTwoKeySignatureValidator;
 
     let proxyAddressTwoKeyUpgradableExchangeSTORAGE;
     let proxyAddressTwoKeyCampaignValidatorSTORAGE;
@@ -95,6 +97,8 @@ module.exports = function deploy(deployer) {
     let proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE;
     let proxyAddressTwoKeyLongTermTokenPoolSTORAGE;
     let proxyAddressTwoKeyRegistrySTORAGE;
+    let proxyAddressTwoKeySignatureValidatorSTORAGE;
+
 
     let deploymentNetwork;
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
@@ -132,6 +136,9 @@ module.exports = function deploy(deployer) {
         deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, initialCongressMemberNames, votingPowers)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
+            .then(() => deployer.link(Call, TwoKeySignatureValidator))
+            .then(() => deployer.deploy(TwoKeySignatureValidator))
+            .then(() => TwoKeySignatureValidator.deployed())
             .then(() => TwoKeyCampaignValidator.deployed())
             .then(() => deployer.deploy(TwoKeyAdmin))
             .then(() => TwoKeyAdmin.deployed())
@@ -188,6 +195,38 @@ module.exports = function deploy(deployer) {
                         proxyAddressTwoKeyRegistrySTORAGE = storageProxy;
                         proxyAddressTwoKeyRegistry = logicProxy;
                         fileObject['TwoKeyRegistry'] = twoKeyReg;
+                        resolve(logicProxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+               await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('... Adding TwoKeySignatureValidator to Proxy registry as valid implementation');
+                        /**
+                         * Adding TwoKeySignatureValidator to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
+                         */
+                        let txHash = await registry.addVersion("TwoKeySignatureValidator", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeySignatureValidator.address);
+                        txHash = await registry.addVersion("TwoKeySignatureValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeySignatureValidatorStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeySignatureValidator", "TwoKeySignatureValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+
+                        console.log('Proxy address for the TwoKeySignatureValidator is : ' + logicProxy);
+                        console.log('Network ID', network_id);
+                        const twoKeySig = fileObject.TwoKeySignatureValidator || {};
+                        twoKeySig[network_id] = {
+                            'address': TwoKeySignatureValidator.address,
+                            'Proxy': logicProxy,
+                            'StorageProxy': storageProxy,
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
+                            maintainer_address: maintainerAddresses,
+                        };
+
+
+                        proxyAddressTwoKeySignatureValidatorSTORAGE = storageProxy;
+                        proxyAddressTwoKeySignatureValidator = logicProxy;
+                        fileObject['TwoKeySignatureValidator'] = twoKeySig;
                         resolve(logicProxy);
                     } catch (e) {
                         reject(e);
@@ -605,6 +644,19 @@ module.exports = function deploy(deployer) {
                             TwoKeySingletonesRegistry.address,
                             proxyAddressTwoKeyMaintainersRegistrySTORAGE,
                             maintainerAddresses
+                        );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Setting initial parameters in contract TwoKeySignatureValidator');
+                        let txHash = await TwoKeySignatureValidator.at(proxyAddressTwoKeySignatureValidator).setInitialParams(
+                            TwoKeySingletonesRegistry.address,
+                            proxyAddressTwoKeySignatureValidatorSTORAGE
                         );
                         resolve(txHash);
                     } catch (e) {

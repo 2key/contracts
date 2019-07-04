@@ -12,6 +12,7 @@ const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
+const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaEventsRegistry = artifacts.require('TwoKeyPlasmaEventsRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
@@ -28,6 +29,7 @@ const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenP
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
+const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaEventsRegistryStorage = artifacts.require('TwoKeyPlasmaEventsRegistryStorage');
@@ -118,7 +120,42 @@ const getContractPerName = ((contractName) => {
         return TwoKeyPlasmaMaintainersRegistry;
     } else if (contractName == 'TwoKeyPlasmaEventsRegistry') {
         return TwoKeyPlasmaEventsRegistry;
-    } else return 'Wrong name';
+    } else if (contractName == 'TwoKeySignatureValidator') {
+        return TwoKeySignatureValidator;
+    } else if(contractName == 'TwoKeyRegistryStorage') {
+        return TwoKeyRegistryStorage;
+    } else if (contractName == 'TwoKeyExchangeRateContractStorage') {
+        return TwoKeyExchangeRateStorage;
+    } else if (contractName == 'TwoKeyAdminStorage') {
+        return TwoKeyAdminStorage;
+    } else if (contractName == 'TwoKeyEventSourceStorage') {
+        return TwoKeyEventSourceStorage;
+    } else if (contractName == 'TwoKeyUpgradableExchangeStorage') {
+        return TwoKeyUpgradableExchangeStorage;
+    } else if (contractName == 'TwoKeyFactoryStorage') {
+        return TwoKeyFactoryStorage;
+    } else if (contractName == 'TwoKeyBaseReputationRegistryStorage') {
+        return TwoKeyBaseReputationRegistryStorage;
+    } else if (contractName == 'TwoKeyCampaignValidatorStorage') {
+        return TwoKeyCampaignValidatorStorage;
+    } else if (contractName == 'TwoKeyCommunityTokenPoolStorage') {
+        return TwoKeyCommunityTokenPoolStorage;
+    } else if (contractName == 'TwoKeyDeepFreezeTokenPoolStorage') {
+        return TwoKeyDeepFreezeTokenPoolStorage;
+    } else if (contractName == 'TwoKeyLongTermTokenPoolStorage') {
+        return TwoKeyLongTermTokenPoolStorage;
+    } else if (contractName == 'TwoKeyMaintainersRegistryStorage') {
+        return TwoKeyMaintainersRegistryStorage;
+    } else if (contractName == 'TwoKeyPlasmaEventsStorage') {
+        return TwoKeyPlasmaEventsStorage;
+    } else if (contractName == 'TwoKeyPlasmaMaintainersRegistryStorage') {
+        return TwoKeyPlasmaMaintainersRegistryStorage;
+    } else if (contractName == 'TwoKeyPlasmaEventsRegistryStorage') {
+        return TwoKeyPlasmaEventsRegistryStorage;
+    } else if (contractName == 'TwoKeySignatureValidatorStorage') {
+        return TwoKeySignatureValidatorStorage;
+    }
+    else return 'Wrong name';
 });
 
 const checkArguments = ((arguments) => {
