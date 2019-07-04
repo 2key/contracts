@@ -365,14 +365,14 @@ describe('TwoKeyProtocol', () => {
 
 
     it('should save balance to ipfs', () => {
-        return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
+        return twoKeyProtocol.ipfs.add(aydnepBalance).then((hash) => {
             console.log('IPFS hash', hash);
             expect(hash).to.be.a('string');
         });
     }).timeout(60000);
 
     it('should read from ipfs', () => {
-        return twoKeyProtocol.Utils.getOffchainDataFromIPFSHash('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
+        return twoKeyProtocol.ipfs.get('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j', false).then((data) => {
             console.log('IPFS data', data);
         });
     }).timeout(60000);
@@ -664,7 +664,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     it('should print joined_from', async () => {
-        const { contractor } = await twoKeyProtocol.Utils.getOffchainDataFromIPFSHash(links.gmail);
+        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail, true);
         console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
     }).timeout(60000);
 

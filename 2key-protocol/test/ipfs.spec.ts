@@ -12,12 +12,6 @@ chai.use(promisedChai);
 
 const ipfsRegex = /Qm[a-zA-Z0-9]{44}/;
 
-// ['https://infura.ipfs.io/api/v2', 'https://18.233.2.70:9095/api/v0', 'https://ipfs.2key.net/api/v0']
-// 'https://ipfs.2key.net/api/v0'
-
-//https://ipfs.2key.net/api/v0/add?stream-channels=true&pin=true
-
-
 describe('IPFS: Basic scenario. Read from Gateway', () => {
     const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
         readUrl: 'https://ipfs.2key.net/ipfs/',
@@ -34,6 +28,16 @@ describe('IPFS: Basic scenario. Read from Gateway', () => {
     it('get object from ipfs through gateway', async () => {
         const obj = await ipfs.get(hash);
         expect(obj.now).to.be.equals(now);
+    }).timeout(30000);
+
+    it('add string to ipfs', async () => {
+        hash = await ipfs.add(now);
+        expect(ipfsRegex.test(hash)).to.be.equals(true);
+    }).timeout(30000);
+
+    it('get string from ipfs through gateway', async () => {
+        const result = await ipfs.get(hash, false);
+        expect(result).to.be.equals(now);
     }).timeout(30000);
 });
 
