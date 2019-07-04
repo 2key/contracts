@@ -1,3 +1,7 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
@@ -301,6 +305,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     let campaignAddress: string;
+    let nonSingletonHash: string;
     let aydnepBalance;
     let txHash;
 
@@ -353,16 +358,11 @@ describe('TwoKeyProtocol', () => {
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
     }).timeout(60000);
 
-
-
-
-
     it('should get total supply of economy contract' ,async() => {
         console.log("Check total supply on 2key-economy contract");
         let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
         console.log(totalSup);
     }).timeout(60000);
-
 
     it('should save balance to ipfs', () => {
         return twoKeyProtocol.ipfs.add(aydnepBalance).then((hash) => {
@@ -443,7 +443,6 @@ describe('TwoKeyProtocol', () => {
         expect(tokenSymbol).to.be.equal('2KEY');
     }).timeout(10000);
 
-
     let campaignData;
 
     it('should create a new campaign Acquisition Contract', async () => {
@@ -481,16 +480,23 @@ describe('TwoKeyProtocol', () => {
 
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
+        nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
         links.deployer = campaign.campaignPublicLinkKey;
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(120000);
 
-    it('should reserve amount for fiat conversion rewards', async() => {
+    // it('should replace acquisition submodule', async() => {
+    //     const src = await twoKeyProtocol.Utils.getSubmodule('bd06b1216ac1af2a09db559590d6ec0a2833b447f410f78574abaef5c5a54cd0', 'acquisition');
+    //     console.log(src);
+    //     expect(src.length).to.be.gte(0);
+    // }).timeout(60000);
+
+    // it('should reserve amount for fiat conversion rewards', async() => {
         // if(amount) {
         //     let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, 0, amount, from);
         //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         // }
-    }).timeout(60000);
+    // }).timeout(60000);
 
     it('should proff that campaign is validated and registered properly', async() => {
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
