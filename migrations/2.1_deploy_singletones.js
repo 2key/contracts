@@ -158,6 +158,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyMaintainersRegistry.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry)) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
+                const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
                  */
@@ -167,9 +168,9 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyRegistry", "1.0", TwoKeyRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyRegistryStorage", "1.0", TwoKeyRegistryStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyRegistry", "TwoKeyRegistryStorage", "1.0");
+                        let txHash = await registry.addVersion("TwoKeyRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyRegistryStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyRegistry", "TwoKeyRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
 
                         console.log('Proxy address for the TwoKeyRegistry is : ' + logicProxy);
@@ -179,7 +180,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyRegistry.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -199,10 +200,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyMaintainersRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyMaintainersRegistry", "1.0", TwoKeyMaintainersRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyMaintainersRegistryStorage", "1.0", TwoKeyMaintainersRegistryStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyMaintainersRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyMaintainersRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyMaintainersRegistryStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyMaintainersRegistry", "TwoKeyMaintainersRegistryStorage", "1.0");
+                        let { logs } = await registry.createProxy("TwoKeyMaintainersRegistry", "TwoKeyMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyMaintainersRegistry is : ' + logicProxy);
                         const twoKeyMaintainersRegistry = fileObject.TwoKeyMaintainersRegistry || {};
@@ -210,7 +211,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyMaintainersRegistry.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
                         proxyAddressTwoKeyMaintainersRegistrySTORAGE = storageProxy;
@@ -229,10 +230,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyFactory", "1.0", TwoKeyFactory.address);
-                        txHash = await registry.addVersion("TwoKeyFactoryStorage", "1.0", TwoKeyFactoryStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyFactory", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyFactory.address);
+                        txHash = await registry.addVersion("TwoKeyFactoryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyFactoryStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyFactory", "TwoKeyFactoryStorage","1.0");
+                        let { logs } = await registry.createProxy("TwoKeyFactory", "TwoKeyFactoryStorage",INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
 
                         console.log('Proxy address for the TwoKeyFactory is : ' + logicProxy);
@@ -242,7 +243,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyFactory.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -262,10 +263,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyCampaignValidator to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyCampaignValidator", "1.0", TwoKeyCampaignValidator.address);
-                        txHash = await registry.addVersion("TwoKeyCampaignValidatorStorage", "1.0", TwoKeyCampaignValidatorStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyCampaignValidator", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCampaignValidator.address);
+                        txHash = await registry.addVersion("TwoKeyCampaignValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCampaignValidatorStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyCampaignValidator", "TwoKeyCampaignValidatorStorage", "1.0");
+                        let { logs } = await registry.createProxy("TwoKeyCampaignValidator", "TwoKeyCampaignValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy , storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyCampaignValidator is : ' + logicProxy);
                         const twoKeyValidator = fileObject.TwoKeyCampaignValidator || {};
@@ -273,7 +274,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyCampaignValidator.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -293,10 +294,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyCommunityTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyCommunityTokenPool", "1.0", TwoKeyCommunityTokenPool.address);
-                        txHash = await registry.addVersion("TwoKeyCommunityTokenPoolStorage", "1.0", TwoKeyCommunityTokenPoolStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyCommunityTokenPool", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCommunityTokenPool.address);
+                        txHash = await registry.addVersion("TwoKeyCommunityTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCommunityTokenPoolStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyCommunityTokenPool", "TwoKeyCommunityTokenPoolStorage", "1.0");
+                        let { logs } = await registry.createProxy("TwoKeyCommunityTokenPool", "TwoKeyCommunityTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyCommunityTokenPool is : ' + logicProxy);
                         const twoKeyCommunityTokenPool = fileObject.TwoKeyCommunityTokenPool || {};
@@ -305,7 +306,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyCommunityTokenPool.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -324,10 +325,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyLongTermTokenPool", "1.0", TwoKeyLongTermTokenPool.address);
-                        txHash =  await registry.addVersion("TwoKeyLongTermTokenPoolStorage", "1.0", TwoKeyLongTermTokenPoolStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyLongTermTokenPool", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyLongTermTokenPool.address);
+                        txHash =  await registry.addVersion("TwoKeyLongTermTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyLongTermTokenPoolStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyLongTermTokenPool", "TwoKeyLongTermTokenPoolStorage","1.0");
+                        let { logs } = await registry.createProxy("TwoKeyLongTermTokenPool", "TwoKeyLongTermTokenPoolStorage",INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyLongTermTokenPool is : ' + logicProxy);
                         const twoKeyLongTermTokenPool = fileObject.TwoKeyLongTermTokenPool || {};
@@ -336,7 +337,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyLongTermTokenPool.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -356,10 +357,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPool", "1.0", TwoKeyDeepFreezeTokenPool.address);
-                        txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPoolStorage", "1.0", TwoKeyDeepFreezeTokenPoolStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPool", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyDeepFreezeTokenPool.address);
+                        txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyDeepFreezeTokenPoolStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyDeepFreezeTokenPool","TwoKeyDeepFreezeTokenPoolStorage", "1.0");
+                        let { logs } = await registry.createProxy("TwoKeyDeepFreezeTokenPool","TwoKeyDeepFreezeTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyDeepFreezeTokenPool is : ' + logicProxy);
 
@@ -368,7 +369,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyDeepFreezeTokenPool.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -392,10 +393,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyBaseReputationRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyBaseReputationRegistry", "1.0", TwoKeyBaseReputationRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyBaseReputationRegistryStorage", "1.0", TwoKeyBaseReputationRegistryStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyBaseReputationRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyBaseReputationRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyBaseReputationRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyBaseReputationRegistryStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyBaseReputationRegistry","TwoKeyBaseReputationRegistryStorage", "1.0");
+                        let { logs } = await registry.createProxy("TwoKeyBaseReputationRegistry","TwoKeyBaseReputationRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + logicProxy);
                         const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
@@ -404,7 +405,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyBaseReputationRegistry.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             // maintainer_address: maintainerAddresses,
                         };
 
@@ -424,10 +425,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyEventSource", "1.0", EventSource.address);
-                        txHash = await registry.addVersion("TwoKeyEventSourceStorage", "1.0", TwoKeyEventSourceStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyEventSource", INITIAL_VERSION_OF_ALL_SINGLETONS, EventSource.address);
+                        txHash = await registry.addVersion("TwoKeyEventSourceStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyEventSourceStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyEventSource", "TwoKeyEventSourceStorage", "1.0");
+                        let { logs } = await registry.createProxy("TwoKeyEventSource", "TwoKeyEventSourceStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the EventSource is : ' + logicProxy);
 
@@ -437,7 +438,7 @@ module.exports = function deploy(deployer) {
                             'address': EventSource.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -457,9 +458,9 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource
                          */
-                        let txHash = await registry.addVersion("TwoKeyExchangeRateContract", "1.0", TwoKeyExchangeRateContract.address);
-                        txHash = await registry.addVersion("TwoKeyExchangeRateStorage", "1.0", TwoKeyExchangeRateStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyExchangeRateContract", "TwoKeyExchangeRateStorage", "1.0");
+                        let txHash = await registry.addVersion("TwoKeyExchangeRateContract", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyExchangeRateContract.address);
+                        txHash = await registry.addVersion("TwoKeyExchangeRateStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyExchangeRateStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyExchangeRateContract", "TwoKeyExchangeRateStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyExchangeRateContract is : ' + logicProxy);
 
@@ -469,7 +470,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyExchangeRateContract.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -489,10 +490,10 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyAdmin to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyAdmin
                          */
-                        let txHash = await registry.addVersion("TwoKeyAdmin", "1.0", TwoKeyAdmin.address);
-                        txHash = await registry.addVersion("TwoKeyAdminStorage", "1.0", TwoKeyAdminStorage.address);
+                        let txHash = await registry.addVersion("TwoKeyAdmin", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyAdmin.address);
+                        txHash = await registry.addVersion("TwoKeyAdminStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyAdminStorage.address);
 
-                        let { logs } = await registry.createProxy("TwoKeyAdmin", "TwoKeyAdminStorage", "1.0");
+                        let { logs } = await registry.createProxy("TwoKeyAdmin", "TwoKeyAdminStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyAdmin contract is : ' + logicProxy);
 
@@ -503,7 +504,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyAdmin.address,
                             'Proxy': logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses
                         };
 
@@ -526,9 +527,9 @@ module.exports = function deploy(deployer) {
                         /**
                          * Adding TwoKeyUpgradableExchange to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyUpgradableExchange
                          */
-                        let txHash = await registry.addVersion("TwoKeyUpgradableExchange", "1.0", TwoKeyUpgradableExchange.address);
-                        txHash = await registry.addVersion("TwoKeyUpgradableExchangeStorage", "1.0", TwoKeyUpgradableExchangeStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyUpgradableExchange", "TwoKeyUpgradableExchangeStorage", "1.0");
+                        let txHash = await registry.addVersion("TwoKeyUpgradableExchange", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyUpgradableExchange.address);
+                        txHash = await registry.addVersion("TwoKeyUpgradableExchangeStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyUpgradableExchangeStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyUpgradableExchange", "TwoKeyUpgradableExchangeStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         console.log('Proxy address for the TwoKeyUpgradableExchange contract is : ' + logicProxy);
 
@@ -537,7 +538,7 @@ module.exports = function deploy(deployer) {
                             'address' : TwoKeyUpgradableExchange.address,
                             'Proxy' : logicProxy,
                             'StorageProxy': storageProxy,
-                            'Version' : "1.0",
+                            'Version' : INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses
                         };
 
@@ -793,9 +794,9 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyPlasmaEvents to Plasma Proxy registry as valid implementation');
 
-                        let txHash = await registry.addVersion("TwoKeyPlasmaEvents", "1.0", TwoKeyPlasmaEvents.address);
-                        txHash = await registry.addVersion("TwoKeyPlasmaEventsStorage", "1.0", TwoKeyPlasmaEventsStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyPlasmaEvents", "TwoKeyPlasmaEventsStorage", "1.0");
+                        let txHash = await registry.addVersion("TwoKeyPlasmaEvents", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaEvents.address);
+                        txHash = await registry.addVersion("TwoKeyPlasmaEventsStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaEventsStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyPlasmaEvents", "TwoKeyPlasmaEventsStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
 
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
@@ -803,7 +804,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyPlasmaEvents.address,
                             'Proxy': logicProxy,
                             'StorageProxy' : storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -821,9 +822,9 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyPlasmaEventsRegistry to Plasma Proxy registry as valid implementation');
 
-                        let txHash = await registry.addVersion("TwoKeyPlasmaEventsRegistry", "1.0", TwoKeyPlasmaEventsRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyPlasmaEventsRegistryStorage", "1.0", TwoKeyPlasmaEventsRegistryStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyPlasmaEventsRegistry", "TwoKeyPlasmaEventsRegistryStorage", "1.0");
+                        let txHash = await registry.addVersion("TwoKeyPlasmaEventsRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaEventsRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyPlasmaEventsRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaEventsRegistryStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyPlasmaEventsRegistry", "TwoKeyPlasmaEventsRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
 
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         const twoKeyPlasmaEventsReg = fileObject.TwoKeyPlasmaEventsRegistry || {};
@@ -831,7 +832,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyPlasmaEventsRegistry.address,
                             'Proxy': logicProxy,
                             'StorageProxy' : storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
@@ -848,9 +849,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('... Adding TwoKeyPlasmaMaintainersRegistry');
-                        let txHash = await registry.addVersion("TwoKeyPlasmaMaintainersRegistry", "1.0", TwoKeyPlasmaMaintainersRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyPlasmaMaintainersRegistryStorage", "1.0", TwoKeyPlasmaMaintainersRegistryStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyPlasmaMaintainersRegistry", "TwoKeyPlasmaMaintainersRegistryStorage", "1.0");
+                        let txHash = await registry.addVersion("TwoKeyPlasmaMaintainersRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaMaintainersRegistry.address);
+                        txHash = await registry.addVersion("TwoKeyPlasmaMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaMaintainersRegistryStorage.address);
+                        let { logs } = await registry.createProxy("TwoKeyPlasmaMaintainersRegistry", "TwoKeyPlasmaMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
 
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         const twoKeyPlasmaMaintainersRegistry = fileObject.TwoKeyPlasmaMaintainersRegistry || {};
@@ -858,7 +859,7 @@ module.exports = function deploy(deployer) {
                             'address': TwoKeyPlasmaMaintainersRegistry.address,
                             'Proxy': logicProxy,
                             'StorageProxy' : storageProxy,
-                            'Version': "1.0",
+                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
                             maintainer_address: maintainerAddresses,
                         };
 
