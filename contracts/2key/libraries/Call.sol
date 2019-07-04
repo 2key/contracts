@@ -121,6 +121,22 @@ library Call {
         return weight;
     }
 
+    function loadPair(bytes sig, uint idx) public pure returns(uint256[2]) {
+        idx += 32;
+        uint256 x;
+        assembly
+        {
+            x := mload(add(sig, idx))
+        }
+        idx += 32;
+        uint256 y;
+        assembly
+        {
+            y := mload(add(sig, idx))
+        }
+        return [x,y];
+    }
+
     function recoverHash(bytes32 hash, bytes sig, uint idx) public pure returns (address) {
         // same as recoverHash in utils/sign.js
         // The signature format is a compact form of:

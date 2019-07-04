@@ -346,6 +346,35 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return true;
   }
 
+  function verifyQMsg(bytes b, uint Rs_idx, uint Qs_idx, uint n) public
+  returns(bool)
+  {
+    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
+    // Qs[i] = h(R[i])*P[i]
+    // and the code will verify that the computation is true
+    for(uint i = 1; i < n; i++) {
+      uint256 Rxi = Call.loadUint256(b, Rs_idx);
+      uint256 Qxi = Call.loadUint256(b, Qs_idx);
+      uint256 Pxi = Pxs[i];
+      Rs_idx+=32;
+      Qs_idx+=32;
+      uint256 Ryi = Call.loadUint256(b,Rs_idx);
+      uint256 Qyi = Call.loadUint256(b,Qs_idx);
+      uint256 Pyi = Pys[i];
+      Rs_idx+=32;
+      Qs_idx+=32;
+
+      // verify that  Qs[i] = h(Rs[i])*P[i]
+      uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi)));
+      if(!ecmulVerify(Pxi,Pyi,h,Qxi,Qyi)) {
+        return false;
+      }
+
+      convert[address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)][i]++;  // record that Ri contributed to a convertion at hope i
+    }
+    return true;
+  }
+
   function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, address a) public
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
@@ -366,13 +395,52 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(verify(s, [Rx, Ry], [Px, Py], m), 'signature failed');
   }
 
-  function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, bytes a) public
+  function convertTestMsg(bytes b) public
+  {
+    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
+    // Qs[i] = h(R[i])*P[i]
+    // and the code will verify that the computation is true
+    uint n = (b.length-3*32) / (2*64) + 1;
+    require(n>0 && (n-1)*2*64+3*32==b.length, 'convertTestMsg bad message length');
+    uint256 Px = Pxs[n];
+    uint256 Py = Pys[n];
+    require(Px != 0 || Py != 0, 'P not defined for n');
+    uint Rs_idx = 3*32;
+    uint Qs_idx = Rs_idx + (n-1)*64;
+    require(verifyQMsg(b, Rs_idx, Qs_idx, n), 'Qs[i] != h(Rs[i])*Ps[i]');
+    uint256 Rx = Call.loadUint256(b,32);
+    uint256 Ry = Call.loadUint256(b,32+32);
+    bytes32 m = keccak256(abi.encodePacked(Rx,Ry,msg.sender));
+
+    for(uint i = 1; i < n; i++) {
+      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(b,Rs_idx), Call.loadUint256(b,Rs_idx+32));
+      Rs_idx+=64;
+      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(b,Qs_idx), Call.loadUint256(b,Qs_idx+32));
+      Qs_idx+=64;
+    }
+
+    require(verify(Call.loadUint256(b,0), [Rx, Ry], [Px, Py], m), 'signature failed');
+  }
+
+  function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, address a) public
   {
     // a can be anything that identifies the influencer. address or the ecdsa made by the influencer
     uint256 h = uint256(keccak256(abi.encodePacked(R_bar,P_bar,a))); // same as abi.encodePacked(R_bar[0],R_bar[1],P_bar[0],P_bar[1],a)
     require(ecmulVerify(P_bar[0],P_bar[1],h,Q[0],Q[1]),'Q != h(R_bar,P_bar,a)*P_bar');
     (R_bar[0], R_bar[1]) = ecadd(R_bar[0], R_bar[1], Q[0], Q[1]);
     require(R_bar[0] == R[0] && R_bar[1] == R[1], 'R!=R_bar+Q');
+  }
+
+  function claimTestMsg(bytes b) public
+  {
+    require(4*64==b.length, 'claimTestMsg bad message length');
+
+    claimTest(
+        Call.loadPair(b,0),
+        Call.loadPair(b,64),
+        Call.loadPair(b,128),
+        Call.loadPair(b,192),
+        msg.sender);
   }
 
   function getConvertions(address R_a) public view
