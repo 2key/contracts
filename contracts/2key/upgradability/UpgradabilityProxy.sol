@@ -14,9 +14,8 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
     /**
     * @dev Constructor function
     */
-    constructor (string _contractName, string _version, address _contractDeployer) public {
+    constructor (string _contractName, string _version) public {
         registry = ITwoKeySingletonesRegistry(msg.sender);
-        _deployer = _contractDeployer;
         _implementation = registry.getVersion(_contractName, _version);
     }
 
@@ -24,9 +23,9 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
     * @dev Upgrades the implementation to the requested version
     * @param _version representing the version name of the new implementation to be set
     */
-    function upgradeTo(string _contractName, string _version) public {
-        require(msg.sender == _deployer);
-        _implementation = registry.getVersion(_contractName, _version);
+    function upgradeTo(string _contractName, string _version, address _impl) public {
+        require(msg.sender == address(registry));
+        _implementation = _impl;
     }
 
 }

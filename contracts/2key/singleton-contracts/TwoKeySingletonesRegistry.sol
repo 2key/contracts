@@ -71,7 +71,6 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
      * @param version representing the version name of the new implementation to be registered
      * @param implementation representing the address of the new implementation to be registered
      */
-    //TODO: Add event through event source whenever someone calls upgradeTo
     function addVersion(
         string contractName,
         string version,
@@ -148,17 +147,30 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 
     function deployProxy(
         string contractName,
-        string version,
-        address _deployer
+        string version
     )
     internal
     returns (address)
     {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, _deployer);
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
         contractNameToProxyAddress[contractName] = proxy;
         emit ProxyCreated(proxy);
         return address(proxy);
     }
+
+    function upgradeContract(
+        string contractName,
+        string version
+    )
+    public
+    onlyMaintainer
+    {
+        address proxyAddress = getContractProxyAddress(contractName);
+        address _impl = getVersion(contractName, version);
+        UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
+    }
+
+
 
     /**
      * @dev Creates an upgradeable proxy for both Storage and Logic
@@ -172,8 +184,8 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
-        address logicProxy = deployProxy(contractName, version, msg.sender);
-        address storageProxy = deployProxy(contractNameStorage, version, msg.sender);
+        address logicProxy = deployProxy(contractName, version);
+        address storageProxy = deployProxy(contractNameStorage, version);
 
         IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
         emit ProxiesDeployed(logicProxy, storageProxy);

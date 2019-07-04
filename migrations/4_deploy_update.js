@@ -53,8 +53,6 @@ const incrementVersion = ((version) => {
 const updateContract = (async (registry, contractName, newImplementationAddress) => {
     await new Promise(async(resolve,reject) => {
         try {
-            // Get contract proxy address
-            let proxyAddress = await registry.getContractProxyAddress(contractName);
             // Get current active version to be patched
             let version = await registry.getLatestContractVersion(contractName);
             // Incremented version
@@ -64,7 +62,7 @@ const updateContract = (async (registry, contractName, newImplementationAddress)
             // Add contract version
             let txHash = await registry.addVersion(contractName, newVersion, newImplementationAddress);
             // Upgrade contract proxy to new version
-            let txHash1 = await Proxy.at(proxyAddress).upgradeTo(contractName, newVersion);
+            let txHash1 = await registry.upgradeContract(contractName, newVersion);
             resolve({
                 txHash, txHash1
             });
