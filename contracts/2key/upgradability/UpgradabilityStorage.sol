@@ -13,6 +13,13 @@ contract UpgradeabilityStorage {
     // Address of the current implementation
     address internal _implementation;
 
+    // Address internal deployer
+    address internal _deployer;
+
+
+    function deployer() public view returns (address) {
+        return _deployer;
+    }
     /**
     * @dev Tells the address of the current implementation
     * @return address of the current implementation

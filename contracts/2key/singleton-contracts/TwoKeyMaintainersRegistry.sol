@@ -38,6 +38,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
 
         PROXY_STORAGE_CONTRACT = ITwoKeyMaintainersRegistryStorage(_proxyStorage);
 
+
         //Set deployer to be also a maintainer
         addMaintainer(msg.sender);
 
