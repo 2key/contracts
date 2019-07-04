@@ -23,7 +23,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 
     address public deployer;
 
-    mapping (string => mapping(string => address)) internal versionsLogic;
+    mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractNameToProxyAddress;
     mapping (string => string) contractNameToLatestVersion;
     mapping (string => address) nonUpgradableContractToAddress;
@@ -79,8 +79,8 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
-        require(versionsLogic[contractName][version] == 0x0);
-        versionsLogic[contractName][version] = implementation;
+        require(versions[contractName][version] == 0x0);
+        versions[contractName][version] = implementation;
         contractNameToLatestVersion[contractName] = version;
         emit VersionAdded(version, implementation);
     }
@@ -98,7 +98,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     view
     returns (address)
     {
-        return versionsLogic[contractName][version];
+        return versions[contractName][version];
     }
 
 
