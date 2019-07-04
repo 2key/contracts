@@ -10,6 +10,7 @@ const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenP
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
+const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
@@ -41,6 +42,8 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyLongTermTokenPoolStorage.deployed())
             .then(() => deployer.deploy(TwoKeyRegistryStorage))
             .then(() => TwoKeyRegistryStorage.deployed())
+            .then(() => deployer.deploy(TwoKeySignatureValidatorStorage))
+            .then(() => TwoKeySignatureValidatorStorage.deployed())
             .then(() => true);
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.deploy(TwoKeyPlasmaEventsStorage)

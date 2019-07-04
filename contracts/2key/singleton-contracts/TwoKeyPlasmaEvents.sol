@@ -13,7 +13,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
     bool initialized;
-
+    //TODO: Join campaign event
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
     // both are ethereum address.
     // this plasma contract does not know in itself who is the contractor on the ethereum network
