@@ -274,6 +274,17 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     }
   }
 
+  function setPs(bytes Ps) public onlyOwner
+  {
+    uint i = 1;
+    for(uint idx = 0; idx < Ps.length; idx+=64) {
+      uint256 Px = Call.loadUint256(Ps,idx);
+      uint256 Py = Call.loadUint256(Ps,idx+32);
+      setPi(i, Px, Py);
+      i++;
+    }
+  }
+
   function getPi(uint i) public view
   returns(uint256 x, uint256 y)
   {
