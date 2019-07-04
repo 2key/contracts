@@ -2,7 +2,6 @@ const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
-const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
@@ -16,7 +15,22 @@ const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry')
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaEventsRegistry = artifacts.require('TwoKeyPlasmaEventsRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
-const Proxy = artifacts.require('UpgradeabilityProxy');
+
+const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
+const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
+const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
+const TwoKeyAdminStorage = artifacts.require('TwoKeyAdminStorage');
+const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
+const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
+const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
+const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
+const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenPoolStorage');
+const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
+const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
+const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
+const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
+const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
+const TwoKeyPlasmaEventsRegistryStorage = artifacts.require('TwoKeyPlasmaEventsRegistryStorage');
 
 /**
  * Function to increment minor version
