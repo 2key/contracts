@@ -164,6 +164,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     )
     public
     onlyMaintainer
+    //TODO: Change to deployer
     {
         address proxyAddress = getContractProxyAddress(contractName);
         address _impl = getVersion(contractName, version);

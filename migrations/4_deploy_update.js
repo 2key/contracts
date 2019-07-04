@@ -45,7 +45,7 @@ const incrementVersion = ((version) => {
         major : vParts[0],
         minor : vParts[1],
         patch : vParts[2]
-    }
+    };
     // target the substring we want to increment on
     partsArray.patch = parseFloat(partsArray.patch) + 1;
     // set an empty array to join our substring values back to
@@ -87,6 +87,22 @@ const updateContract = (async (registry, contractName, newImplementationAddress)
         }
     });
 });
+
+/**
+ * Function to downgrade contract version
+ * @type {function(*, *=, *=)}
+ */
+const downgradeContract = (async (registry, contractName, version) => {
+    await new Promise(async(resolve,reject) => {
+        try {
+            let txHash = await registry.upgradeContract(contractName, version);
+            resolve(txHash);
+        } catch (e) {
+            reject(e);
+        }
+    })
+});
+
 
 const getContractPerName = ((contractName) => {
 
