@@ -318,7 +318,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return Ra == sbmul_add_mul(s, P, h);
   }
 
-  function verifyQ(bytes Rs, bytes Qs) public
+  function verifyQ(bytes Rs, bytes Qs, bytes cuts) public
   returns(bool)
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
@@ -333,9 +333,10 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
       uint256 Ryi = Call.loadUint256(Rs,idx+32);
       uint256 Qyi = Call.loadUint256(Qs,idx+32);
       uint256 Pyi = Pys[i];
+      uint8 cut = Call.loadUint8(cuts,i-1);
 
       // verify that  Qs[i] = h(Rs[i])*P[i]
-      uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi)));
+      uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi,cut)));
       if(!ecmulVerify(Pxi,Pyi,h,Qxi,Qyi)) {
         return false;
       }
@@ -346,36 +347,36 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return true;
   }
 
-  function verifyQMsg(bytes b, uint Rs_idx, uint Qs_idx, uint n) public
-  returns(bool)
-  {
-    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i])*P[i]
-    // and the code will verify that the computation is true
-    for(uint i = 1; i < n; i++) {
-      uint256 Rxi = Call.loadUint256(b, Rs_idx);
-      uint256 Qxi = Call.loadUint256(b, Qs_idx);
-      uint256 Pxi = Pxs[i];
-      Rs_idx+=32;
-      Qs_idx+=32;
-      uint256 Ryi = Call.loadUint256(b,Rs_idx);
-      uint256 Qyi = Call.loadUint256(b,Qs_idx);
-      uint256 Pyi = Pys[i];
-      Rs_idx+=32;
-      Qs_idx+=32;
+//  function verifyQMsg(bytes b, uint Rs_idx, uint Qs_idx, uint n) public
+//  returns(bool)
+//  {
+//    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
+//    // Qs[i] = h(R[i])*P[i]
+//    // and the code will verify that the computation is true
+//    for(uint i = 1; i < n; i++) {
+//      uint256 Rxi = Call.loadUint256(b, Rs_idx);
+//      uint256 Qxi = Call.loadUint256(b, Qs_idx);
+//      uint256 Pxi = Pxs[i];
+//      Rs_idx+=32;
+//      Qs_idx+=32;
+//      uint256 Ryi = Call.loadUint256(b,Rs_idx);
+//      uint256 Qyi = Call.loadUint256(b,Qs_idx);
+//      uint256 Pyi = Pys[i];
+//      Rs_idx+=32;
+//      Qs_idx+=32;
+//
+//      // verify that  Qs[i] = h(Rs[i])*P[i]
+//      uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi)));
+//      if(!ecmulVerify(Pxi,Pyi,h,Qxi,Qyi)) {
+//        return false;
+//      }
+//
+//      convert[address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)][i]++;  // record that Ri contributed to a convertion at hope i
+//    }
+//    return true;
+//  }
 
-      // verify that  Qs[i] = h(Rs[i])*P[i]
-      uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi)));
-      if(!ecmulVerify(Pxi,Pyi,h,Qxi,Qyi)) {
-        return false;
-      }
-
-      convert[address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)][i]++;  // record that Ri contributed to a convertion at hope i
-    }
-    return true;
-  }
-
-  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, address a) public
+  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, bytes cuts, address a) public
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i])*P[i]
@@ -384,7 +385,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
     require(Px != 0 || Py != 0, 'P not defined for n');
-    require(verifyQ(Rs, Qs), 'Qs[i] != h(Rs[i])*Ps[i]');
+    require(verifyQ(Rs, Qs, cuts), 'Qs[i] != h(Rs[i]|cuts[i])*Ps[i]');
     bytes32 m = keccak256(abi.encodePacked(Rx,Ry,a));
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
