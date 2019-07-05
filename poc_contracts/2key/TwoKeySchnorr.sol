@@ -395,32 +395,35 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(verify(s, [Rx, Ry], [Px, Py], m), 'signature failed');
   }
 
-  function convertTestMsg(bytes b) public
-  {
-    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i])*P[i]
-    // and the code will verify that the computation is true
-    uint n = (b.length-3*32) / (2*64) + 1;
-    require(n>0 && (n-1)*2*64+3*32==b.length, 'convertTestMsg bad message length');
-    uint256 Px = Pxs[n];
-    uint256 Py = Pys[n];
-    require(Px != 0 || Py != 0, 'P not defined for n');
-    uint Rs_idx = 3*32;
-    uint Qs_idx = Rs_idx + (n-1)*64;
-    require(verifyQMsg(b, Rs_idx, Qs_idx, n), 'Qs[i] != h(Rs[i])*Ps[i]');
-    uint256 Rx = Call.loadUint256(b,32);
-    uint256 Ry = Call.loadUint256(b,32+32);
-    bytes32 m = keccak256(abi.encodePacked(Rx,Ry,msg.sender));
-
-    for(uint i = 1; i < n; i++) {
-      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(b,Rs_idx), Call.loadUint256(b,Rs_idx+32));
-      Rs_idx+=64;
-      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(b,Qs_idx), Call.loadUint256(b,Qs_idx+32));
-      Qs_idx+=64;
-    }
-
-    require(verify(Call.loadUint256(b,0), [Rx, Ry], [Px, Py], m), 'signature failed');
-  }
+//  // // Takes more gass so dont do it
+//  // let convert_msg = '0x' + s_star + R_star + Rs + Qs
+//  // let t = await c.convertTestMsg(convert_msg,{from: influencer, gas: 3000000})
+//  function convertTestMsg(bytes b) public
+//  {
+//    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
+//    // Qs[i] = h(R[i])*P[i]
+//    // and the code will verify that the computation is true
+//    uint n = (b.length-3*32) / (2*64) + 1;
+//    require(n>0 && (n-1)*2*64+3*32==b.length, 'convertTestMsg bad message length');
+//    uint256 Px = Pxs[n];
+//    uint256 Py = Pys[n];
+//    require(Px != 0 || Py != 0, 'P not defined for n');
+//    uint Rs_idx = 3*32;
+//    uint Qs_idx = Rs_idx + (n-1)*64;
+//    require(verifyQMsg(b, Rs_idx, Qs_idx, n), 'Qs[i] != h(Rs[i])*Ps[i]');
+//    uint256 Rx = Call.loadUint256(b,32);
+//    uint256 Ry = Call.loadUint256(b,32+32);
+//    bytes32 m = keccak256(abi.encodePacked(Rx,Ry,msg.sender));
+//
+//    for(uint i = 1; i < n; i++) {
+//      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(b,Rs_idx), Call.loadUint256(b,Rs_idx+32));
+//      Rs_idx+=64;
+//      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(b,Qs_idx), Call.loadUint256(b,Qs_idx+32));
+//      Qs_idx+=64;
+//    }
+//
+//    require(verify(Call.loadUint256(b,0), [Rx, Ry], [Px, Py], m), 'signature failed');
+//  }
 
   function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, address a) public
   {
@@ -431,22 +434,23 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(R_bar[0] == R[0] && R_bar[1] == R[1], 'R!=R_bar+Q');
   }
 
-  function claimTestMsg(bytes b) public
-  {
-    require(4*64==b.length, 'claimTestMsg bad message length');
-
-    claimTest(
-        Call.loadPair(b,0),
-        Call.loadPair(b,64),
-        Call.loadPair(b,128),
-        Call.loadPair(b,192),
-        msg.sender);
-  }
+//  // let msg = '0x'+R+R_bar+P_bar+Q
+//  // let t = await c.claimTestMsg(msg,{from: influencer, gas: 3000000})
+//  function claimTestMsg(bytes b) public
+//  {
+//    require(4*64==b.length, 'claimTestMsg bad message length');
+//
+//    claimTest(
+//        Call.loadPair(b,0),
+//        Call.loadPair(b,64),
+//        Call.loadPair(b,128),
+//        Call.loadPair(b,192),
+//        msg.sender);
+//  }
 
   function getConvertions(address R_a) public view
   returns(uint)
   {
-//    address R_a = point_hash(R);
     uint cnt = 0;
     for(uint i = 1; i <= N; i++) {
       cnt += convert[R_a][i];
