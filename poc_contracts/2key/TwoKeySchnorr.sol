@@ -321,8 +321,8 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   function verifyQ(bytes Rs, bytes Qs, bytes cuts) public
   returns(bool)
   {
-    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i])*P[i]
+    // instead of computing h(R[i]|cut[i])*P[i] the sender needs to supply a precomputed value
+    // Qs[i] = h(R[i]|cut[i])*P[i]
     // and the code will verify that the computation is true
     require(Rs.length%64 == 0 && Rs.length == Qs.length, 'Rs/Qs bad length');
     uint i = 1;
