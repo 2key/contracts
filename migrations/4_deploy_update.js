@@ -194,13 +194,19 @@ module.exports = function deploy(deployer) {
     let contractName = process.argv.pop();
     let contract = getContractPerName(contractName);
     let newImplementationAddress;
+    let registryContract;
 
+    if(deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
+        registryContract = TwoKeySingletonesRegistry;
+    } else {
+        registryContract = TwoKeyPlasmaSingletoneRegistry;
+    }
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
                 newImplementationAddress = contractInstance.address;
             })
-            .then(() => TwoKeySingletonesRegistry.deployed()
+            .then(() => registryContract.deployed()
                 .then(async (registry) => {
                         await new Promise(async (resolve, reject) => {
                             try {
