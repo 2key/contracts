@@ -833,6 +833,8 @@ module.exports = function deploy(deployer) {
         let proxyAddressTwoKeyPlasmaEventsRegistry;
         let proxyAddressTwoKeyPlasmaEventsRegistrySTORAGE;
 
+        const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
+
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.link(Call, TwoKeyPlasmaEventsRegistry);
         deployer.deploy(TwoKeyPlasmaEvents)
