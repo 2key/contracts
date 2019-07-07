@@ -14,6 +14,10 @@ let i = 1;
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
 
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 const web3switcher = {
     deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
     aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
@@ -396,7 +400,6 @@ describe('TwoKeyDonationCampaign', () => {
         });
 
         let signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
-        console.log(signature);
         let stats = await twoKeyProtocol.DonationCampaign.getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaignAddress, signature);
         console.log(stats);
     }).timeout(60000);
