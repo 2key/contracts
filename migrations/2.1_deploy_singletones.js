@@ -124,6 +124,7 @@ module.exports = function deploy(deployer) {
      */
     const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818E6FECD516Ecc3849DAf6845e3EC868087B755';
     const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
+    const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
 
 
     /**
@@ -165,7 +166,6 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyMaintainersRegistry.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry)) //adding empty admin address
             .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
-                const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
                  */
