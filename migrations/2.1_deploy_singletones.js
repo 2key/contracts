@@ -830,7 +830,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyPlasmaMaintainersRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaRegistry))
             .then(() => TwoKeyPlasmaRegistry.deployed())
-            .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry, maintainerAddresses, '0x0')) //adding empty admin address
+            .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry)) //adding empty admin address
             .then(() => TwoKeyPlasmaSingletoneRegistry.deployed().then(async (registry) => {
                 await new Promise(async(resolve,reject) => {
                     try {

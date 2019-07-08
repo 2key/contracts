@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeySingletonesRegistry.sol";
 import "../interfaces/IStructuredStorage.sol";
-
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../upgradability/UpgradabilityProxy.sol";
 import "../upgradability/Upgradeable.sol";
 
@@ -25,17 +25,13 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
         address storageProxy
     );
 
-    mapping (address => bool) public isMaintainer;
-
-    constructor(address [] _maintainers, address _twoKeyAdmin) public {
-        isMaintainer[msg.sender] = true; //for truffle deployment
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+    constructor() public {
+        deployer = msg.sender;
     }
 
     modifier onlyMaintainer {
-        require(isMaintainer[msg.sender]);
+        address twoKeyPlasmaMaintainersRegistry = contractToProxy["TwoKeyPlasmaMaintainersRegistry"];
+        require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).onlyMaintainer(msg.sender));
         _;
     }
 
@@ -122,34 +118,4 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
-    function addMaintainers(
-        address [] _maintainers
-    )
-    public
-    onlyMaintainer
-    {
-        //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
-        uint numberOfMaintainers = _maintainers.length;
-        for(uint i=0; i<numberOfMaintainers; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-    }
-
-    /**
-     * @notice Function which can remove some maintainers, in general it's array because this supports adding multiple addresses in 1 trnx
-     * @dev only twoKeyAdmin contract is eligible to mutate state of maintainers
-     * @param _maintainers is the array of maintainer addresses
-     */
-    function removeMaintainers(
-        address [] _maintainers
-    )
-    public
-    onlyMaintainer
-    {
-        //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
-        uint numberOfMaintainers = _maintainers.length;
-        for(uint i=0; i<numberOfMaintainers; i++) {
-            isMaintainer[_maintainers[i]] = false;
-        }
-    }
 }
