@@ -143,7 +143,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	function getUint(
 		string key
 	)
-	public
+	internal
 	view
 	returns (uint)
 	{
@@ -158,6 +158,41 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	internal
 	{
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
+	}
+
+	function getTwoKeyRewardsReleaseDate()
+	external
+	view
+	returns(uint)
+	{
+		return getUint("rewardReleaseAfter");
+	}
+
+
+	function getDefaultIntegratorFeePercent()
+	public
+	view
+	returns (uint)
+	{
+		return getUint("twoKeyIntegratorDefaultFeePercent");
+	}
+
+
+	function getDefaultNetworkTaxPercent()
+	public
+	view
+	returns (uint)
+	{
+		return getUint("twoKeyNetworkTaxPercent");
+	}
+
+
+	function getTwoKeyTokenRate()
+	public
+	view
+	returns (uint)
+	{
+		return getUint("twoKeyTokenRate");
 	}
 
 

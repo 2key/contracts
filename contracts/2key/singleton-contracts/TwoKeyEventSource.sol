@@ -255,7 +255,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-        uint integratorFeePercentage = ITwoKeyAdmin(twoKeyAdmin).getUint("twoKeyIntegratorDefaultFeePercent");
+        uint integratorFeePercentage = ITwoKeyAdmin(twoKeyAdmin).getDefaultIntegratorFeePercent();
         return integratorFeePercentage;
     }
 
@@ -268,7 +268,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-        uint networkTaxPercent = ITwoKeyAdmin(twoKeyAdmin).getUint("twoKeyNetworkTaxPercent");
+        uint networkTaxPercent = ITwoKeyAdmin(twoKeyAdmin).getDefaultNetworkTaxPercent();
         return networkTaxPercent;
     }
 }
