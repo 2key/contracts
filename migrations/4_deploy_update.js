@@ -14,7 +14,7 @@ const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
-const TwoKeyPlasmaEventsRegistry = artifacts.require('TwoKeyPlasmaEventsRegistry');
+const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 
 const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
@@ -134,8 +134,8 @@ const getContractPerName = ((contractName) => {
         return TwoKeyPlasmaEvents;
     } else if (contractName == 'TwoKeyPlasmaMaintainersRegistry') {
         return TwoKeyPlasmaMaintainersRegistry;
-    } else if (contractName == 'TwoKeyPlasmaEventsRegistry') {
-        return TwoKeyPlasmaEventsRegistry;
+    } else if (contractName == 'TwoKeyPlasmaRegistry') {
+        return TwoKeyPlasmaRegistry;
     } else if (contractName == 'TwoKeySignatureValidator') {
         return TwoKeySignatureValidator;
     } else if(contractName == 'TwoKeyRegistryStorage') {
