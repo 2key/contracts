@@ -14,7 +14,7 @@ const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValida
 
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
-const TwoKeyPlasmaEventsRegistryStorage = artifacts.require('TwoKeyPlasmaEventsRegistryStorage');
+const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
 module.exports = function deploy(deployer) {
     if(deployer.network.startsWith('public') || deployer.network.startsWith('dev')) {
@@ -50,8 +50,8 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyPlasmaEventsStorage.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaMaintainersRegistryStorage))
             .then(() => TwoKeyPlasmaMaintainersRegistryStorage.deployed())
-            .then(() => deployer.deploy(TwoKeyPlasmaEventsRegistryStorage))
-            .then(() => TwoKeyPlasmaEventsRegistryStorage.deployed())
+            .then(() => deployer.deploy(TwoKeyPlasmaRegistryStorage))
+            .then(() => TwoKeyPlasmaRegistryStorage.deployed())
             .then(() => true);
     } else {
         console.log('No deployment configuration for selected network');

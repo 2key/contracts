@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-contract ITwoKeyPlasmaEventsRegistry {
+contract ITwoKeyPlasmaRegistry {
     function plasma2ethereum(
         address _plasma
     )

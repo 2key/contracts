@@ -80,13 +80,12 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
 
     function deployProxy(
         string contractName,
-        string version,
-        address deployer
+        string version
     )
     internal
     returns (address)
     {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, deployer);
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
         contractToProxy[contractName] = proxy;
         return address(proxy);
     }
@@ -103,11 +102,24 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
-        address logicProxy = deployProxy(contractName, version, msg.sender);
-        address storageProxy = deployProxy(contractNameStorage, version, msg.sender);
+        address logicProxy = deployProxy(contractName, version);
+        address storageProxy = deployProxy(contractNameStorage, version);
 
         IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
         emit ProxiesDeployed(logicProxy, storageProxy);
+    }
+
+    function upgradeContract(
+        string contractName,
+        string version
+    )
+    public
+    onlyMaintainer
+        //TODO: Change to deployer
+    {
+        address proxyAddress = getContractProxyAddress(contractName);
+        address _impl = getVersion(contractName, version);
+        UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
     function addMaintainers(

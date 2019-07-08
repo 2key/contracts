@@ -2,20 +2,20 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 
-import "../interfaces/storage-contracts/ITwoKeyPlasmaEventsRegistryStorage.sol";
+import "../interfaces/storage-contracts/ITwoKeyPlasmaRegistryStorage.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaEvents.sol";
 import "../libraries/Call.sol";
 
-contract TwoKeyPlasmaEventsRegistry is Upgradeable {
+contract TwoKeyPlasmaRegistry is Upgradeable {
 
     using Call for *;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     bool initialized;
 
-    ITwoKeyPlasmaEventsRegistryStorage public PROXY_STORAGE_CONTRACT;
+    ITwoKeyPlasmaRegistryStorage public PROXY_STORAGE_CONTRACT;
 
     function setInitialParams(
         address _twoKeyPlasmaSingletonRegistry,
@@ -26,7 +26,7 @@ contract TwoKeyPlasmaEventsRegistry is Upgradeable {
         require(initialized == false);
 
         TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
-        PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaEventsRegistryStorage(_proxyStorage);
+        PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaRegistryStorage(_proxyStorage);
 
         initialized = true;
     }
@@ -54,6 +54,8 @@ contract TwoKeyPlasmaEventsRegistry is Upgradeable {
 
         PROXY_STORAGE_CONTRACT.setString(keccak256("addressToUsername", plasma_address), username);
         PROXY_STORAGE_CONTRACT.setAddress(keccak256("usernameToAddress",username), plasma_address);
+
+        emitPlasma2Handle(plasma_address, username);
     }
 
     function add_plasma2ethereum(address plasma_address, bytes sig) public {
@@ -66,14 +68,18 @@ contract TwoKeyPlasmaEventsRegistry is Upgradeable {
         PROXY_STORAGE_CONTRACT.setAddress(keccak256("plasma2ethereum", plasma_address), eth_address);
         PROXY_STORAGE_CONTRACT.setAddress(keccak256("ethereum2plasma",eth_address), plasma_address);
 
-        emitEventThroughPlasmaEvents(plasma_address, eth_address);
+        emitPlasma2Ethereum(plasma_address, eth_address);
     }
 
-    function emitEventThroughPlasmaEvents(address plasma, address ethereum) internal {
+    function emitPlasma2Ethereum(address plasma, address ethereum) internal {
         address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents");
         ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitPlasma2EthereumEvent(plasma, ethereum);
     }
 
+    function emitPlasma2Handle(address plasma, string handle) internal {
+        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents");
+        ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitPlasma2HandleEvent(plasma, handle);
+    }
 
     function plasma2ethereum(
         address _plasma

@@ -4,7 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaEventsStorage.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
-import "../interfaces/ITwoKeyPlasmaEventsRegistry.sol";
+import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 
 contract TwoKeyPlasmaEvents is Upgradeable {
 
@@ -39,6 +39,11 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 //    mapping(address => mapping(address => uint256)) public voted_no;
 //    mapping(address => mapping(address => uint256)) public weighted_no;
 
+    modifier onlyTwoKeyPlasmaRegistry {
+        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        require(msg.sender == twoKeyPlasmaRegistry);
+        _;
+    }
 
     function setInitialParams(
         address _twoKeyPlasmaSingletonRegistry,
@@ -67,8 +72,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
 
     function plasmaOf(address me) internal view returns (address) {
-        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventsRegistry");
-        address plasma = ITwoKeyPlasmaEventsRegistry(twoKeyPlasmaEventsRegistry).ethereum2plasma(me);
+        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        address plasma = ITwoKeyPlasmaRegistry(twoKeyPlasmaEventsRegistry).ethereum2plasma(me);
         if (plasma != address(0)) {
             return plasma;
         }
@@ -77,8 +82,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
 
     function ethereumOf(address me) internal view returns (address) {
-        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventsRegistry");
-        address ethereum = ITwoKeyPlasmaEventsRegistry(twoKeyPlasmaEventsRegistry).plasma2ethereum(me);
+        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        address ethereum = ITwoKeyPlasmaRegistry(twoKeyPlasmaEventsRegistry).plasma2ethereum(me);
         if (ethereum != address(0)) {
             return ethereum;
         }
@@ -400,14 +405,20 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         address _ethereum
     )
     public
+    onlyTwoKeyPlasmaRegistry
     {
-        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventsRegistry");
-        require(msg.sender == twoKeyPlasmaEventsRegistry);
+
         emit Plasma2Ethereum(_plasma, _ethereum);
     }
 
-
-
-
+    function emitPlasma2HandleEvent(
+        address _plasma,
+        string _handle
+    )
+    public
+    onlyTwoKeyPlasmaRegistry
+    {
+        emit Plasma2Handle(_plasma, _handle);
+    }
 
 }

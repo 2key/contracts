@@ -6,4 +6,10 @@ contract ITwoKeyPlasmaEvents {
         address _ethereum
     )
     public;
+
+    function emitPlasma2HandleEvent(
+        address _plasma,
+        string _handle
+    )
+    public;
 }
