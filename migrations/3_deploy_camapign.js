@@ -81,41 +81,11 @@ module.exports = function deploy(deployer) {
                     txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
 
-
                     resolve(txHash);
                 } catch (e) {
                     reject(e);
                 }
             })
-        })
-        .then(async () => {
-            console.log("... Adding campaign bytecodes to be valid in the TwoKeyValidator contract");
-            await new Promise(async (resolve, reject) => {
-                try {
-                    let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
-                        .addValidBytecodes(
-                            [
-                                TwoKeyAcquisitionCampaignERC20.address,
-                                TwoKeyConversionHandler.address,
-                                TwoKeyAcquisitionLogicHandler.address,
-                                TwoKeyDonationCampaign.address,
-                                TwoKeyDonationConversionHandler.address,
-                                TwoKeyDonationLogicHandler.address
-                            ],
-                            [
-                                '0x54776f4b65794163717569736974696f6e43616d706169676e00000000000000', //TwoKeyAcquisitionCampaign
-                                '0x54776f4b6579436f6e76657273696f6e48616e646c6572000000000000000000', //TwoKeyConversionHandler
-                                '0x54776f4b65794163717569736974696f6e4c6f67696348616e646c6572000000', //TwoKeyAcquisitionLogicHandler
-                                '0x54776f4b6579446f6e6174696f6e43616d706169676e00000000000000000000', //TwoKeyDonationCampaign
-                                '0x54776f4b6579446f6e6174696f6e436f6e76657273696f6e48616e646c657200',  //TwoKeyDonationConversionHandler
-                                '0x54776f4b6579446f6e6174696f6e4c6f67696348616e646c6572000000000000' //TwoKeyDonationLogicHandler
-                            ]
-                        );
-                    resolve(txHash);
-                } catch (e) {
-                    reject(e);
-                }
-            });
         })
         .then(() => true);
     }
