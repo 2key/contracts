@@ -51,3 +51,35 @@
 
 
 ### Regular contracts
+
+#### TwoKeyAdmin
+- No interface changes
+
+#### TwoKeyCampaignValidator
+- No interface changes
+
+#### TwoKeyEventSource
+- No interface changes
+
+#### TwoKeyExchangeRateChanges
+##### Removed:
+- currencyName2rate
+- struct ExchangeRate
+- getFiatCurrencyDetails
+
+#### TwoKeyFactory
+- No interface changes
+
+#### TwoKeyMaintainersRegistry 
+- Completely new contract
+##### Added:
+- `function onlyMaintainer(address _sender) public view returns (bool)`
+- `function addMaintainers(address [] _maintainers) public`
+- `function removeMaintainers(address [] _maintainers) public`
+
+#### TwoKeyRegistry
+##### Temp removed:
+- `function deleteUser`
+
+##### TwoKeyUpgradableExchange
+- No interface changes
