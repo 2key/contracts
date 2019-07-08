@@ -20,8 +20,6 @@ import "../interfaces/storage-contracts/ITwoKeyFactoryStorage.sol";
 contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized;
-    // I left it as a string, even it increases chances for typo, better suits Upgradable pattern than Enums.
-    mapping(address => string) public addressToCampaignType;
 
     ITwoKeyFactoryStorage PROXY_STORAGE_CONTRACT;
 
