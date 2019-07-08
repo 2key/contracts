@@ -380,7 +380,6 @@ describe('TwoKeyDonationCampaign', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
-
         let stats = await twoKeyProtocol.DonationCampaign.getAddressStatistic(campaignAddress,env.TEST4_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
         console.log(stats);
     }).timeout(60000);
