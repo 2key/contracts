@@ -1283,6 +1283,11 @@ describe('TwoKeyProtocol', () => {
         expect(campaignType).to.be.equal("TOKEN_SELL");
     }).timeout(60000);
 
+    it('should get all maintainers', async() => {
+        let maintainers = await twoKeyProtocol.TwoKeyMaintainersRegistry.getAllMaintainers();
+        expect(maintainers.length).to.be.greaterThan(35);
+    }).timeout(60000);
+
     // it('should build refgraph', async() => {
     //     const {web3, address} = web3switcher.gmail();
     //     from = address;

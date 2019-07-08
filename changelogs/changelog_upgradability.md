@@ -30,9 +30,10 @@
 - plasma2ethereum
 - ethereum2plasma
 - linkUsernameAndAddress (Moved to TwoKeyPlasmaEventsRegistry)
+- Events Plasma2Ethereum & Plasma2Handle
 
 
-#### TwoKeyPlasmaEventsRegistry
+#### TwoKeyPlasmaRegistry
 ##### Added:
 - linkUsernameAndAddress
 - add_plasma2ethereum
@@ -45,6 +46,7 @@
 - function onlyMaintainer(address _sender) public view returns (bool);
 - function addMaintainers(address [] _maintainers) public;
 - function removeMaintainers(address [] _maintainers) public;
+- function getAllMaintainers () public view returns (address[]);
 
 
 
@@ -70,6 +72,8 @@
 
 #### TwoKeyMaintainersRegistry 
 - Completely new contract
+- function getAllMaintainers () public view returns (address[]);
+
 ##### Added:
 - `function onlyMaintainer(address _sender) public view returns (bool)`
 - `function addMaintainers(address [] _maintainers) public`

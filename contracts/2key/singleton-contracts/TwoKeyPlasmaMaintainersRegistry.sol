@@ -24,6 +24,8 @@ contract TwoKeyPlasmaMaintainersRegistry is Upgradeable {
 
         PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaMaintainersRegistryStorage(_proxyStorage);
 
+        PROXY_STORAGE_CONTRACT.setAddressArray(keccak256("maintainers"), _maintainers);
+
         //Set deployer to be also a maintainer
         addMaintainer(msg.sender);
 
@@ -73,6 +75,15 @@ contract TwoKeyPlasmaMaintainersRegistry is Upgradeable {
             removeMaintainer(_maintainers[i]);
         }
     }
+
+    function getAllMaintainers()
+    public
+    view
+    returns (address[])
+    {
+        return PROXY_STORAGE_CONTRACT.getAddressArray(keccak256("maintainers"));
+    }
+
 
     function isMaintainer(
         address _address

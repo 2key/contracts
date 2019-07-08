@@ -42,6 +42,8 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         //Set deployer to be also a maintainer
         addMaintainer(msg.sender);
 
+        PROXY_STORAGE_CONTRACT.setAddressArray(keccak256("maintainers"), _maintainers);
+
         //Set initial maintainers
         for(uint i=0; i<_maintainers.length; i++) {
             addMaintainer(_maintainers[i]);
@@ -102,6 +104,13 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         }
     }
 
+    function getAllMaintainers()
+    public
+    view
+    returns (address[])
+    {
+        return PROXY_STORAGE_CONTRACT.getAddressArray(keccak256("maintainers"));
+    }
 
     function isMaintainer(
         address _address
@@ -137,5 +146,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
+
+
 
 }
