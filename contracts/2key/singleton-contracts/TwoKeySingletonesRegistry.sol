@@ -163,9 +163,8 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         string version
     )
     public
-    onlyMaintainer
-    //TODO: Change to deployer
     {
+        require(msg.sender == deployer);
         address proxyAddress = getContractProxyAddress(contractName);
         address _impl = getVersion(contractName, version);
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
