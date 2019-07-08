@@ -4,7 +4,6 @@ const util = require('util');
 const tar = require('tar');
 const rimraf = require('rimraf');
 const sha256 = require('js-sha256');
-const rhd = require('node-humanhash');
 const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');

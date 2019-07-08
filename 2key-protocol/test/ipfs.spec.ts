@@ -11,6 +11,7 @@ const expect = chai.expect;
 chai.use(promisedChai);
 
 const ipfsRegex = /Qm[a-zA-Z0-9]{44}/;
+const campaign = require('./campaign.json');
 
 describe('IPFS: Basic scenario. Read from Gateway', () => {
     const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
@@ -21,12 +22,12 @@ describe('IPFS: Basic scenario. Read from Gateway', () => {
     const now = new Date().toLocaleTimeString();
 
     it('add object to ipfs', async () => {
-        hash = await ipfs.add({ now });
+        hash = await ipfs.add({ now }, { json: true });
         expect(ipfsRegex.test(hash)).to.be.equals(true);
     }).timeout(30000);
 
     it('get object from ipfs through gateway', async () => {
-        const obj = await ipfs.get(hash);
+        const obj = await ipfs.get(hash, { json: true });
         expect(obj.now).to.be.equals(now);
     }).timeout(30000);
 
@@ -36,34 +37,10 @@ describe('IPFS: Basic scenario. Read from Gateway', () => {
     }).timeout(30000);
 
     it('get string from ipfs through gateway', async () => {
-        const result = await ipfs.get(hash, false);
+        const result = await ipfs.get(hash);
         expect(result).to.be.equals(now);
     }).timeout(30000);
 });
-
-/*
-describe('IPFS: Basic scenario. Wrong URLs', () => {
-    const ipfs = new TwoKeyIPFS('https://ipfs.infura.io/api/v0', {
-        readUrl: 'https://ipfs.infura.io/ipfs/',
-        readMode: ETwoKeyIPFSMode.GATEWAY,
-    });
-    let hash;
-    const now = new Date().toLocaleTimeString();
-
-    it('add object to ipfs', async() => {
-        const worker = () => ipfs.add({ now });
-        // @ts-ignore
-        expect(await worker()).to.be.rejected;
-    }).timeout(30000);
-
-    it('get object from ipfs through gateway', async () => {
-        expect(async() => {
-            await ipfs.get(hash);
-        }).to.throw(Error);
-
-    }).timeout(30000);
-});
- */
 
 describe('IPFS: Basic scenario. Read from API', () => {
     const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
@@ -74,12 +51,12 @@ describe('IPFS: Basic scenario. Read from API', () => {
     const now = new Date().toLocaleTimeString();
 
     it('add object to ipfs', async () => {
-        hash = await ipfs.add({ now });
+        hash = await ipfs.add({ now }, { json: true });
         expect(ipfsRegex.test(hash)).to.be.equals(true);
     }).timeout(30000);
 
     it('get object from ipfs through api', async () => {
-        const obj = await ipfs.get(hash);
+        const obj = await ipfs.get(hash, { json: true });
         expect(obj.now).to.be.equals(now);
     }).timeout(30000);
 });
@@ -93,12 +70,12 @@ describe('IPFS: Read from GW, multiple API endpoints', () => {
     const now = new Date().toLocaleTimeString();
 
     it('add object to ipfs', async () => {
-        hash = await ipfs.add({ now });
+        hash = await ipfs.add({ now }, { json: true });
         expect(ipfsRegex.test(hash)).to.be.equals(true);
     }).timeout(30000);
 
     it('get object from ipfs through api', async () => {
-        const obj = await ipfs.get(hash);
+        const obj = await ipfs.get(hash, { json: true });
         expect(obj.now).to.be.equals(now);
     }).timeout(30000);
 });
@@ -112,12 +89,12 @@ describe('IPFS: Read from wrong GW', () => {
     const now = new Date().toLocaleTimeString();
 
     it('add object to ipfs', async () => {
-        hash = await ipfs.add({ now });
+        hash = await ipfs.add({ now }, { json: true });
         expect(ipfsRegex.test(hash)).to.be.equals(true);
     }).timeout(30000);
 
     it('get object from ipfs through api', async () => {
-        const obj = await ipfs.get(hash);
+        const obj = await ipfs.get(hash, { json: true });
         expect(obj.now).to.be.equals(now);
     }).timeout(30000);
 });
@@ -131,12 +108,80 @@ describe('IPFS: Read from wrong GW, multiple API endpoints', () => {
     const now = new Date().toLocaleTimeString();
 
     it('add object to ipfs', async () => {
-        hash = await ipfs.add({ now });
+        hash = await ipfs.add({ now }, { json: true });
         expect(ipfsRegex.test(hash)).to.be.equals(true);
     }).timeout(30000);
 
     it('get object from ipfs through api', async () => {
-        const obj = await ipfs.get(hash);
+        const obj = await ipfs.get(hash, { json: true });
         expect(obj.now).to.be.equals(now);
     }).timeout(30000);
 });
+
+describe('IPFS: Basic scenario with compression. Read from GW', () => {
+    const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
+        readUrl: 'https://ipfs.2key.net/ipfs/',
+        readMode: ETwoKeyIPFSMode.GATEWAY,
+    });
+    let hash;
+    const now = new Date().toLocaleTimeString();
+
+    it('add object to ipfs', async () => {
+        hash = await ipfs.add({ now }, { json: true, compress: true });
+        expect(ipfsRegex.test(hash)).to.be.equals(true);
+    }).timeout(30000);
+
+    it('get object from ipfs through gateway', async () => {
+        const obj = await ipfs.get(hash, { json: true, compress: true });
+        expect(obj.now).to.be.equals(now);
+    }).timeout(30000);
+});
+
+describe('IPFS: Basic scenario with compression. Read from API', () => {
+    const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
+        readUrl: 'https://ipfs.2key.net/api/v0',
+        readMode: ETwoKeyIPFSMode.API,
+    });
+    let hash;
+    const now = new Date().toLocaleTimeString();
+
+    it('add object to ipfs', async () => {
+        hash = await ipfs.add({ now }, { json: true, compress: true });
+        expect(ipfsRegex.test(hash)).to.be.equals(true);
+    }).timeout(30000);
+
+    it('get object from ipfs through gateway', async () => {
+        const obj = await ipfs.get(hash, { json: true, compress: true });
+        expect(obj.now).to.be.equals(now);
+    }).timeout(30000);
+});
+
+describe('IPFS: Compare sizes', () => {
+    const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
+        readUrl: 'https://ipfs.2key.net/ipfs/',
+        readMode: ETwoKeyIPFSMode.GATEWAY,
+    });
+    let compressedHash;
+    let rawHash;
+
+    it('add object to ipfs', async () => {
+        rawHash = await ipfs.add(campaign, { json: true });
+        expect(ipfsRegex.test(rawHash)).to.be.equals(true);
+    }).timeout(30000);
+
+    it('add object to ipfs', async () => {
+        compressedHash = await ipfs.add(campaign, { json: true, compress: true });
+        expect(ipfsRegex.test(compressedHash)).to.be.equals(true);
+    }).timeout(30000);
+
+    it('get object from ipfs through gateway', async () => {
+        const obj = await ipfs.get(rawHash, { json: true });
+        expect(obj.erc20_address).to.be.equals('0xaf65314b914a116bc299d97ab01b2fe870046f7a');
+    }).timeout(30000);
+
+    it('get object from ipfs through gateway', async () => {
+        const obj = await ipfs.get(compressedHash, { json: true, compress: true });
+        expect(obj.erc20_address).to.be.equals('0xaf65314b914a116bc299d97ab01b2fe870046f7a');
+    }).timeout(30000);
+});
+

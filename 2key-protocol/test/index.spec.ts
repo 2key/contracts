@@ -372,7 +372,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should read from ipfs', () => {
-        return twoKeyProtocol.ipfs.get('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j', false).then((data) => {
+        return twoKeyProtocol.ipfs.get('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
             console.log('IPFS data', data);
         });
     }).timeout(60000);
@@ -670,7 +670,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     it('should print joined_from', async () => {
-        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail, true);
+        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail, { json: true, compress: true });
         console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
     }).timeout(60000);
 
