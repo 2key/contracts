@@ -184,11 +184,10 @@ module.exports = function deploy(deployer) {
                         console.log('Network ID', network_id);
                         const twoKeyReg = fileObject.TwoKeyRegistry || {};
                         twoKeyReg[network_id] = {
-                            'address': TwoKeyRegistry.address,
+                            'implementationAddressLogic': TwoKeyRegistry.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyRegistryStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
 
@@ -216,11 +215,10 @@ module.exports = function deploy(deployer) {
                         console.log('Network ID', network_id);
                         const twoKeySig = fileObject.TwoKeySignatureValidator || {};
                         twoKeySig[network_id] = {
-                            'address': TwoKeySignatureValidator.address,
+                            'implementationAddressLogic': TwoKeySignatureValidator.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeySignatureValidatorStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
 
@@ -247,11 +245,11 @@ module.exports = function deploy(deployer) {
                         console.log('Proxy address for the TwoKeyMaintainersRegistry is : ' + logicProxy);
                         const twoKeyMaintainersRegistry = fileObject.TwoKeyMaintainersRegistry || {};
                         twoKeyMaintainersRegistry[network_id] = {
-                            'address': TwoKeyMaintainersRegistry.address,
+                            'implementationAddressLogic': TwoKeyMaintainersRegistry.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyMaintainersRegistryStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
+                            'maintainers': maintainerAddresses
                         };
                         proxyAddressTwoKeyMaintainersRegistrySTORAGE = storageProxy;
                         proxyAddressTwoKeyMaintainersRegistry = logicProxy;
@@ -279,11 +277,10 @@ module.exports = function deploy(deployer) {
 
                         const twoKeyFactory = fileObject.TwoKeyFactory || {};
                         twoKeyFactory[network_id] = {
-                            'address': TwoKeyFactory.address,
+                            'implementationAddressLogic': TwoKeyFactory.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyFactoryStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyFactorySTORAGE = storageProxy;
@@ -310,11 +307,10 @@ module.exports = function deploy(deployer) {
                         console.log('Proxy address for the TwoKeyCampaignValidator is : ' + logicProxy);
                         const twoKeyValidator = fileObject.TwoKeyCampaignValidator || {};
                         twoKeyValidator[network_id] = {
-                            'address': TwoKeyCampaignValidator.address,
+                            'implementationAddressLogic': TwoKeyCampaignValidator.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyCampaignValidatorStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyCampaignValidatorSTORAGE = storageProxy;
@@ -342,11 +338,10 @@ module.exports = function deploy(deployer) {
                         const twoKeyCommunityTokenPool = fileObject.TwoKeyCommunityTokenPool || {};
 
                         twoKeyCommunityTokenPool[network_id] = {
-                            'address': TwoKeyCommunityTokenPool.address,
+                            'implementationAddressLogic': TwoKeyCommunityTokenPool.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyCommunityTokenPoolStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyCommunityTokenPoolSTORAGE = storageProxy;
@@ -373,11 +368,10 @@ module.exports = function deploy(deployer) {
                         const twoKeyLongTermTokenPool = fileObject.TwoKeyLongTermTokenPool || {};
 
                         twoKeyLongTermTokenPool[network_id] = {
-                            'address': TwoKeyLongTermTokenPool.address,
+                            'implementationAddressLogic': TwoKeyLongTermTokenPool.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyLongTermTokenPoolStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyLongTermTokenPoolSTORAGE = storageProxy;
@@ -405,11 +399,10 @@ module.exports = function deploy(deployer) {
 
                         const twoKeyDeepFreezeTokenPool = fileObject.TwoKeyDeepFreezeTokenPool || {};
                         twoKeyDeepFreezeTokenPool[network_id] = {
-                            'address': TwoKeyDeepFreezeTokenPool.address,
+                            'implementationAddressLogic': TwoKeyDeepFreezeTokenPool.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyDeepFreezeTokenPoolStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE = storageProxy;
@@ -441,11 +434,10 @@ module.exports = function deploy(deployer) {
                         const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
 
                         twoKeyBaseRepReg[network_id] = {
-                            'address': TwoKeyBaseReputationRegistry.address,
+                            'implementationAddressLogic': TwoKeyBaseReputationRegistry.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyBaseReputationRegistryStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            // maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyReputationRegistrySTORAGE = storageProxy;
@@ -474,11 +466,10 @@ module.exports = function deploy(deployer) {
                         const twoKeyEvents = fileObject.TwoKeyEventSource || {};
 
                         twoKeyEvents[network_id] = {
-                            'address': EventSource.address,
+                            'implementationAddressLogic': EventSource.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyEventSourceStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyEventSourceSTORAGE = storageProxy;
@@ -506,11 +497,10 @@ module.exports = function deploy(deployer) {
                         const twoKeyExchangeRate = fileObject.TwoKeyExchange || {};
 
                         twoKeyExchangeRate[network_id] = {
-                            'address': TwoKeyExchangeRateContract.address,
+                            'implementationAddressLogic': TwoKeyExchangeRateContract.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyExchangeRateStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
                         };
 
                         proxyAddressTwoKeyExchangeRateSTORAGE = storageProxy;
@@ -540,11 +530,10 @@ module.exports = function deploy(deployer) {
                         // txHash = await TwoKeyAdmin.at(logicProxy).transfer2KeyTokens(proxyAddressTwoKeyRegistry, 1000000000000000);
                         const twoKeyAdmin = fileObject.TwoKeyAdmin || {};
                         twoKeyAdmin[network_id] = {
-                            'address': TwoKeyAdmin.address,
+                            'implementationAddressLogic': TwoKeyAdmin.address,
                             'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyAdminStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses
                         };
 
 
@@ -574,11 +563,10 @@ module.exports = function deploy(deployer) {
 
                         const twoKeyUpgradableExchange = fileObject.TwoKeyUpgradableExchange || {};
                         twoKeyUpgradableExchange[network_id] = {
-                            'address' : TwoKeyUpgradableExchange.address,
-                            'Proxy' : logicProxy,
+                            'implementationAddressLogic': TwoKeyUpgradableExchange.address,
+                            'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyUpgradableExchangeStorage.address,
                             'StorageProxy': storageProxy,
-                            'Version' : INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses
                         };
 
 
@@ -855,11 +843,10 @@ module.exports = function deploy(deployer) {
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
                         twoKeyPlasmaEvents[network_id] = {
-                            'address': TwoKeyPlasmaEvents.address,
+                            'implementationAddressLogic': TwoKeyPlasmaEvents.address,
                             'Proxy': logicProxy,
-                            'StorageProxy' : storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
+                            'implementationAddressStorage': TwoKeyPlasmaEventsStorage.address,
+                            'StorageProxy': storageProxy,
                         };
 
                         proxyAddressTwoKeyPlasmaEvents = logicProxy;
@@ -883,11 +870,10 @@ module.exports = function deploy(deployer) {
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         const twoKeyPlasmaEventsReg = fileObject.TwoKeyPlasmaEventsRegistry || {};
                         twoKeyPlasmaEventsReg[network_id] = {
-                            'address': TwoKeyPlasmaEventsRegistry.address,
+                            'implementationAddressLogic': TwoKeyPlasmaEventsRegistry.address,
                             'Proxy': logicProxy,
-                            'StorageProxy' : storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
+                            'implementationAddressStorage': TwoKeyPlasmaEventsRegistryStorage.address,
+                            'StorageProxy': storageProxy,
                         };
 
                         proxyAddressTwoKeyPlasmaEventsRegistry = logicProxy;
@@ -910,11 +896,10 @@ module.exports = function deploy(deployer) {
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
                         const twoKeyPlasmaMaintainersRegistry = fileObject.TwoKeyPlasmaMaintainersRegistry || {};
                         twoKeyPlasmaMaintainersRegistry[network_id] = {
-                            'address': TwoKeyPlasmaMaintainersRegistry.address,
+                            'implementationAddressLogic': TwoKeyPlasmaMaintainersRegistry.address,
                             'Proxy': logicProxy,
-                            'StorageProxy' : storageProxy,
-                            'Version': INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            maintainer_address: maintainerAddresses,
+                            'implementationAddressStorage': TwoKeyPlasmaMaintainersRegistryStorage.address,
+                            'StorageProxy': storageProxy,
                         };
 
                         proxyAddressTwoKeyPlasmaMaintainersRegistry = logicProxy;

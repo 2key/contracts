@@ -23,6 +23,15 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     // a malicous plasma user.
     event Visited(address indexed to, address indexed c, address indexed contractor, address from);  // the to is a plasma address, you should lookit up in plasma2ethereum
 
+    event Plasma2Ethereum(
+        address plasma,
+        address eth
+    );
+
+    event Plasma2Handle(
+        address plasma,
+        string handle
+    );
 
 
 //    mapping(address => mapping(address => uint256)) public voted_yes;
@@ -384,6 +393,17 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
         bytes32 keyHash = keccak256("visits_list_timestamps", _c, _contractor, _referrer);
         PROXY_STORAGE_CONTRACT.setUintArray(keyHash, newVisitListTimestamps);
+    }
+
+    function emitPlasma2EthereumEvent(
+        address _plasma,
+        address _ethereum
+    )
+    public
+    {
+        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventsRegistry");
+        require(msg.sender == twoKeyPlasmaEventsRegistry);
+        emit Plasma2Ethereum(_plasma, _ethereum);
     }
 
 

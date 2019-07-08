@@ -30,12 +30,10 @@
 - plasma2ethereum
 - ethereum2plasma
 - linkUsernameAndAddress (Moved to TwoKeyPlasmaEventsRegistry)
-- `event Plasma2Ethereum(address plasma, address eth);`
 
 
 #### TwoKeyPlasmaEventsRegistry
 ##### Added:
-- `event Plasma2Ethereum(address plasma,address eth)`
 - linkUsernameAndAddress
 - add_plasma2ethereum
 - plasma2ethereum

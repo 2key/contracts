@@ -80,10 +80,7 @@ const versioning = require('./generateContractsVersioning');
  *
  * @type {{}}
  */
-let maintainerAddress = {};
-maintainerAddress['rinkeby'] = '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f';
-maintainerAddress['ropsten'] = '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f';
-maintainerAddress['local'] = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
+
 
 async function handleExit(p) {
   console.log(p);
@@ -287,8 +284,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           // 'NetworkHashes': keyHash,
         };
 
-        let obj1 = {};
-        obj1['Maintainers'] = maintainerAddress;
 
         //Handle updating contracts_deployed-develop.json
         /*
@@ -320,7 +315,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         */
 
         contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
-        contracts.contracts.singletons = Object.assign(obj1, contracts.contracts.singletons);
         console.log('Writing contracts for submodules...');
         if(!fs.existsSync(path.join(twoKeyProtocolDir, 'contracts'))) {
           fs.mkdirSync(path.join(twoKeyProtocolDir, 'contracts'));
@@ -330,7 +324,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         });
         // fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         json = Object.assign(obj,json);
-        json = Object.assign(obj1,json);
         fs.writeFileSync(getContractsDeployedPath(), JSON.stringify(json, null, 2));
         console.log('Writing contracts_deployed-develop.json...');
         if (deployment) {
