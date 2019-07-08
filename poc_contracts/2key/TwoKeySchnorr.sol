@@ -425,13 +425,22 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   mapping(address => address) private Sa2from;
   mapping(address => address) private Sa2influencer;
 
-  function getSa(bytes Rs, bytes Qs) public view
+  function getSa(bytes Rs, bytes Qs, address Sa1) public view
   returns(address Sa, uint n)
   {
-    uint256 Sx = 0;
-    uint256 Sy = 0;
+    uint256 Sx;
+    uint256 Sy;
+    if (Sa1 != address(0)) {
+      n = Sa2n[Sa1];
+      Sx = Sa2Sx[Sa1];
+      Sy = Sa2Sy[Sa1];
+    } else {
+      Sx = 0;
+      Sy = 0;
+      n = 0;
+    }
+
     address next_Sa = address(0);
-    n = 0;
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
       (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
