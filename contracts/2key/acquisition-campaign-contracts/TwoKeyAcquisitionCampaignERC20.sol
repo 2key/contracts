@@ -332,7 +332,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
                 address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
-                uint rate = IUpgradableExchange(upgradableExchange).getUint("sellRate2key");
+                uint rate = IUpgradableExchange(upgradableExchange).sellRate2key();
                 totalBounty2keys = (_maxReferralRewardETHWei / (rate)) * (1000);
                 //TODO: add require that there's enough tokens at this moment
             } else {

@@ -360,9 +360,24 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    function buyRate2key() public view returns (uint) {
+        return getUint("buyRate2key");
+    }
+
+    function sellRate2key() public view returns (uint) {
+        return getUint("sellRate2key");
+    }
+
+    function transactionCounter() public view returns (uint) {
+        return getUint("transactionCounter");
+    }
+
+    function weiRaised() public view returns (uint) {
+        return getUint("weiRaised");
+    }
 
     // Internal wrapper methods
-    function getUint(string key) public view returns (uint) {
+    function getUint(string key) internal view returns (uint) {
         return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
     }
 
@@ -370,6 +385,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     function setUint(string key, uint value) internal {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
     }
+
 
     // Internal wrapper methods
     function getAddress(string key) internal view returns (address) {
@@ -389,15 +405,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyMaintainer
     {
         setUint(key, value);
-    }
-
-    //TODO: VERY SENSITIVE PROCESS, SHOULD BE DONE BY CONGRESS ONLY
-    function destruct(address newLogicContract) public onlyMaintainer {
-        newLogicContract.transfer(this.balance);
-        ERC20 dai = ERC20(getAddress("DAI"));
-        ERC20 token = ERC20(getAddress("TWO_KEY_TOKEN"));
-        dai.transfer(newLogicContract, dai.balanceOf(address(this)));
-        token.transfer(newLogicContract, token.balanceOf(address(this)));
     }
 
     /**
