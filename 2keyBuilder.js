@@ -179,6 +179,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     let contracts = {
       'contracts': {},
     };
+
+    let singletonAddresses = [];
     const proxyFile = path.join(buildPath, 'proxyAddresses.json');
     let json = {};
     let data = {};
@@ -200,6 +202,10 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             const mergedNetworks = {};
             Object.keys(networks).forEach(key => {
               mergedNetworks[key] = { ...networks[key], ...proxyNetworks[key] };
+              if(proxyNetworks[key]) {
+                  singletonAddresses.push(proxyNetworks[key].implementationAddressLogic);
+                  singletonAddresses.push(proxyNetworks[key].implementationAddressStorage);
+              }
             });
             if (!contracts.contracts[whiteListedContract.file]) {
               contracts.contracts[whiteListedContract.file] = {};
@@ -233,20 +239,15 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           }
         });
         const nonSingletonsBytecodes = [];
-        const singletonsBytecodes = [];
         Object.keys(contracts.contracts).forEach(submodule => {
           if (submodule !== 'singletons') {
             Object.values(contracts.contracts[submodule]).forEach(({ bytecode, abi }) => {
               nonSingletonsBytecodes.push(bytecode || JSON.stringify(abi));
             });
-          } else {
-            Object.values(contracts.contracts[submodule]).forEach(({ address, abi }) => {
-              singletonsBytecodes.push(address || JSON.stringify(abi));
-            });
           }
         });
         const nonSingletonsHash = sha256(nonSingletonsBytecodes.join(''));
-        const singletonsHash = sha256(singletonsBytecodes.join(''));
+        const singletonsHash = sha256(singletonAddresses.join(''));
         Object.keys(contracts.contracts).forEach(key => {
           contracts.contracts[key]['NonSingletonsHash'] = nonSingletonsHash;
           contracts.contracts[key]['SingletonsHash'] = singletonsHash;
