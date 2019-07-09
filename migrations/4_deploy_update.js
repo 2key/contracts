@@ -32,7 +32,7 @@ const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
-const TwoKeyPlasmaEventsRegistryStorage = artifacts.require('TwoKeyPlasmaEventsRegistryStorage');
+const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
 /**
  * Function to increment minor version
@@ -166,8 +166,8 @@ const getContractPerName = ((contractName) => {
         return TwoKeyPlasmaEventsStorage;
     } else if (contractName == 'TwoKeyPlasmaMaintainersRegistryStorage') {
         return TwoKeyPlasmaMaintainersRegistryStorage;
-    } else if (contractName == 'TwoKeyPlasmaEventsRegistryStorage') {
-        return TwoKeyPlasmaEventsRegistryStorage;
+    } else if (contractName == 'TwoKeyPlasmaRegistryStorage') {
+        return TwoKeyPlasmaRegistryStorage;
     } else if (contractName == 'TwoKeySignatureValidatorStorage') {
         return TwoKeySignatureValidatorStorage;
     }
@@ -221,5 +221,4 @@ module.exports = function deploy(deployer) {
                 )
             )
         );
-
 };
