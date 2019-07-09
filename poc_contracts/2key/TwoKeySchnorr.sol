@@ -419,40 +419,45 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   }
 
   /////////// Cache code
-  mapping(address => uint) private Sa2n;
-  mapping(address => uint256) private Sa2Sx;
-  mapping(address => uint256) private Sa2Sy;
-  mapping(address => address) private Sa2from;
-  mapping(address => address) private Sa2influencer;
+  struct SaInfo {
+    uint n;
+    uint256 Sx;
+    uint256 Sy;
+    address from;
+    address influencer;
+    uint8 cut;
+  }
+//  mapping(address => uint) private Sa2n;
+//  mapping(address => uint256) private Sa2Sx;
+//  mapping(address => uint256) private Sa2Sy;
+//  mapping(address => address) private Sa2from;
+//  mapping(address => address) private Sa2influencer;
+//  mapping(address => bytes1) private Sa2cut;
+  mapping(address => SaInfo) public Sa2Info;
 
-  function getSa(bytes Rs, bytes Qs, address Sa1) public view
+  function getSa(bytes Rs, bytes Qs, address Sa0) public view
   returns(address Sa, uint n)
   {
     uint256 Sx;
     uint256 Sy;
-    if (Sa1 != address(0)) {
-      n = Sa2n[Sa1];
-      Sx = Sa2Sx[Sa1];
-      Sy = Sa2Sy[Sa1];
-    } else {
-      Sx = 0;
-      Sy = 0;
-      n = 0;
+    if (Sa0 != address(0)) {
+      SaInfo info = Sa2Info[Sa0];
+      n = info.n;
+      Sx = info.Sx;
+      Sy = info.Sy;
     }
-
-    address next_Sa = address(0);
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
       (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
       (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Qs,idx), Call.loadUint256(Qs,idx+32));
-      Sa = next_Sa;
-      next_Sa = point_hash([Sx, Sy]);
-      if (Sa2n[next_Sa] != n+1) {
+      Sa = Sa0;
+      Sa0 = point_hash([Sx, Sy]);
+      if (Sa2Info[Sa0].n != n+1) {
         return;
       }
       n++;
     }
-    Sa = next_Sa;
+    Sa = Sa0;
 
     return;
   }
@@ -465,9 +470,10 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     // and the code will verify that the computation is true
 
     if (Sa != address(0)) {
-      n = Sa2n[Sa]+1;
-      Sx = Sa2Sx[Sa];
-      Sy = Sa2Sy[Sa];
+      SaInfo info = Sa2Info[Sa];
+      n = info.n+1;
+      Sx = info.Sx;
+      Sy = info.Sy;
     } else {
       Sx = 0;
       Sy = 0;
@@ -479,14 +485,11 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
       (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
       (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Qs,idx), Call.loadUint256(Qs,idx+32));
       Sa1 = point_hash([Sx, Sy]);
-      Sa2n[Sa1] = n;
-      Sa2Sx[Sa1] = Sx;
-      Sa2Sy[Sa1] = Sy;
-      Sa2from[Sa1] = Sa;
-      Sa2influencer[Sa1] = address(uint256(keccak256(abi.encodePacked(
+      Sa2Info[Sa1] = SaInfo(n, Sx, Sy, Sa, address(uint256(keccak256(abi.encodePacked(
           Call.loadUint256(Rs,idx),
           Call.loadUint256(Rs,idx+32),
-          cuts[idx/64]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+          cuts[idx/64]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF),
+          uint8(cuts[idx/64]));
 
       Sa = Sa1;
       n++;
@@ -507,8 +510,9 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     convertTestVerify(s, Sx, Sy, n, keccak256(abi.encodePacked(Rx,Ry,a)));
 
     while (Sa != address(0)) {
-      convert[Sa2influencer[Sa]][Sa2n[Sa]]++;
-      Sa = Sa2from[Sa];
+      SaInfo info = Sa2Info[Sa];
+      convert[info.influencer][info.n]++;
+      Sa = info.from;
     }
   }
 }
