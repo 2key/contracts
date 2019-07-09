@@ -3,8 +3,9 @@ import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
 import createWeb3, {generatePlasmaFromMnemonic} from './_web3';
-import Sign from '../src/sign';
-import {INationalVotingCampaign} from "../src/decentralizedNation/interfaces";
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
 
 const {env} = process;
 

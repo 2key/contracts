@@ -1,3 +1,7 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import createWeb3 from './_web3';
 import singletons from '../src/contracts/singletons';
 
