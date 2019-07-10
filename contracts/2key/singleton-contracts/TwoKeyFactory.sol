@@ -4,6 +4,7 @@ pragma solidity ^0.4.0;
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../acquisition-campaign-contracts/TwoKeyPurchasesHandler.sol";
@@ -169,8 +170,9 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
         setAddressToCampaignType(proxyAcquisition, "TOKEN_SELL");
-        // Emit an event with proxies for Acquisition campaign
-        emit ProxyForCampaign(
+
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+        .acquisitionCampaignCreated(
             proxyLogicHandler,
             proxyConversions,
             proxyAcquisition,
@@ -257,8 +259,8 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
         setAddressToCampaignType(proxyDonationCampaign, "DONATION_CAMPAIGN");
 
-//         Emit an event
-        emit ProxyForDonationCampaign(
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+        .donationCampaignCreated(
             proxyDonationCampaign,
             proxyDonationConversionHandler,
             proxyDonationLogicHandler,

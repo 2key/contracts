@@ -67,6 +67,21 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint value
     );
 
+    event AcquisitionCampaignCreated(
+        address proxyLogicHandler,
+        address proxyConversionHandler,
+        address proxyAcquisitionCampaign,
+        address proxyPurchasesHandler,
+        address contractor
+    );
+
+    event DonationCampaignCreated(
+        address proxyDonationCampaign,
+        address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
+        address contractor
+    );
+
     /**
      * Modifier which will allow only completely verified and validated contracts to emit the events
      */
@@ -194,7 +209,59 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit Cancelled(_campaign, _converter, _indexOrAmount);
     }
 
+    /**
+     * @notice Function to emit event every time someone starts new Acquisition campaign
+     * @param proxyLogicHandler is the address of TwoKeyAcquisitionLogicHandler proxy deployed by TwoKeyFactory
+     * @param proxyConversionHandler is the address of TwoKeyConversionHandler proxy deployed by TwoKeyFactory
+     * @param proxyAcquisitionCampaign is the address of TwoKeyAcquisitionCampaign proxy deployed by TwoKeyFactory
+     * @param proxyPurchasesHandler is the address of TwoKeyPurchasesHandler proxy deployed by TwoKeyFactory
+     */
+    function acquisitionCampaignCreated(
+        address proxyLogicHandler,
+        address proxyConversionHandler,
+        address proxyAcquisitionCampaign,
+        address proxyPurchasesHandler,
+        address contractor
+    )
+    external
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
+        emit AcquisitionCampaignCreated(
+            proxyLogicHandler,
+            proxyConversionHandler,
+            proxyAcquisitionCampaign,
+            proxyPurchasesHandler,
+            contractor
+        );
+    }
 
+    /**
+     * @notice Function to emit event every time someone starts new Donation campaign
+     * @param proxyDonationCampaign is the address of TwoKeyDonationCampaign proxy deployed by TwoKeyFactory
+     * @param proxyDonationConversionHandler is the address of TwoKeyDonationConversionHandler proxy deployed by TwoKeyFactory
+     * @param proxyDonationLogicHandler is the address of TwoKeyDonationLogicHandler proxy deployed by TwoKeyFactory
+     */
+    function donationCampaignCreated(
+        address proxyDonationCampaign,
+        address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
+        address contractor
+    )
+    external
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
+        emit DonationCampaignCreated(
+            proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
+            contractor
+        );
+    }
+
+    /**
+     * @notice Function to check adequate plasma address for submitted eth address
+     * @param me is the ethereum address we request corresponding plasma address for
+     */
     function plasmaOf(
         address me
     )
