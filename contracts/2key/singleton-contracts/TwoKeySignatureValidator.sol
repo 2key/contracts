@@ -71,5 +71,6 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
+        return message_signer;
     }
 }
