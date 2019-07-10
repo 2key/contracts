@@ -34,6 +34,10 @@ const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage')
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
+
+const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
+const TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS = "0xe6ce6250dcfd0416325999f7891bbff668580a7a";
+
 /**
  * Function to increment minor version
  * @type {function(*)}
@@ -66,19 +70,19 @@ const incrementVersion = ((version) => {
  * Function to perform all necessary logic to update smart contract
  * @type {function(*, *=, *=)}
  */
-const updateContract = (async (registry, contractName, newImplementationAddress) => {
+const updateContract = (async (registryAddress, contractName, newImplementationAddress) => {
     await new Promise(async(resolve,reject) => {
         try {
             // Get current active version to be patched
-            let version = await registry.getLatestContractVersion(contractName);
+            let version = await TwoKeySingletonesRegistry.at(registryAddress).getLatestContractVersion(contractName);
             // Incremented version
             let newVersion = incrementVersion(version);
             //Console log the new version
             console.log('New version is: ' + newVersion);
             // Add contract version
-            let txHash = await registry.addVersion(contractName, newVersion, newImplementationAddress);
+            let txHash = await TwoKeySingletonesRegistry.at(registryAddress).addVersion(contractName, newVersion, newImplementationAddress);
             // Upgrade contract proxy to new version
-            let txHash1 = await registry.upgradeContract(contractName, newVersion);
+            let txHash1 = await TwoKeySingletonesRegistry.at(registryAddress).upgradeContract(contractName, newVersion);
             resolve({
                 txHash, txHash1
             });
@@ -92,10 +96,10 @@ const updateContract = (async (registry, contractName, newImplementationAddress)
  * Function to downgrade contract version
  * @type {function(*, *=, *=)}
  */
-const downgradeContract = (async (registry, contractName, version) => {
+const downgradeContract = (async (registryAddress, contractName, version) => {
     await new Promise(async(resolve,reject) => {
         try {
-            let txHash = await registry.upgradeContract(contractName, version);
+            let txHash = await TwoKeySingletonesRegistry.at(registryAddress).upgradeContract(contractName, version);
             resolve(txHash);
         } catch (e) {
             reject(e);
@@ -194,31 +198,30 @@ module.exports = function deploy(deployer) {
     let contractName = process.argv.pop();
     let contract = getContractPerName(contractName);
     let newImplementationAddress;
-    let registryContract;
+    let registryAddress;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
-        registryContract = TwoKeySingletonesRegistry;
+        registryAddress = TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
     } else {
-        registryContract = TwoKeyPlasmaSingletoneRegistry;
+        registryAddress = TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS;
     }
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
                 newImplementationAddress = contractInstance.address;
             })
-            .then(() => registryContract.deployed()
-                .then(async (registry) => {
-                        await new Promise(async (resolve, reject) => {
-                            try {
-                                console.log('Updating contract: ' + contractName);
-                                let hashes = await updateContract(registry, contractName, newImplementationAddress);
-                                resolve(hashes);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        })
+            .then(async () => {
+                console.log();
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('Updating contract: ' + contractName);
+                        let hashes = await updateContract(registryAddress, contractName, newImplementationAddress);
+                        resolve(hashes);
+                    } catch (e) {
+                        reject(e);
                     }
-                )
-            )
+                })
+            })
+
         );
 };
