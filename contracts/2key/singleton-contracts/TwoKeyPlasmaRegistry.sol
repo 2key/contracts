@@ -99,6 +99,26 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256("ethereum2plasma", _ethereum));
     }
 
+    function getAddressToUsername(
+        address _address
+    )
+    public
+    view
+    returns (string)
+    {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("addressToUsername",_address));
+    }
+
+    function getUsernameToAddress(
+        string _username
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("usernameToAddress", _username));
+    }
+
     /**
      * @notice Function to validate if signature is valid
      * @param signature is the signature
