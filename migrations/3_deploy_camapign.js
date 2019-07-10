@@ -20,6 +20,33 @@ const path = require('path');
 
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 
+/**
+ * Function to increment minor version
+ * @type {function(*)}
+ */
+const incrementVersion = ((version) => {
+    let vParts = version.split('.');
+    // assign each substring a position within our array
+    let partsArray = {
+        major : vParts[0],
+        minor : vParts[1],
+        patch : vParts[2]
+    };
+    // target the substring we want to increment on
+    partsArray.patch = parseFloat(partsArray.patch) + 1;
+    // set an empty array to join our substring values back to
+    let vArray = [];
+    // grabs each property inside our partsArray object
+    for (let prop in partsArray) {
+        if (partsArray.hasOwnProperty(prop)) {
+            // add each property to the end of our new array
+            vArray.push(partsArray[prop]);
+        }
+    }
+    // join everything back into one string with a period between each new property
+    let newVersion = vArray.join('.');
+    return newVersion;
+});
 
 module.exports = function deploy(deployer) {
     if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
@@ -46,7 +73,9 @@ module.exports = function deploy(deployer) {
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = '1.0';
+                    let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
+
+                    version = incrementVersion(version);
 
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
@@ -70,7 +99,9 @@ module.exports = function deploy(deployer) {
             console.log('... Adding implementation versions of Donation campaigns');
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = '1.0';
+                    let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyDonationCampaign");
+
+                    version = incrementVersion(version);
 
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
