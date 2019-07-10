@@ -261,6 +261,11 @@ const tryToRegisterUser = async (username, from) => {
     } catch {
         console.log('Error Plasma.signEthereum');
     }
+    try {
+        registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
+    } catch {
+        console.log('Error Plasma.signedUsername');
+    }
     let registerReceipts;
     try {
         registerReceipts = await registerUserFromBackend(registerData);
