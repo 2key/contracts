@@ -449,31 +449,23 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     address influencer;
     uint8 cut;
   }
-//  mapping(address => uint) private Sa2n;
-//  mapping(address => uint256) private Sa2Sx;
-//  mapping(address => uint256) private Sa2Sy;
-//  mapping(address => address) private Sa2from;
-//  mapping(address => address) private Sa2influencer;
-//  mapping(address => bytes1) private Sa2cut;
   mapping(address => SaInfo) public Sa2Info;
 
   function getSa(bytes Rs, bytes Qs, address Sa0) public view
   returns(address Sa, uint n)
   {
-    uint256 Sx;
-    uint256 Sy;
+    uint256[2] memory S;
     if (Sa0 != address(0)) {
       SaInfo info = Sa2Info[Sa0];
       n = info.n;
-      Sx = info.S[0];
-      Sy = info.S[1];
+      S = info.S;
     }
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
-      (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
-      (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Qs,idx), Call.loadUint256(Qs,idx+32));
+      S = ecadd2(S, Call.loadPair(Rs,idx));
+      S = ecadd2(S, Call.loadPair(Qs,idx));
       Sa = Sa0;
-      Sa0 = point_hash([Sx, Sy]);
+      Sa0 = point_hash(S);
       if (Sa2Info[Sa0].n != n+1) {
         return;
       }
@@ -484,7 +476,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return;
   }
 
-  function convertTestS(bytes Rs, bytes Qs, bytes cuts, address Sa) private
+  function setSa2Info(bytes Rs, bytes Qs, bytes cuts, address Sa) private
   returns (uint256[2] memory S, uint n, address Sa1)
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
@@ -522,7 +514,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     // and the code will verify that the computation is true
     uint n;
     uint256[2] memory S;
-    (S, n, Sa) = convertTestS(Rs, Qs, cuts, Sa);
+    (S, n, Sa) = setSa2Info(Rs, Qs, cuts, Sa);
     S = ecadd2(S, [Rx, Ry]);
 
     convertTestVerify(s, S, n, keccak256(abi.encodePacked(Rx,Ry,a)));
