@@ -52,6 +52,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         uint baseToTargetRate
     )
     public
+    onlyMaintainer
     {
         storeFiatCurrencyDetails(_currency, baseToTargetRate);
         emit PriceUpdated(_currency, baseToTargetRate, block.timestamp, msg.sender);
@@ -67,6 +68,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         uint[] baseToTargetRates
     )
     public
+    onlyMaintainer
     {
         uint numberOfFiats = _currencies.length; //either _isETHGreaterThanCurrencies.length
         //There's no need for validation of input, because only we can call this and that costs gas
