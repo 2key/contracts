@@ -307,21 +307,6 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     require(x != 0 || y != 0,'P not defined for i');
   }
 
-  function verify1(uint256 s, uint256 Rx, uint256 Ry, uint256 Px, uint256 Py) public pure
-  returns(bool)
-  {
-    // gas 1185881
-    address a0 = point_hash([Rx,Ry]);
-    address a1 = point_hash([Px,Py]);
-    bytes32 hash = keccak256(abi.encodePacked(a0,a1));
-
-    uint256 qx;
-    uint256 qy;
-    (qx, qy) = ecmul(Px, Py, uint256(hash));
-    (qx, qy) = ecadd(Rx,Ry,qx,qy);
-    return publicKeyVerify(s, qx, qy);
-  }
-
   function verify(uint256 s, uint256[2] R, uint256[2] P, bytes32 m) public pure
   returns(bool)
   {
@@ -356,7 +341,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     }
   }
 
-  function convertVerify(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, address a) private view
+  function convertVerify(uint256 s, uint256[2] R, bytes Rs, bytes Qs, address a) private view
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i])*P[i]
@@ -365,23 +350,23 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
     require(Px != 0 || Py != 0, 'P not defined for n');
-    bytes32 m = keccak256(abi.encodePacked(Rx,Ry,a));
+    bytes32 m = keccak256(abi.encodePacked(R,a));
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
-      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
-      (Rx, Ry) = ecadd(Rx, Ry, Call.loadUint256(Qs,idx), Call.loadUint256(Qs,idx+32));
+      R = ecadd2(R, Call.loadPair(Rs,idx));
+      R = ecadd2(R, Call.loadPair(Qs,idx));
     }
 
-    require(verify(s, [Rx, Ry], [Px, Py], m), 'signature failed');
+    require(verify(s, R, [Px, Py], m), 'signature failed');
   }
 
-  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, bytes cuts, address a) public
+  function convertTest(uint256 s, uint256[2] R, bytes Rs, bytes Qs, bytes cuts, address a) public
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i])*P[i]
     // and the code will verify that the computation is true
     address[] memory influencers = verifyQ(Rs, Qs, cuts, 1);
-    convertVerify(s, Rx, Ry, Rs, Qs, a);
+    convertVerify(s, R, Rs, Qs, a);
     for(uint i = 0; i < Rs.length>>6; i++) {
       convert[influencers[i]][i+1]++;  // record that Ri|cut contributed to a convertion at hope i
     }
@@ -481,7 +466,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     }
   }
 
-  function convertTestCache(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, bytes cuts, address Sa, address a) public
+  function convertTestCache(uint256 s, uint256[2] R, bytes Rs, bytes Qs, bytes cuts, address Sa, address a) public
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i])*P[i]
@@ -489,9 +474,9 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     uint n;
     uint256[2] memory S;
     (S, n, Sa) = setSa2Info(Rs, Qs, cuts, Sa);
-    S = ecadd2(S, [Rx, Ry]);
+    S = ecadd2(S, R);
 
-    convertTestVerify(s, S, n, keccak256(abi.encodePacked(Rx,Ry,a)));
+    convertTestVerify(s, S, n, keccak256(abi.encodePacked(R,a)));
 
     while (Sa != address(0)) {
       SaInfo info = Sa2Info[Sa];
