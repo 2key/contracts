@@ -332,33 +332,6 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return Ra == sbmul_add_mul(s, P, h);
   }
 
-  function verifyQConvert(bytes Rs, bytes Qs, bytes cuts, uint n) private
-  returns(bool)
-  {
-    // instead of computing h(R[i]|cut[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i]|cut[i])*P[i]
-    // and the code will verify that the computation is true
-    require(Rs.length%64 == 0 && Rs.length == Qs.length, 'Rs/Qs bad length');
-    uint i = 0;
-    for(uint idx = 0; idx < Rs.length; idx+=64) {
-      uint256 Rxi = Call.loadUint256(Rs,idx);
-      uint256 Qxi = Call.loadUint256(Qs,idx);
-      uint256 Ryi = Call.loadUint256(Rs,idx+32);
-      uint256 Qyi = Call.loadUint256(Qs,idx+32);
-      uint8 cut = Call.loadUint8(cuts,i);
-
-      // verify that  Qs[i] = h(Rs[i])*P[i]
-      uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi,cut)));
-      if(!ecmulVerify(Pxs[i+n],Pys[i+n],h,Qxi,Qyi)) {
-        return false;
-      }
-
-      i++;
-      convert[address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)][i]++;  // record that Ri|cut contributed to a convertion at hope i
-    }
-    return true;
-  }
-
   function verifyQ(bytes Rs, bytes Qs, bytes cuts, uint n) private view
   returns(address[] influencers)
   {
@@ -414,6 +387,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     }
   }
 
+  // dont say its pure so we can measure gas
   function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, address a) public
   {
     // a can be anything that identifies the influencer. address or the ecdsa made by the influencer
@@ -433,7 +407,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return cnt;
   }
 
-  function convertTestVerify(uint256 s, uint256[2] S, uint n, bytes32 m) private
+  function convertTestVerify(uint256 s, uint256[2] S, uint n, bytes32 m) private view
   {
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
