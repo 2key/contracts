@@ -194,6 +194,20 @@ contract SECP2561k {
     y3 = mulmod(y3, z, n);
   }
 
+  function ecadd2(
+    uint256[2] p1,
+    uint256[2] p2)
+  public
+  pure
+  returns(uint256[2] memory p3)
+  {
+    uint256 x3;
+    uint256 y3;
+    (x3, y3) = ecadd(p1[0],p1[1],p2[0],p2[1]);
+    p3[0] = x3;
+    p3[1] = y3;
+  }
+
   function ecmul(uint256 x1, uint256 y1, uint256 scalar) public pure
   returns(uint256 x2, uint256 y2)
   {
@@ -346,12 +360,13 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   }
 
   function verifyQ(bytes Rs, bytes Qs, bytes cuts, uint n) private view
-  returns(bool)
+  returns(address[] influencers)
   {
     // instead of computing h(R[i]|cut[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i]|cut[i])*P[i]
     // and the code will verify that the computation is true
     require(Rs.length%64 == 0 && Rs.length == Qs.length, 'Rs/Qs bad length');
+    influencers = new address[](Rs.length/64);
     uint i = 0;
     for(uint idx = 0; idx < Rs.length; idx+=64) {
       uint256 Rxi = Call.loadUint256(Rs,idx);
@@ -360,18 +375,15 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
       uint256 Qyi = Call.loadUint256(Qs,idx+32);
       uint8 cut = Call.loadUint8(cuts,i);
 
-      // verify that  Qs[i] = h(Rs[i])*P[i]
       uint256 h = uint256(keccak256(abi.encodePacked(Rxi,Ryi,cut)));
-      if(!ecmulVerify(Pxs[i+n],Pys[i+n],h,Qxi,Qyi)) {
-        return false;
-      }
+      influencers[i] = address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+      require(ecmulVerify(Pxs[i+n],Pys[i+n],h,Qxi,Qyi),'Qs[i] != h(Rs[i]|cuts[i])*P[i]');
 
       i++;
     }
-    return true;
   }
 
-  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, bytes cuts, address a) public
+  function convertVerify(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, address a) private view
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i])*P[i]
@@ -380,7 +392,6 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
     require(Px != 0 || Py != 0, 'P not defined for n');
-    require(verifyQConvert(Rs, Qs, cuts, 1), 'Qs[i] != h(Rs[i]|cuts[i])*Ps[i]');
     bytes32 m = keccak256(abi.encodePacked(Rx,Ry,a));
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
@@ -389,6 +400,18 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     }
 
     require(verify(s, [Rx, Ry], [Px, Py], m), 'signature failed');
+  }
+
+  function convertTest(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, bytes cuts, address a) public
+  {
+    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
+    // Qs[i] = h(R[i])*P[i]
+    // and the code will verify that the computation is true
+    address[] memory influencers = verifyQ(Rs, Qs, cuts, 1);
+    convertVerify(s, Rx, Ry, Rs, Qs, a);
+    for(uint i = 0; i < Rs.length>>6; i++) {
+      convert[influencers[i]][i+1]++;  // record that Ri|cut contributed to a convertion at hope i
+    }
   }
 
   function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, address a) public
@@ -410,19 +433,18 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return cnt;
   }
 
-  function convertTestVerify(uint256 s, uint256 Sx, uint256 Sy, uint n, bytes32 m) private
+  function convertTestVerify(uint256 s, uint256[2] S, uint n, bytes32 m) private
   {
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
     require(Px != 0 || Py != 0, 'P not defined for n');
-    require(verify(s, [Sx, Sy], [Px, Py], m), 'signature failed');
+    require(verify(s, S, [Px, Py], m), 'signature failed');
   }
 
   /////////// Cache code
   struct SaInfo {
+    uint256[2] S;
     uint n;
-    uint256 Sx;
-    uint256 Sy;
     address from;
     address influencer;
     uint8 cut;
@@ -443,8 +465,8 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     if (Sa0 != address(0)) {
       SaInfo info = Sa2Info[Sa0];
       n = info.n;
-      Sx = info.Sx;
-      Sy = info.Sy;
+      Sx = info.S[0];
+      Sy = info.S[1];
     }
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
@@ -462,8 +484,8 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return;
   }
 
-  function convertTestS(uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, bytes cuts, address Sa) private
-  returns (uint256 Sx, uint256 Sy, uint n, address Sa1)
+  function convertTestS(bytes Rs, bytes Qs, bytes cuts, address Sa) private
+  returns (uint256[2] memory S, uint n, address Sa1)
   {
     // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
     // Qs[i] = h(R[i])*P[i]
@@ -472,29 +494,25 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     if (Sa != address(0)) {
       SaInfo info = Sa2Info[Sa];
       n = info.n+1;
-      Sx = info.Sx;
-      Sy = info.Sy;
+      S = info.S;
     } else {
-      Sx = 0;
-      Sy = 0;
+      S[1] = 0;
+      S[1] = 0;
       n = 1;
     }
-    require(verifyQ(Rs, Qs, cuts, n), 'Qs[i] != h(Rs[i]|cuts[i])*Ps[i]');
+    address[] memory influencers = verifyQ(Rs, Qs, cuts, n);
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
-      (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Rs,idx), Call.loadUint256(Rs,idx+32));
-      (Sx, Sy) = ecadd(Sx, Sy, Call.loadUint256(Qs,idx), Call.loadUint256(Qs,idx+32));
-      Sa1 = point_hash([Sx, Sy]);
-      Sa2Info[Sa1] = SaInfo(n, Sx, Sy, Sa, address(uint256(keccak256(abi.encodePacked(
-          Call.loadUint256(Rs,idx),
-          Call.loadUint256(Rs,idx+32),
-          cuts[idx/64]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF),
-          uint8(cuts[idx/64]));
+      uint256[2] memory R = Call.loadPair(Rs,idx);
+      uint256[2] memory Q = Call.loadPair(Qs,idx);
+      S = ecadd2(S, R);
+      S = ecadd2(S, Q);
+      Sa1 = point_hash(S);
+      Sa2Info[Sa1] = SaInfo(S, n, Sa, influencers[idx/64], uint8(cuts[idx/64]));
 
       Sa = Sa1;
       n++;
     }
-    (Sx, Sy) = ecadd(Sx, Sy, Rx, Ry);
   }
 
   function convertTestCache(uint256 s, uint256 Rx, uint256 Ry, bytes Rs, bytes Qs, bytes cuts, address Sa, address a) public
@@ -503,11 +521,11 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     // Qs[i] = h(R[i])*P[i]
     // and the code will verify that the computation is true
     uint n;
-    uint256 Sx;
-    uint256 Sy;
-    (Sx, Sy, n, Sa) = convertTestS(Rx, Ry, Rs, Qs, cuts, Sa);
+    uint256[2] memory S;
+    (S, n, Sa) = convertTestS(Rs, Qs, cuts, Sa);
+    S = ecadd2(S, [Rx, Ry]);
 
-    convertTestVerify(s, Sx, Sy, n, keccak256(abi.encodePacked(Rx,Ry,a)));
+    convertTestVerify(s, S, n, keccak256(abi.encodePacked(Rx,Ry,a)));
 
     while (Sa != address(0)) {
       SaInfo info = Sa2Info[Sa];
