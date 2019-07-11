@@ -29,6 +29,10 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     Conversion[] conversions;
     ITwoKeyAcquisitionCampaignERC20 twoKeyAcquisitionCampaignERC20;
 
+    mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
+    mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
+    mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
+
 
     mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => uint[]) converterToHisConversions;
@@ -238,10 +242,16 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
             //Update raised funds FIAT once the conversion is executed
             counters[9] = counters[9].add(conversion.conversionAmount);
+
+            //Update amount converter spent in FIAT
+            amountConverterSpentFiatWei[conversion.converter] = amountConverterSpentFiatWei[conversion.converter].add(conversion.conversionAmount);
         } else {
             require(conversion.state == ConversionState.APPROVED);
+            amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
             counters[1]--; //Decrease number of approved conversions
         }
+        //Update bought units
+        unitsConverterBought[conversion.converter] = unitsConverterBought[conversion.converter].add(conversion.baseTokenUnits + conversion.bonusTokenUnits);
 
         // Total rewards for referrers
         uint totalReward2keys = 0;
@@ -254,7 +264,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             conversion.isConversionFiat
         );
 
-        // Update reputation points in registry for conversion executed event
+//         Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
             conversion.converter,
             contractor,
@@ -264,12 +274,13 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         // Add total rewards
         counters[8] = counters[8].add(totalReward2keys);
 
+        // update reserved amount of tokens on acquisition contract
+        twoKeyAcquisitionCampaignERC20.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
+
         //Update total raised funds
         if(conversion.isConversionFiat == false) {
             // update moderator balances
             twoKeyAcquisitionCampaignERC20.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-            // update reserved amount of tokens on acquisition contract
-            twoKeyAcquisitionCampaignERC20.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(totalUnits);
             // update contractor proceeds
             twoKeyAcquisitionCampaignERC20.updateContractorProceeds(conversion.contractorProceedsETHWei);
             // add conversion amount to counter
@@ -411,7 +422,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         for(uint i=0; i<len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion c = conversions[conversionId];
-            if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == false) {
+            if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == true) {
+                //TODO: Here should be APPROVED if it is not fiat
                 counters[0]--; //Reduce number of pending conversions
                 counters[1]++; //Increase number of approved conversions
                 c.state = ConversionState.APPROVED;
@@ -439,14 +451,15 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         for(uint i=0; i< len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion c = conversions[conversionId];
-            if(c.state == ConversionState.PENDING_APPROVAL) {
+            if(c.state == ConversionState.PENDING_APPROVAL || c.state == ConversionState.APPROVED) {
                 counters[0]--; //Reduce number of pending conversions
                 counters[2]++; //Increase number of rejected conversions
                 ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
                 c.state = ConversionState.REJECTED;
-//                conversions[conversionId] = c;
                 reservedAmount += c.baseTokenUnits + c.bonusTokenUnits;
-                refundAmount += c.conversionAmount;
+                if(c.isConversionFiat == false) {
+                    refundAmount += c.conversionAmount;
+                }
             }
         }
         //If there's an amount to be returned and reserved tokens, update state and execute cashback
@@ -558,6 +571,25 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     returns (bytes32)
     {
         return convertConverterStateToBytes(converterToState[_converter]);
+    }
+
+
+    /**
+     * @notice Function to fetch how much user spent money and bought units in total
+     * @param _converter is the converter we're checking this information for
+     */
+    function getConverterPurchasesStats(
+        address _converter
+    )
+    public
+    view
+    returns (uint,uint,uint)
+    {
+        return (
+            amountConverterSpentEthWEI[_converter],
+            amountConverterSpentFiatWei[_converter],
+            unitsConverterBought[_converter]
+        );
     }
 
 }

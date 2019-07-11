@@ -1,7 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "../MaintainingPattern.sol";
-import "../Upgradeable.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyExchangeRateContractStorage.sol";
 
 
 /**
@@ -9,147 +12,108 @@ import "../Upgradeable.sol";
  * This is going to be the contract on which we will store exchange rates between USD and ETH
  * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
-contract TwoKeyExchangeRateContract is Upgradeable, MaintainingPattern {
+contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
+    bool initialized;
 
+    ITwoKeyExchangeRateContractStorage public PROXY_STORAGE_CONTRACT;
     /**
      * @notice Event will be emitted every time we update the price for the fiat
      */
     event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
 
-    /**
-     * @notice public mapping which will store rate between 1 wei eth and 1 wei fiat currency
-     * Will be updated every 8 hours, and it's public
-     */
-    //TODO:  key methodology --> BASE/TARGET
-    //TODO:  add  ETH/USD
-    //TODO:  add  2KEY/USD  (buy rate)
-    //TODO:  add  DAI/USD
-    //TODO:  add  ETH/DAI
-    //TODO:  add  GPB/USD
-    //TODO:  add  JPY/USD
-    //TODO:  add  other fiats
-    mapping(bytes32 => FiatCurrency) public currencyName2rate;
-
-
-    //TODO: change FiatCurrency --> ExchangeRate
-    //TODO: rateEth --> BaseToTargetRate ==> [[1 Base = BaseToTargetRate Targets]]
-    struct FiatCurrency {
-        uint rateEth; // this is representing rate between eth and some currency where will be 1 unit to X units depending on more valuable curr
-        bool isGreater; //Flag which represent if 1 ETH > 1 fiat (ex. 1eth = 120euros) true (1eth = 0.001 X) false
-        uint timeUpdated;
-        address maintainerWhoUpdated;
-    }
-
 
     /**
      * @notice Function which will be called immediately after contract deployment
-     * @param _maintainers is the array of maintainers addresses
-     * @param _twoKeyAdmin is the address of TwoKeyAdmin contract
      * @dev Can be called only once
      */
     function setInitialParams(
-        address [] _maintainers,
-        address _twoKeyAdmin
+        address _twoKeySingletonesRegistry,
+        address _proxyStorage
     )
     external
     {
-        require(_twoKeyAdmin != address(0)); //validation that it can be called only once
-        require(twoKeyAdmin == address(0)); //validation that it can be called only once
-        twoKeyAdmin = _twoKeyAdmin;
-        isMaintainer[msg.sender] = true; //for truffle deployment
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        require(initialized == false);
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyExchangeRateContractStorage(_proxyStorage);
+
+        initialized = true;
     }
+
 
     /**
      * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
      * @dev only twoKeyMaintainer address will be eligible to update it
      * @param _currency is the bytes32 (hex) representation of currency shortcut string ('USD','EUR',etc)
-     * @param _isETHGreaterThanCurrency true if 1 eth = more than 1 unit of X otherwise false
-     * @param _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
      */
     function setFiatCurrencyDetails(
         bytes32 _currency,
-        bool _isETHGreaterThanCurrency,
-        uint _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit
+        uint baseToTargetRate
     )
     public
-    onlyMaintainer
     {
-        storeFiatCurrencyDetails(_currency, _isETHGreaterThanCurrency, _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit);
-        emit PriceUpdated(_currency, _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit, block.timestamp, msg.sender);
+        storeFiatCurrencyDetails(_currency, baseToTargetRate);
+        emit PriceUpdated(_currency, baseToTargetRate, block.timestamp, msg.sender);
     }
 
     /**
      * @notice Function to update multiple rates at once
      * @param _currencies is the array of currencies
-     * @param _isETHGreaterThanCurrencies true if 1 eth = more than 1 unit of X otherwise false
-     * @param _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
      * @dev Only maintainer can call this
      */
     function setMultipleFiatCurrencyDetails(
         bytes32[] _currencies,
-        bool[] _isETHGreaterThanCurrencies,
-        uint[] _RatesFromOneGreaterThanUnitInWeiOfLesserThanUnit
+        uint[] baseToTargetRates
     )
     public
-    onlyMaintainer
     {
         uint numberOfFiats = _currencies.length; //either _isETHGreaterThanCurrencies.length
         //There's no need for validation of input, because only we can call this and that costs gas
         for(uint i=0; i<numberOfFiats; i++) {
-            storeFiatCurrencyDetails(_currencies[i], _isETHGreaterThanCurrencies[i], _RatesFromOneGreaterThanUnitInWeiOfLesserThanUnit[i]);
-            emit PriceUpdated(_currencies[i], _RatesFromOneGreaterThanUnitInWeiOfLesserThanUnit[i], block.timestamp, msg.sender);
+            storeFiatCurrencyDetails(_currencies[i], baseToTargetRates[i]);
+            emit PriceUpdated(_currencies[i], baseToTargetRates[i], block.timestamp, msg.sender);
         }
     }
 
     function storeFiatCurrencyDetails(
         bytes32 _currency,
-        bool _isETHGreaterThanCurrency,
-        uint _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit
+        uint baseToTargetRate
     )
     internal
     {
-        /**
-         * given:  1 ETH == 119.45678 USD ==>
-         * then it holds:   1 * 10^18 ETH_WEI ==  119.45678 * 10^18 USD_WEI
-         * it also holds:  1 ETH = 119.45678 * 10^18 USD_WEI  (iff ETH _isGreater than USD)
-         * so backend will update on the rate of 1 (greater than currency) == X (the updated value) in the (lesser than currency in WEI)
-         * so in the example above, the backend will send the following request:
-         * setFiatCurrencyDetails("USD",true,119456780000000000000)
-         */
-        FiatCurrency memory f = FiatCurrency ({
-            rateEth: _RateFromOneGreaterThanUnitInWeiOfLesserThanUnit,
-            isGreater: _isETHGreaterThanCurrency,
-            timeUpdated: block.timestamp,
-            maintainerWhoUpdated: msg.sender
-            });
-        currencyName2rate[_currency] = f;
+        bytes32 hashKey = keccak256("currencyName2rate", _currency);
+        PROXY_STORAGE_CONTRACT.setUint(hashKey, baseToTargetRate);
     }
 
-    /**
-     * @notice Function to get price for the selected currency
-     * @param _currency is the currency (ex. 'USD', 'EUR', etc.)
-     * @return rate between currency and eth wei
-     */
-    //TODO: please change params of this function, to accept BASE/TARGET pair as input, and output the final rate (do all the isGrater than considerations here in this contract, don't require this contract's clients to do that)
-    function getFiatCurrencyDetails(
-        string _currency
+
+    function getBaseToTargetRate(
+        string base_target
     )
     public
     view
-    returns (uint,bool,uint,address)
+    returns (uint)
     {
-        bytes32 key = stringToBytes32(_currency);
-        return (
-            currencyName2rate[key].rateEth,
-            currencyName2rate[key].isGreater,
-            currencyName2rate[key].timeUpdated,
-            currencyName2rate[key].maintainerWhoUpdated
-        );
+        bytes32 key = stringToBytes32(base_target);
+        bytes32 hashKey = keccak256("currencyName2rate", key);
+        return PROXY_STORAGE_CONTRACT.getUint(hashKey);
     }
+
+
+    /**
+     * @notice Function to calculate how many
+     */
+    function exchangeCurrencies(
+        string base_target,
+        uint base_amount
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getBaseToTargetRate(base_target) * base_amount;
+    }
+
 
     /**
      * @notice Helper method to convert string to bytes32

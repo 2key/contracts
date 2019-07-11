@@ -1,4 +1,7 @@
 import { ledgerWeb3 } from './_web3';
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
 
 
 describe('Test ledger', () => {

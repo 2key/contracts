@@ -1,5 +1,9 @@
 import {expect} from 'chai';
 import 'mocha';
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
 import createWeb3, { ledgerWeb3 } from './_web3';

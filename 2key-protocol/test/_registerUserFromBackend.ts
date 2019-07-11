@@ -8,7 +8,7 @@ import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import Web3 from 'web3';
 import { TwoKeyProtocol } from '../src';
 import { ISignedPlasma, ISignedWalletData } from '../src/registry/interfaces';
-import { ISignedEthereum } from '../src/plasma/interfaces';
+import { ISignedEthereum, ISignedUsername } from '../src/plasma/interfaces';
 
 
 interface IUser {
@@ -32,9 +32,10 @@ export interface IRegistryData {
     signedPlasma?: ISignedPlasma,
     signedEthereum?: ISignedEthereum,
     signedWallet?: ISignedWalletData,
+    signedUsername?: ISignedUsername,
 }
 
-async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereum, signedWallet }: IRegistryData = {}) {
+async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereum, signedWallet, signedUsername }: IRegistryData = {}) {
     // console.log('registerUserFromBackend', signedUser, signedPlasma, signedEthereum, signedWallet);
     console.log('\r\n');
     if (!signedUser && ! signedPlasma && !signedEthereum) {
@@ -132,6 +133,18 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
             receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
         } catch (e) {
             console.log('Error in PlasmaEvents.setPlasmaToEthereumOnPlasma');
+            return Promise.reject(e);
+        }
+    }
+    if (signedUsername) {
+        try {
+            console.log('SET_USERNAME_ON_PLASMA');
+            const txHash = await twoKeyProtocol.PlasmaEvents.setUsernameToPlasmaOnPlasma(signedUsername.plasma2usernameSignature, signedUsername.plasmaAddress, signedUsername.username);
+            console.log('PlasmaEvents.setUsernameToPlasmaOnPlasma hash', txHash);
+            console.log('\r\n');
+            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
+        } catch (e) {
+            console.log('Error in PlasmaEvents.setUsernameToPlasmaOnPlasma');
             return Promise.reject(e);
         }
     }

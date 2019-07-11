@@ -1,3 +1,7 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
@@ -26,16 +30,18 @@ const moderatorFeePercentage = 1;
 const minContributionETHorUSD = 5;
 const maxContributionETHorUSD = 1000000;
 const now = new Date();
-const campaignStartTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() - 30) / 1000);
-const campaignEndTime = Math.round(new Date(now.valueOf()).setDate(now.getDate() + 30) / 1000);
+const campaignStartTime = 0;
+const campaignEndTime = 9884748832;
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-let isKYCRequired = false;
+let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = true;
 const isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
+let campaignInventory = 1234000;
+
 
 let testObject = {
     versionName: 'versionName',
@@ -255,6 +261,11 @@ const tryToRegisterUser = async (username, from) => {
     } catch {
         console.log('Error Plasma.signEthereum');
     }
+    try {
+        registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
+    } catch {
+        console.log('Error Plasma.signedUsername');
+    }
     let registerReceipts;
     try {
         registerReceipts = await registerUserFromBackend(registerData);
@@ -299,6 +310,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     let campaignAddress: string;
+    let nonSingletonHash: string;
     let aydnepBalance;
     let txHash;
 
@@ -351,138 +363,21 @@ describe('TwoKeyProtocol', () => {
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
     }).timeout(60000);
 
-
-    it('Should check SingltonsRegistry NonUpgradableContractNameByAddress' ,async() => {
-        let contractAddress;
-        let txHash;
-
-        const {web3, address} = web3switcher.deployer();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-
-        // //Map testAddress=>testKey
-        // txHash = await twoKeyProtocol.SingletonRegistry.setContractAddressByNonUpgradableContractName(testObject.contractAddress, testObject.versionName, from);
-        //
-        // const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        //
-        // contractAddress = await twoKeyProtocol.SingletonRegistry.getAddressByNonUpgradableContract(testObject.versionName);
-        // expect(contractAddress).to.be.equal(testObject.contractAddress);
-    }).timeout(60000);
-
-
-    it('Should check SingltonsRegistry ImplementationByContractNameAndVersion' ,async() => {
-        // let contractAddress;
-        // let txHash;
-        //
-        // txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion(testObject.contractName, testObject.versionName, testObject.contractAddress, from);
-        // const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        //
-        // contractAddress = await twoKeyProtocol.SingletonRegistry.getImplementationByContractNameAndVersion(testObject.contractName,testObject.versionName);
-        // expect(contractAddress).to.be.equal(testObject.contractAddress);
-    }).timeout(60000);
-
-
-    it('Should check SingltonsRegistry LatestVersion' ,async() => {
-        // let contractLatestVersion;
-        // const {web3, address} = web3switcher.deployer();
-        //
-        // contractLatestVersion = await twoKeyProtocol.SingletonRegistry.getLatestVersionByContractName(testObject.contractName);
-        // expect(contractLatestVersion).to.be.equal(testObject.versionName);
-    }).timeout(60000);
-
-
-    it('Should check SingltonsRegistry ProxyAddress' ,async() => {
-        // let proxyAddress;
-        // let setProxyAddress;
-        //
-        // setProxyAddress = await twoKeyProtocol.SingletonRegistry.setProxyByContract(testObject.contractName, testObject.versionName, from);
-        // proxyAddress = await twoKeyProtocol.SingletonRegistry.getProxyByContractName(testObject.contractName);
-        // expect(proxyAddress).to.be.equal(setProxyAddress);
-
-    }).timeout(60000);
-
-
-    it('Should check maintainingPattern getAdmin() functionality' ,async() => {
-        let currentAdmin;
-
-        const {web3, address} = web3switcher.deployer();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-
-        // currentAdmin = await twoKeyProtocol.MaintainingPattern.getAdmin();
-        // expect(currentAdmin).to.be.equal(testObject.emptyAddress);
-    }).timeout(60000);
-
-    it('Should MaintainingPattern-Pass check maintainer' ,async() => {
-        // let isMaintainer;
-        //
-        // const {web3, address} = web3switcher.deployer();
-        // from = address;
-        // twoKeyProtocol.setWeb3({
-        //     web3,
-        //     networks: {
-        //         mainNetId,
-        //         syncTwoKeyNetId,
-        //     },
-        //     eventsNetUrl,
-        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        // });
-        //
-        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(from);
-        // expect(isMaintainer).to.be.true;
-    }).timeout(60000);
-
-    it('Should check MaintainingPattern-Pass check not maintainer.' ,async() => {
-        // let isMaintainer;
-        //
-        // const {web3, address} = web3switcher.deployer();
-        // from = address;
-        // twoKeyProtocol.setWeb3({
-        //     web3,
-        //     networks: {
-        //         mainNetId,
-        //         syncTwoKeyNetId,
-        //     },
-        //     eventsNetUrl,
-        //     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        // });
-        //
-        // isMaintainer = await twoKeyProtocol.MaintainingPattern.checkIfMaintainer(testObject.notMaintainerAddress);
-        // expect(isMaintainer).not.to.be.true;
-    }).timeout(60000);
-
     it('should get total supply of economy contract' ,async() => {
         console.log("Check total supply on 2key-economy contract");
         let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
         console.log(totalSup);
     }).timeout(60000);
 
-
     it('should save balance to ipfs', () => {
-        return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
+        return twoKeyProtocol.ipfs.add(aydnepBalance).then((hash) => {
             console.log('IPFS hash', hash);
             expect(hash).to.be.a('string');
         });
     }).timeout(60000);
 
     it('should read from ipfs', () => {
-        return twoKeyProtocol.Utils.getOffchainDataFromIPFSHash('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
+        return twoKeyProtocol.ipfs.get('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
             console.log('IPFS data', data);
         });
     }).timeout(60000);
@@ -534,9 +429,16 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should set eth-dolar rate', async() => {
-        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', true, 100000000000000000000, from);
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', 100000000000000000000, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD', from);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate('USD');
+        console.log(value);
+    }).timeout(60000);
+
+    it('should set dollar dai rate', async() => {
+        txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD/DAI', 99000000000000000, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate('USD/DAI');
         console.log(value);
     }).timeout(60000);
 
@@ -546,15 +448,7 @@ describe('TwoKeyProtocol', () => {
         expect(tokenSymbol).to.be.equal('2KEY');
     }).timeout(10000);
 
-
     let campaignData;
-
-    // it('should check a user info', async () => {
-    //     const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
-    //     console.log(`Address ${from} ${isAddressRegistered ? 'REGISTERED' : 'NOT REGISTERED'} in TwoKeyReg`);
-    //     expect(isAddressRegistered).to.true;
-    // }).timeout(60000);
-
 
     it('should create a new campaign Acquisition Contract', async () => {
         campaignData = {
@@ -578,7 +472,8 @@ describe('TwoKeyProtocol', () => {
             incentiveModel,
             isFiatOnly,
             vestingAmount,
-            mustConvertToReferr: false
+            mustConvertToReferr: false,
+            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether')
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -590,27 +485,34 @@ describe('TwoKeyProtocol', () => {
 
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
+        nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
         links.deployer = campaign.campaignPublicLinkKey;
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(120000);
 
-    it('should reserve amount for fiat conversion rewards', async() => {
+    // it('should replace acquisition submodule', async() => {
+    //     const src = await twoKeyProtocol.Utils.getSubmodule('bd06b1216ac1af2a09db559590d6ec0a2833b447f410f78574abaef5c5a54cd0', 'acquisition');
+    //     console.log(src);
+    //     expect(src.length).to.be.gte(0);
+    // }).timeout(60000);
+
+    // it('should reserve amount for fiat conversion rewards', async() => {
         // if(amount) {
         //     let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, 0, amount, from);
         //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         // }
-    }).timeout(60000);
+    // }).timeout(60000);
 
     it('should proff that campaign is validated and registered properly', async() => {
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
         expect(isValidated).to.be.equal(true);
         console.log('Campaign is validated');
     }).timeout(60000);
-
-    it('should proof that non singleton hash is set for the campaign', async() => {
-        let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
-        expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
-    }).timeout(60000);
+    //
+    // it('should proof that non singleton hash is set for the campaign', async() => {
+    //     let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
+    //     expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
+    // }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
         // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
@@ -626,12 +528,19 @@ describe('TwoKeyProtocol', () => {
     it('should print balance after campaign created', printBalances).timeout(15000);
 
     it('should transfer assets to campaign', async () => {
-        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(1234000, 'ether'), from);
-        console.log(twoKeyProtocol.Utils.toWei(1234000, 'ether'));
+        txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(campaignInventory, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
         expect(parseFloat(balance)).to.be.equal(1234000 - amount);
+    }).timeout(600000);
+
+
+    it('should make campaign active', async() => {
+        txHash = await twoKeyProtocol.AcquisitionCampaign.activateCampaign(campaignAddress, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let isActivated = await twoKeyProtocol.AcquisitionCampaign.isCampaignActivated(campaignAddress);
+        expect(isActivated).to.be.equal(true);
     }).timeout(600000);
 
     it('should get user public link', async () => {
@@ -644,14 +553,6 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(10000);
 
-    it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
-        console.log(from);
-        const addressesWhereUserIsContractor = await twoKeyProtocol.Registry.getCampaignsWhereUserIsContractor(from);
-        const addressesWhereUserIsModerator = await twoKeyProtocol.Registry.getCampaignsWhereUserIsModerator(from);
-
-        console.log("Contractor: " + addressesWhereUserIsContractor);
-        console.log("Moderator: " + addressesWhereUserIsModerator);
-    }).timeout(60000);
 
     // it('should save contractor link as the private meta hash', async() => {
     //     console.log(links.deployer);
@@ -774,7 +675,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     it('should print joined_from', async () => {
-        const { contractor } = await twoKeyProtocol.Utils.getOffchainDataFromIPFSHash(links.gmail);
+        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail, { json: true, compress: true });
         console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
     }).timeout(60000);
 
@@ -1185,9 +1086,9 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress, false ,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
     }).timeout(60000);
@@ -1211,7 +1112,7 @@ describe('TwoKeyProtocol', () => {
         const rate = await twoKeyProtocol.UpgradableExchange.getRate(from);
 
         console.log('Rate is : ' + rate);
-        expect(rate.toString()).to.be.equal("0.1");
+        expect(rate.toString()).to.be.equal("0.095");
     }).timeout(60000);
 
     it('should print currency', async() => {
@@ -1235,7 +1136,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
         console.log(stats);
@@ -1311,7 +1212,7 @@ describe('TwoKeyProtocol', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         console.log('Regular executed conversion is: ');
         let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,0,from);
@@ -1377,8 +1278,19 @@ describe('TwoKeyProtocol', () => {
 
     it('should get required rewards inventory', async() => {
         let hardCap = 95000000; //95M dollars
-        let rewardsNeeded = await twoKeyProtocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(true, false, hardCap, 25);
-        console.log('Rewards inventory required' , rewardsNeeded);
+        let obj = await twoKeyProtocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(true, false, hardCap, 25);
+        console.log('Rewards inventory required' , obj);
+    }).timeout(60000);
+
+
+    it('should get campaign type by address', async() => {
+        let campaignType = await twoKeyProtocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
+        expect(campaignType).to.be.equal("TOKEN_SELL");
+    }).timeout(60000);
+
+    it('should get all maintainers', async() => {
+        let maintainers = await twoKeyProtocol.TwoKeyMaintainersRegistry.getAllMaintainers();
+        expect(maintainers.length).to.be.greaterThan(35);
     }).timeout(60000);
 
     // it('should build refgraph', async() => {

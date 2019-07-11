@@ -22,7 +22,6 @@ contract TwoKeyEconomy is StandardTokenModified {
     )
     public
     {
-        require(_twoKeyAdmin != address(0));
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
 
         twoKeyAdmin = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).

@@ -1,62 +1,66 @@
 pragma solidity ^0.4.0;
 
-import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../acquisition-campaign-contracts/TwoKeyPurchasesHandler.sol";
 import "../acquisition-campaign-contracts/TwoKeyAcquisitionLogicHandler.sol";
+import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyFactoryStorage.sol";
 
 
 /**
  * @author Nikola Madjarevic
  * @title Contract used to deploy proxies for other non-singleton contracts
  */
-contract TwoKeyFactory is Upgradeable, MaintainingPattern {
+contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
-    //Address of singleton registry
-    ITwoKeySingletoneRegistryFetchAddress public twoKeySingletonRegistry;
+    bool initialized;
+
+    ITwoKeyFactoryStorage PROXY_STORAGE_CONTRACT;
 
     event ProxyForCampaign(
         address proxyLogicHandler,
         address proxyConversionHandler,
         address proxyAcquisitionCampaign,
         address proxyPurchasesHandler,
-        address contractor,
-        uint timestamp
+        address contractor
+    );
+
+    event ProxyForDonationCampaign(
+        address proxyDonationCampaign,
+        address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
+        address contractor
     );
 
 
     /**
      * @notice Function to set initial parameters for the contract
      * @param _twoKeySingletonRegistry is the address of singleton registry contract
-     * @param _twoKeyAdmin is the address if twoKeyAdmin contract
-     * @param _maintainers is the array of maintainers
      */
     function setInitialParams(
         address _twoKeySingletonRegistry,
-        address _twoKeyAdmin,
-        address [] _maintainers
+        address _proxyStorage
     )
     public
     {
-        require(twoKeySingletonRegistry == address(0));
+        require(initialized == false);
 
-        twoKeyAdmin = _twoKeyAdmin;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
-
-        twoKeySingletonRegistry = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonRegistry);
+        TWO_KEY_SINGLETON_REGISTRY = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonRegistry);
+        PROXY_STORAGE_CONTRACT = ITwoKeyFactoryStorage(_proxyStorage);
+        initialized = true;
     }
 
-    function getContractProxyAddress(string contractName) internal view returns (address) {
-        return twoKeySingletonRegistry.getContractProxyAddress(contractName);
+    function getLatestContractVersion(string contractName) internal view returns (string) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getLatestContractVersion(contractName);
     }
+
 
     /**
      * @notice Function used to deploy all necessary proxy contracts in order to use the campaign.
@@ -83,33 +87,34 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
     public
     payable
     {
+
         //Deploy proxy for Acquisition contract
         ProxyCampaign proxyAcquisition = new ProxyCampaign(
             "TwoKeyAcquisitionCampaignERC20",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionCampaignERC20"),
-            address(twoKeySingletonRegistry)
+            getLatestContractVersion("TwoKeyAcquisitionCampaignERC20"),
+            address(TWO_KEY_SINGLETON_REGISTRY)
         );
 
         //Deploy proxy for ConversionHandler contract
         ProxyCampaign proxyConversions = new ProxyCampaign(
             "TwoKeyConversionHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyConversionHandler"),
-            address(twoKeySingletonRegistry)
+            getLatestContractVersion("TwoKeyConversionHandler"),
+            address(TWO_KEY_SINGLETON_REGISTRY)
         );
 
         //Deploy proxy for TwoKeyAcquisitionLogicHandler contract
         ProxyCampaign proxyLogicHandler = new ProxyCampaign(
             "TwoKeyAcquisitionLogicHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
-            address(twoKeySingletonRegistry)
+            getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
+            address(TWO_KEY_SINGLETON_REGISTRY)
         );
 
 
         //Deploy proxy for TwoKeyPurchasesHandler contract
         ProxyCampaign proxyPurchasesHandler = new ProxyCampaign(
             "TwoKeyPurchasesHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
-            address(twoKeySingletonRegistry)
+            getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
+            address(TWO_KEY_SINGLETON_REGISTRY)
         );
 
 
@@ -122,7 +127,7 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             valuesConversion,
             msg.sender,
             addresses[0],
-            getContractProxyAddress("TwoKeyEventSource"),
+            getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"),
             proxyConversions
         );
 
@@ -133,8 +138,8 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             proxyPurchasesHandler,
             msg.sender,
             addresses[0], //ERC20 address
-            getContractProxyAddress("TwoKeyEventSource"),
-            getContractProxyAddress("TwoKeyBaseReputationRegistry")
+            getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"),
+            getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")
         );
 
         // Set initial arguments inside Logic Handler contract
@@ -145,13 +150,13 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
             addresses[1], // moderator
             msg.sender,
             proxyAcquisition,
-            address(twoKeySingletonRegistry),
+            address(TWO_KEY_SINGLETON_REGISTRY),
             proxyConversions
         );
 
         // Set initial arguments inside AcquisitionCampaign contract
         IHandleCampaignDeployment(proxyAcquisition).setInitialParamsCampaign(
-            address(twoKeySingletonRegistry),
+            address(TWO_KEY_SINGLETON_REGISTRY),
             address(proxyLogicHandler),
             address(proxyConversions),
             addresses[1], //moderator
@@ -161,10 +166,19 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
         );
 
         // Validate campaign so it will be approved to interact (and write) to/with our singleton contracts
-        ITwoKeyCampaignValidator(getContractProxyAddress("TwoKeyCampaignValidator"))
+        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator"))
         .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
-        emit ProxyForCampaign(proxyLogicHandler, proxyConversions, proxyAcquisition, proxyPurchasesHandler, msg.sender, block.timestamp);
+        setAddressToCampaignType(proxyAcquisition, "TOKEN_SELL");
+
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+        .acquisitionCampaignCreated(
+            proxyLogicHandler,
+            proxyConversions,
+            proxyAcquisition,
+            proxyPurchasesHandler,
+            msg.sender
+        );
     }
 
 
@@ -173,49 +187,103 @@ contract TwoKeyFactory is Upgradeable, MaintainingPattern {
      */
     function createProxiesForDonationCampaign(
         address _moderator,
-        address _twoKeySingletonRegistry,
         uint [] numberValues,
-        bool [] booleanValues, //[_shouldConvertToReferr,isKYCRequired, acceptsFiat]
-        string _campaignName,
+        bool [] booleanValues,
+        string _currency,
         string tokenName,
-        string tokenSymbol
+        string tokenSymbol,
+        string nonSingletonHash
     )
     public
-    payable
     {
+
         // Deploying a proxy contract for donations
         ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
             "TwoKeyDonationCampaign",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyDonationCampaign"),
-            address(twoKeySingletonRegistry)
+            getLatestContractVersion("TwoKeyDonationCampaign"),
+            TWO_KEY_SINGLETON_REGISTRY
         );
 
         //Deploying a proxy contract for donation conversion handler
         ProxyCampaign proxyDonationConversionHandler = new ProxyCampaign(
             "TwoKeyDonationConversionHandler",
-            twoKeySingletonRegistry.getLatestContractVersion("TwoKeyDonationConversionHandler"),
-            address(twoKeySingletonRegistry)
+            getLatestContractVersion("TwoKeyDonationConversionHandler"),
+            TWO_KEY_SINGLETON_REGISTRY
+        );
+
+        //Deploying a proxy contract for donation logic handler
+        ProxyCampaign proxyDonationLogicHandler = new ProxyCampaign(
+            "TwoKeyDonationLogicHandler",
+            getLatestContractVersion("TwoKeyDonationLogicHandler"),
+            TWO_KEY_SINGLETON_REGISTRY
+        );
+
+        IHandleCampaignDeployment(proxyDonationLogicHandler).setInitialParamsDonationLogicHandler(
+            numberValues,
+            _currency,
+            msg.sender,
+            _moderator,
+            TWO_KEY_SINGLETON_REGISTRY,
+            proxyDonationCampaign,
+            proxyDonationConversionHandler
         );
 
         // Set initial parameters under Donation conversion handler
         IHandleCampaignDeployment(proxyDonationConversionHandler).setInitialParamsDonationConversionHandler(
             tokenName,
             tokenSymbol,
-            msg.sender //contractor
+            _currency,
+            msg.sender, //contractor
+            proxyDonationCampaign,
+            address(TWO_KEY_SINGLETON_REGISTRY)
         );
 
         // Set initial parameters under Donation campaign contract
         IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
-            msg.sender,
-            _moderator,
-            _twoKeySingletonRegistry,
+            msg.sender, //contractor
+            _moderator, //moderator address
+            TWO_KEY_SINGLETON_REGISTRY,
             proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
             numberValues,
-            booleanValues,
-            _campaignName
+            booleanValues
+        );
+
+        // Validate campaign
+        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator"))
+        .validateDonationCampaign(
+            proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            nonSingletonHash
+        );
+
+        setAddressToCampaignType(proxyDonationCampaign, "DONATION_CAMPAIGN");
+
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+        .donationCampaignCreated(
+            proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
+            msg.sender
         );
     }
 
+    /**
+     * @notice internal function to set address to campaign type
+     * @param _campaignAddress is the address of campaign
+     * @param _campaignType is the type of campaign (String)
+     */
+    function setAddressToCampaignType(address _campaignAddress, string _campaignType) internal {
+        bytes32 keyHash = keccak256("addressToCampaignType",_campaignAddress);
+        PROXY_STORAGE_CONTRACT.setString(keyHash, _campaignType);
+    }
 
+    /**
+     * @notice Function working as a getter
+     * @param _key is the address of campaign
+     */
+    function addressToCampaignType(address _key) public view returns (string) {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("addressToCampaignType", _key));
+    }
 
 }

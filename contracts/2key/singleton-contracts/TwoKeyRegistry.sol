@@ -1,222 +1,48 @@
 pragma solidity ^0.4.24;
 
-import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
 import "../libraries/Call.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../libraries/Utils.sol";
+import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyRegistryStorage.sol";
 
-contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
+
+contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     using Call for *;
 
-    /// mapping user's address to user's name
-    mapping(address => string) public address2username;
-    /// mapping user's name to user's address
-    mapping(bytes32 => address) public username2currentAddress;
-    /// mapping username to array of addresses he is using/used
-    mapping(bytes32 => address[]) public username2AddressHistory;
-    /*
-        mapping address to wallet tag
-        wallet tag = username + '_' + walletname
-    */
-    mapping(address => bytes32) public address2walletTag;
+    bool initialized;
 
-    // reverse mapping from walletTag to address
-    mapping(bytes32 => address) public walletTag2address;
-
-    // plasma address => ethereum address
-    // note that more than one plasma address can point to the same ethereum address so it is not critical to use the same plasma address all the time for the same user
-    // in some cases the plasma address will be the same as the ethereum address and in that case it is not necessary to have an entry
-    // the way to know if an address is a plasma address is to look it up in this mapping
-    mapping(address => address) plasma2ethereum;
-    mapping(address => address) ethereum2plasma;
-
-    mapping(address => bytes) public notes;
-
-    struct UserData {
-        string username;
-        string fullName;
-        string email;
-    }
-
-    mapping(address => UserData) addressToUserData;
-
-    /*
-        Those mappings are for the fetching data about in what contracts user participates in which role
-    */
-
-    /// mapping users address to addresses of campaigns where he is contractor
-    mapping(address => address[]) public userToCampaignsWhereContractor;
-
-    /// mapping users address to addresses of campaigns where he is moderator
-    mapping(address => address[]) public userToCampaignsWhereModerator;
-
-    /// mapping users address to addresses of campaigns where he is refferer
-    mapping(address => address[]) public userToCampaignsWhereReferrer;
-
-    /// mapping users address to addresses of campaigns where he is converter
-    mapping(address => address[]) public userToCampaignsWhereConverter;
-
-    /// Address of 2key event source contract which will have permission to write on this contract
-    /// (Address is enough, there is no need to spend sufficient gas and instantiate whole contract)
-    address public twoKeyEventSource;
-
+    ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
 
     /// @notice Event is emitted when a user's name is changed
     event UserNameChanged(address owner, string name);
 
 
-    /// Modifier which will allow only 2key event source to issue calls on selected methods
-    modifier onlyTwoKeyEventSource {
-        require(msg.sender == twoKeyEventSource);
-        _;
+    function isMaintainer(address x) internal view returns (bool) {
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(x);
     }
+
 
     /**
      * @notice Function which can be called only once
-     * @param _twoKeyEventSource is the address of twoKeyEventSource contract
-     * @param _twoKeyAdmin is the address of twoKeyAdmin contract
-     * @param _maintainers is the address of initial maintainer
      */
     function setInitialParams(
-        address _twoKeyEventSource,
-        address _twoKeyAdmin,
-        address [] _maintainers
+        address _twoKeySingletonesRegistry,
+        address _proxyStorage
     )
     external
     {
-        require(twoKeyEventSource == address(0));
-        twoKeyEventSource = _twoKeyEventSource;
-        twoKeyAdmin = _twoKeyAdmin;
+        require(initialized == false);
 
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyRegistryStorage(_proxyStorage);
+
+        initialized = true;
     }
 
-
-    /// Only TwoKeyEventSource contract can issue this calls
-    /// @notice Function to add new campaign contract where user is contractor
-    /// @dev We're requiring the contract address different address 0 because it needs to be deployed
-    /// @param _userAddress is address of contractor
-    /// @param _contractAddress is address of deployed campaign contract
-    function addWhereContractor(
-        address _userAddress,
-        address _contractAddress
-    )
-    external
-    onlyTwoKeyEventSource
-    {
-        require(_contractAddress != address(0));
-        userToCampaignsWhereContractor[_userAddress].push(_contractAddress);
-    }
-
-    /// Only TwoKeyEventSource contract can issue this calls
-    /// @notice Function to add new campaign contract where user is moderator
-    /// @dev We're requiring the contract address different address 0 because it needs to be deployed
-    /// @param _userAddress is address of moderator
-    /// @param _contractAddress is address of deployed campaign contract
-    function addWhereModerator(
-        address _userAddress,
-        address _contractAddress
-    )
-    external
-    onlyTwoKeyEventSource
-    {
-        require(_contractAddress != address(0));
-        userToCampaignsWhereModerator[_userAddress].push(_contractAddress);
-    }
-
-    /// Only TwoKeyEventSource contract can issue this calls
-    /// @notice Function to add new campaign contract where user is refferer
-    /// @dev We're requiring the contract address different address 0 because it needs to be deployed
-    /// @param _userAddress is address of refferer
-    /// @param _contractAddress is address of deployed campaign contract
-    function addWhereReferrer(
-        address _userAddress,
-        address _contractAddress
-    )
-    external
-    onlyTwoKeyEventSource
-    {
-        require(_contractAddress != address(0));
-        userToCampaignsWhereReferrer[_userAddress].push(_contractAddress);
-    }
-
-    /// Only TwoKeyEventSource contract can issue this calls
-    /// @notice Function to add new campaign contract where user is converter
-    /// @dev We're requiring the contract address different address 0 because it needs to be deployed
-    /// @param _userAddress is address of converter
-    /// @param _contractAddress is address of deployed campaign contract
-    function addWhereConverter(
-        address _userAddress,
-        address _contractAddress
-    )
-    external
-    onlyTwoKeyEventSource
-    {
-        require(_contractAddress != address(0));
-        userToCampaignsWhereConverter[_userAddress].push(_contractAddress);
-    }
-
-    /// View function - doesn't cost any gas to be executed
-    /// @notice Function to fetch all campaign contracts where user is contractor
-    /// @param _userAddress is address of user
-    /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsContractor(
-        address _userAddress
-    )
-    external
-    view
-    returns (address[])
-    {
-        require(_userAddress != address(0));
-        return userToCampaignsWhereContractor[_userAddress];
-    }
-
-    /// View function - doesn't cost any gas to be executed
-    /// @notice Function to fetch all campaign contracts where user is moderator
-    /// @param _userAddress is address of user
-    /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsModerator(
-        address _userAddress
-    )
-    external
-    view
-    returns (address[])
-    {
-        require(_userAddress != address(0));
-        return userToCampaignsWhereModerator[_userAddress];
-    }
-
-    /// View function - doesn't cost any gas to be executed
-    /// @notice Function to fetch all campaign contracts where user is refferer
-    /// @param _userAddress is address of user
-    /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsReferrer(
-        address _userAddress
-    )
-    external
-    view
-    returns (address[])
-    {
-        require(_userAddress != address(0));
-        return userToCampaignsWhereReferrer[_userAddress];
-    }
-
-    /// View function - doesn't cost any gas to be executed
-    /// @notice Function to fetch all campaign contracts where user is converter
-    /// @param _userAddress is address of user
-    /// @return array of addresses (campaign contracts)
-    function getContractsWhereUserIsConverter(
-        address _userAddress
-    )
-    external
-    view
-    returns (address[])
-    {
-        require(_userAddress != address(0));
-        return userToCampaignsWhereConverter[_userAddress];
-    }
 
 
     /// @notice Function where new name/address pair is added or an old address is updated with new name
@@ -230,19 +56,18 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     internal
     {
         bytes32 name = stringToBytes32(_name);
+
+        bytes32 keyHashUserNameToAddress = keccak256("username2currentAddress", name);
+        bytes32 keyHashAddressToUserName = keccak256("address2username", _sender);
+
         // check if name is taken
-        if (username2currentAddress[name] != 0) {
+        if (PROXY_STORAGE_CONTRACT.getAddress(keyHashUserNameToAddress) != address(0)) {
             revert();
         }
-        // remove previous name
-        bytes memory last_name = bytes(address2username[_sender]);
-        if (last_name.length != 0) {
-            username2currentAddress[name] = 0;
-        }
-        address2username[_sender] = _name;
-        username2currentAddress[name] = _sender;
-        // Add history of changes
-        username2AddressHistory[name].push(_sender);
+
+        PROXY_STORAGE_CONTRACT.setString(keyHashAddressToUserName, _name);
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashUserNameToAddress, _sender);
+
         emit UserNameChanged(_sender, _name);
     }
 
@@ -259,8 +84,8 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         bytes _signatureWalletName
     )
     public
-    onlyMaintainer
     {
+        require(isMaintainer(msg.sender));
         addName(_name, _sender, _fullName, _email, _signatureName);
         setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
     }
@@ -277,18 +102,21 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     )
     public
     {
-        require(isMaintainer[msg.sender] == true || msg.sender == address(this));
+        require(isMaintainer(msg.sender)== true || msg.sender == address(this));
 
         string memory concatenatedValues = strConcat(_name,_fullName,_email);
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
         require(message_signer == _sender);
-        addressToUserData[_sender] = UserData({
-            username: _name,
-            fullName: _fullName,
-            email: _email
-        });
+        bytes32 keyHashUsername = keccak256("addressToUserData", "username", _sender);
+        bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _sender);
+        bytes32 keyHashEmail = keccak256("addressToUserData", "email", _sender);
+
+        PROXY_STORAGE_CONTRACT.setString(keyHashUsername, _name);
+        PROXY_STORAGE_CONTRACT.setString(keyHashFullName, _fullName);
+        PROXY_STORAGE_CONTRACT.setString(keyHashEmail, _email);
+
         addNameInternal(_name, _sender);
     }
 
@@ -304,7 +132,7 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(_name))));
         address eth_address = Call.recoverHash(hash,external_sig,0);
-        require (msg.sender == eth_address || isMaintainer[msg.sender] == true, "only maintainer or user can change name");
+        require (msg.sender == eth_address || isMaintainer(msg.sender) == true, "only maintainer or user can change name");
         addNameInternal(_name, eth_address);
     }
 
@@ -314,8 +142,8 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     )
     private
     {
-        // note is a message you can store with sig. For example it could be the secret you used encrypted by you
-        notes[me] = note;
+        bytes32 keyHashNotes = keccak256("notes", me);
+        PROXY_STORAGE_CONTRACT.setBytes(keyHashNotes, note);
     }
 
     function setNoteByUser(
@@ -326,14 +154,6 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         // note is a message you can store with sig. For example it could be the secret you used encrypted by you
         setNoteInternal(note, msg.sender);
     }
-
-//    /// @notice Function where user can add name to his address
-//    /// @param _name is name of user
-//    function addNameByUser(string _name) external {
-//        require(utfStringLength(_name) >= 3 && utfStringLength(_name) <=25);
-//        addNameInternal(_name, msg.sender);
-//    }
-
 
 
     /// @notice Function where TwoKeyMaintainer can add walletname to address
@@ -348,19 +168,25 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     )
     public
     {
-        require(isMaintainer[msg.sender] == true || msg.sender == address(this));
+        require(isMaintainer(msg.sender) == true || msg.sender == address(this));
         require(_address != address(0));
         bytes32 usernameHex = stringToBytes32(username);
-        require(username2currentAddress[usernameHex] == _address); // validating that username exists
+        address usersAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", usernameHex));
+        require(usersAddress == _address); // validating that username exists
 
         string memory concatenatedValues = strConcat(username,_username_walletName,"");
+
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
         require(message_signer == _address);
+
         bytes32 walletTag = stringToBytes32(_username_walletName);
-        address2walletTag[_address] = walletTag;
-        walletTag2address[walletTag] = _address;
+        bytes32 keyHashAddress2WalletTag = keccak256("address2walletTag", _address);
+        PROXY_STORAGE_CONTRACT.setBytes32(keyHashAddress2WalletTag, walletTag);
+
+        bytes32 keyHashWalletTag2Address = keccak256("walletTag2address", walletTag);
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashWalletTag2Address, _address);
     }
 
     function addPlasma2EthereumInternal(
@@ -373,9 +199,13 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         // see setup_demo.js on how to generate sig
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(eth_address))));
         address plasma_address = Call.recoverHash(hash,sig,0);
-        require(plasma2ethereum[plasma_address] == address(0) || plasma2ethereum[plasma_address] == eth_address, "cant change eth=>plasma");
-        plasma2ethereum[plasma_address] = eth_address;
-        ethereum2plasma[eth_address] = plasma_address;
+        bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasma_address);
+        bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", eth_address);
+
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == eth_address, "cant change eth=>plasma");
+
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashPlasmaToEthereum, eth_address);
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashEthereumToPlasma, plasma_address);
     }
 
     function addPlasma2EthereumByUser(
@@ -396,7 +226,7 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
             keccak256(abi.encodePacked(sig,note))));
         address eth_address = Call.recoverHash(hash,external_sig,0);
-        require (msg.sender == eth_address || isMaintainer[msg.sender], "only maintainer or user can change ethereum-plasma");
+        require (msg.sender == eth_address || isMaintainer(msg.sender), "only maintainer or user can change ethereum-plasma");
         addPlasma2EthereumInternal(sig, eth_address);
         setNoteInternal(note, eth_address);
     }
@@ -413,7 +243,7 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     returns (address)
     {
         bytes32 name = stringToBytes32(_name);
-        return username2currentAddress[name];
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", _name));
     }
 
     /// View function - doesn't cost any gas to be executed
@@ -427,74 +257,41 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     view
     returns (string)
     {
-        return address2username[_sender];
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _sender));
     }
 
-    //TODO we'll eventually need to get previous addresses of user, and might need to support multiple "active" addresses per user
-//    /// Get history of changed addresses
-//    /// @return array of addresses sorted
-//    function getHistoryOfChangedAddresses() external view returns (address[]) {
-//        string memory name = address2username[msg.sender];
-//        bytes32 nameHex = stringToBytes32(name);
-//        return username2AddressHistory[nameHex];
-//    }
-
-    /**
-     */
-    function deleteUser(
-        string userName
-    )
-    public
-    onlyMaintainer
-    {
-        bytes32 userNameHex = stringToBytes32(userName);
-        username2AddressHistory[userNameHex] = new address[](0);
-        address _ethereumAddress = username2currentAddress[userNameHex];
-        username2currentAddress[userNameHex] = address(0);
-
-        address2username[_ethereumAddress] = "";
-
-        bytes32 walletTag = address2walletTag[_ethereumAddress];
-        address2walletTag[_ethereumAddress] = bytes32(0);
-        walletTag2address[walletTag] = address(0);
-
-        address plasma = ethereum2plasma[_ethereumAddress];
-        ethereum2plasma[_ethereumAddress] = address(0);
-        plasma2ethereum[plasma] = address(0);
-
-        UserData memory userdata = addressToUserData[_ethereumAddress];
-        userdata.username = "";
-        userdata.fullName = "";
-        userdata.email = "";
-        addressToUserData[_ethereumAddress] = userdata;
-
-        notes[_ethereumAddress] = "";
-    }
-
-
-//    /// @notice Function to fetch actual length of string
-//    /// @param str is the string we'd like to get length of
-//    /// @return length of the string
-//    function utfStringLength(string str) internal pure returns (uint length) {
-//        uint i=0;
-//        bytes memory string_rep = bytes(str);
+//    /**
+//     */
+//    function deleteUser(
+//        string userName
+//    )
+//    public
+//    {
+//        require(isMaintainer(msg.sender));
+//        bytes32 userNameHex = stringToBytes32(userName);
+//        address _ethereumAddress = username2currentAddress[userNameHex];
+//        username2currentAddress[userNameHex] = address(0);
 //
-//        while (i<string_rep.length)
-//        {
-//            if (string_rep[i]>>7==0)
-//                i+=1;
-//            else if (string_rep[i]>>5==0x6)
-//                i+=2;
-//            else if (string_rep[i]>>4==0xE)
-//                i+=3;
-//            else if (string_rep[i]>>3==0x1E)
-//                i+=4;
-//            else
-//            //For safety
-//                i+=1;
-//            length++;
-//        }
+//        address2username[_ethereumAddress] = "";
+//
+//        bytes32 walletTag = address2walletTag[_ethereumAddress];
+//        address2walletTag[_ethereumAddress] = bytes32(0);
+//        walletTag2address[walletTag] = address(0);
+//
+//        address plasma = ethereum2plasma[_ethereumAddress];
+//        ethereum2plasma[_ethereumAddress] = address(0);
+//        PROXY_STORAGE_CONTRACT.deleteAddress()
+//        plasma2ethereum[plasma] = address(0);
+//
+//        UserData memory userdata = addressToUserData[_ethereumAddress];
+//        userdata.username = "";
+//        userdata.fullName = "";
+//        userdata.email = "";
+//        addressToUserData[_ethereumAddress] = userdata;
+//
+//        notes[_ethereumAddress] = "";
 //    }
+
 
     /**
      * @notice Reading from mapping ethereum 2 plasma
@@ -508,8 +305,10 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     view
     returns (address)
     {
-        if(plasma2ethereum[plasma] != address(0)) {
-            return plasma2ethereum[plasma];
+        bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasma);
+        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum);
+        if(ethereum!= address(0)) {
+            return ethereum;
         }
         return plasma;
     }
@@ -526,8 +325,10 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     view
     returns (address)
     {
-        if(ethereum2plasma[ethereum] != address(0)) {
-            return ethereum2plasma[ethereum];
+        bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", ethereum);
+        address plasma = PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma);
+        if(plasma != address(0)) {
+            return plasma;
         }
         return ethereum;
     }
@@ -545,55 +346,19 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     view
     returns (bool)
     {
-        bytes memory tempEmptyStringTest = bytes(address2username[_userAddress]);
+        string memory username = PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _userAddress));
+        bytes memory tempEmptyStringTest = bytes(username);
+        bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", _userAddress);
+        address plasma = PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma);
         //notes[_userAddress].length == 0
-        if(tempEmptyStringTest.length == 0 || address2walletTag[_userAddress] == 0 || ethereum2plasma[_userAddress] == address(0) || notes[_userAddress].length == 0) {
+        bytes memory savedNotes = PROXY_STORAGE_CONTRACT.getBytes(keccak256("notes", _userAddress));
+        bytes32 walletTag = PROXY_STORAGE_CONTRACT.getBytes32(keccak256("address2walletTag", _userAddress));
+        if(tempEmptyStringTest.length == 0 || walletTag == 0 || plasma == address(0) || savedNotes.length == 0) {
             return false;
         }
         return true;
     }
 
-
-    function stringToBytes32(
-        string memory source)
-    internal
-    pure
-    returns (bytes32 result)
-    {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-        assembly {
-            result := mload(add(source, 32))
-        }
-    }
-
-    /**
-     * @notice Function to concat at most 5 strings
-     * @dev If you want to handle concatenation of less than 5, then pass first their values and for the left pass empty strings
-     * @return string concatenated
-     */
-    function strConcat(
-        string _a,
-        string _b,
-        string _c
-    )
-    public
-    pure
-    returns (string)
-    {
-        bytes memory _ba = bytes(_a);
-        bytes memory _bb = bytes(_b);
-        bytes memory _bc = bytes(_c);
-        string memory abcde = new string(_ba.length + _bb.length + _bc.length);
-        bytes memory babcde = bytes(abcde);
-        uint k = 0;
-        for (uint i = 0; i < _ba.length; i++) babcde[k++] = _ba[i];
-        for (i = 0; i < _bb.length; i++) babcde[k++] = _bb[i];
-        for (i = 0; i < _bc.length; i++) babcde[k++] = _bc[i];
-        return string(babcde);
-    }
 
     function getUserData(
         address _user
@@ -602,11 +367,68 @@ contract TwoKeyRegistry is Upgradeable, MaintainingPattern {
     view
     returns (bytes)
     {
-        UserData memory data = addressToUserData[_user];
-        bytes32 username = stringToBytes32(data.username);
-        bytes32 fullName = stringToBytes32(data.fullName);
-        bytes32 email = stringToBytes32(data.email);
+        bytes32 keyHashUsername = keccak256("addressToUserData", "username", _user);
+        bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _user);
+        bytes32 keyHashEmail = keccak256("addressToUserData", "email", _user);
+
+
+        bytes32 username = stringToBytes32(PROXY_STORAGE_CONTRACT.getString(keyHashUsername));
+        bytes32 fullName = stringToBytes32(PROXY_STORAGE_CONTRACT.getString(keyHashFullName));
+        bytes32 email = stringToBytes32(PROXY_STORAGE_CONTRACT.getString(keyHashEmail));
+
         return (abi.encodePacked(username, fullName, email));
     }
+
+    function notes(
+        address keyAddress
+    )
+    public
+    view
+    returns (bytes)
+    {
+        return PROXY_STORAGE_CONTRACT.getBytes(keccak256("notes", keyAddress));
+    }
+
+    function address2walletTag(
+        address keyAddress
+    )
+    public
+    view
+    returns (bytes32)
+    {
+        return PROXY_STORAGE_CONTRACT.getBytes32(keccak256("address2walletTag", keyAddress));
+    }
+
+    function walletTag2address(
+        bytes32 walletTag
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("walletTag2address", walletTag));
+    }
+
+    function address2username(
+        address keyAddress
+    )
+    public
+    view
+    returns (string)
+    {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", keyAddress));
+    }
+
+    function username2currentAddress(
+        bytes32 _username
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", _username));
+    }
+
+
 
 }

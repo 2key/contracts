@@ -4,7 +4,6 @@ const util = require('util');
 const tar = require('tar');
 const rimraf = require('rimraf');
 const sha256 = require('js-sha256');
-const rhd = require('node-humanhash');
 const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
@@ -81,10 +80,7 @@ const versioning = require('./generateContractsVersioning');
  *
  * @type {{}}
  */
-let maintainerAddress = {};
-maintainerAddress['rinkeby'] = '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f';
-maintainerAddress['ropsten'] = '0x99663fdaf6d3e983333fb856b5b9c54aa5f27b2f';
-maintainerAddress['local'] = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
+
 
 async function handleExit(p) {
   console.log(p);
@@ -183,6 +179,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     let contracts = {
       'contracts': {},
     };
+
+    let singletonAddresses = [];
     const proxyFile = path.join(buildPath, 'proxyAddresses.json');
     let json = {};
     let data = {};
@@ -204,6 +202,10 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             const mergedNetworks = {};
             Object.keys(networks).forEach(key => {
               mergedNetworks[key] = { ...networks[key], ...proxyNetworks[key] };
+              if(proxyNetworks[key]) {
+                  singletonAddresses.push(proxyNetworks[key].implementationAddressLogic);
+                  singletonAddresses.push(proxyNetworks[key].implementationAddressStorage);
+              }
             });
             if (!contracts.contracts[whiteListedContract.file]) {
               contracts.contracts[whiteListedContract.file] = {};
@@ -237,20 +239,15 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           }
         });
         const nonSingletonsBytecodes = [];
-        const singletonsBytecodes = [];
         Object.keys(contracts.contracts).forEach(submodule => {
           if (submodule !== 'singletons') {
             Object.values(contracts.contracts[submodule]).forEach(({ bytecode, abi }) => {
               nonSingletonsBytecodes.push(bytecode || JSON.stringify(abi));
             });
-          } else {
-            Object.values(contracts.contracts[submodule]).forEach(({ address, abi }) => {
-              singletonsBytecodes.push(address || JSON.stringify(abi));
-            });
           }
         });
         const nonSingletonsHash = sha256(nonSingletonsBytecodes.join(''));
-        const singletonsHash = sha256(singletonsBytecodes.join(''));
+        const singletonsHash = sha256(singletonAddresses.join(''));
         Object.keys(contracts.contracts).forEach(key => {
           contracts.contracts[key]['NonSingletonsHash'] = nonSingletonsHash;
           contracts.contracts[key]['SingletonsHash'] = singletonsHash;
@@ -288,8 +285,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
           // 'NetworkHashes': keyHash,
         };
 
-        let obj1 = {};
-        obj1['Maintainers'] = maintainerAddress;
 
         //Handle updating contracts_deployed-develop.json
         /*
@@ -321,7 +316,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         */
 
         contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
-        contracts.contracts.singletons = Object.assign(obj1, contracts.contracts.singletons);
         console.log('Writing contracts for submodules...');
         if(!fs.existsSync(path.join(twoKeyProtocolDir, 'contracts'))) {
           fs.mkdirSync(path.join(twoKeyProtocolDir, 'contracts'));
@@ -331,7 +325,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         });
         // fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
         json = Object.assign(obj,json);
-        json = Object.assign(obj1,json);
         fs.writeFileSync(getContractsDeployedPath(), JSON.stringify(json, null, 2));
         console.log('Writing contracts_deployed-develop.json...');
         if (deployment) {
@@ -484,7 +477,7 @@ async function deploy() {
     const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
 
     const deployedHistory = fs.existsSync(getDeploymentHistoryPath())
-      ? JSON.parse(fs.readFileSync(getDeploymentHistoryPath())) : {};
+      ? JSON.parse(fs.readFileSync(getDeploymentHistoryPath(), { encoding: 'utf-8' })) : {};
     const artifacts = await getCurrentDeployedAddresses();
     if (Object.keys(artifacts).length) {
       if (!Object.keys(deployedHistory).length) {
@@ -494,17 +487,11 @@ async function deploy() {
       }
     }
     const l = networks.length;
-    // Object.keys(whitelist).forEach(key => {
-    //   if (whitelist[key].singletone) {
-    //     fs.unlinkSync(path.join(buildPath, `${key}.json`));
-    //   }
-    // });
-    // await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['compile', '--all']);
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
       await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
       deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
-      await runMigration3(networks[i]);
+      // await runMigration3(networks[i]);
       /* eslint-enable no-await-in-loop */
     }
     const sessionDeployedContracts = await getCurrentDeployedAddresses();

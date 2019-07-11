@@ -1,4 +1,8 @@
 import 'mocha';
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import {TwoKeyProtocol} from '../src';
 import web3switcher from './_web3';
 import {promisify} from '../src/utils/promisify';

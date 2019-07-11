@@ -1,3 +1,7 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
@@ -12,6 +16,7 @@ const syncTwoKeyNetId = env.SYNC_NET_ID;
 
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
+let config = require('../../accountsConfig.json');
 
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
@@ -43,8 +48,9 @@ describe('TwoKeyProtocol LOCAL', () => {
     it('LOCAL: should transfer ether', async () => {
         let error = false;
         const addresses = Object.keys(env).filter(key => key.endsWith('_ADDRESS') && env[key].includes('0x') && env[key].length == 42).map(key => env[key]);
+        addresses.push(config.address);
         let l = addresses.length;
-        await sendETH('0xfab160d5bdebd8139f18b521cf18e876894ea44d');
+        await sendETH('0x9aace881c7a80b596d38eaff66edbb5368d2f2c5');
         for (let i = 0; i < l; i++) {
             const receipt = await sendETH(addresses[i]);
             if (!receipt || receipt.status !== '0x1') {

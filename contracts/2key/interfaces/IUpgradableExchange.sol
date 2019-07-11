@@ -2,7 +2,8 @@ pragma solidity ^0.4.24;
 
 contract IUpgradableExchange {
 
-    uint256 public rate;
+    function buyRate2key() public view returns (uint);
+    function sellRate2key() public view returns (uint);
 
     function buyTokens(
         address _beneficiary
@@ -10,7 +11,7 @@ contract IUpgradableExchange {
     public
     payable
     returns (uint);
-    
+
     function buyStableCoinWith2key(
         uint _twoKeyUnits,
         address _beneficiary

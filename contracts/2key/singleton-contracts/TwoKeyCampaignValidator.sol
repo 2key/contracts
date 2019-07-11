@@ -1,16 +1,18 @@
 pragma solidity ^0.4.24;
 
 import "../libraries/GetCode.sol";
-import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
 
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
-import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
 import "../interfaces/IGetImplementation.sol";
+import "../interfaces/IStructuredStorage.sol";
+import "../interfaces/storage-contracts/ITwoKeyCampaignValidatorStorage.sol";
+
+import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
 
 
 /*******************************************************************************************************************
@@ -40,40 +42,34 @@ import "../interfaces/IGetImplementation.sol";
  * @author Nikola Madjarevic
  * Created at 2/12/19
  */
-contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
+contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
-    address public twoKeySingletoneRegistry;
-    address public twoKeyFactory;
+    bool initialized;
 
-    mapping(address => string) public campaign2nonSingletonHash;
-
-
-    mapping(bytes => bool) isCodeValid;
-    mapping(bytes => bytes32) contractCodeToName;
-
-    // Will store the mapping between campaign address and if it satisfies all the criteria
-    mapping(address => bool) public isCampaignValidated;
-
+    ITwoKeyCampaignValidatorStorage public PROXY_STORAGE_CONTRACT;
 
     /**
      * @notice Function to set initial parameters in this contract
      * @param _twoKeySingletoneRegistry is the address of TwoKeySingletoneRegistry contract
-     * @param _maintainers is the array of initial maintainer addresses
      */
     function setInitialParams(
         address _twoKeySingletoneRegistry,
-        address [] _maintainers
+        address _proxyStorage
     )
     public
     {
-        require(twoKeySingletoneRegistry == address(0));
-        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        twoKeyAdmin =  ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
-        twoKeyFactory = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyFactory");
-        isMaintainer[msg.sender] = true;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        require(initialized == false);
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletoneRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyCampaignValidatorStorage(_proxyStorage);
+
+        initialized = true;
+    }
+
+    modifier onlyTwoKeyFactory {
+        address twoKeyFactory = getAddressFromTwoKeySingletonRegistry("TwoKeyFactory");
+        require(msg.sender == twoKeyFactory);
+        _;
     }
 
     /**
@@ -87,41 +83,17 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         string nonSingletonHash
     )
     public
+    onlyTwoKeyFactory
     {
-        require(isCampaignValidated[campaign] == false);
-        require(msg.sender == twoKeyFactory);
-
-        address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
-        address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator(); //Moderator we'll need for emit eventxw
-
-        //Validating that the bytecode of the campaign and campaign helper contracts are eligible
         address conversionHandler = ITwoKeyAcquisitionCampaignStateVariables(campaign).conversionHandler();
         address logicHandler = ITwoKeyAcquisitionCampaignStateVariables(campaign).twoKeyAcquisitionLogicHandler();
 
-        address campaignImplementation = IGetImplementation(campaign).implementation();
-        address conversionHandlerImplementation = IGetImplementation(conversionHandler).implementation();
-        address logicHandlerImplementation = IGetImplementation(logicHandler).implementation();
+        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", conversionHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", logicHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",campaign), true);
+        PROXY_STORAGE_CONTRACT.setString(keccak256("campaign2NonSingletonHash",campaign), nonSingletonHash);
 
-        bytes memory codeAcquisition = GetCode.at(campaignImplementation);
-        bytes memory codeHandler = GetCode.at(conversionHandlerImplementation);
-        bytes memory codeLogicHandler = GetCode.at(logicHandlerImplementation);
-
-        require(isCodeValid[codeAcquisition] == true);
-        require(isCodeValid[codeHandler] == true);
-        require(isCodeValid[codeLogicHandler] == true);
-
-
-        //If the campaign passes all this validation steps means it's valid one, and it can be proceeded forward
-        isCampaignValidated[campaign] = true;
-
-        //Adding campaign 2 non singleton hash at the moment
-        campaign2nonSingletonHash[campaign] = nonSingletonHash;
-
-        //Get the event source address
-        address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
-                                    (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
-
-        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
+        emitCreatedEvent(campaign);
     }
 
     /**
@@ -135,70 +107,14 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         string nonSingletonHash
     )
     public
+    onlyTwoKeyFactory
     {
-        address contractor = ITwoKeyCampaignPublicAddresses(campaign).contractor();
-        address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
+        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",campaign), true);
+        PROXY_STORAGE_CONTRACT.setString(keccak256("campaign2NonSingletonHash",campaign), nonSingletonHash);
 
-        require(isCampaignValidated[campaign] == false);
-        bytes memory donationCampaignCode = GetCode.at(campaign);
-        bytes memory donationConversionHandlerCode = GetCode.at(donationConversionHandler);
-
-        //Validate that this bytecode is validated and added
-        require(isCodeValid[donationCampaignCode] == true);
-        require(isCodeValid[donationConversionHandlerCode] == true);
-
-        require(
-            ITwoKeyDonationCampaignFetchAddresses(donationConversionHandler).twoKeyDonationCampaign() == campaign &&
-            ITwoKeyDonationCampaignFetchAddresses(campaign).twoKeyDonationConversionHandler() == donationConversionHandler
-        );
-
-        //Validate that public link key is set
-        require(ITwoKeyCampaignPublicAddresses(campaign).publicLinkKeyOf(contractor) != address(0));
-        campaign2nonSingletonHash[campaign] = nonSingletonHash;
-
-        isCampaignValidated[campaign] = true;
-
-        //Get the event source
-        address twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress
-        (twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyEventSource");
-
-        //Emit the event that campaign is created
-//        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
+        emitCreatedEvent(campaign);
     }
 
-    /**
-     * @notice Function to add valid bytecodes for the contracts
-     * @param contracts is the array of contracts (deployed)
-     * @param names is the array of hexed contract names
-     * @dev Only maintainer can issue calls to this function
-     */
-    function addValidBytecodes(
-        address[] contracts,
-        bytes32[] names
-    )
-    public
-    onlyMaintainer
-    {
-        require(contracts.length == names.length);
-        uint length = contracts.length;
-        for(uint i=0; i<length; i++) {
-            bytes memory contractCode = GetCode.at(contracts[i]);
-            isCodeValid[contractCode] = true;
-            contractCodeToName[contractCode] = names[i];
-        }
-    }
-
-    /**
-     * @notice Function to remove bytecode of the contract from whitelisted ones
-     */
-    function removeBytecode(
-        bytes _bytecode
-    )
-    public
-    onlyMaintainer
-    {
-        isCodeValid[_bytecode] = false;
-    }
 
     /**
      * @notice Function to validate if specific conversion handler code is valid
@@ -212,25 +128,10 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
     view
     returns (bool)
     {
-        address implementation = IGetImplementation(_conversionHandler).implementation();
-        bytes memory contractCode = GetCode.at(implementation);
-        require(isCodeValid[contractCode]);
-        bytes32 name = stringToBytes32("TwoKeyConversionHandler");
-        require(contractCodeToName[contractCode] == name);
+        require(PROXY_STORAGE_CONTRACT.getBool(keccak256("isCampaignValidated",_conversionHandler)) == true);
         return true;
     }
 
-    function isContractCodeAddressValidated(
-        address _contract
-    )
-    public
-    view
-    returns (bool)
-    {
-        address implementation = IGetImplementation(_contract).implementation();
-        bytes memory contractCode = GetCode.at(implementation);
-        return isCodeValid[contractCode];
-    }
 
     /**
      * @notice Pure function to convert input string to hex
@@ -250,5 +151,25 @@ contract TwoKeyCampaignValidator is Upgradeable, MaintainingPattern {
         assembly {
             result := mload(add(source, 32))
         }
+    }
+
+    function isCampaignValidated(address campaign) public view returns (bool) {
+        bytes32 hashKey = keccak256("isCampaignValidated", campaign);
+        return PROXY_STORAGE_CONTRACT.getBool(hashKey);
+    }
+
+    function campaign2NonSingletonHash(address campaign) public view returns (string) {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("campaign2NonSingletonHash", campaign));
+    }
+
+
+    function emitCreatedEvent(address campaign) internal {
+        address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
+        address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator();
+
+        //Get the event source address
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+        // Emit event
+        ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }
 }

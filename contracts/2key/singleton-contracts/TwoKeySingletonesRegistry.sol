@@ -1,13 +1,16 @@
 pragma solidity ^0.4.24;
 
-import '../Upgradeable.sol';
-import "../UpgradabilityProxy.sol";
 import "../UpgradabilityProxyAcquisition.sol";
-import "../MaintainingPattern.sol";
 
 import '../interfaces/ITwoKeySingletonesRegistry.sol';
 import "../interfaces/IHandleCampaignDeployment.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/IStructuredStorage.sol";
+
+import "../upgradability/UpgradabilityProxy.sol";
+import "../upgradability/Upgradeable.sol";
+
 
 
 /**
@@ -16,42 +19,35 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
  * @dev This contract works as a registry of versions, it holds the implementations for the registered versions.
  * @notice Will be everything mapped by contract name, so we will easily update and get versions per contract, all stored here
  */
-contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegistry {
+contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
+
+    address public deployer;
 
     mapping (string => mapping(string => address)) internal versions;
-
-
-    mapping (string => address) contractToProxy;
-    mapping (string => string) contractNameToLatestVersionName;
+    mapping (string => address) contractNameToProxyAddress;
+    mapping (string => string) contractNameToLatestVersion;
     mapping (string => address) nonUpgradableContractToAddress;
 
-    address[] allVerified2keyContracts;
 
-    event ProxyForCampaign(
-        address proxyLogicHandler,
-        address proxyConversionHandler,
-        address proxyAcquisitionCampaign,
-        address proxyPurchasesHandler,
-        address contractor,
-        uint timestamp
+    event ProxiesDeployed(
+        address logicProxy,
+        address storageProxy
     );
 
     /**
      * @notice Calling super constructor from maintaining pattern
      */
-    constructor(
-        address [] _maintainers,
-        address _twoKeyAdmin
-    )
+    constructor()
     public
     {
-        twoKeyAdmin = _twoKeyAdmin;
-        isMaintainer[msg.sender] = true; //for truffle deployment
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        deployer = msg.sender;
     }
 
+    modifier onlyMaintainer {
+        address twoKeyMaintainersRegistry = contractNameToProxyAddress["TwoKeyMaintainersRegistry"];
+        require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        _;
+    }
 
     /**
      * @notice Function to add non upgradable contract in registry of all contracts
@@ -69,9 +65,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
         nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
-    /**
-     * todo: make sure only admin/deployer can call this function
-     */
+
     /**
      * @dev Registers a new version with its implementation address
      * @param version representing the version name of the new implementation to be registered
@@ -87,7 +81,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     {
         require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
-        contractNameToLatestVersionName[contractName] = version;
+        contractNameToLatestVersion[contractName] = version;
         emit VersionAdded(version, implementation);
     }
 
@@ -108,6 +102,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     }
 
 
+
     /**
      * @notice Gets the latest contract version
      * @param contractName is the name of the contract
@@ -120,7 +115,7 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     view
     returns (string)
     {
-        return contractNameToLatestVersionName[contractName];
+        return contractNameToLatestVersion[contractName];
     }
 
 
@@ -146,39 +141,54 @@ contract TwoKeySingletonesRegistry is MaintainingPattern, ITwoKeySingletonesRegi
     view
     returns (address)
     {
-        return contractToProxy[_contractName];
+        return contractNameToProxyAddress[_contractName];
     }
 
-    /**
-     * @dev Creates an upgradeable proxy
-     * @param version representing the first version to be set for the proxy
-     * @return address of the new proxy created
-     */
-    function createProxy(
+
+    function deployProxy(
+        string contractName,
+        string version
+    )
+    internal
+    returns (address)
+    {
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
+        contractNameToProxyAddress[contractName] = proxy;
+        emit ProxyCreated(proxy);
+        return address(proxy);
+    }
+
+    function upgradeContract(
         string contractName,
         string version
     )
     public
-    onlyMaintainer
-    payable
-    returns (UpgradeabilityProxy)
     {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, msg.sender);
-        Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
-        contractToProxy[contractName] = proxy;
-        emit ProxyCreated(proxy);
-        return proxy;
+        require(msg.sender == deployer);
+        address proxyAddress = getContractProxyAddress(contractName);
+        address _impl = getVersion(contractName, version);
+        UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
+
+
     /**
-     * @notice Function to return all 2key running contract addresses
-     * @return array with all contract addresses
+     * @dev Creates an upgradeable proxy for both Storage and Logic
+     * @param version representing the first version to be set for the proxy
      */
-    function getAll2keyContracts()
+    function createProxy(
+        string contractName,
+        string contractNameStorage,
+        string version
+    )
     public
-    view
-    returns (address[])
+    onlyMaintainer
     {
-        return allVerified2keyContracts;
+        address logicProxy = deployProxy(contractName, version);
+        address storageProxy = deployProxy(contractNameStorage, version);
+
+        IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
+        emit ProxiesDeployed(logicProxy, storageProxy);
     }
+
 }
