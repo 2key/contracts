@@ -338,9 +338,8 @@ contract TwoKeyCampaign is ArcERC20 {
 			else {
 				revert();
 			}
-
+			reservedAmount2keyForRewards -= balance;
 		}
-        reservedAmount2keyForRewards -= balance;
 	}
 }
 
