@@ -4,12 +4,15 @@ import {expect} from "chai";
 import {IConversion, ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";
 import {promisify} from "../src/utils/promisify";
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
+import singletons from "../src/contracts/singletons";
 const { env } = process;
 
 const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const eventsNetUrl = env.PLASMA_RPC_URL;
+const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
+
 let i = 1;
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
@@ -401,6 +404,17 @@ describe('TwoKeyDonationCampaign', () => {
         let signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
         let stats = await twoKeyProtocol.DonationCampaign.getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaignAddress, signature);
         console.log(stats);
+    }).timeout(60000);
+
+    it('should get balance of TwoKeyEconomy tokens on DonationCampaign', async() => {
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
+        console.log('ERC20 TwoKeyEconomy balance on this contract is : ' + balance);
+    }).timeout(60000);
+
+    it('referrer should withdraw his earnings', async() => {
+        printTestNumber();
+        let txHash = await twoKeyProtocol.DonationCampaign.moderatorAndReferrerWithdraw(campaignAddress, false, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
 });

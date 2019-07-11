@@ -302,7 +302,6 @@ contract TwoKeyCampaign is ArcERC20 {
 		return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress(contractName);
 	}
 
-
 	/**
  	 * @notice Function where moderator or referrer can withdraw their available funds
  	 * @param _address is the address we're withdrawing funds to

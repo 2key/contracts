@@ -73,9 +73,11 @@ module.exports = function deploy(deployer) {
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
+                    // let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
+                    //
+                    // version = incrementVersion(version);
 
-                    version = incrementVersion(version);
+                    let version = "1.1.1"
 
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
@@ -99,9 +101,11 @@ module.exports = function deploy(deployer) {
             console.log('... Adding implementation versions of Donation campaigns');
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyDonationCampaign");
+                    // let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyDonationCampaign");
+                    //
+                    // version = incrementVersion(version);
+                    let version = "1.1.1"
 
-                    version = incrementVersion(version);
 
                     let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
                         .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);

@@ -54,7 +54,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
         twoKeySingletonesRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
-
+        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
+            .getNonUpgradableContractAddress("TwoKeyEconomy");
         totalSupply_ = 1000000;
 
         maxReferralRewardPercent = numberValues[0];
