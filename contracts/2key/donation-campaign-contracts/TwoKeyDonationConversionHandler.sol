@@ -311,7 +311,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         moveFromPendingOrRejectedToApprovedState(_converter);
     }
 
-
+    //TODO: Add converter rejection
 
     /**
      * @notice Function to get all conversion ids for the converter
