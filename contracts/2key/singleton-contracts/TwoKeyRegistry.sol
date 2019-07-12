@@ -243,7 +243,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     returns (address)
     {
         bytes32 name = stringToBytes32(_name);
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", _name));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", name));
     }
 
     /// View function - doesn't cost any gas to be executed
