@@ -452,7 +452,11 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             uint conversionId = converterToHisConversions[_converter][i];
             Conversion c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL || c.state == ConversionState.APPROVED) {
-                counters[0]--; //Reduce number of pending conversions
+                if(c.state == ConversionState.PENDING_APPROVAL) {
+                    counters[0]--; //Reduce number of pending conversions
+                } else {
+                    counters[1]--; //Reduce number of approved conversions
+                }
                 counters[2]++; //Increase number of rejected conversions
                 ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
                 c.state = ConversionState.REJECTED;
