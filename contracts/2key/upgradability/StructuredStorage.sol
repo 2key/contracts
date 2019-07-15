@@ -98,8 +98,6 @@ contract StructuredStorage is Upgradeable {
         return boolArrayStorage[_key];
     }
 
-
-
     // *** Setter Methods ***
     function setUint(bytes32 _key, uint _value) onlyProxyLogicContract external {
         uIntStorage[_key] = _value;
