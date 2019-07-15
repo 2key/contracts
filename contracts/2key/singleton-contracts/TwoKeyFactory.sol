@@ -254,6 +254,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         .validateDonationCampaign(
             proxyDonationCampaign,
             proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
             nonSingletonHash
         );
 

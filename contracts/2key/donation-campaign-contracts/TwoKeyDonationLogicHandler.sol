@@ -136,7 +136,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
-//        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyDonationCampaign, referrerPlasma, reward);
+        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyDonationCampaign, referrerPlasma, reward);
     }
 
     /**

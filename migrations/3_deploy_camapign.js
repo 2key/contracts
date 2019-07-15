@@ -19,7 +19,10 @@ const fs = require('fs');
 const path = require('path');
 
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
-const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
+
+
+let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
+
 
 /**
  * Function to increment minor version
@@ -51,6 +54,9 @@ const incrementVersion = ((version) => {
 
 module.exports = function deploy(deployer) {
     if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
+        if(deployer.network.startsWith('dev')) {
+            TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
+        }
         const { network_id } = deployer;
         let x = 1;
         let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
@@ -78,7 +84,7 @@ module.exports = function deploy(deployer) {
                     //
                     // version = incrementVersion(version);
 
-                    let version = "1.1.3";
+                    let version = "1.1.4";
 
                     let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
@@ -105,7 +111,7 @@ module.exports = function deploy(deployer) {
                     // let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyDonationCampaign");
                     //
                     // version = incrementVersion(version);
-                    let version = "1.1.3";
+                    let version = "1.1.4";
 
 
                     let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)

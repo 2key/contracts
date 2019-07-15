@@ -104,12 +104,16 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     function validateDonationCampaign(
         address campaign,
         address donationConversionHandler,
+        address donationLogicHandler,
         string nonSingletonHash
     )
     public
     onlyTwoKeyFactory
     {
         PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",campaign), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",donationConversionHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",donationLogicHandler), true);
+
         PROXY_STORAGE_CONTRACT.setString(keccak256("campaign2NonSingletonHash",campaign), nonSingletonHash);
 
         emitCreatedEvent(campaign);
