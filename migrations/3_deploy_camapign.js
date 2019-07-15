@@ -19,6 +19,7 @@ const fs = require('fs');
 const path = require('path');
 
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
+const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
 
 /**
  * Function to increment minor version
@@ -77,18 +78,18 @@ module.exports = function deploy(deployer) {
                     //
                     // version = incrementVersion(version);
 
-                    let version = "1.1.3"
+                    let version = "1.1.3";
 
-                    let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyPurchasesHandler', version, TwoKeyPurchasesHandler.address);
 
                     resolve(txHash);
@@ -104,16 +105,16 @@ module.exports = function deploy(deployer) {
                     // let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyDonationCampaign");
                     //
                     // version = incrementVersion(version);
-                    let version = "1.1.3"
+                    let version = "1.1.3";
 
 
-                    let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
 
                     resolve(txHash);
