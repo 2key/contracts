@@ -407,6 +407,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should get balance of TwoKeyEconomy tokens on DonationCampaign', async() => {
+        printTestNumber();
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
         console.log('ERC20 TwoKeyEconomy balance on this contract is : ' + balance);
     }).timeout(60000);

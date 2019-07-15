@@ -464,7 +464,7 @@ describe('TwoKeyProtocol', () => {
             currency: acquisitionCurrency,
             tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
-            numberOfVestingPortions: 200,
+            numberOfVestingPortions: 6,
             numberOfDaysBetweenPortions: 1,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
             isKYCRequired,
