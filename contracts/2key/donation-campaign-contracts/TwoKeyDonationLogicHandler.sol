@@ -5,7 +5,7 @@ import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
-import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
@@ -136,6 +136,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
+//        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyDonationCampaign, referrerPlasma, reward);
     }
 
     /**
@@ -485,7 +486,4 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     {
         return (campaignStartTime,campaignEndTime, minDonationAmountWei, maxDonationAmountWei, campaignGoal);
     }
-
-
-
 }

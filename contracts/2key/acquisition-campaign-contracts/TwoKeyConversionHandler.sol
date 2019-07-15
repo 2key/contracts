@@ -418,18 +418,18 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     onlyContractorOrMaintainer
     {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
-        uint len = converterToHisConversions[_converter].length;
-        for(uint i=0; i<len; i++) {
-            uint conversionId = converterToHisConversions[_converter][i];
-            Conversion c = conversions[conversionId];
-            if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == true) {
-                //TODO: Here should be APPROVED if it is not fiat
-                counters[0]--; //Reduce number of pending conversions
-                counters[1]++; //Increase number of approved conversions
-                c.state = ConversionState.APPROVED;
-//                conversions[conversionId] = c;
-            }
-        }
+//        uint len = converterToHisConversions[_converter].length;
+//        for(uint i=0; i<len; i++) {
+//            uint conversionId = converterToHisConversions[_converter][i];
+//            Conversion c = conversions[conversionId];
+//            if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == true) {
+//                //TODO: Here should be APPROVED if it is not fiat
+//                counters[0]--; //Reduce number of pending conversions
+//                counters[1]++; //Increase number of approved conversions
+//                c.state = ConversionState.APPROVED;
+////                conversions[conversionId] = c;
+//            }
+//        }
         moveFromPendingOrRejectedToApprovedState(_converter);
     }
 

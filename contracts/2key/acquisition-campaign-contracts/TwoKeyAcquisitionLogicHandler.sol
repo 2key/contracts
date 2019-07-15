@@ -7,7 +7,7 @@ import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
-import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 //Libraries
 import "../libraries/SafeMath.sol";
@@ -114,8 +114,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
         twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
 
-        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
-        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyMaintainersRegistry");
+        twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
+        twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
 
         ownerPlasma = plasmaOf(contractor);
         twoKeyConversionHandler = _twoKeyConversionHandler;
@@ -141,7 +141,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             return leftToSpendInEther;
         } else {
             //In order to work with this I have to convert everything to same currency
-            address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
+            address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
             uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
 
             uint totalAmountSpentConvertedToFIAT = (alreadySpentETHWei*rate).div(10**18) + alreadySpentFiatWEI;
@@ -202,7 +202,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
                 return(false, leftToSpend);
             }
         } else {
-            address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
+            address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
             uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
@@ -265,7 +265,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
         } else {
             if(keccak256(currency) != keccak256('ETH')) {
-                address ethUSDExchangeContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
+                address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
                 uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
 
                 conversionAmountETHWeiOrFiat = (conversionAmountETHWeiOrFiat.mul(rate)).div(10 ** 18); //converting eth to $wei
@@ -514,6 +514,9 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
+
+        address twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
+        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyAcquisitionCampaign, referrerPlasma, reward);
     }
 
     /**
@@ -544,7 +547,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             reward = IncentiveModels.averageModelRewards(totalBounty2keys, numberOfInfluencers);
             for(i=0; i<numberOfInfluencers; i++) {
                 updateReferrerMappings(influencers[i], reward, _conversionId);
-
             }
         } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
             uint rewardForLast;
@@ -727,4 +729,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         return me;
     }
 
+    function getAddressFromRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress(contractName);
+    }
 }
