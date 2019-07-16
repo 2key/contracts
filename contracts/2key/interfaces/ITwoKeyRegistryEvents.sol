@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 contract ITwoKeyRegistryEvents {
     function getPlasmaToEthereum(address plasma) public view returns (address);

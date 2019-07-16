@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 contract ITwoKeyDonationLogicHandler {
     function getReferrers(address customer) public view returns (address[]);
