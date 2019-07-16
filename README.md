@@ -30,77 +30,67 @@ Almost all singleton contracts are upgradable except Token contract, using Proxy
 Which gave us pros such as continuously upgrading the logic of our contracts, and expanding storage as ideas are coming out, but again, we don’t have any power to affect any user funds, which will
 keep security on the highest level. 
 
+
 ##### (1) TwoKeyCongress (NON-UPGRADABLE)
-```
 Contract which is on the top of the hierarchy, DAO, which has supremacy over all system, and upon voting for specific proposal, if the
 quorum is reached, can modify almost everything. All manipulations of other singletons from congress will go through TwoKeyAdmin contract.
-```
+
 
 ##### (2) TwoKeyAdminContract (UPGRADABLE)
-```
 Contract which is in charge to execute specific operations per congress request.
-```
+
 
 ##### (3) TwoKeyEconomy (NON-UPGRADABLE)
-```
 Contract which is implementation of regular ERC20, with a minor modification. Our TwoKeyEconomy will have ability to freeze all transfers
 per request of the token. Mints 1B 2KEY tokens, which will be used as a fuel for our system to work, distribute rewards, etc.
-```
+
 
 ##### (4) TwoKeyBaseReputationRegistry (UPGRADABLE)
-```
 Contract which will handle accounting of reputation points, depending on number of executed and rejected conversions, campaigns, etc.
-```
 
 ##### (5) TwoKeyCampaignValidator (UPGRADABLE)
-```
 Contract which is in charge to store addresses of all valid campaigns. Every time campaign is created via TwoKeyFactory, it will call this contract and make 
 fresh created campaign valid to interact with other singletons. It's some kind of Firewall.
-```
 
 ##### (6) TwoKeyEventSource (UPGRADABLE)
-```
 Contract which is going to be a single place from which will be all events emitted. 
-```
 
 ##### (7) TwoKeyExchangeRateContract (UPGRADABLE)
-```
 Contract which will handle exchange rates between FIAT currencies, between FIAT - CRYPTO and will be maintained by approved maintainers stored in TwoKeyMaintainersRegistry
-```
 
 ##### (8) TwoKeyFactory (UPGRADABLE) 
-```
 Contract which will be in charge of deployment of Proxies for all types of campaign. Once it deploys proxy, it will initialize campaigns
 (call setInitialParams methods -> replacement for constructor) and validate campaign through TwoKeyCampaignValidator + call TwoKeyEventSource
 to emit "created" event. 
-```
 
 ##### (9) TwoKeyMaintainersRegistry (UPGRADABLE)
-```
 Contract which will store all the maintianers eligible to modify some stuff around singletons. In general, the most important function
 it exports is getter if user is maintainer.
-```
 
 ##### (10) TwoKeyRegistry (UPGRADABLE)
-```
 Contract which will store user information, such as handle, wallet name, etc.
-```
 
 ##### (11) TwoKeySignatureValidator (UPGRADABLE)
-```
 Contract which will be in charge to valiadate specific signatures per request
-```
 
 ##### (12) TwoKeySingletonRegistry (UPGRADABLE)
-```
 Contract which is working as accountant for all versions of other upgradable contracts + the only one eligible to upgrade specific singleton contract per deployer request 
-```
 
 ##### (13) TwoKeyUpgradableExchange (UPGRADABLE)
-```
 Contract which be in charge mostly for supporting rewards payment, also, handle exchanges to stable coin (hedging), etc.
-```
 
+##### (14) TwoKeyPlasmaSingletonRegistry (NON-UPGRADABLE)
+Contract which is working as accountant for all versions of other upgradable contracts on plasma network + the only one eligible to upgrade specific singleton contract per deployer request 
+
+##### (15) TwoKeyPlasmaEvents (UPGRADABLE)
+Contract which will handle joins on plasma + emit needed events
+
+##### (16) TwoKeyPlasmaMaintainersRegistry (UPGRADABLE)
+Contract which will store all the maintainers on plasma eligible to modify some stuff around singletons. In general, the most important function
+it exports is getter if user is maintainer.
+
+##### (17) TwoKeyPlasmaRegistry (UPGRADABLE)
+Contract which work same as TwoKeyRegistry just on plasma network.
   
 
 ##### Non-Singleton contracts - Campaigns
