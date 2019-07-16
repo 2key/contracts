@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 /**
  * @title Interface contract to handle calls on different contracts
