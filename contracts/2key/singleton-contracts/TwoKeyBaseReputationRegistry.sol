@@ -56,7 +56,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
-        validateCall(acquisitionCampaign);
+        validateCall();
         int d = 1;
         int initialRewardWei = 10*(10**18);
 
@@ -94,27 +94,29 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
-        validateCall(acquisitionCampaign);
+        validateCall();
         int d = 1;
-        int initialPenaltyWei = 5*(10**18);
+        int initialRewardWei = 5*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
 
         bytes32 keyHashContractorScore = keccak256("address2contractorGlobalReputationScoreWei", contractor);
         int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore - initialPenaltyWei);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore - initialRewardWei);
 
         bytes32 keyHashConverterScore = keccak256("address2converterGlobalReputationScoreWei", converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialPenaltyWei);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialRewardWei);
 
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
-        //TODO: Check spec why here is not loop
-        bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[0]);
-        int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialPenaltyWei);
-    }
 
+        for(uint i=0; i<referrers.length; i++) {
+            bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[i]);
+            int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialRewardWei/d);
+            d = d + 1;
+        }
+    }
 
     /**
      * @notice Internal getter from Acquisition campaign to fetch logic handler address
@@ -145,16 +147,22 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice Function to validate call to method
      */
-    function validateCall(
-        address acquisitionCampaign
-    )
+    function validateCall()
     internal
+    view
     {
-        address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
-        require(msg.sender == conversionHandler);
         address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(acquisitionCampaign) == true);
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isConversionHandlerCodeValid(conversionHandler) == true);
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
+    }
+
+    function validateCallTest(address _address)
+    public
+    view
+    returns (bool)
+    {
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(_address) == true);
+        return true;
     }
 
     /**
