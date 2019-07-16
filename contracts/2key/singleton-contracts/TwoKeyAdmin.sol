@@ -50,7 +50,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		twoKeyEconomy = _economy;
 
 		setUint("twoKeyIntegratorDefaultFeePercent",2);
-		setUint("twoKeyNetworkTaxPercent",2);
+		setUint("twoKeyNetworkTaxPercent",25);
 		setUint("twoKeyTokenRate", 95);
 		setUint("rewardReleaseAfter",_twoKeyTokenReleaseDate);
 

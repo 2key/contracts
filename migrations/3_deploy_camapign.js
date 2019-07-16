@@ -29,7 +29,13 @@ let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682b
  * @type {function(*)}
  */
 const incrementVersion = ((version) => {
+    if(version == "") {
+        version = "1.0.0";
+    }
     let vParts = version.split('.');
+    if(vParts.length < 2) {
+        vParts = "1.0.0".split('.');
+    }
     // assign each substring a position within our array
     let partsArray = {
         major : vParts[0],
@@ -80,11 +86,9 @@ module.exports = function deploy(deployer) {
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
                 try {
-                    // let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
-                    //
-                    // version = incrementVersion(version);
+                    let version = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
 
-                    let version = "1.1.4";
+                    version = incrementVersion(version);
 
                     let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
@@ -108,11 +112,9 @@ module.exports = function deploy(deployer) {
             console.log('... Adding implementation versions of Donation campaigns');
             await new Promise(async(resolve,reject) => {
                 try {
-                    // let version = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address).getLatestContractVersion("TwoKeyDonationCampaign");
-                    //
-                    // version = incrementVersion(version);
-                    let version = "1.1.4";
+                    let version = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS).getLatestContractVersion("TwoKeyDonationCampaign");
 
+                    version = incrementVersion(version);
 
                     let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
