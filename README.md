@@ -30,20 +30,16 @@ Almost all singleton contracts are upgradable except Token contract, using Proxy
 Which gave us pros such as continuously upgrading the logic of our contracts, and expanding storage as ideas are coming out, but again, we don’t have any power to affect any user funds, which will
 keep security on the highest level. 
 
-
 ##### (1) TwoKeyCongress (NON-UPGRADABLE)
 Contract which is on the top of the hierarchy, DAO, which has supremacy over all system, and upon voting for specific proposal, if the
 quorum is reached, can modify almost everything. All manipulations of other singletons from congress will go through TwoKeyAdmin contract.
 
-
 ##### (2) TwoKeyAdminContract (UPGRADABLE)
 Contract which is in charge to execute specific operations per congress request.
-
 
 ##### (3) TwoKeyEconomy (NON-UPGRADABLE)
 Contract which is implementation of regular ERC20, with a minor modification. Our TwoKeyEconomy will have ability to freeze all transfers
 per request of the token. Mints 1B 2KEY tokens, which will be used as a fuel for our system to work, distribute rewards, etc.
-
 
 ##### (4) TwoKeyBaseReputationRegistry (UPGRADABLE)
 Contract which will handle accounting of reputation points, depending on number of executed and rejected conversions, campaigns, etc.
