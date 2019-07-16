@@ -152,7 +152,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     view
     {
         address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator) .isCampaignValidated(msg.sender) == true);
     }
 
     function validateCallTest(address _address)

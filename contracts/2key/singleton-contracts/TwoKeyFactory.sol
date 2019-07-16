@@ -16,7 +16,6 @@ import "../interfaces/storage-contracts/ITwoKeyFactoryStorage.sol";
 
 /**
  * @author Nikola Madjarevic
- * @title Contract used to deploy proxies for other non-singleton contracts
  */
 contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 

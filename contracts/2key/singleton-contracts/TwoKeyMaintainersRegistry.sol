@@ -6,8 +6,6 @@ import "../upgradability/Upgradeable.sol";
 
 /**
  * @author Nikola Madjarevic
- * @notice This is maintaining pattern supporting maintainers and twoKeyAdmin as ``central authority`` which is only eligible
- * to edit maintainers list
  */
 
 contract TwoKeyMaintainersRegistry is Upgradeable {

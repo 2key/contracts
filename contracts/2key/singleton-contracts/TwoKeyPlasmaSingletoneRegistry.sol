@@ -8,9 +8,6 @@ import "../upgradability/Upgradeable.sol";
 
 /**
  * @author Nikola Madjarevic
- * @title Registry for plasma network
- * @dev This contract works as a registry of versions, it holds the implementations for the registered versions.
- * @notice Will be everything mapped by contract name, so we will easily update and get versions per contract, all stored here
  */
 contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
 

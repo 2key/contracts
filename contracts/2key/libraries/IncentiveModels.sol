@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 /**
- * @title Library to handle implementation of different reward models
  * @author Nikola Madjarevic
  */
 library IncentiveModels {
