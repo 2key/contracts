@@ -10,7 +10,6 @@ import "../libraries/Call.sol";
 import "./ArcERC20.sol";
 
 /**
- * @title Contract which describes all 2key campaigns
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
  */
 contract TwoKeyCampaign is ArcERC20 {

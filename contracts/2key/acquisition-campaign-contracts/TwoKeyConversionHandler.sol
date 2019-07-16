@@ -11,8 +11,6 @@ import "../libraries/SafeMath.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 /**
- * @notice Contract to handle logic related for Acquisition
- * @dev There will be 1 conversion handler per Acquisition Campaign
  * @author Nikola Madjarevic
  */
 contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates, TwoKeyConverterStates {
