@@ -203,7 +203,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
             Object.keys(networks).forEach(key => {
               mergedNetworks[key] = { ...networks[key], ...proxyNetworks[key] };
               if(proxyNetworks[key]) {
-                  singletonAddresses.push(proxyNetworks[key].implementationAddressLogic);
+                  singletonAddresses.push(proxyNetworks[key].address);
                   singletonAddresses.push(proxyNetworks[key].implementationAddressStorage);
               }
             });
