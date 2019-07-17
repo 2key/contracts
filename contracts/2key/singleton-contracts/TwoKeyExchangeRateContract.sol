@@ -2,9 +2,10 @@ pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/storage-contracts/ITwoKeyExchangeRateContractStorage.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradability/Upgradeable.sol";
 import "./ITwoKeySingletonUtils.sol";
-import "../interfaces/storage-contracts/ITwoKeyExchangeRateContractStorage.sol";
 
 
 /**
@@ -17,11 +18,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     bool initialized;
 
     ITwoKeyExchangeRateContractStorage public PROXY_STORAGE_CONTRACT;
-    /**
-     * @notice Event will be emitted every time we update the price for the fiat
-     */
-    event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
-
 
     /**
      * @notice Function which will be called immediately after contract deployment
@@ -55,7 +51,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     onlyMaintainer
     {
         storeFiatCurrencyDetails(_currency, baseToTargetRate);
-        emit PriceUpdated(_currency, baseToTargetRate, block.timestamp, msg.sender);
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+        ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currency, baseToTargetRate, block.timestamp, msg.sender);
     }
 
     /**
@@ -74,7 +71,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         //There's no need for validation of input, because only we can call this and that costs gas
         for(uint i=0; i<numberOfFiats; i++) {
             storeFiatCurrencyDetails(_currencies[i], baseToTargetRates[i]);
-            emit PriceUpdated(_currencies[i], baseToTargetRates[i], block.timestamp, msg.sender);
+            address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+            ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currencies[i], baseToTargetRates[i], block.timestamp, msg.sender);
         }
     }
 

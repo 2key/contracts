@@ -82,6 +82,14 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address contractor
     );
 
+    event PriceUpdated(
+        bytes32 _currency,
+        uint newRate,
+        uint _timestamp,
+        address _updater
+    );
+
+
     /**
      * Modifier which will allow only completely verified and validated contracts to emit the events
      */
@@ -256,6 +264,18 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
             proxyDonationLogicHandler,
             contractor
         );
+    }
+
+    function priceUpdated(
+        bytes32 _currency,
+        uint newRate,
+        uint _timestamp,
+        address _updater
+    )
+    external
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"));
+        emit PriceUpdated(_currency, newRate, _timestamp, _updater);
     }
 
     /**

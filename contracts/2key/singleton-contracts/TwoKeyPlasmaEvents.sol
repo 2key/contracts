@@ -145,7 +145,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             if(to == address(0)) {
                 return false;
             }
-            to = getVisitedFrom(c, contractor, to);
+            //TODO: Check with UDI do we need here plasmaOf or ethereum address
+            to = plasmaOf(getVisitedFrom(c, contractor, to));
         }
         return true;
     }

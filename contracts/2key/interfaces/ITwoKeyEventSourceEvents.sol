@@ -35,5 +35,14 @@ contract ITwoKeyEventSourceEvents {
     )
     external;
 
+    function priceUpdated(
+        bytes32 _currency,
+        uint newRate,
+        uint _timestamp,
+        address _updater
+    )
+    external;
+
+
 
 }
