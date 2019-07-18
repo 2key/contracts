@@ -489,8 +489,10 @@ async function deploy() {
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
       /* eslint-disable no-await-in-loop */
-      await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
-      deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
+      for(let i=4; i<process.argv.length; i++) {
+          await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv[i]));
+          deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
+      }
       await runMigration3(networks[i]);
       /* eslint-enable no-await-in-loop */
     }
