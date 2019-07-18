@@ -368,6 +368,7 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
 
 const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
     try {
+        console.log("Running update migration");
         await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '4', '--network', network, 'update', contractName]);
         resolve(true);
     } catch (e) {
@@ -510,7 +511,7 @@ async function deploy() {
             /* eslint-disable no-await-in-loop */
             let contractsToBeUpdated = getAllContractsToBeUpdated(process.argv);
             console.log('Contracts to be updated: ' + contractsToBeUpdated);
-            if(contractsToBeUpdated.len > 0) {
+            if(contractsToBeUpdated.length > 0) {
                 runUpdateMigration(networks[i], contractsToBeUpdated[i]);
             } else {
                 await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
