@@ -366,6 +366,25 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
     }
 });
 
+const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '4', '--network', network, 'update', contractName]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+const getAllContractsToBeUpdated = (arguments) => {
+    let len = arguments.length;
+    let contracts = [];
+    while(arguments[len] != 'update' && len > 0) {
+        contracts.push(arguments[len]);
+        len--;
+    }
+    return contracts;
+};
+
 const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
 
 const ipfsGet = (hash) => new Promise((resolve, reject) => {
@@ -489,9 +508,15 @@ async function deploy() {
         const l = networks.length;
         for (let i = 0; i < l; i += 1) {
             /* eslint-disable no-await-in-loop */
-            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
-            deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
-            await runMigration3(networks[i]);
+            let contractsToBeUpdated = getAllContractsToBeUpdated(process.argv);
+            console.log('Contracts to be updated: ' + contractsToBeUpdated);
+            if(contractsToBeUpdated.len > 0) {
+                runUpdateMigration(networks[i], contractsToBeUpdated[i]);
+            } else {
+                await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
+                deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
+                await runMigration3(networks[i]);
+            }
             /* eslint-enable no-await-in-loop */
         }
         const sessionDeployedContracts = await getCurrentDeployedAddresses();
