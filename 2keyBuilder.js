@@ -517,7 +517,7 @@ async function deploy() {
             console.log('Contracts to be updated: ' + contractsToBeUpdated.length);
             let ctr = 0;
             if(contractsToBeUpdated.length > 0) {
-                runUpdateMigration(networks[i], contractsToBeUpdated[ctr]);
+                await runUpdateMigration(networks[i], contractsToBeUpdated[ctr]);
                 ctr++;
             } else {
                 await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
