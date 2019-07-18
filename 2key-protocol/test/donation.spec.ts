@@ -258,6 +258,36 @@ describe('TwoKeyDonationCampaign', () => {
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
+    it('should visit campaign from same referral link', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.renata();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
+        });
+
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail);
+        let maxReward = await twoKeyProtocol.DonationCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
+        console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
+    }).timeout(60000);
+
+    it('should donate 2 ether to campaign', async() => {
+        printTestNumber();
+        console.log('4) buy from test4 REFLINK', links.gmail);
+
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail, from);
+        console.log(txHash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+        expect(txHash).to.be.a('string');
+    }).timeout(60000);
+
     it('should get all pending converters in case KYC is required', async() => {
         printTestNumber();
         const {web3, address} = web3switcher.deployer();
@@ -274,11 +304,10 @@ describe('TwoKeyDonationCampaign', () => {
 
         if(isKYCRequired == true) {
             let pendingConverters = await twoKeyProtocol.DonationCampaign.getAllPendingConverters(campaignAddress, from);
-            expect(pendingConverters.length).to.be.equal(1);
+            expect(pendingConverters.length).to.be.equal(2);
         }
 
     }).timeout(60000);
-
 
     it('should approve converter and execute conversion if KYC == TRUE', async() => {
         printTestNumber();
@@ -294,6 +323,17 @@ describe('TwoKeyDonationCampaign', () => {
             await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
             console.log('Conversion is succesfully executed');
+        } else {
+            console.log('For this campaign KYC is not required since that -> This test case is not relevant!')
+        }
+    }).timeout(60000);
+
+    it('should reject converter if KYC == TRUE', async() => {
+        printTestNumber();
+        if(isKYCRequired == true) {
+            let txHash = await twoKeyProtocol.DonationCampaign.rejectConverter(campaignAddress,env.RENATA_ADDRESS,from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            console.log('Converter is successfully rejected');
         } else {
             console.log('For this campaign KYC is not required since that -> This test case is not relevant!')
         }

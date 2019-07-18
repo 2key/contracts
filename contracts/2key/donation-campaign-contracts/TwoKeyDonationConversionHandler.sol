@@ -311,7 +311,36 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         moveFromPendingOrRejectedToApprovedState(_converter);
     }
 
-    //TODO: Add converter rejection
+    function rejectConverter(
+        address _converter
+    )
+    public
+    onlyContractorOrMaintainer
+    {
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+        moveFromPendingToRejectedState(_converter);
+
+        uint refundAmount = 0;
+        uint len = converterToHisConversions[_converter].length;
+
+        for(uint i=0; i<len; i++) {
+            uint conversionId = converterToHisConversions[_converter][i];
+            Conversion c = conversions[conversionId];
+
+            //In this case since we don't support FIAT, every conversion is auto approved
+            if(c.state == ConversionState.APPROVED) {
+                counters[1]--; // Reduce number of approved conversions
+                counters[2]++; //Increase number of rejected conversions
+//                ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
+                c.state = ConversionState.REJECTED;
+                refundAmount += c.conversionAmount;
+            }
+        }
+
+        if(refundAmount > 0) {
+            twoKeyDonationCampaign.sendBackEthWhenConversionRejected(_converter, refundAmount);
+        }
+    }
 
     /**
      * @notice Function to get all conversion ids for the converter

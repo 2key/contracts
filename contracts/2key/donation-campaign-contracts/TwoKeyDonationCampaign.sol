@@ -362,6 +362,22 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     }
 
     /**
+     * @notice Function to send ether back to converter if his conversion is cancelled
+     * @param _rejectedConverter is the address of cancelled converter
+     * @param _conversionAmount is the amount he sent to the contract
+     * @dev This function can be called only by conversion handler
+     */
+    function sendBackEthWhenConversionRejected(
+        address _rejectedConverter,
+        uint _conversionAmount
+    )
+    public
+    onlyTwoKeyDonationConversionHandler
+    {
+        _rejectedConverter.transfer(_conversionAmount);
+    }
+
+    /**
      * @notice Function to get balance of influencer for his plasma address
      * @param _influencer is the plasma address of influencer
      * @return balance in wei's
