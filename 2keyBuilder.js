@@ -510,9 +510,11 @@ async function deploy() {
         for (let i = 0; i < l; i += 1) {
             /* eslint-disable no-await-in-loop */
             let contractsToBeUpdated = getAllContractsToBeUpdated(process.argv);
-            console.log('Contracts to be updated: ' + contractsToBeUpdated);
+            console.log('Contracts to be updated: ' + contractsToBeUpdated.length);
+            let ctr = 0;
             if(contractsToBeUpdated.length > 0) {
-                runUpdateMigration(networks[i], contractsToBeUpdated[i]);
+                runUpdateMigration(networks[i], contractsToBeUpdated[ctr]);
+                ctr++;
             } else {
                 await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
                 deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
