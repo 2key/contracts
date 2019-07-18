@@ -366,6 +366,12 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
     }
 });
 
+/**
+ * If there's a need to update, we'll run this function
+ * @param network
+ * @param contractName
+ * @returns {Promise<any>}
+ */
 const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
     try {
         console.log("Running update migration");
@@ -376,6 +382,11 @@ const runUpdateMigration = (network, contractName) => new Promise(async(resolve,
     }
 });
 
+/**
+ * Parse all arguments to check all contracts to be updated
+ * @param arguments
+ * @returns {*}
+ */
 const getAllContractsToBeUpdated = (arguments) => {
     let len = arguments.length;
     let contracts = [];
@@ -383,7 +394,9 @@ const getAllContractsToBeUpdated = (arguments) => {
         contracts.push(arguments[len]);
         len--;
     }
-    if(contracts.length > 1) {
+    if(len == 0) {
+        return [];
+    } else if(contracts.length > 1) {
         return contracts.slice(1);
     } else {
         return contracts;
