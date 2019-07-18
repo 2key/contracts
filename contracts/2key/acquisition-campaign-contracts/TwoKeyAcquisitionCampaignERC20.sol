@@ -333,10 +333,12 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
                 address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
                 uint rate = IUpgradableExchange(upgradableExchange).sellRate2key();
                 totalBounty2keys = (_maxReferralRewardETHWei / (rate)) * (1000);
+                reservedAmountOfTokens = reservedAmountOfTokens.add(totalBounty2keys);
                 //TODO: add require that there's enough tokens at this moment
             } else {
                 //Buy tokens from upgradable exchange
                 totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+                reservedAmountOfTokens = reservedAmountOfTokens.add(totalBounty2keys);
             }
             // Update reserved amount
             //Handle refchain rewards

@@ -70,7 +70,7 @@ const getVersionsPath = (branch = true) => {
         return result;
     }
     return result.replace('{branch}', '');
-}
+};
 
 
 const contractsGit = simpleGit();
