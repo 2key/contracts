@@ -382,10 +382,12 @@ const getAllContractsToBeUpdated = (arguments) => {
     while(arguments[len] != 'update' && len > 0) {
         contracts.push(arguments[len]);
         len--;
-        console.log(contracts);
-        console.log(contracts.length);
     }
-    return contracts;
+    if(contracts.length > 1) {
+        return contracts.slice(1);
+    } else {
+        return contracts;
+    }
 };
 
 const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
@@ -515,8 +517,6 @@ async function deploy() {
             console.log('Contracts to be updated: ' + contractsToBeUpdated.length);
             let ctr = 0;
             if(contractsToBeUpdated.length > 0) {
-                console.log('i' + contractsToBeUpdated[i]);
-                console.log('whole' + contractsToBeUpdated);
                 runUpdateMigration(networks[i], contractsToBeUpdated[ctr]);
                 ctr++;
             } else {
