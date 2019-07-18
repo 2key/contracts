@@ -28,10 +28,17 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _to
     );
 
-    event Converted(
+    event ConvertedAcquisition(
         address _campaign,
         address _converter,
-        uint256 _amount
+        uint256 _baseTokens,
+        uint256 _bonusTokens
+    );
+
+    event ConvertedDonation(
+        address _campaign,
+        address _converter,
+        uint _conversionAmount
     );
 
     event Rewarded(
@@ -175,20 +182,31 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
      * @notice Function to emit created event every time conversion happened
      * @param _campaign is the address of the deployed campaign
      * @param _converter is the converter address
-     * @param _amountETHWei is the conversion amount
      * @dev this function updates values in TwoKeyRegistry contract
      */
-    function converted(
+    function convertedAcquisition(
         address _campaign,
         address _converter,
-        uint256 _amountETHWei
+        uint256 _baseTokens,
+        uint256 _bonusTokens
     )
     external
     onlyAllowedContracts
     {
 //        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
 //        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
-        emit Converted(_campaign, _converter, _amountETHWei);
+        emit ConvertedAcquisition(_campaign, _converter, _baseTokens, _bonusTokens);
+    }
+
+    function convertedDonation(
+        address _campaign,
+        address _converter,
+        uint256 _conversionAmount
+    )
+    external
+    onlyAllowedContracts
+    {
+        emit ConvertedDonation(_campaign, _converter, _conversionAmount);
     }
 
     /**
