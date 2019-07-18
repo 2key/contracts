@@ -284,11 +284,10 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev onlyContractor can call this method
      * @return true if successful otherwise will 'revert'
      */
-    function withdrawContractor()
-	public
-	onlyContractor
+    function withdrawContractorInternal()
+	internal
 	{
-        uint balance = contractorBalance;
+		uint balance = contractorBalance;
         contractorBalance = 0;
         /**
          * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas

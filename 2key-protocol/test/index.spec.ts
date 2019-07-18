@@ -1050,8 +1050,8 @@ describe('TwoKeyProtocol', () => {
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
         console.log('Contractor balance: ' + contractorBalance.available);
 
-        const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
 
     it('==> should get address statistics', async() => {

@@ -2,9 +2,8 @@ pragma solidity ^0.4.24;
 
 import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
-
-import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
+import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 
@@ -553,6 +552,18 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         require(msg.sender == twoKeyAcquisitionLogicHandler);
         referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
+    }
+
+    /**
+     * @notice Function where contractor can withdraw his earnings after campaign ends
+     * @dev onlyContractor can call this function
+     */
+    function withdrawContractor()
+    public
+    onlyContractor
+    {
+        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkIsCampaignActive() == false);
+        withdrawContractorInternal();
     }
 
 
