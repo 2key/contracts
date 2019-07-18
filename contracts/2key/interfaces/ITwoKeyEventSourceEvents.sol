@@ -43,6 +43,15 @@ contract ITwoKeyEventSourceEvents {
     )
     external;
 
+    function userRegistered(
+        string _name,
+        address _address,
+        string _fullName,
+        string _email,
+        string _username_walletName
+    )
+    external;
+
 
 
 }

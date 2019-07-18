@@ -89,6 +89,14 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _updater
     );
 
+    event UserRegistered(
+        string _name,
+        address _address,
+        string _fullName,
+        string _email,
+        string _username_walletName
+    );
+
 
     /**
      * Modifier which will allow only completely verified and validated contracts to emit the events
@@ -278,6 +286,19 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit PriceUpdated(_currency, newRate, _timestamp, _updater);
     }
 
+
+    function userRegistered(
+        string _name,
+        address _address,
+        string _fullName,
+        string _email,
+        string _username_walletName
+    )
+    external
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
+    }
     /**
      * @notice Function to check adequate plasma address for submitted eth address
      * @param me is the ethereum address we request corresponding plasma address for

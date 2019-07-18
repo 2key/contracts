@@ -108,6 +108,10 @@ const downgradeContract = (async (registryAddress, contractName, version) => {
 });
 
 
+/**
+ * Function to determine and return truffle build of selected contract
+ * @type {function(*)}
+ */
 const getContractPerName = ((contractName) => {
 
     if(contractName == 'TwoKeyRegistry') {
@@ -178,6 +182,10 @@ const getContractPerName = ((contractName) => {
     else return 'Wrong name';
 });
 
+/**
+ * Validate arguments of method call
+ * @type {function(*)}
+ */
 const checkArguments = ((arguments) => {
     let isArgumentFound = false;
     arguments.forEach((argument) => {

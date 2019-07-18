@@ -646,12 +646,14 @@ async function main() {
 
           await restoreFromArchive();
         const networks = process.argv[3];
-        const contractName = process.argv[4];
-        let str = contractName.toString()+".json";
-        console.log(str);
+        for(let i=4; i<process.argv.length; i++) {
+            let contractName = process.argv[i];
+            let str = contractName.toString()+".json";
+            console.log(str);
+            fs.unlinkSync(path.join(buildPath, str));
+            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f', 4,'update',contractName]);
+        }
         //truffle migrate --network=dev-local --f 4 update
-        fs.unlinkSync(path.join(buildPath, str));
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f', 4,'update',contractName]);
         await generateSOLInterface();
         process.exit(0);
       } catch (err) {
