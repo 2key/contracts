@@ -1,10 +1,12 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IERC20.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
-
+/**
+ * @author Nikola Madjarevic
+ */
 contract TwoKeyPurchasesHandler is UpgradeableCampaign {
 
     enum VestingAmount {BONUS, BASE_AND_BONUS}
