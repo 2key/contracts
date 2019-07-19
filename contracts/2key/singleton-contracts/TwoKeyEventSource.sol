@@ -28,6 +28,12 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _to
     );
 
+    event Converted(
+        address _campaign,
+        address _converter,
+        uint256 _amount
+    );
+
     event ConvertedAcquisition(
         address _campaign,
         address _converter,
@@ -176,6 +182,19 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 //        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
 //        ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
         emit Joined(_campaign, _from, _to);
+    }
+
+    function converted(
+        address _campaign,
+        address _converter,
+        uint256 _amountETHWei
+    )
+    external
+    onlyAllowedContracts
+    {
+        //        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+        //        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
+        emit Converted(_campaign, _converter, _amountETHWei);
     }
 
     /**
