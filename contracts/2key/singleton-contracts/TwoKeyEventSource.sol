@@ -38,7 +38,9 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _campaign,
         address _converter,
         uint256 _baseTokens,
-        uint256 _bonusTokens
+        uint256 _bonusTokens,
+        uint256 _conversionAmount,
+        bool _isFiatConversion
     );
 
     event ConvertedDonation(
@@ -207,14 +209,16 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _campaign,
         address _converter,
         uint256 _baseTokens,
-        uint256 _bonusTokens
+        uint256 _bonusTokens,
+        uint256 _conversionAmount,
+        bool _isFiatConversion
     )
     external
     onlyAllowedContracts
     {
 //        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
 //        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
-        emit ConvertedAcquisition(_campaign, _converter, _baseTokens, _bonusTokens);
+        emit ConvertedAcquisition(_campaign, _converter, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion);
     }
 
     function convertedDonation(
