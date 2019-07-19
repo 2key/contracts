@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 /**
- * @title Interface contract to handle calls on different contracts
  * @author Nikola Madjarevic
  */
 contract IHandleCampaignDeployment {

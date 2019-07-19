@@ -2,9 +2,6 @@ pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeySingletonesRegistry.sol";
 
-/**
- * @title UpgradeabilityStorage
- */
 contract UpgradeabilityCampaignStorage {
     // Versions registry
     ITwoKeySingletonesRegistry internal registry;
