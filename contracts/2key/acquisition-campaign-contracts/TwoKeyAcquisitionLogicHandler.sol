@@ -45,6 +45,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
     bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
 
+    uint campaignRaisedAlready;
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
     uint minContributionETHorFiatCurrency; //Minimal contribution
@@ -53,8 +54,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     uint unit_decimals; // ERC20 selling data
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
     uint campaignHardCapWei; // Hard cap of campaign
-
     string public currency; // Currency campaign is currently in
+    bool endCampaignWhenHardCapReached;
 
     // Enumerator representing incentive model selected for the contract
     IncentiveModel incentiveModel;
@@ -99,11 +100,16 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         //Add as 6th argument incentive model uint
         incentiveModel = IncentiveModel(values[6]);
+
         if(values[7] == 1) {
             isAcceptingFiatOnly = true;
         }
 
         campaignHardCapWei = values[8];
+
+        if(values[9] == 1) {
+            endCampaignWhenHardCapReached = true;
+        }
 
         currency = _currency;
         assetContractERC20 = _assetContractERC20;
@@ -124,54 +130,108 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     }
 
     /**
-     *
+     * @notice Function to activate campaign, can be called only ONCE
+     * @dev onlyContractor can call this function
      */
     function activateCampaign() public onlyContractor {
         require(IS_CAMPAIGN_ACTIVE == false);
-        uint balanceOfTokenBeingSoldOnAcquisition = getInventoryBalance();
+        uint balanceOfTokensOnAcquisitionAtTheBeginning = IERC20(assetContractERC20).balanceOf(twoKeyAcquisitionCampaign);
         //balance is in weis, price is in weis and hardcap is regular number
-        require((balanceOfTokenBeingSoldOnAcquisition * pricePerUnitInETHWeiOrUSD).div(10**18) >= campaignHardCapWei);
+        require((balanceOfTokensOnAcquisitionAtTheBeginning * pricePerUnitInETHWeiOrUSD).div(10**18) >= campaignHardCapWei);
         IS_CAMPAIGN_ACTIVE = true;
     }
 
+    /**
+     * @notice Function which will validate following:
+     * (1) is campaign active in terms of time
+     * (2) is campaign active in case contractor selected `endCampaignWhenHardCapReached`
+     * (3) if converter has reached max contribution amount
+     * @param converter is the address who want to convert
+     * @param conversionAmount is the amount of conversion
+     * @param isFiatConversion is flag if conversion is fiat or ether
+     */
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, bool isFiatConversion) external returns (bool) {
+        require(msg.sender == twoKeyAcquisitionCampaign);
+        require(IS_CAMPAIGN_ACTIVE == true);
+        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount, isFiatConversion) == true);
+        require(updateRaisedFundsAndValidateConversionInTermsOfHardCap(conversionAmount, isFiatConversion) == true);
+        require(checkIsCampaignActiveInTermsOfTime() == true);
+        return true;
+    }
 
-    function checkHowMuchUserCanSpend(uint alreadySpentETHWei, uint alreadySpentFiatWEI) public view returns (uint) {
+
+    function checkHowMuchUserCanConvert(uint alreadySpentETHWei, uint alreadySpentFiatWEI) internal view returns (uint) {
         if(keccak256(currency) == keccak256('ETH')) {
             uint leftToSpendInEther = maxContributionETHorFiatCurrency - alreadySpentETHWei;
             return leftToSpendInEther;
         } else {
-            //In order to work with this I have to convert everything to same currency
-            address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
-            uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
-
+            uint rate = getRateFromExchange();
             uint totalAmountSpentConvertedToFIAT = (alreadySpentETHWei*rate).div(10**18) + alreadySpentFiatWEI;
             uint limit = maxContributionETHorFiatCurrency; // Initially we assume it's fiat currency campaign
-            uint leftToSpendInFiats = limit-totalAmountSpentConvertedToFIAT;
+            uint leftToSpendInFiats = limit.sub(totalAmountSpentConvertedToFIAT);
             return leftToSpendInFiats;
         }
     }
 
-    function canConversionBeCreated(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool) {
-        bool canConvert = checkIsCampaignActive();
-        if(IS_CAMPAIGN_ACTIVE == false) {
-            return false;
+    /**
+     * @notice Function which will update total raised funds which will be always compared with hard cap
+     * @param newAmount is the value including the new conversion amount
+     */
+    function updateTotalRaisedFunds(uint newAmount) internal {
+        campaignRaisedAlready = campaignRaisedAlready.add(newAmount);
+    }
+
+    /**
+     * @notice Function which will calculate how much will be raised including the conversion which try to be created
+     * @param conversionAmount is the amount of conversion
+     * @param isFiatConversion is flag which determines if conversion is either fiat or ether
+     */
+    function calculateRaisedFundsIncludingNewConversion(uint conversionAmount, bool isFiatConversion) internal view returns (uint) {
+        uint total = 0;
+        if(keccak256(currency) == keccak256('ETH')) {
+            total = campaignRaisedAlready + conversionAmount;
+        } else {
+            if(isFiatConversion) {
+                total = campaignRaisedAlready + conversionAmount;
+            } else {
+                uint rate = getRateFromExchange();
+                total = (conversionAmount*rate).div(10**18) + campaignRaisedAlready;
+            }
         }
-        if(canConvert == false) {
-            return false;
+        return total;
+    }
+
+    /**
+     * @notice Function which will validate if conversion can be created if endCampaignWhenHardCapReached is selected
+     * @param campaignRaisedIncludingConversion is how much will be total campaign raised with new conversion
+     */
+    function canConversionBeCreatedInTermsOfHardCap(uint campaignRaisedIncludingConversion) internal view returns (bool) {
+        if(endCampaignWhenHardCapReached == true) {
+            require(campaignRaisedIncludingConversion <= campaignHardCapWei);
         }
+        return true;
+    }
+
+    function updateRaisedFundsAndValidateConversionInTermsOfHardCap(uint conversionAmount, bool isFiatConversion) internal returns (bool) {
+        uint newTotalRaisedFunds = calculateRaisedFundsIncludingNewConversion(conversionAmount, isFiatConversion); // calculating new total raised funds
+        require(canConversionBeCreatedInTermsOfHardCap(newTotalRaisedFunds)); // checking that criteria is satisfied
+        updateTotalRaisedFunds(newTotalRaisedFunds); //updating new total raised funds
+        return true;
+    }
+
+
+    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint amountWillingToSpend, bool isFiat) internal view returns (bool) {
+        bool canConvert;
         //If we reach this point means we have reached point that campaign is still active
         if(isFiat) {
-            (canConvert,)= canMakeFiatConversion(converter, amountWillingToSpend);
+            (canConvert,)= validateMinMaxContributionForFIATConversion(converter, amountWillingToSpend);
         } else {
-            (canConvert,) = canMakeETHConversion(converter, amountWillingToSpend);
+            (canConvert,) = validateMinMaxContributionForETHConversion(converter, amountWillingToSpend);
         }
-
         return canConvert;
     }
 
-    //TODO: HANDLE INSIDE THIS METHODS MIN CONTRIBUTION AMOUNT
-
-    function canMakeFiatConversion(address converter, uint amountWillingToSpendFiatWei) internal view returns (bool,uint) {
+    function validateMinMaxContributionForFIATConversion(address converter, uint amountWillingToSpendFiatWei) internal view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
         if(keccak256(currency) == keccak256('ETH')) {
@@ -179,7 +239,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         } else {
             (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
 
-            uint leftToSpendFiat = checkHowMuchUserCanSpend(alreadySpentETHWei,alreadySpentFIATWEI);
+            uint leftToSpendFiat = checkHowMuchUserCanConvert(alreadySpentETHWei,alreadySpentFIATWEI);
             if(leftToSpendFiat >= amountWillingToSpendFiatWei) {
                 return (true,leftToSpendFiat);
             } else {
@@ -188,11 +248,11 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         }
     }
 
-    function canMakeETHConversion(address converter, uint amountWillingToSpendEthWei) public view returns (bool,uint) {
+    function validateMinMaxContributionForETHConversion(address converter, uint amountWillingToSpendEthWei) public view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
         (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
-        uint leftToSpend = checkHowMuchUserCanSpend(alreadySpentETHWei, alreadySpentFIATWEI);
+        uint leftToSpend = checkHowMuchUserCanConvert(alreadySpentETHWei, alreadySpentFIATWEI);
 
         if(keccak256(currency) == keccak256('ETH')) {
             //Adding a deviation of 1000 weis
@@ -202,8 +262,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
                 return(false, leftToSpend);
             }
         } else {
-            address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
-            uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+            uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
             if(leftToSpend + 1000 >= amountToBeSpentInFiat) {
@@ -214,11 +273,37 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         }
     }
 
+
+    /**
+     * @notice Function to check if campaign has ended
+     */
+    function isCampaignEnded() internal view returns (bool) {
+        if(checkIsCampaignActiveInTermsOfTime() == false) {
+            return true;
+        }
+        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready == campaignHardCapWei) {
+            return true;
+        }
+        return false;
+    }
+
+    function canContractorWithdrawUnsoldTokens() public view returns (bool) {
+        return isCampaignEnded();
+    }
+
+    function canContractorWithdrawFunds() public view returns (bool) {
+        if(isCampaignEnded() == true || campaignRaisedAlready == campaignHardCapWei) {
+            return true;
+        }
+        return false;
+    }
+
+
     /**
      * @notice Requirement for the checking if the campaign is active or not
      */
-    function checkIsCampaignActive()
-    public
+    function checkIsCampaignActiveInTermsOfTime()
+    internal
     view
     returns (bool)
     {
@@ -236,9 +321,15 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     function getInvestmentRules()
     public
     view
-    returns (bool,uint,uint)
+    returns (bool,uint,uint,uint,bool)
     {
-        return (isFixedInvestmentAmount, minContributionETHorFiatCurrency, maxContributionETHorFiatCurrency);
+        return (
+            isFixedInvestmentAmount,
+            minContributionETHorFiatCurrency,
+            maxContributionETHorFiatCurrency,
+            campaignHardCapWei,
+            endCampaignWhenHardCapReached
+        );
     }
 
 
@@ -325,22 +416,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         );
     }
 
-
-    /**
-    * @notice Function to check balance of the ERC20 inventory (view - no gas needed to call this function)
-    * @dev we're using Utils contract and fetching the balance of this contract address
-    * @return balance value as uint
-    */
-    function getInventoryBalance()
-    internal
-    view
-    returns (uint)
-    {
-        uint balance = IERC20(assetContractERC20).balanceOf(twoKeyAcquisitionCampaign);
-        return balance;
-    }
-
-
     /**
      * @notice Function to check if the msg.sender has already joined
      * @return true/false depending of joined status
@@ -363,8 +438,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         }
         return false;
     }
-
-
 
     /**
      * @notice Function to fetch stats for the address
@@ -729,7 +802,15 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         return me;
     }
 
+
     function getAddressFromRegistry(string contractName) internal view returns (address) {
         return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress(contractName);
     }
+
+    function getRateFromExchange() internal view returns (uint) {
+        address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
+        uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+        return rate;
+    }
+
 }

@@ -225,12 +225,12 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        bool canConvert = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canConversionBeCreated(
+        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
             msg.value,
             false
-        );
-        require(canConvert == true);
+        ) == true);
+
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, msg.sender);
@@ -255,12 +255,12 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        bool canConvert = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canConversionBeCreated(
+        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
             _converter,
             conversionAmountFiatWei,
             true
-        );
-        require(canConvert == true);
+        ) == true);
+
         address _converterPlasma = twoKeyEventSource.plasmaOf(_converter);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, _converter);
@@ -570,7 +570,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     onlyContractor
     {
-        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkIsCampaignActive() == false);
+        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canContractorWithdrawFunds() == true);
         withdrawContractorInternal();
     }
 
@@ -580,7 +580,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
      * @dev This function will throw in case the caller is not contractor
      */
     function withdrawUnsoldTokens() onlyContractor {
-        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkIsCampaignActive() == false);
+        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canContractorWithdrawUnsoldTokens() == true);
         uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
         IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
 

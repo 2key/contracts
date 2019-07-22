@@ -36,7 +36,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
 
-
 	string public publicMetaHash; // Ipfs hash of json campaign object
 	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
 
