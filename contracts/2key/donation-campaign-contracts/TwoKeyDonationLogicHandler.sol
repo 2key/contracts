@@ -479,6 +479,20 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return me;
     }
 
+    /**
+     * @notice Requirement for the checking if the campaign is active or not
+     */
+    function checkIsCampaignActiveInTermsOfTime()
+    internal
+    view
+    returns (bool)
+    {
+        if(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime) {
+            return true;
+        }
+        return false;
+    }
+
     function getConstantInfo()
     public
     view
