@@ -668,9 +668,12 @@ async function deploy() {
 const slack_message = async (newVersion) => {
     const token = process.env.SLACK_TOKEN;
 
+    process.cwd();
+
     let commitHash = require('child_process')
         .execSync('git rev-parse HEAD')
         .toString().trim();
+
 
     let commitHash2keyProtocol = require('child_process')
         .execSync('cd 2key-protocol/dist && git rev-parse HEAD')
@@ -837,7 +840,7 @@ async function main() {
             process.exit(0);
             break;
         case '--slack':
-            await slack_message();
+            await slack_message("SOME MESSAGE TEST");
             process.exit(0);
         default:
             await deploy();
