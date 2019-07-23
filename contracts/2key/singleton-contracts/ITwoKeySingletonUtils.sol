@@ -14,7 +14,10 @@ contract ITwoKeySingletonUtils {
         _;
     }
 
-    // Internal function to fetch address from TwoKeyRegTwoistry
+    /**
+     * @notice Function to get any singleton contract proxy address from TwoKeySingletonRegistry contract
+     * @param contractName is the name of the contract we're looking for
+     */
     function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);

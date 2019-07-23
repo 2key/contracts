@@ -99,52 +99,25 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Function to validate if specific conversion handler code is valid
-     * @param _conversionHandler is the address of already deployed conversion handler
-     * @return true if code is valid and responds to conversion handler contract
+     * @notice Function which will return either is or not one of the campaign contracts validated
+     * @param campaign is any contract deployed during any campaign creation through TwoKeyFactory
      */
-    function isConversionHandlerCodeValid(
-        address _conversionHandler
-    )
-    public
-    view
-    returns (bool)
-    {
-        require(PROXY_STORAGE_CONTRACT.getBool(keccak256("isCampaignValidated",_conversionHandler)) == true);
-        return true;
-    }
-
-
-    /**
-     * @notice Pure function to convert input string to hex
-     * @param source is the input string
-     */
-    function stringToBytes32(
-        string memory source
-    )
-    internal
-    pure
-    returns (bytes32 result)
-    {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-            return 0x0;
-        }
-        assembly {
-            result := mload(add(source, 32))
-        }
-    }
-
     function isCampaignValidated(address campaign) public view returns (bool) {
         bytes32 hashKey = keccak256("isCampaignValidated", campaign);
         return PROXY_STORAGE_CONTRACT.getBool(hashKey);
     }
 
+    /**
+     * @notice Function which is serving as getter for non-singleton hash at the time of campaign creation
+     * @param campaign is the address of strictly main campaign contract (TwoKeyAcquisitionCampaignERC20, TwoKeyDonationCampaign for now)
+     */
     function campaign2NonSingletonHash(address campaign) public view returns (string) {
         return PROXY_STORAGE_CONTRACT.getString(keccak256("campaign2NonSingletonHash", campaign));
     }
 
-
+    /**
+     * @notice Function to emit event on TwoKeyEventSource contract
+     */
     function emitCreatedEvent(address campaign) internal {
         address contractor = ITwoKeyCampaignPublicAddresses(campaign).contractor();
         address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
