@@ -18,6 +18,8 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
 
     /**
      * @notice Function which can be called only once, and is used as replacement for a constructor
+     * @param _twoKeySingletonRegistry is the address of TWO_KEY_SINGLETON_REGISTRY contract
+     * @param _proxyStorage is the address of proxy of storage contract
      * @param _maintainers is the array of initial maintainers we'll kick off contract with
      */
     function setInitialParams(
@@ -29,15 +31,15 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     {
         require(initialized == false);
 
-
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
 
         PROXY_STORAGE_CONTRACT = ITwoKeyMaintainersRegistryStorage(_proxyStorage);
 
 
-        //Set deployer to be also a maintainer
+        //Deployer is also maintainer
         addMaintainer(msg.sender);
 
+        // Store all maintainers inside array (just for getter purposes)
         PROXY_STORAGE_CONTRACT.setAddressArray(keccak256("maintainers"), _maintainers);
 
         //Set initial maintainers
@@ -59,6 +61,9 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         return true;
     }
 
+    /**
+     * @notice Function which will determine if address is maintainer
+     */
     function onlyMaintainer(address _sender) public view returns (bool) {
         return isMaintainer(_sender);
     }
@@ -76,6 +81,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         require(onlyTwoKeyAdmin(msg.sender) == true);
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
+
         for(uint i=0; i<numberOfMaintainers; i++) {
             addMaintainer(_maintainers[i]);
         }
@@ -100,6 +106,9 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         }
     }
 
+    /**
+     * @notice Function to get all maintainers set DURING CAMPAIGN CREATION
+     */
     function getAllMaintainers()
     public
     view
@@ -108,6 +117,10 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         return PROXY_STORAGE_CONTRACT.getAddressArray(keccak256("maintainers"));
     }
 
+    /**
+     * @notice Function to check if address is maintainer
+     * @param _address is the address we're checking if it's maintainer or not
+     */
     function isMaintainer(
         address _address
     )
@@ -119,6 +132,10 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         return PROXY_STORAGE_CONTRACT.getBool(keyHash);
     }
 
+    /**
+     * @notice Function which will add maintainer
+     * @param _maintainer is the address of new maintainer we're adding
+     */
     function addMaintainer(
         address _maintainer
     )
@@ -128,6 +145,10 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         PROXY_STORAGE_CONTRACT.setBool(keyHash, true);
     }
 
+    /**
+     * @notice Function which will remove maintainer
+     * @param _maintainer is the address of the maintainer we're removing
+     */
     function removeMaintainer(
         address _maintainer
     )
