@@ -8,12 +8,9 @@ import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-
-//Libraries
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
-
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 

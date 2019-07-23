@@ -8,7 +8,7 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/IStructuredStorage.sol";
 
-import "../upgradability/UpgradabilityProxy.sol";
+import "../upgradability/UpgradeabilityProxy.sol";
 import "../upgradability/Upgradeable.sol";
 
 

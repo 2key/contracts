@@ -8,9 +8,8 @@ import "../upgradability/Upgradeable.sol";
  * @author Nikola Madjarevic
  */
 contract TwoKeyMaintainersRegistry is Upgradeable {
-    /**
-     * Flag which will make function setInitialParams callable only once
-     */
+
+    // Flag which will make function setInitialParams callable only once
     bool initialized;
 
     address public TWO_KEY_SINGLETON_REGISTRY;

@@ -1,4 +1,6 @@
 pragma solidity ^0.4.24;
+
+
 import "./StandardTokenModified.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 

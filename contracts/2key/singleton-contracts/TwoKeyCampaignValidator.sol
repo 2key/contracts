@@ -15,29 +15,6 @@ import "../upgradability/Upgradeable.sol";
 import "./ITwoKeySingletonUtils.sol";
 
 
-/*******************************************************************************************************************
- *       General purpose of this contract is to validate the layer we can't control,
- *
- *
- *            *****************************************
- *            *  Contracts which are deployed by user *
- *            *  - TwoKeyAcquisitionCampaign          *
- *            *  - TwoKeyAcquisitionLogicHandler      *
- *            *  - TwoKeyConversionHandler            *
-              *  - TwoKeyDonationCampaign             *
-              *  - TwoKeyDonationConversionHandler    *
- *            *****************************************
- *                               |
- *                               |
- *                               |
- *            *****************************************
- *            *   Contract that validates everything  *      Permits        ************************************
- *            *   in the contracts deployed above     * ------------------> * Interaction with our singletones *
- *            *****************************************                     ************************************
- *
- ******************************************************************************************************************/
-
-
 /**
  * @author Nikola Madjarevic
  * Created at 2/12/19

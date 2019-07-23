@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeySingletonesRegistry.sol";
 import "../interfaces/IStructuredStorage.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-import "../upgradability/UpgradabilityProxy.sol";
+import "../upgradability/UpgradeabilityProxy.sol";
 import "../upgradability/Upgradeable.sol";
 
 /**

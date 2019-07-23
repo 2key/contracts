@@ -5,10 +5,8 @@ import "../libraries/SafeMath.sol";
 
 
 /**
-    Implementation of ERC20 token with frozen/unfrozen options
-    Core taken from openzeppelin contracts
-    @author Nikola Madjarevic added frozen transfer options
-*/
+ * @author Nikola Madjarevic added frozen transfer options
+ */
 contract StandardTokenModified is ERC20Basic {
 
     using SafeMath for uint256;

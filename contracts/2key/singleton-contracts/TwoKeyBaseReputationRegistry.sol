@@ -14,7 +14,6 @@ import "../interfaces/storage-contracts/ITwoKeyBaseReputationRegistryStorage.sol
 
 /**
  * @author Nikola Madjarevic
- * Created at 1/31/19
  */
 contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
