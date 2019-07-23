@@ -7,8 +7,7 @@ const sha256 = require('js-sha256');
 const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
-
-
+const axios = require('axios');
 // const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
@@ -27,6 +26,10 @@ const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist'
 const deploymentHistoryPath = path.join(__dirname, 'history{branch}.json');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
+
+require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
+
+
 const deployedTo = {};
 
 let contractsStatus;
@@ -638,6 +641,10 @@ async function deploy() {
                 await runProcess('npm', ['publish', '--tag', contractsStatus.current]);
             }
             await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
+
+            //TODO: Slack message
+            const message = commit + "\n" + npmVersionTag;
+            slack_message(message);
         } else {
             process.exit(0);
         }
@@ -654,6 +661,40 @@ async function deploy() {
         await contractsGit.reset('hard');
     }
 }
+
+/**
+ * Function to send message to slack channel
+ * @param message
+ */
+const slack_message = async (message) => {
+    const token = process.env.SLACK_TOKEN;
+    const body = {
+        channel: 'CKL4T7M2S',
+        attachments: [
+            {
+                blocks: [
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: message,
+                        }
+                    }
+                ]
+            }
+        ]
+    };
+
+    await axios.post('https://slack.com/api/chat.postMessage', body, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-type': 'application/json; charset=utf-8'
+        }
+    }).then(
+        res => {process.exit(0)},
+        err => {console.log(err);process.exit(1)}
+    );
+};
 
 const test = () => new Promise(async (resolve, reject) => {
     // const testsPath = path.join(twoKeyProtocolDir, 'test');
@@ -769,6 +810,9 @@ async function main() {
             await buildSubmodules(contracts);
             process.exit(0);
             break;
+        case '--slack':
+            await slack_message("hello, testing slackbot");
+            process.exit(0);
         default:
             await deploy();
             process.exit(0);
