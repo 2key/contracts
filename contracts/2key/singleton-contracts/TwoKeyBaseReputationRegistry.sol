@@ -8,7 +8,6 @@ import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
-import "../libraries/SafeMath.sol";
 import "./ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyBaseReputationRegistryStorage.sol";
 
@@ -17,7 +16,6 @@ import "../interfaces/storage-contracts/ITwoKeyBaseReputationRegistryStorage.sol
  */
 contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
-    using SafeMath for uint;
 
     bool initialized;
 
@@ -144,24 +142,14 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function to validate call to method
+     * @notice Function to validate that the call is comming from validated campaign
      */
     function validateCall()
     internal
     view
     {
         address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator) .isCampaignValidated(msg.sender) == true);
-    }
-
-    function validateCallTest(address _address)
-    public
-    view
-    returns (bool)
-    {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(_address) == true);
-        return true;
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
     }
 
     /**
