@@ -642,9 +642,8 @@ async function deploy() {
             }
             await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
 
-            //TODO: Slack message
-            const message = commit + "\n" + npmVersionTag;
-            slack_message(message);
+            //Run slack message
+            await slack_message(npmVersionTag);
         } else {
             process.exit(0);
         }
@@ -666,8 +665,18 @@ async function deploy() {
  * Function to send message to slack channel
  * @param message
  */
-const slack_message = async (message) => {
+const slack_message = async (newVersion) => {
     const token = process.env.SLACK_TOKEN;
+
+    let commitHash = require('child_process')
+        .execSync('git rev-parse HEAD')
+        .toString().trim();
+
+    let commitHash2keyProtocol = require('child_process')
+        .execSync('cd 2key-protocol/dist && git rev-parse HEAD')
+        .toString().trim();
+
+
     const body = {
         channel: 'CKL4T7M2S',
         attachments: [
@@ -677,9 +686,26 @@ const slack_message = async (message) => {
                         type: 'section',
                         text: {
                             type: 'mrkdwn',
-                            text: message,
+                            text: `*2KEY-PROTOCOL DEPLOYED NEW VERSION* :  *${newVersion.toUpperCase()}*`,
                         }
-                    }
+                    },
+                    {
+                        type: 'divider',
+                    },
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `*Last commit contracts repo: * https://github.com/2key/contracts/commit/${commitHash}`,
+                        },
+                    },
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `*Last commit 2key-protocol repo: * https://github.com/2key/2key-protocol/commit/${commitHash2keyProtocol.toUpperCase()}`,
+                        },
+                    },
                 ]
             }
         ]
@@ -811,7 +837,7 @@ async function main() {
             process.exit(0);
             break;
         case '--slack':
-            await slack_message("hello, testing slackbot");
+            await slack_message();
             process.exit(0);
         default:
             await deploy();
