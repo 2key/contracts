@@ -207,8 +207,10 @@ module.exports = function deploy(deployer) {
     let contract = getContractPerName(contractName);
     let newImplementationAddress;
     let registryAddress;
-
-    if(deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
+    if(deployer.network.startsWith('dev')) {
+        registryAddress = TwoKeySingletonesRegistry.address;
+    }
+    else if(deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
         registryAddress = TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
     } else {
         registryAddress = TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS;
