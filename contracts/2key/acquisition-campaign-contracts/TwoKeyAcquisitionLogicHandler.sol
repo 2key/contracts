@@ -622,14 +622,15 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             uint rewardForLast;
             // Calculate reward for regular ones and for the last
             (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(totalBounty2keys, numberOfInfluencers);
+            if(numberOfInfluencers > 0) {
+                //Update equal rewards to all influencers but last
+                for(i=0; i<numberOfInfluencers - 1; i++) {
+                    updateReferrerMappings(influencers[i], reward, _conversionId);
 
-            //Update equal rewards to all influencers but last
-            for(i=0; i<numberOfInfluencers - 1; i++) {
-                updateReferrerMappings(influencers[i], reward, _conversionId);
-
+                }
+                //Update reward for last
+                updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
             }
-            //Update reward for last
-            updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
         } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
             // Get rewards per referrer
             uint [] memory rewards = IncentiveModels.powerLawRewards(totalBounty2keys, numberOfInfluencers, 2);
