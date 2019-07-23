@@ -292,7 +292,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     }
 
     function canContractorWithdrawFunds() public view returns (bool) {
-        if(isCampaignEnded() == true || campaignRaisedAlready == campaignHardCapWei) {
+        if(isCampaignEnded() == true || campaignRaisedAlready >= campaignHardCapWei) {
             return true;
         }
         return false;
