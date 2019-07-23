@@ -641,7 +641,7 @@ async function deploy() {
                 await runProcess('npm', ['publish', '--tag', contractsStatus.current]);
             }
             await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
-
+            process.chdir('../../');
             //Run slack message
             await slack_message(npmVersionTag);
         } else {
@@ -667,8 +667,6 @@ async function deploy() {
  */
 const slack_message = async (newVersion) => {
     const token = process.env.SLACK_TOKEN;
-
-    process.cwd();
 
     let commitHash = require('child_process')
         .execSync('git rev-parse HEAD')
@@ -840,7 +838,7 @@ async function main() {
             process.exit(0);
             break;
         case '--slack':
-            await slack_message("1.1.23-develop");
+            await slack_message();
             process.exit(0);
         default:
             await deploy();
