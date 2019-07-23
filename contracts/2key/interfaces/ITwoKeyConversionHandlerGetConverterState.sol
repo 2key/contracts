@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "../TwoKeyConverterStates.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/20/19
