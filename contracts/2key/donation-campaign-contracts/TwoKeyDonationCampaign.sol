@@ -211,6 +211,11 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     public
     payable
     {
+        bool canConvert = ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
+            msg.sender,
+            msg.value
+        );
+        require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, msg.sender);

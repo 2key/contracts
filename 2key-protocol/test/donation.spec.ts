@@ -53,11 +53,11 @@ let campaignName = 'Donation for Some Services';
 let tokenName = 'NikolaToken';
 let tokenSymbol = 'NTKN';
 let maxReferralRewardPercent = 5;
-let campaignStartTime = 12345;
-let campaignEndTime = 1234567;
+let campaignStartTime = 0;
+let campaignEndTime = 9884748832;
 let minDonationAmount = 0.001;
 let maxDonationAmount = 1000;
-let campaignGoal = 1000000000;
+let campaignGoal = 10000000000000000000000000000000;
 let conversionQuota = 5;
 let isKYCRequired = true;
 let shouldConvertToRefer = false;
@@ -65,7 +65,7 @@ let acceptsFiat = false;
 let incentiveModel = "VANILLA_AVERAGE";
 let conversionAmountEth = 1;
 let currency = "ETH";
-
+let endCampaignOnceGoalReached = false;
 let campaignAddress: string;
 let invoiceTokenAddress: string;
 
@@ -94,7 +94,8 @@ let campaignData: ICreateCampaign = {
     shouldConvertToRefer,
     acceptsFiat,
     incentiveModel,
-    currency
+    currency,
+    endCampaignOnceGoalReached
 };
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
