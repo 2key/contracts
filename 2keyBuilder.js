@@ -840,7 +840,7 @@ async function main() {
             process.exit(0);
             break;
         case '--slack':
-            await slack_message("SOME MESSAGE TEST");
+            await slack_message("1.1.23-develop");
             process.exit(0);
         default:
             await deploy();
