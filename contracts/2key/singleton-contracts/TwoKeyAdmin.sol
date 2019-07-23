@@ -10,12 +10,13 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 	bool initialized = false;
 
-	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT;
-	address public twoKeyCongress;
-	address twoKeyEconomy;
+	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; //Pointer to storage contract
+
+	address twoKeyCongress; // Address of TwoKeyCongress (logic)
+	address twoKeyEconomy; // Address of TwoKeyEconomy (2KEY ERC20 token)
 
 
-    /// @notice Modifier will revert if calling address is not a member of electorateAdmins
+    /// @notice Modifier which throws if caller is not TwoKeyCongress
 	modifier onlyTwoKeyCongress {
 		require(msg.sender == twoKeyCongress);
 	    _;
@@ -30,6 +31,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice Function to set initial parameters in the contract including singletones
+     * @param _twoKeySingletonRegistry is the singletons registry contract address
+     * @param _proxyStorageContract is the address of proxy for storage for this contract
      * @param _twoKeyCongress is the address of TwoKeyCongress
      * @param _economy is the address of TwoKeyEconomy
      * @dev This function can be called only once, which will be done immediately after deployment.
@@ -56,23 +59,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
-    /// @notice Function where only elected admin can transfer tokens to an address
-    /// @dev We're recurring to address different from address 0 and token amount greater than 0
-    /// @param _to receiver's address
-    /// @param _tokens is token amounts to be transfers
-	function transferByAdmins(
-		address _to,
-		uint256 _tokens
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		require (_to != address(0));
-		IERC20(twoKeyEconomy).transfer(_to, _tokens);
-	}
 
-    /// @notice Function where only elected admin can transfer ether to an address
-    /// @dev We're recurring to address different from address 0 and amount greater than 0
+    /// @notice Function where only TwoKeyCongress can transfer ether to an address
+    /// @dev We're recurring to address different from address 0
     /// @param to receiver's address
     /// @param amount of ether to be transferred
 	function transferEtherByAdmins(
@@ -86,26 +75,22 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		to.transfer(amount);
 	}
 
-    /// @notice Function will transfer contract balance to owner if contract was never replaced else will transfer the funds to the new Admin contract address
-	function destroy()
-	public
-	onlyTwoKeyCongress
-	{
-        selfdestruct(twoKeyCongress);
-	}
 
     /// @notice Function to add/update name - address pair from twoKeyAdmin
 	/// @param _name is name of user
 	/// @param _addr is address of user
+	/// @param _fullName is full name of the user
+	/// @param _email is the email of the user
+	/// @param _signature is the signature generated on client side
     function addNameToReg(
 		string _name,
 		address _addr,
-		string fullName,
-		string email,
-		bytes signature
+		string _fullName,
+		string _email,
+		bytes _signature
 	) external {
 		address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-    	ITwoKeyReg(twoKeyRegistry).addName(_name, _addr, fullName, email, signature);
+    	ITwoKeyReg(twoKeyRegistry).addName(_name, _addr, _fullName, _email, _signature);
     }
 
 
@@ -125,7 +110,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
 	}
 
-	// Function to transfer 2key tokens
+	/// @notice Function to transfer 2key tokens
+	/// @dev only TwoKeyCongress can call this function
+	/// @param _to is tokens receiver
+	/// @param _amount is the amount of tokens to be transferred
     function transfer2KeyTokens(
 		address _to,
 		uint256 _amount
@@ -138,7 +126,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return completed;
 	}
 
-	// Public wrapper method
+	/// @notice Getter for all integers we'd like to store
+	/// @param key is the key (var name)
 	function getUint(
 		string key
 	)
@@ -149,7 +138,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
 	}
 
-	// Internal wrapper method
+	/// @notice Setter for all integers we'd like to store
+	/// @param key is the key (var name)
+	/// @param value is the value of integer we'd like to store
 	function setUint(
 		string key,
 		uint value
@@ -159,6 +150,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
 	}
 
+	/// @notice Getter function for TwoKeyRewardsReleaseDate
 	function getTwoKeyRewardsReleaseDate()
 	external
 	view
@@ -167,7 +159,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint("rewardReleaseAfter");
 	}
 
-
+	/// @notice Getter function for TwoKeyIntegratorDefaultFeePercent
 	function getDefaultIntegratorFeePercent()
 	public
 	view
@@ -176,7 +168,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint("twoKeyIntegratorDefaultFeePercent");
 	}
 
-
+	/// @notice Getter function for TwoKeyNetworkTaxPercent
 	function getDefaultNetworkTaxPercent()
 	public
 	view
@@ -185,7 +177,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint("twoKeyNetworkTaxPercent");
 	}
 
-
+	/// @notice Getter function for TwoKeyTokenRate
 	function getTwoKeyTokenRate()
 	public
 	view
@@ -194,15 +186,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint("twoKeyTokenRate");
 	}
 
-
-	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
-	/// @dev A payable fallback method
+	/// Fallback function
 	function()
 	external
 	payable
 	{
 
 	}
-
 
 }
