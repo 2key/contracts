@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../libraries/GetCode.sol";
 
-import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
@@ -28,6 +28,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice Function to set initial parameters in this contract
      * @param _twoKeySingletoneRegistry is the address of TwoKeySingletoneRegistry contract
+     * @param _proxyStorage is the address of proxy of storage contract
      */
     function setInitialParams(
         address _twoKeySingletoneRegistry,
@@ -43,6 +44,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
+    // Modifier which will make function throw if caller is not TwoKeyFactory proxy contract
     modifier onlyTwoKeyFactory {
         address twoKeyFactory = getAddressFromTwoKeySingletonRegistry("TwoKeyFactory");
         require(msg.sender == twoKeyFactory);
@@ -50,10 +52,9 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function which is in charge to validate if the campaign contract is ready
-     * It should be called by contractor after he finish all the stuff necessary for campaign to work
-     * @param campaign is the address of the campaign, in this particular case it's acquisition
-     * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
+     * @notice Function which will make newly created campaign validated
+     * @param campaign is the address of the campaign
+     * @param nonSingletonHash is the non singleton hash at the moment of campaign creation
      */
     function validateAcquisitionCampaign(
         address campaign,
@@ -62,8 +63,8 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyTwoKeyFactory
     {
-        address conversionHandler = ITwoKeyAcquisitionCampaignStateVariables(campaign).conversionHandler();
-        address logicHandler = ITwoKeyAcquisitionCampaignStateVariables(campaign).twoKeyAcquisitionLogicHandler();
+        address conversionHandler = ITwoKeyAcquisitionCampaignERC20(campaign).conversionHandler();
+        address logicHandler = ITwoKeyAcquisitionCampaignERC20(campaign).twoKeyAcquisitionLogicHandler();
 
         PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", conversionHandler), true);
         PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", logicHandler), true);
@@ -74,7 +75,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function to validate Donation campaign if it is ready
+     * @notice Function which will make newly created campaign validated
      * @param campaign is the campaign address
      * @dev Validates all the required stuff, if the campaign is not validated, it can't update our singletones
      */
@@ -145,8 +146,8 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
 
     function emitCreatedEvent(address campaign) internal {
-        address contractor = ITwoKeyAcquisitionCampaignStateVariables(campaign).contractor();
-        address moderator = ITwoKeyAcquisitionCampaignStateVariables(campaign).moderator();
+        address contractor = ITwoKeyCampaignPublicAddresses(campaign).contractor();
+        address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
 
         //Get the event source address
         address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");

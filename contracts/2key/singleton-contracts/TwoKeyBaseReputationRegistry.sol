@@ -5,7 +5,7 @@ import "../upgradability/Upgradeable.sol";
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "./ITwoKeySingletonUtils.sol";
@@ -125,7 +125,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (address)
     {
-        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
+        return ITwoKeyAcquisitionCampaignERC20(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
     }
 
     /**
@@ -138,7 +138,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (address)
     {
-        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).conversionHandler();
+        return ITwoKeyAcquisitionCampaignERC20(acquisitionCampaign).conversionHandler();
     }
 
     /**
