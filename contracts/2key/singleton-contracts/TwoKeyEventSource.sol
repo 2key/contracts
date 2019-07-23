@@ -16,6 +16,44 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyEventSourceStorage public PROXY_STORAGE_CONTRACT;
 
+    /**
+     * Modifier which will allow only completely verified and validated contracts to call some functions
+     */
+    modifier onlyAllowedContracts {
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
+        _;
+    }
+
+    /**
+     * Modifier which will allow only TwoKeyCampaignValidator to make some calls
+     */
+    modifier onlyTwoKeyCampaignValidator {
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        require(msg.sender == twoKeyCampaignValidator);
+        _;
+    }
+
+    /**
+     * @notice Function to set initial params in the contract
+     * @param _twoKeySingletonesRegistry is the address of TWO_KEY_SINGLETON_REGISTRY contract
+     * @param _proxyStorage is the address of proxy of storage contract
+     */
+    function setInitialParams(
+        address _twoKeySingletonesRegistry,
+        address _proxyStorage
+    )
+    external
+    {
+        require(initialized == false);
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyEventSourceStorage(_proxyStorage);
+
+        initialized = true;
+    }
+
+
     event Created(
         address _campaign,
         address _owner,
@@ -114,38 +152,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * Modifier which will allow only completely verified and validated contracts to emit the events
-     */
-    modifier onlyAllowedContracts {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
-        _;
-    }
-
-    modifier onlyValidator {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(msg.sender == twoKeyCampaignValidator);
-        _;
-    }
-
-    /**
-     * @notice Function to set initial params in the contract
-     */
-    function setInitialParams(
-        address _twoKeySingletonesRegistry,
-        address _proxyStorage
-    )
-    external
-    {
-        require(initialized == false);
-
-        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
-        PROXY_STORAGE_CONTRACT = ITwoKeyEventSourceStorage(_proxyStorage);
-
-        initialized = true;
-    }
-
-    /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
      * @param _owner is the contractor address of the campaign
@@ -158,11 +164,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _moderator
     )
     external
-    onlyValidator
+    onlyTwoKeyCampaignValidator
     {
-//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-//        ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
-//        ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
     }
 
@@ -181,28 +184,34 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyAllowedContracts
     {
-//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-//        ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
         emit Joined(_campaign, _from, _to);
     }
 
+    /**
+     * @notice Function to emit converted event
+     * @param _campaign is the address of main campaign contract
+     * @param _converter is the address of converter during the conversion
+     * @param _conversionAmount is conversion amount
+     */
     function converted(
         address _campaign,
         address _converter,
-        uint256 _amountETHWei
+        uint256 _conversionAmount
     )
     external
     onlyAllowedContracts
     {
-        //        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-        //        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
-        emit Converted(_campaign, _converter, _amountETHWei);
+        emit Converted(_campaign, _converter, _conversionAmount);
     }
 
     /**
-     * @notice Function to emit created event every time conversion happened
+     * @notice Function to emit created event every time conversion happened under AcquisitionCampaign
      * @param _campaign is the address of the deployed campaign
      * @param _converter is the converter address
+     * @param _baseTokens is the amount of tokens bought
+     * @param _bonusTokens is the amount of bonus tokens received
+     * @param _conversionAmount is the amount of conversion
+     * @param _isFiatConversion is flag representing if conversion is either FIAT or ETHER
      * @dev this function updates values in TwoKeyRegistry contract
      */
     function convertedAcquisition(
@@ -216,11 +225,15 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyAllowedContracts
     {
-//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-//        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
         emit ConvertedAcquisition(_campaign, _converter, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion);
     }
 
+    /**
+     * @notice Function to emit created event every time conversion happened under DonationCampaign
+     * @param _campaign is the address of main campaign contract
+     * @param _converter is the address of the converter
+     * @param _conversionAmount is the amount of conversion
+     */
     function convertedDonation(
         address _campaign,
         address _converter,
@@ -233,7 +246,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function to emit created event every time reward happened
+     * @notice Function to emit created event every time bounty is distributed between influencers
      * @param _campaign is the address of the deployed campaign
      * @param _to is the reward receiver
      * @param _amount is the reward amount
@@ -315,19 +328,33 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    /**
+     * @notice Function which will emit event PriceUpdated every time that happens under TwoKeyExchangeRateContract
+     * @param _currency is the hexed string of currency name
+     * @param _newRate is the new rate
+     * @param _timestamp is the time of updating
+     * @param _updater is the maintainer address which performed this call
+     */
     function priceUpdated(
         bytes32 _currency,
-        uint newRate,
+        uint _newRate,
         uint _timestamp,
         address _updater
     )
     external
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"));
-        emit PriceUpdated(_currency, newRate, _timestamp, _updater);
+        emit PriceUpdated(_currency, _newRate, _timestamp, _updater);
     }
 
-
+    /**
+     * @notice Function to emit event every time user is registered
+     * @param _name is the name of the user
+     * @param _address is the address of the user
+     * @param _fullName is the full user name
+     * @param _email is users email
+     * @param _username_walletName is = concat(username,'_',walletName)
+     */
     function userRegistered(
         string _name,
         address _address,
@@ -380,7 +407,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Address to check if an address is maintainer in registry
+     * @notice Address to check if an address is maintainer in TwoKeyMaintainersRegistry
      * @param _maintainer is the address we're checking this for
      */
     function isAddressMaintainer(
