@@ -303,7 +303,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      * @notice Function to check if contractor can withdraw his proceeds
      */
     function canContractorWithdrawFunds() public view returns (bool) {
-        if(isCampaignEnded() == true || campaignRaisedAlready >= campaignHardCapWei) {
+        if(isCampaignEnded() == true || campaignRaisedAlready >= campaignSoftCapWei) {
             return true;
         }
         return false;
