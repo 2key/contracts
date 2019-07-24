@@ -233,8 +233,9 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             } else {
                 require(conversion.state == ConversionState.PENDING_APPROVAL);
                 require(msg.sender == contractor); // first check who calls this in order to save gas
-                uint availableTokens = twoKeyAcquisitionCampaignERC20.getAvailableAndNonReservedTokensAmount();
-                require(totalUnits < availableTokens);
+//                uint availableTokens = twoKeyAcquisitionCampaignERC20.getAvailableAndNonReservedTokensAmount();
+//                require(totalUnits < availableTokens);
+                //Sufficient because we reserve tokens at the time of creation, in case we bought all, we'll get 0 which will always throw
                 counters[0]--; //Decrease number of pending conversions
             }
 
