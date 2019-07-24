@@ -13,6 +13,7 @@ import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+import "../../openzeppelin-solidity/contracts/ownership/HasNoEther.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -42,7 +43,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
     bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
 
-    uint campaignRaisedAlready;
+    uint public campaignRaisedAlready;
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
     uint minContributionETHorFiatCurrency; //Minimal contribution
@@ -51,6 +52,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     uint unit_decimals; // ERC20 selling data
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
     uint campaignHardCapWei; // Hard cap of campaign
+    uint campaignSoftCapWei; //Soft cap of campaign
     string public currency; // Currency campaign is currently in
     bool endCampaignWhenHardCapReached;
 
@@ -107,6 +109,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(values[9] == 1) {
             endCampaignWhenHardCapReached = true;
         }
+
+        campaignSoftCapWei = values[10];
 
         currency = _currency;
         assetContractERC20 = _assetContractERC20;
@@ -204,7 +208,11 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      */
     function canConversionBeCreatedInTermsOfHardCap(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignWhenHardCapReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignHardCapWei);
+            if(keccak256(currency) == keccak256("ETH")) {
+                require(campaignRaisedIncludingConversion <= campaignHardCapWei);
+            } else {
+                require(campaignRaisedIncludingConversion <= campaignHardCapWei + 10000); //small GAP
+            }
         }
         return true;
     }
@@ -278,16 +286,22 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready == campaignHardCapWei) {
+        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready >= campaignHardCapWei) {
             return true;
         }
         return false;
     }
 
+    /**
+     * @notice Function to check if contractor can withdraw unsold tokens
+     */
     function canContractorWithdrawUnsoldTokens() public view returns (bool) {
         return isCampaignEnded();
     }
 
+    /**
+     * @notice Function to check if contractor can withdraw his proceeds
+     */
     function canContractorWithdrawFunds() public view returns (bool) {
         if(isCampaignEnded() == true || campaignRaisedAlready >= campaignHardCapWei) {
             return true;
@@ -810,5 +824,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
         return rate;
     }
+
 
 }

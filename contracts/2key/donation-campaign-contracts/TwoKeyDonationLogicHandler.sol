@@ -38,7 +38,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     uint minDonationAmountWei; // Minimal donation amount
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
-
     bool endCampaignOnceGoalReached;
     string public currency;
 
@@ -554,11 +553,19 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
      */
     function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignOnceGoalReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignGoal);
+            if(keccak256(currency) == keccak256("ETH")) {
+                require(campaignRaisedIncludingConversion <= campaignGoal);
+            } else {
+                require(campaignRaisedIncludingConversion <= campaignGoal + 10000); //small GAP
+            }
+            return true;
         }
         return true;
     }
 
+    /**
+     * @notice Function to determine if contractor can withdraw his funds
+     */
     function canContractorWithdrawFunds() public view returns (bool) {
         if(isCampaignEnded() == true || campaignRaisedAlready >= campaignGoal) {
             return true;
@@ -573,7 +580,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignOnceGoalReached == true && campaignRaisedAlready == campaignGoal) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedAlready >= campaignGoal) {
             return true;
         }
         return false;

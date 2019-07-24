@@ -474,6 +474,7 @@ describe('TwoKeyProtocol', () => {
             vestingAmount,
             mustConvertToReferr: false,
             campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
+            campaignSoftCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
             endCampaignWhenHardCapReached: false,
         };
 
