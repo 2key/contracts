@@ -12,6 +12,11 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
     bool initialized;
     ITwoKeySignatureValidatorStorage public PROXY_STORAGE_CONTRACT;
 
+    /**
+     * @notice Function to simulate constructor
+     * @param _twoKeySingletonRegistry is the address of TWO_KEY_SINGLETON_REGISTRY
+     * @param _proxyStorage is the address of proxy of storage contracts
+     */
     function setInitialParams(
         address _twoKeySingletonRegistry,
         address _proxyStorage
@@ -26,6 +31,14 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
         initialized = true;
     }
 
+    /**
+     * @notice Function to validate signature which will sign user data
+     * @param _name is the name of user
+     * @param _fullName is the full name of user
+     * @param _email is the email of user
+     * @param signature is the signature
+     * @return if signature is good it will resolve address, otherwise it will be address(0)
+     */
     function validateSignUserData(
         string _name,
         string _fullName,
@@ -43,6 +56,12 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
         return message_signer;
     }
 
+    /**
+     * @notice Function to validate signature which will sign name
+     * @param _name is user name to be signed
+     * @param signature is signature containing that signed name
+     * @return if signature is good it will resolve address, otherwise it will be address(0)
+     */
     function validateSignName(
         string _name,
         bytes signature
@@ -57,6 +76,12 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
         return eth_address;
     }
 
+    /**
+     * @notice Function to validate signature which will sign wallet name
+     * @param username is the username of the user
+     * @param _username_walletName is = concat(username,'_',walletName)
+     * @return if signature is good it will resolve address, otherwise it will be address(0)
+     */
     function validateSignWalletName(
         string memory username,
         string memory _username_walletName,
