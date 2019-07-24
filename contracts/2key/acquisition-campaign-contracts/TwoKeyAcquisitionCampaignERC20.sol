@@ -302,7 +302,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         twoKeyEventSource.convertedAcquisition(
             address(this),
-            converterAddress,
+            twoKeyEventSource.plasmaOf(converterAddress),
             baseTokensForConverterUnits,
             bonusTokensForConverterUnits,
             conversionAmountETHWeiOrFiat,

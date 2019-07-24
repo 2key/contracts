@@ -221,7 +221,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
             distributeArcsBasedOnSignature(signature, msg.sender);
         }
         createConversion(msg.value, msg.sender);
-        twoKeyEventSource.convertedDonation(address(this),msg.sender,msg.value);
+        twoKeyEventSource.convertedDonation(address(this),_converterPlasma,msg.value);
     }
 
     /*
