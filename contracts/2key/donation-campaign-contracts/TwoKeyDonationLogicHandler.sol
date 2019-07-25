@@ -553,12 +553,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
      */
     function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignOnceGoalReached == true) {
-            if(keccak256(currency) == keccak256("ETH")) {
-                require(campaignRaisedIncludingConversion <= campaignGoal);
-            } else {
-                require(campaignRaisedIncludingConversion <= campaignGoal + 10000); //small GAP
-            }
-            return true;
+            require(campaignRaisedIncludingConversion <= campaignGoal + minDonationAmountWei); //small GAP
         }
         return true;
     }

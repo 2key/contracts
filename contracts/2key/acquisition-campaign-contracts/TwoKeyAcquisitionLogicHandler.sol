@@ -208,11 +208,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      */
     function canConversionBeCreatedInTermsOfHardCap(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignWhenHardCapReached == true) {
-            if(keccak256(currency) == keccak256("ETH")) {
-                require(campaignRaisedIncludingConversion <= campaignHardCapWei);
-            } else {
-                require(campaignRaisedIncludingConversion <= campaignHardCapWei + 10000); //small GAP
-            }
+            require(campaignRaisedIncludingConversion <= campaignHardCapWei + minContributionETHorFiatCurrency); //small GAP
         }
         return true;
     }
