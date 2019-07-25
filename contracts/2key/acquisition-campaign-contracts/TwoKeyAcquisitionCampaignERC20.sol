@@ -67,9 +67,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             isKYCRequired = true;
         }
 
-        if(values[3] == 1) {
-            mustConvertToReferr = true;
-        }
+//        if(values[3] == 1) {
+//            mustConvertToReferr = true;
+//        }
 
         totalSupply_ = 1000000;
 
@@ -191,10 +191,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     onlyContractor
     payable
     {
-        //If you send eth, we ignore argument and create your fiat inventory amount with buying tokens
-        if(msg.value > 0) {
-            buyTokensFromUpgradableExchange(msg.value, address(this));
-        }
+        buyTokensFromUpgradableExchange(msg.value, address(this));
     }
 
 
@@ -296,22 +293,23 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
 
-        uint id = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
+        uint conversionId = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
             conversionAmountETHWeiOrFiat, maxReferralRewardFiatOrETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, isKYCRequired);
 
-        twoKeyEventSource.convertedAcquisition(
-            address(this),
-            twoKeyEventSource.plasmaOf(converterAddress),
-            baseTokensForConverterUnits,
-            bonusTokensForConverterUnits,
-            conversionAmountETHWeiOrFiat,
-            isFiatConversion
-        );
+//        twoKeyEventSource.convertedAcquisitionV2(
+//            address(this),
+//            twoKeyEventSource.plasmaOf(converterAddress),
+//            baseTokensForConverterUnits,
+//            bonusTokensForConverterUnits,
+//            conversionAmountETHWeiOrFiat,
+//            isFiatConversion,
+//            conversionId
+//        );
 
         if(isKYCRequired == false) {
             if(isFiatConversion == false || ITwoKeyConversionHandler(conversionHandler).isFiatConversionAutomaticallyApproved()) {
-                ITwoKeyConversionHandler(conversionHandler).executeConversion(id);
+                ITwoKeyConversionHandler(conversionHandler).executeConversion(conversionId);
             }
         }
     }

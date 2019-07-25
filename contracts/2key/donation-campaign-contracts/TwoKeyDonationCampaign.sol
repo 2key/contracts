@@ -65,7 +65,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         twoKeyDonationLogicHandler = _twoKeyDonationLogicHandler;
 
 
-        mustConvertToReferr = booleanValues[0];
+//        mustConvertToReferr = booleanValues[0];
         isKYCRequired = booleanValues[1];
         acceptsFiat = booleanValues[2];
 
@@ -221,7 +221,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
             distributeArcsBasedOnSignature(signature, msg.sender);
         }
         createConversion(msg.value, msg.sender);
-        twoKeyEventSource.convertedDonation(address(this),_converterPlasma,msg.value);
     }
 
     /*
@@ -237,15 +236,22 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     {
         uint256 maxReferralRewardFiatOrETHWei = conversionAmountEthWEI.mul(maxReferralRewardPercent).div(100);
 
-        uint id = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).supportForCreateConversion(
+        uint conversionId = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).supportForCreateConversion(
             converterAddress,
             conversionAmountEthWEI,
             maxReferralRewardFiatOrETHWei,
             isKYCRequired
         );
 
+        twoKeyEventSource.convertedDonationV2(
+            address(this),
+            twoKeyEventSource.plasmaOf(converterAddress),
+            conversionAmountEthWEI,
+            conversionId
+        );
+
         if(isKYCRequired == false) {
-            ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(id);
+            ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(conversionId);
         }
     }
 

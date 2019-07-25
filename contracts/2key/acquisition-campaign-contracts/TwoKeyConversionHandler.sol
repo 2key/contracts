@@ -205,9 +205,41 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
         converterToHisConversions[_converterAddress].push(numberOfConversions);
         emit ConversionCreated(numberOfConversions);
+
+        emitConvertedEvent(
+            _converterAddress,
+            baseTokensForConverterUnits,
+            bonusTokensForConverterUnits,
+            _conversionAmount,
+            isConversionFiat,
+            numberOfConversions
+        );
+
         numberOfConversions++;
 
         return numberOfConversions-1;
+    }
+
+    function emitConvertedEvent(
+        address converterAddress,
+        uint baseTokens,
+        uint bonusTokens,
+        uint conversionAmount,
+        bool isFiatConversion,
+        uint conversionId
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).convertedAcquisitionV2(
+            twoKeyAcquisitionCampaignERC20,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
+            baseTokens,
+            bonusTokens,
+            conversionAmount,
+            isFiatConversion,
+            conversionId
+        );
     }
 
 
