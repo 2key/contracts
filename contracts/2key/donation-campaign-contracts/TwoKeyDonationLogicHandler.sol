@@ -31,7 +31,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     address contractor;
     address moderator;
 
-    uint campaignRaisedAlready;
+    uint public campaignRaisedAlready;
     uint powerLawFactor;
     uint campaignStartTime; // Time when campaign starts
     uint campaignEndTime; // Time when campaign ends
