@@ -50,6 +50,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
 
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
+    mapping(address => uint256) private converterToAmountOfDonationTokensReceived;
     mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => ConverterState) converterToState; // Converter to state
     mapping(address => uint[]) converterToHisConversions;
@@ -181,13 +182,14 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     {
         if(keccak256(currency) == keccak256('ETH')) {
             erc20InvoiceToken.transfer(_converter, _conversionAmountETHWei);
+            converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(_conversionAmountETHWei);
         } else {
             address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
             uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate(currency);
 
             uint conversionAmountInFIAT = (_conversionAmountETHWei*rate).div(10**18);
-
             erc20InvoiceToken.transfer(_converter, conversionAmountInFIAT);
+            converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(conversionAmountInFIAT);
         }
     }
 
@@ -524,8 +526,19 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     )
     public
     view
-    returns (uint) {
+    returns (uint)
+    {
         return amountConverterSpentEthWEI[converter];
+    }
+
+    function getAmountOfDonationTokensConverterReceived(
+        address converter
+    )
+    public
+    view
+    returns (uint)
+    {
+        return converterToAmountOfDonationTokensReceived[converter];
     }
 
 }

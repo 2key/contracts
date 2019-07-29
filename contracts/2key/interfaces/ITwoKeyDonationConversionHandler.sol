@@ -22,6 +22,13 @@ contract ITwoKeyDonationConversionHandler {
     view
     returns (uint);
 
+    function getAmountOfDonationTokensConverterReceived(
+        address converter
+    )
+    public
+    view
+    returns (uint);
+
     function getStateForConverter(
         address _converter
     )

@@ -376,6 +376,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             bool isReferrer;
 
             uint amountConverterSpent = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(eth_address);
+            uint amountOfTokensReceived = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountOfDonationTokensConverterReceived(eth_address);
 
             if(amountConverterSpent> 0) {
                 isConverter = true;
@@ -389,6 +390,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             return abi.encodePacked(
                 amountConverterSpent,
                 referrerPlasma2TotalEarnings2key[plasma_address],
+                amountOfTokensReceived,
                 isConverter,
                 isReferrer,
                 state
