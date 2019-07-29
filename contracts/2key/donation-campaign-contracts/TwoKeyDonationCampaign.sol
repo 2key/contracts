@@ -291,7 +291,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     onlyTwoKeyDonationConversionHandler
     {
         //Get deep freeze token pool address
-        address twoKeyDeepFreezeTokenPool = getContractPrwoxyAddress("TwoKeyDeepFreezeTokenPool");
+        address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
 
         uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
 

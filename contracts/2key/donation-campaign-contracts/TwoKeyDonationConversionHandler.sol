@@ -25,6 +25,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
     ITwoKeyDonationCampaign twoKeyDonationCampaign;
 
+    event ConversionCreated(uint conversionId);
+
     address twoKeySingletonRegistry;
     address twoKeyEventSource;
 
@@ -292,6 +294,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         converterToHisConversions[_converterAddress].push(numberOfConversions);
         emitConvertedEvent(_converterAddress, _conversionAmount, numberOfConversions);
 
+        emit ConversionCreated(numberOfConversions);
         numberOfConversions++;
 
         return numberOfConversions-1;

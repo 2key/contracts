@@ -21,6 +21,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
     bool public isFiatConversionAutomaticallyApproved;
 
+    event ConversionCreated(uint conversionId);
     uint numberOfConversions;
 
     Conversion[] conversions;
@@ -261,6 +262,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             isConversionFiat,
             numberOfConversions
         );
+
+        emit ConversionCreated(numberOfConversions);
 
         numberOfConversions++;
 
