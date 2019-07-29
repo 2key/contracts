@@ -4,6 +4,10 @@ pragma solidity ^0.4.24;
  * Created at 2/13/19
  */
 contract ITwoKeyEventSourceEvents {
+    // This 2 functions will be always in the interface since we need them very often
+    function ethereumOf(address me) public view returns (address);
+    function plasmaOf(address me) public view returns (address);
+
     function created(
         address _campaign,
         address _owner,

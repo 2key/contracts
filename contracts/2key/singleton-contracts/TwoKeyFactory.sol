@@ -7,8 +7,6 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
-import "../acquisition-campaign-contracts/TwoKeyPurchasesHandler.sol";
-import "../acquisition-campaign-contracts/TwoKeyAcquisitionLogicHandler.sol";
 import "../upgradability/Upgradeable.sol";
 import "./ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyFactoryStorage.sol";
@@ -176,7 +174,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             proxyConversions,
             proxyAcquisition,
             proxyPurchasesHandler,
-            msg.sender
+            plasmaOf(msg.sender)
         );
     }
 
@@ -264,7 +262,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             proxyDonationCampaign,
             proxyDonationConversionHandler,
             proxyDonationLogicHandler,
-            msg.sender
+            plasmaOf(msg.sender)
         );
     }
 
@@ -285,5 +283,13 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
     function addressToCampaignType(address _key) public view returns (string) {
         return PROXY_STORAGE_CONTRACT.getString(keccak256("addressToCampaignType", _key));
     }
+
+    function plasmaOf(address _address) internal view returns (address) {
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+        address plasma = ITwoKeyEventSourceEvents(twoKeyEventSource).plasmaOf(_address);
+        return plasma;
+    }
+
+
 
 }
