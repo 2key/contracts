@@ -92,7 +92,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
         ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).userRegistered(
             _name,
-            _sender,
+            getEthereumToPlasma(_sender),
             _fullName,
             _email,
             _username_walletName
