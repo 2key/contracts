@@ -64,7 +64,7 @@ let shouldConvertToRefer = false;
 let acceptsFiat = false;
 let incentiveModel = "VANILLA_AVERAGE";
 let conversionAmountEth = 1;
-let currency = "ETH";
+let currency = "USD";
 let endCampaignOnceGoalReached = false;
 let campaignAddress: string;
 let invoiceTokenAddress: string;
@@ -345,7 +345,11 @@ describe('TwoKeyDonationCampaign', () => {
 
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(invoiceTokenAddress, env.TEST4_ADDRESS);
         balance = parseFloat(twoKeyProtocol.Utils.fromWei(balance,'ether').toString());
-        expect(balance).to.be.equal(1);
+        let expectedValue = 1;
+        if(currency == 'USD') {
+            expectedValue = 100;
+        }
+        expect(balance).to.be.equal(expectedValue);
     }).timeout(60000);
 
     it('should get conversion object', async() => {
@@ -408,7 +412,11 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
         let leftToDonate = await twoKeyProtocol.DonationCampaign.howMuchUserCanContribute(campaignAddress, env.TEST4_ADDRESS, from);
         console.log(leftToDonate);
-        expect(leftToDonate).to.be.equal(maxDonationAmount-conversionAmountEth);
+        let expectedValue = conversionAmountEth;
+        if(currency == 'USD') {
+            expectedValue = conversionAmountEth * 100;
+        }
+        expect(leftToDonate).to.be.equal(maxDonationAmount-expectedValue);
     }).timeout(60000);
 
     it('should show address statistic', async() => {
