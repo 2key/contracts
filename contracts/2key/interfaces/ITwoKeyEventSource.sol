@@ -33,4 +33,12 @@ contract ITwoKeyEventSource {
     external
     view;
 
+    function executed(
+        address _campaignAddress,
+        address _converterPlasmaAddress,
+        uint _conversionId
+    )
+    external
+    view;
+
 }

@@ -170,6 +170,11 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         string _username_walletName
     );
 
+    event Executed(
+        address campaignAddress,
+        address converterPlasmaAddress,
+        uint conversionId
+    );
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -225,6 +230,24 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     onlyAllowedContracts
     {
         emit Converted(_campaign, _converter, _conversionAmount);
+    }
+
+    /**
+     * @notice Function to emit event every time conversion gets executed
+     * @param _campaignAddress is the main campaign contract address
+     * @param _converterPlasmaAddress is the address of converter plasma
+     * @param _conversionId is the ID of conversion, unique per campaign
+     */
+    function executed(
+        address _campaignAddress,
+        address _converterPlasmaAddress,
+        uint _conversionId
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit Executed(_campaignAddress, _converterPlasmaAddress, _conversionId);
     }
 
     //TODO: DEPRECATED FOR NEW CAMPAIGNS

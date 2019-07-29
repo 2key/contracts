@@ -21,7 +21,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
     bool public isFiatConversionAutomaticallyApproved;
 
-    event ConversionCreated(uint conversionId);
     uint numberOfConversions;
 
     Conversion[] conversions;
@@ -132,6 +131,42 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         return fee;
     }
 
+    function emitConvertedEvent(
+        address converterAddress,
+        uint baseTokens,
+        uint bonusTokens,
+        uint conversionAmount,
+        bool isFiatConversion,
+        uint conversionId
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).convertedAcquisitionV2(
+            twoKeyAcquisitionCampaignERC20,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
+            baseTokens,
+            bonusTokens,
+            conversionAmount,
+            isFiatConversion,
+            conversionId
+        );
+    }
+
+    function emitExecutedEvent(
+        address _converterAddress,
+        uint conversionId
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).executed(
+            twoKeyAcquisitionCampaignERC20,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress),
+            conversionId
+        );
+    }
+
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
@@ -204,7 +239,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         conversions.push(c);
 
         converterToHisConversions[_converterAddress].push(numberOfConversions);
-        emit ConversionCreated(numberOfConversions);
 
         emitConvertedEvent(
             _converterAddress,
@@ -218,28 +252,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         numberOfConversions++;
 
         return numberOfConversions-1;
-    }
-
-    function emitConvertedEvent(
-        address converterAddress,
-        uint baseTokens,
-        uint bonusTokens,
-        uint conversionAmount,
-        bool isFiatConversion,
-        uint conversionId
-    )
-    internal
-    view
-    {
-        ITwoKeyEventSource(twoKeyEventSource).convertedAcquisitionV2(
-            twoKeyAcquisitionCampaignERC20,
-            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
-            baseTokens,
-            bonusTokens,
-            conversionAmount,
-            isFiatConversion,
-            conversionId
-        );
     }
 
 
@@ -337,6 +349,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         conversion.state = ConversionState.EXECUTED;
         counters[3]++; //Increase number of executed conversions
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
+
+        emitExecutedEvent(conversion.converter, _conversionId);
     }
 
 

@@ -243,13 +243,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
             isKYCRequired
         );
 
-        twoKeyEventSource.convertedDonationV2(
-            address(this),
-            twoKeyEventSource.plasmaOf(converterAddress),
-            conversionAmountEthWEI,
-            conversionId
-        );
-
         if(isKYCRequired == false) {
             ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(conversionId);
         }
