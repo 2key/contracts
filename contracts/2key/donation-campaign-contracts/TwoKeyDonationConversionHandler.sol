@@ -158,6 +158,19 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         );
     }
 
+    function emitRejectedEvent(
+        address _campaignAddress,
+        address _converterAddress
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).rejected(
+            twoKeyDonationCampaign,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress)
+        );
+    }
+
     function transferInvoiceToken(
         address _converter,
         uint _conversionAmountETHWei
@@ -377,6 +390,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         if(refundAmount > 0) {
             twoKeyDonationCampaign.sendBackEthWhenConversionRejected(_converter, refundAmount);
         }
+
+        emitRejectedEvent(twoKeyDonationCampaign, _converter);
     }
 
     /**

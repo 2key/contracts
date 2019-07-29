@@ -167,6 +167,19 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         );
     }
 
+    function emitRejectedEvent(
+        address _campaignAddress,
+        address _converterAddress
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).rejected(
+            twoKeyAcquisitionCampaignERC20,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress)
+        );
+    }
+
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
@@ -516,6 +529,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             twoKeyAcquisitionCampaignERC20.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
             twoKeyAcquisitionCampaignERC20.sendBackEthWhenConversionCancelled(_converter, refundAmount);
         }
+
+        emitRejectedEvent(twoKeyAcquisitionCampaignERC20, _converter);
     }
 
 

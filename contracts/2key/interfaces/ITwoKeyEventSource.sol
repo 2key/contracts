@@ -7,6 +7,8 @@ contract ITwoKeyEventSource {
     function isAddressMaintainer(address _maintainer) public view returns (bool);
     function getTwoKeyDefaultIntegratorFeeFromAdmin() public view returns (uint);
     function joined(address _campaign, address _from, address _to) external view;
+    function rejected(address _campaign, address _converter) external view;
+
     function convertedAcquisitionV2(
         address _campaign,
         address _converterPlasma,

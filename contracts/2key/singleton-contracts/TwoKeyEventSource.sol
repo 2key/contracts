@@ -232,6 +232,17 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit Converted(_campaign, _converter, _conversionAmount);
     }
 
+    function rejected(
+        address _campaign,
+        address _converter
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit Rejected(_campaign, _converter);
+    }
+
     /**
      * @notice Function to emit event every time conversion gets executed
      * @param _campaignAddress is the main campaign contract address
