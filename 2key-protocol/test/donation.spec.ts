@@ -357,6 +357,7 @@ describe('TwoKeyDonationCampaign', () => {
 
         let conversionId = 0;
         let conversion: IConversion = await twoKeyProtocol.DonationCampaign.getConversion(campaignAddress, conversionId, from);
+        console.log(conversion);
         expect(conversion.conversionState).to.be.equal("EXECUTED");
     }).timeout(60000);
 

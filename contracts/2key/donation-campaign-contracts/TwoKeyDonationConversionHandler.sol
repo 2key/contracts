@@ -67,6 +67,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         uint256 maxReferralRewardETHWei; // Total referral reward for the conversion
         uint256 maxReferralReward2key;
         uint256 moderatorFeeETHWei;
+        uint256 tokensBought;
     }
 
     event InvoiceTokenCreated(
@@ -179,10 +180,12 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         uint _conversionAmountETHWei
     )
     internal
+    returns (uint)
     {
         if(keccak256(currency) == keccak256('ETH')) {
             erc20InvoiceToken.transfer(_converter, _conversionAmountETHWei);
             converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(_conversionAmountETHWei);
+            return _conversionAmountETHWei;
         } else {
             address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
             uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate(currency);
@@ -190,6 +193,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             uint conversionAmountInFIAT = (_conversionAmountETHWei*rate).div(10**18);
             erc20InvoiceToken.transfer(_converter, conversionAmountInFIAT);
             converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(conversionAmountInFIAT);
+            return conversionAmountInFIAT;
         }
     }
 
@@ -289,7 +293,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             _conversionAmount,
             _maxReferralRewardETHWei,
             0,
-            _moderatorFeeETHWei
+            _moderatorFeeETHWei,
+            0
         );
 
         conversions.push(c);
@@ -346,10 +351,9 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         conversion.state = ConversionState.EXECUTED;
         counters[3]++; //Increase number of executed conversions
 
-        //TODO: Add tokens transfer
-        transferInvoiceToken(conversion.converter, conversion.conversionAmount);
+        uint amountOfTokens = transferInvoiceToken(conversion.converter, conversion.conversionAmount);
+        conversion.tokensBought = amountOfTokens;
         emitExecutedEvent(conversion.converter, _conversionId);
-
     }
 
 
@@ -514,6 +518,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             converter,
             conversion.contractorProceedsETHWei,
             conversion.conversionAmount,
+            conversion.tokensBought,
             conversion.maxReferralRewardETHWei,
             conversion.maxReferralReward2key,
             conversion.moderatorFeeETHWei,
