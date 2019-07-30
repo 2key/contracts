@@ -577,7 +577,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignOnceGoalReached == true && campaignRaisedAlready >= campaignGoal) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedAlready + minDonationAmountWei >= campaignGoal) {
             return true;
         }
         return false;

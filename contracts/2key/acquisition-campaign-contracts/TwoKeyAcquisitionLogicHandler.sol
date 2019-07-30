@@ -241,7 +241,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
 
             uint leftToSpendFiat = checkHowMuchUserCanConvert(alreadySpentETHWei,alreadySpentFIATWEI);
-            if(leftToSpendFiat >= amountWillingToSpendFiatWei) {
+            if(leftToSpendFiat >= amountWillingToSpendFiatWei && minContributionETHorFiatCurrency <= amountWillingToSpendFiatWei) {
                 return (true,leftToSpendFiat);
             } else {
                 return (false,leftToSpendFiat);
@@ -257,7 +257,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         if(keccak256(currency) == keccak256('ETH')) {
             //Adding a deviation of 1000 weis
-            if(leftToSpend + 1000 > amountWillingToSpendEthWei) {
+            if(leftToSpend + 1000 > amountWillingToSpendEthWei && minContributionETHorFiatCurrency <= amountWillingToSpendEthWei) {
                 return(true, leftToSpend);
             } else {
                 return(false, leftToSpend);
@@ -266,7 +266,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
-            if(leftToSpend + 1000 >= amountToBeSpentInFiat) {
+            if(leftToSpend + 1000 >= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat) {
                 return (true,leftToSpend);
             } else {
                 return (false,leftToSpend);
@@ -282,7 +282,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready >= campaignHardCapWei) {
+        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready + minContributionETHorFiatCurrency >= campaignHardCapWei) {
             return true;
         }
         return false;
