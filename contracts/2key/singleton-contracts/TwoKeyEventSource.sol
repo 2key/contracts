@@ -176,6 +176,13 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint conversionId
     );
 
+    event ExecutedV1(
+        address campaignAddress,
+        address converterPlasmaAddress,
+        uint conversionId,
+        uint tokens
+    );
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -259,6 +266,25 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     onlyAllowedContracts
     {
         emit Executed(_campaignAddress, _converterPlasmaAddress, _conversionId);
+    }
+
+    /**
+     * @notice Function to emit event every time conversion gets executed
+     * @param _campaignAddress is the main campaign contract address
+     * @param _converterPlasmaAddress is the address of converter plasma
+     * @param _conversionId is the ID of conversion, unique per campaign
+     */
+    function executedV1(
+        address _campaignAddress,
+        address _converterPlasmaAddress,
+        uint _conversionId,
+        uint tokens
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit ExecutedV1(_campaignAddress, _converterPlasmaAddress, _conversionId, tokens);
     }
 
     //TODO: DEPRECATED FOR NEW CAMPAIGNS

@@ -150,15 +150,17 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
     function emitExecutedEvent(
         address _converterAddress,
-        uint conversionId
+        uint conversionId,
+        uint tokens
     )
     internal
     view
     {
-        ITwoKeyEventSource(twoKeyEventSource).executed(
+        ITwoKeyEventSource(twoKeyEventSource).executedV1(
             twoKeyDonationCampaign,
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress),
-            conversionId
+            conversionId,
+            tokens
         );
     }
 
@@ -353,7 +355,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
         uint amountOfTokens = transferInvoiceToken(conversion.converter, conversion.conversionAmount);
         conversion.tokensBought = amountOfTokens;
-        emitExecutedEvent(conversion.converter, _conversionId);
+        emitExecutedEvent(conversion.converter, _conversionId, amountOfTokens);
     }
 
 

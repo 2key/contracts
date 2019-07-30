@@ -156,15 +156,17 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
     function emitExecutedEvent(
         address _converterAddress,
-        uint conversionId
+        uint conversionId,
+        uint tokens
     )
     internal
     view
     {
-        ITwoKeyEventSource(twoKeyEventSource).executed(
+        ITwoKeyEventSource(twoKeyEventSource).executedV1(
             twoKeyAcquisitionCampaignERC20,
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress),
-            conversionId
+            conversionId,
+            tokens
         );
     }
 
@@ -366,7 +368,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         counters[3]++; //Increase number of executed conversions
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
 
-        emitExecutedEvent(conversion.converter, _conversionId);
+        emitExecutedEvent(conversion.converter, _conversionId, conversion.baseTokenUnits + conversion.bonusTokenUnits);
     }
 
 
