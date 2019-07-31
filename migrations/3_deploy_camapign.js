@@ -21,7 +21,7 @@ const path = require('path');
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 
 
-let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
+let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
 
 
 /**
