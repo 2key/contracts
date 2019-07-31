@@ -89,7 +89,7 @@ module.exports = function deploy(deployer) {
                     // let version = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
                     //
                     // version = incrementVersion(version);
-                    let version = "1.0.0";
+                    let version = "1.0.1";
 
                     let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
@@ -117,7 +117,7 @@ module.exports = function deploy(deployer) {
                     //
                     // version = incrementVersion(version);
 
-                    let version = "1.0.0";
+                    let version = "1.0.1";
 
                     let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
