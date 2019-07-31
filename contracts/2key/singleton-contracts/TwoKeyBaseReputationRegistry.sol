@@ -1,26 +1,25 @@
 pragma solidity ^0.4.24;
 
 
-import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
+import "../upgradability/Upgradeable.sol";
 
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol";
+import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
-import "../libraries/SafeMath.sol";
+import "./ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyBaseReputationRegistryStorage.sol";
 
 /**
  * @author Nikola Madjarevic
- * Created at 1/31/19
  */
-contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
+contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
-    using SafeMath for uint;
 
-    address twoKeySingletoneRegistry;
-    address twoKeyCampaignValidator;
+    bool initialized;
+
+    ITwoKeyBaseReputationRegistryStorage public PROXY_STORAGE_CONTRACT;
 
     /**
      * @notice Since using singletone pattern, this is replacement for the constructor
@@ -28,32 +27,17 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
      */
     function setInitialParams(
         address _twoKeySingletoneRegistry,
-        address[] _maintainers
+        address _proxyStorage
     )
     public
     {
-        require(twoKeySingletoneRegistry == address(0));
-        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
-        twoKeyAdmin =
-            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyAdmin");
-        twoKeyCampaignValidator =
-            ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyCampaignValidator");
-        isMaintainer[msg.sender] = true; //also the deployer will be authorized maintainer
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        require(initialized == false);
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletoneRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyBaseReputationRegistryStorage(_proxyStorage);
+
+        initialized = true;
     }
-
-    mapping(address => ReputationScore) public address2contractorGlobalReputationScoreWei;
-    mapping(address => ReputationScore) public address2converterGlobalReputationScoreWei;
-    mapping(address => ReputationScore) public plasmaAddress2referrerGlobalReputationScoreWei;
-
-    // Struct to represent reputation score
-    struct ReputationScore {
-        uint points; //number of points
-        bool isPositive; //are points negative/positive
-    }
-
 
     /**
      * @notice If the conversion executed event occured, 10 points for the converter and contractor + 10/distance to referrer
@@ -69,19 +53,26 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     )
     public
     {
-        validateCall(acquisitionCampaign);
-        uint d = 1;
-        uint initialRewardWei = 10*(10**18);
+        validateCall();
+        int d = 1;
+        int initialRewardWei = 10*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
 
-        address2contractorGlobalReputationScoreWei[contractor] = addToReputationScore(initialRewardWei, address2contractorGlobalReputationScoreWei[contractor]);
-        address2converterGlobalReputationScoreWei[converter] = addToReputationScore(initialRewardWei, address2converterGlobalReputationScoreWei[converter]);
+        bytes32 keyHashContractorScore = keccak256("address2contractorGlobalReputationScoreWei", contractor);
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + initialRewardWei);
+
+        bytes32 keyHashConverterScore = keccak256("address2converterGlobalReputationScoreWei", converter);
+        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + initialRewardWei);
 
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
 
         for(uint i=0; i<referrers.length; i++) {
-            plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]] = addToReputationScore(initialRewardWei/d,plasmaAddress2referrerGlobalReputationScoreWei[referrers[i]]);
+            bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[i]);
+            int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + initialRewardWei/d);
             d = d + 1;
         }
     }
@@ -100,75 +91,28 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     )
     public
     {
-        validateCall(acquisitionCampaign);
-        uint d = 1;
-        uint initialPenaltyWei = 5*(10**18);
+        validateCall();
+        int d = 1;
+        int initialRewardWei = 5*(10**18);
 
         address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
 
-        address2contractorGlobalReputationScoreWei[contractor] = subFromReputationScore(initialPenaltyWei, address2contractorGlobalReputationScoreWei[contractor]);
-        address2converterGlobalReputationScoreWei[converter] = subFromReputationScore(initialPenaltyWei, address2converterGlobalReputationScoreWei[converter]);
+        bytes32 keyHashContractorScore = keccak256("address2contractorGlobalReputationScoreWei", contractor);
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore - initialRewardWei);
+
+        bytes32 keyHashConverterScore = keccak256("address2converterGlobalReputationScoreWei", converter);
+        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialRewardWei);
+
         address[] memory referrers = ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter, acquisitionCampaign);
-        plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]] = subFromReputationScore(initialPenaltyWei,plasmaAddress2referrerGlobalReputationScoreWei[referrers[0]]);
-    }
 
-    /**
-     * @notice Function to handle additions to reputation scores
-     * @param value is value we want to add
-     * @param score is the reputation score we want to modify
-     */
-    function addToReputationScore(
-        uint value,
-        ReputationScore score
-    )
-    internal
-    view
-    returns (ReputationScore)
-    {
-        if(score.points == 0) {
-            score.points = value;
-            score.isPositive = true;
+        for(uint i=0; i<referrers.length; i++) {
+            bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[i]);
+            int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialRewardWei/d);
+            d = d + 1;
         }
-        if(score.isPositive) {
-            score.points = score.points.add(value);
-        } else {
-            if(score.points > value) {
-                score.points = score.points.sub(value);
-            } else {
-                score.points = value.sub(score.points);
-                score.isPositive = true;
-            }
-        }
-        return score;
-    }
-
-    /**
-     * @notice Function to handle substract operations on reputation scores
-     * @param value is the value we want to substract
-     * @param score is the score we want to modify
-     */
-    function subFromReputationScore(
-        uint value,
-        ReputationScore score
-    )
-    internal
-    view
-    returns (ReputationScore)
-    {
-        if(score.points == 0) {
-            score.points = value;
-            score.isPositive = false;
-        } else if(score.isPositive) {
-            if(score.points > value) {
-                score.points = score.points.sub(value);
-            } else {
-                score.points = value.sub(score.points);
-                score.isPositive = false;
-            }
-        } else {
-            score.points = score.points.add(value);
-        }
-        return score;
     }
 
     /**
@@ -181,7 +125,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     view
     returns (address)
     {
-        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
+        return ITwoKeyAcquisitionCampaignERC20(acquisitionCampaign).twoKeyAcquisitionLogicHandler();
     }
 
     /**
@@ -194,21 +138,18 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     view
     returns (address)
     {
-        return ITwoKeyAcquisitionCampaignStateVariables(acquisitionCampaign).conversionHandler();
+        return ITwoKeyAcquisitionCampaignERC20(acquisitionCampaign).conversionHandler();
     }
 
     /**
-     * @notice Function to validate call to method
+     * @notice Function to validate that the call is comming from validated campaign
      */
-    function validateCall(
-        address acquisitionCampaign
-    )
+    function validateCall()
     internal
+    view
     {
-        address conversionHandler = getConversionHandlerAddress(acquisitionCampaign);
-        require(msg.sender == conversionHandler);
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(acquisitionCampaign) == true);
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isConversionHandlerCodeValid(conversionHandler) == true);
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
     }
 
     /**
@@ -221,7 +162,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
         address converter,
         address acquisitionCampaign
     )
-    public
+    internal
     view
     returns (address[])
     {
@@ -239,22 +180,25 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, MaintainingPattern {
     )
     public
     view
-    returns (bytes)
+    returns (int,int,int)
     {
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyRegistry");
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress("TwoKeyRegistry");
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
 
-        ReputationScore memory reputationAsContractor = address2contractorGlobalReputationScoreWei[_address];
-        ReputationScore memory reputationAsConverter = address2converterGlobalReputationScoreWei[_address];
-        ReputationScore memory reputationAsReferrer = plasmaAddress2referrerGlobalReputationScoreWei[plasma];
+        bytes32 keyHashContractorScore = keccak256("address2contractorGlobalReputationScoreWei", _address);
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
 
-        return abi.encodePacked(
-            reputationAsContractor.points,
-            reputationAsContractor.isPositive,
-            reputationAsConverter.points,
-            reputationAsConverter.isPositive,
-            reputationAsReferrer.points,
-            reputationAsReferrer.isPositive
+        bytes32 keyHashConverterScore = keccak256("address2converterGlobalReputationScoreWei", _address);
+        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
+
+        bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", plasma);
+        int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+
+
+        return (
+            contractorScore,
+            converterScore,
+            referrerScore
         );
 
     }

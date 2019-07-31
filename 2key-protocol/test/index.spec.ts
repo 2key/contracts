@@ -1,3 +1,7 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
@@ -257,6 +261,11 @@ const tryToRegisterUser = async (username, from) => {
     } catch {
         console.log('Error Plasma.signEthereum');
     }
+    try {
+        registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
+    } catch {
+        console.log('Error Plasma.signedUsername');
+    }
     let registerReceipts;
     try {
         registerReceipts = await registerUserFromBackend(registerData);
@@ -301,6 +310,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     let campaignAddress: string;
+    let nonSingletonHash: string;
     let aydnepBalance;
     let txHash;
 
@@ -353,26 +363,21 @@ describe('TwoKeyProtocol', () => {
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
     }).timeout(60000);
 
-
-
-
-
     it('should get total supply of economy contract' ,async() => {
         console.log("Check total supply on 2key-economy contract");
         let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
         console.log(totalSup);
     }).timeout(60000);
 
-
     it('should save balance to ipfs', () => {
-        return twoKeyProtocol.Utils.ipfsAdd(aydnepBalance).then((hash) => {
+        return twoKeyProtocol.ipfs.add(aydnepBalance).then((hash) => {
             console.log('IPFS hash', hash);
             expect(hash).to.be.a('string');
         });
     }).timeout(60000);
 
     it('should read from ipfs', () => {
-        return twoKeyProtocol.Utils.getOffchainDataFromIPFSHash('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
+        return twoKeyProtocol.ipfs.get('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
             console.log('IPFS data', data);
         });
     }).timeout(60000);
@@ -426,14 +431,14 @@ describe('TwoKeyProtocol', () => {
     it('should set eth-dolar rate', async() => {
         txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD', 100000000000000000000, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD', from);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate('USD');
         console.log(value);
     }).timeout(60000);
 
     it('should set dollar dai rate', async() => {
         txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue('USD/DAI', 99000000000000000, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        let value = await twoKeyProtocol.TwoKeyExchangeContract.getRatesETHFiat('USD/DAI', from);
+        let value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate('USD/DAI');
         console.log(value);
     }).timeout(60000);
 
@@ -442,7 +447,6 @@ describe('TwoKeyProtocol', () => {
         console.log(tokenSymbol);
         expect(tokenSymbol).to.be.equal('2KEY');
     }).timeout(10000);
-
 
     let campaignData;
 
@@ -461,7 +465,7 @@ describe('TwoKeyProtocol', () => {
             tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
             numberOfVestingPortions: 6,
-            numberOfDaysBetweenPortions: 30,
+            numberOfDaysBetweenPortions: 1,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
             isKYCRequired,
             isFiatConversionAutomaticallyApproved,
@@ -469,7 +473,9 @@ describe('TwoKeyProtocol', () => {
             isFiatOnly,
             vestingAmount,
             mustConvertToReferr: false,
-            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether')
+            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
+            campaignSoftCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
+            endCampaignWhenHardCapReached: false,
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -481,27 +487,34 @@ describe('TwoKeyProtocol', () => {
 
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
+        nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
         links.deployer = campaign.campaignPublicLinkKey;
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(120000);
 
-    it('should reserve amount for fiat conversion rewards', async() => {
+    // it('should replace acquisition submodule', async() => {
+    //     const src = await twoKeyProtocol.Utils.getSubmodule('bd06b1216ac1af2a09db559590d6ec0a2833b447f410f78574abaef5c5a54cd0', 'acquisition');
+    //     console.log(src);
+    //     expect(src.length).to.be.gte(0);
+    // }).timeout(60000);
+
+    // it('should reserve amount for fiat conversion rewards', async() => {
         // if(amount) {
         //     let txHash = await twoKeyProtocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, 0, amount, from);
         //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         // }
-    }).timeout(60000);
+    // }).timeout(60000);
 
     it('should proff that campaign is validated and registered properly', async() => {
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
         expect(isValidated).to.be.equal(true);
         console.log('Campaign is validated');
     }).timeout(60000);
-
-    it('should proof that non singleton hash is set for the campaign', async() => {
-        let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
-        expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
-    }).timeout(60000);
+    //
+    // it('should proof that non singleton hash is set for the campaign', async() => {
+    //     let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
+    //     expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
+    // }).timeout(60000);
 
     it('should save campaign to IPFS', async () => {
         // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
@@ -542,14 +555,6 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(10000);
 
-    it('should check for the moderator and contractor in registry after campaign is created and registered', async() => {
-        console.log(from);
-        const addressesWhereUserIsContractor = await twoKeyProtocol.Registry.getCampaignsWhereUserIsContractor(from);
-        const addressesWhereUserIsModerator = await twoKeyProtocol.Registry.getCampaignsWhereUserIsModerator(from);
-
-        console.log("Contractor: " + addressesWhereUserIsContractor);
-        console.log("Moderator: " + addressesWhereUserIsModerator);
-    }).timeout(60000);
 
     // it('should save contractor link as the private meta hash', async() => {
     //     console.log(links.deployer);
@@ -672,7 +677,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     it('should print joined_from', async () => {
-        const { contractor } = await twoKeyProtocol.Utils.getOffchainDataFromIPFSHash(links.gmail);
+        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail, { json: true, compress: true });
         console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
     }).timeout(60000);
 
@@ -1047,8 +1052,8 @@ describe('TwoKeyProtocol', () => {
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
         console.log('Contractor balance: ' + contractorBalance.available);
 
-        const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
 
     it('==> should get address statistics', async() => {
@@ -1085,7 +1090,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress,from);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress, false ,from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
     }).timeout(60000);
@@ -1283,6 +1288,11 @@ describe('TwoKeyProtocol', () => {
     it('should get campaign type by address', async() => {
         let campaignType = await twoKeyProtocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
         expect(campaignType).to.be.equal("TOKEN_SELL");
+    }).timeout(60000);
+
+    it('should get all maintainers', async() => {
+        let maintainers = await twoKeyProtocol.TwoKeyMaintainersRegistry.getAllMaintainers();
+        expect(maintainers.length).to.be.greaterThan(35);
     }).timeout(60000);
 
     // it('should build refgraph', async() => {

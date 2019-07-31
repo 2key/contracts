@@ -1,368 +1,237 @@
+const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const EventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
-const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
-const TwoKeyCongress = artifacts.require('TwoKeyCongress');
-const Proxy = artifacts.require('UpgradeabilityProxy');
-const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
-const TwoKeyFactory = artifacts.require('TwoKeyFactory');
-
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
-const Call = artifacts.require('Call');
+const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
+const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
+const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
+const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
+const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
+const TwoKeyFactory = artifacts.require('TwoKeyFactory');
+const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
+const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
+const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
+const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 
-const fs = require('fs');
-const path = require('path');
+const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
+const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
+const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
+const TwoKeyAdminStorage = artifacts.require('TwoKeyAdminStorage');
+const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
+const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
+const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
+const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
+const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenPoolStorage');
+const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
+const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
+const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
+const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
+const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
+const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
+const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
-const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
+
+const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
+const TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS = "0xe6ce6250dcfd0416325999f7891bbff668580a7a";
+
+/**
+ * Function to increment minor version
+ * @type {function(*)}
+ */
+const incrementVersion = ((version) => {
+    let vParts = version.split('.');
+    // assign each substring a position within our array
+    let partsArray = {
+        major : vParts[0],
+        minor : vParts[1],
+        patch : vParts[2]
+    };
+    // target the substring we want to increment on
+    partsArray.patch = parseFloat(partsArray.patch) + 1;
+    // set an empty array to join our substring values back to
+    let vArray = [];
+    // grabs each property inside our partsArray object
+    for (let prop in partsArray) {
+        if (partsArray.hasOwnProperty(prop)) {
+            // add each property to the end of our new array
+            vArray.push(partsArray[prop]);
+        }
+    }
+    // join everything back into one string with a period between each new property
+    let newVersion = vArray.join('.');
+    return newVersion;
+});
+
+/**
+ * Function to perform all necessary logic to update smart contract
+ * @type {function(*, *=, *=)}
+ */
+const updateContract = (async (registryAddress, contractName, newImplementationAddress) => {
+    await new Promise(async(resolve,reject) => {
+        try {
+            // Get current active version to be patched
+            let version = await TwoKeySingletonesRegistry.at(registryAddress).getLatestContractVersion(contractName);
+            // Incremented version
+            let newVersion = incrementVersion(version);
+            //Console log the new version
+            console.log('New version is: ' + newVersion);
+            // Add contract version
+            let txHash = await TwoKeySingletonesRegistry.at(registryAddress).addVersion(contractName, newVersion, newImplementationAddress);
+            // Upgrade contract proxy to new version
+            let txHash1 = await TwoKeySingletonesRegistry.at(registryAddress).upgradeContract(contractName, newVersion);
+            resolve({
+                txHash, txHash1
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+});
+
+/**
+ * Function to downgrade contract version
+ * @type {function(*, *=, *=)}
+ */
+const downgradeContract = (async (registryAddress, contractName, version) => {
+    await new Promise(async(resolve,reject) => {
+        try {
+            let txHash = await TwoKeySingletonesRegistry.at(registryAddress).upgradeContract(contractName, version);
+            resolve(txHash);
+        } catch (e) {
+            reject(e);
+        }
+    })
+});
 
 
-module.exports = function deploy(deployer) {
-    const { network_id } = deployer;
-    let found = false;
+/**
+ * Function to determine and return truffle build of selected contract
+ * @type {function(*)}
+ */
+const getContractPerName = ((contractName) => {
 
-    let isRegistry = false;
-    let isEventSource = false;
-    let isTwoKeyExchangeContract = false;
-    let isTwoKeyAdmin = false;
-    let isTwoKeyCongress = false;
-    let isTwoKeyPlasmaEvents = false;
-    let isTwoKeyUpgradableExchange = false;
-    let isTwoKeyFactory = false;
+    if(contractName == 'TwoKeyRegistry') {
+        return TwoKeyRegistry;
+    } else if (contractName == 'TwoKeyExchangeRateContract') {
+        return TwoKeyExchangeRateContract;
+    } else if (contractName == 'TwoKeyAdmin') {
+        return TwoKeyAdmin;
+    } else if (contractName == 'TwoKeyEventSource') {
+        return EventSource;
+    } else if (contractName == 'TwoKeyUpgradableExchange') {
+        return TwoKeyUpgradableExchange;
+    } else if (contractName == 'TwoKeyFactory') {
+        return TwoKeyFactory;
+    } else if (contractName == 'TwoKeyBaseReputationRegistry') {
+        return TwoKeyBaseReputationRegistry;
+    } else if (contractName == 'TwoKeyCampaignValidator') {
+        return TwoKeyCampaignValidator;
+    } else if (contractName == 'TwoKeyCommunityTokenPool') {
+        return TwoKeyCommunityTokenPool;
+    } else if (contractName == 'TwoKeyDeepFreezeTokenPool') {
+        return TwoKeyDeepFreezeTokenPool;
+    } else if (contractName == 'TwoKeyLongTermTokenPool') {
+        return TwoKeyLongTermTokenPool;
+    } else if (contractName == 'TwoKeyMaintainersRegistry') {
+        return TwoKeyMaintainersRegistry;
+    } else if (contractName == 'TwoKeyPlasmaEvents') {
+        return TwoKeyPlasmaEvents;
+    } else if (contractName == 'TwoKeyPlasmaMaintainersRegistry') {
+        return TwoKeyPlasmaMaintainersRegistry;
+    } else if (contractName == 'TwoKeyPlasmaRegistry') {
+        return TwoKeyPlasmaRegistry;
+    } else if (contractName == 'TwoKeySignatureValidator') {
+        return TwoKeySignatureValidator;
+    } else if(contractName == 'TwoKeyRegistryStorage') {
+        return TwoKeyRegistryStorage;
+    } else if (contractName == 'TwoKeyExchangeRateContractStorage') {
+        return TwoKeyExchangeRateStorage;
+    } else if (contractName == 'TwoKeyAdminStorage') {
+        return TwoKeyAdminStorage;
+    } else if (contractName == 'TwoKeyEventSourceStorage') {
+        return TwoKeyEventSourceStorage;
+    } else if (contractName == 'TwoKeyUpgradableExchangeStorage') {
+        return TwoKeyUpgradableExchangeStorage;
+    } else if (contractName == 'TwoKeyFactoryStorage') {
+        return TwoKeyFactoryStorage;
+    } else if (contractName == 'TwoKeyBaseReputationRegistryStorage') {
+        return TwoKeyBaseReputationRegistryStorage;
+    } else if (contractName == 'TwoKeyCampaignValidatorStorage') {
+        return TwoKeyCampaignValidatorStorage;
+    } else if (contractName == 'TwoKeyCommunityTokenPoolStorage') {
+        return TwoKeyCommunityTokenPoolStorage;
+    } else if (contractName == 'TwoKeyDeepFreezeTokenPoolStorage') {
+        return TwoKeyDeepFreezeTokenPoolStorage;
+    } else if (contractName == 'TwoKeyLongTermTokenPoolStorage') {
+        return TwoKeyLongTermTokenPoolStorage;
+    } else if (contractName == 'TwoKeyMaintainersRegistryStorage') {
+        return TwoKeyMaintainersRegistryStorage;
+    } else if (contractName == 'TwoKeyPlasmaEventsStorage') {
+        return TwoKeyPlasmaEventsStorage;
+    } else if (contractName == 'TwoKeyPlasmaMaintainersRegistryStorage') {
+        return TwoKeyPlasmaMaintainersRegistryStorage;
+    } else if (contractName == 'TwoKeyPlasmaRegistryStorage') {
+        return TwoKeyPlasmaRegistryStorage;
+    } else if (contractName == 'TwoKeySignatureValidatorStorage') {
+        return TwoKeySignatureValidatorStorage;
+    }
+    else return 'Wrong name';
+});
 
-    /**
-     * Determining which contract we want to update
-     */
-    process.argv.forEach((argument) => {
-        if (argument == 'update') {
-            found = true
-        }
-        else if (argument == 'TwoKeyRegistry') {
-            isRegistry = true;
-        }
-        else if (argument == 'TwoKeyEventSource') {
-            isEventSource = true;
-        }
-        else if (argument == 'TwoKeyExchangeRateContract') {
-            isTwoKeyExchangeContract = true;
-        }
-        else if (argument == 'TwoKeyAdmin') {
-            isTwoKeyAdmin = true;
-        }
-        else if (argument == 'TwoKeyUpgradableExchange') {
-            isTwoKeyUpgradableExchange = true;
-        }
-        else if(argument == 'TwoKeyFactory') {
-            isTwoKeyFactory = true;
-        }
-        else if (argument == 'TwoKeyPlasmaEvents') {
-            isTwoKeyPlasmaEvents = true;
+/**
+ * Validate arguments of method call
+ * @type {function(*)}
+ */
+const checkArguments = ((arguments) => {
+    let isArgumentFound = false;
+    arguments.forEach((argument) => {
+        if(argument == 'update') {
+            isArgumentFound = true;
         }
     });
 
+    return isArgumentFound;
+});
 
-    if(found) {
-        let fileObject = {};
-        if (fs.existsSync(proxyFile)) {
-            fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
-        }
-        if(isRegistry) {
-            /**
-             * If contract we're updating is TwoKeyRegistry (argument) this 'subscript' will be executed.
-             */
-            let lastTwoKeyRegistryAddress;
-            console.log('TwoKeyRegistry contract will be updated now.');
-            deployer.deploy(TwoKeyRegistry)
-                .then(() => TwoKeyRegistry.deployed()
-                .then(async (twoKeyRegistryInstance) => {
-                    lastTwoKeyRegistryAddress = twoKeyRegistryInstance.address;
-                })
-                .then(() => TwoKeySingletonesRegistry.deployed()
-                    .then(async (registry) => {
-                        await new Promise(async (resolve, reject) => {
-                            try {
-                                console.log('... Adding new version of TwoKeyRegistry to the registry contract');
-                                const twoKeyReg = fileObject.TwoKeyRegistry || {};
-
-                                let v = parseInt(twoKeyReg[network_id].Version.substr(-1)) + 1;
-                                twoKeyReg[network_id].Version = twoKeyReg[network_id].Version.substr(0, twoKeyReg[network_id].Version.length - 1) + v.toString();
-
-                                console.log('New version : ' + twoKeyReg[network_id].Version);
-                                let txHash = await registry.addVersion("TwoKeyRegistry", twoKeyReg[network_id].Version, TwoKeyRegistry.address);
-
-                                console.log('... Upgrading proxy to new version');
-                                txHash = await Proxy.at(twoKeyReg[network_id].Proxy).upgradeTo("TwoKeyRegistry", "1.1");
-                                twoKeyReg[network_id].address = lastTwoKeyRegistryAddress;
-                                fileObject['TwoKeyRegistry'] = twoKeyReg;
-                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                                resolve(txHash);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        })
-                    }
-                )))
-        } else if (isEventSource) {
-            /**
-             * If contract we're updating is TwoKeyEventSource (argument) this 'subscript' will be executed!
-             */
-            let lastEventSourceAddress;
-            console.log('TwoKeyEventSource will be updated now.');
-            deployer.deploy(EventSource)
-                .then(() => EventSource.deployed()
-                .then((eventSourceInstance) => {
-                    lastEventSourceAddress = eventSourceInstance.address;
-                })
-                .then(() => TwoKeySingletonesRegistry.deployed())
-                        .then(async(registry) => {
-                            await new Promise(async(resolve,reject) => {
-                                try {
-                                    console.log('... Adding new version of TwoKeyEventSource to the registry contract');
-                                    const twoKeyEventSource = fileObject.TwoKeyEventSource || {};
-
-                                    let v = parseInt(twoKeyEventSource[network_id].Version.substr(-1)) + 1;
-                                    twoKeyEventSource[network_id].Version = twoKeyEventSource[network_id].Version.substr(0, twoKeyEventSource[network_id].Version.length - 1) + v.toString();
-                                    console.log('New version : ' + twoKeyEventSource[network_id].Version);
-                                    let txHash = await registry.addVersion("TwoKeyEventSource", twoKeyEventSource[network_id].Version, EventSource.address);
-
-                                    console.log('... Upgrading proxy to new version');
-                                    txHash = await Proxy.at(twoKeyEventSource[network_id].Proxy).upgradeTo("TwoKeyEventSource", twoKeyEventSource[network_id].Version);
-                                    twoKeyEventSource[network_id].address = lastEventSourceAddress;
-
-                                    fileObject['TwoKeyEventSource'] = twoKeyEventSource;
-                                    fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                                    resolve(txHash);
-                                } catch (e) {
-                                    reject(e);
-                                }
-                            })
-                        })
-
-                )
-        } else if(isTwoKeyExchangeContract) {
-            /**
-             * If contract we're updating is TwoKeyExchangeRateContract (argument) this 'subscript' will be executed!
-             */
-            let lastTwoKeyExchangeContract;
-            console.log('TwoKeyExchangeRateContract will be updated now.');
-            deployer.deploy(TwoKeyExchangeRateContract)
-                .then(() => TwoKeyExchangeRateContract.deployed()
-                    .then((twoKeyExchangeInstance) => {
-                        lastTwoKeyExchangeContract = twoKeyExchangeInstance.address;
-                    })
-                    .then(() => TwoKeySingletonesRegistry.deployed())
-                    .then(async(registry) => {
-                        await new Promise(async(resolve,reject) => {
-                            try {
-                                console.log('... Adding new version of TwoKeyExchangeRateContract to the registry contract');
-                                const twoKeyExchange = fileObject.ITwoKeyExchangeRateContract || {};
-
-                                let v = parseInt(twoKeyExchange[network_id].Version.substr(-1)) + 1;
-                                twoKeyExchange[network_id].Version = twoKeyExchange[network_id].Version.substr(0, twoKeyExchange[network_id].Version.length - 1) + v.toString();
-                                console.log('New version : ' + twoKeyExchange[network_id].Version);
-                                let txHash = await registry.addVersion("TwoKeyExchangeRateContract", twoKeyExchange[network_id].Version, TwoKeyExchangeRateContract.address);
-
-                                console.log('... Upgrading proxy to new version');
-                                txHash = await Proxy.at(twoKeyExchange[network_id].Proxy).upgradeTo("TwoKeyExchangeRateContract", twoKeyExchange[network_id].Version);
-                                twoKeyExchange[network_id].address = lastTwoKeyExchangeContract;
-
-                                fileObject['TwoKeyExchangeRateContract'] = twoKeyExchange;
-                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                                resolve(txHash);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        })
-                    })
-                )
-        } else if (isTwoKeyUpgradableExchange) {
-            /**
-             * If contract we're updating is TwoKeyUpgradableExchange (arugment) this 'subscript' will be executed
-             */
-            let lastTwoKeyUpgradableExchangeContract;
-            console.log('TwoKeyUpgradableExchange will be updated now.');
-            deployer.deploy(TwoKeyUpgradableExchange)
-                .then(() => TwoKeyUpgradableExchange.deployed()
-                    .then((twoKeyUpgradableExchangeInstance) => {
-                        lastTwoKeyUpgradableExchangeContract = twoKeyUpgradableExchangeInstance.address;
-                    })
-                    .then(() => TwoKeySingletonesRegistry.deployed())
-                    .then(async(registry) => {
-                        await new Promise(async(resolve,reject) => {
-                            try {
-                                console.log('... Adding new version of TwoKeyUpgradableExchange to the registry contract');
-                                const twoKeyUpgradableExchange = fileObject.TwoKeyUpgradableExchange || {};
-                                let v = parseInt(twoKeyUpgradableExchange[network_id].Version.substr(-1)) + 1;
-                                twoKeyUpgradableExchange[network_id].Version = twoKeyUpgradableExchange[network_id].Version.substr(0, twoKeyUpgradableExchange[network_id].Version.length - 1) + v.toString();
-                                console.log('New version : ' + twoKeyUpgradableExchange[network_id].Version);
-                                let txHash = await registry.addVersion("TwoKeyUpgradableExchange", "1.7", TwoKeyUpgradableExchange.address);
-
-                                console.log('... Upgrading proxy to new version');
-                                // txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", twoKeyUpgradableExchange[network_id].Version);
-                                txHash = await Proxy.at(twoKeyUpgradableExchange[network_id].Proxy).upgradeTo("TwoKeyUpgradableExchange", "1.7");
-                                twoKeyUpgradableExchange[network_id].address = lastTwoKeyUpgradableExchangeContract;
-
-                                fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
-                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                                resolve(txHash);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        })
-                    })
-                )
-        } else if(isTwoKeyAdmin) {
-            /**
-             * If contract we're updating is TwoKeyAdmin (arugment) this 'subscript' will be executed
-             */
-            let lastTwoKeyAdminContract;
-            console.log('TwoKeyAdmin will be updated now.');
-            deployer.deploy(TwoKeyAdmin)
-                .then(() => TwoKeyAdmin.deployed()
-                    .then((twoKeyAdminInstance) => {
-                        lastTwoKeyAdminContract = twoKeyAdminInstance.address;
-                    })
-                    .then(() => TwoKeySingletonesRegistry.deployed())
-                    .then(async(registry) => {
-                        await new Promise(async(resolve,reject) => {
-                            try {
-                                console.log('... Adding new version of TwoKeyAdminContract to the registry contract');
-                                const twoKeyAdmin = fileObject.TwoKeyAdmin || {};
-                                let v = parseInt(twoKeyAdmin[network_id].Version.substr(-1)) + 1;
-                                twoKeyAdmin[network_id].Version = twoKeyAdmin[network_id].Version.substr(0, twoKeyAdmin[network_id].Version.length - 1) + v.toString();
-                                console.log('New version : ' + twoKeyAdmin[network_id].Version);
-                                let txHash = await registry.addVersion("TwoKeyAdmin", twoKeyAdmin[network_id].Version, TwoKeyAdmin.address);
-
-                                console.log('... Upgrading proxy to new version');
-                                txHash = await Proxy.at(twoKeyAdmin[network_id].Proxy).upgradeTo("TwoKeyAdmin", twoKeyAdmin[network_id].Version);
-                                twoKeyAdmin[network_id].address = lastTwoKeyAdminContract;
-
-                                fileObject['TwoKeyAdmin'] = twoKeyAdmin;
-                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                                resolve(txHash);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        })
-                    })
-                )
-        }
-        else if(isTwoKeyFactory) {
-            /**
-             * If contract we're updating is TwoKeyFactory (arugment) this 'subscript' will be executed
-             */
-            let lastTwoKeyFactoryAddress;
-            console.log('TwoKeyFactory will be updated now.');
-            deployer.deploy(TwoKeyFactory)
-                .then(() => TwoKeyFactory.deployed()
-                    .then((twoKeyFactoryInstance) => {
-                        lastTwoKeyFactoryAddress = twoKeyFactoryInstance.address;
-                    })
-                    .then(() => TwoKeySingletonesRegistry.deployed())
-                    .then(async(registry) => {
-                        await new Promise(async(resolve,reject) => {
-                            try {
-                                console.log('... Adding new version of TwoKeyFactory contract to the registry contract');
-                                const twoKeyFactory = fileObject.TwoKeyFactory || {};
-                                let v = parseInt(twoKeyFactory[network_id].Version.substr(-1)) + 1;
-                                twoKeyFactory[network_id].Version = twoKeyFactory[network_id].Version.substr(0, twoKeyFactory[network_id].Version.length - 1) + v.toString();
-                                console.log('New version : ' + twoKeyFactory[network_id].Version);
-                                // let txHash = await registry.addVersion("TwoKeyFactory", twoKeyFactory[network_id].Version, TwoKeyFactory.address);
-                                let txHash = await registry.addVersion("TwoKeyFactory", "1.3", TwoKeyFactory.address);
-
-                                console.log('... Upgrading proxy to new version');
-                                // txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", twoKeyFactory[network_id].Version);
-                                txHash = await Proxy.at(twoKeyFactory[network_id].Proxy).upgradeTo("TwoKeyFactory", "1.3");
-                                twoKeyFactory[network_id].address = lastTwoKeyFactoryAddress;
-
-                                fileObject['TwoKeyFactory'] = twoKeyFactory;
-                                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                                resolve(txHash);
-                            } catch (e) {
-                                reject(e);
-                            }
-                        })
-                    })
-                )
-
-        } else if(isTwoKeyCongress) {
-            /**
-             * If contract we're updating is TwoKeyCongress (argument) this 'subscript' will be executed
-             */
-            let lastTwoKeyCongressContract;
-            console.log('TwoKeyCongress will be updated now.');
-            deployer.deploy(TwoKeyCongress)
-                .then(() => TwoKeyCongress.deployed()
-                    .then((twoKeyCongressInstance) => {
-                        lastTwoKeyCongressContract = twoKeyCongressInstance.address;
-                    })
-                    .then(() => TwoKeySingletonesRegistry.deployed)
-                    .then(async(registry) => {
-                       await new Promise(async(resolve,reject) => {
-                           try {
-                               console.log('... Adding new version of TwoKeyCongress to the registry contract');
-                               const twoKeyCongress = fileObject.twoKeyCongress || {};
-                               let v = parseInt(twoKeyCongress[network_id].Version.substr(-1)) + 1;
-                               twoKeyCongress[network_id].Version = twoKeyCongress[network_id].Version.substr(0, twoKeyCongress[network_id].Version.length - 1) + v.toString();
-                               console.log('New version : ' + twoKeyCongress[network_id].Version);
-                               let txHash = await registry.addVersion("TwoKeyCongress", twoKeyCongress[network_id].Version, TwoKeyCongress.address);
-
-                               console.log('... Upgrading proxy to new version');
-                               txHash = await Proxy.at(twoKeyCongress[network_id].Proxy).upgradeTo("TwoKeyCongress", twoKeyCongress[network_id].Version);
-                               twoKeyCongress[network_id].address = lastTwoKeyCongressContract;
-
-                               fileObject['TwoKeyCongress'] = twoKeyCongress;
-                               fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                               resolve(txHash);
-                           } catch (e) {
-                               reject(e);
-                           }
-                       })
-                    })
-                )
-        } else if (isTwoKeyPlasmaEvents) {
-            /**
-             * If contract we're updating is TwoKeyPlasmaEvents (argument) this 'subscript' will be executed
-             */
-            let lastTwoKeyPlasmaEvents;
-            console.log('TwoKeyPlasmaEvents contract on plasma network will be updated now', network_id);
-            deployer.link(Call, TwoKeyPlasmaEvents);
-            deployer.deploy(TwoKeyPlasmaEvents)
-            .then(() => TwoKeyPlasmaEvents.deployed()
-                .then((twoKeyPlasmaEventsInstance) => {
-                    lastTwoKeyPlasmaEvents = twoKeyPlasmaEventsInstance.address;
-                })
-                .then(() => TwoKeyPlasmaSingletoneRegistry.deployed())
-                .then(async(registry) => {
-                    await new Promise(async(resolve,reject) => {
-                        try {
-                            console.log('... Adding new version of TwoKeyPlasmaEvents to Registry on Plasma Network');
-                            const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
-                            let v = parseInt(twoKeyPlasmaEvents[network_id].Version.substr(-1)) + 1;
-                            twoKeyPlasmaEvents[network_id].Version = twoKeyPlasmaEvents[network_id].Version.substr(0, twoKeyPlasmaEvents[network_id].Version.length - 1) + v.toString();
-                            console.log('New version : ' + twoKeyPlasmaEvents[network_id].Version);
-                            //
-                            let txHash = await registry.addVersion("TwoKeyPlasmaEvents",twoKeyPlasmaEvents[network_id].Version, TwoKeyPlasmaEvents.address);
-                            // let txHash = await registry.addVersion("TwoKeyPlasmaEvents", '1.10', TwoKeyPlasmaEvents.address);
-
-                            console.log('... Upgrading proxy to new version');
-                            txHash = await Proxy.at(twoKeyPlasmaEvents[network_id].Proxy).upgradeTo("TwoKeyPlasmaEvents", twoKeyPlasmaEvents[network_id].Version);
-                            // txHash = await Proxy.at(twoKeyPlasmaEvents[network_id].Proxy).upgradeTo("TwoKeyPlasmaEvents", '1.10');
-                            twoKeyPlasmaEvents[network_id].address = lastTwoKeyPlasmaEvents;
-
-                            fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
-                            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                            resolve(txHash);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    })
-                })
-            )
-            .then(() => true);
-        }
-    } else {
-        console.log('Argument is not found - contracts will not be updated!');
+module.exports = function deploy(deployer) {
+    if(checkArguments(process.argv) == false) {
+        console.log('No update will be performed');
+        return;
     }
+
+    let contractName = process.argv.pop();
+    let contract = getContractPerName(contractName);
+    let newImplementationAddress;
+    let registryAddress;
+    if(deployer.network.startsWith('dev')) {
+        registryAddress = TwoKeySingletonesRegistry.address;
+    }
+    else if(deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
+        registryAddress = TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
+    } else {
+        registryAddress = TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS;
+    }
+    deployer.deploy(contract)
+        .then(() => contract.deployed()
+            .then(async (contractInstance) => {
+                newImplementationAddress = contractInstance.address;
+            })
+            .then(async () => {
+                console.log();
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('Updating contract: ' + contractName);
+                        let hashes = await updateContract(registryAddress, contractName, newImplementationAddress);
+                        resolve(hashes);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            })
+
+        );
 };

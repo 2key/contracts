@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 contract ITwoKeyDonationConversionHandler {
     function supportForCreateConversion(
@@ -14,4 +14,26 @@ contract ITwoKeyDonationConversionHandler {
         uint _conversionId
     )
     public;
+
+    function getAmountConverterSpent(
+        address converter
+    )
+    public
+    view
+    returns (uint);
+
+    function getAmountOfDonationTokensConverterReceived(
+        address converter
+    )
+    public
+    view
+    returns (uint);
+
+    function getStateForConverter(
+        address _converter
+    )
+    external
+    view
+    returns (bytes32);
+
 }

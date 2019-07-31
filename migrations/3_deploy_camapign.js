@@ -10,6 +10,8 @@ const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
 const TwoKeyDonationConversionHandler = artifacts.require('TwoKeyDonationConversionHandler');
 const TwoKeyPurchasesHandler = artifacts.require('TwoKeyPurchasesHandler');
+const TwoKeyDonationLogicHandler = artifacts.require('TwoKeyDonationLogicHandler');
+
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -19,8 +21,48 @@ const path = require('path');
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 
 
+let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
+
+
+/**
+ * Function to increment minor version
+ * @type {function(*)}
+ */
+const incrementVersion = ((version) => {
+    if(version == "") {
+        version = "1.0.0";
+    }
+    let vParts = version.split('.');
+    if(vParts.length < 2) {
+        vParts = "1.0.0".split('.');
+    }
+    // assign each substring a position within our array
+    let partsArray = {
+        major : vParts[0],
+        minor : vParts[1],
+        patch : vParts[2]
+    };
+    // target the substring we want to increment on
+    partsArray.patch = parseFloat(partsArray.patch) + 1;
+    // set an empty array to join our substring values back to
+    let vArray = [];
+    // grabs each property inside our partsArray object
+    for (let prop in partsArray) {
+        if (partsArray.hasOwnProperty(prop)) {
+            // add each property to the end of our new array
+            vArray.push(partsArray[prop]);
+        }
+    }
+    // join everything back into one string with a period between each new property
+    let newVersion = vArray.join('.');
+    return newVersion;
+});
+
 module.exports = function deploy(deployer) {
     if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
+        if(deployer.network.startsWith('dev')) {
+            TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
+        }
         const { network_id } = deployer;
         let x = 1;
         let json = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf-8'}));
@@ -34,47 +76,30 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
         .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
         .then(() => true)
-        .then(() => deployer.deploy(TwoKeyDonationConversionHandler,
-            'Nikoloken',
-            'NTKN',
-            ))
-        .then(() => deployer.link(IncentiveModels, TwoKeyDonationCampaign))
+        .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
+        .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
+        .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
+        .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
         .then(() => deployer.link(Call, TwoKeyDonationCampaign))
         .then(() => deployer.deploy(TwoKeyDonationCampaign))
-            // json.TwoKeyAdmin[network_id].Proxy,
-            // 'Donation for Something',
-            // [
-            //     5,
-            //     12345,
-            //     1231112,
-            //     10000,
-            //     100000000,
-            //     10000000000000,
-            //     5
-            // ],
-            // false,
-            // false,
-            // false,
-            // TwoKeySingletonesRegistry.address,
-            // TwoKeyDonationConversionHandler.address,
-            // 0
-            // ))
         .then(async () => {
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = '1.5';
+                    let version = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
 
-                    let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    version = incrementVersion(version);
+
+                    let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
 
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyPurchasesHandler', version, TwoKeyPurchasesHandler.address);
 
                     resolve(txHash);
@@ -87,45 +112,24 @@ module.exports = function deploy(deployer) {
             console.log('... Adding implementation versions of Donation campaigns');
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = '1.2';
+                    let version = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS).getLatestContractVersion("TwoKeyDonationCampaign");
 
-                    let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+                    version = incrementVersion(version);
+
+                    let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
-                    txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
+
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
                         .addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
+
+                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
+                        .addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
 
                     resolve(txHash);
                 } catch (e) {
                     reject(e);
                 }
             })
-        })
-        .then(async () => {
-            console.log("... Adding TwoKeyAcquisitionCampaign bytecodes to be valid in the TwoKeyValidator contract");
-            await new Promise(async (resolve, reject) => {
-                try {
-                    let txHash = await TwoKeyCampaignValidator.at(json.TwoKeyCampaignValidator[network_id].Proxy)
-                        .addValidBytecodes(
-                            [
-                                TwoKeyAcquisitionCampaignERC20.address,
-                                TwoKeyConversionHandler.address,
-                                TwoKeyAcquisitionLogicHandler.address,
-                                TwoKeyDonationCampaign.address,
-                                TwoKeyDonationConversionHandler.address
-                            ],
-                            [
-                                '0x54776f4b65794163717569736974696f6e43616d706169676e00000000000000', //TwoKeyAcquisitionCampaign
-                                '0x54776f4b6579436f6e76657273696f6e48616e646c6572000000000000000000', //TwoKeyConversionHandler
-                                '0x54776f4b65794163717569736974696f6e4c6f67696348616e646c6572000000', //TwoKeyAcquisitionLogicHandler
-                                '0x54776f4b6579446f6e6174696f6e43616d706169676e00000000000000000000', //TwoKeyDonationCampaign
-                                '0x54776f4b6579446f6e6174696f6e436f6e76657273696f6e48616e646c657200'  //TwoKeyDonationConversionHandler
-                            ]
-                        );
-                    resolve(txHash);
-                } catch (e) {
-                    reject(e);
-                }
-            });
         })
         .then(() => true);
     }

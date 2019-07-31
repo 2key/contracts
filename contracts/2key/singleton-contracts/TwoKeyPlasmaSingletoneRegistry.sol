@@ -1,31 +1,35 @@
 pragma solidity ^0.4.24;
 
-import '../Upgradeable.sol';
-import "../UpgradabilityProxy.sol";
-import "../MaintainingPattern.sol";
 import "../interfaces/ITwoKeySingletonesRegistry.sol";
+import "../interfaces/IStructuredStorage.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../upgradability/UpgradeabilityProxy.sol";
+import "../upgradability/Upgradeable.sol";
 
 /**
  * @author Nikola Madjarevic
- * @title Registry for plasma network
- * @dev This contract works as a registry of versions, it holds the implementations for the registered versions.
- * @notice Will be everything mapped by contract name, so we will easily update and get versions per contract, all stored here
  */
-contract TwoKeyPlasmaSingletoneRegistry is MaintainingPattern, ITwoKeySingletonesRegistry {
+contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
+
+    address public deployer;
 
     mapping (string => mapping(string => address)) internal versions;
     mapping (string => address) contractToProxy;
     mapping (string => string) contractNameToLatestVersionName;
 
-    /**
-     * @notice Calling super constructor from maintaining pattern
-     */
-    constructor(address [] _maintainers, address _twoKeyAdmin) public {
-        twoKeyAdmin = _twoKeyAdmin;
-        isMaintainer[msg.sender] = true; //for truffle deployment
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+    event ProxiesDeployed(
+        address logicProxy,
+        address storageProxy
+    );
+
+    constructor() public {
+        deployer = msg.sender;
+    }
+
+    modifier onlyMaintainer {
+        address twoKeyPlasmaMaintainersRegistry = contractToProxy["TwoKeyPlasmaMaintainersRegistry"];
+        require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).onlyMaintainer(msg.sender));
+        _;
     }
 
     /**
@@ -67,16 +71,47 @@ contract TwoKeyPlasmaSingletoneRegistry is MaintainingPattern, ITwoKeySingletone
         return contractToProxy[_contractName];
     }
 
-    /**
-     * @dev Creates an upgradeable proxy
-     * @param version representing the first version to be set for the proxy
-     * @return address of the new proxy created
-     */
-    function createProxy(string contractName, string version) public onlyMaintainer payable returns (UpgradeabilityProxy) {
-        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version, msg.sender);
-        Upgradeable(proxy).initialize.value(msg.value)(msg.sender);
+    function deployProxy(
+        string contractName,
+        string version
+    )
+    internal
+    returns (address)
+    {
+        UpgradeabilityProxy proxy = new UpgradeabilityProxy(contractName, version);
         contractToProxy[contractName] = proxy;
-        emit ProxyCreated(proxy);
-        return proxy;
+        return address(proxy);
     }
+
+    /**
+     * @dev Creates an upgradeable proxy for both Storage and Logic
+     * @param version representing the first version to be set for the proxy
+     */
+    function createProxy(
+        string contractName,
+        string contractNameStorage,
+        string version
+    )
+    public
+    onlyMaintainer
+    {
+        address logicProxy = deployProxy(contractName, version);
+        address storageProxy = deployProxy(contractNameStorage, version);
+
+        IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
+        emit ProxiesDeployed(logicProxy, storageProxy);
+    }
+
+    function upgradeContract(
+        string contractName,
+        string version
+    )
+    public
+    {
+        require(msg.sender == deployer);
+        address proxyAddress = getContractProxyAddress(contractName);
+        address _impl = getVersion(contractName, version);
+        UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
+    }
+
 }

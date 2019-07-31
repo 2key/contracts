@@ -1,3 +1,7 @@
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';

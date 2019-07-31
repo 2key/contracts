@@ -2,42 +2,46 @@ pragma solidity ^0.4.24;
 
 import "./TokenPool.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
+import "../interfaces/storage-contracts/ITwoKeyCommunityTokenPoolStorage.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
 contract TwoKeyCommunityTokenPool is TokenPool {
 
-    address public twoKeyRegistry;
-    uint public constant totalAmount2keys = 200000000;
-    uint public constant annualTransferAmountLimit = totalAmount2keys / 10;
+    ITwoKeyCommunityTokenPoolStorage public PROXY_STORAGE_CONTRACT;
 
-    uint startingDate;
 
-    struct AnnualReport {
-        uint startingDate;
-        uint transferedThisYear;
-    }
+    mapping(uint => uint) yearToStartingDate;
+    mapping(uint => uint) yearToTransferedThisYear;
 
-    mapping(uint => AnnualReport) public yearToAnnualReport;
 
-    uint256 [] annualTransfers;
 
     function setInitialParams(
-        address _twoKeyAdmin,
+        address twoKeySingletonesRegistry,
         address _erc20Address,
-        address [] _maintainers,
-        address _twoKeyRegistry
+        address _proxyStorage
     )
     external
     {
         require(initialized == false);
-        setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
-        twoKeyRegistry = _twoKeyRegistry;
-        startingDate = block.timestamp;
-        for(uint i=1;i<=10;i++) {
-            yearToAnnualReport[i] = AnnualReport({startingDate: startingDate + i*(1 years),transferedThisYear: 0});
+
+        setInitialParameters(_erc20Address, TWO_KEY_SINGLETON_REGISTRY);
+
+        PROXY_STORAGE_CONTRACT = ITwoKeyCommunityTokenPoolStorage(_proxyStorage);
+
+        setUint("totalAmount2keys", 200000000);
+        setUint("annualTransferAmountLimit", 20000000);
+        setUint("startingDate", block.timestamp);
+
+        for(uint i=1; i<=10; i++) {
+            bytes32 key1 = keccak256("yearToStartingDate", i);
+            bytes32 key2 = keccak256("yearToTransferedThisYear", i);
+
+            PROXY_STORAGE_CONTRACT.setUint(key1, block.timestamp + i*(1 years));
+            PROXY_STORAGE_CONTRACT.setUint(key2, 0);
         }
+
         initialized = true;
     }
 
@@ -51,6 +55,7 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     view
     returns (bool)
     {
+        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
         return ITwoKeyRegistry(twoKeyRegistry).checkIfUserExists(_receiver);
     }
 
@@ -73,13 +78,17 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         uint year = checkInWhichYearIsTheTransfer();
         require(year >= 1 && year <= 10);
 
-        AnnualReport memory report = yearToAnnualReport[year];
+        bytes32 keyTransferedThisYear = keccak256("yearToTransferedThisYear",year);
+        bytes32 keyAnnualTransferAmountLimit = keccak256("annualTransferAmountLimit");
 
-        require(report.transferedThisYear + _amount <= annualTransferAmountLimit);
+        uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keyTransferedThisYear);
+        uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
+
+        require(transferedThisYear + _amount <= annualTransferAmountLimit);
         super.transferTokens(_receiver,_amount);
-        report.transferedThisYear = report.transferedThisYear + _amount;
 
-        yearToAnnualReport[year] = report;
+        PROXY_STORAGE_CONTRACT.setUint(keyTransferedThisYear, transferedThisYear + _amount);
+
     }
 
     function checkInWhichYearIsTheTransfer()
@@ -87,6 +96,8 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     view
     returns (uint)
     {
+        uint startingDate = getUint("startingDate");
+
         if(block.timestamp > startingDate && block.timestamp < startingDate + 1 years) {
             return 1;
         } else {
@@ -98,6 +109,26 @@ contract TwoKeyCommunityTokenPool is TokenPool {
             }
             return counter;
         }
+    }
+
+    // Internal wrapper method
+    function setUint(
+        string key,
+        uint value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
+    }
+
+    function getUint(
+        string key
+    )
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
     }
 
 }

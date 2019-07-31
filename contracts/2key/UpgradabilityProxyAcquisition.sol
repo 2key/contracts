@@ -1,8 +1,8 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 
-import "./Proxy.sol";
-import "./UpgradabilityStorage.sol";
+import "./upgradability/UpgradabilityStorage.sol";
+import "./upgradability/Proxy.sol";
 
 
 contract UpgradabilityProxyAcquisition is Proxy, UpgradeabilityStorage {

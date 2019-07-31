@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 
 import "./InvoiceTokenERC20.sol";
@@ -10,8 +10,8 @@ import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
-
-
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 
@@ -25,8 +25,12 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
     ITwoKeyDonationCampaign twoKeyDonationCampaign;
 
+    event ConversionCreated(uint conversionId);
+
+    address twoKeySingletonRegistry;
     address twoKeyEventSource;
-    address twoKeyBaseReputationRegistry;
+
+    string currency;
     address contractor;
     uint numberOfConversions;
     /**
@@ -46,6 +50,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
 
     mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
+    mapping(address => uint256) private converterToAmountOfDonationTokensReceived;
     mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => ConverterState) converterToState; // Converter to state
     mapping(address => uint[]) converterToHisConversions;
@@ -62,6 +67,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         uint256 maxReferralRewardETHWei; // Total referral reward for the conversion
         uint256 maxReferralReward2key;
         uint256 moderatorFeeETHWei;
+        uint256 tokensBought;
     }
 
     event InvoiceTokenCreated(
@@ -70,10 +76,10 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         string tokenSymbol
     );
 
-    event ConversionCreated(uint conversionId);
 
     modifier onlyContractorOrMaintainer {
-        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender));
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
         _;
     }
 
@@ -81,10 +87,10 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     function setInitialParamsDonationConversionHandler(
         string tokenName,
         string tokenSymbol,
+        string _currency,
         address _contractor,
         address _twoKeyDonationCampaign,
-        address _twoKeyEventSource,
-        address _twoKeyBaseReputationRegistry
+        address _twoKeySingletonRegistry
     )
     public
     {
@@ -92,16 +98,22 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
         counters = new uint[](10);
         twoKeyDonationCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
-
-        twoKeyEventSource = _twoKeyEventSource;
-        twoKeyBaseReputationRegistry = _twoKeyBaseReputationRegistry;
-
+        twoKeySingletonRegistry = _twoKeySingletonRegistry;
+        twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
         contractor = _contractor;
+        currency = _currency;
         // Deploy an ERC20 token which will be used as the Invoice
         erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
         // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(address(erc20InvoiceToken), tokenName, tokenSymbol);
         isCampaignInitialized = true;
+    }
+
+
+    // Internal function to fetch address from TwoKeyRegTwoistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry)
+        .getContractProxyAddress(contractName);
     }
 
     /**
@@ -120,106 +132,74 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         return fee;
     }
 
-
-    /**
-     * @param _converterAddress is the one who calls join and donate function
-     */
-    function supportForCreateConversion(
-        address _converterAddress,
-        uint _conversionAmount,
-        uint _maxReferralRewardETHWei,
-        bool _isKYCRequired
+    function emitConvertedEvent(
+        address converterAddress,
+        uint conversionAmount,
+        uint conversionId
     )
-    public
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).convertedDonationV2(
+            twoKeyDonationCampaign,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
+            conversionAmount,
+            conversionId
+        );
+    }
+
+    function emitExecutedEvent(
+        address _converterAddress,
+        uint conversionId,
+        uint tokens
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).executedV1(
+            twoKeyDonationCampaign,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress),
+            conversionId,
+            tokens
+        );
+    }
+
+    function emitRejectedEvent(
+        address _campaignAddress,
+        address _converterAddress
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).rejected(
+            twoKeyDonationCampaign,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress)
+        );
+    }
+
+    function transferInvoiceToken(
+        address _converter,
+        uint _conversionAmountETHWei
+    )
+    internal
     returns (uint)
     {
-        require(msg.sender == address(twoKeyDonationCampaign));
-        //If KYC is required, basic funnel executes and we require that converter is not previously rejected
-        if(_isKYCRequired == true) {
-            require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
-            // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
-            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
-                converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
-                stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
-            }
+        if(keccak256(currency) == keccak256('ETH')) {
+            erc20InvoiceToken.transfer(_converter, _conversionAmountETHWei);
+            converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(_conversionAmountETHWei);
+            return _conversionAmountETHWei;
         } else {
-            //If KYC is not required converter is automatically approved
-            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
-                converterToState[_converterAddress] = ConverterState.APPROVED;
-                stateToConverter[bytes32("APPROVED")].push(_converterAddress);
-            }
+            address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
+            uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate(currency);
+
+            uint conversionAmountInFIAT = (_conversionAmountETHWei*rate).div(10**18);
+            erc20InvoiceToken.transfer(_converter, conversionAmountInFIAT);
+            converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(conversionAmountInFIAT);
+            return conversionAmountInFIAT;
         }
-
-
-        uint256 _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
-        uint256 _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
-        counters[1]++;
-
-        Conversion memory c = Conversion(
-            contractor,
-            _contractorProceeds,
-            _converterAddress,
-            ConversionState.APPROVED,
-            _conversionAmount,
-            _maxReferralRewardETHWei,
-            0,
-            _moderatorFeeETHWei
-        );
-
-        conversions.push(c);
-        converterToHisConversions[_converterAddress].push(numberOfConversions);
-        emit ConversionCreated(numberOfConversions);
-        numberOfConversions++;
-
-        return numberOfConversions-1;
     }
 
-    function executeConversion(
-        uint _conversionId
-    )
-    public
-    {
-        Conversion conversion = conversions[_conversionId];
-        require(converterToState[conversion.converter] == ConverterState.APPROVED);
-        require(conversion.state == ConversionState.APPROVED);
 
-        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
-        counters[1]--; //Decrease number of approved conversions
-
-//         Buy tokens from campaign and distribute rewards between referrers
-        uint totalReward2keys = twoKeyDonationCampaign.distributeReferrerRewards(
-            conversion.converter,
-            conversion.maxReferralRewardETHWei,
-            _conversionId
-        );
-
-        // Update reputation points in registry for conversion executed event
-//        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
-//            conversion.converter,
-//            contractor,
-//            twoKeyDonationCampaign
-//        );
-
-
-
-        counters[8] = counters[8].add(totalReward2keys);
-        twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-        twoKeyDonationCampaign.updateContractorBalanceAndConverterDonations(conversion.converter, conversion.contractorProceedsETHWei, conversion.conversionAmount);
-
-        counters[6] = counters[6].add(conversion.conversionAmount);
-
-        if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
-            counters[5]++; //increase number of unique converters
-            doesConverterHaveExecutedConversions[conversion.converter] = true;
-        }
-
-        conversion.maxReferralReward2key = totalReward2keys;
-        conversion.state = ConversionState.EXECUTED;
-        counters[3]++; //Increase number of executed conversions
-
-        //TODO: Add tokens transfer
-        erc20InvoiceToken.transfer(conversion.converter, conversion.conversionAmount);
-    }
 
     /// @notice Function to move converter address from stateA to stateB
     /// @param _converter is the address of converter
@@ -273,6 +253,112 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     }
 
 
+    /**
+     * @param _converterAddress is the one who calls join and donate function
+     */
+    function supportForCreateConversion(
+        address _converterAddress,
+        uint _conversionAmount,
+        uint _maxReferralRewardETHWei,
+        bool _isKYCRequired
+    )
+    public
+    returns (uint)
+    {
+        require(msg.sender == address(twoKeyDonationCampaign));
+        //If KYC is required, basic funnel executes and we require that converter is not previously rejected
+        if(_isKYCRequired == true) {
+            require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
+            // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
+            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
+                converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
+                stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
+            }
+        } else {
+            //If KYC is not required converter is automatically approved
+            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
+                converterToState[_converterAddress] = ConverterState.APPROVED;
+                stateToConverter[bytes32("APPROVED")].push(_converterAddress);
+            }
+        }
+
+
+        uint256 _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
+        uint256 _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
+        counters[1]++;
+
+        Conversion memory c = Conversion(
+            contractor,
+            _contractorProceeds,
+            _converterAddress,
+            ConversionState.APPROVED,
+            _conversionAmount,
+            _maxReferralRewardETHWei,
+            0,
+            _moderatorFeeETHWei,
+            0
+        );
+
+        conversions.push(c);
+        converterToHisConversions[_converterAddress].push(numberOfConversions);
+        emitConvertedEvent(_converterAddress, _conversionAmount, numberOfConversions);
+
+        emit ConversionCreated(numberOfConversions);
+        numberOfConversions++;
+
+        return numberOfConversions-1;
+
+    }
+
+    function executeConversion(
+        uint _conversionId
+    )
+    public
+    {
+        Conversion conversion = conversions[_conversionId];
+        require(converterToState[conversion.converter] == ConverterState.APPROVED);
+        require(conversion.state == ConversionState.APPROVED);
+
+        counters[1]--; //Decrease number of approved conversions
+
+//         Buy tokens from campaign and distribute rewards between referrers
+        uint totalReward2keys = twoKeyDonationCampaign.buyTokensAndDistributeReferrerRewards(
+            conversion.maxReferralRewardETHWei,
+            conversion.converter,
+            _conversionId
+        );
+
+
+        // Update reputation points in registry for conversion executed event
+//        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
+//            conversion.converter,
+//            contractor,
+//            twoKeyDonationCampaign
+//        );
+
+
+        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
+        counters[8] = counters[8].add(totalReward2keys);
+        twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
+        twoKeyDonationCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
+
+        counters[6] = counters[6].add(conversion.conversionAmount);
+
+        if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
+            counters[5]++; //increase number of unique converters
+            doesConverterHaveExecutedConversions[conversion.converter] = true;
+        }
+
+        conversion.maxReferralReward2key = totalReward2keys;
+        conversion.state = ConversionState.EXECUTED;
+        counters[3]++; //Increase number of executed conversions
+
+        uint amountOfTokens = transferInvoiceToken(conversion.converter, conversion.conversionAmount);
+        conversion.tokensBought = amountOfTokens;
+        emitExecutedEvent(conversion.converter, _conversionId, amountOfTokens);
+    }
+
+
     /// @notice Function where we are approving converter
     /// @dev only maintainer or contractor can call this method
     /// @param _converter is the address of converter
@@ -284,6 +370,39 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingOrRejectedToApprovedState(_converter);
+    }
+
+    function rejectConverter(
+        address _converter
+    )
+    public
+    onlyContractorOrMaintainer
+    {
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+        moveFromPendingToRejectedState(_converter);
+
+        uint refundAmount = 0;
+        uint len = converterToHisConversions[_converter].length;
+
+        for(uint i=0; i<len; i++) {
+            uint conversionId = converterToHisConversions[_converter][i];
+            Conversion c = conversions[conversionId];
+
+            //In this case since we don't support FIAT, every conversion is auto approved
+            if(c.state == ConversionState.APPROVED) {
+                counters[1]--; // Reduce number of approved conversions
+                counters[2]++; //Increase number of rejected conversions
+//                ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
+                c.state = ConversionState.REJECTED;
+                refundAmount += c.conversionAmount;
+            }
+        }
+
+        if(refundAmount > 0) {
+            twoKeyDonationCampaign.sendBackEthWhenConversionRejected(_converter, refundAmount);
+        }
+
+        emitRejectedEvent(twoKeyDonationCampaign, _converter);
     }
 
     /**
@@ -350,6 +469,21 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         return numberOfConversions;
     }
 
+    /**
+     * @notice Function to get converter state
+     * @param _converter is the address of the requested converter
+     * @return hexed string of the state
+     */
+    function getStateForConverter(
+        address _converter
+    )
+    external
+    view
+    returns (bytes32)
+    {
+        return convertConverterStateToBytes(converterToState[_converter]);
+    }
+
 
     function getAllConvertersPerState(
         bytes32 state
@@ -374,6 +508,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     returns (bytes)
     {
         Conversion memory conversion = conversions[conversionId];
+
         address converter; // Defaults to 0x0
 
         if(isConverterAnonymous[conversion.converter] == false) {
@@ -385,11 +520,32 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             converter,
             conversion.contractorProceedsETHWei,
             conversion.conversionAmount,
+            conversion.tokensBought,
             conversion.maxReferralRewardETHWei,
             conversion.maxReferralReward2key,
             conversion.moderatorFeeETHWei,
             conversion.state
         );
+    }
+
+    function getAmountConverterSpent(
+        address converter
+    )
+    public
+    view
+    returns (uint)
+    {
+        return amountConverterSpentEthWEI[converter];
+    }
+
+    function getAmountOfDonationTokensConverterReceived(
+        address converter
+    )
+    public
+    view
+    returns (uint)
+    {
+        return converterToAmountOfDonationTokensReceived[converter];
     }
 
 }

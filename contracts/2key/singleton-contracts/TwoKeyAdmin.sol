@@ -1,34 +1,22 @@
 pragma solidity ^0.4.24;
 
-import './TwoKeyEconomy.sol';
-import './TwoKeyUpgradableExchange.sol';
-import "./TwoKeyEventSource.sol";
-import "./TwoKeyRegistry.sol";
-import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/IERC20.sol";
-import "../interfaces/IMaintainingPattern.sol";
-import "../Upgradeable.sol";
+import "../interfaces/ITwoKeyReg.sol";
+import "../upgradability/Upgradeable.sol";
+import "./ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
 
-//TODO: Add all the missing functions from other singletones which can be called by TwoKeyAdmin
-contract TwoKeyAdmin is Upgradeable {
+contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
-	TwoKeyEconomy twoKeyEconomy;
-	TwoKeyUpgradableExchange twoKeyUpgradableExchange;
-	TwoKeyEventSource twoKeyEventSource;
-	TwoKeyRegistry twoKeyReg;
+	bool initialized = false;
+
+	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; //Pointer to storage contract
+
+	address twoKeyCongress; // Address of TwoKeyCongress (logic)
+	address twoKeyEconomy; // Address of TwoKeyEconomy (2KEY ERC20 token)
 
 
-	address public twoKeyCongress;
-	address public newTwoKeyAdminAddress;
-
-	uint twoKeyIntegratorDefaultFeePercent; // 2% is default value for this
-	uint twoKeyNetworkTaxPercent; //2% is default value for this
-	uint twoKeyTokenRate;
-	uint rewardReleaseAfter;
-
-    bool initialized = false;
-
-    /// @notice Modifier will revert if calling address is not a member of electorateAdmins
+    /// @notice Modifier which throws if caller is not TwoKeyCongress
 	modifier onlyTwoKeyCongress {
 		require(msg.sender == twoKeyCongress);
 	    _;
@@ -36,57 +24,44 @@ contract TwoKeyAdmin is Upgradeable {
 
     /// @notice Modifier will revert if caller is not TwoKeyUpgradableExchange
     modifier onlyTwoKeyUpgradableExchange {
+		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
         require(msg.sender == address(twoKeyUpgradableExchange));
         _;
     }
 
     /**
      * @notice Function to set initial parameters in the contract including singletones
+     * @param _twoKeySingletonRegistry is the singletons registry contract address
+     * @param _proxyStorageContract is the address of proxy for storage for this contract
      * @param _twoKeyCongress is the address of TwoKeyCongress
      * @param _economy is the address of TwoKeyEconomy
-     * @param _exchange is the address of TwoKeyUpgradableExchange
-     * @param _twoKeyRegistry is the address of TwoKeyRegistry
-     * @param _eventSource is the address of TwoKeyEventSource
      * @dev This function can be called only once, which will be done immediately after deployment.
      */
     function setInitialParams(
+		address _twoKeySingletonRegistry,
+		address _proxyStorageContract,
         address _twoKeyCongress,
         address _economy,
-        address _exchange,
-        address _twoKeyRegistry,
-        address _eventSource,
 		uint _twoKeyTokenReleaseDate
     ) external {
         require(initialized == false);
-        twoKeyIntegratorDefaultFeePercent = 2;
-		twoKeyNetworkTaxPercent = 2;
-		twoKeyTokenRate = 95; //The actual rate is 95 / 1000 = 0.095$
-        twoKeyCongress = _twoKeyCongress;
-        twoKeyReg = TwoKeyRegistry(_twoKeyRegistry);
-        twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
-        twoKeyEconomy = TwoKeyEconomy(_economy);
-        twoKeyEventSource = TwoKeyEventSource(_eventSource);
+
+		TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
+		PROXY_STORAGE_CONTRACT = ITwoKeyAdminStorage(_proxyStorageContract);
+		twoKeyCongress = _twoKeyCongress;
+		twoKeyEconomy = _economy;
+
+		setUint("twoKeyIntegratorDefaultFeePercent",2);
+		setUint("twoKeyNetworkTaxPercent",25);
+		setUint("twoKeyTokenRate", 95);
+		setUint("rewardReleaseAfter",_twoKeyTokenReleaseDate);
+
         initialized = true;
-		rewardReleaseAfter = _twoKeyTokenReleaseDate; //01/01/2020
     }
 
-    /// @notice Function where only elected admin can transfer tokens to an address
-    /// @dev We're recurring to address different from address 0 and token amount greater than 0
-    /// @param _to receiver's address
-    /// @param _tokens is token amounts to be transfers
-	function transferByAdmins(
-		address _to,
-		uint256 _tokens
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		require (_to != address(0) && _tokens > 0);
-		twoKeyEconomy.transfer(_to, _tokens);
-	}
 
-    /// @notice Function where only elected admin can transfer ether to an address
-    /// @dev We're recurring to address different from address 0 and amount greater than 0
+    /// @notice Function where only TwoKeyCongress can transfer ether to an address
+    /// @dev We're recurring to address different from address 0
     /// @param to receiver's address
     /// @param amount of ether to be transferred
 	function transferEtherByAdmins(
@@ -96,75 +71,28 @@ contract TwoKeyAdmin is Upgradeable {
 	external
 	onlyTwoKeyCongress
 	{
-		require(to != address(0)  && amount > 0);
+		require(to != address(0));
 		to.transfer(amount);
 	}
 
-    /// @notice Function will transfer contract balance to owner if contract was never replaced else will transfer the funds to the new Admin contract address
-	function destroy()
-	public
-	onlyTwoKeyCongress
-	{
-        selfdestruct(twoKeyCongress);
-	}
 
     /// @notice Function to add/update name - address pair from twoKeyAdmin
 	/// @param _name is name of user
 	/// @param _addr is address of user
+	/// @param _fullName is full name of the user
+	/// @param _email is the email of the user
+	/// @param _signature is the signature generated on client side
     function addNameToReg(
 		string _name,
 		address _addr,
-		string fullName,
-		string email,
-		bytes signature
+		string _fullName,
+		string _email,
+		bytes _signature
 	) external {
-    	twoKeyReg.addName(_name, _addr, fullName, email, signature);
+		address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+    	ITwoKeyReg(twoKeyRegistry).addName(_name, _addr, _fullName, _email, _signature);
     }
 
-    /// @notice Function to update twoKeyUpgradableExchange contract address
-	/// @param _exchange is address of new twoKeyUpgradableExchange contract
-	function updateExchange(
-		address _exchange
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		require (_exchange != address(0));
-		twoKeyUpgradableExchange = TwoKeyUpgradableExchange(_exchange);
-	}
-
-	/// @notice Function to update reward release date
-	function updateRewardsRelease(uint newRewardReleaseAfter)
-	external
-	onlyTwoKeyCongress
-	{
-		require (now <= newRewardReleaseAfter && now <= rewardReleaseAfter);
-		rewardReleaseAfter = newRewardReleaseAfter;
-	}
-
-    /// @notice Function to update twoKeyRegistry contract address
-	/// @param _reg is address of new twoKeyRegistry contract
-	function updateRegistry(
-		address _reg
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		require (_reg != address(0));
-		twoKeyReg = TwoKeyRegistry(_reg);
-	}
-
-    /// @notice Function to update twoKeyEventSource contract address
-	/// @param _eventSource is address of new twoKeyEventSource contract
-	function updateEventSource(
-		address _eventSource
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		require (_eventSource != address(0));
-		twoKeyEventSource = TwoKeyEventSource(_eventSource);
-	}
 
 	/// @notice Function to freeze all transfers for 2KEY token
 	function freezeTransfersInEconomy()
@@ -182,6 +110,10 @@ contract TwoKeyAdmin is Upgradeable {
 		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
 	}
 
+	/// @notice Function to transfer 2key tokens
+	/// @dev only TwoKeyCongress can call this function
+	/// @param _to is tokens receiver
+	/// @param _amount is the amount of tokens to be transferred
     function transfer2KeyTokens(
 		address _to,
 		uint256 _amount
@@ -190,127 +122,76 @@ contract TwoKeyAdmin is Upgradeable {
 	onlyTwoKeyCongress
 	returns (bool)
 	{
-		bool completed = twoKeyEconomy.transfer(_to, _amount);
+		bool completed = IERC20(twoKeyEconomy).transfer(_to, _amount);
 		return completed;
 	}
 
-
-	/// View function - doesn't cost any gas to be executed
-	/// @notice Function to fetch twoKeyEconomy contract address
-	/// @return _economy is address of twoKeyEconomy contract
-    function getTwoKeyEconomy()
-	external
+	/// @notice Getter for all integers we'd like to store
+	/// @param key is the key (var name)
+	function getUint(
+		string key
+	)
+	internal
 	view
-	returns(address)
+	returns (uint)
 	{
-    	return address(twoKeyEconomy);
-    }
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
+	}
 
-	/// View function - doesn't cost any gas to be executed
-	/// @notice Function to fetch twoKeyReg contract address
-	/// @return _address is address of twoKeyReg contract
-    function getTwoKeyReg()
-	external
-	view
-	returns(address)
+	/// @notice Setter for all integers we'd like to store
+	/// @param key is the key (var name)
+	/// @param value is the value of integer we'd like to store
+	function setUint(
+		string key,
+		uint value
+	)
+	internal
 	{
-    	return address(twoKeyReg);
-    }
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
+	}
 
-
+	/// @notice Getter function for TwoKeyRewardsReleaseDate
 	function getTwoKeyRewardsReleaseDate()
 	external
 	view
 	returns(uint)
 	{
-		return rewardReleaseAfter;
+		return getUint("rewardReleaseAfter");
 	}
 
-    /// View function - doesn't cost any gas to be executed
-	/// @notice Function to fetch twoKeyUpgradableExchange contract address
-	/// @return _address is address of twoKeyUpgradableExchange contract
-    function getTwoKeyUpgradableExchange()
-	external
-	view
-	returns(address)
-	{
-    	return address(twoKeyUpgradableExchange);
-    }
-
-	/// @notice Fallback function will transfer payable value to new admin contract if admin contract is replaced else will be stored this the exist admin contract as it's balance
-	/// @dev A payable fallback method
-	function() external payable {
-
-    }
-
-	function addMaintainersToSelectedSingletone(
-		address destinationContract,
-		address [] maintainers
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		IMaintainingPattern(destinationContract).addMaintainers(maintainers);
-	}
-
-	function deleteMaintainersFromSelectedSingletone(
-		address destinationContract,
-		address [] maintainers
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		IMaintainingPattern(destinationContract).removeMaintainers(maintainers);
-	}
-
-	function changeDefaultIntegratorFeePercent(
-		uint newFee
-	)
-	public
-	onlyTwoKeyCongress
-	{
-		twoKeyIntegratorDefaultFeePercent = newFee;
-	}
-
+	/// @notice Getter function for TwoKeyIntegratorDefaultFeePercent
 	function getDefaultIntegratorFeePercent()
 	public
 	view
 	returns (uint)
 	{
-		return twoKeyIntegratorDefaultFeePercent;
+		return getUint("twoKeyIntegratorDefaultFeePercent");
 	}
 
-	function changeDefaulTwoKeyNetworkTaxPercent(
-		uint newTaxPercent
-	)
-	public
-	onlyTwoKeyCongress
-	{
-		twoKeyNetworkTaxPercent = newTaxPercent;
-	}
-
+	/// @notice Getter function for TwoKeyNetworkTaxPercent
 	function getDefaultNetworkTaxPercent()
 	public
 	view
 	returns (uint)
 	{
-		return twoKeyNetworkTaxPercent;
+		return getUint("twoKeyNetworkTaxPercent");
 	}
 
-	function updateTwoKeyTokenRate(
-		uint newRate
-	)
-	public
-	onlyTwoKeyCongress
-	{
-		twoKeyTokenRate = newRate;
-	}
-
+	/// @notice Getter function for TwoKeyTokenRate
 	function getTwoKeyTokenRate()
 	public
 	view
 	returns (uint)
 	{
-		return twoKeyTokenRate;
+		return getUint("twoKeyTokenRate");
 	}
+
+	/// Fallback function
+	function()
+	external
+	payable
+	{
+
+	}
+
 }

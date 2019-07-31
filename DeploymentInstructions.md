@@ -38,7 +38,9 @@ Git add .
 Git commit -m 'sync submodules' 
 Git push -u
 
-yarn run deploy public.test.k8s-hdwallet,private.test.k8s-hdwallet --reset
+yarn run deploy public.test.k8s-hdwallet --reset
+
+yarn run deploy private.test.k8s-hdwallet --reset
 
 ```
 

@@ -2,7 +2,9 @@ import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
 const { env } = process;
-
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
 const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;

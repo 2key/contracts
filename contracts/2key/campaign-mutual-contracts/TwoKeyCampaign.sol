@@ -10,7 +10,6 @@ import "../libraries/Call.sol";
 import "./ArcERC20.sol";
 
 /**
- * @title Contract which describes all 2key campaigns
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
  */
 contract TwoKeyCampaign is ArcERC20 {
@@ -36,7 +35,6 @@ contract TwoKeyCampaign is ArcERC20 {
 	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
-
 
 	string public publicMetaHash; // Ipfs hash of json campaign object
 	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
@@ -285,11 +283,10 @@ contract TwoKeyCampaign is ArcERC20 {
      * @dev onlyContractor can call this method
      * @return true if successful otherwise will 'revert'
      */
-    function withdrawContractor()
-	public
-	onlyContractor
+    function withdrawContractorInternal()
+	internal
 	{
-        uint balance = contractorBalance;
+		uint balance = contractorBalance;
         contractorBalance = 0;
         /**
          * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
@@ -302,39 +299,43 @@ contract TwoKeyCampaign is ArcERC20 {
 		return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress(contractName);
 	}
 
-
 	/**
  	 * @notice Function where moderator or referrer can withdraw their available funds
  	 * @param _address is the address we're withdrawing funds to
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
 	function referrerWithdraw(
-		address _address
+		address _address,
+		bool _withdrawAsStable
 	)
 	public
 	{
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		address twoKeyAdminAddress;
 		address twoKeyUpgradableExchangeContract;
-		uint balance;
 
+		uint balance;
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
+
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
-			twoKeyAdminAddress =  getContractProxyAddress("TwoKeyAdmin");
+			twoKeyAdminAddress = getContractProxyAddress("TwoKeyAdmin");
 			twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
 
 			balance = referrerPlasma2Balances2key[_referrer];
 			referrerPlasma2Balances2key[_referrer] = 0;
 
-			if(now >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()){
-				IERC20(twoKeyEconomy).transfer(_address,balance);
-			}
-			else {
-				//In case 2Key rewards still locked;
+			if(_withdrawAsStable == true) {
 				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
 			}
-			reservedAmount2keyForRewards -= balance;
+			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
+				IERC20(twoKeyEconomy).transfer(_address, balance);
+			}
+			else {
+				revert();
+			}
+			reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
 		}
 	}
 }
+

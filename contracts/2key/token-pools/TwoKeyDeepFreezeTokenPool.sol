@@ -1,27 +1,34 @@
 pragma solidity ^0.4.24;
 
 import "./TokenPool.sol";
+import "../interfaces/storage-contracts/ITwoKeyDeepFreezeTokenPoolStorage.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
 contract TwoKeyDeepFreezeTokenPool is TokenPool {
 
-    uint tokensReleaseDate;
+    ITwoKeyDeepFreezeTokenPoolStorage public PROXY_STORAGE_CONTRACT;
+
     address public twoKeyCommunityTokenPool;
 
     function setInitialParams(
-        address _twoKeyAdmin,
+        address _twoKeySingletonesRegistry,
         address _erc20Address,
-        address [] _maintainers,
-        address _twoKeyCommunityTokenPool
+        address _twoKeyCommunityTokenPool,
+        address _proxyStorage
     )
     public
     {
         require(initialized == false);
-        setInitialParameters(_twoKeyAdmin, _erc20Address, _maintainers);
+
+        setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
+
+        PROXY_STORAGE_CONTRACT = ITwoKeyDeepFreezeTokenPoolStorage(_proxyStorage);
         twoKeyCommunityTokenPool = _twoKeyCommunityTokenPool;
-        tokensReleaseDate = block.timestamp + 10 * (1 years);
+
+        PROXY_STORAGE_CONTRACT.setUint(keccak256("tokensReleaseDate"), block.timestamp + 10 * (1 years));
+
         initialized = true;
     }
 
@@ -36,6 +43,8 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
     public
     onlyTwoKeyAdmin
     {
+        uint tokensReleaseDate = PROXY_STORAGE_CONTRACT.getUint(keccak256("tokensReleaseDate"));
+
         require(getContractBalance() >= amount);
         require(block.timestamp > tokensReleaseDate);
         super.transferTokens(twoKeyCommunityTokenPool,amount);

@@ -1,29 +1,40 @@
 pragma solidity ^0.4.24;
 
-import "../Upgradeable.sol";
-import "../MaintainingPattern.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IERC20.sol";
+import "../upgradability/Upgradeable.sol";
+import "../singleton-contracts/ITwoKeySingletonUtils.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
-contract TokenPool is Upgradeable, MaintainingPattern {
+contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized = false;
-    address public erc20Address;
+
+    address public TWO_KEY_ECONOMY;
 
     function setInitialParameters(
-        address _twoKeyAdmin,
-        address _erc20Address,
-        address [] _maintainers
+        address _erc20address,
+        address _twoKeySingletonesRegistry
     )
     internal
     {
-        twoKeyAdmin = _twoKeyAdmin;
-        erc20Address = _erc20Address;
-        for(uint i=0; i<_maintainers.length; i++) {
-            isMaintainer[_maintainers[i]] = true;
-        }
+        TWO_KEY_ECONOMY = _erc20address;
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
+    }
+
+    modifier onlyMaintainer {
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        _;
+    }
+
+    modifier onlyTwoKeyAdmin {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        require(msg.sender == twoKeyAdmin);
+        _;
     }
 
     /**
@@ -34,7 +45,7 @@ contract TokenPool is Upgradeable, MaintainingPattern {
     view
     returns (uint)
     {
-        return IERC20(erc20Address).balanceOf(address(this));
+        return IERC20(TWO_KEY_ECONOMY).balanceOf(address(this));
     }
 
     /**
@@ -46,7 +57,7 @@ contract TokenPool is Upgradeable, MaintainingPattern {
     )
     internal
     {
-        IERC20(erc20Address).transfer(receiver,amount);
+        IERC20(TWO_KEY_ECONOMY).transfer(receiver,amount);
     }
 
 }

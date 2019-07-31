@@ -1,8 +1,8 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 
-import "./Proxy.sol";
 import "./UpgradabilityCampaignStorage.sol";
+import "../upgradability/Proxy.sol";
 
 
 contract ProxyCampaign is Proxy, UpgradeabilityCampaignStorage {
