@@ -1,3 +1,4 @@
+require('regenerator-runtime/runtime');
 require('babel-register');
 const Web3 = require('web3');
 const TransportNodeJs = require('@ledgerhq/hw-transport-node-hid').default;
