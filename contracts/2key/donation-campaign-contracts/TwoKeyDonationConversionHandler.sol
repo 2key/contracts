@@ -177,26 +177,37 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         );
     }
 
+    /**
+     * @notice Function to calculate amount of donation tokens to be received
+     * @param _conversionAmountETHWei is the amount of conversion in WEI
+     */
+    function calculateAmountOfTokens(
+        uint _conversionAmountETHWei
+    )
+    internal
+    view
+    returns (uint)
+    {
+        if(keccak256(currency) == keccak256('ETH')) {
+            return _conversionAmountETHWei;
+        } else {
+            address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
+            uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate(currency);
+            uint conversionAmountInFIAT = (_conversionAmountETHWei*rate).div(10**18);
+            return conversionAmountInFIAT;
+        }
+    }
+
+
     function transferInvoiceToken(
         address _converter,
         uint _conversionAmountETHWei
     )
     internal
-    returns (uint)
     {
-        if(keccak256(currency) == keccak256('ETH')) {
-            erc20InvoiceToken.transfer(_converter, _conversionAmountETHWei);
-            converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(_conversionAmountETHWei);
-            return _conversionAmountETHWei;
-        } else {
-            address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
-            uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate(currency);
-
-            uint conversionAmountInFIAT = (_conversionAmountETHWei*rate).div(10**18);
-            erc20InvoiceToken.transfer(_converter, conversionAmountInFIAT);
-            converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(conversionAmountInFIAT);
-            return conversionAmountInFIAT;
-        }
+        uint amountOfTokens = calculateAmountOfTokens(_conversionAmountETHWei);
+        erc20InvoiceToken.transfer(_converter, amountOfTokens);
+        converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(amountOfTokens);
     }
 
 
@@ -287,6 +298,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         uint256 _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
         counters[1]++;
 
+        uint amountOfTokens = calculateAmountOfTokens(_conversionAmount);
+
         Conversion memory c = Conversion(
             contractor,
             _contractorProceeds,
@@ -296,7 +309,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
             _maxReferralRewardETHWei,
             0,
             _moderatorFeeETHWei,
-            0
+            amountOfTokens
         );
 
         conversions.push(c);
@@ -353,9 +366,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         conversion.state = ConversionState.EXECUTED;
         counters[3]++; //Increase number of executed conversions
 
-        uint amountOfTokens = transferInvoiceToken(conversion.converter, conversion.conversionAmount);
-        conversion.tokensBought = amountOfTokens;
-        emitExecutedEvent(conversion.converter, _conversionId, amountOfTokens);
+        transferInvoiceToken(conversion.converter, conversion.conversionAmount);
+        emitExecutedEvent(conversion.converter, _conversionId, conversion.tokensBought);
     }
 
 
