@@ -179,7 +179,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      * @param newAmount is the value including the new conversion amount
      */
     function updateTotalRaisedFunds(uint newAmount) internal {
-        campaignRaisedAlready = campaignRaisedAlready.add(newAmount);
+        campaignRaisedAlready = newAmount;
     }
 
     /**
@@ -190,13 +190,13 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     function calculateRaisedFundsIncludingNewConversion(uint conversionAmount, bool isFiatConversion) internal view returns (uint) {
         uint total = 0;
         if(keccak256(currency) == keccak256('ETH')) {
-            total = campaignRaisedAlready + conversionAmount;
+            total = campaignRaisedAlready.add(conversionAmount);
         } else {
             if(isFiatConversion) {
-                total = campaignRaisedAlready + conversionAmount;
+                total = campaignRaisedAlready.add(conversionAmount);
             } else {
                 uint rate = getRateFromExchange();
-                total = (conversionAmount*rate).div(10**18) + campaignRaisedAlready;
+                total = ((conversionAmount*rate).div(10**18)).add(campaignRaisedAlready);
             }
         }
         return total;
