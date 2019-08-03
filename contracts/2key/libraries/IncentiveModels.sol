@@ -1,22 +1,23 @@
 pragma solidity ^0.4.24;
 
+import "./SafeMath.sol";
+
 /**
- * @title Library to handle implementation of different reward models
  * @author Nikola Madjarevic
  */
 library IncentiveModels {
-
+    using SafeMath for uint;
     /**
      * @notice Implementation of average incentive model, reward is splited equally per referrer
-     * @param totalRewardEthWEI is total reward for the influencers
+     * @param totalBounty is total reward for the influencers
      * @param numberOfInfluencers is how many influencers we're splitting reward between
      */
     function averageModelRewards(
-        uint totalRewardEthWEI,
+        uint totalBounty,
         uint numberOfInfluencers
     ) internal pure returns (uint) {
         if(numberOfInfluencers > 0) {
-            uint equalPart = totalRewardEthWEI / numberOfInfluencers;
+            uint equalPart = totalBounty.div(numberOfInfluencers);
             return equalPart;
         }
         return 0;
@@ -24,17 +25,17 @@ library IncentiveModels {
 
     /**
      * @notice Implementation similar to average incentive model, except direct referrer) - gets 3x as the others
-     * @param totalRewardEthWEI is total reward for the influencers
+     * @param totalBounty is total reward for the influencers
      * @param numberOfInfluencers is how many influencers we're splitting reward between
      * @return two values, first is reward per regular referrer, and second is reward for last referrer in the chain
      */
     function averageLast3xRewards(
-        uint totalRewardEthWEI,
+        uint totalBounty,
         uint numberOfInfluencers
     ) internal pure returns (uint,uint) {
         if(numberOfInfluencers> 0) {
-            uint rewardPerReferrer = totalRewardEthWEI / (numberOfInfluencers + 2);
-            uint rewardForLast = rewardPerReferrer*3;
+            uint rewardPerReferrer = totalBounty.div(numberOfInfluencers + 2);
+            uint rewardForLast = rewardPerReferrer.mul(3);
             return (rewardPerReferrer, rewardForLast);
         }
         return (0,0);
@@ -42,20 +43,20 @@ library IncentiveModels {
 
     /**
      * @notice Function to return array of corresponding values with rewards in power law schema
-     * @param totalRewardEthWEI is totalReward
+     * @param totalBounty is totalReward
      * @param numberOfInfluencers is the total number of influencers
      * @return rewards in wei
      */
     function powerLawRewards(
-        uint totalRewardEthWEI,
+        uint totalBounty,
         uint numberOfInfluencers,
         uint factor
     ) internal pure returns (uint[]) {
         uint[] memory rewards = new uint[](numberOfInfluencers);
         if(numberOfInfluencers > 0) {
-            uint x = calculateX(totalRewardEthWEI,numberOfInfluencers,factor);
+            uint x = calculateX(totalBounty,numberOfInfluencers,factor);
             for(uint i=0; i<numberOfInfluencers;i++) {
-                rewards[numberOfInfluencers-i-1] = x / (2**i);
+                rewards[numberOfInfluencers-i-1] = x.div(2**i);
             }
         }
         return rewards;
@@ -76,9 +77,9 @@ library IncentiveModels {
         uint a = 1;
         uint sumOfFactors = 1;
         for(uint i=1; i<numberOfElements; i++) {
-            a = a*factor;
-            sumOfFactors += a;
+            a = a.mul(factor);
+            sumOfFactors = sumOfFactors.add(a);
         }
-        return (sumWei*a) / sumOfFactors;
+        return sumWei.mul(a).div(sumOfFactors);
     }
 }

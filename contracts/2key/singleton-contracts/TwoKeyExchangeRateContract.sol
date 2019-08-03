@@ -2,30 +2,27 @@ pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/storage-contracts/ITwoKeyExchangeRateContractStorage.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradability/Upgradeable.sol";
 import "./ITwoKeySingletonUtils.sol";
-import "../interfaces/storage-contracts/ITwoKeyExchangeRateContractStorage.sol";
+import "../libraries/SafeMath.sol";
 
 
 /**
  * @author Nikola Madjarevic
- * This is going to be the contract on which we will store exchange rates between USD and ETH
- * Will be maintained, and updated by our trusted server and CMC api every 8 hours.
  */
 contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
+    using SafeMath for uint;
     bool initialized;
 
     ITwoKeyExchangeRateContractStorage public PROXY_STORAGE_CONTRACT;
-    /**
-     * @notice Event will be emitted every time we update the price for the fiat
-     */
-    event PriceUpdated(bytes32 _currency, uint newRate, uint _timestamp, address _updater);
-
 
     /**
      * @notice Function which will be called immediately after contract deployment
-     * @dev Can be called only once
+     * @param _twoKeySingletonesRegistry is the address of TWO_KEY_SINGLETON_REGISTRY contract
+     * @param _proxyStorage is the address of proxy storage contract
      */
     function setInitialParams(
         address _twoKeySingletonesRegistry,
@@ -43,18 +40,21 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Function where our backend will update the state (rate between eth_wei and dollar_wei) every 8 hours
+     * @notice Backend calls to update rates
      * @dev only twoKeyMaintainer address will be eligible to update it
-     * @param _currency is the bytes32 (hex) representation of currency shortcut string ('USD','EUR',etc)
+     * @param _currency is the bytes32 (hex) representation of currency shortcut string
+     * @param _baseToTargetRate is the rate between base and target currency
      */
     function setFiatCurrencyDetails(
         bytes32 _currency,
-        uint baseToTargetRate
+        uint _baseToTargetRate
     )
     public
+    onlyMaintainer
     {
-        storeFiatCurrencyDetails(_currency, baseToTargetRate);
-        emit PriceUpdated(_currency, baseToTargetRate, block.timestamp, msg.sender);
+        storeFiatCurrencyDetails(_currency, _baseToTargetRate);
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+        ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currency, _baseToTargetRate, block.timestamp, msg.sender);
     }
 
     /**
@@ -64,29 +64,40 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
      */
     function setMultipleFiatCurrencyDetails(
         bytes32[] _currencies,
-        uint[] baseToTargetRates
+        uint[] _baseToTargetRates
     )
     public
+    onlyMaintainer
     {
         uint numberOfFiats = _currencies.length; //either _isETHGreaterThanCurrencies.length
         //There's no need for validation of input, because only we can call this and that costs gas
         for(uint i=0; i<numberOfFiats; i++) {
-            storeFiatCurrencyDetails(_currencies[i], baseToTargetRates[i]);
-            emit PriceUpdated(_currencies[i], baseToTargetRates[i], block.timestamp, msg.sender);
+            storeFiatCurrencyDetails(_currencies[i], _baseToTargetRates[i]);
+            address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+            ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currencies[i], _baseToTargetRates[i], block.timestamp, msg.sender);
         }
     }
 
+    /**
+     * @notice Function to store details about currency
+     * @param _currency is the bytes32 (hex) representation of currency shortcut string
+     * @param _baseToTargetRate is the rate between base and target currency
+     */
     function storeFiatCurrencyDetails(
         bytes32 _currency,
-        uint baseToTargetRate
+        uint _baseToTargetRate
     )
     internal
     {
         bytes32 hashKey = keccak256("currencyName2rate", _currency);
-        PROXY_STORAGE_CONTRACT.setUint(hashKey, baseToTargetRate);
+        PROXY_STORAGE_CONTRACT.setUint(hashKey, _baseToTargetRate);
     }
 
 
+    /**
+     * @notice Function getter for base to target rate
+     * @param base_target is the name of the currency
+     */
     function getBaseToTargetRate(
         string base_target
     )
@@ -101,7 +112,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Function to calculate how many
+     * @notice Helper calculation function
      */
     function exchangeCurrencies(
         string base_target,
@@ -111,7 +122,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        return getBaseToTargetRate(base_target) * base_amount;
+        return getBaseToTargetRate(base_target).mul(base_amount);
     }
 
 

@@ -5,15 +5,12 @@ import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
-import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-
-//Libraries
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
-
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
@@ -34,13 +31,14 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     address contractor;
     address moderator;
 
+    uint public campaignRaisedAlready;
     uint powerLawFactor;
     uint campaignStartTime; // Time when campaign starts
     uint campaignEndTime; // Time when campaign ends
     uint minDonationAmountWei; // Minimal donation amount
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
-
+    bool endCampaignOnceGoalReached;
     string public currency;
 
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -72,22 +70,45 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         campaignGoal = numberValues[5];
         incentiveModel = IncentiveModel(numberValues[7]);
 
+        if(numberValues[8] == 1) {
+            endCampaignOnceGoalReached = true;
+        }
+
         contractor = _contractor;
         moderator = _moderator;
         currency = _currency;
 
         twoKeySingletoneRegistry = twoKeySingletonRegistry;
-        twoKeyEventSource = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
-            .getContractProxyAddress("TwoKeyEventSource");
-        twoKeyMaintainersRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
-            .getContractProxyAddress("TwoKeyMaintainersRegistry");
-        twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry)
-            .getContractProxyAddress("TwoKeyRegistry");
+        twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
+        twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
+        twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
 
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
     }
 
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool) {
+        require(msg.sender == twoKeyDonationCampaign);
+        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount) == true);
+        require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmount) == true);
+        require(checkIsCampaignActiveInTermsOfTime() == true);
+        return true;
+    }
+
+    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) internal view returns (bool) {
+        uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpend(converter);
+        if(keccak256(currency) == keccak256("ETH")) {
+            if(leftToSpendInCampaignCurrency >= conversionAmountEthWEI) {
+                return true;
+            }
+        } else {
+            uint rate = getRateFromExchange();
+            if(leftToSpendInCampaignCurrency >= (conversionAmountEthWEI*rate).div(10**18)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     function checkHowMuchUserCanSpend(
         address _converter
@@ -96,8 +117,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     view
     returns (uint)
     {
-        uint amountAlreadySpent = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(_converter);
-        uint leftToSpend = getHowMuchLeftForUserToSpend(amountAlreadySpent);
+        uint amountAlreadySpentEth = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(_converter);
+        uint leftToSpend = getHowMuchLeftForUserToSpend(amountAlreadySpentEth);
         return leftToSpend;
     }
 
@@ -115,8 +136,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             uint availableToDonate = maxDonationAmountWei.sub(alreadyDonatedEthWEI);
             return availableToDonate;
         } else {
-            address twoKeyExchangeRateContract = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress("TwoKeyExchangeRateContract");
-            uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate(currency);
+            uint rate = getRateFromExchange();
 
             uint totalAmountSpentConvertedToFIAT = (alreadyDonatedEthWEI*rate).div(10**18);
             uint limit = maxDonationAmountWei; // Initially we assume it's fiat currency campaign
@@ -124,6 +144,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             return leftToSpendInFiats;
         }
     }
+
+
 
     function updateReferrerMappings(
         address referrerPlasma,
@@ -136,6 +158,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
+        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyDonationCampaign, referrerPlasma, reward);
     }
 
     /**
@@ -172,14 +195,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             uint rewardForLast;
             // Calculate reward for regular ones and for the last
             (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(totalBounty2keys, numberOfInfluencers);
-
-            //Update equal rewards to all influencers but last
-            for(i=0; i<numberOfInfluencers - 1; i++) {
-                updateReferrerMappings(influencers[i], reward, _conversionId);
-
+            if(numberOfInfluencers > 0) {
+                //Update equal rewards to all influencers but last
+                for(i=0; i<numberOfInfluencers - 1; i++) {
+                    updateReferrerMappings(influencers[i], reward, _conversionId);
+                }
+                updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
             }
-            //Update reward for last
-            updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
         } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
             // Get rewards per referrer
             uint [] memory rewards = IncentiveModels.powerLawRewards(totalBounty2keys, numberOfInfluencers, 2);
@@ -354,6 +376,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             bool isReferrer;
 
             uint amountConverterSpent = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(eth_address);
+            uint amountOfTokensReceived = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountOfDonationTokensConverterReceived(eth_address);
 
             if(amountConverterSpent> 0) {
                 isConverter = true;
@@ -367,6 +390,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             return abi.encodePacked(
                 amountConverterSpent,
                 referrerPlasma2TotalEarnings2key[plasma_address],
+                amountOfTokensReceived,
                 isConverter,
                 isReferrer,
                 state
@@ -478,6 +502,87 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return me;
     }
 
+    /**
+     * @notice Requirement for the checking if the campaign is active or not
+     */
+    function checkIsCampaignActiveInTermsOfTime()
+    internal
+    view
+    returns (bool)
+    {
+        if(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @notice Function which will calculate how much will be raised including the conversion which try to be created
+     * @param conversionAmount is the amount of conversion
+     */
+    function calculateRaisedFundsIncludingNewConversion(uint conversionAmount) internal view returns (uint) {
+        uint total = 0;
+        if(keccak256(currency) == keccak256('ETH')) {
+            total = campaignRaisedAlready.add(conversionAmount);
+        } else {
+            uint rate = getRateFromExchange();
+            total = ((conversionAmount*rate).div(10**18)).add(campaignRaisedAlready);
+        }
+        return total;
+    }
+
+    /**
+     * @notice Function which will update total raised funds which will be always compared with hard cap
+     * @param newAmount is the value including the new conversion amount
+     */
+    function updateTotalRaisedFunds(uint newAmount) internal {
+        campaignRaisedAlready = newAmount;
+    }
+
+    /**
+     * @notice Function to update total raised funds and validate conversion in terms of campaign goal
+     */
+    function updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(uint conversionAmount) internal returns (bool) {
+        uint newTotalRaisedFunds = calculateRaisedFundsIncludingNewConversion(conversionAmount); // calculating new total raised funds
+        require(canConversionBeCreatedInTermsOfCampaignGoal(newTotalRaisedFunds)); // checking that criteria is satisfied
+        updateTotalRaisedFunds(newTotalRaisedFunds); //updating new total raised funds
+        return true;
+    }
+
+    /**
+     * @notice Function which will validate if conversion can be created if endCampaignOnceGoalReached is selected
+     * @param campaignRaisedIncludingConversion is how much will be total campaign raised with new conversion
+     */
+    function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
+        if(endCampaignOnceGoalReached == true) {
+            require(campaignRaisedIncludingConversion <= campaignGoal + minDonationAmountWei); //small GAP
+        }
+        return true;
+    }
+
+    /**
+     * @notice Function to determine if contractor can withdraw his funds
+     */
+    function canContractorWithdrawFunds() public view returns (bool) {
+        if(isCampaignEnded() == true || campaignRaisedAlready >= campaignGoal) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @notice Function to check if campaign has ended
+     */
+    function isCampaignEnded() internal view returns (bool) {
+        if(checkIsCampaignActiveInTermsOfTime() == false) {
+            return true;
+        }
+        if(endCampaignOnceGoalReached == true && campaignRaisedAlready + minDonationAmountWei >= campaignGoal) {
+            return true;
+        }
+        return false;
+    }
+
     function getConstantInfo()
     public
     view
@@ -486,6 +591,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return (campaignStartTime,campaignEndTime, minDonationAmountWei, maxDonationAmountWei, campaignGoal);
     }
 
+    function getAddressFromRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress(contractName);
+    }
 
-
+    function getRateFromExchange() internal view returns (uint) {
+        address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
+        uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
+        return rate;
+    }
 }

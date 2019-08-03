@@ -4,12 +4,15 @@ import {expect} from "chai";
 import {IConversion, ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";
 import {promisify} from "../src/utils/promisify";
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
+import singletons from "../src/contracts/singletons";
 const { env } = process;
 
 const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const eventsNetUrl = env.PLASMA_RPC_URL;
+const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
+
 let i = 1;
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
@@ -50,19 +53,19 @@ let campaignName = 'Donation for Some Services';
 let tokenName = 'NikolaToken';
 let tokenSymbol = 'NTKN';
 let maxReferralRewardPercent = 5;
-let campaignStartTime = 12345;
-let campaignEndTime = 1234567;
+let campaignStartTime = 0;
+let campaignEndTime = 9884748832;
 let minDonationAmount = 0.001;
 let maxDonationAmount = 1000;
-let campaignGoal = 1000000000;
+let campaignGoal = 10000000000000000000000000000000;
 let conversionQuota = 5;
 let isKYCRequired = true;
 let shouldConvertToRefer = false;
 let acceptsFiat = false;
 let incentiveModel = "VANILLA_AVERAGE";
 let conversionAmountEth = 1;
-let currency = "ETH";
-
+let currency = "USD";
+let endCampaignOnceGoalReached = false;
 let campaignAddress: string;
 let invoiceTokenAddress: string;
 
@@ -91,7 +94,8 @@ let campaignData: ICreateCampaign = {
     shouldConvertToRefer,
     acceptsFiat,
     incentiveModel,
-    currency
+    currency,
+    endCampaignOnceGoalReached
 };
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {
@@ -255,6 +259,36 @@ describe('TwoKeyDonationCampaign', () => {
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
+    it('should visit campaign from same referral link', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.renata();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
+        });
+
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail);
+        let maxReward = await twoKeyProtocol.DonationCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
+        console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
+    }).timeout(60000);
+
+    it('should donate 2 ether to campaign', async() => {
+        printTestNumber();
+        console.log('4) buy from test4 REFLINK', links.gmail);
+
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail, from);
+        console.log(txHash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+        expect(txHash).to.be.a('string');
+    }).timeout(60000);
+
     it('should get all pending converters in case KYC is required', async() => {
         printTestNumber();
         const {web3, address} = web3switcher.deployer();
@@ -271,11 +305,10 @@ describe('TwoKeyDonationCampaign', () => {
 
         if(isKYCRequired == true) {
             let pendingConverters = await twoKeyProtocol.DonationCampaign.getAllPendingConverters(campaignAddress, from);
-            expect(pendingConverters.length).to.be.equal(1);
+            expect(pendingConverters.length).to.be.equal(2);
         }
 
     }).timeout(60000);
-
 
     it('should approve converter and execute conversion if KYC == TRUE', async() => {
         printTestNumber();
@@ -296,12 +329,27 @@ describe('TwoKeyDonationCampaign', () => {
         }
     }).timeout(60000);
 
+    it('should reject converter if KYC == TRUE', async() => {
+        printTestNumber();
+        if(isKYCRequired == true) {
+            let txHash = await twoKeyProtocol.DonationCampaign.rejectConverter(campaignAddress,env.RENATA_ADDRESS,from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            console.log('Converter is successfully rejected');
+        } else {
+            console.log('For this campaign KYC is not required since that -> This test case is not relevant!')
+        }
+    }).timeout(60000);
+
     it('should proof that the invoice has been issued for executed conversion (Invoice tokens transfered)', async() => {
         printTestNumber();
 
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(invoiceTokenAddress, env.TEST4_ADDRESS);
         balance = parseFloat(twoKeyProtocol.Utils.fromWei(balance,'ether').toString());
-        expect(balance).to.be.equal(1);
+        let expectedValue = 1;
+        if(currency == 'USD') {
+            expectedValue = 100;
+        }
+        expect(balance).to.be.equal(expectedValue);
     }).timeout(60000);
 
     it('should get conversion object', async() => {
@@ -309,6 +357,7 @@ describe('TwoKeyDonationCampaign', () => {
 
         let conversionId = 0;
         let conversion: IConversion = await twoKeyProtocol.DonationCampaign.getConversion(campaignAddress, conversionId, from);
+        console.log(conversion);
         expect(conversion.conversionState).to.be.equal("EXECUTED");
     }).timeout(60000);
 
@@ -364,7 +413,11 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
         let leftToDonate = await twoKeyProtocol.DonationCampaign.howMuchUserCanContribute(campaignAddress, env.TEST4_ADDRESS, from);
         console.log(leftToDonate);
-        expect(leftToDonate).to.be.equal(maxDonationAmount-conversionAmountEth);
+        let expectedValue = conversionAmountEth;
+        if(currency == 'USD') {
+            expectedValue = conversionAmountEth * 100;
+        }
+        expect(leftToDonate).to.be.equal(maxDonationAmount-expectedValue);
     }).timeout(60000);
 
     it('should show address statistic', async() => {
@@ -401,6 +454,18 @@ describe('TwoKeyDonationCampaign', () => {
         let signature = await twoKeyProtocol.PlasmaEvents.signReferrerToGetRewards();
         let stats = await twoKeyProtocol.DonationCampaign.getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaignAddress, signature);
         console.log(stats);
+    }).timeout(60000);
+
+    it('should get balance of TwoKeyEconomy tokens on DonationCampaign', async() => {
+        printTestNumber();
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
+        console.log('ERC20 TwoKeyEconomy balance on this contract is : ' + balance);
+    }).timeout(60000);
+
+    it('referrer should withdraw his earnings', async() => {
+        printTestNumber();
+        let txHash = await twoKeyProtocol.DonationCampaign.moderatorAndReferrerWithdraw(campaignAddress, false, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
 });

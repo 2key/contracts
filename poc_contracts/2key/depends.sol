@@ -19,4 +19,4 @@ import "../../contracts/2key/singleton-contracts/TwoKeySingletonesRegistry.sol";
 import "../../contracts/2key/singleton-contracts/TwoKeyRegistry.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyRegistryStorage.sol";
 
-import "../../contracts/2key/upgradability/UpgradabilityProxy.sol";
+import "../../contracts/2key/upgradability/UpgradeabilityProxy.sol";

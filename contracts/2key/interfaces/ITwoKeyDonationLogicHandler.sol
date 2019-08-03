@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 contract ITwoKeyDonationLogicHandler {
     function getReferrers(address customer) public view returns (address[]);
@@ -12,4 +12,6 @@ contract ITwoKeyDonationLogicHandler {
     public;
 
     function getReferrerPlasmaTotalEarnings(address _referrer) public view returns (uint);
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool);
+    function canContractorWithdrawFunds() public view returns (bool);
 }

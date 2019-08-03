@@ -1,9 +1,5 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
-/**
- * @title Utils
- * @dev Utility functions to perform various repeated actions in contracts
- */
 contract Utils {
 
     /**

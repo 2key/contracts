@@ -145,7 +145,8 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             if(to == address(0)) {
                 return false;
             }
-            to = getVisitedFrom(c, contractor, to);
+            //TODO: Check with UDI do we need here plasmaOf or ethereum address
+            to = plasmaOf(getVisitedFrom(c, contractor, to));
         }
         return true;
     }
@@ -339,6 +340,11 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     function setVisitedFromTime(address campaign, address contractor, address new_address, address old_address) internal {
         bytes32 keyHash = keccak256("visited_from_time", campaign, contractor, new_address, old_address);
         PROXY_STORAGE_CONTRACT.setUint(keyHash, block.timestamp);
+    }
+
+    function getVisitedSig(address _campaign, address _contractor, address _last_address) public view returns (bytes) {
+        bytes32 keyHash = keccak256("visited_sig", _campaign, _contractor, _last_address);
+        return PROXY_STORAGE_CONTRACT.getBytes(keyHash);
     }
 
     function setVisitedSig(address _campaign, address _contractor, address _last_address, bytes _sig) internal {

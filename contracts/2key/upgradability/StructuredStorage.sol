@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 import "./Upgradeable.sol";
 
@@ -35,7 +35,7 @@ contract StructuredStorage is Upgradeable {
         _;
     }
 
-    // *** Setter for Contract which holds all the logic ***
+    //Setter for Contract which holds all the logic
     function setProxyLogicContractAndDeployer(address _proxyLogicContract, address deployer) external {
         require(initialized == false);
 
@@ -97,8 +97,6 @@ contract StructuredStorage is Upgradeable {
     function getBoolArray(bytes32 _key) onlyProxyLogicContract external view returns (bool[]) {
         return boolArrayStorage[_key];
     }
-
-
 
     // *** Setter Methods ***
     function setUint(bytes32 _key, uint _value) onlyProxyLogicContract external {

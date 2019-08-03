@@ -465,7 +465,7 @@ describe('TwoKeyProtocol', () => {
             tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
             numberOfVestingPortions: 6,
-            numberOfDaysBetweenPortions: 30,
+            numberOfDaysBetweenPortions: 1,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
             isKYCRequired,
             isFiatConversionAutomaticallyApproved,
@@ -473,7 +473,9 @@ describe('TwoKeyProtocol', () => {
             isFiatOnly,
             vestingAmount,
             mustConvertToReferr: false,
-            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether')
+            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
+            campaignSoftCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
+            endCampaignWhenHardCapReached: false,
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -1050,8 +1052,8 @@ describe('TwoKeyProtocol', () => {
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
         console.log('Contractor balance: ' + contractorBalance.available);
 
-        const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        // const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
+        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
 
     it('==> should get address statistics', async() => {

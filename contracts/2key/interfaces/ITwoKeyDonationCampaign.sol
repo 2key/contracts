@@ -1,4 +1,4 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
 contract ITwoKeyDonationCampaign {
 
@@ -21,4 +21,5 @@ contract ITwoKeyDonationCampaign {
     function updateContractorProceeds(uint value) public;
     function getReceivedFrom(address _receiver) public view returns (address);
     function balanceOf(address _owner) public view returns (uint256);
+    function sendBackEthWhenConversionRejected(address _rejectedConverter, uint _conversionAmount) public;
 }

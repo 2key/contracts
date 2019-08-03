@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '../interfaces/ITwoKeySingletonesRegistry.sol';
 
 /**
- * @title UpgradeabilityStorage
+ * @author Nikola Madjarevic
  * @dev This contract holds all the necessary state variables to support the upgrade functionality
  */
 contract UpgradeabilityStorage {

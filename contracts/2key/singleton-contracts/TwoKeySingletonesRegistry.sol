@@ -8,16 +8,13 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/IStructuredStorage.sol";
 
-import "../upgradability/UpgradabilityProxy.sol";
+import "../upgradability/UpgradeabilityProxy.sol";
 import "../upgradability/Upgradeable.sol";
 
 
 
 /**
  * @author Nikola Madjarevic
- * @title Registry
- * @dev This contract works as a registry of versions, it holds the implementations for the registered versions.
- * @notice Will be everything mapped by contract name, so we will easily update and get versions per contract, all stored here
  */
 contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 

@@ -54,7 +54,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
         twoKeySingletonesRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
-
+        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
+            .getNonUpgradableContractAddress("TwoKeyEconomy");
         totalSupply_ = 1000000;
 
         maxReferralRewardPercent = numberValues[0];
@@ -64,7 +65,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         twoKeyDonationLogicHandler = _twoKeyDonationLogicHandler;
 
 
-        mustConvertToReferr = booleanValues[0];
+//        mustConvertToReferr = booleanValues[0];
         isKYCRequired = booleanValues[1];
         acceptsFiat = booleanValues[2];
 
@@ -210,12 +211,16 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     public
     payable
     {
+        bool canConvert = ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
+            msg.sender,
+            msg.value
+        );
+        require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, msg.sender);
         }
         createConversion(msg.value, msg.sender);
-        twoKeyEventSource.converted(address(this),msg.sender,msg.value);
     }
 
     /*
@@ -231,7 +236,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     {
         uint256 maxReferralRewardFiatOrETHWei = conversionAmountEthWEI.mul(maxReferralRewardPercent).div(100);
 
-        uint id = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).supportForCreateConversion(
+        uint conversionId = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).supportForCreateConversion(
             converterAddress,
             conversionAmountEthWEI,
             maxReferralRewardFiatOrETHWei,
@@ -239,7 +244,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         );
 
         if(isKYCRequired == false) {
-            ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(id);
+            ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(conversionId);
         }
     }
 
@@ -350,7 +355,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      * @notice Contractor can withdraw funds only if criteria is satisfied
      */
     function withdrawContractor() public onlyContractor {
-        super.withdrawContractor();
+        require(ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).canContractorWithdrawFunds());
+        withdrawContractorInternal();
     }
 
     /**
@@ -358,6 +364,22 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      */
     function getReservedAmount2keyForRewards() public view returns (uint) {
         return reservedAmount2keyForRewards;
+    }
+
+    /**
+     * @notice Function to send ether back to converter if his conversion is cancelled
+     * @param _rejectedConverter is the address of cancelled converter
+     * @param _conversionAmount is the amount he sent to the contract
+     * @dev This function can be called only by conversion handler
+     */
+    function sendBackEthWhenConversionRejected(
+        address _rejectedConverter,
+        uint _conversionAmount
+    )
+    public
+    onlyTwoKeyDonationConversionHandler
+    {
+        _rejectedConverter.transfer(_conversionAmount);
     }
 
     /**

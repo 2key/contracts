@@ -16,6 +16,44 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyEventSourceStorage public PROXY_STORAGE_CONTRACT;
 
+    /**
+     * Modifier which will allow only completely verified and validated contracts to call some functions
+     */
+    modifier onlyAllowedContracts {
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
+        _;
+    }
+
+    /**
+     * Modifier which will allow only TwoKeyCampaignValidator to make some calls
+     */
+    modifier onlyTwoKeyCampaignValidator {
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        require(msg.sender == twoKeyCampaignValidator);
+        _;
+    }
+
+    /**
+     * @notice Function to set initial params in the contract
+     * @param _twoKeySingletonesRegistry is the address of TWO_KEY_SINGLETON_REGISTRY contract
+     * @param _proxyStorage is the address of proxy of storage contract
+     */
+    function setInitialParams(
+        address _twoKeySingletonesRegistry,
+        address _proxyStorage
+    )
+    external
+    {
+        require(initialized == false);
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyEventSourceStorage(_proxyStorage);
+
+        initialized = true;
+    }
+
+
     event Created(
         address _campaign,
         address _owner,
@@ -32,6 +70,41 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _campaign,
         address _converter,
         uint256 _amount
+    );
+
+    // TODO: DEPRECATED IN NEW DEPLOYMENT
+    event ConvertedAcquisition(
+        address _campaign,
+        address _converter,
+        uint256 _baseTokens,
+        uint256 _bonusTokens,
+        uint256 _conversionAmount,
+        bool _isFiatConversion
+    );
+
+
+    event ConvertedAcquisitionV2(
+        address _campaign,
+        address _converterPlasma,
+        uint256 _baseTokens,
+        uint256 _bonusTokens,
+        uint256 _conversionAmount,
+        bool _isFiatConversion,
+        uint _conversionId
+    );
+
+    // TODO: DEPRECATED
+    event ConvertedDonation(
+        address _campaign,
+        address _converter,
+        uint _conversionAmount
+    );
+
+    event ConvertedDonationV2(
+        address _campaign,
+        address _converterPlasma,
+        uint _conversionAmount,
+        uint _conversionId
     );
 
     event Rewarded(
@@ -82,37 +155,33 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address contractor
     );
 
-    /**
-     * Modifier which will allow only completely verified and validated contracts to emit the events
-     */
-    modifier onlyAllowedContracts {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
-        _;
-    }
+    event PriceUpdated(
+        bytes32 _currency,
+        uint newRate,
+        uint _timestamp,
+        address _updater
+    );
 
-    modifier onlyValidator {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(msg.sender == twoKeyCampaignValidator);
-        _;
-    }
+    event UserRegistered(
+        string _name,
+        address _address,
+        string _fullName,
+        string _email,
+        string _username_walletName
+    );
 
-    /**
-     * @notice Function to set initial params in the contract
-     */
-    function setInitialParams(
-        address _twoKeySingletonesRegistry,
-        address _proxyStorage
-    )
-    external
-    {
-        require(initialized == false);
+    event Executed(
+        address campaignAddress,
+        address converterPlasmaAddress,
+        uint conversionId
+    );
 
-        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
-        PROXY_STORAGE_CONTRACT = ITwoKeyEventSourceStorage(_proxyStorage);
-
-        initialized = true;
-    }
+    event ExecutedV1(
+        address campaignAddress,
+        address converterPlasmaAddress,
+        uint conversionId,
+        uint tokens
+    );
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -127,11 +196,9 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _moderator
     )
     external
-    onlyValidator
+    view
+    onlyTwoKeyCampaignValidator
     {
-//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-//        ITwoKeyReg(twoKeyRegistry).addWhereContractor(_owner, _campaign);
-//        ITwoKeyReg(twoKeyRegistry).addWhereModerator(_moderator, _campaign);
         emit Created(_campaign, _owner, _moderator);
     }
 
@@ -148,35 +215,158 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _to
     )
     external
+    view
     onlyAllowedContracts
     {
-//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-//        ITwoKeyReg(twoKeyRegistry).addWhereReferrer(_campaign, _from);
         emit Joined(_campaign, _from, _to);
     }
 
     /**
-     * @notice Function to emit created event every time conversion happened
-     * @param _campaign is the address of the deployed campaign
-     * @param _converter is the converter address
-     * @param _amountETHWei is the conversion amount
-     * @dev this function updates values in TwoKeyRegistry contract
+     * @notice Function to emit converted event
+     * @param _campaign is the address of main campaign contract
+     * @param _converter is the address of converter during the conversion
+     * @param _conversionAmount is conversion amount
      */
     function converted(
         address _campaign,
         address _converter,
-        uint256 _amountETHWei
+        uint256 _conversionAmount
     )
     external
+    view
     onlyAllowedContracts
     {
-//        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-//        ITwoKeyReg(twoKeyRegistry).addWhereConverter(_converter, _campaign);
-        emit Converted(_campaign, _converter, _amountETHWei);
+        emit Converted(_campaign, _converter, _conversionAmount);
+    }
+
+    function rejected(
+        address _campaign,
+        address _converter
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit Rejected(_campaign, _converter);
     }
 
     /**
-     * @notice Function to emit created event every time reward happened
+     * @notice Function to emit event every time conversion gets executed
+     * @param _campaignAddress is the main campaign contract address
+     * @param _converterPlasmaAddress is the address of converter plasma
+     * @param _conversionId is the ID of conversion, unique per campaign
+     */
+    function executed(
+        address _campaignAddress,
+        address _converterPlasmaAddress,
+        uint _conversionId
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit Executed(_campaignAddress, _converterPlasmaAddress, _conversionId);
+    }
+
+    /**
+     * @notice Function to emit event every time conversion gets executed
+     * @param _campaignAddress is the main campaign contract address
+     * @param _converterPlasmaAddress is the address of converter plasma
+     * @param _conversionId is the ID of conversion, unique per campaign
+     */
+    function executedV1(
+        address _campaignAddress,
+        address _converterPlasmaAddress,
+        uint _conversionId,
+        uint tokens
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit ExecutedV1(_campaignAddress, _converterPlasmaAddress, _conversionId, tokens);
+    }
+
+    //TODO: DEPRECATED FOR NEW CAMPAIGNS
+    function convertedAcquisition(
+        address _campaign,
+        address _converter,
+        uint256 _baseTokens,
+        uint256 _bonusTokens,
+        uint256 _conversionAmount,
+        bool _isFiatConversion
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit ConvertedAcquisition(_campaign, _converter, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion);
+    }
+
+
+    /**
+     * @notice Function to emit created event every time conversion happened under AcquisitionCampaign
+     * @param _campaign is the address of the deployed campaign
+     * @param _converterPlasma is the converter address
+     * @param _baseTokens is the amount of tokens bought
+     * @param _bonusTokens is the amount of bonus tokens received
+     * @param _conversionAmount is the amount of conversion
+     * @param _isFiatConversion is flag representing if conversion is either FIAT or ETHER
+     * @param _conversionId is the id of conversion
+     * @dev this function updates values in TwoKeyRegistry contract
+     */
+    function convertedAcquisitionV2(
+        address _campaign,
+        address _converterPlasma,
+        uint256 _baseTokens,
+        uint256 _bonusTokens,
+        uint256 _conversionAmount,
+        bool _isFiatConversion,
+        uint _conversionId
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit ConvertedAcquisitionV2(_campaign, _converterPlasma, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion, _conversionId);
+    }
+
+
+    function convertedDonation(
+        address _campaign,
+        address _converter,
+        uint256 _conversionAmount
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit ConvertedDonation(_campaign, _converter, _conversionAmount);
+    }
+
+
+    /**
+     * @notice Function to emit created event every time conversion happened under DonationCampaign
+     * @param _campaign is the address of main campaign contract
+     * @param _converterPlasma is the address of the converter
+     * @param _conversionAmount is the amount of conversion
+     * @param _conversionId is the id of conversion
+     */
+    function convertedDonationV2(
+        address _campaign,
+        address _converterPlasma,
+        uint256 _conversionAmount,
+        uint256 _conversionId
+    )
+    external
+    view
+    onlyAllowedContracts
+    {
+        emit ConvertedDonationV2(_campaign, _converterPlasma, _conversionAmount, _conversionId);
+    }
+
+    /**
+     * @notice Function to emit created event every time bounty is distributed between influencers
      * @param _campaign is the address of the deployed campaign
      * @param _to is the reward receiver
      * @param _amount is the reward amount
@@ -187,6 +377,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _amount
     )
     external
+    view
     onlyAllowedContracts
     {
         emit Rewarded(_campaign, _to, _amount);
@@ -204,6 +395,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _indexOrAmount
     )
     external
+    view
     onlyAllowedContracts
     {
         emit Cancelled(_campaign, _converter, _indexOrAmount);
@@ -224,6 +416,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address contractor
     )
     external
+    view
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
         emit AcquisitionCampaignCreated(
@@ -248,6 +441,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address contractor
     )
     external
+    view
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
         emit DonationCampaignCreated(
@@ -258,6 +452,47 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    /**
+     * @notice Function which will emit event PriceUpdated every time that happens under TwoKeyExchangeRateContract
+     * @param _currency is the hexed string of currency name
+     * @param _newRate is the new rate
+     * @param _timestamp is the time of updating
+     * @param _updater is the maintainer address which performed this call
+     */
+    function priceUpdated(
+        bytes32 _currency,
+        uint _newRate,
+        uint _timestamp,
+        address _updater
+    )
+    external
+    view
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"));
+        emit PriceUpdated(_currency, _newRate, _timestamp, _updater);
+    }
+
+    /**
+     * @notice Function to emit event every time user is registered
+     * @param _name is the name of the user
+     * @param _address is the address of the user
+     * @param _fullName is the full user name
+     * @param _email is users email
+     * @param _username_walletName is = concat(username,'_',walletName)
+     */
+    function userRegistered(
+        string _name,
+        address _address,
+        string _fullName,
+        string _email,
+        string _username_walletName
+    )
+    external
+    view
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
+    }
     /**
      * @notice Function to check adequate plasma address for submitted eth address
      * @param me is the ethereum address we request corresponding plasma address for
@@ -298,7 +533,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Address to check if an address is maintainer in registry
+     * @notice Address to check if an address is maintainer in TwoKeyMaintainersRegistry
      * @param _maintainer is the address we're checking this for
      */
     function isAddressMaintainer(

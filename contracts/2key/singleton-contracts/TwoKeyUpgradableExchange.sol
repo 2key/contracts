@@ -69,7 +69,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Constructor of the contract
+     * @notice Constructor of the contract, can be called only once
+     * @param _token is ERC20 2key token
+     * @param _daiAddress is the address of DAI on ropsten
+     * @param _kyberNetworkProxy is the address of Kyber network contract
+     * @param _twoKeySingletonesRegistry is the address of TWO_KEY_SINGLETON_REGISTRY
+     * @param _proxyStorageContract is the address of proxy of storage contract
      */
     function setInitialParams(
         ERC20 _token,
@@ -338,6 +343,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    /**
+     * @notice Function to emit an event, created separately because of stack depth
+     */
     function emitEventWithdrawExecuted(
         address _beneficiary,
         uint _stableCoinsOnContractBefore,
@@ -360,18 +368,30 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    /**
+     * @notice Getter for 2key buy rate
+     */
     function buyRate2key() public view returns (uint) {
         return getUint("buyRate2key");
     }
 
+    /**
+     * @notice Getter for 2key sell rate
+     */
     function sellRate2key() public view returns (uint) {
         return getUint("sellRate2key");
     }
 
+    /**
+     * @notice Getter for transactionCounter
+     */
     function transactionCounter() public view returns (uint) {
         return getUint("transactionCounter");
     }
 
+    /**
+     * @notice Getter for weiRaised
+     */
     function weiRaised() public view returns (uint) {
         return getUint("weiRaised");
     }
@@ -397,6 +417,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setAddress(keccak256(key), value);
     }
 
+    /**
+     * @notice Function where maintainer can update any unassigned integer value
+     */
     function updateUint(
         string key,
         uint value
@@ -405,6 +428,33 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyMaintainer
     {
         setUint(key, value);
+    }
+
+    /**
+     * @notice Withdraw all ether from contract
+     */
+    function withdrawEther()
+    public
+    {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        require(msg.sender == twoKeyAdmin);
+        _forwardFunds(twoKeyAdmin);
+    }
+
+
+    /**
+     * @notice Function to withdraw any ERC20 tokens to TwoKeyAdmin
+     */
+    function withdrawERC20(
+        address _erc20TokenAddress,
+        uint _tokenAmount
+    )
+    public
+    {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        require(msg.sender == twoKeyAdmin);
+        ERC20(_erc20TokenAddress).safeTransfer(twoKeyAdmin, _tokenAmount);
+
     }
 
     /**
