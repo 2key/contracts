@@ -475,7 +475,7 @@ describe('TwoKeyProtocol', () => {
             mustConvertToReferr: false,
             campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
             campaignSoftCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
-            endCampaignWhenHardCapReached: false,
+            endCampaignWhenHardCapReached: true,
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {

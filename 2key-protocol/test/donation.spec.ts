@@ -65,7 +65,7 @@ let acceptsFiat = false;
 let incentiveModel = "VANILLA_AVERAGE";
 let conversionAmountEth = 1;
 let currency = "USD";
-let endCampaignOnceGoalReached = false;
+let endCampaignOnceGoalReached = true;
 let campaignAddress: string;
 let invoiceTokenAddress: string;
 
