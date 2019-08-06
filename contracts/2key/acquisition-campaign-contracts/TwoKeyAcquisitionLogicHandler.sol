@@ -163,7 +163,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
     function checkHowMuchUserCanConvert(uint alreadySpentETHWei, uint alreadySpentFiatWEI) internal view returns (uint) {
         if(keccak256(currency) == keccak256('ETH')) {
-            uint leftToSpendInEther = maxContributionETHorFiatCurrency - alreadySpentETHWei;
+            uint leftToSpendInEther = maxContributionETHorFiatCurrency.sub(alreadySpentETHWei);
             return leftToSpendInEther;
         } else {
             uint rate = getRateFromExchange();
