@@ -328,7 +328,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint stableCoinsOnContractBefore = dai.balanceOf(address(this));
         token.transferFrom(msg.sender, address(this), _twoKeyUnits);
 
-        uint stableCoinsAfter = stableCoinsOnContractBefore - stableCoinUnits;
+        uint stableCoinsAfter = stableCoinsOnContractBefore.sub(stableCoinUnits);
 
         emitEventWithdrawExecuted(
             _beneficiary,
