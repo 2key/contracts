@@ -232,25 +232,25 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
         if(isConversionFiat == false) {
             _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
-            _contractorProceeds = _conversionAmount - _maxReferralRewardETHWei - _moderatorFeeETHWei;
+            _contractorProceeds = _conversionAmount.sub(_maxReferralRewardETHWei.add(_moderatorFeeETHWei));
             //TODO: Add accounting for fiat proceeds
             state = ConversionState.APPROVED; // All eth conversions are auto approved
-            counters[1]++;
+            counters[1] = counters[1].add(1);
         } else {
             //This means fiat conversion is automatically approved
             if(isFiatConversionAutomaticallyApproved) {
                 state = ConversionState.APPROVED;
-                counters[1] ++; // Increase the number of approved conversions
+                counters[1] = counters[1].add(1); // Increase the number of approved conversions
             } else {
                 state = ConversionState.PENDING_APPROVAL; // Fiat conversion state is PENDING_APPROVAL
-                counters[0]++; // If conversion is FIAT it will be always first pending and will have to be approved
+                counters[0] = counters[0].add(1); // If conversion is FIAT it will be always first pending and will have to be approved
             }
         }
 
         Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits,
-            now, now + expiryConversionInHours * (1 hours), isConversionFiat);
+            now, now.add(expiryConversionInHours.mul(1 hours)), isConversionFiat);
 
         conversions.push(c);
 
@@ -267,9 +267,9 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
         emit ConversionCreated(numberOfConversions);
 
-        numberOfConversions++;
+        numberOfConversions = numberOfConversions.add(1);
 
-        return numberOfConversions-1;
+        return numberOfConversions - 1;
     }
 
 
@@ -284,21 +284,21 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     {
         Conversion conversion = conversions[_conversionId];
 
-        uint totalUnits = conversion.baseTokenUnits + conversion.bonusTokenUnits;
+        uint totalUnits = conversion.baseTokenUnits.add(conversion.bonusTokenUnits);
 
         // Converter must be approved in all cases
         require(converterToState[conversion.converter] == ConverterState.APPROVED);
 
         if(conversion.isConversionFiat == true) {
             if(isFiatConversionAutomaticallyApproved) {
-                counters[1] --; // Decrease number of approved conversions
+                counters[1] = counters[1].sub(1); // Decrease number of approved conversions
             } else {
                 require(conversion.state == ConversionState.PENDING_APPROVAL);
                 require(msg.sender == contractor); // first check who calls this in order to save gas
 //                uint availableTokens = twoKeyAcquisitionCampaignERC20.getAvailableAndNonReservedTokensAmount();
 //                require(totalUnits < availableTokens);
                 //Sufficient because we reserve tokens at the time of creation, in case we bought all, we'll get 0 which will always throw
-                counters[0]--; //Decrease number of pending conversions
+                counters[0] = counters[0].sub(1); //Decrease number of pending conversions
             }
 
             //Update raised funds FIAT once the conversion is executed
@@ -309,10 +309,10 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         } else {
             require(conversion.state == ConversionState.APPROVED);
             amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
-            counters[1]--; //Decrease number of approved conversions
+            counters[1] = counters[1].sub(1); //Decrease number of approved conversions
         }
         //Update bought units
-        unitsConverterBought[conversion.converter] = unitsConverterBought[conversion.converter].add(conversion.baseTokenUnits + conversion.bonusTokenUnits);
+        unitsConverterBought[conversion.converter] = unitsConverterBought[conversion.converter].add(conversion.baseTokenUnits).add(conversion.bonusTokenUnits);
 
         // Total rewards for referrers
         uint totalReward2keys = 0;
@@ -349,7 +349,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
         }
 
         if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
-            counters[5]++; //increase number of unique converters
+            counters[5] = counters[5].add(1); //increase number of unique converters
             doesConverterHaveExecutedConversions[conversion.converter] = true;
         }
 
@@ -365,10 +365,10 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
 
         conversion.maxReferralReward2key = totalReward2keys;
         conversion.state = ConversionState.EXECUTED;
-        counters[3]++; //Increase number of executed conversions
+        counters[3] = counters[3].add(1); //Increase number of executed conversions
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
 
-        emitExecutedEvent(conversion.converter, _conversionId, conversion.baseTokenUnits + conversion.bonusTokenUnits);
+        emitExecutedEvent(conversion.converter, _conversionId, conversion.baseTokenUnits.add(conversion.bonusTokenUnits));
     }
 
 
@@ -436,7 +436,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
                 pending[i] = pending[pending.length-1];
                 delete pending[pending.length-1];
                 stateToConverter[key] = pending;
-                stateToConverter[key].length--;
+                stateToConverter[key].length = stateToConverter[key].length.sub(1) ;
                 break;
             }
         }
@@ -516,16 +516,16 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
             Conversion c = conversions[conversionId];
             if(c.state == ConversionState.PENDING_APPROVAL || c.state == ConversionState.APPROVED) {
                 if(c.state == ConversionState.PENDING_APPROVAL) {
-                    counters[0]--; //Reduce number of pending conversions
+                    counters[0] = counters[0].sub(1); //Reduce number of pending conversions
                 } else {
-                    counters[1]--; //Reduce number of approved conversions
+                    counters[1] = counters[1].sub(1); //Reduce number of approved conversions
                 }
-                counters[2]++; //Increase number of rejected conversions
+                counters[2] = counters[2].add(1); //Increase number of rejected conversions
                 ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
                 c.state = ConversionState.REJECTED;
-                reservedAmount += c.baseTokenUnits + c.bonusTokenUnits;
+                reservedAmount += c.baseTokenUnits.add(c.bonusTokenUnits);
                 if(c.isConversionFiat == false) {
-                    refundAmount += c.conversionAmount;
+                    refundAmount = refundAmount.add(c.conversionAmount);
                 }
             }
         }
@@ -592,12 +592,13 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     {
         Conversion conversion = conversions[_conversionId];
 
-        require(conversion.conversionCreatedAt + 10*(1 days) < block.timestamp);
+        uint numberOfDays = 10;
+        require(conversion.conversionCreatedAt.add(numberOfDays.mul(1 days)) < block.timestamp);
         require(msg.sender == conversion.converter);
         require(conversion.state == ConversionState.PENDING_APPROVAL);
 
-        counters[0]--; // Reduce number of pending conversions
-        counters[4]++; // Increase number of cancelled conversions
+        counters[0] = counters[0].sub(1); // Reduce number of pending conversions
+        counters[4] = counters[4].add(1); // Increase number of cancelled conversions
         conversion.state = ConversionState.CANCELLED_BY_CONVERTER;
         twoKeyAcquisitionCampaignERC20.sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
     }

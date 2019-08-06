@@ -192,6 +192,18 @@ contract TwoKeyCampaign is ArcERC20 {
 		setPublicLinkKeyOf(msg.sender, new_public_key);
 	}
 
+	/**
+	 * @notice Function to allow updating public meta hash
+	 * @param _newPublicMetaHash is the new meta hash
+	 */
+	function updateIpfsHashOfCampaign(
+		string _newPublicMetaHash
+	)
+	public
+	onlyContractor
+	{
+		publicMetaHash = _newPublicMetaHash;
+	}
 
 	/**
  	 * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract

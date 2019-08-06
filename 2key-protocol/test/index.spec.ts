@@ -452,6 +452,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should create a new campaign Acquisition Contract', async () => {
         campaignData = {
+            moderator: from,
             campaignStartTime,
             campaignEndTime,
             expiryConversion: 1000 * 60 * 60 * 24,
@@ -475,7 +476,7 @@ describe('TwoKeyProtocol', () => {
             mustConvertToReferr: false,
             campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
             campaignSoftCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
-            endCampaignWhenHardCapReached: false,
+            endCampaignWhenHardCapReached: true,
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {

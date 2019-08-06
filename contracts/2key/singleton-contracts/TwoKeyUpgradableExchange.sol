@@ -319,7 +319,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     )
     external
     onlyValidatedContracts
-    returns (uint)
     {
         ERC20 dai = ERC20(getAddress("DAI"));
         ERC20 token = ERC20(getAddress("TWO_KEY_TOKEN"));
@@ -329,9 +328,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint stableCoinsOnContractBefore = dai.balanceOf(address(this));
         token.transferFrom(msg.sender, address(this), _twoKeyUnits);
 
-        uint stableCoinsAfter = stableCoinsOnContractBefore - stableCoinUnits;
-
-        dai.transfer(_beneficiary, stableCoinUnits);
+        uint stableCoinsAfter = stableCoinsOnContractBefore.sub(stableCoinUnits);
 
         emitEventWithdrawExecuted(
             _beneficiary,
@@ -341,6 +338,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             stableCoinUnits,
             _twoKeyUnits
         );
+
+        dai.transfer(_beneficiary, stableCoinUnits);
     }
 
     /**

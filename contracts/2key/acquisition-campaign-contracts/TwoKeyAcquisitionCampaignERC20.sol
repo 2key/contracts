@@ -284,14 +284,14 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         (baseTokensForConverterUnits, bonusTokensForConverterUnits)
         = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getEstimatedTokenAmount(conversionAmountETHWeiOrFiat, isFiatConversion);
 
-        uint totalTokensForConverterUnits = baseTokensForConverterUnits + bonusTokensForConverterUnits;
+        uint totalTokensForConverterUnits = baseTokensForConverterUnits.add(bonusTokensForConverterUnits);
 
         uint256 _total_units = getAvailableAndNonReservedTokensAmount();
         require(_total_units >= totalTokensForConverterUnits);
 
         uint256 maxReferralRewardFiatOrETHWei = conversionAmountETHWeiOrFiat.mul(maxReferralRewardPercent).div(100);
 
-        reservedAmountOfTokens = reservedAmountOfTokens + totalTokensForConverterUnits;
+        reservedAmountOfTokens = reservedAmountOfTokens.add(totalTokensForConverterUnits);
 
         uint conversionId = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
             conversionAmountETHWeiOrFiat, maxReferralRewardFiatOrETHWei,
@@ -337,7 +337,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             if(_isConversionFiat) {
                 address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
                 uint rate = IUpgradableExchange(upgradableExchange).sellRate2key();
-                totalBounty2keys = (_maxReferralRewardETHWei / (rate)) * (1000);
+                totalBounty2keys = (_maxReferralRewardETHWei.div(rate)).mul(1000);
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
                 //TODO: add require that there's enough tokens at this moment
             } else {
@@ -372,8 +372,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
 
+        uint total = 100;
         // Balance which will go to moderator
-        uint balance = moderatorFee.mul(100-networkFee).div(100);
+        uint balance = moderatorFee.mul(total.sub(networkFee)).div(100);
 
         uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
         buyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
@@ -584,7 +585,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         if(assetContractERC20 != twoKeyEconomy) {
             address twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
-            uint rewardsNotSpent = getTokenBalance(twoKeyEconomy) - reservedAmount2keyForRewards;
+            uint tokensBalance = getTokenBalance(twoKeyEconomy);
+            uint rewardsNotSpent = tokensBalance.sub(reservedAmount2keyForRewards);
             IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, rewardsNotSpent);
             IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(rewardsNotSpent, msg.sender);
         }

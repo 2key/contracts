@@ -221,11 +221,8 @@ contract TwoKeyCongress {
         bytes32 memberName,
         uint _votingPower
     )
-    public
+    internal
     {
-        if(initialized == true) {
-            require(msg.sender == address(this));
-        }
         minimumQuorum = allMembers.length;
         maxVotingPower += _votingPower;
         address2Member[targetMember] = Member(
@@ -251,9 +248,8 @@ contract TwoKeyCongress {
     function removeMember(
         address targetMember
     )
-    public
+    internal
     {
-        require(msg.sender == address(this));
         require(isMemberInCongress[targetMember] == true);
 
         //Remove member voting power from max voting power
@@ -274,7 +270,9 @@ contract TwoKeyCongress {
         }
         //After reduce array size
         delete allMembers[allMembers.length-1];
-        allMembers.length--;
+
+        uint newLength = allMembers.length.sub(1);
+        allMembers.length = newLength;
 
         //Remove him from state mapping
         isMemberInCongress[targetMember] = false;
@@ -301,9 +299,8 @@ contract TwoKeyCongress {
     function addNewAllowedBytecode(
         bytes32 functionSignature
     )
-    public
+    internal
     {
-        require(msg.sender == address(this));
         allowedMethodSignatures.push(bytes32(functionSignature));
     }
     /**
@@ -498,11 +495,13 @@ contract TwoKeyCongress {
 
         // ...then execute result
         p.executed = true; // Avoid recursive calling
-        require(p.recipient.call.value(p.amount)(transactionBytecode));
         p.proposalPassed = true;
 
         // Fire Events
         emit ProposalTallied(proposalNumber, p.currentResult, p.numberOfVotes, p.proposalPassed);
+
+        // Call external function
+        require(p.recipient.call.value(p.amount)(transactionBytecode));
     }
 
 

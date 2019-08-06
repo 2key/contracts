@@ -34,7 +34,7 @@ library IncentiveModels {
         uint numberOfInfluencers
     ) internal pure returns (uint,uint) {
         if(numberOfInfluencers> 0) {
-            uint rewardPerReferrer = totalBounty.div(numberOfInfluencers + 2);
+            uint rewardPerReferrer = totalBounty.div(numberOfInfluencers.add(2));
             uint rewardForLast = rewardPerReferrer.mul(3);
             return (rewardPerReferrer, rewardForLast);
         }
@@ -56,7 +56,7 @@ library IncentiveModels {
         if(numberOfInfluencers > 0) {
             uint x = calculateX(totalBounty,numberOfInfluencers,factor);
             for(uint i=0; i<numberOfInfluencers;i++) {
-                rewards[numberOfInfluencers-i-1] = x.div(2**i);
+                rewards[numberOfInfluencers.sub(i.add(1))] = x.div(2**i);
             }
         }
         return rewards;
