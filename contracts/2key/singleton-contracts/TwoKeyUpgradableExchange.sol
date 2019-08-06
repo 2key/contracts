@@ -330,8 +330,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         uint stableCoinsAfter = stableCoinsOnContractBefore - stableCoinUnits;
 
-        dai.transfer(_beneficiary, stableCoinUnits);
-
         emitEventWithdrawExecuted(
             _beneficiary,
             stableCoinsOnContractBefore,
@@ -340,6 +338,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             stableCoinUnits,
             _twoKeyUnits
         );
+
+        dai.transfer(_beneficiary, stableCoinUnits);
     }
 
     /**
