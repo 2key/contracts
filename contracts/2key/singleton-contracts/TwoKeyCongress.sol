@@ -498,11 +498,13 @@ contract TwoKeyCongress {
 
         // ...then execute result
         p.executed = true; // Avoid recursive calling
-        require(p.recipient.call.value(p.amount)(transactionBytecode));
         p.proposalPassed = true;
 
         // Fire Events
         emit ProposalTallied(proposalNumber, p.currentResult, p.numberOfVotes, p.proposalPassed);
+
+        // Call external function
+        require(p.recipient.call.value(p.amount)(transactionBytecode));
     }
 
 
