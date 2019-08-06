@@ -3,7 +3,7 @@ pragma solidity ^0.4.24; //We have to specify what version of compiler this code
 import "../../contracts/openzeppelin-solidity/contracts/token/ERC20/BasicToken.sol";
 import '../../contracts/openzeppelin-solidity/contracts/ownership/Ownable.sol';
 import "../../contracts/openzeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
-import './TwoKeyEventSource.sol';
+import './TwoKeyEventSourcePOC.sol';
 import '../../contracts/2key/singleton-contracts/TwoKeyRegistry.sol';
 import '../../contracts/2key/libraries/Call.sol';
 
@@ -25,7 +25,7 @@ contract TwoKeyContract is StandardToken, Ownable {
   using SafeMath for uint256;
   // Public variables of the token
   TwoKeyRegistry registry;
-  TwoKeyEventSource eventSource;
+  TwoKeyEventSourcePOC eventSource;
 
   // address public owner;  // Who created the contract (business) // contained in Ownable.sol
   address owner_plasma; // must be set in constructor
@@ -309,7 +309,7 @@ contract TwoKeyAcquisitionContract is TwoKeyContract
   uint256 public _total_units; // total number of units on offer
 
   // Initialize all the constants
-  constructor(TwoKeyRegistry _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(TwoKeyRegistry _reg, TwoKeyEventSourcePOC _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         uint256 _units, string _ipfs_hash) public {
     require(_bounty <= _cost,"bounty bigger than cost");
@@ -365,7 +365,7 @@ contract TwoKeyPresellContract is TwoKeyContract {
 //  address dc;
 
   // Initialize all the constants
-  constructor(TwoKeyRegistry _reg, TwoKeyEventSource _eventSource, string _name, string _symbol,
+  constructor(TwoKeyRegistry _reg, TwoKeyEventSourcePOC _eventSource, string _name, string _symbol,
         uint256 _tSupply, uint256 _quota, uint256 _cost, uint256 _bounty,
         string _ipfs_hash, StandardToken _erc20_token_sell_contract) public {
     require(_bounty <= _cost,"bounty bigger than cost");

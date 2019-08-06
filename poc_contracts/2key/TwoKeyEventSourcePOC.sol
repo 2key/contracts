@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 import '../../contracts/2key/TwoKeyTypes.sol';
 import "../../contracts/2key/libraries/GetCode.sol";
 
-contract TwoKeyEventSource is TwoKeyTypes {
+contract TwoKeyEventSourcePOC is TwoKeyTypes {
 
     mapping(address => bool) public activeUser;
 
