@@ -270,7 +270,7 @@ contract TwoKeyCongress {
         }
         //After reduce array size
         delete allMembers[allMembers.length-1];
-        allMembers.length--;
+        allMembers.length = allMembers.length.sub(1);
 
         //Remove him from state mapping
         isMemberInCongress[targetMember] = false;
