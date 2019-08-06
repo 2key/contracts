@@ -197,9 +197,6 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         //Only converter of maintainer can call this function
         require(msg.sender == p.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
         require(p.isPortionWithdrawn[portion] == false && block.timestamp > portionToUnlockingDate[portion]);
-        //Transfer tokens
-        require(IERC20(assetContractERC20).transfer(p.converter, p.portionAmounts[portion]));
-        p.isPortionWithdrawn[portion] = true;
 
         emit TokensWithdrawn (
             block.timestamp,
@@ -208,6 +205,10 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
             portion,
             p.portionAmounts[portion]
         );
+
+        p.isPortionWithdrawn[portion] = true;
+        //Transfer tokens
+        require(IERC20(assetContractERC20).transfer(p.converter, p.portionAmounts[portion]));
     }
 
     function getPurchaseInformation(
