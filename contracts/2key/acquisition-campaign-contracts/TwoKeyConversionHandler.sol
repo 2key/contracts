@@ -436,7 +436,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
                 pending[i] = pending[pending.length-1];
                 delete pending[pending.length-1];
                 stateToConverter[key] = pending;
-                stateToConverter[key].length--;
+                stateToConverter[key].length = stateToConverter[key].length.sub(1) ;
                 break;
             }
         }
