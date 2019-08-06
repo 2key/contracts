@@ -17,6 +17,5 @@ contract IUpgradableExchange {
         address _beneficiary
     )
     public
-    payable
-    returns (uint);
+    payable;
 }

@@ -319,7 +319,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     )
     external
     onlyValidatedContracts
-    returns (uint)
     {
         ERC20 dai = ERC20(getAddress("DAI"));
         ERC20 token = ERC20(getAddress("TWO_KEY_TOKEN"));
