@@ -452,6 +452,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should create a new campaign Acquisition Contract', async () => {
         campaignData = {
+            moderator: from,
             campaignStartTime,
             campaignEndTime,
             expiryConversion: 1000 * 60 * 60 * 24,
