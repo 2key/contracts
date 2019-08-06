@@ -592,7 +592,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     {
         Conversion conversion = conversions[_conversionId];
 
-        require(conversion.conversionCreatedAt + 10*(1 days) < block.timestamp);
+        uint numberOfDays = 10;
+        require(conversion.conversionCreatedAt.add(numberOfDays.mul(1 days)) < block.timestamp);
         require(msg.sender == conversion.converter);
         require(conversion.state == ConversionState.PENDING_APPROVAL);
 
