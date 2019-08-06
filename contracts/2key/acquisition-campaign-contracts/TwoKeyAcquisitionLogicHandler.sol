@@ -167,7 +167,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             return leftToSpendInEther;
         } else {
             uint rate = getRateFromExchange();
-            uint totalAmountSpentConvertedToFIAT = (alreadySpentETHWei*rate).div(10**18) + alreadySpentFiatWEI;
+            uint totalAmountSpentConvertedToFIAT = ((alreadySpentETHWei*rate).div(10**18)).add(alreadySpentFiatWEI);
             uint limit = maxContributionETHorFiatCurrency; // Initially we assume it's fiat currency campaign
             uint leftToSpendInFiats = limit.sub(totalAmountSpentConvertedToFIAT);
             return leftToSpendInFiats;
@@ -208,7 +208,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      */
     function canConversionBeCreatedInTermsOfHardCap(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignWhenHardCapReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignHardCapWei + minContributionETHorFiatCurrency); //small GAP
+            require(campaignRaisedIncludingConversion <= campaignHardCapWei.add(minContributionETHorFiatCurrency)); //small GAP
         }
         return true;
     }
@@ -257,7 +257,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         if(keccak256(currency) == keccak256('ETH')) {
             //Adding a deviation of 1000 weis
-            if(leftToSpend + 1000 > amountWillingToSpendEthWei && minContributionETHorFiatCurrency <= amountWillingToSpendEthWei) {
+            if(leftToSpend.add(1000) > amountWillingToSpendEthWei && minContributionETHorFiatCurrency <= amountWillingToSpendEthWei) {
                 return(true, leftToSpend);
             } else {
                 return(false, leftToSpend);
@@ -266,7 +266,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
-            if(leftToSpend + 1000 >= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat) {
+            if(leftToSpend.add(1000) >= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat) {
                 return (true,leftToSpend);
             } else {
                 return (false,leftToSpend);
@@ -282,7 +282,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready + minContributionETHorFiatCurrency >= campaignHardCapWei) {
+        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready.add(minContributionETHorFiatCurrency) >= campaignHardCapWei) {
             return true;
         }
         return false;
@@ -577,7 +577,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             if (influencer == plasmaOf(contractor)) {
                 break;
             }
-            n_influencers++;
+            n_influencers = n_influencers.add(1);
         }
 
         address[] memory influencers = new address[](n_influencers);
@@ -585,7 +585,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         while (n_influencers > 0) {
             influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
-            n_influencers--;
+            n_influencers = n_influencers.sub(1);
             influencers[n_influencers] = influencer;
         }
 
@@ -596,7 +596,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
-        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
+        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
 
         address twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
         ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyAcquisitionCampaign, referrerPlasma, reward);
