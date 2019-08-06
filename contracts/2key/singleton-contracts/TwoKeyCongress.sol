@@ -221,11 +221,8 @@ contract TwoKeyCongress {
         bytes32 memberName,
         uint _votingPower
     )
-    public
+    internal
     {
-        if(initialized == true) {
-            require(msg.sender == address(this));
-        }
         minimumQuorum = allMembers.length;
         maxVotingPower += _votingPower;
         address2Member[targetMember] = Member(
@@ -251,9 +248,8 @@ contract TwoKeyCongress {
     function removeMember(
         address targetMember
     )
-    public
+    internal
     {
-        require(msg.sender == address(this));
         require(isMemberInCongress[targetMember] == true);
 
         //Remove member voting power from max voting power
@@ -301,9 +297,8 @@ contract TwoKeyCongress {
     function addNewAllowedBytecode(
         bytes32 functionSignature
     )
-    public
+    internal
     {
-        require(msg.sender == address(this));
         allowedMethodSignatures.push(bytes32(functionSignature));
     }
     /**
