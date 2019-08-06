@@ -206,8 +206,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     internal
     {
         uint amountOfTokens = calculateAmountOfTokens(_conversionAmountETHWei);
-        erc20InvoiceToken.transfer(_converter, amountOfTokens);
         converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(amountOfTokens);
+        erc20InvoiceToken.transfer(_converter, amountOfTokens);
     }
 
 
