@@ -770,7 +770,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     view
     returns (uint)
     {
-        require(msg.sender == twoKeyAcquisitionCampaign);
         return referrerPlasma2TotalEarnings2key[_referrer];
     }
 
