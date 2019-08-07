@@ -560,15 +560,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return true;
     }
 
-    /**
-     * @notice Function to determine if contractor can withdraw his funds
-     */
-    function canContractorWithdrawFunds() public view returns (bool) {
-        if(isCampaignEnded() == true || campaignRaisedAlready >= campaignGoal) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * @notice Function to check if campaign has ended
