@@ -80,7 +80,8 @@ contract TwoKeyCongress {
     view
     returns (bool)
     {
-        for(uint i=0; i< allowedMethodSignatures.length; i++) {
+        uint length = allowedMethodSignatures.length;
+        for(uint i=0; i< length; i++) {
             if(compare(allowedMethodSignatures[i], bytecode)) {
                 return true;
             }
