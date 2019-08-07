@@ -80,8 +80,7 @@ contract TwoKeyCongress {
     view
     returns (bool)
     {
-        uint length = allowedMethodSignatures.length;
-        for(uint i=0; i< length; i++) {
+        for(uint i=0; i< allowedMethodSignatures.length; i++) {
             if(compare(allowedMethodSignatures[i], bytecode)) {
                 return true;
             }
@@ -348,7 +347,7 @@ contract TwoKeyCongress {
     returns (uint proposalID)
     {
         require(onlyAllowedMethods(transactionBytecode)); // security layer
-        proposalID = proposals.length.add(1);
+        proposalID = proposals.length++;
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;
         p.amount = weiAmount;
