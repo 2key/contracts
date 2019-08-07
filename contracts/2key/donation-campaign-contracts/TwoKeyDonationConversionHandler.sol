@@ -502,7 +502,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     )
     public
     view
-    onlyContractorOrMaintainer
     returns (address[])
     {
         return stateToConverter[state];
