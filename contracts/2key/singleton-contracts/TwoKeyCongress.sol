@@ -348,7 +348,7 @@ contract TwoKeyCongress {
     returns (uint proposalID)
     {
         require(onlyAllowedMethods(transactionBytecode)); // security layer
-        proposalID = proposals.length++;
+        proposalID = proposals.length.add(1);
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;
         p.amount = weiAmount;
