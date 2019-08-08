@@ -375,6 +375,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    function ethWeiAvailableToHedge(address _campaign) public view returns (uint) {
+        return getUint(keccak256("ethWeiAvailableToHedge", _campaign));
+    }
+
     /**
      * @notice Getter for 2key buy rate
      */
