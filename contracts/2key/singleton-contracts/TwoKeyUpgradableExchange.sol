@@ -314,6 +314,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
         require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
+
     }
 
     /**
@@ -375,6 +376,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    /**
+     * @notice Getter for "mapping" ethWeiAvailableToHedge (per contract)
+     */
     function ethWeiAvailableToHedge(address _campaign) public view returns (uint) {
         return getUint(keccak256("ethWeiAvailableToHedge", _campaign));
     }
