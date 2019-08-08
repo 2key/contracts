@@ -90,15 +90,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
 
-        setUint(("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
-        setUint(("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
-        setUint(("weiRaised"),0);
-        setUint("transactionCounter",0);
+        setUint(keccak256("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
+        setUint(keccak256("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
+        setUint(keccak256("weiRaised"),0);
+        setUint(keccak256("transactionCounter"),0);
 
-        setAddress(("TWO_KEY_TOKEN"),address(_token));
-        setAddress(("DAI"), _daiAddress);
-        setAddress(("ETH_TOKEN_ADDRESS"), 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
-        setAddress(("KYBER_NETWORK_PROXY"), _kyberNetworkProxy);
+        setAddress(keccak256("TWO_KEY_TOKEN"),address(_token));
+        setAddress(keccak256("DAI"), _daiAddress);
+        setAddress(keccak256("ETH_TOKEN_ADDRESS"), 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
+        setAddress(keccak256("KYBER_NETWORK_PROXY"), _kyberNetworkProxy);
 
         initialized = true;
     }
@@ -141,7 +141,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     internal
     {
         //Take the address of token from storage
-        address tokenAddress = getAddress("TWO_KEY_TOKEN");
+        address tokenAddress = getAddress(keccak256("TWO_KEY_TOKEN"));
 
         ERC20(tokenAddress).safeTransfer(_beneficiary, _tokenAmount);
     }
@@ -177,7 +177,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
-        return (_weiAmount*rate).mul(1000).div(getUint("sellRate2key")).div(10**18);
+        return (_weiAmount*rate).mul(1000).div(sellRate2key()).div(10**18);
     }
 
 
@@ -201,9 +201,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint lowestAcceptedRate = 96;
         require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
 
-        uint buyRate2key = getUint("buyRate2key");
+        uint buyRate2keys = buyRate2key();
 
-        uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2key).div(1000);  // 100*95/1000 = 9.5
+        uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2keys).div(1000);  // 100*95/1000 = 9.5
         uint amountOfDAIs = dollarWeiWorthTokens.mul(rate).div(10**18);      // 9.5 * 1.01 =vOK
 
         return amountOfDAIs;
@@ -242,9 +242,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint256 tokens = _getTokenAmountToBeSold(weiAmount);
 
         // update state
-        uint weiRaised = getUint("weiRaised").add(weiAmount);
-        setUint("weiRaised",weiRaised);
-        setUint("transactionCounter",getUint("transactionCounter")+1);
+        bytes32 weiRaisedKeyHash = keccak256("weiRaised");
+        bytes32 transactionCounterKeyHash = keccak256("transactionCounter");
+
+        uint weiRaised = getUint(weiRaisedKeyHash).add(weiAmount);
+        setUint(weiRaisedKeyHash,weiRaised);
+        setUint(transactionCounterKeyHash,getUint(transactionCounterKeyHash)+1);
 
         _processPurchase(_beneficiary, tokens);
 
@@ -254,7 +257,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             _beneficiary,
             weiAmount,
             tokens,
-            getUint("sellRate2key")
+            sellRate2key()
         );
 
         return tokens;
@@ -273,11 +276,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address kyberProxyContract = getAddress("KYBER_NETWORK_PROXY");
+        address kyberProxyContract = getAddress(keccak256("KYBER_NETWORK_PROXY"));
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
-        ERC20 eth = ERC20(getAddress("ETH_TOKEN_ADDRESS"));
-        ERC20 dai = ERC20(getAddress("DAI"));
+        ERC20 eth = ERC20(getAddress(keccak256("ETH_TOKEN_ADDRESS")));
+        ERC20 dai = ERC20(getAddress(keccak256("DAI")));
 
         uint minConversionRate;
         (minConversionRate,) = proxyContract.getExpectedRate(eth, dai, amountEthWei);
@@ -298,9 +301,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyMaintainer
     {
-        ERC20 dai = ERC20(getAddress("DAI"));
+        ERC20 dai = ERC20(getAddress(keccak256("DAI")));
 
-        address kyberProxyContract = getAddress("KYBER_NETWORK_PROXY");
+        address kyberProxyContract = getAddress(keccak256("KYBER_NETWORK_PROXY"));
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
@@ -320,8 +323,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyValidatedContracts
     {
-        ERC20 dai = ERC20(getAddress("DAI"));
-        ERC20 token = ERC20(getAddress("TWO_KEY_TOKEN"));
+        ERC20 dai = ERC20(getAddress(keccak256("DAI")));
+        ERC20 token = ERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
 
         uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits);
         uint etherBalanceOnContractBefore = this.balance;
@@ -371,49 +374,48 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @notice Getter for 2key buy rate
      */
     function buyRate2key() public view returns (uint) {
-        return getUint("buyRate2key");
+        return getUint(keccak256("buyRate2key"));
     }
 
     /**
      * @notice Getter for 2key sell rate
      */
     function sellRate2key() public view returns (uint) {
-        return getUint("sellRate2key");
+        return getUint(keccak256("sellRate2key"));
     }
 
     /**
      * @notice Getter for transactionCounter
      */
     function transactionCounter() public view returns (uint) {
-        return getUint("transactionCounter");
+        return getUint(keccak256("transactionCounter"));
     }
 
     /**
      * @notice Getter for weiRaised
      */
     function weiRaised() public view returns (uint) {
-        return getUint("weiRaised");
+        return getUint(keccak256("weiRaised"));
     }
 
     // Internal wrapper methods
-    function getUint(string key) internal view returns (uint) {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
+    function getUint(bytes32 key) internal view returns (uint) {
+        return PROXY_STORAGE_CONTRACT.getUint(key);
     }
 
     // Internal wrapper methods
-    function setUint(string key, uint value) internal {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
-    }
-
-
-    // Internal wrapper methods
-    function getAddress(string key) internal view returns (address) {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(key));
+    function setUint(bytes32 key, uint value) internal {
+        PROXY_STORAGE_CONTRACT.setUint(key, value);
     }
 
     // Internal wrapper methods
-    function setAddress(string key, address value) internal {
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(key), value);
+    function getAddress(bytes32 key) internal view returns (address) {
+        return PROXY_STORAGE_CONTRACT.getAddress(key);
+    }
+
+    // Internal wrapper methods
+    function setAddress(bytes32 key, address value) internal {
+        PROXY_STORAGE_CONTRACT.setAddress(key, value);
     }
 
     /**
@@ -426,7 +428,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyMaintainer
     {
-        setUint(key, value);
+        bytes32 keyHash = keccak256(key);
+        setUint(keyHash, value);
     }
 
     /**
