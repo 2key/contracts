@@ -243,11 +243,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         // update state
         bytes32 weiRaisedKeyHash = keccak256("weiRaised");
-        bytes32 transactionCounterKeyHash = keccak256("transactionCounter");
-
         uint weiRaised = getUint(weiRaisedKeyHash).add(weiAmount);
         setUint(weiRaisedKeyHash,weiRaised);
+
+        bytes32 transactionCounterKeyHash = keccak256("transactionCounter");
         setUint(transactionCounterKeyHash,getUint(transactionCounterKeyHash)+1);
+
+        // Update EthWeiAvailableToHedge per contract
+        bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge",msg.sender);
+        setUint(ethWeiAvailableToHedgeKeyHash, getUint(ethWeiAvailableToHedgeKeyHash).add(msg.value));
+
 
         _processPurchase(_beneficiary, tokens);
 
