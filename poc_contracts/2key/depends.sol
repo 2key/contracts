@@ -10,8 +10,12 @@ import "../../contracts/2key/singleton-storage-contracts/TwoKeyPlasmaRegistrySto
 import "../../contracts/2key/singleton-contracts/TwoKeyPlasmaEvents.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyPlasmaEventsStorage.sol";
 
+import "../../contracts/2key/singleton-contracts/TwoKeyEventSource.sol";
+import "../../contracts/2key/singleton-storage-contracts/TwoKeyEventSourceStorage.sol";
+
 import "../../contracts/2key/singleton-contracts/TwoKeyMaintainersRegistry.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyMaintainersRegistryStorage.sol";
+
 import "../../contracts/2key/singleton-contracts/TwoKeyPlasmaMaintainersRegistry.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyPlasmaMaintainersRegistryStorage.sol";
 
@@ -28,3 +32,6 @@ import "../../contracts/2key/donation-campaign-contracts/TwoKeyDonationCampaign.
 
 import "../../contracts/2key/singleton-contracts/TwoKeyFactory.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyFactoryStorage.sol";
+
+import "../../contracts/2key/singleton-contracts/TwoKeyCampaignValidator.sol";
+import "../../contracts/2key/singleton-storage-contracts/TwoKeyCampaignValidatorStorage.sol";
