@@ -10,6 +10,9 @@ import "../../contracts/2key/singleton-storage-contracts/TwoKeyPlasmaRegistrySto
 import "../../contracts/2key/singleton-contracts/TwoKeyPlasmaEvents.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyPlasmaEventsStorage.sol";
 
+import "../../contracts/2key/singleton-contracts/TwoKeyAdmin.sol";
+import "../../contracts/2key/singleton-storage-contracts/TwoKeyAdminStorage.sol";
+
 import "../../contracts/2key/singleton-contracts/TwoKeyEventSource.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyEventSourceStorage.sol";
 
