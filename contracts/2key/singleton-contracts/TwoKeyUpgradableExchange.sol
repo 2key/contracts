@@ -339,11 +339,22 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return _daiReceived.mul(10**18).div(_ethWeiHedged);
     }
 
-    function testingFunction(uint ethWei, uint dai) public {
+    function testingFunction(
+        uint ethWei,
+        uint dai)
+    public
+    {
         reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(ethWei, dai);
     }
 
-    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(uint _ethWeiHedged, uint _daiReceived) internal {
+
+
+    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(
+        uint _ethWeiHedged,
+        uint _daiReceived
+    )
+    internal
+    {
         uint numberOfContractsCurrently = numberOfContracts();
         uint sumOfAmounts = calculateSumOnAllContracts(); //Will represent total sum we have on the contract
         uint i;
@@ -357,16 +368,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             if(ethWeiAvailableToHedge(i) > 0) {
                 bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", i);
                 bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", i);
+                bytes32 ethWeiHedgedPerContractKeyHash = keccak256("ethWeiHedgedPerContract", i);
+                bytes32 daiWeiReceivedFromHedgingPerContractKeyHash = keccak256("daiWeiReceivedFromHedgingPerContract",i);
 
                 uint currentEthWEIAvailableForContractI = ethWeiAvailableToHedge(i);
                 uint hundredPercentWei = 10**18;
-                uint afterDeductionAvailableEthWEI = currentEthWEIAvailableForContractI.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
+                uint afterHedgingAvailableEthWei = currentEthWEIAvailableForContractI.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
 
-                uint deductedEthWEI = currentEthWEIAvailableForContractI.sub(afterDeductionAvailableEthWEI);
-                uint amountOfDAIsToAdd = deductedEthWEI.mul(ratio).div(10**18);
+                uint hedgedEthWei = currentEthWEIAvailableForContractI.sub(afterHedgingAvailableEthWei);
+                uint daisReceived = hedgedEthWei.mul(ratio).div(10**18);
 
-                setUint(ethWeiAvailableToHedgeKeyHash, afterDeductionAvailableEthWEI);
-                setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(i).add(amountOfDAIsToAdd));
+                setUint(daiWeiReceivedFromHedgingPerContractKeyHash, daiWeiReceivedFromHedgingPerContract(i).add(daisReceived));
+                setUint(ethWeiHedgedPerContractKeyHash, ethWeiHedgedPerContract(i).add(hedgedEthWei));
+                setUint(ethWeiAvailableToHedgeKeyHash, afterHedgingAvailableEthWei);
+                setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(i).add(daisReceived));
             }
         }
     }
@@ -517,6 +532,21 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     function numberOfContracts() public view returns (uint) {
         return getUint(keccak256("numberOfContracts"));
+    }
+
+    function getEth2DaiAverageExchangeRatePerContract(uint _contractID) public view returns (uint) {
+        uint ethWeiHedgedPerContractByNow = ethWeiHedgedPerContract(_contractID); //total hedged
+        uint daiWeiReceivedFromHedgingPerContractByNow = daiWeiReceivedFromHedgingPerContract(_contractID); //total received
+        // Average weighted by eth
+        return daiWeiReceivedFromHedgingPerContractByNow.mul(10**18).div(ethWeiHedgedPerContractByNow);
+    }
+
+    function ethWeiHedgedPerContract(uint _contractID) public view returns (uint) {
+        return getUint(keccak256("ethWeiHedgedPerContract", _contractID));
+    }
+
+    function daiWeiReceivedFromHedgingPerContract(uint _contractID) public view returns (uint) {
+        return getUint(keccak256("daiWeiReceivedFromHedgingPerContract", _contractID));
     }
 
     /**
