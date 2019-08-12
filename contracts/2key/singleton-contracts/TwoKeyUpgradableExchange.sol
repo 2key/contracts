@@ -23,7 +23,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     bool initialized;
 
     ITwoKeyUpgradableExchangeStorage public PROXY_STORAGE_CONTRACT;
-
     /**
      all contracts iterable
 
@@ -123,7 +122,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
-
         setUint(keccak256("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
         setUint(keccak256("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("weiRaised"),0);
@@ -303,36 +301,72 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return tokens;
     }
 
-
-    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(uint _ethWeiHedged, uint _daiReceived) internal {
+    function calculateSumOnAllContracts()
+    public //Will be internal after we test it
+    view
+    returns (uint)
+    {
         uint numberOfContractsCurrently = numberOfContracts();
         uint sumOfAmounts = 0; //Will represent total sum we have on the contract
         uint i;
+
+        // Sum all amounts on all contracts
         for(i=1; i<=numberOfContractsCurrently; i++) {
             sumOfAmounts = sumOfAmounts.add(ethWeiAvailableToHedge(i));
         }
+        return sumOfAmounts;
+    }
 
-        if(sumOfAmounts == _ethWeiHedged) {
-            //This means we hedged all eth so we're updating all values to 0
-            for(i=1; i<=numberOfContractsCurrently; i++) {
-                uint ratio = _daiReceived.mul(10**18).div(_ethWeiHedged);
+    function calculatePercentageToDeduct(
+        uint _ethWeiHedged,
+        uint _sumOfAmounts
+    )
+    public
+    view
+    returns (uint)
+    {
+        return _ethWeiHedged.mul(10**18).div(_sumOfAmounts);
+    }
 
+    function calculateRatioBetweenDAIandETH(
+        uint _ethWeiHedged,
+        uint _daiReceived
+    )
+    public
+    view
+    returns (uint)
+    {
+        return _daiReceived.mul(10**18).div(_ethWeiHedged);
+    }
+
+    function testingFunction(uint ethWei, uint dai) public {
+        reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(ethWei, dai);
+    }
+
+    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(uint _ethWeiHedged, uint _daiReceived) internal {
+        uint numberOfContractsCurrently = numberOfContracts();
+        uint sumOfAmounts = calculateSumOnAllContracts(); //Will represent total sum we have on the contract
+        uint i;
+
+        uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedged, sumOfAmounts); // Percentage to deduct in WEI (less than 1)
+
+        // Representing how much ETH is 1 DAI (DAI/ETH)
+        uint ratio = calculateRatioBetweenDAIandETH(_ethWeiHedged, _daiReceived);
+
+        for(i=1; i<=numberOfContractsCurrently; i++) {
+            if(ethWeiAvailableToHedge(i) > 0) {
                 bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", i);
-                bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToHedge", i);
+                bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", i);
 
-                uint availableBeforeDeduction = ethWeiAvailableToHedge(i);
-                uint amountOfDAIsToAdd = availableBeforeDeduction.mul(ratio).div(10**18);
+                uint currentEthWEIAvailableForContractI = ethWeiAvailableToHedge(i);
+                uint hundredPercentWei = 10**18;
+                uint afterDeductionAvailableEthWEI = currentEthWEIAvailableForContractI.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
 
+                uint deductedEthWEI = currentEthWEIAvailableForContractI.sub(afterDeductionAvailableEthWEI);
+                uint amountOfDAIsToAdd = deductedEthWEI.mul(ratio).div(10**18);
+
+                setUint(ethWeiAvailableToHedgeKeyHash, afterDeductionAvailableEthWEI);
                 setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(i).add(amountOfDAIsToAdd));
-                setUint(ethWeiAvailableToHedgeKeyHash, 0);
-            }
-        } else if (sumOfAmounts >= _ethWeiHedged) {
-            uint percentageToDeductWei = _ethWeiHedged*mul(10**18).div(sumOfAmounts); // Percentage to deduct in WEI (less than 1)
-            for(i=1; i<=numberOfContractsCurrently; i++) {
-                bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", i);
-                uint currentAvailable = ethWeiAvailableToHedge(i);
-                uint afterDeduction = currentAvailable.mul((10**18).sub(percentageToDeductWei)).div(10**.18);
-                setUint(ethWeiAvailableToHedgeKeyHash, afterDeduction);
             }
         }
     }
@@ -366,7 +400,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice Function to determine if contract exists or not
      */
-    function getContractId(address _contractAddress) internal view returns (uint) {
+    function getContractId(address _contractAddress) public view returns (uint) {
         bytes32 keyHashContractAddressToId = keccak256("contractAddressToId", _contractAddress);
         uint id = getUint(keyHashContractAddressToId);
         return id;
@@ -419,6 +453,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
 
+        reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(amountToBeHedged, stableCoinUnits);
     }
 
     /**
@@ -589,6 +624,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         ERC20(_erc20TokenAddress).safeTransfer(twoKeyAdmin, _tokenAmount);
 
     }
+
 
     /**
      * @notice Fallback function to handle incoming ether
