@@ -327,7 +327,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      */
     function testingFunction(
         uint ethWei,
-        uint dai)
+        uint dai
+    )
     public
     {
         reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(ethWei, dai);
@@ -366,6 +367,31 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         }
     }
 
+    /**
+     * @notice Function which will be called every time by campaign when referrer select to withdraw directly 2key token
+     * @param amountOfTokensWithdrawn is the amount of tokens he wants to withdraw
+     */
+    function report2KEYWithdrawnFromNetwork(
+        uint amountOfTokensWithdrawn
+    )
+    public
+    onlyValidatedContracts
+    {
+        uint contractID = getContractId(msg.sender);
+        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractID);
+
+        uint _daiWeiAvailableToWithdraw = get2KEY2DAIHedgedRate(contractID).mul(amountOfTokensWithdrawn).div(10**18);
+        setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailableToWithdraw);
+    }
+
+
+    /**
+     * @notice Internal function created to update specific values, separated because of stack depth
+     * @param _daisReceived is the amount of received dais
+     * @param _hedgedEthWei is the amount of ethWei hedged
+     * @param _afterHedgingAvailableEthWei is the amount available after hedging
+     * @param _contractID is the ID of the contract
+     */
     function updateAccountingValues(
         uint _daisReceived,
         uint _hedgedEthWei,

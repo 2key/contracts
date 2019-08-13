@@ -18,4 +18,9 @@ contract IUpgradableExchange {
     )
     public
     payable;
+
+    function report2KEYWithdrawnFromNetwork(
+        uint amountOfTokensWithdrawn
+    )
+    public;
 }

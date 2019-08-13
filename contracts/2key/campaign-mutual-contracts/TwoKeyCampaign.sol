@@ -341,6 +341,7 @@ contract TwoKeyCampaign is ArcERC20 {
 			}
 			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
 				IERC20(twoKeyEconomy).transfer(_address, balance);
+				IUpgradableExchange(twoKeyUpgradableExchangeContract).report2KEYWithdrawnFromNetwork(balance);
 			}
 			else {
 				revert();

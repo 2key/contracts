@@ -1073,6 +1073,13 @@ describe('TwoKeyProtocol', () => {
         console.log(hexedValues);
     }).timeout(60000);
 
+    it('should start hedging some ether', async() => {
+        let approvedMinConversionRate = 1000;
+        let amountToBeHedged = 2300000000000000000;
+        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(amountToBeHedged, approvedMinConversionRate, from);
+        console.log(hash);
+    }).timeout(50000);
+
     it('==> should print moderator address', async() => {
         const moderatorAddress: string = await twoKeyProtocol.AcquisitionCampaign.getModeratorAddress(campaignAddress,from);
         console.log("Moderator address is: " + moderatorAddress);

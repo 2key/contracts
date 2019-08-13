@@ -16,7 +16,7 @@ contract KyberNetworkTestMockContract {
     payable
     returns(uint)
     {
-        return 1000;
+        return 1000*(10**18);
     }
 
 
