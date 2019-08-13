@@ -559,6 +559,18 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return getUint(keccak256("numberOfContracts"));
     }
 
+    function get2KEY2DAIHedgedRate(
+        uint _contractID
+    )
+    public
+    view
+    returns (uint)
+    {
+        //Eth2DAI/Eth22Key
+        uint rate = getEth2DaiAverageExchangeRatePerContract(_contractID).mul(10**18).div(getEth2KeyAverageRatePerContract(_contractID));
+        return rate;
+    }
+
     /**
      * @notice Function to get Eth2DAI average exchange rate per contract
      * @param _contractID is the ID of the contract we're requesting information
@@ -676,6 +688,28 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         return getUint(keccak256("ethWeiAvailableToHedge", _contractID));
+    }
+
+    /**
+     * @notice Getter wrapping all information about income/outcome for every contract
+     * @param _contractAddress is the main campaign address
+     */
+    function getAllStatsForContract(
+        address _contractAddress
+    )
+    public
+    view
+    returns (uint,uint,uint,uint,uint,uint)
+    {
+        uint _contractID = getContractId(_contractAddress);
+        return (
+            ethWeiAvailableToHedge(_contractID),
+            daiWeiAvailableToWithdraw(_contractID),
+            daiWeiReceivedFromHedgingPerContract(_contractID),
+            ethWeiHedgedPerContract(_contractID),
+            sent2keyToContract(_contractID),
+            ethReceivedFromContract(_contractID)
+        );
     }
 
     /**
