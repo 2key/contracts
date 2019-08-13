@@ -190,7 +190,7 @@ library Call {
         return (influencers, keys, weights, offsets, msg_len);
     }
 
-    function recoverSigParts(bytes sig, address last_address) private pure returns (address[], address[], uint8[], uint[]) {
+    function recoverSigParts(bytes sig, address last_address) pure returns (address[], address[], uint8[], uint[]) {
         // sig structure:
         // 1 byte version 0, 1 or 2
         // 20 bytes are the address of the contractor or the influencer who created sig.

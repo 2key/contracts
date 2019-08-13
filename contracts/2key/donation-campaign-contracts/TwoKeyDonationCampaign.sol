@@ -4,6 +4,7 @@ import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 
 import "../libraries/IncentiveModels.sol";
+import "../libraries/Call.sol";
 import "../TwoKeyConverterStates.sol";
 import "../TwoKeyConversionStates.sol";
 
@@ -205,22 +206,55 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      * @notice Function where converter can convert
      * @dev payable function
      */
+    function convertConverterValue(
+        bytes signature, address converter, uint value
+    )
+    private
+    {
+        bool canConvert = ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
+            converter,
+            value
+        );
+        require(canConvert == true);
+        address _converterPlasma = twoKeyEventSource.plasmaOf(converter);
+        if(received_from[_converterPlasma] == address(0)) {
+            distributeArcsBasedOnSignature(signature, converter);
+        }
+        createConversion(value, converter);
+    }
+
     function convert(
         bytes signature
     )
     public
     payable
     {
-        bool canConvert = ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
-            msg.sender,
-            msg.value
-        );
-        require(canConvert == true);
-        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-        if(received_from[_converterPlasma] == address(0)) {
-            distributeArcsBasedOnSignature(signature, msg.sender);
+        convertConverterValue(signature, msg.sender, msg.value);
+    }
+
+    event ConvertSig(address indexed influencer, bytes signature, address plasmaConverter, bytes moderatorSig);
+    function convertByModeratorSig(
+        bytes signature, address plasmaConverter, bytes moderatorSig
+    )
+    public
+    {
+        address m = Call.recoverHash(keccak256(abi.encodePacked(signature,plasmaConverter)), moderatorSig, 0);
+        require(moderator == m || twoKeyEventSource.plasmaOf(moderator)  == m);
+        convertConverterValue(signature, plasmaConverter, 0);
+
+        // emit a ConvertSig event for every influencer involved in the convertion
+        address[] memory influencers;
+        address[] memory keys;
+        uint8[] memory weights;
+        uint[] memory offsets;
+        (influencers, keys, weights, offsets) = Call.recoverSigParts(signature, plasmaConverter);
+        uint i;
+        address influencer;
+        uint numberOfInfluencers = influencers.length;
+        for (i = 0; i < numberOfInfluencers; i++) {
+            influencer = twoKeyEventSource.plasmaOf(influencers[i]);
+            emit ConvertSig(influencer, signature, plasmaConverter, moderatorSig);
         }
-        createConversion(msg.value, msg.sender);
     }
 
     /*
