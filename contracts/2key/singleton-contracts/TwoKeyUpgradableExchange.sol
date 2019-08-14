@@ -295,7 +295,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function to calculate how much percentage will be deducted from values
+     * @notice Function to calculate how much pnercentage will be deducted from values
      */
     function calculatePercentageToDeduct(
         uint _ethWeiHedged,
@@ -322,17 +322,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return _daiReceived.mul(10**18).div(_ethWeiHedged);
     }
 
-    /**
-     * TODO: REMOVE ONCE TESTING DONE.
-     */
-    function testingFunction(
-        uint ethWei,
-        uint dai
-    )
-    public
-    {
-        reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(ethWei, dai);
-    }
 
     /**
      * @notice Function to reduce available amount to hedge and increase available DAI to withdraw
@@ -367,26 +356,53 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         }
     }
 
-    /**
-     * @notice Function which will be called every time by campaign when referrer select to withdraw directly 2key token
-     * @param amountOfTokensWithdrawn is the amount of tokens he wants to withdraw
-     */
+    function getDaiWeiAvailableToWithdrawAndDaiWeiToReduce(
+        uint _contractID,
+        uint amountOfTokensWithdrawn
+    )
+    public
+    view
+    returns (uint,uint)
+    {
+
+        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
+        uint _daiWeiToReduce = get2KEY2DAIHedgedRate(_contractID).mul(amountOfTokensWithdrawn).div(10**18);
+
+        return (_daiWeiAvailable, _daiWeiToReduce);
+    }
+
     function report2KEYWithdrawnFromNetwork(
         uint amountOfTokensWithdrawn
     )
     public
     onlyValidatedContracts
     {
-        uint contractID = getContractId(msg.sender);
-        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractID);
+        uint _contractID = getContractId(msg.sender);
+        report2KEYWithdrawnFromNetworkInternal(amountOfTokensWithdrawn, _contractID);
+    }
+
+    /**
+     * @notice Function which will be called every time by campaign when referrer select to withdraw directly 2key token
+     * @param amountOfTokensWithdrawn is the amount of tokens he wants to withdraw
+     */
+    function report2KEYWithdrawnFromNetworkInternal(
+        uint amountOfTokensWithdrawn,
+        uint _contractID
+    )
+    public
+    {
+        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
-        uint _daiWeiAmount = daiWeiAvailableToWithdraw(contractID);
-        uint _daiWeiAvailableToWithdraw = get2KEY2DAIHedgedRate(contractID).mul(amountOfTokensWithdrawn).div(10**18);
-        uint _daiWeiAvailableToFill2KEYReserve = _daiWeiAmount.sub(_daiWeiAvailableToWithdraw);
+        uint _daiWeiAvailable;
+        uint _daiWeiToReduce;
+        uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2KEYReserve);
-        setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailableToWithdraw);
+        (_daiWeiAvailable, _daiWeiToReduce) = getDaiWeiAvailableToWithdrawAndDaiWeiToReduce(_contractID, amountOfTokensWithdrawn);
+
+
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiToReduce));
+        setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailable.sub(_daiWeiToReduce));
     }
 
 
@@ -597,7 +613,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        //Eth2DAI/Eth22Key
+        //dai/eth  / 2key/eth = DAI/2key
         uint rate = getEth2DaiAverageExchangeRatePerContract(_contractID).mul(10**18).div(getEth2KeyAverageRatePerContract(_contractID));
         return rate;
     }
@@ -616,7 +632,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint ethWeiHedgedPerContractByNow = ethWeiHedgedPerContract(_contractID); //total hedged
         uint daiWeiReceivedFromHedgingPerContractByNow = daiWeiReceivedFromHedgingPerContract(_contractID); //total received
         // Average weighted by eth
-        return daiWeiReceivedFromHedgingPerContractByNow.mul(10**18).div(ethWeiHedgedPerContractByNow);
+        return daiWeiReceivedFromHedgingPerContractByNow.mul(10**18).div(ethWeiHedgedPerContractByNow); //dai/eth
     }
 
 
@@ -633,8 +649,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint ethReceivedFromContractByNow = ethReceivedFromContract(_contractID);
         uint sent2keyToContractByNow = sent2keyToContract(_contractID);
-        // Average weighted by eth
+        // Average weighted by eth 2key/eth
         return sent2keyToContractByNow.mul(10**18).div(ethReceivedFromContractByNow);
+    }
+
+    function daiWeiAvailableToFill2KEYReserve()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256("daiWeiAvailableToFill2KEYReserve"));
     }
 
     /**

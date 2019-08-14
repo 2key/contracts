@@ -1001,7 +1001,36 @@ describe('TwoKeyProtocol', () => {
         console.log(purchase);
     }).timeout(60000);
 
+    it('should start hedging some ether', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        let approvedMinConversionRate = 1000;
+        let amountToBeHedged = 2310000000000000000;
+        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(amountToBeHedged, approvedMinConversionRate, from);
+        console.log(hash);
+    }).timeout(50000);
+
     it('should show campaign summary', async() => {
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
+        });
         const summary = await twoKeyProtocol.AcquisitionCampaign.getCampaignSummary(campaignAddress, from);
         console.log(summary);
     }).timeout(60000);
@@ -1069,16 +1098,9 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
-        let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.TEST4_ADDRESS,'0x0000000000000000000000000000000000000000',{from});
+        let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.RENATA_ADDRESS,'0x0000000000000000000000000000000000000000',{from});
         console.log(hexedValues);
     }).timeout(60000);
-
-    it('should start hedging some ether', async() => {
-        let approvedMinConversionRate = 1000;
-        let amountToBeHedged = 2300000000000000000;
-        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(amountToBeHedged, approvedMinConversionRate, from);
-        console.log(hash);
-    }).timeout(50000);
 
     it('==> should print moderator address', async() => {
         const moderatorAddress: string = await twoKeyProtocol.AcquisitionCampaign.getModeratorAddress(campaignAddress,from);
@@ -1301,6 +1323,12 @@ describe('TwoKeyProtocol', () => {
     it('should get all maintainers', async() => {
         let maintainers = await twoKeyProtocol.TwoKeyMaintainersRegistry.getAllMaintainers();
         expect(maintainers.length).to.be.greaterThan(35);
+    }).timeout(60000);
+
+
+    it('should get stats for the contract from upgradable exchange', async() => {
+        let stats = await twoKeyProtocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
+        console.log(stats);
     }).timeout(60000);
 
     // it('should build refgraph', async() => {
