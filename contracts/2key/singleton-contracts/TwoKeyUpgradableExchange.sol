@@ -379,8 +379,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint contractID = getContractId(msg.sender);
         bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractID);
+        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
+        uint _daiWeiAmount = daiWeiAvailableToWithdraw(contractID);
         uint _daiWeiAvailableToWithdraw = get2KEY2DAIHedgedRate(contractID).mul(amountOfTokensWithdrawn).div(10**18);
+        uint _daiWeiAvailableToFill2KEYReserve = _daiWeiAmount.sub(_daiWeiAvailableToWithdraw);
+
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2KEYReserve);
         setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailableToWithdraw);
     }
 
