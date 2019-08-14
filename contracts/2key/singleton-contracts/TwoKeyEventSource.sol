@@ -155,6 +155,13 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address contractor
     );
 
+    event CPCCampaignCreated(
+        address proxyCPCCampaign,
+        address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
+        address contractor
+    );
+
     event PriceUpdated(
         bytes32 _currency,
         uint newRate,
@@ -446,6 +453,30 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
         emit DonationCampaignCreated(
             proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
+            contractor
+        );
+    }
+
+    /**
+     * @notice Function to emit event every time someone starts new CPC campaign
+     * @param proxyCPCCampaign is the address of TwoKeyCPCCampaign proxy deployed by TwoKeyFactory
+     * @param proxyDonationConversionHandler is the address of TwoKeyDonationConversionHandler proxy deployed by TwoKeyFactory
+     * @param proxyDonationLogicHandler is the address of TwoKeyDonationLogicHandler proxy deployed by TwoKeyFactory
+     */
+    function cpcCampaignCreated(
+        address proxyCPCCampaign,
+        address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
+        address contractor
+    )
+    external
+    view
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
+        emit CPCCampaignCreated(
+            proxyCPCCampaign,
             proxyDonationConversionHandler,
             proxyDonationLogicHandler,
             contractor

@@ -267,6 +267,93 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
+     * @notice Function to deploy proxy contracts for CPC campaigns
+     */
+    function createProxiesForCPCCampaign(
+        address _moderator,
+        uint [] numberValues,
+        bool [] booleanValues,
+        string _currency,
+        string tokenName,
+        string tokenSymbol,
+        string nonSingletonHash
+    )
+    public
+    {
+
+        // Deploying a proxy contract for donations
+        ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
+            "TwoKeyCPCCampaign",
+            getLatestContractVersion("TwoKeyCPCCampaign"),
+            TWO_KEY_SINGLETON_REGISTRY
+        );
+
+        //Deploying a proxy contract for donation conversion handler
+        ProxyCampaign proxyDonationConversionHandler = new ProxyCampaign(
+            "TwoKeyDonationConversionHandler",
+            getLatestContractVersion("TwoKeyDonationConversionHandler"),
+            TWO_KEY_SINGLETON_REGISTRY
+        );
+
+        //Deploying a proxy contract for donation logic handler
+        ProxyCampaign proxyDonationLogicHandler = new ProxyCampaign(
+            "TwoKeyDonationLogicHandler",
+            getLatestContractVersion("TwoKeyDonationLogicHandler"),
+            TWO_KEY_SINGLETON_REGISTRY
+        );
+
+        IHandleCampaignDeployment(proxyDonationLogicHandler).setInitialParamsDonationLogicHandler(
+            numberValues,
+            _currency,
+            msg.sender,
+            _moderator,
+            TWO_KEY_SINGLETON_REGISTRY,
+            proxyDonationCampaign,
+            proxyDonationConversionHandler
+        );
+
+        // Set initial parameters under Donation conversion handler
+        IHandleCampaignDeployment(proxyDonationConversionHandler).setInitialParamsDonationConversionHandler(
+            tokenName,
+            tokenSymbol,
+            _currency,
+            msg.sender, //contractor
+            proxyDonationCampaign,
+            address(TWO_KEY_SINGLETON_REGISTRY)
+        );
+
+        // Set initial parameters under Donation campaign contract
+        IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
+            msg.sender, //contractor
+            _moderator, //moderator address
+            TWO_KEY_SINGLETON_REGISTRY,
+            proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
+            numberValues,
+            booleanValues
+        );
+
+        // Validate campaign
+        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator"))
+        .validateDonationCampaign(
+            proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
+            nonSingletonHash
+        );
+
+        setAddressToCampaignType(proxyDonationCampaign, "CPC_CAMPAIGN");
+
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+        .cpcCampaignCreated(
+            proxyDonationCampaign,
+            proxyDonationConversionHandler,
+            proxyDonationLogicHandler,
+            plasmaOf(msg.sender)
+        );
+    }
+
+    /**
      * @notice internal function to set address to campaign type
      * @param _campaignAddress is the address of campaign
      * @param _campaignType is the type of campaign (String)

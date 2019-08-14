@@ -39,6 +39,14 @@ contract ITwoKeyEventSourceEvents {
     )
     external;
 
+    function cpcCampaignCreated(
+        address proxyDonationCampaign,
+        address proxyDonationConversionHandler,
+        address proxyDonationLogicHandler,
+        address contractor
+    )
+    external;
+
     function priceUpdated(
         bytes32 _currency,
         uint newRate,

@@ -32,6 +32,7 @@ import "../../contracts/2key/libraries/IncentiveModels.sol";
 import "../../contracts/2key/donation-campaign-contracts/TwoKeyDonationConversionHandler.sol";
 import "../../contracts/2key/donation-campaign-contracts/TwoKeyDonationLogicHandler.sol";
 import "../../contracts/2key/donation-campaign-contracts/TwoKeyDonationCampaign.sol";
+import "../../contracts/2key/cpc-campaign-contracts/TwoKeyCPCCampaign.sol";
 
 import "../../contracts/2key/singleton-contracts/TwoKeyFactory.sol";
 import "../../contracts/2key/singleton-storage-contracts/TwoKeyFactoryStorage.sol";
