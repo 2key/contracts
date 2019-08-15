@@ -731,6 +731,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyMaintainer
     {
+        // Firstly we need to approve Bancor converter to take tokens from us
+        address dai = getAddress(keccak256("DAI"));
+        address bancor = getAddress(keccak256("BANCOR")); //TODO: See how to store this
+
+        // Approving bancor to take tokens from US
+        ERC20(dai).approve(bancor, amountDAI);
 
     }
 
