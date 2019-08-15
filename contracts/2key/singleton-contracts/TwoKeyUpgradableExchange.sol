@@ -715,14 +715,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             stableCoinUnits,
             _twoKeyUnits
         );
-
+]
         dai.transfer(_beneficiary, stableCoinUnits);
     }
 
     /**
      * @notice Function to buy 2key tokens from Bancor
      * @param amountDAI we're willing to send (daiWeiAvailableToFill2keyReserve)
-     * @param amount2KEY is the amount of 2key tokens
+     * @param amount2KEY the minimum amount of 2KEY that is acceptable in return
      */
     function buy2KEYFromBancor(
         uint amountDAI,
@@ -740,6 +740,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     function numberOfContracts() public view returns (uint) {
         return getUint(keccak256("numberOfContracts"));
     }
+
 
     function get2KEY2DAIHedgedRate(
         uint _contractID
