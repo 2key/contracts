@@ -719,6 +719,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         dai.transfer(_beneficiary, stableCoinUnits);
     }
 
+    /**
+     * @notice Function to buy 2key tokens from Bancor
+     * @param amountDAI we're willing to send (daiWeiAvailableToFill2keyReserve)
+     * @param amount2KEY is the amount of 2key tokens
+     */
+    function buy2KEYFromBancor(
+        uint amountDAI,
+        uint amount2KEY
+    )
+    public
+    onlyMaintainer
+    {
+
+    }
 
     /**
      * @notice Function to return number of campaign contracts (different) interacted with this contract
