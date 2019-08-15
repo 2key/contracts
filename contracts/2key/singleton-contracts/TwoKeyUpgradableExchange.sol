@@ -159,6 +159,199 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         _deliverTokens(_beneficiary, _tokenAmount);
     }
 
+    /**
+     * @dev Determines how ETH is stored/forwarded on purchases.
+     */
+    function _forwardFunds(
+        address _twoKeyAdmin
+    )
+    internal
+    {
+        _twoKeyAdmin.transfer(msg.value);
+    }
+
+    /**
+     * @notice Function to reduce available amount to hedge and increase available DAI to withdraw
+     * @param _ethWeiHedged is how much eth was hedged
+     * @param _daiReceived is how much DAI's we got for that hedging
+     */
+    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(
+        uint _ethWeiHedged,
+        uint _daiReceived
+    )
+    internal
+    {
+        uint numberOfContractsCurrently = numberOfContracts();
+        uint sumOfAmounts = calculateSumOnAllContracts(); //Will represent total sum we have on the contract
+        uint i;
+
+        uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedged, sumOfAmounts); // Percentage to deduct in WEI (less than 1)
+
+        // Representing how much ETH is 1 DAI (DAI/ETH)
+        uint ratio = calculateRatioBetweenDAIandETH(_ethWeiHedged, _daiReceived);
+
+        for(i=1; i<=numberOfContractsCurrently; i++) {
+            if(ethWeiAvailableToHedge(i) > 0) {
+                uint currentEthWEIAvailableForContractI = ethWeiAvailableToHedge(i);
+                uint hundredPercentWei = 10**18;
+                uint afterHedgingAvailableEthWei = currentEthWEIAvailableForContractI.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
+
+                uint hedgedEthWei = currentEthWEIAvailableForContractI.sub(afterHedgingAvailableEthWei);
+                uint daisReceived = hedgedEthWei.mul(ratio).div(10**18);
+                updateAccountingValues(daisReceived, hedgedEthWei, afterHedgingAvailableEthWei, i);
+            }
+        }
+    }
+
+    /**
+     * @notice Internal function created to update specific values, separated because of stack depth
+     * @param _daisReceived is the amount of received dais
+     * @param _hedgedEthWei is the amount of ethWei hedged
+     * @param _afterHedgingAvailableEthWei is the amount available after hedging
+     * @param _contractID is the ID of the contract
+     */
+    function updateAccountingValues(
+        uint _daisReceived,
+        uint _hedgedEthWei,
+        uint _afterHedgingAvailableEthWei,
+        uint _contractID
+    )
+    internal
+    {
+        bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
+        bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", _contractID);
+        bytes32 ethWeiHedgedPerContractKeyHash = keccak256("ethWeiHedgedPerContract", _contractID);
+        bytes32 daiWeiReceivedFromHedgingPerContractKeyHash = keccak256("daiWeiReceivedFromHedgingPerContract",_contractID);
+
+        setUint(daiWeiReceivedFromHedgingPerContractKeyHash, daiWeiReceivedFromHedgingPerContract(_contractID).add(_daisReceived));
+        setUint(ethWeiHedgedPerContractKeyHash, ethWeiHedgedPerContract(_contractID).add(_hedgedEthWei));
+        setUint(ethWeiAvailableToHedgeKeyHash, _afterHedgingAvailableEthWei);
+        setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(_contractID).add(_daisReceived));
+    }
+
+    /**
+     * @notice Function to calculate how much pnercentage will be deducted from values
+     */
+    function calculatePercentageToDeduct(
+        uint _ethWeiHedged,
+        uint _sumOfAmounts
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return _ethWeiHedged.mul(10**18).div(_sumOfAmounts);
+    }
+
+    /**
+     * @notice Function to calculate ratio between eth and dai in WEI's
+     */
+    function calculateRatioBetweenDAIandETH(
+        uint _ethWeiHedged,
+        uint _daiReceived
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return _daiReceived.mul(10**18).div(_ethWeiHedged);
+    }
+
+    /**
+     * @notice Function to calculate available to hedge sum on all contracts
+     */
+    function calculateSumOnAllContracts()
+    internal
+    view
+    returns (uint)
+    {
+        uint numberOfContractsCurrently = numberOfContracts();
+        uint sumOfAmounts = 0; //Will represent total sum we have on the contract
+        uint i;
+
+        // Sum all amounts on all contracts
+        for(i=1; i<=numberOfContractsCurrently; i++) {
+            sumOfAmounts = sumOfAmounts.add(ethWeiAvailableToHedge(i));
+        }
+        return sumOfAmounts;
+    }
+
+    /**
+     * @notice Setter for EthWeiAvailableToHedge
+     * @param _contractID is the ID of the contract
+     * @param _msgValue is the amount sent
+     */
+    function updateEthWeiAvailableToHedge(
+        uint _contractID,
+        uint _msgValue
+    )
+    internal {
+        // Update EthWeiAvailableToHedge per contract
+        bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
+        setUint(ethWeiAvailableToHedgeKeyHash, getUint(ethWeiAvailableToHedgeKeyHash).add(_msgValue));
+    }
+
+    /**
+     * @notice Internal helper function
+     * @param _contractID is the id of the contract we'd like to do the math
+     * @param amountOfTokensWithdrawn is the amount of tokens withdrawn from campaign
+     */
+    function getDaiWeiAvailableToWithdrawAndDaiWeiToReduce(
+        uint _contractID,
+        uint amountOfTokensWithdrawn
+    )
+    internal
+    view
+    returns (uint,uint)
+    {
+
+        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
+        uint _daiWeiToReduce = get2KEY2DAIHedgedRate(_contractID).mul(amountOfTokensWithdrawn).div(10**18);
+
+        return (_daiWeiAvailable, _daiWeiToReduce);
+    }
+
+    /**
+     * @notice Function to register new contract with corresponding ID
+     * @param _contractAddress is the address of the contract we're adding
+     */
+    function addNewContract(
+        address _contractAddress
+    )
+    internal
+    returns (uint)
+    {
+        // Get number of currently different contracts and increment by 1
+        uint numberOfContractsExisting = numberOfContracts();
+        uint id = numberOfContractsExisting.add(1);
+
+        bytes32 keyHashContractAddressToId = keccak256("contractAddressToId", _contractAddress);
+        bytes32 keyHashIdToContractAddress = keccak256("idToContractAddress", id);
+
+        // Set mappings id=>contractAddress and contractAddress=>id
+        setUint(keyHashContractAddressToId, id);
+        setAddress(keyHashIdToContractAddress, _contractAddress);
+
+        // Increment number of existing contracts
+        setUint(keccak256("numberOfContracts"), id);
+
+        // Return contract ID
+        return id;
+    }
+
+    /**
+     * @notice Function to get contract id, if return 0 means contract is not existing
+     */
+    function getContractId(
+        address _contractAddress
+    )
+    internal
+    view
+    returns (uint) {
+        bytes32 keyHashContractAddressToId = keccak256("contractAddressToId", _contractAddress);
+        uint id = getUint(keyHashContractAddressToId);
+        return id;
+    }
 
     /**
      * @dev Override to extend the way in which ether is converted to tokens.
@@ -168,7 +361,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     function _getTokenAmountToBeSold(
         uint256 _weiAmount
     )
-    public
+    internal
     view
     returns (uint256)
     {
@@ -176,6 +369,31 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
         return (_weiAmount*rate).mul(1000).div(sellRate2key()).div(10**18);
+    }
+
+    /**
+     * @notice Function to emit an event, created separately because of stack depth
+     */
+    function emitEventWithdrawExecuted(
+        address _beneficiary,
+        uint _stableCoinsOnContractBefore,
+        uint _stableCoinsAfter,
+        uint _etherBalanceOnContractBefore,
+        uint _stableCoinUnits,
+        uint twoKeyUnits
+    )
+    internal
+    {
+        emit WithdrawExecuted(
+            msg.sender,
+            _beneficiary,
+            _stableCoinsOnContractBefore,
+            _stableCoinsAfter,
+            _etherBalanceOnContractBefore,
+            this.balance,
+            _stableCoinUnits,
+            twoKeyUnits
+        );
     }
 
 
@@ -206,19 +424,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         return amountOfDAIs;
     }
-
-
-    /**
-     * @dev Determines how ETH is stored/forwarded on purchases.
-     */
-    function _forwardFunds(
-        address _twoKeyAdmin
-    )
-    internal
-    {
-        _twoKeyAdmin.transfer(msg.value);
-    }
-
 
     /**
      * @notice Function to buyTokens
@@ -273,104 +478,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return tokens;
     }
 
-
-
     /**
-     * @notice Function to calculate available to hedge sum on all contracts
+     * @notice Function which will be called every time by campaign when referrer select to withdraw directly 2key token
+     * @param amountOfTokensWithdrawn is the amount of tokens he wants to withdraw
      */
-    function calculateSumOnAllContracts()
-    public //Will be internal after we test it
-    view
-    returns (uint)
-    {
-        uint numberOfContractsCurrently = numberOfContracts();
-        uint sumOfAmounts = 0; //Will represent total sum we have on the contract
-        uint i;
-
-        // Sum all amounts on all contracts
-        for(i=1; i<=numberOfContractsCurrently; i++) {
-            sumOfAmounts = sumOfAmounts.add(ethWeiAvailableToHedge(i));
-        }
-        return sumOfAmounts;
-    }
-
-    /**
-     * @notice Function to calculate how much pnercentage will be deducted from values
-     */
-    function calculatePercentageToDeduct(
-        uint _ethWeiHedged,
-        uint _sumOfAmounts
-    )
-    public
-    view
-    returns (uint)
-    {
-        return _ethWeiHedged.mul(10**18).div(_sumOfAmounts);
-    }
-
-    /**
-     * @notice Function to calculate ratio between eth and dai in WEI's
-     */
-    function calculateRatioBetweenDAIandETH(
-        uint _ethWeiHedged,
-        uint _daiReceived
-    )
-    public
-    view
-    returns (uint)
-    {
-        return _daiReceived.mul(10**18).div(_ethWeiHedged);
-    }
-
-
-    /**
-     * @notice Function to reduce available amount to hedge and increase available DAI to withdraw
-     * @param _ethWeiHedged is how much eth was hedged
-     * @param _daiReceived is how much DAI's we got for that hedging
-     */
-    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(
-        uint _ethWeiHedged,
-        uint _daiReceived
-    )
-    internal
-    {
-        uint numberOfContractsCurrently = numberOfContracts();
-        uint sumOfAmounts = calculateSumOnAllContracts(); //Will represent total sum we have on the contract
-        uint i;
-
-        uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedged, sumOfAmounts); // Percentage to deduct in WEI (less than 1)
-
-        // Representing how much ETH is 1 DAI (DAI/ETH)
-        uint ratio = calculateRatioBetweenDAIandETH(_ethWeiHedged, _daiReceived);
-
-        for(i=1; i<=numberOfContractsCurrently; i++) {
-            if(ethWeiAvailableToHedge(i) > 0) {
-                uint currentEthWEIAvailableForContractI = ethWeiAvailableToHedge(i);
-                uint hundredPercentWei = 10**18;
-                uint afterHedgingAvailableEthWei = currentEthWEIAvailableForContractI.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
-
-                uint hedgedEthWei = currentEthWEIAvailableForContractI.sub(afterHedgingAvailableEthWei);
-                uint daisReceived = hedgedEthWei.mul(ratio).div(10**18);
-                updateAccountingValues(daisReceived, hedgedEthWei, afterHedgingAvailableEthWei, i);
-            }
-        }
-    }
-
-    function getDaiWeiAvailableToWithdrawAndDaiWeiToReduce(
-        uint _contractID,
-        uint amountOfTokensWithdrawn
-    )
-    public
-    view
-    returns (uint,uint)
-    {
-
-        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
-        uint _daiWeiToReduce = get2KEY2DAIHedgedRate(_contractID).mul(amountOfTokensWithdrawn).div(10**18);
-
-        return (_daiWeiAvailable, _daiWeiToReduce);
-    }
-
     function report2KEYWithdrawnFromNetwork(
         uint amountOfTokensWithdrawn
     )
@@ -382,8 +493,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function which will be called every time by campaign when referrer select to withdraw directly 2key token
      * @param amountOfTokensWithdrawn is the amount of tokens he wants to withdraw
+     * @param _contractID is the id of the contract
      */
     function report2KEYWithdrawnFromNetworkInternal(
         uint amountOfTokensWithdrawn,
@@ -404,92 +515,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiToReduce));
         setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailable.sub(_daiWeiToReduce));
     }
-
-
-    /**
-     * @notice Internal function created to update specific values, separated because of stack depth
-     * @param _daisReceived is the amount of received dais
-     * @param _hedgedEthWei is the amount of ethWei hedged
-     * @param _afterHedgingAvailableEthWei is the amount available after hedging
-     * @param _contractID is the ID of the contract
-     */
-    function updateAccountingValues(
-        uint _daisReceived,
-        uint _hedgedEthWei,
-        uint _afterHedgingAvailableEthWei,
-        uint _contractID
-    )
-    internal
-    {
-        bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
-        bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", _contractID);
-        bytes32 ethWeiHedgedPerContractKeyHash = keccak256("ethWeiHedgedPerContract", _contractID);
-        bytes32 daiWeiReceivedFromHedgingPerContractKeyHash = keccak256("daiWeiReceivedFromHedgingPerContract",_contractID);
-
-        setUint(daiWeiReceivedFromHedgingPerContractKeyHash, daiWeiReceivedFromHedgingPerContract(_contractID).add(_daisReceived));
-        setUint(ethWeiHedgedPerContractKeyHash, ethWeiHedgedPerContract(_contractID).add(_hedgedEthWei));
-        setUint(ethWeiAvailableToHedgeKeyHash, _afterHedgingAvailableEthWei);
-        setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(_contractID).add(_daisReceived));
-    }
-
-    /**
-     * @notice Setter for EthWeiAvailableToHedge
-     * @param _contractID is the ID of the contract
-     * @param _msgValue is the amount sent
-     */
-    function updateEthWeiAvailableToHedge(
-        uint _contractID,
-        uint _msgValue
-    )
-    internal {
-        // Update EthWeiAvailableToHedge per contract
-        bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
-        setUint(ethWeiAvailableToHedgeKeyHash, getUint(ethWeiAvailableToHedgeKeyHash).add(_msgValue));
-    }
-
-
-    /**
-     * @notice Function to register new contract with corresponding ID
-     * @param _contractAddress is the address of the contract we're adding
-     */
-    function addNewContract(
-        address _contractAddress
-    )
-    internal
-    returns (uint)
-    {
-        // Get number of currently different contracts and increment by 1
-        uint numberOfContractsExisting = numberOfContracts();
-        uint id = numberOfContractsExisting.add(1);
-
-        bytes32 keyHashContractAddressToId = keccak256("contractAddressToId", _contractAddress);
-        bytes32 keyHashIdToContractAddress = keccak256("idToContractAddress", id);
-
-        // Set mappings id=>contractAddress and contractAddress=>id
-        setUint(keyHashContractAddressToId, id);
-        setAddress(keyHashIdToContractAddress, _contractAddress);
-
-        // Increment number of existing contracts
-        setUint(keccak256("numberOfContracts"), id);
-
-        // Return contract ID
-        return id;
-    }
-
-    /**
-     * @notice Function to get contract id, if return 0 means contract is not existing
-     */
-    function getContractId(
-        address _contractAddress
-    )
-    public
-    view
-    returns (uint) {
-        bytes32 keyHashContractAddressToId = keccak256("contractAddressToId", _contractAddress);
-        uint id = getUint(keyHashContractAddressToId);
-        return id;
-    }
-
 
     /**
      * @notice Function to get expected rate from Kyber contract
@@ -574,30 +599,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         dai.transfer(_beneficiary, stableCoinUnits);
     }
 
-    /**
-     * @notice Function to emit an event, created separately because of stack depth
-     */
-    function emitEventWithdrawExecuted(
-        address _beneficiary,
-        uint _stableCoinsOnContractBefore,
-        uint _stableCoinsAfter,
-        uint _etherBalanceOnContractBefore,
-        uint _stableCoinUnits,
-        uint twoKeyUnits
-    )
-    internal
-    {
-        emit WithdrawExecuted(
-            msg.sender,
-            _beneficiary,
-            _stableCoinsOnContractBefore,
-            _stableCoinsAfter,
-            _etherBalanceOnContractBefore,
-            this.balance,
-            _stableCoinUnits,
-            twoKeyUnits
-        );
-    }
 
     /**
      * @notice Function to return number of campaign contracts (different) interacted with this contract
@@ -770,66 +771,97 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice Getter for 2key buy rate
      */
-    function buyRate2key() public view returns (uint) {
+    function buyRate2key()
+    public
+    view
+    returns (uint)
+    {
         return getUint(keccak256("buyRate2key"));
     }
 
     /**
      * @notice Getter for 2key sell rate
      */
-    function sellRate2key() public view returns (uint) {
+    function sellRate2key()
+    public
+    view
+    returns (uint)
+    {
         return getUint(keccak256("sellRate2key"));
     }
 
     /**
      * @notice Getter for weiRaised
      */
-    function weiRaised() public view returns (uint) {
+    function weiRaised()
+    public
+    view
+    returns (uint)
+    {
         return getUint(keccak256("weiRaised"));
     }
 
     // Internal wrapper methods
-    function getUint(bytes32 key) internal view returns (uint) {
+    function getUint(
+        bytes32 key
+    )
+    internal
+    view
+    returns (uint)
+    {
         return PROXY_STORAGE_CONTRACT.getUint(key);
     }
 
     // Internal wrapper methods
-    function setUint(bytes32 key, uint value) internal {
+    function setUint(
+        bytes32 key,
+        uint value
+    )
+    internal
+    {
         PROXY_STORAGE_CONTRACT.setUint(key, value);
     }
 
     //Internal wrapper method
-    function getBool(bytes32 key) internal view returns (bool) {
+    function getBool(
+        bytes32 key
+    )
+    internal
+    view
+    returns (bool)
+    {
         PROXY_STORAGE_CONTRACT.getBool(key);
     }
 
     //Internal wrapper method
-    function setBool(bytes32 key, bool value) internal {
+    function setBool(
+        bytes32 key,
+        bool value
+    )
+    internal
+    {
         PROXY_STORAGE_CONTRACT.setBool(key,value);
     }
 
     // Internal wrapper methods
-    function getAddress(bytes32 key) internal view returns (address) {
+    function getAddress(
+        bytes32 key
+    )
+    internal
+    view
+    returns (address)
+    {
         return PROXY_STORAGE_CONTRACT.getAddress(key);
     }
 
     // Internal wrapper methods
-    function setAddress(bytes32 key, address value) internal {
-        PROXY_STORAGE_CONTRACT.setAddress(key, value);
-    }
-
-    /**
-     * @notice Function where maintainer can update any unassigned integer value
-     */
-    function updateUint(
-        string key,
-        uint value
+    function setAddress(
+        bytes32 key,
+        address value
     )
-    public
-    onlyMaintainer
+    internal
     {
-        bytes32 keyHash = keccak256(key);
-        setUint(keyHash, value);
+        PROXY_STORAGE_CONTRACT.setAddress(key, value);
     }
 
     /**
