@@ -396,6 +396,126 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    // Internal wrapper methods
+    function getUint(
+        bytes32 key
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(key);
+    }
+
+    // Internal wrapper methods
+    function setUint(
+        bytes32 key,
+        uint value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(key, value);
+    }
+
+    //Internal wrapper method
+    function getBool(
+        bytes32 key
+    )
+    internal
+    view
+    returns (bool)
+    {
+        PROXY_STORAGE_CONTRACT.getBool(key);
+    }
+
+    //Internal wrapper method
+    function setBool(
+        bytes32 key,
+        bool value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setBool(key,value);
+    }
+
+    // Internal wrapper methods
+    function getAddress(
+        bytes32 key
+    )
+    internal
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(key);
+    }
+
+    // Internal wrapper methods
+    function setAddress(
+        bytes32 key,
+        address value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(key, value);
+    }
+
+    /**
+     * @notice Function to get eth received from contract for specific contract ID
+     * @param _contractID is the ID of the contract we're requesting information
+     */
+    function ethReceivedFromContract(
+        uint _contractID
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return getUint(keccak256("ethReceivedFromContract", _contractID));
+    }
+
+    /**
+     * @notice Function to get how many 2keys are sent to selected contract
+     * @param _contractID is the ID of the contract we're requesting information
+     */
+    function sent2keyToContract(
+        uint _contractID
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return getUint(keccak256("sent2keyToContract", _contractID));
+    }
+
+    /**
+     * @notice Function to get how much ethWei hedged per contract
+     * @param _contractID is the ID of the contract we're requesting information
+     */
+    function ethWeiHedgedPerContract(
+        uint _contractID
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return getUint(keccak256("ethWeiHedgedPerContract", _contractID));
+    }
+
+    /**
+     * @notice Function to determine how many dai received from hedging per contract
+     * @param _contractID is the ID of the contract we're requesting information
+     */
+    function daiWeiReceivedFromHedgingPerContract(
+        uint _contractID
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return getUint(keccak256("daiWeiReceivedFromHedgingPerContract", _contractID));
+    }
+
+
 
     /**
      * @notice Function to calculate how many stable coins we can get for specific amount of 2keys
@@ -663,64 +783,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function to get eth received from contract for specific contract ID
-     * @param _contractID is the ID of the contract we're requesting information
-     */
-    function ethReceivedFromContract(
-        uint _contractID
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return getUint(keccak256("ethReceivedFromContract", _contractID));
-    }
-
-    /**
-     * @notice Function to get how many 2keys are sent to selected contract
-     * @param _contractID is the ID of the contract we're requesting information
-     */
-    function sent2keyToContract(
-        uint _contractID
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return getUint(keccak256("sent2keyToContract", _contractID));
-    }
-
-
-    /**
-     * @notice Function to get how much ethWei hedged per contract
-     * @param _contractID is the ID of the contract we're requesting information
-     */
-    function ethWeiHedgedPerContract(
-        uint _contractID
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return getUint(keccak256("ethWeiHedgedPerContract", _contractID));
-    }
-
-
-    /**
-     * @notice Function to determine how many dai received from hedging per contract
-     * @param _contractID is the ID of the contract we're requesting information
-     */
-    function daiWeiReceivedFromHedgingPerContract(
-        uint _contractID
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return getUint(keccak256("daiWeiReceivedFromHedgingPerContract", _contractID));
-    }
-
-    /**
      * @notice Getter for mapping "daiWeiAvailableToWithdraw" (per contract)
      */
     function daiWeiAvailableToWithdraw(
@@ -799,69 +861,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         return getUint(keccak256("weiRaised"));
-    }
-
-    // Internal wrapper methods
-    function getUint(
-        bytes32 key
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return PROXY_STORAGE_CONTRACT.getUint(key);
-    }
-
-    // Internal wrapper methods
-    function setUint(
-        bytes32 key,
-        uint value
-    )
-    internal
-    {
-        PROXY_STORAGE_CONTRACT.setUint(key, value);
-    }
-
-    //Internal wrapper method
-    function getBool(
-        bytes32 key
-    )
-    internal
-    view
-    returns (bool)
-    {
-        PROXY_STORAGE_CONTRACT.getBool(key);
-    }
-
-    //Internal wrapper method
-    function setBool(
-        bytes32 key,
-        bool value
-    )
-    internal
-    {
-        PROXY_STORAGE_CONTRACT.setBool(key,value);
-    }
-
-    // Internal wrapper methods
-    function getAddress(
-        bytes32 key
-    )
-    internal
-    view
-    returns (address)
-    {
-        return PROXY_STORAGE_CONTRACT.getAddress(key);
-    }
-
-    // Internal wrapper methods
-    function setAddress(
-        bytes32 key,
-        address value
-    )
-    internal
-    {
-        PROXY_STORAGE_CONTRACT.setAddress(key, value);
     }
 
     /**
