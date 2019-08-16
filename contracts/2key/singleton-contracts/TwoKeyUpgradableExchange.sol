@@ -763,6 +763,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+    /**
+     * @notice Function to get 2key to DAI hedged rate
+     * @param _contractID is the ID of the contract we're fetching this rate (avg)
+     */
     function get2KEY2DAIHedgedRate(
         uint _contractID
     )
