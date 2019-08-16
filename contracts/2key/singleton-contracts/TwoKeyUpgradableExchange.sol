@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/IKyberNetworkProxy.sol";
 import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/IBancorContract.sol";
 
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
@@ -715,7 +716,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             stableCoinUnits,
             _twoKeyUnits
         );
-]
+
         dai.transfer(_beneficiary, stableCoinUnits);
     }
 
@@ -729,15 +730,29 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint amount2KEY
     )
     public
+    payable
     onlyMaintainer
     {
         // Firstly we need to approve Bancor converter to take tokens from us
         address dai = getAddress(keccak256("DAI"));
-        address bancor = getAddress(keccak256("BANCOR")); //TODO: See how to store this
+        address bancorConverter = getAddress(keccak256("BANCOR_CONVERTER")); //TODO: See how to store this
+        address bancorToken = getAddress(keccak256("BNT"));
 
         // Approving bancor to take tokens from US
-        ERC20(dai).approve(bancor, amountDAI);
+        ERC20(dai).approve(bancorConverter, amountDAI);
 
+        // We need to create path
+        IERC20[] memory path = new IERC20[](5);
+        path[0] = IERC20(dai);
+        path[1] = IERC20(bancorToken);
+        path[2] = IERC20(bancorToken);
+        path[3] = IERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
+        path[4] = IERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
+
+        uint receivedTokens = IBancorContract(bancorConverter).quickConvert(path, amountDAI, amount2KEY);
+
+        bytes32 daiWeiAvailablbeToFill2keyReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+        setUint(daiWeiAvailablbeToFill2keyReserveKeyHash, daiWeiAvailableToFill2KEYReserve().sub(amountDAI));
     }
 
     /**
