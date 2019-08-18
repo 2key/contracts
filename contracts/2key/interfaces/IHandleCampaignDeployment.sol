@@ -87,6 +87,23 @@ contract IHandleCampaignDeployment {
     ) public;
 
     /**
+     * @notice Function which will be used as simulation for constructor under TwoKeyCPCCampaign contract
+     * @dev This is just an interface of the function, the actual logic
+     * is implemented under TwoKeyDonationCampaign.sol contract
+     * This function can be called only once per proxy address
+     */
+    function setWebsiteCPCCampaign(string _website);
+    function setInitialParamsCPCCampaign(
+        address _contractor,
+        address _moderator,
+        address _twoKeySingletonRegistry,
+        address _twoKeyDonationConversionHandler,
+        address _twoKeyDonationLogicHandler,
+        uint [] numberValues,
+        bool [] booleanValues
+    ) public;
+
+    /**
      * @notice Function which will be used as simulation for constructor under TwoKeyDonationConversionHandler contract
      * @dev This is just an interface of the function, the actual logic
      * is implemented under TwoKeyDonationConversionHandler.sol contract

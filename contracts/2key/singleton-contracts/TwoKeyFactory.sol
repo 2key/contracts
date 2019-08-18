@@ -273,7 +273,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         address _moderator,
         uint [] numberValues,
         bool [] booleanValues,
-        string _currency,
+        string _website,
         string tokenName,
         string tokenSymbol,
         string nonSingletonHash
@@ -304,7 +304,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
         IHandleCampaignDeployment(proxyDonationLogicHandler).setInitialParamsDonationLogicHandler(
             numberValues,
-            _currency,
+            'ETH',
             msg.sender,
             _moderator,
             TWO_KEY_SINGLETON_REGISTRY,
@@ -316,16 +316,17 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         IHandleCampaignDeployment(proxyDonationConversionHandler).setInitialParamsDonationConversionHandler(
             tokenName,
             tokenSymbol,
-            _currency,
+            'ETH',
             msg.sender, //contractor
             proxyDonationCampaign,
             address(TWO_KEY_SINGLETON_REGISTRY)
         );
 
         // Set initial parameters under Donation campaign contract
-        IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
-            msg.sender, //contractor
-            _moderator, //moderator address
+        IHandleCampaignDeployment(proxyDonationCampaign).setWebsiteCPCCampaign(_website);
+        IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsCPCCampaign(
+            msg.sender, // contractor
+            _moderator, // moderator address
             TWO_KEY_SINGLETON_REGISTRY,
             proxyDonationConversionHandler,
             proxyDonationLogicHandler,

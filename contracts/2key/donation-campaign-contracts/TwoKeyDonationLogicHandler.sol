@@ -57,7 +57,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     )
     public
     {
-        require(initialized == false);
+        require(initialized == false,'dlh1');
 
         twoKeyDonationCampaign = _twoKeyDonationCampaign;
         twoKeyDonationConversionHandler = _twoKeyDonationConversionHandler;
@@ -88,10 +88,10 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     }
 
     function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool) {
-        require(msg.sender == twoKeyDonationCampaign);
-        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount) == true);
-        require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmount) == true);
-        require(checkIsCampaignActiveInTermsOfTime() == true);
+        require(msg.sender == twoKeyDonationCampaign,'dlh2');
+        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount) == true,'dlh3');
+        require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmount) == true,'dlh4');
+        require(checkIsCampaignActiveInTermsOfTime() == true,'dlh5');
         return true;
     }
 
@@ -175,7 +175,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     )
     public
     {
-        require(msg.sender == twoKeyDonationCampaign);
+        require(msg.sender == twoKeyDonationCampaign,'dlh6');
 
 //        Get all the influencers
         address[] memory influencers = getReferrers(_converter);
@@ -286,7 +286,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             _referrerAddress = recover(_sig);
         }
         else {
-            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender),'dlh7');
             _referrerAddress = plasmaOf(_referrerAddress);
         }
 
@@ -313,7 +313,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     view
     returns (uint256[], uint256[])
     {
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender),'dlh8');
 
         uint numberOfAddresses = _referrerPlasmaList.length;
         uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
@@ -544,7 +544,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
      */
     function updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(uint conversionAmount) internal returns (bool) {
         uint newTotalRaisedFunds = calculateRaisedFundsIncludingNewConversion(conversionAmount); // calculating new total raised funds
-        require(canConversionBeCreatedInTermsOfCampaignGoal(newTotalRaisedFunds)); // checking that criteria is satisfied
+        require(canConversionBeCreatedInTermsOfCampaignGoal(newTotalRaisedFunds),'dlh9'); // checking that criteria is satisfied
         updateTotalRaisedFunds(newTotalRaisedFunds); //updating new total raised funds
         return true;
     }
@@ -555,7 +555,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
      */
     function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignOnceGoalReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignGoal + minDonationAmountWei); //small GAP
+            require(campaignRaisedIncludingConversion <= campaignGoal + minDonationAmountWei,'dlh10'); //small GAP
         }
         return true;
     }

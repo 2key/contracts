@@ -79,7 +79,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
     modifier onlyContractorOrMaintainer {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender),'dch1');
         _;
     }
 
@@ -94,7 +94,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     )
     public
     {
-        require(isCampaignInitialized == false);
+        require(isCampaignInitialized == false,'dch2');
 
         counters = new uint[](10);
         twoKeyDonationCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
@@ -276,10 +276,10 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     public
     returns (uint)
     {
-        require(msg.sender == address(twoKeyDonationCampaign));
+        require(msg.sender == address(twoKeyDonationCampaign),'dch3');
         //If KYC is required, basic funnel executes and we require that converter is not previously rejected
         if(_isKYCRequired == true) {
-            require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
+            require(converterToState[_converterAddress] != ConverterState.REJECTED,'dch4'); // If converter is rejected then can't create conversion
             // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
             if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
                 converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
@@ -329,8 +329,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     public
     {
         Conversion conversion = conversions[_conversionId];
-        require(converterToState[conversion.converter] == ConverterState.APPROVED);
-        require(conversion.state == ConversionState.APPROVED);
+        require(converterToState[conversion.converter] == ConverterState.APPROVED,'dch5');
+        require(conversion.state == ConversionState.APPROVED,'dch6');
 
         counters[1] = counters[1].sub(1); //Decrease number of approved conversions
 
@@ -380,7 +380,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     public
     onlyContractorOrMaintainer
     {
-        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL,'dch7');
         moveFromPendingOrRejectedToApprovedState(_converter);
     }
 
@@ -390,7 +390,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     public
     onlyContractorOrMaintainer
     {
-        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
+        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL,'dch8');
         moveFromPendingToRejectedState(_converter);
 
         uint refundAmount = 0;
