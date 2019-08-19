@@ -196,7 +196,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _moderator
     )
     external
-    view
     onlyTwoKeyCampaignValidator
     {
         emit Created(_campaign, _owner, _moderator);
@@ -215,7 +214,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _to
     )
     external
-    view
     onlyAllowedContracts
     {
         emit Joined(_campaign, _from, _to);
@@ -233,7 +231,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _conversionAmount
     )
     external
-    view
     onlyAllowedContracts
     {
         emit Converted(_campaign, _converter, _conversionAmount);
@@ -244,7 +241,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _converter
     )
     external
-    view
     onlyAllowedContracts
     {
         emit Rejected(_campaign, _converter);
@@ -262,7 +258,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint _conversionId
     )
     external
-    view
     onlyAllowedContracts
     {
         emit Executed(_campaignAddress, _converterPlasmaAddress, _conversionId);
@@ -281,7 +276,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint tokens
     )
     external
-    view
     onlyAllowedContracts
     {
         emit ExecutedV1(_campaignAddress, _converterPlasmaAddress, _conversionId, tokens);
@@ -297,7 +291,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         bool _isFiatConversion
     )
     external
-    view
     onlyAllowedContracts
     {
         emit ConvertedAcquisition(_campaign, _converter, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion);
@@ -325,7 +318,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint _conversionId
     )
     external
-    view
     onlyAllowedContracts
     {
         emit ConvertedAcquisitionV2(_campaign, _converterPlasma, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion, _conversionId);
@@ -338,7 +330,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _conversionAmount
     )
     external
-    view
     onlyAllowedContracts
     {
         emit ConvertedDonation(_campaign, _converter, _conversionAmount);
@@ -359,7 +350,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _conversionId
     )
     external
-    view
     onlyAllowedContracts
     {
         emit ConvertedDonationV2(_campaign, _converterPlasma, _conversionAmount, _conversionId);
@@ -377,7 +367,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _amount
     )
     external
-    view
     onlyAllowedContracts
     {
         emit Rewarded(_campaign, _to, _amount);
@@ -395,7 +384,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _indexOrAmount
     )
     external
-    view
     onlyAllowedContracts
     {
         emit Cancelled(_campaign, _converter, _indexOrAmount);
@@ -416,7 +404,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address contractor
     )
     external
-    view
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
         emit AcquisitionCampaignCreated(
@@ -441,7 +428,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address contractor
     )
     external
-    view
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
         emit DonationCampaignCreated(
@@ -466,7 +452,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _updater
     )
     external
-    view
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"));
         emit PriceUpdated(_currency, _newRate, _timestamp, _updater);
@@ -488,7 +473,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         string _username_walletName
     )
     external
-    view
     {
         require(isAddressMaintainer(msg.sender) == true);
         emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
