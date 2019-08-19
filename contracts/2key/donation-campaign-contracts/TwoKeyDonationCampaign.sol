@@ -355,7 +355,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      * @notice Contractor can withdraw funds only if criteria is satisfied
      */
     function withdrawContractor() public onlyContractor {
-        require(ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).canContractorWithdrawFunds());
         withdrawContractorInternal();
     }
 
@@ -394,7 +393,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     view
     returns (uint)
     {
-        require(msg.sender == twoKeyDonationLogicHandler);
         return (referrerPlasma2Balances2key[_influencer]);
     }
 

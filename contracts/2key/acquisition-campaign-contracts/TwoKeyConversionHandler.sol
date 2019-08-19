@@ -411,7 +411,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyConversionStates,
     )
     public
     view
-    onlyContractorOrMaintainer
     returns (address[])
     {
         return stateToConverter[state];

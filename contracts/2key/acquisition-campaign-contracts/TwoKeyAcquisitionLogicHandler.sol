@@ -295,16 +295,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         return isCampaignEnded();
     }
 
-    /**
-     * @notice Function to check if contractor can withdraw his proceeds
-     */
-    function canContractorWithdrawFunds() public view returns (bool) {
-        if(isCampaignEnded() == true || campaignRaisedAlready >= campaignSoftCapWei) {
-            return true;
-        }
-        return false;
-    }
-
 
     /**
      * @notice Requirement for the checking if the campaign is active or not
@@ -770,7 +760,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     view
     returns (uint)
     {
-        require(msg.sender == twoKeyAcquisitionCampaign);
         return referrerPlasma2TotalEarnings2key[_referrer];
     }
 

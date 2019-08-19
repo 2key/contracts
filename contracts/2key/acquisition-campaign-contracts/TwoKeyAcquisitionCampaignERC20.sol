@@ -522,7 +522,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
      */
     function getContractorBalance()
     external
-    onlyContractor
     view
     returns (uint)
     {
@@ -542,7 +541,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     view
     returns (uint)
     {
-        require(msg.sender == twoKeyAcquisitionLogicHandler);
         return (referrerPlasma2Balances2key[_influencer]);
     }
 
@@ -569,7 +567,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     onlyContractor
     {
-        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canContractorWithdrawFunds() == true);
         withdrawContractorInternal();
     }
 

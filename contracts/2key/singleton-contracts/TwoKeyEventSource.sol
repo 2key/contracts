@@ -521,7 +521,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     view
     {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        require(isAddressMaintainer(msg.sender) == true);
         emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
     }
     /**

@@ -282,7 +282,6 @@ contract TwoKeyCampaign is ArcERC20 {
      */
     function getContractorBalanceAndTotalProceeds()
 	external
-	onlyContractor
 	view
 	returns (uint,uint)
 	{

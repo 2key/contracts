@@ -105,7 +105,8 @@ contract TwoKeyCongress {
     public
     {
         changeVotingRules(0, _minutesForDebate);
-        for(uint i=0; i<initialMembers.length; i++) {
+        uint length = initialMembers.length;
+        for(uint i=0; i<length; i++) {
             addMember(initialMembers[i], initialMemberNames[i], votingPowers[i]);
         }
         initialized = true;
@@ -188,7 +189,8 @@ contract TwoKeyCongress {
         isMemberInCongress[msg.sender] = false;
 
         //Update array containing all members addresses
-        for(uint i=0; i<allMembers.length; i++) {
+        uint length = allMembers.length;
+        for(uint i=0; i<length; i++) {
             if(allMembers[i] == msg.sender) {
                 allMembers[i] = _newMemberAddress;
             }
@@ -256,16 +258,17 @@ contract TwoKeyCongress {
         uint votingPower = getMemberVotingPower(targetMember);
         maxVotingPower-= votingPower;
 
+        uint length = allMembers.length;
         uint i=0;
         //Find selected member
         while(allMembers[i] != targetMember) {
-            if(i == allMembers.length) {
+            if(i == length) {
                 revert();
             }
             i++;
         }
         //After member is found, remove his address from all members
-        for (uint j = i; j< allMembers.length; j++){
+        for (uint j = i; j< length; j++){
             allMembers[j] = allMembers[j+1];
         }
         //After reduce array size

@@ -11,7 +11,6 @@ const libraryName = {
 const config = {
   entry: {
     acquisition: './2key-protocol/src/acquisition/index.ts',
-    dao: './2key-protocol/src/decentralizedNation/index.ts',
     donation: './2key-protocol/src/donation/index.ts'
   },
   devtool: 'none',

@@ -50,51 +50,51 @@ contract StructuredStorage is Upgradeable {
     }
 
     // *** Getter Methods ***
-    function getUint(bytes32 _key) onlyProxyLogicContract external view returns (uint) {
+    function getUint(bytes32 _key) external view returns (uint) {
         return uIntStorage[_key];
     }
 
-    function getString(bytes32 _key) onlyProxyLogicContract external view returns(string) {
+    function getString(bytes32 _key) external view returns(string) {
         return stringStorage[_key];
     }
 
-    function getAddress(bytes32 _key) onlyProxyLogicContract external view returns(address) {
+    function getAddress(bytes32 _key) external view returns(address) {
         return addressStorage[_key];
     }
 
-    function getBytes(bytes32 _key) onlyProxyLogicContract external view returns(bytes) {
+    function getBytes(bytes32 _key) external view returns(bytes) {
         return bytesStorage[_key];
     }
 
-    function getBool(bytes32 _key) onlyProxyLogicContract external view returns(bool) {
+    function getBool(bytes32 _key) external view returns(bool) {
         return boolStorage[_key];
     }
 
-    function getInt(bytes32 _key) onlyProxyLogicContract external view returns(int) {
+    function getInt(bytes32 _key) external view returns(int) {
         return intStorage[_key];
     }
 
-    function getBytes32(bytes32 _key) onlyProxyLogicContract external view returns (bytes32) {
+    function getBytes32(bytes32 _key) external view returns (bytes32) {
         return bytes32Storage[_key];
     }
 
-    function getBytes32Array(bytes32 _key) onlyProxyLogicContract external view returns (bytes32[]) {
+    function getBytes32Array(bytes32 _key) external view returns (bytes32[]) {
         return bytes32ArrayStorage[_key];
     }
 
-    function getAddressArray(bytes32 _key) onlyProxyLogicContract external view returns (address[]) {
+    function getAddressArray(bytes32 _key) external view returns (address[]) {
         return addressArrayStorage[_key];
     }
 
-    function getUintArray(bytes32 _key) onlyProxyLogicContract external view returns (uint[]) {
+    function getUintArray(bytes32 _key) external view returns (uint[]) {
         return uintArrayStorage[_key];
     }
 
-    function getIntArray(bytes32 _key) onlyProxyLogicContract external view returns (int[]) {
+    function getIntArray(bytes32 _key) external view returns (int[]) {
         return intArrayStorage[_key];
     }
 
-    function getBoolArray(bytes32 _key) onlyProxyLogicContract external view returns (bool[]) {
+    function getBoolArray(bytes32 _key) external view returns (bool[]) {
         return boolArrayStorage[_key];
     }
 

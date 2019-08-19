@@ -5,7 +5,6 @@ pragma solidity ^0.4.24;
  */
 contract ITwoKeyAcquisitionLogicHandler {
     function canContractorWithdrawUnsoldTokens() public view returns (bool);
-    function canContractorWithdrawFunds() public view returns (bool);
     bool public IS_CAMPAIGN_ACTIVE;
     function getEstimatedTokenAmount(uint conversionAmountETHWei, bool isFiatConversion) public view returns (uint, uint);
     function getReferrers(address customer, address acquisitionCampaignContract) public view returns (address[]);

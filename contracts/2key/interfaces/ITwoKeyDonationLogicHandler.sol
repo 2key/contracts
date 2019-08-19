@@ -13,5 +13,4 @@ contract ITwoKeyDonationLogicHandler {
 
     function getReferrerPlasmaTotalEarnings(address _referrer) public view returns (uint);
     function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool);
-    function canContractorWithdrawFunds() public view returns (bool);
 }

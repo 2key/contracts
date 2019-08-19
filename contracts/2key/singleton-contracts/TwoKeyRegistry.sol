@@ -89,14 +89,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         require(isMaintainer(msg.sender));
         addName(_name, _sender, _fullName, _email, _signatureName);
         setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
-
-        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).userRegistered(
-            _name,
-            getEthereumToPlasma(_sender),
-            _fullName,
-            _email,
-            _username_walletName
-        );
     }
 
     /// @notice Function where only admin can add a name - address pair
