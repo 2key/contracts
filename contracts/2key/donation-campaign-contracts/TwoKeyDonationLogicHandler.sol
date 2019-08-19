@@ -98,12 +98,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) internal view returns (bool) {
         uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpend(converter);
         if(keccak256(currency) == keccak256("ETH")) {
-            if(leftToSpendInCampaignCurrency >= conversionAmountEthWEI) {
+            if(leftToSpendInCampaignCurrency >= conversionAmountEthWEI && conversionAmountEthWEI >= minDonationAmountWei) {
                 return true;
             }
         } else {
             uint rate = getRateFromExchange();
-            if(leftToSpendInCampaignCurrency >= (conversionAmountEthWEI*rate).div(10**18)) {
+            uint conversionAmountConverted = (conversionAmountEthWEI.mul(rate)).div(10**18);
+            if(leftToSpendInCampaignCurrency >= conversionAmountConverted && conversionAmountConverted >= minDonationAmountWei) {
                 return true;
             }
         }
@@ -560,15 +561,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return true;
     }
 
-    /**
-     * @notice Function to determine if contractor can withdraw his funds
-     */
-    function canContractorWithdrawFunds() public view returns (bool) {
-        if(isCampaignEnded() == true || campaignRaisedAlready >= campaignGoal) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * @notice Function to check if campaign has ended
