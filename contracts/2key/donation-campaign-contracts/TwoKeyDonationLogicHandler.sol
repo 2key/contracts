@@ -1,9 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
-import "../interfaces/ITwoKeyExchangeRateContract.sol";
-import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
@@ -13,37 +10,16 @@ import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaignLogicHandler.sol";
 
-contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncentiveModels {
+contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicHandler {
 
-    using SafeMath for uint256;
-    bool initialized;
-
-    IncentiveModel incentiveModel; //Incentive model for rewards
-    address twoKeySingletoneRegistry;
-    address public twoKeyDonationCampaign;
-    address public twoKeyDonationConversionHandler;
-    address ownerPlasma;
-
-    address twoKeyMaintainersRegistry;
-    address twoKeyRegistry;
-    address twoKeyEventSource;
-    address contractor;
-    address moderator;
-
-    uint public campaignRaisedAlready;
     uint powerLawFactor;
-    uint campaignStartTime; // Time when campaign starts
-    uint campaignEndTime; // Time when campaign ends
+
     uint minDonationAmountWei; // Minimal donation amount
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     bool endCampaignOnceGoalReached;
-    string public currency;
-
-    mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
-    mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
-    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
 
     function setInitialParamsDonationLogicHandler(
@@ -59,8 +35,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     {
         require(initialized == false);
 
-        twoKeyDonationCampaign = _twoKeyDonationCampaign;
-        twoKeyDonationConversionHandler = _twoKeyDonationConversionHandler;
+        twoKeyCampaign = _twoKeyDonationCampaign;
+        conversionHandler = _twoKeyDonationConversionHandler;
 
         powerLawFactor = 2;
         campaignStartTime = numberValues[1];
@@ -78,7 +54,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         moderator = _moderator;
         currency = _currency;
 
-        twoKeySingletoneRegistry = twoKeySingletonRegistry;
+        twoKeySingletonRegistry = twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
@@ -88,7 +64,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     }
 
     function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool) {
-        require(msg.sender == twoKeyDonationCampaign);
+        require(msg.sender == twoKeyCampaign);
         require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount) == true);
         require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmount) == true);
         require(checkIsCampaignActiveInTermsOfTime() == true);
@@ -118,7 +94,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     view
     returns (uint)
     {
-        uint amountAlreadySpentEth = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(_converter);
+        uint amountAlreadySpentEth = ITwoKeyDonationConversionHandler(conversionHandler).getAmountConverterSpent(_converter);
         uint leftToSpend = getHowMuchLeftForUserToSpend(amountAlreadySpentEth);
         return leftToSpend;
     }
@@ -155,11 +131,11 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     )
     internal
     {
-        ITwoKeyDonationCampaign(twoKeyDonationCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
+        ITwoKeyDonationCampaign(twoKeyCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
-        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyDonationCampaign, referrerPlasma, reward);
+        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyCampaign, referrerPlasma, reward);
     }
 
     /**
@@ -176,7 +152,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     )
     public
     {
-        require(msg.sender == twoKeyDonationCampaign);
+        require(msg.sender == twoKeyCampaign);
 
 //        Get all the influencers
         address[] memory influencers = getReferrers(_converter);
@@ -218,7 +194,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
                     b = totalBounty2keys;
                 }
                 else {
-                    uint256 cut = ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReferrerCut(influencers[i]);
+                    uint256 cut = ITwoKeyDonationCampaign(twoKeyCampaign).getReferrerCut(influencers[i]);
                     if (cut > 0 && cut <= 101) {
                         b = totalBounty2keys.mul(cut.sub(1)).div(100);
                     } else {// cut == 0 or 255 indicates equal particine of the bounty
@@ -249,7 +225,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         uint n_influencers = 0;
 
         while (true) {
-            influencer = plasmaOf(ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyDonationCampaign(twoKeyCampaign).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
                 break;
             }
@@ -259,7 +235,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         influencer = plasmaOf(customer);
 
         while (n_influencers > 0) {
-            influencer = plasmaOf(ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyDonationCampaign(twoKeyCampaign).getReceivedFrom(influencer));
             n_influencers--;
             influencers[n_influencers] = influencer;
         }
@@ -298,7 +274,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
         }
 
-        uint referrerBalance = ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReferrerPlasmaBalance(_referrerAddress);
+        uint referrerBalance = ITwoKeyDonationCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerAddress);
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
 
@@ -321,7 +297,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersPendingPlasmaBalance[i] = ITwoKeyDonationCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
             referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
         }
 
@@ -345,8 +321,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             return false;
         }
         if (plasma == ownerPlasma || _address == address(moderator) ||
-        ITwoKeyDonationCampaign(twoKeyDonationCampaign).getReceivedFrom(plasma) != address(0)
-        || ITwoKeyDonationCampaign(twoKeyDonationCampaign).balanceOf(plasma) > 0) {
+        ITwoKeyDonationCampaign(twoKeyCampaign).getReceivedFrom(plasma) != address(0)
+        || ITwoKeyDonationCampaign(twoKeyCampaign).balanceOf(plasma) > 0) {
             return true;
         }
         return false;
@@ -376,12 +352,12 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
             bool isConverter;
             bool isReferrer;
 
-            uint amountConverterSpent = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountConverterSpent(eth_address);
-            uint amountOfTokensReceived = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getAmountOfDonationTokensConverterReceived(eth_address);
+            uint amountConverterSpent = ITwoKeyDonationConversionHandler(conversionHandler).getAmountConverterSpent(eth_address);
+            uint amountOfTokensReceived = ITwoKeyDonationConversionHandler(conversionHandler).getAmountOfDonationTokensConverterReceived(eth_address);
 
             if(amountConverterSpent> 0) {
                 isConverter = true;
-                state = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).getStateForConverter(eth_address);
+                state = ITwoKeyDonationConversionHandler(conversionHandler).getStateForConverter(eth_address);
             }
 
             if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
@@ -457,51 +433,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     }
 
 
-    /**
-     * @notice Function to get rewards model present in contract for referrers
-     * @return position of the model inside enum IncentiveModel
-     */
-    function getIncentiveModel() public view returns (IncentiveModel) {
-        return incentiveModel;
-    }
 
-    /**
-     * @notice Function to determine plasma address of ethereum address
-     * @param me is the address (ethereum) of the user
-     * @return an address
-     */
-    function plasmaOf(
-        address me
-    )
-    public
-    view
-    returns (address)
-    {
-        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
-        if (plasma != address(0)) {
-            return plasma;
-        }
-        return me;
-    }
-
-    /**
-     * @notice Function to determine ethereum address of plasma address
-     * @param me is the plasma address of the user
-     * @return ethereum address
-     */
-    function ethereumOf(
-        address me
-    )
-    public
-    view
-    returns (address)
-    {
-        address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
-        if (ethereum != address(0)) {
-            return ethereum;
-        }
-        return me;
-    }
 
     /**
      * @notice Requirement for the checking if the campaign is active or not
@@ -581,15 +513,5 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     returns (uint,uint,uint,uint,uint)
     {
         return (campaignStartTime,campaignEndTime, minDonationAmountWei, maxDonationAmountWei, campaignGoal);
-    }
-
-    function getAddressFromRegistry(string contractName) internal view returns (address) {
-        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress(contractName);
-    }
-
-    function getRateFromExchange() internal view returns (uint) {
-        address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
-        uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
-        return rate;
     }
 }

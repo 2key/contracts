@@ -1,51 +1,31 @@
 pragma solidity ^0.4.24;
-import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
-import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyAcquisitionARC.sol";
-import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
-import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../../openzeppelin-solidity/contracts/ownership/HasNoEther.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaignLogicHandler.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
  */
-contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncentiveModels {
-
-    using SafeMath for uint256;
-
-    bool isCampaignInitialized;
+contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicHandler {
 
     bool public IS_CAMPAIGN_ACTIVE;
 
-    address public twoKeySingletoneRegistry;
-    address public twoKeyAcquisitionCampaign;
-    address public twoKeyConversionHandler;
-    address public ownerPlasma;
-
-    address twoKeyRegistry;
-    address twoKeyMaintainersRegistry;
-
     address assetContractERC20;
-    address contractor;
-    address moderator;
 
 
     bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
     bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
 
-    uint public campaignRaisedAlready;
-    uint campaignStartTime; // Time when campaign start
-    uint campaignEndTime; // Time when campaign ends
+
     uint minContributionETHorFiatCurrency; //Minimal contribution
     uint maxContributionETHorFiatCurrency; //Maximal contribution
     uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
@@ -53,22 +33,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
     uint campaignHardCapWei; // Hard cap of campaign
     uint campaignSoftCapWei; //Soft cap of campaign
-    string public currency; // Currency campaign is currently in
     bool endCampaignWhenHardCapReached;
-
-    // Enumerator representing incentive model selected for the contract
-    IncentiveModel incentiveModel;
-
-    //Referral accounting stuff
-    mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
-    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
-    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
-
-
-    modifier onlyContractor {
-        require(msg.sender == contractor);
-        _;
-    }
 
     function setInitialParamsLogicHandler(
         uint [] values,
@@ -84,7 +49,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     {
         require(values[1] >= values[0], "max contribution criteria not satisfied");
         require(values[4] > values[3], "campaign start time can't be greater than end time");
-        require(isCampaignInitialized == false);
+        require(initialized == false);
 
         if(values[0] == values[1]) {
             isFixedInvestmentAmount = true;
@@ -118,16 +83,16 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         contractor = _contractor;
         unit_decimals = IERC20(_assetContractERC20).decimals();
 
-        twoKeyAcquisitionCampaign = _acquisitionCampaignAddress;
-        twoKeySingletoneRegistry = _twoKeySingletoneRegistry;
+        twoKeyCampaign = _acquisitionCampaignAddress;
+        twoKeySingletonRegistry = _twoKeySingletoneRegistry;
 
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
-
+        twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
         ownerPlasma = plasmaOf(contractor);
-        twoKeyConversionHandler = _twoKeyConversionHandler;
+        conversionHandler = _twoKeyConversionHandler;
 
-        isCampaignInitialized = true;
+        initialized = true;
     }
 
     /**
@@ -136,7 +101,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      */
     function activateCampaign() public onlyContractor {
         require(IS_CAMPAIGN_ACTIVE == false);
-        uint balanceOfTokensOnAcquisitionAtTheBeginning = IERC20(assetContractERC20).balanceOf(twoKeyAcquisitionCampaign);
+        uint balanceOfTokensOnAcquisitionAtTheBeginning = IERC20(assetContractERC20).balanceOf(twoKeyCampaign);
         //balance is in weis, price is in weis and hardcap is regular number
         require((balanceOfTokensOnAcquisitionAtTheBeginning * pricePerUnitInETHWeiOrUSD).div(10**18) >= campaignHardCapWei);
         IS_CAMPAIGN_ACTIVE = true;
@@ -152,7 +117,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
      * @param isFiatConversion is flag if conversion is fiat or ether
      */
     function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, bool isFiatConversion) external returns (bool) {
-        require(msg.sender == twoKeyAcquisitionCampaign);
+        require(msg.sender == twoKeyCampaign);
         require(IS_CAMPAIGN_ACTIVE == true);
         require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount, isFiatConversion) == true);
         require(updateRaisedFundsAndValidateConversionInTermsOfHardCap(conversionAmount, isFiatConversion) == true);
@@ -238,7 +203,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         if(keccak256(currency) == keccak256('ETH')) {
             return (false, 0);
         } else {
-            (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
+            (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(conversionHandler).getConverterPurchasesStats(converter);
 
             uint leftToSpendFiat = checkHowMuchUserCanConvert(alreadySpentETHWei,alreadySpentFIATWEI);
             if(leftToSpendFiat >= amountWillingToSpendFiatWei && minContributionETHorFiatCurrency <= amountWillingToSpendFiatWei) {
@@ -252,7 +217,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     function validateMinMaxContributionForETHConversion(address converter, uint amountWillingToSpendEthWei) public view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
-        (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
+        (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(conversionHandler).getConverterPurchasesStats(converter);
         uint leftToSpend = checkHowMuchUserCanConvert(alreadySpentETHWei, alreadySpentFIATWEI);
 
         if(keccak256(currency) == keccak256('ETH')) {
@@ -429,8 +394,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             return false;
         }
         if (plasma == ownerPlasma || _address == address(moderator) ||
-        ITwoKeyAcquisitionARC(twoKeyAcquisitionCampaign).getReceivedFrom(plasma) != address(0)
-        || ITwoKeyAcquisitionARC(twoKeyAcquisitionCampaign).balanceOf(plasma) > 0) {
+        ITwoKeyAcquisitionARC(twoKeyCampaign).getReceivedFrom(plasma) != address(0)
+        || ITwoKeyAcquisitionARC(twoKeyCampaign).balanceOf(plasma) > 0) {
             return true;
         }
         return false;
@@ -463,10 +428,10 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             uint amountConverterSpent;
             uint amountConverterSpentFIAT;
 
-            (amountConverterSpent,amountConverterSpentFIAT, unitsConverterBought) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(eth_address);
+            (amountConverterSpent,amountConverterSpentFIAT, unitsConverterBought) = ITwoKeyConversionHandler(conversionHandler).getConverterPurchasesStats(eth_address);
             if(unitsConverterBought> 0) {
                 isConverter = true;
-                state = ITwoKeyConversionHandler(twoKeyConversionHandler).getStateForConverter(eth_address);
+                state = ITwoKeyConversionHandler(conversionHandler).getStateForConverter(eth_address);
             }
             if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
                 isReferrer = true;
@@ -583,13 +548,11 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     }
 
     function updateReferrerMappings(address referrerPlasma, uint reward, uint conversionId) internal {
-        ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
+        ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
-
-        address twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
-        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyAcquisitionCampaign, referrerPlasma, reward);
+        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyCampaign, referrerPlasma, reward);
     }
 
     /**
@@ -606,10 +569,10 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     )
     public
     {
-        require(msg.sender == twoKeyAcquisitionCampaign);
+        require(msg.sender == twoKeyCampaign);
 
         //Get all the influencers
-        address[] memory influencers = getReferrers(_converter,twoKeyAcquisitionCampaign);
+        address[] memory influencers = getReferrers(_converter, twoKeyCampaign);
 
         //Get array length
         uint numberOfInfluencers = influencers.length;
@@ -649,7 +612,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
                     b = totalBounty2keys;
                 }
                 else {
-                    uint256 cut = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerCut(influencers[i]);
+                    uint256 cut = ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).getReferrerCut(influencers[i]);
                     if (cut > 0 && cut <= 101) {
                         b = totalBounty2keys.mul(cut.sub(1)).div(100);
                     } else {// cut == 0 or 255 indicates equal particine of the bounty
@@ -708,7 +671,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersPendingPlasmaBalance[i] = ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
             referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
         }
 
@@ -748,7 +711,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
         }
 
-        uint referrerBalance = ITwoKeyAcquisitionCampaignERC20(twoKeyAcquisitionCampaign).getReferrerPlasmaBalance(_referrerAddress);
+        uint referrerBalance = ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).getReferrerPlasmaBalance(_referrerAddress);
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
 
@@ -763,54 +726,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         return referrerPlasma2TotalEarnings2key[_referrer];
     }
 
-    /**
-     * @notice Function to determine plasma address of ethereum address
-     * @param me is the address (ethereum) of the user
-     * @return an address
-     */
-    function plasmaOf(
-        address me
-    )
-    public
-    view
-    returns (address)
-    {
-        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
-        if (plasma != address(0)) {
-            return plasma;
-        }
-        return me;
-    }
 
-    /**
-     * @notice Function to determine ethereum address of plasma address
-     * @param me is the plasma address of the user
-     * @return ethereum address
-     */
-    function ethereumOf(
-        address me
-    )
-    public
-    view
-    returns (address)
-    {
-        address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
-        if (ethereum != address(0)) {
-            return ethereum;
-        }
-        return me;
-    }
-
-
-    function getAddressFromRegistry(string contractName) internal view returns (address) {
-        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletoneRegistry).getContractProxyAddress(contractName);
-    }
-
-    function getRateFromExchange() internal view returns (uint) {
-        address ethUSDExchangeContract = getAddressFromRegistry("TwoKeyExchangeRateContract");
-        uint rate = ITwoKeyExchangeRateContract(ethUSDExchangeContract).getBaseToTargetRate(currency);
-        return rate;
-    }
 
 
 }
