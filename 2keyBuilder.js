@@ -30,6 +30,12 @@ let deployment = process.env.FORCE_DEPLOYMENT || false;
 require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
 
 
+const branch_to_env = {
+  "develop": "test",
+  "staging": "staging",
+  "master": "prod"
+};
+
 const deployedTo = {};
 
 let contractsStatus;
@@ -612,6 +618,7 @@ async function deploy() {
          */
         if(!local || process.env.FORCE_NPM) {
             process.chdir(twoKeyProtocolDist);
+            const oldVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
             if (process.env.NODE_ENV === 'production') {
                 await runProcess('npm', ['version', 'patch']);
             } else {
@@ -642,8 +649,9 @@ async function deploy() {
             }
             await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
             process.chdir('../../');
+            
             //Run slack message
-            await slack_message(npmVersionTag);
+            await slack_message(npmVersionTag, oldVersion, branch_to_env[contractsStatus.current]);
         } else {
             process.exit(0);
         }
@@ -665,7 +673,7 @@ async function deploy() {
  * Function to send message to slack channel
  * @param message
  */
-const slack_message = async (newVersion) => {
+const slack_message = async (newVersion, oldVersion, devEnv) => {
     const token = process.env.SLACK_TOKEN;
 
     let commitHash = require('child_process')
@@ -677,40 +685,59 @@ const slack_message = async (newVersion) => {
         .execSync('cd 2key-protocol/dist && git rev-parse HEAD')
         .toString().trim();
 
+    let diffData = require('child_process')
+      .execSync(`git --no-pager log --no-color -p -1 ${oldVersion}..${newVersion}`)
+      .toString().trim();
 
     const body = {
-        channel: 'CKL4T7M2S',
-        attachments: [
+      channel: 'CKL4T7M2S',
+      attachments: [
+        {
+          blocks: [
             {
-                blocks: [
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `*2KEY-PROTOCOL DEPLOYED NEW VERSION* :  *${newVersion.toUpperCase()}*`,
-                        }
-                    },
-                    {
-                        type: 'divider',
-                    },
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `*Last commit contracts repo: * https://github.com/2key/contracts/commit/${commitHash}`,
-                        },
-                    },
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `*Last commit 2key-protocol repo: * https://github.com/2key/2key-protocol/commit/${commitHash2keyProtocol.toUpperCase()}`,
-                        },
-                    },
-                ]
-            }
-        ]
-    };
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `[${devEnv.toUpperCase()}] protocol updated, version: ${newVersion}`,
+              },
+            },
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `\`\`\`${diffData}\`\`\``,
+              },
+            },
+            {
+              type: 'divider',
+            },
+            {
+              type: 'context',
+              elements: [
+                {
+                  type: 'mrkdwn',
+                  text: `For more info, click <https://github.com/2key/contracts/compare/${oldVersion}...${newVersion}|here>`,
+                },
+              ],
+            },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `*Last commit contracts repo: * <https://github.com/2key/contracts/commit/${commitHash}|${commitHash}>`,
+                },
+            },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `*Last commit 2key-protocol repo: * <https://github.com/2key/2key-protocol/commit/${commitHash2keyProtocol.toUpperCase()}|${commitHash2keyProtocol.toUpperCase()}>`,
+                },
+            },
+          ],
+        },
+      ],
+    }
 
     await axios.post('https://slack.com/api/chat.postMessage', body, {
         headers: {
