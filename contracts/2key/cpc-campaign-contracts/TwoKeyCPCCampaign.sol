@@ -33,7 +33,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     modifier onlyTwoKeyDonationConversionHandler {
-        require(msg.sender == twoKeyDonationConversionHandler,'cpc5');
+        require(msg.sender == twoKeyDonationConversionHandler);
         _;
     }
 
@@ -63,7 +63,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     )
     public
     {
-        require(initialized == false,'cpc8');
+        require(initialized == false);
 
         contractor = _contractor;
         // Moderator address
@@ -110,7 +110,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         address plasma = twoKeyEventSource.plasmaOf(me);
-        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut,'cpc9');
+        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut);
         referrerPlasma2cut[plasma] = cut;
     }
 
@@ -167,7 +167,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
             if (received_from[new_address] == 0) {
                 transferFrom(old_address, new_address, 1);
             } else {
-                require(received_from[new_address] == old_address,'only tree ARCs allowed cpc9');
+                require(received_from[new_address] == old_address,'only tree ARCs allowed');
             }
             old_address = new_address;
 
@@ -200,7 +200,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     )
     public
     {
-        require(msg.sender == twoKeyDonationConversionHandler,'cpc10');
+        require(msg.sender == twoKeyDonationConversionHandler);
         contractorTotalProceeds = contractorTotalProceeds.add(value);
         contractorBalance = contractorBalance.add(value);
     }
@@ -234,7 +234,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
             converter,
             value
         );
-        require(canConvert == true,'cpc11');
+        require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(converter);
         address[] memory influencers;
         if(received_from[_converterPlasma] == address(0)) {
@@ -260,7 +260,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     payable
     {
         address m = Call.recoverHash(keccak256(abi.encodePacked(signature,plasmaConverter)), moderatorSig, 0);
-        require(moderator == m || twoKeyEventSource.plasmaOf(moderator)  == m,'cpc12');
+        require(moderator == m || twoKeyEventSource.plasmaOf(moderator)  == m);
         address[] memory influencers = convertConverterValue(signature, plasmaConverter, msg.value); // 10000000000000000 contract donates 0.01ETH
 
         uint numberOfInfluencers = influencers.length;
@@ -309,7 +309,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     public
     returns (uint)
     {
-        require(msg.sender == twoKeyDonationConversionHandler,'cpc1');
+        require(msg.sender == twoKeyDonationConversionHandler);
         //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
         uint totalBounty2keys;
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
@@ -394,7 +394,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     )
     public
     {
-        require(msg.sender == twoKeyDonationLogicHandler,'cpc2');
+        require(msg.sender == twoKeyDonationLogicHandler);
         referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
     }
 
@@ -402,7 +402,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
      * @notice Contractor can withdraw funds only if criteria is satisfied
      */
     function withdrawContractor() public onlyContractor {
-        require(ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).canContractorWithdrawFunds(),'cpc3');
+        // TODO check this comment:
+        // require(ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).canContractorWithdrawFunds());
         withdrawContractorInternal();
     }
 
@@ -441,7 +442,6 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     view
     returns (uint)
     {
-        require(msg.sender == twoKeyDonationLogicHandler,'cpc4');
         return (referrerPlasma2Balances2key[_influencer]);
     }
 
