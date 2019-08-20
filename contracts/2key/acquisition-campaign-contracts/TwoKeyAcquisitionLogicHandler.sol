@@ -25,9 +25,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
     bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
 
-
-    uint minContributionETHorFiatCurrency; //Minimal contribution
-    uint maxContributionETHorFiatCurrency; //Maximal contribution
     uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
@@ -55,8 +52,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             isFixedInvestmentAmount = true;
         }
 
-        minContributionETHorFiatCurrency = values[0];
-        maxContributionETHorFiatCurrency = values[1];
+        minContributionAmountWei = values[0];
+        maxContributionAmountWei = values[1];
         pricePerUnitInETHWeiOrUSD = values[2];
         campaignStartTime = values[3];
         campaignEndTime = values[4];
@@ -128,12 +125,12 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
 
     function checkHowMuchUserCanConvert(uint alreadySpentETHWei, uint alreadySpentFiatWEI) internal view returns (uint) {
         if(keccak256(currency) == keccak256('ETH')) {
-            uint leftToSpendInEther = maxContributionETHorFiatCurrency.sub(alreadySpentETHWei);
+            uint leftToSpendInEther = maxContributionAmountWei.sub(alreadySpentETHWei);
             return leftToSpendInEther;
         } else {
             uint rate = getRateFromExchange();
             uint totalAmountSpentConvertedToFIAT = ((alreadySpentETHWei*rate).div(10**18)).add(alreadySpentFiatWEI);
-            uint limit = maxContributionETHorFiatCurrency; // Initially we assume it's fiat currency campaign
+            uint limit = maxContributionAmountWei; // Initially we assume it's fiat currency campaign
             uint leftToSpendInFiats = limit.sub(totalAmountSpentConvertedToFIAT);
             return leftToSpendInFiats;
         }
@@ -173,7 +170,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
      */
     function canConversionBeCreatedInTermsOfHardCap(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignWhenHardCapReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignHardCapWei.add(minContributionETHorFiatCurrency)); //small GAP
+            require(campaignRaisedIncludingConversion <= campaignHardCapWei.add(minContributionAmountWei)); //small GAP
         }
         return true;
     }
@@ -206,7 +203,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(conversionHandler).getConverterPurchasesStats(converter);
 
             uint leftToSpendFiat = checkHowMuchUserCanConvert(alreadySpentETHWei,alreadySpentFIATWEI);
-            if(leftToSpendFiat >= amountWillingToSpendFiatWei && minContributionETHorFiatCurrency <= amountWillingToSpendFiatWei) {
+            if(leftToSpendFiat >= amountWillingToSpendFiatWei && minContributionAmountWei <= amountWillingToSpendFiatWei) {
                 return (true,leftToSpendFiat);
             } else {
                 return (false,leftToSpendFiat);
@@ -222,7 +219,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
 
         if(keccak256(currency) == keccak256('ETH')) {
             //Adding a deviation of 1000 weis
-            if(leftToSpend.add(1000) > amountWillingToSpendEthWei && minContributionETHorFiatCurrency <= amountWillingToSpendEthWei) {
+            if(leftToSpend.add(1000) > amountWillingToSpendEthWei && minContributionAmountWei <= amountWillingToSpendEthWei) {
                 return(true, leftToSpend);
             } else {
                 return(false, leftToSpend);
@@ -231,7 +228,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
-            if(leftToSpend.add(1000) >= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat) {
+            if(leftToSpend.add(1000) >= amountToBeSpentInFiat && minContributionAmountWei <= amountToBeSpentInFiat) {
                 return (true,leftToSpend);
             } else {
                 return (false,leftToSpend);
@@ -247,7 +244,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready.add(minContributionETHorFiatCurrency) >= campaignHardCapWei) {
+        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready.add(minContributionAmountWei) >= campaignHardCapWei) {
             return true;
         }
         return false;
@@ -261,19 +258,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     }
 
 
-    /**
-     * @notice Requirement for the checking if the campaign is active or not
-     */
-    function checkIsCampaignActiveInTermsOfTime()
-    internal
-    view
-    returns (bool)
-    {
-        if(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime) {
-            return true;
-        }
-        return false;
-    }
+
 
 
     /**
@@ -287,8 +272,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     {
         return (
             isFixedInvestmentAmount,
-            minContributionETHorFiatCurrency,
-            maxContributionETHorFiatCurrency,
+            minContributionAmountWei,
+            maxContributionAmountWei,
             campaignHardCapWei,
             endCampaignWhenHardCapReached
         );
@@ -341,7 +326,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     public
     onlyContractor
     {
-        minContributionETHorFiatCurrency = value;
+        minContributionAmountWei = value;
     }
 
     /**
@@ -355,7 +340,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     external
     onlyContractor
     {
-        maxContributionETHorFiatCurrency = value;
+        maxContributionAmountWei = value;
     }
 
     /**
@@ -370,36 +355,14 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         return (
             campaignStartTime,
             campaignEndTime,
-            minContributionETHorFiatCurrency,
-            maxContributionETHorFiatCurrency,
+            minContributionAmountWei,
+            maxContributionAmountWei,
             unit_decimals,
             pricePerUnitInETHWeiOrUSD,
             maxConverterBonusPercent
         );
     }
 
-    /**
-     * @notice Function to check if the msg.sender has already joined
-     * @return true/false depending of joined status
-     */
-    function getAddressJoinedStatus(
-        address _address
-    )
-    public
-    view
-    returns (bool)
-    {
-        address plasma = plasmaOf(_address);
-        if (_address == address(0)) {
-            return false;
-        }
-        if (plasma == ownerPlasma || _address == address(moderator) ||
-        ITwoKeyAcquisitionARC(twoKeyCampaign).getReceivedFrom(plasma) != address(0)
-        || ITwoKeyAcquisitionARC(twoKeyCampaign).balanceOf(plasma) > 0) {
-            return true;
-        }
-        return false;
-    }
 
     /**
      * @notice Function to fetch stats for the address

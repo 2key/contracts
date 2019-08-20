@@ -16,8 +16,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
 
     uint powerLawFactor;
 
-    uint minDonationAmountWei; // Minimal donation amount
-    uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
     bool endCampaignOnceGoalReached;
 
@@ -41,8 +39,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         powerLawFactor = 2;
         campaignStartTime = numberValues[1];
         campaignEndTime = numberValues[2];
-        minDonationAmountWei = numberValues[3];
-        maxDonationAmountWei = numberValues[4];
+        minContributionAmountWei = numberValues[3];
+        maxContributionAmountWei = numberValues[4];
         campaignGoal = numberValues[5];
         incentiveModel = IncentiveModel(numberValues[7]);
 
@@ -74,13 +72,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) internal view returns (bool) {
         uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpend(converter);
         if(keccak256(currency) == keccak256("ETH")) {
-            if(leftToSpendInCampaignCurrency >= conversionAmountEthWEI && conversionAmountEthWEI >= minDonationAmountWei) {
+            if(leftToSpendInCampaignCurrency >= conversionAmountEthWEI && conversionAmountEthWEI >= minContributionAmountWei) {
                 return true;
             }
         } else {
             uint rate = getRateFromExchange();
             uint conversionAmountConverted = (conversionAmountEthWEI.mul(rate)).div(10**18);
-            if(leftToSpendInCampaignCurrency >= conversionAmountConverted && conversionAmountConverted >= minDonationAmountWei) {
+            if(leftToSpendInCampaignCurrency >= conversionAmountConverted && conversionAmountConverted >= minContributionAmountWei) {
                 return true;
             }
         }
@@ -110,13 +108,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     returns (uint)
     {
         if(keccak256(currency) == keccak256('ETH')) {
-            uint availableToDonate = maxDonationAmountWei.sub(alreadyDonatedEthWEI);
+            uint availableToDonate = maxContributionAmountWei.sub(alreadyDonatedEthWEI);
             return availableToDonate;
         } else {
             uint rate = getRateFromExchange();
 
             uint totalAmountSpentConvertedToFIAT = (alreadyDonatedEthWEI*rate).div(10**18);
-            uint limit = maxDonationAmountWei; // Initially we assume it's fiat currency campaign
+            uint limit = maxContributionAmountWei; // Initially we assume it's fiat currency campaign
             uint leftToSpendInFiats = limit.sub(totalAmountSpentConvertedToFIAT);
             return leftToSpendInFiats;
         }
@@ -306,29 +304,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
 
 
     /**
-     * @notice Function to check if the msg.sender has already joined
-     * @return true/false depending of joined status
-     */
-    function getAddressJoinedStatus(
-        address _address
-    )
-    public
-    view
-    returns (bool)
-    {
-        address plasma = plasmaOf(_address);
-        if (_address == address(0)) {
-            return false;
-        }
-        if (plasma == ownerPlasma || _address == address(moderator) ||
-        ITwoKeyDonationCampaign(twoKeyCampaign).getReceivedFrom(plasma) != address(0)
-        || ITwoKeyDonationCampaign(twoKeyCampaign).balanceOf(plasma) > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @notice Function to fetch stats for the address
      */
     function getAddressStatistic(
@@ -433,22 +408,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     }
 
 
-
-
-    /**
-     * @notice Requirement for the checking if the campaign is active or not
-     */
-    function checkIsCampaignActiveInTermsOfTime()
-    internal
-    view
-    returns (bool)
-    {
-        if(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime) {
-            return true;
-        }
-        return false;
-    }
-
     /**
      * @notice Function which will calculate how much will be raised including the conversion which try to be created
      * @param conversionAmount is the amount of conversion
@@ -488,7 +447,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
      */
     function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignOnceGoalReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignGoal + minDonationAmountWei); //small GAP
+            require(campaignRaisedIncludingConversion <= campaignGoal + minContributionAmountWei); //small GAP
         }
         return true;
     }
@@ -501,7 +460,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignOnceGoalReached == true && campaignRaisedAlready + minDonationAmountWei >= campaignGoal) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedAlready + minContributionAmountWei >= campaignGoal) {
             return true;
         }
         return false;
@@ -510,8 +469,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     function getConstantInfo()
     public
     view
-    returns (uint,uint,uint,uint,uint)
+    returns (uint,uint,uint,uint)
     {
-        return (campaignStartTime,campaignEndTime, minDonationAmountWei, maxDonationAmountWei, campaignGoal);
+        return (campaignStartTime,campaignEndTime, minContributionAmountWei, maxContributionAmountWei);
     }
 }

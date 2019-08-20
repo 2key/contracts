@@ -6,6 +6,7 @@ import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
+import "../interfaces/ITwoKeyCampaign.sol";
 
 contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
 
@@ -31,6 +32,8 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     address contractor;
     address moderator;
 
+    uint minContributionAmountWei; //Minimal contribution
+    uint maxContributionAmountWei; //Maximal contribution
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
 
@@ -101,6 +104,43 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
      */
     function getIncentiveModel() public view returns (IncentiveModel) {
         return incentiveModel;
+    }
+
+    /**
+     * @notice Requirement for the checking if the campaign is active or not
+     */
+    function checkIsCampaignActiveInTermsOfTime()
+    internal
+    view
+    returns (bool)
+    {
+        if(block.timestamp >= campaignStartTime && block.timestamp <= campaignEndTime) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @notice Function to check if the msg.sender has already joined
+     * @return true/false depending of joined status
+     */
+    function getAddressJoinedStatus(
+        address _address
+    )
+    public
+    view
+    returns (bool)
+    {
+        address plasma = plasmaOf(_address);
+        if (_address == address(0)) {
+            return false;
+        }
+        if (plasma == ownerPlasma || _address == address(moderator) ||
+        ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(plasma) != address(0)
+        || ITwoKeyCampaign(twoKeyCampaign).balanceOf(plasma) > 0) {
+            return true;
+        }
+        return false;
     }
 
 
