@@ -349,23 +349,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         }
     }
 
-
-    /**
-     * @notice Internal helper function
-     */
-    function recover(
-        bytes signature
-    )
-    internal
-    view
-    returns (address)
-    {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
-        address x = Call.recoverHash(hash, signature, 0);
-        return x;
-    }
-
     /**
      * @notice Function to get super statistics
      * @param _user is the user address we want stats for
