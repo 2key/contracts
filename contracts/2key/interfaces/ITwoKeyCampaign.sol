@@ -15,4 +15,18 @@ contract ITwoKeyCampaign {
     public
     view
     returns (uint256);
+
+    function getReferrerCut(
+        address me
+    )
+    public
+    view
+    returns (uint256);
+
+    function getReferrerPlasmaBalance(
+        address _influencer
+    )
+    public
+    view
+    returns (uint);
 }

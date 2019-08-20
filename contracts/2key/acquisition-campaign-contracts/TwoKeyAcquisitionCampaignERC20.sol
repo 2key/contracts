@@ -19,7 +19,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
-    mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
@@ -486,21 +485,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
     /**
-     * @notice Function to get cut for an (ethereum) address
-     * @param me is the ethereum address
-     */
-    function getReferrerCut(
-        address me
-    )
-    public
-    view
-    returns (uint256)
-    {
-        return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
-    }
-
-
-    /**
      * @notice Function to check available amount of the tokens on the contract
      */
     function getAvailableAndNonReservedTokensAmount()
@@ -529,20 +513,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
 
-    /**
-     * @notice Function to get balance of influencer for his plasma address
-     * @param _influencer is the plasma address of influencer
-     * @return balance in wei's
-     */
-    function getReferrerPlasmaBalance(
-        address _influencer
-    )
-    public
-    view
-    returns (uint)
-    {
-        return (referrerPlasma2Balances2key[_influencer]);
-    }
+
 
     /**
      * @notice Function to update referrer plasma balance

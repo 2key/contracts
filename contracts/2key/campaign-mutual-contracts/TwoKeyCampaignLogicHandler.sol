@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaign.sol";
+import "../libraries/Call.sol";
 
 contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
 
@@ -141,6 +142,22 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
             return true;
         }
         return false;
+    }
+
+    /**
+     * @notice Internal helper function
+     */
+    function recover(
+        bytes signature
+    )
+    internal
+    view
+    returns (address)
+    {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        address x = Call.recoverHash(hash, signature, 0);
+        return x;
     }
 
 

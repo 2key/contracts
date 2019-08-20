@@ -1,12 +1,11 @@
 pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeyDonationCampaign.sol";
-import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../libraries/SafeMath.sol";
-import "../libraries/Call.sol";
+
 import "../libraries/IncentiveModels.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
@@ -192,7 +191,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
                     b = totalBounty2keys;
                 }
                 else {
-                    uint256 cut = ITwoKeyDonationCampaign(twoKeyCampaign).getReferrerCut(influencers[i]);
+                    uint256 cut = ITwoKeyCampaign(twoKeyCampaign).getReferrerCut(influencers[i]);
                     if (cut > 0 && cut <= 101) {
                         b = totalBounty2keys.mul(cut.sub(1)).div(100);
                     } else {// cut == 0 or 255 indicates equal particine of the bounty
@@ -223,7 +222,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         uint n_influencers = 0;
 
         while (true) {
-            influencer = plasmaOf(ITwoKeyDonationCampaign(twoKeyCampaign).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
                 break;
             }
@@ -233,7 +232,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         influencer = plasmaOf(customer);
 
         while (n_influencers > 0) {
-            influencer = plasmaOf(ITwoKeyDonationCampaign(twoKeyCampaign).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
             n_influencers--;
             influencers[n_influencers] = influencer;
         }
@@ -272,7 +271,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
         }
 
-        uint referrerBalance = ITwoKeyDonationCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerAddress);
+        uint referrerBalance = ITwoKeyCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerAddress);
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
 
@@ -295,7 +294,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = ITwoKeyDonationCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersPendingPlasmaBalance[i] = ITwoKeyCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
             referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
         }
 

@@ -2,7 +2,6 @@ pragma solidity ^0.4.24;
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
-import "../interfaces/ITwoKeyAcquisitionARC.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
@@ -417,21 +416,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         }
     }
 
-    /**
-     * @notice Internal helper function
-     */
-    function recover(
-        bytes signature
-    )
-    internal
-    view
-    returns (address)
-    {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
-        address x = Call.recoverHash(hash, signature, 0);
-        return x;
-    }
 
     /**
      * @notice Function to get super statistics
@@ -491,7 +475,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         uint n_influencers = 0;
 
         while (true) {
-            influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyCampaign(acquisitionCampaignContract).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
                 break;
             }
@@ -502,7 +486,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         influencer = plasmaOf(customer);
 
         while (n_influencers > 0) {
-            influencer = plasmaOf(ITwoKeyAcquisitionARC(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyCampaign(acquisitionCampaignContract).getReceivedFrom(influencer));
             n_influencers = n_influencers.sub(1);
             influencers[n_influencers] = influencer;
         }
@@ -575,7 +559,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
                     b = totalBounty2keys;
                 }
                 else {
-                    uint256 cut = ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).getReferrerCut(influencers[i]);
+                    uint256 cut = ITwoKeyCampaign(twoKeyCampaign).getReferrerCut(influencers[i]);
                     if (cut > 0 && cut <= 101) {
                         b = totalBounty2keys.mul(cut.sub(1)).div(100);
                     } else {// cut == 0 or 255 indicates equal particine of the bounty
@@ -634,7 +618,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersPendingPlasmaBalance[i] = ITwoKeyCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
             referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
         }
 
@@ -674,7 +658,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
         }
 
-        uint referrerBalance = ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).getReferrerPlasmaBalance(_referrerAddress);
+        uint referrerBalance = ITwoKeyCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerAddress);
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
 
