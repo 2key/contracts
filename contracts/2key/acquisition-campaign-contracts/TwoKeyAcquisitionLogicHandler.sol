@@ -260,7 +260,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
 
 
 
-    /**
+    /**recover
      * @notice Function to get investment rules
      * @return tuple containing if investment amount is fixed, and lower/upper bound of the same if not (if yes lower = upper)
      */
@@ -416,47 +416,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         }
     }
 
-
-    /**
-     * @notice Function to get super statistics
-     * @param _user is the user address we want stats for
-     * @param plasma is if that address is plasma or not
-     * @param signature in case we're calling this from referrer who doesn't have yet opened wallet
-     */
-    function getSuperStatistics(
-        address _user,
-        bool plasma,
-        bytes signature
-    )
-    public
-    view
-    returns (bytes)
-    {
-        address eth_address = _user;
-
-        if (plasma) {
-            (eth_address) = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_user);
-        }
-
-        bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
-
-        bool isJoined = getAddressJoinedStatus(_user);
-        bool flag;
-
-        address _address;
-
-        if(msg.sender == contractor || msg.sender == eth_address) {
-            flag = true;
-        } else {
-            _address = recover(signature);
-            if(_address == ownerPlasma) {
-                flag = true;
-            }
-        }
-        bytes memory stats = getAddressStatistic(_user, plasma, flag, _address);
-        return abi.encodePacked(userData, isJoined, eth_address, stats);
-    }
-
     /**
      * @notice Function to return referrers participated in the referral chain
      * @param customer is the one who converted (bought tokens)
@@ -574,93 +533,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         }
     }
 
-
-//    /**
-//     * @notice Helper function to get how much _referrer address earned for all conversions for eth_address
-//     * @param _referrer is the address we're checking the earnings
-//     * @param eth_address is the converter address we're getting all conversion ids for
-//     * @return sum of all earnings
-//     */
-//    function getTotalReferrerEarnings(
-//        address _referrer,
-//        address eth_address
-//    )
-//    internal
-//    view
-//    returns (uint)
-//    {
-//        uint[] memory conversionIds = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterConversionIds(eth_address);
-//        uint sum = 0;
-//        uint len = conversionIds.length;
-//        for(uint i=0; i<len; i++) {
-//            sum += referrerPlasma2EarningsPerConversion[_referrer][conversionIds[i]];
-//        }
-//        return sum;
-//    }
-
-
-    /**
-     * @notice Function to get balance and total earnings for all referrer addresses passed in arg
-     * @param _referrerPlasmaList is the array of plasma addresses of referrer
-     * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
-     */
-    function getReferrersBalancesAndTotalEarnings(
-        address[] _referrerPlasmaList
-    )
-    public
-    view
-    returns (uint256[], uint256[])
-    {
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-
-        uint numberOfAddresses = _referrerPlasmaList.length;
-        uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
-        uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
-
-        for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = ITwoKeyCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
-            referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
-        }
-
-        return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
-    }
-
-
-    /**
-     * @notice Function to fetch for the referrer his balance, his total earnings, and how many conversions he participated in
-     * @dev only referrer by himself, moderator, or contractor can call this
-     * @param _referrerAddress is the address of referrer we're checking for
-     * @param _sig is the signature if calling functions from FE without ETH address
-     * @param _conversionIds are the ids of conversions this referrer participated in
-     * @return tuple containing this 3 information
-     */
-    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
-        address _referrerAddress,
-        bytes _sig,
-        uint[] _conversionIds
-    )
-    public
-    view
-    returns (uint,uint,uint,uint[],address)
-    {
-        if(_sig.length > 0) {
-            _referrerAddress = recover(_sig);
-        }
-        else {
-            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-            _referrerAddress = plasmaOf(_referrerAddress);
-        }
-
-        uint len = _conversionIds.length;
-        uint[] memory earnings = new uint[](len);
-
-        for(uint i=0; i<len; i++) {
-            earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
-        }
-
-        uint referrerBalance = ITwoKeyCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerAddress);
-        return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
-    }
 
 
     function getReferrerPlasmaTotalEarnings(
