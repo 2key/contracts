@@ -296,16 +296,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             conversionAmountETHWeiOrFiat, maxReferralRewardFiatOrETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, isKYCRequired);
 
-//        twoKeyEventSource.convertedAcquisitionV2(
-//            address(this),
-//            twoKeyEventSource.plasmaOf(converterAddress),
-//            baseTokensForConverterUnits,
-//            bonusTokensForConverterUnits,
-//            conversionAmountETHWeiOrFiat,
-//            isFiatConversion,
-//            conversionId
-//        );
-
         if(isKYCRequired == false) {
             if(isFiatConversion == false || ITwoKeyConversionHandler(conversionHandler).isFiatConversionAutomaticallyApproved()) {
                 ITwoKeyConversionHandler(conversionHandler).executeConversion(conversionId);
@@ -394,7 +384,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     onlyTwoKeyConversionHandler
     {
-        _cancelledConverter.transfer(_conversionAmount);
+        _cancelledConverter. (_conversionAmount);
     }
 
     /**
