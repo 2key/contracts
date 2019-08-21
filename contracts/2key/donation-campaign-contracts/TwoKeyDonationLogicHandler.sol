@@ -205,38 +205,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         }
     }
 
-    /**
-     * @notice Function to return referrers participated in the referral chain
-     * @param customer is the one who converted (bought tokens)
-     * @return array of referrer addresses
-     */
-    function getReferrers(
-        address customer
-    )
-    public
-    view
-    returns (address[])
-    {
-        address influencer = plasmaOf(customer);
-        uint n_influencers = 0;
 
-        while (true) {
-            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
-            if (influencer == plasmaOf(contractor)) {
-                break;
-            }
-            n_influencers++;
-        }
-        address[] memory influencers = new address[](n_influencers);
-        influencer = plasmaOf(customer);
-
-        while (n_influencers > 0) {
-            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
-            n_influencers--;
-            influencers[n_influencers] = influencer;
-        }
-        return influencers;
-    }
 
 
 
@@ -288,40 +257,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     }
 
 
-    function getSuperStatistics(
-        address _user,
-        bool plasma,
-        bytes signature
-    )
-    public
-    view
-    returns (bytes)
-    {
-        address eth_address = _user;
-
-        if (plasma) {
-            (eth_address) = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_user);
-        }
-
-        bytes memory userData = ITwoKeyReg(twoKeyRegistry).getUserData(eth_address);
-
-        bool isJoined = getAddressJoinedStatus(_user);
-        bool flag;
-
-        address _address;
-
-        if(msg.sender == contractor || msg.sender == eth_address) {
-            flag = true;
-        } else {
-            _address = recover(signature);
-            if(_address == ownerPlasma) {
-                flag = true;
-            }
-        }
-        bytes memory stats = getAddressStatistic(_user, plasma, flag, _address);
-        return abi.encodePacked(userData, isJoined, eth_address, stats);
-    }
-
 
     /**
      * @notice Function which will calculate how much will be raised including the conversion which try to be created
@@ -336,14 +271,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
             total = ((conversionAmount*rate).div(10**18)).add(campaignRaisedAlready);
         }
         return total;
-    }
-
-    /**
-     * @notice Function which will update total raised funds which will be always compared with hard cap
-     * @param newAmount is the value including the new conversion amount
-     */
-    function updateTotalRaisedFunds(uint newAmount) internal {
-        campaignRaisedAlready = newAmount;
     }
 
     /**
@@ -384,8 +311,14 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     function getConstantInfo()
     public
     view
-    returns (uint,uint,uint,uint)
+    returns (uint,uint,uint,uint,uint)
     {
-        return (campaignStartTime,campaignEndTime, minContributionAmountWei, maxContributionAmountWei);
+        return (
+            campaignStartTime,
+            campaignEndTime,
+            minContributionAmountWei,
+            maxContributionAmountWei,
+            campaignGoal
+        );
     }
 }

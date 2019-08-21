@@ -134,13 +134,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         }
     }
 
-    /**
-     * @notice Function which will update total raised funds which will be always compared with hard cap
-     * @param newAmount is the value including the new conversion amount
-     */
-    function updateTotalRaisedFunds(uint newAmount) internal {
-        campaignRaisedAlready = newAmount;
-    }
+
 
     /**
      * @notice Function which will calculate how much will be raised including the conversion which try to be created
@@ -256,9 +250,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     }
 
 
-
-
-
     /**recover
      * @notice Function to get investment rules
      * @return tuple containing if investment amount is fixed, and lower/upper bound of the same if not (if yes lower = upper)
@@ -276,8 +267,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         endCampaignOnceGoalReached
         );
     }
-
-
 
     /**
      * @notice Function which will calculate the base amount, bonus amount
@@ -311,34 +300,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         baseTokensForConverterUnits = conversionAmountETHWeiOrFiat.mul(10 ** unit_decimals).div(value);
         bonusTokensForConverterUnits = baseTokensForConverterUnits.mul(maxConverterBonusPercent).div(100);
         return (baseTokensForConverterUnits, bonusTokensForConverterUnits);
-    }
-
-    /**
-     * @notice Function to update MinContributionETH
-     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-     * @param value is the new value we are going to set for minContributionETH
-     */
-    function updateMinContributionETHOrUSD(
-        uint value
-    )
-    public
-    onlyContractor
-    {
-        minContributionAmountWei = value;
-    }
-
-    /**
-     * @notice Function to update maxContributionETH
-     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
-     * @param value is the new maxContribution value
-     */
-    function updateMaxContributionETHorUSD(
-        uint value
-    )
-    external
-    onlyContractor
-    {
-        maxContributionAmountWei = value;
     }
 
     /**
@@ -413,41 +374,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
                 state
             );
         }
-    }
-
-    /**
-     * @notice Function to return referrers participated in the referral chain
-     * @param customer is the one who converted (bought tokens)
-     * @return array of referrer addresses
-     */
-    function getReferrers(
-        address customer
-    )
-    public
-    view
-    returns (address[])
-    {
-        address influencer = plasmaOf(customer);
-        uint n_influencers = 0;
-
-        while (true) {
-            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
-            if (influencer == plasmaOf(contractor)) {
-                break;
-            }
-            n_influencers = n_influencers.add(1);
-        }
-
-        address[] memory influencers = new address[](n_influencers);
-        influencer = plasmaOf(customer);
-
-        while (n_influencers > 0) {
-            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
-            n_influencers = n_influencers.sub(1);
-            influencers[n_influencers] = influencer;
-        }
-
-        return influencers;
     }
 
     function updateReferrerMappings(address referrerPlasma, uint reward, uint conversionId) internal {
@@ -529,20 +455,5 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             }
         }
     }
-
-
-
-    function getReferrerPlasmaTotalEarnings(
-        address _referrer
-    )
-    public
-    view
-    returns (uint)
-    {
-        return referrerPlasma2TotalEarnings2key[_referrer];
-    }
-
-
-
 
 }

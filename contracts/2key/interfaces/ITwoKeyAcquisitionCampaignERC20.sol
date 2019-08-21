@@ -2,8 +2,6 @@ pragma solidity ^0.4.24;
 
 // @author Nikola Madjarevic
 contract ITwoKeyAcquisitionCampaignERC20 {
-    address public conversionHandler;
-    address public twoKeyAcquisitionLogicHandler;
     function buyTokensAndDistributeReferrerRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId, bool _isConversionFiat) public returns (uint);
     function moveFungibleAsset(address _to, uint256 _amount) public;
     function updateContractorProceeds(uint value) public;

@@ -263,6 +263,39 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         return abi.encodePacked(userData, isJoined, eth_address, stats);
     }
 
+    /**
+     * @notice Function to return referrers participated in the referral chain
+     * @param customer is the one who converted (bought tokens)
+     * @return array of referrer addresses
+     */
+    function getReferrers(
+        address customer
+    )
+    public
+    view
+    returns (address[])
+    {
+        address influencer = plasmaOf(customer);
+        uint n_influencers = 0;
+
+        while (true) {
+            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
+            if (influencer == plasmaOf(contractor)) {
+                break;
+            }
+            n_influencers = n_influencers.add(1);
+        }
+        address[] memory influencers = new address[](n_influencers);
+        influencer = plasmaOf(customer);
+
+        while (n_influencers > 0) {
+            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
+            n_influencers = n_influencers.sub(1);
+            influencers[n_influencers] = influencer;
+        }
+        return influencers;
+    }
+
     function getAddressStatistic(
         address _address,
         bool plasma,
@@ -295,10 +328,32 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     function updateMaxContributionETHorUSD(
         uint value
     )
-    external
+    public
     onlyContractor
     {
         maxContributionAmountWei = value;
+    }
+
+    /**
+     * @notice Gets total earnings for referrer plasma address
+     * @param _referrer is the address of influencer
+     */
+    function getReferrerPlasmaTotalEarnings(
+        address _referrer
+    )
+    public
+    view
+    returns (uint)
+    {
+        return referrerPlasma2TotalEarnings2key[_referrer];
+    }
+
+    /**
+     * @notice Function which will update total raised funds which will be always compared with hard cap
+     * @param newAmount is the value including the new conversion amount
+     */
+    function updateTotalRaisedFunds(uint newAmount) internal {
+        campaignRaisedAlready = newAmount;
     }
 
 }

@@ -29,4 +29,8 @@ contract ITwoKeyCampaign {
     public
     view
     returns (uint);
+
+    address public logicHandler;
+    address public conversionHandler;
+
 }

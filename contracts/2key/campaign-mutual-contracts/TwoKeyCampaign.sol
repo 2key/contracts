@@ -19,6 +19,9 @@ contract TwoKeyCampaign is ArcERC20 {
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
 
+	address public conversionHandler; // Contract which will handle all conversions
+	address public logicHandler;  // Contract which will handle logic
+
 	address twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
 	address twoKeyEconomy; // Address of twoKeyEconomy contract
 	address ownerPlasma; //contractor plasma address
