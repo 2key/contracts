@@ -472,7 +472,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     view
     returns (uint256[])
     {
-        address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer,address(this));
+        address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer);
         uint256[] memory cuts = new uint256[](influencers.length + 1);
 
         uint numberOfInfluencers = influencers.length;

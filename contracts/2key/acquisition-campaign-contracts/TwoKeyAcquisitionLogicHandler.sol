@@ -418,12 +418,10 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     /**
      * @notice Function to return referrers participated in the referral chain
      * @param customer is the one who converted (bought tokens)
-     * @param acquisitionCampaignContract is the acquisition campaign address
      * @return array of referrer addresses
      */
     function getReferrers(
-        address customer,
-        address acquisitionCampaignContract
+        address customer
     )
     public
     view
@@ -433,7 +431,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         uint n_influencers = 0;
 
         while (true) {
-            influencer = plasmaOf(ITwoKeyCampaign(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
             if (influencer == plasmaOf(contractor)) {
                 break;
             }
@@ -444,7 +442,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         influencer = plasmaOf(customer);
 
         while (n_influencers > 0) {
-            influencer = plasmaOf(ITwoKeyCampaign(acquisitionCampaignContract).getReceivedFrom(influencer));
+            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
             n_influencers = n_influencers.sub(1);
             influencers[n_influencers] = influencer;
         }
@@ -477,7 +475,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         require(msg.sender == twoKeyCampaign);
 
         //Get all the influencers
-        address[] memory influencers = getReferrers(_converter, twoKeyCampaign);
+        address[] memory influencers = getReferrers(_converter);
 
         //Get array length
         uint numberOfInfluencers = influencers.length;
