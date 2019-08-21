@@ -13,8 +13,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
     bool public isFiatConversionAutomaticallyApproved;
 
-    event ConversionCreated(uint conversionId);
-
     Conversion[] conversions;
     ITwoKeyAcquisitionCampaignERC20 twoKeyCampaign;
 
@@ -24,7 +22,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     uint expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
     address assetContractERC20;
-
 
 
     /// Structure which will represent conversion
@@ -43,8 +40,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         uint256 conversionExpiresAt; // When conversion expires
         bool isConversionFiat;
     }
-
-
 
     function setInitialParamsConversionHandler(
         uint [] values,
@@ -78,28 +73,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     }
 
 
-    function emitConvertedEvent(
-        address converterAddress,
-        uint baseTokens,
-        uint bonusTokens,
-        uint conversionAmount,
-        bool isFiatConversion,
-        uint conversionId
-    )
-    internal
-    view
-    {
-        ITwoKeyEventSource(twoKeyEventSource).convertedAcquisitionV2(
-            twoKeyCampaign,
-            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
-            baseTokens,
-            bonusTokens,
-            conversionAmount,
-            isFiatConversion,
-            conversionId
-        );
-    }
-
     function emitExecutedEvent(
         address _converterAddress,
         uint conversionId,
@@ -128,6 +101,29 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress)
         );
     }
+
+    function emitConvertedEvent(
+        address converterAddress,
+        uint baseTokens,
+        uint bonusTokens,
+        uint conversionAmount,
+        bool isFiatConversion,
+        uint conversionId
+    )
+    internal
+    view
+    {
+        ITwoKeyEventSource(twoKeyEventSource).convertedAcquisitionV2(
+            twoKeyCampaign,
+            ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
+            baseTokens,
+            bonusTokens,
+            conversionAmount,
+            isFiatConversion,
+            conversionId
+        );
+    }
+
 
 
     /// @notice Support function to create conversion
@@ -352,96 +348,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     }
 
 
-    function getAllConvertersPerState(
-        bytes32 state
-    )
-    public
-    view
-    returns (address[])
-    {
-        return stateToConverter[state];
-    }
-
-
-    /// @notice Function to move converter address from stateA to stateB
-    /// @param _converter is the address of converter
-    /// @param destinationState is the state we'd like to move converter to
-    function moveFromStateAToStateB(
-        address _converter,
-        bytes32 destinationState
-    )
-    internal
-    {
-        ConverterState state = converterToState[_converter];
-        bytes32 key = convertConverterStateToBytes(state);
-        address[] memory pending = stateToConverter[key];
-        for(uint i=0; i< pending.length; i++) {
-            if(pending[i] == _converter) {
-                stateToConverter[destinationState].push(_converter);
-                pending[i] = pending[pending.length-1];
-                delete pending[pending.length-1];
-                stateToConverter[key] = pending;
-                stateToConverter[key].length = stateToConverter[key].length.sub(1) ;
-                break;
-            }
-        }
-    }
-
-
-    /// @notice Function where we can change state of converter to Approved
-    /// @dev Converter can only be approved if his previous state is pending or rejected
-    /// @param _converter is the address of converter
-    function moveFromPendingOrRejectedToApprovedState(
-        address _converter
-    )
-    internal
-    {
-        bytes32 destination = bytes32("APPROVED");
-        moveFromStateAToStateB(_converter, destination);
-        converterToState[_converter] = ConverterState.APPROVED;
-    }
-
-
-    /// @notice Function where we're going to move state of conversion from pending to rejected
-    /// @dev private function, will be executed in another one
-    /// @param _converter is the address of converter
-    function moveFromPendingToRejectedState(
-        address _converter
-    )
-    internal
-    {
-        bytes32 destination = bytes32("REJECTED");
-        moveFromStateAToStateB(_converter, destination);
-        converterToState[_converter] = ConverterState.REJECTED;
-    }
-
-
-    /// @notice Function where we are approving converter
-    /// @dev only maintainer or contractor can call this method
-    /// @param _converter is the address of converter
-    function approveConverter(
-        address _converter
-    )
-    public
-    onlyContractorOrMaintainer
-    {
-        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
-//        uint len = converterToHisConversions[_converter].length;
-//        for(uint i=0; i<len; i++) {
-//            uint conversionId = converterToHisConversions[_converter][i];
-//            Conversion c = conversions[conversionId];
-//            if(c.state == ConversionState.PENDING_APPROVAL && c.isConversionFiat == true) {
-//                //TODO: Here should be APPROVED if it is not fiat
-//                counters[0]--; //Reduce number of pending conversions
-//                counters[1]++; //Increase number of approved conversions
-//                c.state = ConversionState.APPROVED;
-////                conversions[conversionId] = c;
-//            }
-//        }
-        moveFromPendingOrRejectedToApprovedState(_converter);
-    }
-
-
     /// @notice Function where we can reject converter
     /// @dev only maintainer or contractor can call this function
     /// @param _converter is the address of converter
@@ -451,8 +357,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     public
     onlyContractorOrMaintainer
     {
-        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
-        moveFromPendingToRejectedState(_converter);
+        rejectConverterInternal(_converter);
         uint reservedAmount = 0;
         uint refundAmount = 0;
         uint len = converterToHisConversions[_converter].length;
@@ -485,47 +390,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
 
     /**
-     * @notice Function to get all conversion ids for the converter
-     * @param _converter is the address of the converter
-     * @return array of conversion ids
-     * @dev can only be called by converter itself or maintainer/contractor
-     */
-    function getConverterConversionIds(
-        address _converter
-    )
-    public
-    view
-    returns (uint[])
-    {
-//        require(msg.sender == contractor || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) || msg.sender == _converter);
-        return converterToHisConversions[_converter];
-    }
-
-    function getLastConverterConversionId(
-        address _converter
-    )
-    public
-    view
-    returns (uint)
-    {
-        return converterToHisConversions[_converter][converterToHisConversions[_converter].length - 1];
-    }
-
-
-    /**
-     * @notice Function to get number of conversions
-     * @dev Can only be called by contractor or maintainer
-     */
-    function getNumberOfConversions()
-    external
-    view
-    returns (uint)
-    {
-        return numberOfConversions;
-    }
-
-
-    /**
      * @notice Function to cancel conversion and get back money
      * @param _conversionId is the id of the conversion
      * @dev returns all the funds to the converter back
@@ -547,47 +411,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         conversion.state = ConversionState.CANCELLED_BY_CONVERTER;
         twoKeyCampaign.sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
     }
-
-    /**
-     * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
-     getCampaignSummary
-     */
-    function getCampaignSummary()
-    public
-    view
-    returns (uint,uint,uint,uint[])
-    {
-        bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
-        bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
-        bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
-
-        uint numberOfPending = stateToConverter[pending].length;
-        uint numberOfApproved = stateToConverter[approved].length;
-        uint numberOfRejected = stateToConverter[rejected].length;
-
-        return (
-            numberOfPending,
-            numberOfApproved,
-            numberOfRejected,
-            counters
-        );
-    }
-
-    /**
-     * @notice Function to get converter state
-     * @param _converter is the address of the requested converter
-     * @return hexed string of the state
-     */
-    function getStateForConverter(
-        address _converter
-    )
-    external
-    view
-    returns (bytes32)
-    {
-        return convertConverterStateToBytes(converterToState[_converter]);
-    }
-
 
     /**
      * @notice Function to fetch how much user spent money and bought units in total

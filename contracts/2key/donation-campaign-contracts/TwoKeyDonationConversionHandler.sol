@@ -16,8 +16,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
     ITwoKeyDonationCampaign twoKeyCampaign;
 
-    event ConversionCreated(uint conversionId);
-
     string currency;
 
     mapping(address => uint256) private converterToAmountOfDonationTokensReceived;
@@ -114,6 +112,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         );
     }
 
+
+
     /**
      * @notice Function to calculate amount of donation tokens to be received
      * @param _conversionAmountETHWei is the amount of conversion in WEI
@@ -145,59 +145,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         uint amountOfTokens = calculateAmountOfTokens(_conversionAmountETHWei);
         converterToAmountOfDonationTokensReceived[_converter] = converterToAmountOfDonationTokensReceived[_converter].add(amountOfTokens);
         erc20InvoiceToken.transfer(_converter, amountOfTokens);
-    }
-
-
-
-    /// @notice Function to move converter address from stateA to stateB
-    /// @param _converter is the address of converter
-    /// @param destinationState is the state we'd like to move converter to
-    function moveFromStateAToStateB(
-        address _converter,
-        bytes32 destinationState
-    )
-    internal
-    {
-        ConverterState state = converterToState[_converter];
-        bytes32 key = convertConverterStateToBytes(state);
-        address[] memory pending = stateToConverter[key];
-        for(uint i=0; i< pending.length; i++) {
-            if(pending[i] == _converter) {
-                stateToConverter[destinationState].push(_converter);
-                pending[i] = pending[pending.length-1];
-                delete pending[pending.length-1];
-                stateToConverter[key] = pending;
-                stateToConverter[key].length--;
-                break;
-            }
-        }
-    }
-
-    /// @notice Function where we can change state of converter to Approved
-    /// @dev Converter can only be approved if his previous state is pending or rejected
-    /// @param _converter is the address of converter
-    function moveFromPendingOrRejectedToApprovedState(
-        address _converter
-    )
-    internal
-    {
-        bytes32 destination = bytes32("APPROVED");
-        moveFromStateAToStateB(_converter, destination);
-        converterToState[_converter] = ConverterState.APPROVED;
-    }
-
-
-    /// @notice Function where we're going to move state of conversion from pending to rejected
-    /// @dev private function, will be executed in another one
-    /// @param _converter is the address of converter
-    function moveFromPendingToRejectedState(
-        address _converter
-    )
-    internal
-    {
-        bytes32 destination = bytes32("REJECTED");
-        moveFromStateAToStateB(_converter, destination);
-        converterToState[_converter] = ConverterState.REJECTED;
     }
 
 
@@ -308,28 +255,13 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     }
 
 
-    /// @notice Function where we are approving converter
-    /// @dev only maintainer or contractor can call this method
-    /// @param _converter is the address of converter
-    function approveConverter(
-        address _converter
-    )
-    public
-    onlyContractorOrMaintainer
-    {
-        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
-        moveFromPendingOrRejectedToApprovedState(_converter);
-    }
-
     function rejectConverter(
         address _converter
     )
     public
     onlyContractorOrMaintainer
     {
-        require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
-        moveFromPendingToRejectedState(_converter);
-
+        rejectConverterInternal(_converter);
         uint refundAmount = 0;
         uint len = converterToHisConversions[_converter].length;
 
@@ -352,96 +284,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         }
 
         emitRejectedEvent(twoKeyCampaign, _converter);
-    }
-
-    /**
-     * @notice Function to get all conversion ids for the converter
-     * @param _converter is the address of the converter
-     * @return array of conversion ids
-     * @dev can only be called by converter itself or maintainer/contractor
-     */
-    function getConverterConversionIds(
-        address _converter
-    )
-    public
-    view
-    returns (uint[])
-    {
-        return converterToHisConversions[_converter];
-    }
-
-
-    function getLastConverterConversionId(
-        address _converter
-    )
-    public
-    view
-    returns (uint)
-    {
-        return converterToHisConversions[_converter][converterToHisConversions[_converter].length - 1];
-    }
-
-    /**
-     * @notice Get's number of converters per type, and returns tuple, as well as total raised funds
-     getCampaignSummary
-     */
-    function getCampaignSummary()
-    public
-    view
-    returns (uint,uint,uint,uint[])
-    {
-        bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
-        bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
-        bytes32 rejected = convertConverterStateToBytes(ConverterState.REJECTED);
-
-        uint numberOfPending = stateToConverter[pending].length;
-        uint numberOfApproved = stateToConverter[approved].length;
-        uint numberOfRejected = stateToConverter[rejected].length;
-
-        return (
-        numberOfPending,
-        numberOfApproved,
-        numberOfRejected,
-        counters
-        );
-    }
-
-    /**
-     * @notice Function to get number of conversions
-     * @dev Can only be called by contractor or maintainer
-     */
-    function getNumberOfConversions()
-    external
-    view
-    returns (uint)
-    {
-        return numberOfConversions;
-    }
-
-    /**
-     * @notice Function to get converter state
-     * @param _converter is the address of the requested converter
-     * @return hexed string of the state
-     */
-    function getStateForConverter(
-        address _converter
-    )
-    external
-    view
-    returns (bytes32)
-    {
-        return convertConverterStateToBytes(converterToState[_converter]);
-    }
-
-
-    function getAllConvertersPerState(
-        bytes32 state
-    )
-    public
-    view
-    returns (address[])
-    {
-        return stateToConverter[state];
     }
 
     /**
