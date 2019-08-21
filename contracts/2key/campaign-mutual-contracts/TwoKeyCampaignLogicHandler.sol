@@ -41,6 +41,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     string public currency; // Currency campaign is currently in
 
     uint public campaignRaisedAlready;
+    bool endCampaignOnceGoalReached;
 
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
     mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
@@ -271,5 +272,33 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     internal
     view
     returns (bytes);
+
+    /**
+     * @notice Function to update MinContributionETH
+     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+     * @param value is the new value we are going to set for minContributionETH
+     */
+    function updateMinContributionETHOrUSD(
+        uint value
+    )
+    public
+    onlyContractor
+    {
+        minContributionAmountWei = value;
+    }
+
+    /**
+     * @notice Function to update maxContributionETH
+     * @dev only Contractor can call this method, otherwise it will revert - emits Event when updated
+     * @param value is the new maxContribution value
+     */
+    function updateMaxContributionETHorUSD(
+        uint value
+    )
+    external
+    onlyContractor
+    {
+        maxContributionAmountWei = value;
+    }
 
 }

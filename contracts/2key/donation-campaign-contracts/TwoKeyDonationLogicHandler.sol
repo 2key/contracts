@@ -16,7 +16,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     uint powerLawFactor;
 
     uint campaignGoal; // Goal of the campaign, how many funds to raise
-    bool endCampaignOnceGoalReached;
 
 
     function setInitialParamsDonationLogicHandler(

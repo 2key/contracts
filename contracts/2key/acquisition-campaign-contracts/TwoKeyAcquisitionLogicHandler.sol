@@ -29,7 +29,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     uint maxConverterBonusPercent; // Maximal bonus percent per converter
     uint campaignHardCapWei; // Hard cap of campaign
     uint campaignSoftCapWei; //Soft cap of campaign
-    bool endCampaignWhenHardCapReached;
 
     function setInitialParamsLogicHandler(
         uint [] values,
@@ -68,7 +67,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         campaignHardCapWei = values[8];
 
         if(values[9] == 1) {
-            endCampaignWhenHardCapReached = true;
+            endCampaignOnceGoalReached = true;
         }
 
         campaignSoftCapWei = values[10];
@@ -168,7 +167,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
      * @param campaignRaisedIncludingConversion is how much will be total campaign raised with new conversion
      */
     function canConversionBeCreatedInTermsOfHardCap(uint campaignRaisedIncludingConversion) internal view returns (bool) {
-        if(endCampaignWhenHardCapReached == true) {
+        if(endCampaignOnceGoalReached == true) {
             require(campaignRaisedIncludingConversion <= campaignHardCapWei.add(minContributionAmountWei)); //small GAP
         }
         return true;
@@ -243,7 +242,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignWhenHardCapReached == true && campaignRaisedAlready.add(minContributionAmountWei) >= campaignHardCapWei) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedAlready.add(minContributionAmountWei) >= campaignHardCapWei) {
             return true;
         }
         return false;
@@ -274,7 +273,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             minContributionAmountWei,
             maxContributionAmountWei,
             campaignHardCapWei,
-            endCampaignWhenHardCapReached
+        endCampaignOnceGoalReached
         );
     }
 
