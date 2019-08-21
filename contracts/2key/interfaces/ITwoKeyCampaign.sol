@@ -30,6 +30,12 @@ contract ITwoKeyCampaign {
     view
     returns (uint);
 
+    function updateReferrerPlasmaBalance(
+        address _influencer,
+        uint _balance
+    )
+    public;
+
     address public logicHandler;
     address public conversionHandler;
 

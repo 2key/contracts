@@ -7,6 +7,8 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaign.sol";
+import "../interfaces/ITwoKeyEventSourceEvents.sol";
+
 import "../libraries/Call.sol";
 
 contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
@@ -356,4 +358,19 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         campaignRaisedAlready = newAmount;
     }
 
+
+
+    function updateReferrerMappings(
+        address referrerPlasma,
+        uint reward,
+        uint conversionId
+    )
+    internal
+    {
+        ITwoKeyCampaign(twoKeyCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
+        referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
+        referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
+        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
+        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyCampaign, referrerPlasma, reward);
+    }
 }

@@ -315,20 +315,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         return referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_referrer)];
     }
 
-    /**
-     * @notice Function to update referrer plasma balance
-     * @param _influencer is the plasma address of referrer
-     * @param _balance is the new balance
-     */
-    function updateReferrerPlasmaBalance(
-        address _influencer,
-        uint _balance
-    )
-    public
-    {
-        require(msg.sender == logicHandler);
-        referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
-    }
 
     /**
      * @notice Contractor can withdraw funds only if criteria is satisfied

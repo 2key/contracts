@@ -1,7 +1,6 @@
 pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeyDonationCampaign.sol";
-import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyDonationConversionHandler.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../libraries/SafeMath.sol";
@@ -116,22 +115,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
             uint leftToSpendInFiats = limit.sub(totalAmountSpentConvertedToFIAT);
             return leftToSpendInFiats;
         }
-    }
-
-
-
-    function updateReferrerMappings(
-        address referrerPlasma,
-        uint reward,
-        uint conversionId
-    )
-    internal
-    {
-        ITwoKeyDonationCampaign(twoKeyCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
-        referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
-        referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
-        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] += 1;
-        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyCampaign, referrerPlasma, reward);
     }
 
     /**

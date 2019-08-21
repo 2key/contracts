@@ -376,13 +376,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         }
     }
 
-    function updateReferrerMappings(address referrerPlasma, uint reward, uint conversionId) internal {
-        ITwoKeyAcquisitionCampaignERC20(twoKeyCampaign).updateReferrerPlasmaBalance(referrerPlasma,reward);
-        referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
-        referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
-        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
-        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyCampaign, referrerPlasma, reward);
-    }
 
     /**
      * @notice Update refferal chain with rewards (update state variables)

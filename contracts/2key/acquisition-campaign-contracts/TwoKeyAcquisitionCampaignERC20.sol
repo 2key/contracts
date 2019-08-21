@@ -499,24 +499,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         return contractorBalance;
     }
 
-
-
-
-    /**
-     * @notice Function to update referrer plasma balance
-     * @param _influencer is the plasma address of referrer
-     * @param _balance is the new balance
-     */
-    function updateReferrerPlasmaBalance(
-        address _influencer,
-        uint _balance
-    )
-    public
-    {
-        require(msg.sender == logicHandler);
-        referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
-    }
-
     /**
      * @notice Function where contractor can withdraw his earnings after campaign ends
      * @dev onlyContractor can call this function
