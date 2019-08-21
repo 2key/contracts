@@ -50,8 +50,7 @@ contract IHandleCampaignDeployment {
         address _twoKeyPurchasesHandler,
         address _contractor,
         address _assetContractERC20,
-        address _twoKeyEventSource,
-        address _twoKeyBaseReputationRegistry
+        address _twoKeySingletonRegistry
     ) public;
 
 

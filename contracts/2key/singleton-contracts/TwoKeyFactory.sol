@@ -135,8 +135,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             proxyPurchasesHandler,
             msg.sender,
             addresses[0], //ERC20 address
-            getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"),
-            getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")
+            TWO_KEY_SINGLETON_REGISTRY
         );
 
         // Set initial arguments inside Logic Handler contract

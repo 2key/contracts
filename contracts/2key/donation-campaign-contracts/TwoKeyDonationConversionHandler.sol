@@ -2,60 +2,26 @@ pragma solidity ^0.4.24;
 
 
 import "./InvoiceTokenERC20.sol";
-import "../TwoKeyConversionStates.sol";
-import "../TwoKeyConverterStates.sol";
-
-import "../libraries/SafeMath.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
-import "../interfaces/ITwoKeyEventSource.sol";
-import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
-import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaignConversionHandler.sol";
 
 
-contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversionStates, TwoKeyConverterStates {
-
-    using SafeMath for uint256; // Define lib necessary to handle uint operations
-    bool isCampaignInitialized; //defaults to false
+contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversionHandler {
 
     Conversion [] public conversions;
     InvoiceTokenERC20 public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
 
-    ITwoKeyDonationCampaign twoKeyDonationCampaign;
+    ITwoKeyDonationCampaign twoKeyCampaign;
 
     event ConversionCreated(uint conversionId);
 
-    address twoKeySingletonRegistry;
-    address twoKeyEventSource;
-
     string currency;
-    address contractor;
-    uint numberOfConversions;
-    /**
-     * This array will represent counter values where position will be index (which counter) and value will be actual counter value
-     * counters[0] = PENDING_CONVERSIONS
-     * counters[1] = APPROVED_CONVERSIONS
-     * counters[2] = REJECTED_CONVERSIONS
-     * counters[3] = EXECUTED_CONVERSIONS
-     * counters[4] = CANCELLED_CONVERSIONS
-     * counters[5] = UNIQUE_CONVERTERS
-     * counters[6] = RAISED_FUNDS_ETH_WEI
-     * counters[7] = TOKENS_SOLD
-     * counters[8] = TOTAL_BOUNTY
-     * counters[9] = RAISED_FUNDS_FIAT_WEI
-     */
-    uint [] counters; //Metrics counter
 
-
-    mapping(address => uint256) private amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(address => uint256) private converterToAmountOfDonationTokensReceived;
-    mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
-    mapping(address => ConverterState) converterToState; // Converter to state
-    mapping(address => uint[]) converterToHisConversions;
-    mapping(address => bool) isConverterAnonymous;
-    mapping(address => bool) doesConverterHaveExecutedConversions;
+
 
     //Struct to represent donation in Ether
     struct Conversion {
@@ -77,13 +43,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     );
 
 
-    modifier onlyContractorOrMaintainer {
-        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-        _;
-    }
-
-
     function setInitialParamsDonationConversionHandler(
         string tokenName,
         string tokenSymbol,
@@ -97,7 +56,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         require(isCampaignInitialized == false);
 
         counters = new uint[](10);
-        twoKeyDonationCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
+        twoKeyCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
         contractor = _contractor;
@@ -110,28 +69,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     }
 
 
-    // Internal function to fetch address from TwoKeyRegTwoistry
-    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
-        return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry)
-        .getContractProxyAddress(contractName);
-    }
-
-    /**
-     * given the total payout, calculates the moderator fee
-     * @param  _conversionAmountETHWei total payout for escrow
-     * @return moderator fee
-     */
-    function calculateModeratorFee(
-        uint256 _conversionAmountETHWei
-    )
-    private
-    view
-    returns (uint256)
-    {
-        uint256 fee = _conversionAmountETHWei.mul(ITwoKeyEventSource(twoKeyEventSource).getTwoKeyDefaultIntegratorFeeFromAdmin()).div(100);
-        return fee;
-    }
-
     function emitConvertedEvent(
         address converterAddress,
         uint conversionAmount,
@@ -141,7 +78,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     view
     {
         ITwoKeyEventSource(twoKeyEventSource).convertedDonationV2(
-            twoKeyDonationCampaign,
+            twoKeyCampaign,
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
             conversionAmount,
             conversionId
@@ -157,7 +94,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     view
     {
         ITwoKeyEventSource(twoKeyEventSource).executedV1(
-            twoKeyDonationCampaign,
+            twoKeyCampaign,
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress),
             conversionId,
             tokens
@@ -172,7 +109,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     view
     {
         ITwoKeyEventSource(twoKeyEventSource).rejected(
-            twoKeyDonationCampaign,
+            twoKeyCampaign,
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress)
         );
     }
@@ -276,7 +213,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
     public
     returns (uint)
     {
-        require(msg.sender == address(twoKeyDonationCampaign));
+        require(msg.sender == address(twoKeyCampaign));
         //If KYC is required, basic funnel executes and we require that converter is not previously rejected
         if(_isKYCRequired == true) {
             require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
@@ -335,7 +272,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         counters[1] = counters[1].sub(1); //Decrease number of approved conversions
 
 //         Buy tokens from campaign and distribute rewards between referrers
-        uint totalReward2keys = twoKeyDonationCampaign.buyTokensAndDistributeReferrerRewards(
+        uint totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
             conversion.maxReferralRewardETHWei,
             conversion.converter,
             _conversionId
@@ -352,8 +289,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
 
         amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[8] = counters[8].add(totalReward2keys);
-        twoKeyDonationCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
-        twoKeyDonationCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
+        twoKeyCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
+        twoKeyCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
 
         counters[6] = counters[6].add(conversion.conversionAmount);
 
@@ -411,10 +348,10 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyConversio
         }
 
         if(refundAmount > 0) {
-            twoKeyDonationCampaign.sendBackEthWhenConversionRejected(_converter, refundAmount);
+            twoKeyCampaign.sendBackEthWhenConversionRejected(_converter, refundAmount);
         }
 
-        emitRejectedEvent(twoKeyDonationCampaign, _converter);
+        emitRejectedEvent(twoKeyCampaign, _converter);
     }
 
     /**
