@@ -8,7 +8,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaign.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
-
+import "../libraries/IncentiveModels.sol";
 import "../libraries/Call.sol";
 
 contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
@@ -359,7 +359,6 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     }
 
 
-
     function updateReferrerMappings(
         address referrerPlasma,
         uint reward,
@@ -373,4 +372,76 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
         ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyCampaign, referrerPlasma, reward);
     }
+
+    /**
+ * @notice Update refferal chain with rewards (update state variables)
+ * @param _maxReferralRewardETHWei is the max referral reward set
+ * @param _converter is the address of the converter
+ * @dev This function can only be called by TwoKeyConversionHandler contract
+ */
+    function updateRefchainRewards(
+        uint256 _maxReferralRewardETHWei,
+        address _converter,
+        uint _conversionId,
+        uint totalBounty2keys
+    )
+    public
+    {
+        require(msg.sender == twoKeyCampaign);
+
+        //Get all the influencers
+        address[] memory influencers = getReferrers(_converter);
+
+        //Get array length
+        uint numberOfInfluencers = influencers.length;
+
+        uint i;
+        uint reward;
+        if(incentiveModel == IncentiveModel.VANILLA_AVERAGE) {
+            reward = IncentiveModels.averageModelRewards(totalBounty2keys, numberOfInfluencers);
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], reward, _conversionId);
+            }
+        } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
+            uint rewardForLast;
+            // Calculate reward for regular ones and for the last
+            (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(totalBounty2keys, numberOfInfluencers);
+            if(numberOfInfluencers > 0) {
+                //Update equal rewards to all influencers but last
+                for(i=0; i<numberOfInfluencers - 1; i++) {
+                    updateReferrerMappings(influencers[i], reward, _conversionId);
+                }
+                //Update reward for last
+                updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
+            }
+        } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
+            // Get rewards per referrer
+            uint [] memory rewards = IncentiveModels.powerLawRewards(totalBounty2keys, numberOfInfluencers, 2);
+            //Iterate through all referrers and distribute rewards
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], rewards[i], _conversionId);
+            }
+        } else if(incentiveModel == IncentiveModel.MANUAL) {
+            for (i = 0; i < numberOfInfluencers; i++) {
+                uint256 b;
+
+                if (i == influencers.length - 1) {  // if its the last influencer then all the bounty goes to it.
+                    b = totalBounty2keys;
+                }
+                else {
+                    uint256 cut = ITwoKeyCampaign(twoKeyCampaign).getReferrerCut(influencers[i]);
+                    if (cut > 0 && cut <= 101) {
+                        b = totalBounty2keys.mul(cut.sub(1)).div(100);
+                    } else {// cut == 0 or 255 indicates equal particine of the bounty
+                        b = totalBounty2keys.div(influencers.length - i);
+                    }
+                }
+
+                updateReferrerMappings(influencers[i], b, _conversionId);
+                //Decrease bounty for distributed
+                totalBounty2keys = totalBounty2keys.sub(b);
+            }
+        }
+    }
+
 }
