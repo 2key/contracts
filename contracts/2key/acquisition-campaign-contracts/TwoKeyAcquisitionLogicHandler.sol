@@ -259,7 +259,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             minContributionAmountWei,
             maxContributionAmountWei,
             campaignHardCapWei,
-        endCampaignOnceGoalReached
+            endCampaignOnceGoalReached
         );
     }
 
