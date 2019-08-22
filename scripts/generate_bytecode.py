@@ -14,12 +14,27 @@ def generate_bytecode(method_name_and_params,types,values):
     bytecode = '0x' + method_selector + packed_args
     return (bytecode)
 
-
-if __name__ == "__main__":
-    deployer_address = sys.argv[1]
-    token_amount = int(sys.argv[2]) * (10**18)
+def generate_bytecode_for_transfering_tokens(deployer_address, token_amount):
+    token_amount = int(token_amount) * (10**18)
     method_name_and_params = "transfer2KeyTokens(address,uint256)"
     types = ["address","uint256"]
     values = [deployer_address,token_amount]
-
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_upgrading_contracts(contract_name, contract_version):
+    method_name_and_params = "upgradeContract(string,string)"
+    types = ["string","string"]
+    values = [contract_name, contract_version]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+
+if __name__ == "__main__":
+    arg1 = sys.argv[1]
+    arg2 = sys.argv[2]
+    arg3 = sys.argv[3]
+
+    if(arg3 == "upgrade_contracts"):
+        generate_bytecode_for_upgrading_contracts(arg1,arg2)
+    if(arg3 == "transfer_tokens") :
+        generate_bytecode_for_transfering_tokens(arg1,arg2)
+

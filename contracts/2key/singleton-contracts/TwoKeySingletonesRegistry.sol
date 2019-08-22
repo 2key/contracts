@@ -161,7 +161,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     )
     public
     {
-        require(msg.sender == deployer);
+        require(msg.sender == nonUpgradableContractToAddress["TwoKeyCongress"]);
         address proxyAddress = getContractProxyAddress(contractName);
         address _impl = getVersion(contractName, version);
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);

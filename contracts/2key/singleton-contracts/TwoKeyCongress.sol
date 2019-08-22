@@ -132,6 +132,7 @@ contract TwoKeyCongress {
         hashAllowedMethods("deleteMaintainersFromSelectedSingletone(address,address[])");
         hashAllowedMethods("updateRewardsRelease(uint256)");
         hashAllowedMethods("updateTwoKeyTokenRate(uint256)");
+        hashAllowedMethods("upgradeContract(string,string)");
     }
 
 
@@ -209,7 +210,6 @@ contract TwoKeyCongress {
         );
     }
 
-    //TODO: Security backdoor, handle and close ASAP
     /**
      * Add member
      *
@@ -293,19 +293,6 @@ contract TwoKeyCongress {
         minimumQuorum -= 1;
     }
 
-    /**
-     *  Method to add voting for new allowed bytecode
-     *  The point is that for anything to be executed has to be voted
-     *  @param functionSignature is the new transaction bytecode we'd like to whitelist
-     *  @dev method requires that it's called only by contract
-    */
-    function addNewAllowedBytecode(
-        bytes32 functionSignature
-    )
-    internal
-    {
-        allowedMethodSignatures.push(bytes32(functionSignature));
-    }
     /**
      * Change voting rules
      *
@@ -491,7 +478,6 @@ contract TwoKeyCongress {
              !p.executed                                                         // and it has not already been executed
             && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
             && p.numberOfVotes >= minimumQuorum.sub(1) // and a minimum quorum has been reached...
-        //TODO: Delete -1 from MINIMUM QUORUM, left because KIKI is OOO
             && uint(p.currentResult) >= maxVotingPower.mul(51).div(100)
             && p.currentResult > 0
         );
@@ -503,7 +489,7 @@ contract TwoKeyCongress {
         // Fire Events
         emit ProposalTallied(proposalNumber, p.currentResult, p.numberOfVotes, p.proposalPassed);
 
-        // Call external function
+//         Call external function
         require(p.recipient.call.value(p.amount)(transactionBytecode));
     }
 
