@@ -17,7 +17,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
 
 
     bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
-    bool isAcceptingFiatOnly; // Means that only fiat conversions will be able to execute -> no referral rewards at all
+    bool isAcceptingFiat;
 
     uint pricePerUnitInETHWeiOrUSD; // There's single price for the unit ERC20 (Should be in WEI)
     uint unit_decimals; // ERC20 selling data
@@ -56,7 +56,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         incentiveModel = IncentiveModel(values[6]);
 
         if(values[7] == 1) {
-            isAcceptingFiatOnly = true;
+            isAcceptingFiat = true;
         }
 
         campaignHardCapWei = values[8];
@@ -108,6 +108,11 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
      */
     function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, bool isFiatConversion) external returns (bool) {
         require(msg.sender == twoKeyCampaign);
+        if(isAcceptingFiat) {
+            require(isFiatConversion == true);
+        } else {
+            require(isFiatConversion == false);
+        }
         require(IS_CAMPAIGN_ACTIVE == true);
         require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount, isFiatConversion) == true);
         require(updateRaisedFundsAndValidateConversionInTermsOfHardCap(conversionAmount, isFiatConversion) == true);
