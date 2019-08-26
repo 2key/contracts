@@ -20,7 +20,7 @@ const path = require('path');
 
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 
-let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x233c0939e96bfa0b79461a8c8916d96cf3c996c7";
+let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
 /**
  * Function to increment minor version
  * @type {function(*)}
