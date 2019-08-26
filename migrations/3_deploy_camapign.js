@@ -20,7 +20,7 @@ const path = require('path');
 
 const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 
-
+let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x233c0939e96bfa0b79461a8c8916d96cf3c996c7";
 /**
  * Function to increment minor version
  * @type {function(*)}
@@ -57,7 +57,6 @@ const incrementVersion = ((version) => {
 
 module.exports = function deploy(deployer) {
     if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
-        let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
         if(deployer.network.startsWith('dev')) {
             TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
         }
