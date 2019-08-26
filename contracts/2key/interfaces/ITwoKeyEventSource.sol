@@ -6,8 +6,8 @@ contract ITwoKeyEventSource {
     function plasmaOf(address me) public view returns (address);
     function isAddressMaintainer(address _maintainer) public view returns (bool);
     function getTwoKeyDefaultIntegratorFeeFromAdmin() public view returns (uint);
-    function joined(address _campaign, address _from, address _to) external view;
-    function rejected(address _campaign, address _converter) external view;
+    function joined(address _campaign, address _from, address _to) external;
+    function rejected(address _campaign, address _converter) external;
 
     function convertedAcquisitionV2(
         address _campaign,
@@ -18,8 +18,7 @@ contract ITwoKeyEventSource {
         bool _isFiatConversion,
         uint _conversionId
     )
-    external
-    view;
+    external;
 
     function getTwoKeyDefaultNetworkTaxPercent()
     public
@@ -32,8 +31,7 @@ contract ITwoKeyEventSource {
         uint256 _conversionAmount,
         uint256 _conversionId
     )
-    external
-    view;
+    external;
 
     function executedV1(
         address _campaignAddress,
@@ -41,7 +39,6 @@ contract ITwoKeyEventSource {
         uint _conversionId,
         uint tokens
     )
-    external
-    view;
+    external;
 
 }

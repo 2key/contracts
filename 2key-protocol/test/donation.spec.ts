@@ -391,8 +391,38 @@ describe('TwoKeyDonationCampaign', () => {
         expect(isAddressContractor).to.be.equal(true);
     }).timeout(60000);
 
+    it('should start hedging some ether', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        let approvedMinConversionRate = 1000;
+        let amountToBeHedged = 70000000000000000;
+        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(amountToBeHedged, approvedMinConversionRate, from);
+        console.log(hash);
+    }).timeout(50000);
+
     it('should get contractor balance and total earnings', async() => {
         printTestNumber();
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
         let earnings = await twoKeyProtocol.DonationCampaign.getContractorBalanceAndTotalProceeds(campaignAddress, from);
         console.log(earnings);
     }).timeout(60000);
@@ -461,6 +491,8 @@ describe('TwoKeyDonationCampaign', () => {
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
         console.log('ERC20 TwoKeyEconomy balance on this contract is : ' + balance);
     }).timeout(60000);
+
+
 
     it('referrer should withdraw his earnings', async() => {
         printTestNumber();
