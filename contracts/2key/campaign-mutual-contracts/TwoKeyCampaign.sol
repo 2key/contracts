@@ -19,6 +19,9 @@ contract TwoKeyCampaign is ArcERC20 {
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
 
+	address public conversionHandler; // Contract which will handle all conversions
+	address public logicHandler;  // Contract which will handle logic
+
 	address twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
 	address twoKeyEconomy; // Address of twoKeyEconomy contract
 	address ownerPlasma; //contractor plasma address
@@ -39,6 +42,9 @@ contract TwoKeyCampaign is ArcERC20 {
 	string public publicMetaHash; // Ipfs hash of json campaign object
 	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
 
+
+	//Referral accounting stuff
+	mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 	mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
 
 	mapping(address => address) public public_link_key;
@@ -205,6 +211,22 @@ contract TwoKeyCampaign is ArcERC20 {
 		publicMetaHash = _newPublicMetaHash;
 	}
 
+
+	/**
+     * @notice Function to update referrer plasma balance
+     * @param _influencer is the plasma address of referrer
+     * @param _balance is the new balance
+     */
+	function updateReferrerPlasmaBalance(
+		address _influencer,
+		uint _balance
+	)
+	public
+	{
+		require(msg.sender == logicHandler);
+		referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
+	}
+
 	/**
  	 * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
  	 * @param amountOfMoney is the ether balance person has on the contract
@@ -289,26 +311,56 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 
-    /**
-     * @notice Function where contractor can withdraw his funds
-     * @dev onlyContractor can call this method
-     * @return true if successful otherwise will 'revert'
-     */
-    function withdrawContractorInternal()
-	internal
+	/**
+	 * @notice Function to get balance of influencer for his plasma address
+	 * @param _influencer is the plasma address of influencer
+	 * @return balance in wei's
+	 */
+	function getReferrerPlasmaBalance(
+		address _influencer
+	)
+	public
+	view
+	returns (uint)
 	{
-		uint balance = contractorBalance;
-        contractorBalance = 0;
-        /**
-         * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
-         * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer
-         */
-        contractor.transfer(balance);
-    }
+		return (referrerPlasma2Balances2key[_influencer]);
+	}
 
 	function getContractProxyAddress(string contractName) internal returns (address) {
 		return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress(contractName);
 	}
+
+	/**
+	 * @notice Function to get cut for an (ethereum) address
+	 * @param me is the ethereum address
+	 */
+	function getReferrerCut(
+		address me
+	)
+	public
+	view
+	returns (uint256)
+	{
+		return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
+	}
+
+	/**
+     * @notice Function where contractor can withdraw his funds
+     * @dev onlyContractor can call this method
+     * @return true if successful otherwise will 'revert'
+     */
+	function withdrawContractorInternal()
+	internal
+	{
+		uint balance = contractorBalance;
+		contractorBalance = 0;
+		/**
+         * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
+         * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer
+         */
+		contractor.transfer(balance);
+	}
+
 
 	/**
  	 * @notice Function where moderator or referrer can withdraw their available funds

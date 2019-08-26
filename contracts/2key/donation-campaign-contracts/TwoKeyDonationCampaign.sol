@@ -19,18 +19,11 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
 
     bool initialized;
 
-    address public twoKeyDonationConversionHandler; // Contract which will handle all donations
-    address public twoKeyDonationLogicHandler;
-
     bool acceptsFiat; // Will determine if fiat conversion can be created or not
 
 
-
-    //Referral accounting stuff
-    mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
-
     modifier onlyTwoKeyDonationConversionHandler {
-        require(msg.sender == twoKeyDonationConversionHandler);
+        require(msg.sender == conversionHandler);
         _;
     }
 
@@ -61,8 +54,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         maxReferralRewardPercent = numberValues[0];
         conversionQuota = numberValues[6];
 
-        twoKeyDonationConversionHandler = _twoKeyDonationConversionHandler;
-        twoKeyDonationLogicHandler = _twoKeyDonationLogicHandler;
+        conversionHandler = _twoKeyDonationConversionHandler;
+        logicHandler = _twoKeyDonationLogicHandler;
 
 
 //        mustConvertToReferr = booleanValues[0];
@@ -110,20 +103,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         setCutOf(msg.sender, cut);
     }
 
-
-    /**
-     * @notice Function to get cut for an (ethereum) address
-     * @param me is the ethereum address
-     */
-    function getReferrerCut(
-        address me
-    )
-    public
-    view
-    returns (uint256)
-    {
-        return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
-    }
 
     /**
      * @notice Function to track arcs and make ref tree
@@ -181,7 +160,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     )
     public
     {
-        require(msg.sender == twoKeyDonationConversionHandler);
+        require(msg.sender == conversionHandler);
         contractorTotalProceeds = contractorTotalProceeds.add(value);
         contractorBalance = contractorBalance.add(value);
     }
@@ -211,7 +190,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     public
     payable
     {
-        bool canConvert = ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
+        bool canConvert = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
             msg.value
         );
@@ -236,7 +215,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     {
         uint256 maxReferralRewardFiatOrETHWei = conversionAmountEthWEI.mul(maxReferralRewardPercent).div(100);
 
-        uint conversionId = ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).supportForCreateConversion(
+        uint conversionId = ITwoKeyDonationConversionHandler(conversionHandler).supportForCreateConversion(
             converterAddress,
             conversionAmountEthWEI,
             maxReferralRewardFiatOrETHWei,
@@ -244,7 +223,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         );
 
         if(isKYCRequired == false) {
-            ITwoKeyDonationConversionHandler(twoKeyDonationConversionHandler).executeConversion(conversionId);
+            ITwoKeyDonationConversionHandler(conversionHandler).executeConversion(conversionId);
         }
     }
 
@@ -262,7 +241,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     public
     returns (uint)
     {
-        require(msg.sender == twoKeyDonationConversionHandler);
+        require(msg.sender == conversionHandler);
         //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
         uint totalBounty2keys;
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
@@ -270,7 +249,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
             //Buy tokens from upgradable exchange
             totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
             //Handle refchain rewards
-            ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).updateRefchainRewards(
+            ITwoKeyDonationLogicHandler(logicHandler).updateRefchainRewards(
                 _maxReferralRewardETHWei,
                 _converter,
                 _conversionId,
@@ -316,7 +295,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     view
     returns (uint256[])
     {
-        address[] memory influencers = ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).getReferrers(last_influencer);
+        address[] memory influencers = ITwoKeyDonationLogicHandler(logicHandler).getReferrers(last_influencer);
         uint256[] memory cuts = new uint256[](influencers.length + 1);
 
         uint numberOfInfluencers = influencers.length;
@@ -336,20 +315,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         return referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_referrer)];
     }
 
-    /**
-     * @notice Function to update referrer plasma balance
-     * @param _influencer is the plasma address of referrer
-     * @param _balance is the new balance
-     */
-    function updateReferrerPlasmaBalance(
-        address _influencer,
-        uint _balance
-    )
-    public
-    {
-        require(msg.sender == twoKeyDonationLogicHandler);
-        referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
-    }
 
     /**
      * @notice Contractor can withdraw funds only if criteria is satisfied
@@ -380,21 +345,5 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     {
         _rejectedConverter.transfer(_conversionAmount);
     }
-
-    /**
-     * @notice Function to get balance of influencer for his plasma address
-     * @param _influencer is the plasma address of influencer
-     * @return balance in wei's
-     */
-    function getReferrerPlasmaBalance(
-        address _influencer
-    )
-    public
-    view
-    returns (uint)
-    {
-        return (referrerPlasma2Balances2key[_influencer]);
-    }
-
 
 }

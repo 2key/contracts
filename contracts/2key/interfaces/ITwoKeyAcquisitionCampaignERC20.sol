@@ -2,8 +2,6 @@ pragma solidity ^0.4.24;
 
 // @author Nikola Madjarevic
 contract ITwoKeyAcquisitionCampaignERC20 {
-    address public conversionHandler;
-    address public twoKeyAcquisitionLogicHandler;
     function buyTokensAndDistributeReferrerRewards(uint256 _maxReferralRewardETHWei, address _converter, uint _conversionId, bool _isConversionFiat) public returns (uint);
     function moveFungibleAsset(address _to, uint256 _amount) public;
     function updateContractorProceeds(uint value) public;
@@ -14,8 +12,6 @@ contract ITwoKeyAcquisitionCampaignERC20 {
     function getStatistics(address ethereum, address plasma) public view returns (uint,uint,uint,uint);
     function getAvailableAndNonReservedTokensAmount() external view returns (uint);
     function getTotalReferrerEarnings(address _referrer, address eth_address) public view returns (uint);
-    function getReferrerPlasmaBalance(address _influencer) public view returns (uint);
     function updateReferrerPlasmaBalance(address _influencer, uint _balance) public;
-    function getReferrerCut(address me) public view returns (uint256);
     function getInventoryBalance() public view returns (uint);
 }

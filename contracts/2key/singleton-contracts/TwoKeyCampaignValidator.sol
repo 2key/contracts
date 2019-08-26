@@ -2,7 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../libraries/GetCode.sol";
 
-import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
+import "../interfaces/ITwoKeyCampaign.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
@@ -63,8 +63,8 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyTwoKeyFactory
     {
-        address conversionHandler = ITwoKeyAcquisitionCampaignERC20(campaign).conversionHandler();
-        address logicHandler = ITwoKeyAcquisitionCampaignERC20(campaign).twoKeyAcquisitionLogicHandler();
+        address conversionHandler = ITwoKeyCampaign(campaign).conversionHandler();
+        address logicHandler = ITwoKeyCampaign(campaign).logicHandler();
 
         PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", conversionHandler), true);
         PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", logicHandler), true);

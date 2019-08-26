@@ -36,7 +36,7 @@ const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = true;
-const isFiatOnly = false;
+let isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
@@ -1202,37 +1202,42 @@ describe('TwoKeyProtocol', () => {
         console.log(obj);
     }).timeout(60000);
 
-    it('should create an offline(fiat) conversion', async() => {
-        const {web3, address} = web3switcher.gmail2();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
-        });
+    if(
+        isFiatOnly == true
+    ) {
 
-        console.log(twoKeyProtocol.plasmaAddress);
-        let signature = await twoKeyProtocol.AcquisitionCampaign.getSignatureFromLink(links.renata, twoKeyProtocol.plasmaAddress);
-        console.log('Trying to perform offline conversion from gmail2');
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, signature, from, from, 50);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
+        it('should create an offline(fiat) conversion', async () => {
+            const {web3, address} = web3switcher.gmail2();
+            from = address;
+            twoKeyProtocol.setWeb3({
+                web3,
+                networks: {
+                    mainNetId,
+                    syncTwoKeyNetId,
+                },
+                eventsNetUrl,
+                plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
+            });
 
-    it('should check conversion ids conversion handler after conversion is created', async() => {
-        let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
-        console.log('Conversion ids for the Gmail 2 are: ' + conversionIds);
-    }).timeout(60000);
+            console.log(twoKeyProtocol.plasmaAddress);
+            let signature = await twoKeyProtocol.AcquisitionCampaign.getSignatureFromLink(links.renata, twoKeyProtocol.plasmaAddress);
+            console.log('Trying to perform offline conversion from gmail2');
+            let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, signature, from, from, 50);
+            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }).timeout(60000);
+
+        it('should check conversion ids conversion handler after conversion is created', async () => {
+            let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
+            console.log('Conversion ids for the Gmail 2 are: ' + conversionIds);
+        }).timeout(60000);
 
 
-    it('should check conversion object for the created fiat conversion', async() => {
-        console.log("Fiat conversion is this: ");
-        let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress,4,from);
-        console.log(conversion);
-    }).timeout(60000);
+        it('should check conversion object for the created fiat conversion', async () => {
+            console.log("Fiat conversion is this: ");
+            let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress, 4, from);
+            console.log(conversion);
+        }).timeout(60000);
+    }
 
     it('should check conversion object', async() => {
         const {web3, address} = web3switcher.test4();
@@ -1251,25 +1256,28 @@ describe('TwoKeyProtocol', () => {
         console.log(conversion);
     }).timeout(60000);
 
-    it('should execute conversion from contractor', async() => {
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        if(!(isFiatConversionAutomaticallyApproved == true && isKYCRequired ==false)) {
-            console.log('Trying to execute fiat conversion from Contractor');
-            let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
-            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        }
+    if(isFiatOnly == true) {
+        it('should execute conversion from contractor', async() => {
+            const {web3, address} = web3switcher.aydnep();
+            from = address;
+            twoKeyProtocol.setWeb3({
+                web3,
+                networks: {
+                    mainNetId,
+                    syncTwoKeyNetId,
+                },
+                eventsNetUrl,
+                plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+            });
+            if(!(isFiatConversionAutomaticallyApproved == true && isKYCRequired ==false)) {
+                console.log('Trying to execute fiat conversion from Contractor');
+                let txHash = await twoKeyProtocol.AcquisitionCampaign.executeConversion(campaignAddress,4,from);
+                const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            }
 
-    }).timeout(60000);
+        }).timeout(60000);
+    }
+
 
     it('should return number of forwarders for the campaign', async() => {
         let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);

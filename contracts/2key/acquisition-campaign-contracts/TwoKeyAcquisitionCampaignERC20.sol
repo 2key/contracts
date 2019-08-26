@@ -14,12 +14,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     bool isCampaignInitialized; // Once this is set to true can't be modified
 
-    address public conversionHandler; // Address of conversion handler contract
-    address public twoKeyAcquisitionLogicHandler; // Address of logic handler contract
-
     address assetContractERC20; // Asset contract is address of ERC20 inventory
 
-    mapping(address => uint256) private referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
@@ -80,7 +76,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         maxReferralRewardPercent = values[0];
         conversionQuota = values[1];
 
-        twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
+        logicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
         assetContractERC20 = _assetContractERC20;
 
@@ -222,7 +218,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
+        require(ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
             msg.value,
             false
@@ -252,7 +248,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).checkAllRequirementsForConversionAndTotalRaised(
+        require(ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             _converter,
             conversionAmountFiatWei,
             true
@@ -282,7 +278,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint bonusTokensForConverterUnits;
 
         (baseTokensForConverterUnits, bonusTokensForConverterUnits)
-        = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getEstimatedTokenAmount(conversionAmountETHWeiOrFiat, isFiatConversion);
+        = ITwoKeyAcquisitionLogicHandler(logicHandler).getEstimatedTokenAmount(conversionAmountETHWeiOrFiat, isFiatConversion);
 
         uint totalTokensForConverterUnits = baseTokensForConverterUnits.add(bonusTokensForConverterUnits);
 
@@ -296,16 +292,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint conversionId = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
             conversionAmountETHWeiOrFiat, maxReferralRewardFiatOrETHWei,
             baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, isKYCRequired);
-
-//        twoKeyEventSource.convertedAcquisitionV2(
-//            address(this),
-//            twoKeyEventSource.plasmaOf(converterAddress),
-//            baseTokensForConverterUnits,
-//            bonusTokensForConverterUnits,
-//            conversionAmountETHWeiOrFiat,
-//            isFiatConversion,
-//            conversionId
-//        );
 
         if(isKYCRequired == false) {
             if(isFiatConversion == false || ITwoKeyConversionHandler(conversionHandler).isFiatConversionAutomaticallyApproved()) {
@@ -347,7 +333,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             }
             // Update reserved amount
             //Handle refchain rewards
-            ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).updateRefchainRewards(
+            ITwoKeyAcquisitionLogicHandler(logicHandler).updateRefchainRewards(
                 _maxReferralRewardETHWei,
                 _converter,
                 _conversionId,
@@ -473,7 +459,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     view
     returns (uint256[])
     {
-        address[] memory influencers = ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).getReferrers(last_influencer,address(this));
+        address[] memory influencers = ITwoKeyAcquisitionLogicHandler(logicHandler).getReferrers(last_influencer);
         uint256[] memory cuts = new uint256[](influencers.length + 1);
 
         uint numberOfInfluencers = influencers.length;
@@ -484,21 +470,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         cuts[influencers.length] = getReferrerCut(last_influencer);
         return cuts;
     }
-
-    /**
-     * @notice Function to get cut for an (ethereum) address
-     * @param me is the ethereum address
-     */
-    function getReferrerCut(
-        address me
-    )
-    public
-    view
-    returns (uint256)
-    {
-        return referrerPlasma2cut[twoKeyEventSource.plasmaOf(me)];
-    }
-
 
     /**
      * @notice Function to check available amount of the tokens on the contract
@@ -528,37 +499,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         return contractorBalance;
     }
 
-
-    /**
-     * @notice Function to get balance of influencer for his plasma address
-     * @param _influencer is the plasma address of influencer
-     * @return balance in wei's
-     */
-    function getReferrerPlasmaBalance(
-        address _influencer
-    )
-    public
-    view
-    returns (uint)
-    {
-        return (referrerPlasma2Balances2key[_influencer]);
-    }
-
-    /**
-     * @notice Function to update referrer plasma balance
-     * @param _influencer is the plasma address of referrer
-     * @param _balance is the new balance
-     */
-    function updateReferrerPlasmaBalance(
-        address _influencer,
-        uint _balance
-    )
-    public
-    {
-        require(msg.sender == twoKeyAcquisitionLogicHandler);
-        referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
-    }
-
     /**
      * @notice Function where contractor can withdraw his earnings after campaign ends
      * @dev onlyContractor can call this function
@@ -576,7 +516,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
      * @dev This function will throw in case the caller is not contractor
      */
     function withdrawUnsoldTokens() onlyContractor {
-        require(ITwoKeyAcquisitionLogicHandler(twoKeyAcquisitionLogicHandler).canContractorWithdrawUnsoldTokens() == true);
+        require(ITwoKeyAcquisitionLogicHandler(logicHandler).canContractorWithdrawUnsoldTokens() == true);
         uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
         IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
 
