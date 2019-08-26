@@ -35,7 +35,7 @@ const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMa
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
 
-const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x233c0939e96bfa0b79461a8c8916d96cf3c996c7"; //Staging
+const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414"; //Develop
 const TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS = "0xc83b8a5c607b4d282c1d30a5a350e5529c007737"; //Staging
 
 /**
