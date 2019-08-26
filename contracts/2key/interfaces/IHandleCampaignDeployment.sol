@@ -108,7 +108,7 @@ contract IHandleCampaignDeployment {
         address moderator,
         address twoKeySingletonRegistry,
         address twoKeyDonationCampaign,
-        address twoKeyDonationLogicHandler
+        address twokeyDonationConversionHandler
     ) public;
 }
 

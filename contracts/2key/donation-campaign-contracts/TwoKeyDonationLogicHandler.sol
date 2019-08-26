@@ -22,7 +22,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         string _currency,
         address _contractor,
         address _moderator,
-        address twoKeySingletonRegistry,
+        address _twoKeySingletonRegistry,
         address _twoKeyDonationCampaign,
         address _twoKeyDonationConversionHandler
     )
@@ -49,11 +49,11 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         moderator = _moderator;
         currency = _currency;
 
-        twoKeySingletonRegistry = twoKeySingletonRegistry;
+        twoKeySingletonRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
-
+//
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
     }

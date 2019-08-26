@@ -233,7 +233,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             proxyDonationCampaign,
             address(TWO_KEY_SINGLETON_REGISTRY)
         );
-
+//
         // Set initial parameters under Donation campaign contract
         IHandleCampaignDeployment(proxyDonationCampaign).setInitialParamsDonationCampaign(
             msg.sender, //contractor
