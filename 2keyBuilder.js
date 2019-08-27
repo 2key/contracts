@@ -8,7 +8,6 @@ const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
 const axios = require('axios');
-// const compressor = require('node-minify');
 const simpleGit = require('simple-git/promise');
 const childProcess = require('child_process');
 const moment = require('moment');
