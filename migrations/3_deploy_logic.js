@@ -27,16 +27,6 @@ const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json')
 const deploymentConfigFile = path.join(__dirname, '../deploymentConfig.json');
 
 module.exports = function deploy(deployer) {
-    const {network_id} = deployer;
-    /**
-     * Read the logicProxy file into fileObject
-     * @type {{}}
-     */
-    let fileObject = {};
-    if (fs.existsSync(proxyFile)) {
-        fileObject = JSON.parse(fs.readFileSync(proxyFile, {encoding: 'utf8'}));
-    }
-
     let deploymentObject = {};
     if (fs.existsSync(deploymentConfigFile)) {
         deploymentObject = JSON.parse(fs.readFileSync(deploymentConfigFile, {encoding: 'utf8'}));
