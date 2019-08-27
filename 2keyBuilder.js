@@ -21,8 +21,8 @@ const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
 const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
 const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist', 'submodules');
-
-const deploymentHistoryPath = path.join(__dirname, 'history{branch}.json');
+const contractsGit = simpleGit();
+const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
@@ -38,13 +38,6 @@ const getBuildArchPath = () => {
         return buildArchPath.replace('{branch}',`-${contractsStatus.current}`);
     }
     return buildArchPath;
-};
-
-const getDeploymentHistoryPath = () => {
-    if(contractsStatus && contractsStatus.current) {
-        return deploymentHistoryPath.replace('{branch}',`-${contractsStatus.current}`);
-    }
-    return deploymentHistoryPath;
 };
 
 const getContractsDeployedPath = () => {
@@ -74,16 +67,6 @@ const getVersionsPath = (branch = true) => {
     return result.replace('{branch}', '');
 };
 
-
-const contractsGit = simpleGit();
-const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
-const versioning = require('./generateContractsVersioning');
-/**
- *
- * @type {{}}
- */
-
-
 async function handleExit(p) {
     console.log(p);
     if (p !== 0
@@ -107,26 +90,6 @@ process.on('SIGUSR1', handleExit);
 process.on('SIGUSR2', handleExit);
 process.on('uncaughtException', handleExit);
 
-
-const getCurrentDeployedAddresses = () => new Promise((resolve) => {
-    const contracts = {};
-    if (fs.existsSync(buildPath)) {
-        readdir(buildPath).then((files) => {
-            const l = files.length;
-            for (let i = 0; i < l; i += 1) {
-                const {
-                    networks, contractName, bytecode, abi
-                } = JSON.parse(fs.readFileSync(path.join(buildPath, files[i])));
-                if (networks && Object.keys(networks).length) {
-                    contracts[contractName] = networks;
-                }
-            }
-            resolve(contracts);
-        });
-    } else {
-        resolve(contracts);
-    }
-});
 
 const rmDir = (dir) => new Promise((resolve) => {
     rimraf(dir, () => {
@@ -198,8 +161,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                     } = JSON.parse(fs.readFileSync(path.join(buildPath, file), { encoding: 'utf-8' }));
                     if (whitelist[contractName]) {
                         const whiteListedContract = whitelist[contractName];
-                        // contracts[contractName] = whitelist[contractName].deployed
-                        //   ? { abi, networks } : { abi, networks, bytecode };
                         const proxyNetworks = proxyAddresses[contractName] || {};
                         const mergedNetworks = {};
                         Object.keys(networks).forEach(key => {
@@ -447,7 +408,6 @@ async function deploy() {
             await test();
         }
 
-        // TODO: Add build/contracts backup
         await restoreFromArchive();
 
         const networks = process.argv[2].split(',');
@@ -456,16 +416,6 @@ async function deploy() {
         const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
         const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
 
-        const deployedHistory = fs.existsSync(getDeploymentHistoryPath())
-            ? JSON.parse(fs.readFileSync(getDeploymentHistoryPath(), { encoding: 'utf-8' })) : {};
-        const artifacts = await getCurrentDeployedAddresses();
-        if (Object.keys(artifacts).length) {
-            if (!Object.keys(deployedHistory).length) {
-                deployedHistory.initial = {
-                    contracts: artifacts
-                };
-            }
-        }
         const l = networks.length;
         for (let i = 0; i < l; i += 1) {
             /* eslint-disable no-await-in-loop */
@@ -483,47 +433,7 @@ async function deploy() {
             await runMigration3(networks[i]);
             /* eslint-enable no-await-in-loop */
         }
-        const sessionDeployedContracts = await getCurrentDeployedAddresses();
-        const lastDeployed = Object.keys(deployedHistory).filter(key => key !== 'initial').sort((a, b) => {
-            if (a > b) {
-                return 1;
-            }
-            if (b > a) {
-                return -1;
-            }
-            return 0;
-        }).pop();
-        const deployedUpdates = {
-            contracts: {}
-        };
-        Object.keys(sessionDeployedContracts).forEach((contract) => {
-            if (!lastDeployed || !lastDeployed[contract]
-                || !Object.keys(lastDeployed[contract].networks).length) {
-                deployedUpdates.contracts[contract] = {...sessionDeployedContracts[contract]};
-            } else if (lastDeployed[contract] && Object.keys(lastDeployed[contract].networks).length) {
-                Object.keys(lastDeployed[contract].networks).forEach((net) => {
-                    if (sessionDeployedContracts[contract].networks
-                        && sessionDeployedContracts[contract].networks[net]
-                        && sessionDeployedContracts[contract].networks[net].address
-                        && lastDeployed[contract].networks[net].address
-                        !== sessionDeployedContracts[contract].networks[net].address) {
-                        deployedUpdates.contracts[contract] = {
-                            ...sessionDeployedContracts[contract],
-                            networks: {
-                                ...deployedUpdates.contracts[contract].networks,
-                                [net]: sessionDeployedContracts[contract].networks[net]
-                            }
-                        };
-                    }
-                });
-            }
-        });
-        if (Object.keys(deployedUpdates.contracts).length) {
-            deployedUpdates.data = now.format();
-            deployedUpdates.networks = networks;
-            deployedHistory[tag] = deployedUpdates;
-            fs.writeFileSync(getDeploymentHistoryPath(), JSON.stringify(deployedHistory, null, 2));
-        }
+
         const contracts = await generateSOLInterface();
         await archiveBuild();
         await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
@@ -704,25 +614,14 @@ async function main() {
                 const networks = process.argv[3].split(',');
 
                 const l = networks.length;
-                let flag = false;
                 for (let i = 0; i < l; i += 1) {
                     /* eslint-disable no-await-in-loop */
                     await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(4)));
                     deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
                     /* eslint-enable no-await-in-loop */
-                    if(networks[i] === 'public.test.k8s' || networks[i] === 'public.test.k8s-hdwallet' || networks[i] == 'ropsten') {
-                        flag = true;
-                    }
                 }
 
-                if(flag) {
-                    Console.log('Generating new contracts_version-develop.json for 2key-protocol and config.json file for 2key-backend...');
-                    versioning.wrapper(4);
-                }
-                // await runProcess(path.join(_dirname,'generateContractsVersioning.js'), ['--network'], networks[0]);
-                //   console.log(path.join(_dirname,'generateContractsVersioning.js'), ['--network'], networks[0]);
                 await generateSOLInterface();
-                // await runProcess(path.join(__dirname, 'node_modules/.bin/typechain'), ['--force', '--outDir', path.join(twoKeyProtocolDir, 'contracts'), `${buildPath}/*.json`]);
                 process.exit(0);
             } catch (err) {
                 process.exit(1);
@@ -732,7 +631,6 @@ async function main() {
             try {
                 const networks = process.argv[3].split(',');
                 runMigration3(networks[0]);
-                // process.exit(0);
             } catch (e) {
                 console.log(e);
             }
