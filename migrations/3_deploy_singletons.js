@@ -68,6 +68,8 @@ module.exports = function deploy(deployer) {
     }
 
 
+    let contractNameToProxyAddress = {};
+
     /**
      * Define proxyAddress variables for the contracts
      */
@@ -111,11 +113,8 @@ module.exports = function deploy(deployer) {
      * Initial voting powers for congress members
      * @type {number[]}
      */
-    let votingPowers = deploymentObject[deploymentNetwork].votingPowers;
     let maintainerAddresses = deploymentObject[deploymentNetwork].maintainers;
     let rewardsReleaseAfter = deploymentObject[deploymentNetwork].admin2keyReleaseDate; //1 January 2020
-    let initialCongressMembers = deploymentObject[deploymentNetwork].initialCongressMembers;
-    let initialCongressMemberNames = deploymentObject[deploymentNetwork].initialCongressMembersNames;
 
 
     let kyberAddress;
@@ -126,46 +125,10 @@ module.exports = function deploy(deployer) {
     const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
     const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
 
-
-    /**
-     * Deployment process
-     */
-    deployer.deploy(Call);
-    deployer.deploy(IncentiveModels);
+    console.log('Here');
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
-        deployer.deploy(TwoKeyCongress, 24*60, initialCongressMembers, initialCongressMemberNames, votingPowers)
-            .then(() => TwoKeyCongress.deployed())
-            .then(() => deployer.deploy(TwoKeyCampaignValidator))
-            .then(() => deployer.link(Call, TwoKeySignatureValidator))
-            .then(() => deployer.deploy(TwoKeySignatureValidator))
-            .then(() => TwoKeySignatureValidator.deployed())
-            .then(() => TwoKeyCampaignValidator.deployed())
-            .then(() => deployer.deploy(TwoKeyAdmin))
-            .then(() => TwoKeyAdmin.deployed())
-            .then(() => deployer.deploy(TwoKeyExchangeRateContract))
-            .then(() => TwoKeyExchangeRateContract.deployed())
-            .then(() => deployer.deploy(TwoKeyEventSource))
-            .then(() => deployer.link(Call, TwoKeyRegistry))
-            .then(() => deployer.deploy(TwoKeyRegistry)
-            .then(() => TwoKeyRegistry.deployed())
-            .then(() => deployer.deploy(KyberNetworkTestMockContract))
-            .then(() => KyberNetworkTestMockContract.deployed())
-            .then(() => deployer.deploy(TwoKeyBaseReputationRegistry))
-            .then(() => TwoKeyBaseReputationRegistry.deployed())
-            .then(() => deployer.deploy(TwoKeyUpgradableExchange))
-            .then(() => TwoKeyUpgradableExchange.deployed())
-            .then(() => deployer.deploy(TwoKeyCommunityTokenPool))
-            .then(() => TwoKeyCommunityTokenPool.deployed())
-            .then(() => deployer.deploy(TwoKeyDeepFreezeTokenPool))
-            .then(() => TwoKeyDeepFreezeTokenPool.deployed())
-            .then(() => deployer.deploy(TwoKeyLongTermTokenPool))
-            .then(() => TwoKeyLongTermTokenPool.deployed())
-            .then(() => deployer.deploy(TwoKeyFactory))
-            .then(() => TwoKeyFactory.deployed())
-            .then(() => deployer.deploy(TwoKeyMaintainersRegistry))
-            .then(() => TwoKeyMaintainersRegistry.deployed())
-            .then(() => deployer.deploy(TwoKeySingletonesRegistry)) //adding empty admin address
-            .then(() => TwoKeySingletonesRegistry.deployed().then(async (registry) => {
+            deployer.then(async () => {
+                let registry = TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
                 /**
                  * Here we will be adding all contracts to the Registry and create a Proxies for them
                  */
@@ -580,7 +543,7 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
-            }))
+            })
             .then(() => deployer.deploy(TwoKeyEconomy,proxyAddressTwoKeyAdmin, TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
@@ -810,9 +773,6 @@ module.exports = function deploy(deployer) {
                 });
             })
             .then(() => true)
-            .catch((err) => {
-                console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
-            }));
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         let proxyAddressTwoKeyPlasmaEvents;
         let proxyAddressTwoKeyPlasmaEventsSTORAGE;
