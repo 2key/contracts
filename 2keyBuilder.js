@@ -6,6 +6,7 @@ const rimraf = require('rimraf');
 const sha256 = require('js-sha256');
 const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
+const prompt = require('prompt');
 const { networks: truffleNetworks } = require('./truffle');
 const axios = require('axios');
 const simpleGit = require('simple-git/promise');
@@ -13,7 +14,6 @@ const childProcess = require('child_process');
 const moment = require('moment');
 const ledgerProvider = require('./LedgerProvider');
 const whitelist = require('./ContractDeploymentWhiteList.json');
-
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
@@ -67,29 +67,28 @@ const getVersionsPath = (branch = true) => {
     return result.replace('{branch}', '');
 };
 
-async function handleExit(p) {
-    console.log(p);
-    if (p !== 0
-        && (process.argv[2] !== '--migrate'
-            && process.argv[2] !== '--generate'
-            && process.argv[2] !== '--extract'
-            && process.argv[2] !== '--update'
-            && process.argv[2] !== '--test'
-            && process.argv[2] !== '--ledger'
-            && process.argv[2] !== '--submodules'
-        )) {
-        console.log('Do you want to accept hard reset of branch? [Y/N]');
-        await contractsGit.reset('hard');
-        await twoKeyProtocolLibGit.reset('hard');
-    }
-    process.exit();
+
+
+
+async function handleExit() {
+     console.log('Do you want to accept hard reset of branch? [Y/N]');
+     prompt.start();
+     prompt.get(['option'], async function (err, result) {
+        if(result.option == 'Y') {
+            await contractsGit.reset('hard');
+            await twoKeyProtocolLibGit.reset('hard');
+        } else {
+            console.log('Bye Bye');
+        }
+        process.exit();
+    });
 }
 
-process.on('exit', handleExit);
-process.on('SIGINT', handleExit);
-process.on('SIGUSR1', handleExit);
-process.on('SIGUSR2', handleExit);
-process.on('uncaughtException', handleExit);
+// process.on('exit', handleExit);
+// process.on('SIGINT', handleExit);
+// process.on('SIGUSR1', handleExit);
+// process.on('SIGUSR2', handleExit);
+// process.on('uncaughtException', handleExit);
 
 
 const rmDir = (dir) => new Promise((resolve) => {
@@ -231,12 +230,9 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                 });
                 json = Object.assign(obj,json);
                 fs.writeFileSync(getContractsDeployedPath(), JSON.stringify(json, null, 2));
-                console.log('Writing contracts_deployed-develop.json...');
                 if (deployment) {
                     fs.copyFileSync(getContractsDeployedPath(),getContractsDeployedDistPath());
-                    console.log('Copying this to 2key-protocol/dist...');
                 }
-                console.log('Done');
                 resolve(contracts);
             } catch (err) {
                 reject(err);
