@@ -220,10 +220,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                         if (whiteListedContract.bytecode) {
                             contracts.contracts[whiteListedContract.file][contractName].bytecode = bytecode;
                         }
-                        /*
-                          whitelist[contractName].singleton
-                          ? {networks: mergedNetworks, abi, name: contractName} : {bytecode, abi, name: contractName};
-                        */
+
                         json[contractName] = whitelist[contractName].singleton
                             ? {networks: mergedNetworks, abi, name: contractName} : {bytecode, abi, name: contractName};
 
@@ -255,68 +252,13 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                     contracts.contracts[key]['NonSingletonsHash'] = nonSingletonsHash;
                     contracts.contracts[key]['SingletonsHash'] = singletonsHash;
                 });
-                /*
-                let keyHash = {};
-                // deployedTo
-                Object.keys(data).forEach((key) => {
-                    let arr = data[key];
-                    let arrayOfAddresses = [];
-                    arr.forEach((element) => {
-                        arrayOfAddresses.push(element.address);
-                    });
-                    let mergedString = [];
-                    arrayOfAddresses.forEach((address) => {
-                      if(address) {
-                          mergedString = mergedString + address.toString();
-                      }
-                    });
 
-                    let hash = sha256(mergedString);
-                    keyHash[key] =
-                        {
-                            hash: hash,
-                            humanHash: rhd.humanizeDigest(hash,8)
-                        };
-                    if (deployedTo[key.toString()]) {
-                      keyHash[key]['NonSingletonsHash'] = nonSingletonsHash;
-                    }
-                });
-                */
                 let obj = {
                     'NonSingletonsHash': nonSingletonsHash,
                     'SingletonsHash': singletonsHash,
                     // 'NetworkHashes': keyHash,
                 };
 
-
-                //Handle updating contracts_deployed-develop.json
-                /*
-                let existingFile = path.join(twoKeyProtocolDir, 'contracts_deployed-develop.json');
-                let fileObject = {};
-                if (fs.existsSync(existingFile)) {
-                    fileObject = JSON.parse(fs.readFileSync(existingFile, { encoding: 'utf8' }));
-                }
-                */
-                /**
-                 * Handle network hashes
-                 */
-                /*
-                let networkHashes = fileObject.NetworkHashes;
-                Object.keys(networkHashes).forEach((key) => {
-                  let hashPerNetwork = networkHashes[key];
-                  if(obj['NetworkHashes'][key]['hash']) {
-                    hashPerNetwork['hash'] = obj['NetworkHashes'][key]['hash'];
-                  }
-                  if(obj['NetworkHashes'][key]['humanHash']) {
-                    hashPerNetwork['humanHash'] = obj['NetworkHashes'][key]['humanHash'];
-                  }
-                  if(obj['NetworkHashes'][key]['NonSingletonsHash']) {
-                    hashPerNetwork['NonSingletonsHash'] = obj['NetworkHashes'][key]['NonSingletonsHash'];
-                  }
-                  networkHashes[key] = hashPerNetwork;
-                });
-                obj['NetworkHashes'] = networkHashes;
-                */
 
                 contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
                 console.log('Writing contracts for submodules...');
@@ -326,7 +268,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                 Object.keys(contracts.contracts).forEach(file => {
                     fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts', `${file}.ts`), `export default ${util.inspect(contracts.contracts[file], {depth: 10})}`)
                 });
-                // fs.writeFileSync(path.join(twoKeyProtocolDir, 'contracts.ts'), `export default ${util.inspect(contracts, {depth: 10})}`);
                 json = Object.assign(obj,json);
                 fs.writeFileSync(getContractsDeployedPath(), JSON.stringify(json, null, 2));
                 console.log('Writing contracts_deployed-develop.json...');
@@ -567,8 +508,6 @@ async function deploy() {
                         && sessionDeployedContracts[contract].networks[net].address
                         && lastDeployed[contract].networks[net].address
                         !== sessionDeployedContracts[contract].networks[net].address) {
-                        // deployUpdates.date = now.format();
-                        // deployUpdates.networks = networks;
                         deployedUpdates.contracts[contract] = {
                             ...sessionDeployedContracts[contract],
                             networks: {
@@ -630,7 +569,6 @@ async function deploy() {
             let npmVersionTag = json.version;
             console.log(npmVersionTag);
             process.chdir('../../');
-            // await twoKeyProtocolLibGit.addTagcd(tag);
             await contractsGit.addTag('v'+npmVersionTag.toString());
             await twoKeyProtocolLibGit.pushTags('origin');
             await contractsGit.pushTags('origin');
@@ -724,24 +662,13 @@ const slack_message = async (newVersion) => {
 };
 
 const test = () => new Promise(async (resolve, reject) => {
-    // const testsPath = path.join(twoKeyProtocolDir, 'test');
     try {
-        // await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/**/*.spec.ts']);
         await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/test/index.spec.ts']);
         resolve();
     } catch (err) {
         reject(err);
     }
 
-    // if (fs.existsSync(testsPath)) {
-    //   const files = (await readdir(testsPath)).filter(file => file.endsWith('.spec.ts'));
-    //   const l = files.length;
-    //   for (let i = 0; i < l; i += 1) {
-    //     /* eslint-disable no-await-in-loop */
-    //     await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', path.join(testsPath, files[i])]);
-    //     /* eslint-enable no-await-in-loop */
-    //   }
-    // }
 });
 
 const buildSubmodules = async(contracts) => {
@@ -756,7 +683,6 @@ async function main() {
     switch (mode) {
         case '--update':
             try {
-                //truffle migrate --network=plasma-azure --f 4 update TwoKeyPlasmaEvents
 
                 await restoreFromArchive();
                 const networks = process.argv[3];
