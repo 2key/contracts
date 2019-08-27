@@ -1,7 +1,7 @@
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
-const EventSource = artifacts.require('TwoKeyEventSource');
+const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
@@ -144,7 +144,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyAdmin.deployed())
             .then(() => deployer.deploy(TwoKeyExchangeRateContract))
             .then(() => TwoKeyExchangeRateContract.deployed())
-            .then(() => deployer.deploy(EventSource))
+            .then(() => deployer.deploy(TwoKeyEventSource))
             .then(() => deployer.link(Call, TwoKeyRegistry))
             .then(() => deployer.deploy(TwoKeyRegistry)
             .then(() => TwoKeyRegistry.deployed())
@@ -452,21 +452,21 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async (resolve, reject) => {
                     try {
-                        console.log('... Adding EventSource to Proxy registry as valid implementation');
+                        console.log('... Adding TwoKeyEventSource to Proxy registry as valid implementation');
                         /**
-                         * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource and setting initial params there
+                         * Adding TwoKeyEventSource to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyEventSource and setting initial params there
                          */
-                        let txHash = await registry.addVersion("TwoKeyEventSource", INITIAL_VERSION_OF_ALL_SINGLETONS, EventSource.address);
+                        let txHash = await registry.addVersion("TwoKeyEventSource", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyEventSource.address);
                         txHash = await registry.addVersion("TwoKeyEventSourceStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyEventSourceStorage.address);
 
                         let { logs } = await registry.createProxy("TwoKeyEventSource", "TwoKeyEventSourceStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
                         let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the EventSource is : ' + logicProxy);
+                        console.log('Proxy address for the TwoKeyEventSource is : ' + logicProxy);
 
                         const twoKeyEvents = fileObject.TwoKeyEventSource || {};
 
                         twoKeyEvents[network_id] = {
-                            'implementationAddressLogic': EventSource.address,
+                            'implementationAddressLogic': TwoKeyEventSource.address,
                             'Proxy': logicProxy,
                             'implementationAddressStorage': TwoKeyEventSourceStorage.address,
                             'StorageProxy': storageProxy,
@@ -486,7 +486,7 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('... Adding TwoKeyExchangeRateContract to Proxy registry as valid implementation');
                         /**
-                         * Adding EventSource to the registry, deploying 1st logicProxy for that 1.0 version of EventSource
+                         * Adding TwoKeyEventSource to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyEventSource
                          */
                         let txHash = await registry.addVersion("TwoKeyExchangeRateContract", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyExchangeRateContract.address);
                         txHash = await registry.addVersion("TwoKeyExchangeRateStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyExchangeRateStorage.address);
@@ -710,8 +710,8 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-                        console.log('Setting initial parameters in contract EventSource');
-                        let txHash = await EventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(
+                        console.log('Setting initial parameters in contract TwoKeyEventSource');
+                        let txHash = await TwoKeyEventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             proxyAddressTwoKeyEventSourceSTORAGE
                         );

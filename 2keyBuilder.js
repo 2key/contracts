@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 const tar = require('tar');
-const rimraf = require('rimraf');
 const sha256 = require('js-sha256');
 const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
@@ -10,9 +9,7 @@ const prompt = require('prompt');
 const { networks: truffleNetworks } = require('./truffle');
 const axios = require('axios');
 const simpleGit = require('simple-git/promise');
-const childProcess = require('child_process');
 const moment = require('moment');
-const ledgerProvider = require('./LedgerProvider');
 const whitelist = require('./ContractDeploymentWhiteList.json');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
@@ -27,7 +24,7 @@ const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
 require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
-
+const { runProcess, runMigration4, runUpdateMigration, rmDir } = require('./helpers');
 
 const deployedTo = {};
 
@@ -91,11 +88,6 @@ async function handleExit() {
 // process.on('uncaughtException', handleExit);
 
 
-const rmDir = (dir) => new Promise((resolve) => {
-    rimraf(dir, () => {
-        resolve();
-    })
-});
 
 const archiveBuild = () => new Promise(async (resolve, reject) => {
     try {
@@ -241,47 +233,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     }
 });
 
-const runProcess = (app, args) => new Promise((resolve, reject) => {
-    console.log('Run process', app, args && args.join(' '));
-    const proc = childProcess.spawn(app, args, {stdio: [process.stdin, process.stdout, process.stderr]});
-    proc.on('close', async (code) => {
-        console.log('process exit with code', code);
-        if (code === 0) {
-            resolve(code);
-        } else {
-            reject(code);
-        }
-    });
-});
-
-const runMigration4 = (network) => new Promise(async(resolve, reject) => {
-    try {
-        if (!process.env.SKIP_4MIGRATION) {
-            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '4', '--network', network]);
-            resolve(true);
-        } else {
-            resolve(true);
-        }
-    } catch (e) {
-        reject(e);
-    }
-});
-
-/**
- * If there's a need to update, we'll run this function
- * @param network
- * @param contractName
- * @returns {Promise<any>}
- */
-const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
-    try {
-        console.log("Running update migration");
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '5', '--network', network, 'update', contractName]);
-        resolve(true);
-    } catch (e) {
-        reject(e);
-    }
-});
 
 /**
  * Parse all arguments to check all contracts to be updated
@@ -377,6 +328,7 @@ const commitAndPushContractsFolder = async(commitMessage) => {
 async function deploy() {
     try {
         deployment = true;
+
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
         let twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
@@ -633,9 +585,6 @@ async function main() {
             }
             break;
         }
-        case '--test':
-            test();
-            break;
         case '--generate':
             await generateSOLInterface();
             process.exit(0);
@@ -648,18 +597,11 @@ async function main() {
             restoreFromArchive();
             process.exit(0);
             break;
-        case '--ledger':
-            ledgerProvider('https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad', { networkId: 3 });
-            process.exit(0);
-            break;
         case '--submodules':
             const contracts = await generateSOLInterface();
             await buildSubmodules(contracts);
             process.exit(0);
             break;
-        case '--slack':
-            await slack_message();
-            process.exit(0);
         default:
             await deploy();
             process.exit(0);
