@@ -78,6 +78,7 @@ async function handleExit(p) {
             && process.argv[2] !== '--ledger'
             && process.argv[2] !== '--submodules'
         )) {
+        console.log('Do you want to accept hard reset of branch? [Y/N]');
         await contractsGit.reset('hard');
         await twoKeyProtocolLibGit.reset('hard');
     }
@@ -257,10 +258,10 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
     });
 });
 
-const runMigration3 = (network) => new Promise(async(resolve, reject) => {
+const runMigration4 = (network) => new Promise(async(resolve, reject) => {
     try {
-        if (!process.env.SKIP_3MIGRATION) {
-            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '3', '--network', network]);
+        if (!process.env.SKIP_4MIGRATION) {
+            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '4', '--network', network]);
             resolve(true);
         } else {
             resolve(true);
@@ -279,7 +280,7 @@ const runMigration3 = (network) => new Promise(async(resolve, reject) => {
 const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
     try {
         console.log("Running update migration");
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '4', '--network', network, 'update', contractName]);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '5', '--network', network, 'update', contractName]);
         resolve(true);
     } catch (e) {
         reject(e);
@@ -430,7 +431,7 @@ async function deploy() {
                 await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
                 deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
             }
-            await runMigration3(networks[i]);
+            await runMigration4(networks[i]);
             /* eslint-enable no-await-in-loop */
         }
 
@@ -600,7 +601,7 @@ async function main() {
                     let str = contractName.toString()+".json";
                     console.log(str);
                     fs.unlinkSync(path.join(buildPath, str));
-                    await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f', 4,'update',contractName]);
+                    await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f', 5,'update',contractName]);
                 }
                 //truffle migrate --network=dev-local --f 4 update
                 await generateSOLInterface();
@@ -630,7 +631,7 @@ async function main() {
         case '--migration3': {
             try {
                 const networks = process.argv[3].split(',');
-                runMigration3(networks[0]);
+                runMigration4(networks[0]);
             } catch (e) {
                 console.log(e);
             }

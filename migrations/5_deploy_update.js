@@ -38,33 +38,8 @@ const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStora
 const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414";
 const TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS = "0xe6ce6250dcfd0416325999f7891bbff668580a7a";
 
-/**
- * Function to increment minor version
- * @type {function(*)}
- */
-const incrementVersion = ((version) => {
-    let vParts = version.split('.');
-    // assign each substring a position within our array
-    let partsArray = {
-        major : vParts[0],
-        minor : vParts[1],
-        patch : vParts[2]
-    };
-    // target the substring we want to increment on
-    partsArray.patch = parseFloat(partsArray.patch) + 1;
-    // set an empty array to join our substring values back to
-    let vArray = [];
-    // grabs each property inside our partsArray object
-    for (let prop in partsArray) {
-        if (partsArray.hasOwnProperty(prop)) {
-            // add each property to the end of our new array
-            vArray.push(partsArray[prop]);
-        }
-    }
-    // join everything back into one string with a period between each new property
-    let newVersion = vArray.join('.');
-    return newVersion;
-});
+const { incrementVersion } = require('../helpers');
+
 
 /**
  * Function to perform all necessary logic to update smart contract
