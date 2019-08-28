@@ -53,10 +53,7 @@ const deploymentConfigFile = path.join(__dirname, '../deploymentConfig.json');
 
 module.exports = function deploy(deployer) {
     const { network_id } = deployer;
-    /**
-     * Read the logicProxy file into fileObject
-     * @type {{}}
-     */
+
     let fileObject = {};
     if (fs.existsSync(proxyFile)) {
         fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
@@ -70,36 +67,52 @@ module.exports = function deploy(deployer) {
 
     let contractNameToProxyAddress = {};
 
-    /**
-     * Define proxyAddress variables for the contracts
-     */
-    let proxyAddressTwoKeyRegistry;
-    let proxyAddressTwoKeyEventSource;
-    let proxyAddressTwoKeyExchange;
-    let proxyAddressTwoKeyAdmin;
-    let proxyAddressTwoKeyUpgradableExchange;
-    let proxyAddressTwoKeyBaseReputationRegistry;
-    let proxyAddressTwoKeyCommunityTokenPool;
-    let proxyAddressTwoKeyLongTermTokenPool;
-    let proxyAddressTwoKeyDeepFreezeTokenPool;
-    let proxyAddressTwoKeyCampaignValidator;
-    let proxyAddressTwoKeyFactory;
-    let proxyAddressTwoKeyMaintainersRegistry;
-    let proxyAddressTwoKeySignatureValidator;
+    let contractStorageArtifacts = {
+        TwoKeyUpgradableExchangeStorage,
+        TwoKeyAdminStorage,
+        TwoKeyEventSourceStorage,
+        TwoKeyRegistryStorage,
+        TwoKeyExchangeRateStorage,
+        TwoKeyBaseReputationRegistryStorage,
+        TwoKeyCommunityTokenPoolStorage,
+        TwoKeyDeepFreezeTokenPoolStorage,
+        TwoKeyLongTermTokenPoolStorage,
+        TwoKeyCampaignValidatorStorage,
+        TwoKeyFactoryStorage,
+        TwoKeyMaintainersRegistryStorage,
+        TwoKeySignatureValidatorStorage
+    };
 
-    let proxyAddressTwoKeyUpgradableExchangeSTORAGE;
-    let proxyAddressTwoKeyCampaignValidatorSTORAGE;
-    let proxyAddressTwoKeyEventSourceSTORAGE;
-    let proxyAddressTwoKeyAdminSTORAGE;
-    let proxyAddressTwoKeyFactorySTORAGE;
-    let proxyAddressTwoKeyMaintainersRegistrySTORAGE;
-    let proxyAddressTwoKeyExchangeRateSTORAGE;
-    let proxyAddressTwoKeyReputationRegistrySTORAGE;
-    let proxyAddressTwoKeyCommunityTokenPoolSTORAGE;
-    let proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE;
-    let proxyAddressTwoKeyLongTermTokenPoolSTORAGE;
-    let proxyAddressTwoKeyRegistrySTORAGE;
-    let proxyAddressTwoKeySignatureValidatorSTORAGE;
+    let contractLogicArtifacts = {
+         TwoKeyUpgradableExchange,
+         TwoKeyAdmin,
+         TwoKeyEventSource,
+         TwoKeyRegistry,
+         TwoKeyExchangeRateContract,
+         TwoKeyBaseReputationRegistry,
+         TwoKeyCommunityTokenPool,
+         TwoKeyDeepFreezeTokenPool,
+         TwoKeyLongTermTokenPool,
+         TwoKeyCampaignValidator,
+         TwoKeyFactory,
+         TwoKeyMaintainersRegistry,
+         TwoKeySignatureValidator
+    };
+
+    /**
+     * Function to determine and return truffle build of selected contract
+     * @type {function(*)}
+     */
+    const getContractPerName = ((contractName) => {
+        if(contractLogicArtifacts[contractName]) {
+            return contractLogicArtifacts[contractName]
+        } else if (contractStorageArtifacts[contractName]) {
+            return contractStorageArtifacts[contractName]
+        }
+        else {
+            return "Wrong name";
+        }
+    });
 
 
     let deploymentNetwork;
@@ -109,442 +122,68 @@ module.exports = function deploy(deployer) {
         deploymentNetwork = 'ropsten-environment';
     }
 
-    /**
-     * Initial voting powers for congress members
-     * @type {number[]}
-     */
-    let maintainerAddresses = deploymentObject[deploymentNetwork].maintainers;
-    let rewardsReleaseAfter = deploymentObject[deploymentNetwork].admin2keyReleaseDate; //1 January 2020
 
-
-    let kyberAddress;
-    /**
-     * KYBER NETWORK ADDRESS and DAI ADDRESS
-     */
+    const maintainerAddresses = deploymentObject[deploymentNetwork].maintainers;
+    const rewardsReleaseAfter = deploymentObject[deploymentNetwork].admin2keyReleaseDate; //1 January 2020
     const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818E6FECD516Ecc3849DAf6845e3EC868087B755';
     const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
     const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
+    let kyberAddress;
 
-    console.log('Here');
+
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
             deployer.then(async () => {
                 let registry = TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
-                /**
-                 * Here we will be adding all contracts to the Registry and create a Proxies for them
-                 */
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyRegistry to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyRegistryStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyRegistry", "TwoKeyRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
 
-                        console.log('Proxy address for the TwoKeyRegistry is : ' + logicProxy);
-                        console.log('Network ID', network_id);
-                        const twoKeyReg = fileObject.TwoKeyRegistry || {};
-                        twoKeyReg[network_id] = {
-                            'implementationAddressLogic': TwoKeyRegistry.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyRegistryStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-
-                        proxyAddressTwoKeyRegistrySTORAGE = storageProxy;
-                        proxyAddressTwoKeyRegistry = logicProxy;
-                        fileObject['TwoKeyRegistry'] = twoKeyReg;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-               await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeySignatureValidator to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeySignatureValidator to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeySignatureValidator", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeySignatureValidator.address);
-                        txHash = await registry.addVersion("TwoKeySignatureValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeySignatureValidatorStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeySignatureValidator", "TwoKeySignatureValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
-
-                        console.log('Proxy address for the TwoKeySignatureValidator is : ' + logicProxy);
-                        console.log('Network ID', network_id);
-                        const twoKeySig = fileObject.TwoKeySignatureValidator || {};
-                        twoKeySig[network_id] = {
-                            'implementationAddressLogic': TwoKeySignatureValidator.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeySignatureValidatorStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-
-                        proxyAddressTwoKeySignatureValidatorSTORAGE = storageProxy;
-                        proxyAddressTwoKeySignatureValidator = logicProxy;
-                        fileObject['TwoKeySignatureValidator'] = twoKeySig;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyMaintainersRegistry to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyMaintainersRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyMaintainersRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyMaintainersRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyMaintainersRegistryStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyMaintainersRegistry", "TwoKeyMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyMaintainersRegistry is : ' + logicProxy);
-                        const twoKeyMaintainersRegistry = fileObject.TwoKeyMaintainersRegistry || {};
-                        twoKeyMaintainersRegistry[network_id] = {
-                            'implementationAddressLogic': TwoKeyMaintainersRegistry.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyMaintainersRegistryStorage.address,
-                            'StorageProxy': storageProxy,
-                            'maintainers': maintainerAddresses
-                        };
-                        proxyAddressTwoKeyMaintainersRegistrySTORAGE = storageProxy;
-                        proxyAddressTwoKeyMaintainersRegistry = logicProxy;
-
-                        fileObject['TwoKeyMaintainersRegistry'] = twoKeyMaintainersRegistry;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyFactory to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyFactory", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyFactory.address);
-                        txHash = await registry.addVersion("TwoKeyFactoryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyFactoryStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyFactory", "TwoKeyFactoryStorage",INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
-
-                        console.log('Proxy address for the TwoKeyFactory is : ' + logicProxy);
-
-                        const twoKeyFactory = fileObject.TwoKeyFactory || {};
-                        twoKeyFactory[network_id] = {
-                            'implementationAddressLogic': TwoKeyFactory.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyFactoryStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyFactorySTORAGE = storageProxy;
-                        proxyAddressTwoKeyFactory = logicProxy;
-
-                        fileObject['TwoKeyFactory'] = twoKeyFactory;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyCampaignValidator to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyCampaignValidator to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyCampaignValidator", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCampaignValidator.address);
-                        txHash = await registry.addVersion("TwoKeyCampaignValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCampaignValidatorStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyCampaignValidator", "TwoKeyCampaignValidatorStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy , storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyCampaignValidator is : ' + logicProxy);
-                        const twoKeyValidator = fileObject.TwoKeyCampaignValidator || {};
-                        twoKeyValidator[network_id] = {
-                            'implementationAddressLogic': TwoKeyCampaignValidator.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyCampaignValidatorStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyCampaignValidatorSTORAGE = storageProxy;
-
-                        fileObject['TwoKeyCampaignValidator'] = twoKeyValidator;
-                        proxyAddressTwoKeyCampaignValidator = logicProxy;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyCommunityTokenPool to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyCommunityTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyCommunityTokenPool", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCommunityTokenPool.address);
-                        txHash = await registry.addVersion("TwoKeyCommunityTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyCommunityTokenPoolStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyCommunityTokenPool", "TwoKeyCommunityTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyCommunityTokenPool is : ' + logicProxy);
-                        const twoKeyCommunityTokenPool = fileObject.TwoKeyCommunityTokenPool || {};
-
-                        twoKeyCommunityTokenPool[network_id] = {
-                            'implementationAddressLogic': TwoKeyCommunityTokenPool.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyCommunityTokenPoolStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyCommunityTokenPoolSTORAGE = storageProxy;
-                        proxyAddressTwoKeyCommunityTokenPool = logicProxy;
-                        fileObject['TwoKeyCommunityTokenPool'] = twoKeyCommunityTokenPool;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyLongTermTokenPool to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyLongTermTokenPool", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyLongTermTokenPool.address);
-                        txHash =  await registry.addVersion("TwoKeyLongTermTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyLongTermTokenPoolStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyLongTermTokenPool", "TwoKeyLongTermTokenPoolStorage",INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyLongTermTokenPool is : ' + logicProxy);
-                        const twoKeyLongTermTokenPool = fileObject.TwoKeyLongTermTokenPool || {};
-
-                        twoKeyLongTermTokenPool[network_id] = {
-                            'implementationAddressLogic': TwoKeyLongTermTokenPool.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyLongTermTokenPoolStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyLongTermTokenPoolSTORAGE = storageProxy;
-                        proxyAddressTwoKeyLongTermTokenPool = logicProxy;
-
-                        fileObject['TwoKeyLongTermTokenPool'] = twoKeyLongTermTokenPool;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyDeepFreezeTokenPool to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyLongTermTokenPool to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPool", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyDeepFreezeTokenPool.address);
-                        txHash = await registry.addVersion("TwoKeyDeepFreezeTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyDeepFreezeTokenPoolStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyDeepFreezeTokenPool","TwoKeyDeepFreezeTokenPoolStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyDeepFreezeTokenPool is : ' + logicProxy);
-
-                        const twoKeyDeepFreezeTokenPool = fileObject.TwoKeyDeepFreezeTokenPool || {};
-                        twoKeyDeepFreezeTokenPool[network_id] = {
-                            'implementationAddressLogic': TwoKeyDeepFreezeTokenPool.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyDeepFreezeTokenPoolStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE = storageProxy;
-                        proxyAddressTwoKeyDeepFreezeTokenPool = logicProxy;
-
-                        fileObject['TwoKeyDeepFreezeTokenPool'] = twoKeyDeepFreezeTokenPool;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-
-
-
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyBaseReputationRegistry to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyBaseReputationRegistry to the registry, deploying 1st logicProxy for that 1.0 version and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyBaseReputationRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyBaseReputationRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyBaseReputationRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyBaseReputationRegistryStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyBaseReputationRegistry","TwoKeyBaseReputationRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyBaseReputationRegistry is : ' + logicProxy);
-                        const twoKeyBaseRepReg = fileObject.TwoKeyBaseReputationRegistry || {};
-
-                        twoKeyBaseRepReg[network_id] = {
-                            'implementationAddressLogic': TwoKeyBaseReputationRegistry.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyBaseReputationRegistryStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyReputationRegistrySTORAGE = storageProxy;
-                        proxyAddressTwoKeyBaseReputationRegistry = logicProxy;
-
-                        fileObject['TwoKeyBaseReputationRegistry'] = twoKeyBaseRepReg;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('... Adding TwoKeyEventSource to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyEventSource to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyEventSource and setting initial params there
-                         */
-                        let txHash = await registry.addVersion("TwoKeyEventSource", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyEventSource.address);
-                        txHash = await registry.addVersion("TwoKeyEventSourceStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyEventSourceStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyEventSource", "TwoKeyEventSourceStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyEventSource is : ' + logicProxy);
-
-                        const twoKeyEvents = fileObject.TwoKeyEventSource || {};
-
-                        twoKeyEvents[network_id] = {
-                            'implementationAddressLogic': TwoKeyEventSource.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyEventSourceStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyEventSourceSTORAGE = storageProxy;
-
-                        fileObject['TwoKeyEventSource'] = twoKeyEvents;
-                        proxyAddressTwoKeyEventSource = logicProxy;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        console.log('... Adding TwoKeyExchangeRateContract to Proxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyEventSource to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyEventSource
-                         */
-                        let txHash = await registry.addVersion("TwoKeyExchangeRateContract", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyExchangeRateContract.address);
-                        txHash = await registry.addVersion("TwoKeyExchangeRateStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyExchangeRateStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyExchangeRateContract", "TwoKeyExchangeRateStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyExchangeRateContract is : ' + logicProxy);
-
-                        const twoKeyExchangeRate = fileObject.TwoKeyExchange || {};
-
-                        twoKeyExchangeRate[network_id] = {
-                            'implementationAddressLogic': TwoKeyExchangeRateContract.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyExchangeRateStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyExchangeRateSTORAGE = storageProxy;
-                        proxyAddressTwoKeyExchange = logicProxy;
-                        fileObject['TwoKeyExchangeRateContract'] = twoKeyExchangeRate;
-
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async(resolve,reject) => {
-                    try {
-                        console.log('... Adding TwoKeyAdmin contract to logicProxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyAdmin to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyAdmin
-                         */
-                        let txHash = await registry.addVersion("TwoKeyAdmin", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyAdmin.address);
-                        txHash = await registry.addVersion("TwoKeyAdminStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyAdminStorage.address);
-
-                        let { logs } = await registry.createProxy("TwoKeyAdmin", "TwoKeyAdminStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyAdmin contract is : ' + logicProxy);
-
-
-                        // txHash = await TwoKeyAdmin.at(logicProxy).transfer2KeyTokens(proxyAddressTwoKeyRegistry, 1000000000000000);
-                        const twoKeyAdmin = fileObject.TwoKeyAdmin || {};
-                        twoKeyAdmin[network_id] = {
-                            'implementationAddressLogic': TwoKeyAdmin.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyAdminStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-
-                        proxyAddressTwoKeyAdminSTORAGE = storageProxy;
-                        proxyAddressTwoKeyAdmin = logicProxy;
-
-                        fileObject['TwoKeyAdmin'] = twoKeyAdmin;
-
-                        resolve(logicProxy);
-
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async(resolve,reject) => {
-                    try {
-                        console.log('... Adding TwoKeyUpgradableExchange contract to logicProxy registry as valid implementation');
-                        /**
-                         * Adding TwoKeyUpgradableExchange to the registry, deploying 1st logicProxy for that 1.0 version of TwoKeyUpgradableExchange
-                         */
-                        let txHash = await registry.addVersion("TwoKeyUpgradableExchange", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyUpgradableExchange.address);
-                        txHash = await registry.addVersion("TwoKeyUpgradableExchangeStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyUpgradableExchangeStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyUpgradableExchange", "TwoKeyUpgradableExchangeStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        console.log('Proxy address for the TwoKeyUpgradableExchange contract is : ' + logicProxy);
-
-                        const twoKeyUpgradableExchange = fileObject.TwoKeyUpgradableExchange || {};
-                        twoKeyUpgradableExchange[network_id] = {
-                            'implementationAddressLogic': TwoKeyUpgradableExchange.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyUpgradableExchangeStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-
-                        proxyAddressTwoKeyUpgradableExchangeSTORAGE = storageProxy;
-                        proxyAddressTwoKeyUpgradableExchange = logicProxy;
-
-                        fileObject['TwoKeyUpgradableExchange'] = twoKeyUpgradableExchange;
-                        fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
+                let upgradableLogicContracts = Object.keys(contractLogicArtifacts);
+                let upgradableStorageContracts = Object.keys(contractStorageArtifacts);
+
+                /* eslint-disable no-await-in-loop */
+                for (let i = 0; i < upgradableLogicContracts.length; i++) {
+                    await new Promise(async (resolve, reject) => {
+                        try {
+                            console.log('-----------------------------------------------------------------------------------');
+                            console.log('... Adding ' + upgradableLogicContracts[i] + ' to Proxy registry as valid implementation');
+                            let contractName = upgradableLogicContracts[i];
+                            let contractStorageName = upgradableStorageContracts[i];
+
+                            let txHash = await registry.addVersionDuringCreation(
+                                contractName,
+                                contractStorageName,
+                                getContractPerName(contractName).address,
+                                getContractPerName(contractStorageName).address,
+                                INITIAL_VERSION_OF_ALL_SINGLETONS
+                            );
+
+                            let { logs } = await registry.createProxy(
+                                contractName,
+                                contractStorageName,
+                                INITIAL_VERSION_OF_ALL_SINGLETONS
+                            );
+
+                            let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+
+                            const jsonObject = fileObject[contractName] || {};
+                            jsonObject[network_id] = {
+                                'implementationAddressLogic': getContractPerName(contractName).address,
+                                'Proxy': logicProxy,
+                                'implementationAddressStorage': getContractPerName(contractStorageName).address,
+                                'StorageProxy': storageProxy,
+                            };
+
+                            contractNameToProxyAddress[contractName] = logicProxy;
+                            contractNameToProxyAddress[contractStorageName] = storageProxy;
+
+                            fileObject[contractName] = jsonObject;
+                            resolve(logicProxy);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                }
+                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
             })
-            .then(() => deployer.deploy(TwoKeyEconomy,proxyAddressTwoKeyAdmin, TwoKeySingletonesRegistry.address))
+            .then(() => deployer.deploy(TwoKeyEconomy,contractNameToProxyAddress["TwoKeyAdmin"], TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
 
@@ -590,10 +229,11 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async (resolve,reject) => {
                     try {
+                        console.log('----------------------------------------------------------------');
                         console.log('Setting initial parameters in contract TwoKeyMaintainersRegistry');
-                        let txHash = await TwoKeyMaintainersRegistry.at(proxyAddressTwoKeyMaintainersRegistry).setInitialParams(
+                        let txHash = await TwoKeyMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyMaintainersRegistry"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyMaintainersRegistrySTORAGE,
+                            contractNameToProxyAddress["TwoKeyMaintainersRegistryStorage"],
                             maintainerAddresses
                         );
                         resolve(txHash);
@@ -605,9 +245,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async (resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeySignatureValidator');
-                        let txHash = await TwoKeySignatureValidator.at(proxyAddressTwoKeySignatureValidator).setInitialParams(
+                        let txHash = await TwoKeySignatureValidator.at(contractNameToProxyAddress["TwoKeySignatureValidator"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeySignatureValidatorSTORAGE
+                            contractNameToProxyAddress["TwoKeySignatureValidatorStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -618,10 +258,10 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
-                        let txHash = await TwoKeyCommunityTokenPool.at(proxyAddressTwoKeyCommunityTokenPool).setInitialParams(
+                        let txHash = await TwoKeyCommunityTokenPool.at(contractNameToProxyAddress["TwoKeyCommunityTokenPool"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
-                            proxyAddressTwoKeyCommunityTokenPoolSTORAGE
+                            contractNameToProxyAddress["TwoKeyCommunityTokenPoolStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -632,10 +272,10 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
-                        let txHash = await TwoKeyLongTermTokenPool.at(proxyAddressTwoKeyLongTermTokenPool).setInitialParams(
+                        let txHash = await TwoKeyLongTermTokenPool.at(contractNameToProxyAddress["TwoKeyLongTermTokenPool"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
-                            proxyAddressTwoKeyLongTermTokenPoolSTORAGE
+                            contractNameToProxyAddress["TwoKeyLongTermTokenPoolStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -646,11 +286,11 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyDeepFreezeTokenPool');
-                        let txHash = await TwoKeyDeepFreezeTokenPool.at(proxyAddressTwoKeyDeepFreezeTokenPool).setInitialParams(
+                        let txHash = await TwoKeyDeepFreezeTokenPool.at(contractNameToProxyAddress["TwoKeyDeepFreezeTokenPool"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
                             TwoKeyEconomy.address,
-                            proxyAddressTwoKeyCommunityTokenPool,
-                            proxyAddressTwoKeyDeepFreezeTokenPoolSTORAGE
+                            contractNameToProxyAddress["TwoKeyCommunityTokenPool"],
+                            contractNameToProxyAddress["TwoKeyDeepFreezeTokenPoolStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -661,9 +301,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
-                        let txHash = await TwoKeyCampaignValidator.at(proxyAddressTwoKeyCampaignValidator).setInitialParams(
+                        let txHash = await TwoKeyCampaignValidator.at(contractNameToProxyAddress["TwoKeyCampaignValidator"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyCampaignValidatorSTORAGE
+                            contractNameToProxyAddress["TwoKeyCampaignValidatorStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -674,9 +314,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyEventSource');
-                        let txHash = await TwoKeyEventSource.at(proxyAddressTwoKeyEventSource).setInitialParams(
+                        let txHash = await TwoKeyEventSource.at(contractNameToProxyAddress["TwoKeyEventSource"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyEventSourceSTORAGE
+                            contractNameToProxyAddress["TwoKeyEventSourceStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -687,9 +327,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
-                        let txHash = await TwoKeyBaseReputationRegistry.at(proxyAddressTwoKeyBaseReputationRegistry).setInitialParams(
+                        let txHash = await TwoKeyBaseReputationRegistry.at(contractNameToProxyAddress["TwoKeyBaseReputationRegistry"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyReputationRegistrySTORAGE
+                            contractNameToProxyAddress["TwoKeyBaseReputationRegistryStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -700,9 +340,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
-                        let txHash = await TwoKeyExchangeRateContract.at(proxyAddressTwoKeyExchange).setInitialParams(
+                        let txHash = await TwoKeyExchangeRateContract.at(contractNameToProxyAddress["TwoKeyExchangeRateContract"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyExchangeRateSTORAGE
+                            contractNameToProxyAddress["TwoKeyExchangeRateStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -713,12 +353,12 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
-                        let txHash = await TwoKeyUpgradableExchange.at(proxyAddressTwoKeyUpgradableExchange).setInitialParams(
+                        let txHash = await TwoKeyUpgradableExchange.at(contractNameToProxyAddress["TwoKeyUpgradableExchange"]).setInitialParams(
                             TwoKeyEconomy.address,
                             DAI_ROPSTEN_ADDRESS,
                             kyberAddress,
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyUpgradableExchangeSTORAGE
+                            contractNameToProxyAddress["TwoKeyUpgradableExchangeStorage"]
                         );
 
                         resolve(txHash);
@@ -731,9 +371,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyAdmin');
-                        let txHash = await TwoKeyAdmin.at(proxyAddressTwoKeyAdmin).setInitialParams(
+                        let txHash = await TwoKeyAdmin.at(contractNameToProxyAddress["TwoKeyAdmin"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyAdminSTORAGE,
+                            contractNameToProxyAddress["TwoKeyAdminStorage"],
                             TwoKeyCongress.address,
                             TwoKeyEconomy.address,
                             deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
@@ -747,9 +387,9 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyFactory');
-                        let txHash = await TwoKeyFactory.at(proxyAddressTwoKeyFactory).setInitialParams(
+                        let txHash = await TwoKeyFactory.at(contractNameToProxyAddress["TwoKeyFactory"]).setInitialParams(
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyFactorySTORAGE
+                            contractNameToProxyAddress["TwoKeyFactoryStorage"]
                         );
                         resolve(txHash);
                     } catch (e) {
@@ -760,10 +400,10 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         console.log('Setting initial parameters in contract TwoKeyRegistry');
-                        let txHash = await TwoKeyRegistry.at(proxyAddressTwoKeyRegistry).setInitialParams
+                        let txHash = await TwoKeyRegistry.at(contractNameToProxyAddress["TwoKeyRegistry"]).setInitialParams
                         (
                             TwoKeySingletonesRegistry.address,
-                            proxyAddressTwoKeyRegistrySTORAGE
+                            contractNameToProxyAddress["TwoKeyRegistryStorage"]
                         );
 
                         resolve(txHash);

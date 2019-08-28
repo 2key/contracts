@@ -23,7 +23,6 @@ const IncentiveModels = artifacts.require('IncentiveModels');
 const fs = require('fs');
 const path = require('path');
 
-const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
 const deploymentConfigFile = path.join(__dirname, '../deploymentConfig.json');
 
 module.exports = function deploy(deployer) {
