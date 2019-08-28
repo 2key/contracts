@@ -49,11 +49,14 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         moderator = _moderator;
         currency = _currency;
 
+
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
-//
+
+        ALLOWED_GAP = 1000000000000000;
+
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
     }
@@ -198,7 +201,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
      */
     function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignOnceGoalReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignGoal + minContributionAmountWei); //small GAP
+            require(campaignRaisedIncludingConversion <= campaignGoal.add(minContributionAmountWei)); //small GAP
         }
         return true;
     }

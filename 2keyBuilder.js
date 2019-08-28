@@ -13,6 +13,7 @@ const moment = require('moment');
 const whitelist = require('./ContractDeploymentWhiteList.json');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
+const configPath = path.join(__dirname, 'configurationFiles');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
@@ -138,7 +139,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         };
 
         let singletonAddresses = [];
-        const proxyFile = path.join(buildPath, 'proxyAddresses.json');
+        const proxyFile = path.join(configPath, 'proxyAddresses.json');
         let json = {};
         let data = {};
         let proxyAddresses = {};

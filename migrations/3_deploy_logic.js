@@ -23,7 +23,7 @@ const IncentiveModels = artifacts.require('IncentiveModels');
 const fs = require('fs');
 const path = require('path');
 
-const deploymentConfigFile = path.join(__dirname, '../deploymentConfig.json');
+const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
 
 module.exports = function deploy(deployer) {
     let deploymentObject = {};

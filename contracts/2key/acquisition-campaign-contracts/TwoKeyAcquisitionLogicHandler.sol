@@ -15,7 +15,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
 
     address assetContractERC20;
 
-
     bool isFixedInvestmentAmount; // This means that minimal contribution is equal maximal contribution
     bool isAcceptingFiat;
 
@@ -37,8 +36,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     )
     public
     {
-        require(values[1] >= values[0], "max contribution criteria not satisfied");
-        require(values[4] > values[3], "campaign start time can't be greater than end time");
+        require(values[1] >= values[0]);
+        require(values[4] > values[3]);
         require(initialized == false);
 
         if(values[0] == values[1]) {
@@ -82,6 +81,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         ownerPlasma = plasmaOf(contractor);
         conversionHandler = _twoKeyConversionHandler;
 
+        ALLOWED_GAP = 1000000000000000;
         initialized = true;
     }
 
@@ -218,7 +218,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             }
         } else {
             uint rate = getRateFromExchange();
-            uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
+            uint amountToBeSpentInFiat = (amountWillingToSpendEthWei.mul(rate)).div(10**18);
             //Adding gap of 100 weis
             if(leftToSpend.add(1000) >= amountToBeSpentInFiat && minContributionAmountWei <= amountToBeSpentInFiat) {
                 return (true,leftToSpend);
@@ -252,17 +252,15 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
 
     /**recover
      * @notice Function to get investment rules
-     * @return tuple containing if investment amount is fixed, and lower/upper bound of the same if not (if yes lower = upper)
+     * @return tuple containing if investment amount is fixed
      */
     function getInvestmentRules()
     public
     view
-    returns (bool,uint,uint,uint,bool)
+    returns (bool,uint,bool)
     {
         return (
             isFixedInvestmentAmount,
-            minContributionAmountWei,
-            maxContributionAmountWei,
             campaignHardCapWei,
             endCampaignOnceGoalReached
         );
@@ -358,12 +356,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             if(referrerPlasma2TotalEarnings2key[plasma_address] > 0) {
                 isReferrer = true;
             }
-
-//            if(flag == false) {
-//                //referrer is address in signature
-//                //plasma_address is plasma address of the address requested in method
-//                referrerTotalBalance  = getTotalReferrerEarnings(referrer, eth_address);
-//            }
 
             return abi.encodePacked(
                 amountConverterSpent,

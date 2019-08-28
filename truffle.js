@@ -2,7 +2,7 @@
 require('babel-register');
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const LedgerProvider = require('./LedgerProvider');
-const config = require('./accountsConfig.json');
+const config = require('./configurationFiles/accountsConfig.json');
 
 const mnemonic = config.mnemonic;
 const infuraApiKey = config.infuraApiKey;

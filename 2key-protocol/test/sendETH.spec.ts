@@ -16,7 +16,7 @@ const syncTwoKeyNetId = env.SYNC_NET_ID;
 
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
-let config = require('../../accountsConfig.json');
+let config = require('../../configurationFiles/accountsConfig.json');
 
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {

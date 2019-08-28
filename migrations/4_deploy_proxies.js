@@ -47,9 +47,9 @@ const IncentiveModels = artifacts.require('IncentiveModels');
 const fs = require('fs');
 const path = require('path');
 
-const proxyFile = path.join(__dirname, '../build/contracts/proxyAddresses.json');
-const deploymentConfigFile = path.join(__dirname, '../deploymentConfig.json');
-
+const proxyFile = path.join(__dirname, '../configurationFiles/proxyAddresses.json');
+const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
+const addressesFile = path.join(__dirname, '../configurationFiles/contractNamesToProxyAddresses.json');
 
 module.exports = function deploy(deployer) {
     const { network_id } = deployer;
@@ -182,6 +182,7 @@ module.exports = function deploy(deployer) {
                     });
                 }
                 fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                fs.writeFileSync(addressesFile, JSON.stringify(contractNameToProxyAddress, null, 4));
             })
             .then(() => deployer.deploy(TwoKeyEconomy,contractNameToProxyAddress["TwoKeyAdmin"], TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())

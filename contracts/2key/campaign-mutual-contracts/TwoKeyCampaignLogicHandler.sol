@@ -40,6 +40,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
 
+    uint public ALLOWED_GAP;
     string public currency; // Currency campaign is currently in
 
     uint public campaignRaisedAlready;
