@@ -44,6 +44,26 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
         emit VersionAdded(version, implementation);
     }
 
+    function addVersionDuringCreation(
+        string contractLogicName,
+        string contractStorageName,
+        address contractLogicImplementation,
+        address contractStorageImplementation,
+        string version
+    )
+    public
+    onlyMaintainer
+    {
+        // Can be called only when we're creating first time contracts
+        require(keccak256(version) == keccak256("1.0.0"));
+
+        versions[contractLogicName][version] = contractLogicImplementation;
+        versions[contractStorageName][version] = contractStorageImplementation;
+
+        contractNameToLatestVersionName[contractLogicName] = version;
+        contractNameToLatestVersionName[contractStorageName] = version;
+    }
+
     /**
      * @dev Tells the address of the implementation for a given version
      * @param version to query the implementation of

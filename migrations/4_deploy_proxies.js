@@ -6,7 +6,6 @@ const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
-const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
 const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
@@ -40,7 +39,7 @@ const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
-
+const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -106,6 +105,19 @@ module.exports = function deploy(deployer) {
          TwoKeySignatureValidator
     };
 
+    let contractLogicArtifactsPlasma = {
+        TwoKeyPlasmaEvents,
+        TwoKeyPlasmaMaintainersRegistry,
+        TwoKeyPlasmaRegistry
+    };
+
+    let contractStorageArtifactsPlasma = {
+        TwoKeyPlasmaEventsStorage,
+        TwoKeyPlasmaMaintainersRegistryStorage,
+        TwoKeyPlasmaRegistryStorage,
+    };
+
+
     /**
      * Function to determine and return truffle build of selected contract
      * @type {function(*)}
@@ -115,13 +127,15 @@ module.exports = function deploy(deployer) {
             return contractLogicArtifacts[contractName]
         } else if (contractStorageArtifacts[contractName]) {
             return contractStorageArtifacts[contractName]
+        } else if (contractLogicArtifactsPlasma[contractName]) {
+            return contractLogicArtifactsPlasma[contractName];
+        } else if (contractStorageArtifactsPlasma[contractName]) {
+            return (contractStorageArtifactsPlasma[contractName]);
         }
         else {
             return "Wrong name";
         }
     });
-
-
 
 
     const maintainerAddresses = deploymentObject[deploymentNetwork].maintainers;
@@ -217,153 +231,58 @@ module.exports = function deploy(deployer) {
             })
             .then(() => true)
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
-        let proxyAddressTwoKeyPlasmaEvents;
-        let proxyAddressTwoKeyPlasmaEventsSTORAGE;
-        let proxyAddressTwoKeyPlasmaMaintainersRegistry;
-        let proxyAddressTwoKeyPlasmaMaintainersRegistrySTORAGE;
-        let proxyAddressTwoKeyPlasmaRegistry;
-        let proxyAddressTwoKeyPlasmaRegistryStorage;
+        deployer.then(async () => {
+                let registry = TwoKeyPlasmaSingletoneRegistry.at(TwoKeyPlasmaSingletoneRegistry.address);
 
-        const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
+            let upgradableLogicContractsPlasma = Object.keys(contractLogicArtifactsPlasma);
+            let upgradableStorageContractsPlasma = Object.keys(contractStorageArtifactsPlasma);
 
-        deployer.link(Call, TwoKeyPlasmaEvents);
-        deployer.link(Call, TwoKeyPlasmaRegistry);
-        deployer.deploy(TwoKeyPlasmaEvents)
-            .then(() => deployer.deploy(TwoKeyPlasmaMaintainersRegistry))
-            .then(() => TwoKeyPlasmaMaintainersRegistry.deployed())
-            .then(() => deployer.deploy(TwoKeyPlasmaRegistry))
-            .then(() => TwoKeyPlasmaRegistry.deployed())
-            .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry)) //adding empty admin address
-            .then(() => TwoKeyPlasmaSingletoneRegistry.deployed().then(async (registry) => {
-                await new Promise(async(resolve,reject) => {
+            /* eslint-disable no-await-in-loop */
+            for (let i = 0; i < upgradableLogicContractsPlasma.length; i++) {
+                await new Promise(async (resolve, reject) => {
                     try {
-                        console.log('... Adding TwoKeyPlasmaEvents to Plasma Proxy registry as valid implementation');
+                        console.log('-----------------------------------------------------------------------------------');
+                        console.log('... Adding ' + upgradableLogicContractsPlasma[i] + ' to Proxy registry as valid implementation');
+                        let contractName = upgradableLogicContractsPlasma[i];
+                        let contractStorageName = upgradableStorageContractsPlasma[i];
 
-                        let txHash = await registry.addVersion("TwoKeyPlasmaEvents", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaEvents.address);
-                        txHash = await registry.addVersion("TwoKeyPlasmaEventsStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaEventsStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyPlasmaEvents", "TwoKeyPlasmaEventsStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
+                        let txHash = await registry.addVersionDuringCreation(
+                            contractName,
+                            contractStorageName,
+                            getContractPerName(contractName).address,
+                            getContractPerName(contractStorageName).address,
+                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                        );
 
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        const twoKeyPlasmaEvents = fileObject.TwoKeyPlasmaEvents || {};
-                        twoKeyPlasmaEvents[network_id] = {
-                            'implementationAddressLogic': TwoKeyPlasmaEvents.address,
+                        let { logs } = await registry.createProxy(
+                            contractName,
+                            contractStorageName,
+                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                        );
+
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+
+                        const jsonObject = fileObject[contractName] || {};
+                        jsonObject[network_id] = {
+                            'implementationAddressLogic': getContractPerName(contractName).address,
                             'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyPlasmaEventsStorage.address,
+                            'implementationAddressStorage': getContractPerName(contractStorageName).address,
                             'StorageProxy': storageProxy,
                         };
 
-                        proxyAddressTwoKeyPlasmaEvents = logicProxy;
-                        proxyAddressTwoKeyPlasmaEventsSTORAGE = storageProxy;
-                        fileObject['TwoKeyPlasmaEvents'] = twoKeyPlasmaEvents;
+                        contractNameToProxyAddress[contractName] = logicProxy;
+                        contractNameToProxyAddress[contractStorageName] = storageProxy;
 
-                        resolve(proxyAddressTwoKeyPlasmaEventsSTORAGE);
+                        fileObject[contractName] = jsonObject;
+                        resolve(logicProxy);
                     } catch (e) {
                         reject(e);
                     }
                 });
-
-                await new Promise(async(resolve,reject) => {
-                    try {
-                        console.log('... Adding TwoKeyPlasmaRegistry to Plasma Proxy registry as valid implementation');
-
-                        let txHash = await registry.addVersion("TwoKeyPlasmaRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyPlasmaRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaRegistryStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyPlasmaRegistry", "TwoKeyPlasmaRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        const twoKeyPlasmaEventsReg = fileObject.TwoKeyPlasmaEventsRegistry || {};
-                        twoKeyPlasmaEventsReg[network_id] = {
-                            'implementationAddressLogic': TwoKeyPlasmaRegistry.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyPlasmaRegistryStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyPlasmaRegistry = logicProxy;
-                        proxyAddressTwoKeyPlasmaRegistryStorage = storageProxy;
-                        fileObject['TwoKeyPlasmaRegistry'] = twoKeyPlasmaEventsReg;
-
-                        resolve(proxyAddressTwoKeyPlasmaEventsSTORAGE);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async(resolve,reject) => {
-                    try {
-                        console.log('... Adding TwoKeyPlasmaMaintainersRegistry');
-                        let txHash = await registry.addVersion("TwoKeyPlasmaMaintainersRegistry", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaMaintainersRegistry.address);
-                        txHash = await registry.addVersion("TwoKeyPlasmaMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS, TwoKeyPlasmaMaintainersRegistryStorage.address);
-                        let { logs } = await registry.createProxy("TwoKeyPlasmaMaintainersRegistry", "TwoKeyPlasmaMaintainersRegistryStorage", INITIAL_VERSION_OF_ALL_SINGLETONS);
-
-                        let { logicProxy , storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-                        const twoKeyPlasmaMaintainersRegistry = fileObject.TwoKeyPlasmaMaintainersRegistry || {};
-                        twoKeyPlasmaMaintainersRegistry[network_id] = {
-                            'implementationAddressLogic': TwoKeyPlasmaMaintainersRegistry.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyPlasmaMaintainersRegistryStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        proxyAddressTwoKeyPlasmaMaintainersRegistry = logicProxy;
-                        proxyAddressTwoKeyPlasmaMaintainersRegistrySTORAGE = storageProxy;
-                        fileObject['TwoKeyPlasmaMaintainersRegistry'] = twoKeyPlasmaMaintainersRegistry;
-
-                        fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-                        resolve(proxyAddressTwoKeyPlasmaMaintainersRegistrySTORAGE);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
-
-            }))
-            .then(async () => {
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        console.log('Setting initial params in plasma contract on plasma network');
-                        let txHash = await TwoKeyPlasmaEvents.at(proxyAddressTwoKeyPlasmaEvents).setInitialParams
-                        (
-                            TwoKeyPlasmaSingletoneRegistry.address,
-                            proxyAddressTwoKeyPlasmaEventsSTORAGE,
-                        );
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        console.log('Setting initial params in plasma registry contract on plasma network');
-                        let txHash = await TwoKeyPlasmaRegistry.at(proxyAddressTwoKeyPlasmaRegistry).setInitialParams
-                        (
-                            TwoKeyPlasmaSingletoneRegistry.address,
-                            proxyAddressTwoKeyPlasmaRegistryStorage
-                        );
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        console.log('Setting initial params in Maintainers contract on plasma network');
-                        let txHash = await TwoKeyPlasmaMaintainersRegistry.at(proxyAddressTwoKeyPlasmaMaintainersRegistry).setInitialParams
-                        (
-                            TwoKeyPlasmaSingletoneRegistry.address,
-                            proxyAddressTwoKeyPlasmaMaintainersRegistrySTORAGE,
-                            maintainerAddresses
-                        );
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            })
-            .then(() => true)
-            .catch((err) => {
-                console.log('\x1b[31m', 'Error:', err.message, '\x1b[0m');
-            });
+            }
+            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+            fs.writeFileSync(addressesFile, JSON.stringify(contractNameToProxyAddress, null, 4));
+        })
+        .then(() => true);
     }
 };

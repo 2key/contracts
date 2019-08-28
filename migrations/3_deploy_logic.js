@@ -16,6 +16,11 @@ const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
+
+const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
+const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
+
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -49,6 +54,7 @@ module.exports = function deploy(deployer) {
 
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
+
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
         deployer.deploy(TwoKeyCongress, 24 * 60, initialCongressMembers, initialCongressMemberNames, votingPowers)
             .then(() => TwoKeyCongress.deployed())
@@ -83,5 +89,16 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyMaintainersRegistry.deployed())
             .then(() => deployer.deploy(TwoKeySingletonesRegistry))
             .then(() => true);
+    }
+    else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+        deployer.link(Call, TwoKeyPlasmaEvents);
+        deployer.link(Call, TwoKeyPlasmaRegistry);
+        deployer.deploy(TwoKeyPlasmaEvents)
+            .then(() => deployer.deploy(TwoKeyPlasmaMaintainersRegistry))
+            .then(() => TwoKeyPlasmaMaintainersRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeyPlasmaRegistry))
+            .then(() => TwoKeyPlasmaRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry)) //adding empty admin address
+            .then(() => TwoKeyPlasmaSingletoneRegistry.deployed())
     }
 }

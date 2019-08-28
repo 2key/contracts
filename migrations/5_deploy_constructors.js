@@ -16,6 +16,11 @@ const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry')
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 
+const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
+const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
+const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
+const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
+
 const fs = require('fs');
 const path = require('path');
 const addressesFile = path.join(__dirname, '../configurationFiles/contractNamesToProxyAddresses.json');
@@ -55,191 +60,239 @@ module.exports = function deploy(deployer) {
         kyberAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
     }
 
-    deployer.then(async () => {
-        await new Promise(async (resolve,reject) => {
-            try {
-                console.log('----------------------------------------------------------------');
-                console.log('Setting initial parameters in contract TwoKeyMaintainersRegistry');
-                let txHash = await TwoKeyMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyMaintainersRegistry"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyMaintainersRegistryStorage"],
-                    maintainerAddresses
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
+        deployer.then(async () => {
+            await new Promise(async (resolve,reject) => {
+                try {
+                    console.log('----------------------------------------------------------------');
+                    console.log('Setting initial parameters in contract TwoKeyMaintainersRegistry');
+                    let txHash = await TwoKeyMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyMaintainersRegistry"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyMaintainersRegistryStorage"],
+                        maintainerAddresses
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async (resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeySignatureValidator');
-                let txHash = await TwoKeySignatureValidator.at(contractNameToProxyAddress["TwoKeySignatureValidator"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeySignatureValidatorStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async (resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeySignatureValidator');
+                    let txHash = await TwoKeySignatureValidator.at(contractNameToProxyAddress["TwoKeySignatureValidator"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeySignatureValidatorStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
-                let txHash = await TwoKeyCommunityTokenPool.at(contractNameToProxyAddress["TwoKeyCommunityTokenPool"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    TwoKeyEconomy.address,
-                    contractNameToProxyAddress["TwoKeyCommunityTokenPoolStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
+                    let txHash = await TwoKeyCommunityTokenPool.at(contractNameToProxyAddress["TwoKeyCommunityTokenPool"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        TwoKeyEconomy.address,
+                        contractNameToProxyAddress["TwoKeyCommunityTokenPoolStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
-                let txHash = await TwoKeyLongTermTokenPool.at(contractNameToProxyAddress["TwoKeyLongTermTokenPool"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    TwoKeyEconomy.address,
-                    contractNameToProxyAddress["TwoKeyLongTermTokenPoolStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
+                    let txHash = await TwoKeyLongTermTokenPool.at(contractNameToProxyAddress["TwoKeyLongTermTokenPool"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        TwoKeyEconomy.address,
+                        contractNameToProxyAddress["TwoKeyLongTermTokenPoolStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyDeepFreezeTokenPool');
-                let txHash = await TwoKeyDeepFreezeTokenPool.at(contractNameToProxyAddress["TwoKeyDeepFreezeTokenPool"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    TwoKeyEconomy.address,
-                    contractNameToProxyAddress["TwoKeyCommunityTokenPool"],
-                    contractNameToProxyAddress["TwoKeyDeepFreezeTokenPoolStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyDeepFreezeTokenPool');
+                    let txHash = await TwoKeyDeepFreezeTokenPool.at(contractNameToProxyAddress["TwoKeyDeepFreezeTokenPool"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        TwoKeyEconomy.address,
+                        contractNameToProxyAddress["TwoKeyCommunityTokenPool"],
+                        contractNameToProxyAddress["TwoKeyDeepFreezeTokenPoolStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
-                let txHash = await TwoKeyCampaignValidator.at(contractNameToProxyAddress["TwoKeyCampaignValidator"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyCampaignValidatorStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
+                    let txHash = await TwoKeyCampaignValidator.at(contractNameToProxyAddress["TwoKeyCampaignValidator"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyCampaignValidatorStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyEventSource');
-                let txHash = await TwoKeyEventSource.at(contractNameToProxyAddress["TwoKeyEventSource"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyEventSourceStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyEventSource');
+                    let txHash = await TwoKeyEventSource.at(contractNameToProxyAddress["TwoKeyEventSource"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyEventSourceStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
-                let txHash = await TwoKeyBaseReputationRegistry.at(contractNameToProxyAddress["TwoKeyBaseReputationRegistry"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyBaseReputationRegistryStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
+                    let txHash = await TwoKeyBaseReputationRegistry.at(contractNameToProxyAddress["TwoKeyBaseReputationRegistry"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyBaseReputationRegistryStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
-                let txHash = await TwoKeyExchangeRateContract.at(contractNameToProxyAddress["TwoKeyExchangeRateContract"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyExchangeRateStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
+                    let txHash = await TwoKeyExchangeRateContract.at(contractNameToProxyAddress["TwoKeyExchangeRateContract"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyExchangeRateStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
-                let txHash = await TwoKeyUpgradableExchange.at(contractNameToProxyAddress["TwoKeyUpgradableExchange"]).setInitialParams(
-                    TwoKeyEconomy.address,
-                    DAI_ROPSTEN_ADDRESS,
-                    kyberAddress,
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyUpgradableExchangeStorage"]
-                );
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
+                    let txHash = await TwoKeyUpgradableExchange.at(contractNameToProxyAddress["TwoKeyUpgradableExchange"]).setInitialParams(
+                        TwoKeyEconomy.address,
+                        DAI_ROPSTEN_ADDRESS,
+                        kyberAddress,
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyUpgradableExchangeStorage"]
+                    );
 
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyAdmin');
-                let txHash = await TwoKeyAdmin.at(contractNameToProxyAddress["TwoKeyAdmin"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyAdminStorage"],
-                    TwoKeyCongress.address,
-                    TwoKeyEconomy.address,
-                    deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyAdmin');
+                    let txHash = await TwoKeyAdmin.at(contractNameToProxyAddress["TwoKeyAdmin"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyAdminStorage"],
+                        TwoKeyCongress.address,
+                        TwoKeyEconomy.address,
+                        deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyFactory');
-                let txHash = await TwoKeyFactory.at(contractNameToProxyAddress["TwoKeyFactory"]).setInitialParams(
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyFactoryStorage"]
-                );
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyFactory');
+                    let txHash = await TwoKeyFactory.at(contractNameToProxyAddress["TwoKeyFactory"]).setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyFactoryStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
-        await new Promise(async(resolve,reject) => {
-            try {
-                console.log('Setting initial parameters in contract TwoKeyRegistry');
-                let txHash = await TwoKeyRegistry.at(contractNameToProxyAddress["TwoKeyRegistry"]).setInitialParams
-                (
-                    TwoKeySingletonesRegistry.address,
-                    contractNameToProxyAddress["TwoKeyRegistryStorage"]
-                );
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyRegistry');
+                    let txHash = await TwoKeyRegistry.at(contractNameToProxyAddress["TwoKeyRegistry"]).setInitialParams
+                    (
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyRegistryStorage"]
+                    );
 
-                resolve(txHash);
-            } catch (e) {
-                reject(e);
-            }
-        });
-    })
-    .then(() => true);
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        })
+        .then(() => true);
+    } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+        deployer.then(async() => {
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Setting initial params in plasma contract on plasma network');
+                        let txHash = await TwoKeyPlasmaEvents.at(contractNameToProxyAddress["TwoKeyPlasmaEvents"]).setInitialParams
+                        (
+                            TwoKeyPlasmaSingletoneRegistry.address,
+                            contractNameToProxyAddress["TwoKeyPlasmaEventsStorage"],
+                        );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Setting initial params in plasma registry contract on plasma network');
+                        let txHash = await TwoKeyPlasmaRegistry.at(contractNameToProxyAddress["TwoKeyPlasmaRegistry"]).setInitialParams
+                        (
+                            TwoKeyPlasmaSingletoneRegistry.address,
+                            contractNameToProxyAddress["TwoKeyPlasmaRegistryStorage"]
+                        );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Setting initial params in Maintainers contract on plasma network');
+                        let txHash = await TwoKeyPlasmaMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyPlasmaMaintainersRegistry"]).setInitialParams
+                        (
+                            TwoKeyPlasmaSingletoneRegistry.address,
+                            contractNameToProxyAddress["TwoKeyPlasmaMaintainersRegistryStorage"],
+                            maintainerAddresses
+                        );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            })
+            .then(() => true)
+    }
 }
