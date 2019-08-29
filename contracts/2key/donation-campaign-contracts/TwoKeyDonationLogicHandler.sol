@@ -30,7 +30,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     address twoKeyEventSource;
     address contractor;
     address moderator;
-    uint GAP;
     uint public campaignRaisedAlready;
     uint powerLawFactor;
     uint campaignStartTime; // Time when campaign starts
@@ -78,11 +77,15 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         moderator = _moderator;
         currency = _currency;
 
+        if(keccak256(_currency) == keccak256('ETH')) {
+            require(numberValues[3] >= (10**16));
+        } else {
+            require(numberValues[3] >= (10**18));
+        }
         twoKeySingletoneRegistry = twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
-        GAP = 1000000000000000;
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
     }
@@ -104,7 +107,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         } else {
             uint rate = getRateFromExchange();
             uint conversionAmountConverted = (conversionAmountEthWEI.mul(rate)).div(10**18);
-            if(leftToSpendInCampaignCurrency.add(GAP) >= conversionAmountConverted && conversionAmountConverted.add(GAP) >= minDonationAmountWei) {
+            if(leftToSpendInCampaignCurrency.add(1000) >= conversionAmountConverted && conversionAmountConverted.add(1000) >= minDonationAmountWei) {
                 return true;
             }
         }
@@ -575,7 +578,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
      */
     function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignOnceGoalReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignGoal.add(minDonationAmountWei).add(GAP)); //small GAP
+            require(campaignRaisedIncludingConversion <= campaignGoal.add(minDonationAmountWei)); //small GAP
         }
         return true;
     }
@@ -588,7 +591,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignOnceGoalReached == true && campaignRaisedAlready.add(GAP).add(minDonationAmountWei) >= campaignGoal) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedAlready.add(minDonationAmountWei) >= campaignGoal) {
             return true;
         }
         return false;
