@@ -38,7 +38,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     uint minDonationAmountWei; // Minimal donation amount
     uint maxDonationAmountWei; // Maximal donation amount
     uint campaignGoal; // Goal of the campaign, how many funds to raise
-    bool endCampaignOnceGoalReached;
+    bool public endCampaignOnceGoalReached;
     string public currency;
 
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -96,7 +96,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     }
 
     function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) internal view returns (bool) {
-        uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpend(converter);
+        uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpendInTermsOfMinMaxContribution(converter);
         if(keccak256(currency) == keccak256("ETH")) {
             if(leftToSpendInCampaignCurrency >= conversionAmountEthWEI && conversionAmountEthWEI >= minDonationAmountWei) {
                 return true;
@@ -111,10 +111,29 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         return false;
     }
 
-    function checkHowMuchUserCanSpend(
+    function checkHowMuchUserCanConvert(
         address _converter
     )
     public
+    view
+    returns (uint)
+    {
+        uint maximumPossibleToConvert = checkHowMuchUserCanSpendInTermsOfMinMaxContribution(_converter);
+        if(endCampaignOnceGoalReached == true) {
+            uint leftover = campaignGoal.sub(campaignRaisedAlready);
+            if(leftover > maximumPossibleToConvert) {
+                return maximumPossibleToConvert;
+            } else {
+                return leftover;
+            }
+        }
+        return maximumPossibleToConvert;
+    }
+
+    function checkHowMuchUserCanSpendInTermsOfMinMaxContribution(
+        address _converter
+    )
+    internal
     view
     returns (uint)
     {
