@@ -58,20 +58,10 @@ module.exports = function deploy(deployer) {
         fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
     }
 
-    let deploymentObject = {};
-    if( fs.existsSync(deploymentConfigFile)) {
-        deploymentObject = JSON.parse(fs.readFileSync(deploymentConfigFile, {encoding: 'utf8'}));
-    }
-
-    let deploymentNetwork;
-    if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
-        deploymentNetwork = 'dev-local-environment'
-    } else if (deployer.network.startsWith('public') || deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
-        deploymentNetwork = 'ropsten-environment';
-    }
-
-
     let contractNameToProxyAddress = {};
+    if (fs.existsSync(addressesFile)) {
+        contractNameToProxyAddress = JSON.parse(fs.readFileSync(addressesFile, { encoding: 'utf8' }));
+    }
 
     let contractStorageArtifacts = {
         TwoKeyUpgradableExchangeStorage,
@@ -138,7 +128,6 @@ module.exports = function deploy(deployer) {
     });
 
 
-    const maintainerAddresses = deploymentObject[deploymentNetwork].maintainers;
     const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
 
 

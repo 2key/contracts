@@ -18,10 +18,11 @@ const IncentiveModels = artifacts.require('IncentiveModels');
 const fs = require('fs');
 const path = require('path');
 
-const { incrementVersion } = require('../helpers');
+const { incrementVersion, getGitBranch } = require('../helpers');
 
 
 module.exports = function deploy(deployer) {
+
     if(!deployer.network.startsWith('private') && !deployer.network.startsWith('plasma')) {
         let TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
         if(deployer.network.startsWith('dev')) {
@@ -45,6 +46,7 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.link(Call, TwoKeyDonationCampaign))
         .then(() => deployer.deploy(TwoKeyDonationCampaign))
         .then(async () => {
+
             console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
                 try {

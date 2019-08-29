@@ -30,7 +30,7 @@ const path = require('path');
 
 const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
 
-module.exports = function deploy(deployer) {
+const instantiateConfigs = ((deployer) => {
     let deploymentObject = {};
     if (fs.existsSync(deploymentConfigFile)) {
         deploymentObject = JSON.parse(fs.readFileSync(deploymentConfigFile, {encoding: 'utf8'}));
@@ -43,13 +43,21 @@ module.exports = function deploy(deployer) {
         deploymentNetwork = 'ropsten-environment';
     }
 
+    return deploymentObject[deploymentNetwork];
+
+});
+module.exports = function deploy(deployer) {
+
+
+    let deploymentConfig = instantiateConfigs(deployer);
+
     /**
      * Initial voting powers for congress members
      * @type {number[]}
      */
-    let votingPowers = deploymentObject[deploymentNetwork].votingPowers;
-    let initialCongressMembers = deploymentObject[deploymentNetwork].initialCongressMembers;
-    let initialCongressMemberNames = deploymentObject[deploymentNetwork].initialCongressMembersNames;
+    let votingPowers = deploymentConfig.votingPowers;
+    let initialCongressMembers = deploymentConfig.initialCongressMembers;
+    let initialCongressMemberNames = deploymentConfig.initialCongressMembersNames;
 
 
     deployer.deploy(Call);

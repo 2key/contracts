@@ -27,44 +27,50 @@ const addressesFile = path.join(__dirname, '../configurationFiles/contractNamesT
 const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
 
 
-module.exports = function deploy(deployer) {
-
+const instantiateConfigs = ((deployer) => {
     let deploymentObject = {};
-    if( fs.existsSync(deploymentConfigFile)) {
+    if (fs.existsSync(deploymentConfigFile)) {
         deploymentObject = JSON.parse(fs.readFileSync(deploymentConfigFile, {encoding: 'utf8'}));
     }
 
     let deploymentNetwork;
-    if(deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
         deploymentNetwork = 'dev-local-environment'
     } else if (deployer.network.startsWith('public') || deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deploymentNetwork = 'ropsten-environment';
     }
 
-    let contractNameToProxyAddress = {};
+    return deploymentObject[deploymentNetwork];
+});
 
+module.exports = function deploy(deployer) {
+
+    let deploymentConfig = instantiateConfigs(deployer);
+
+    let contractNameToProxyAddress = {};
     if (fs.existsSync(addressesFile)) {
         contractNameToProxyAddress = JSON.parse(fs.readFileSync(addressesFile, { encoding: 'utf8' }));
     }
 
-    const maintainerAddresses = deploymentObject[deploymentNetwork].maintainers;
-    const rewardsReleaseAfter = deploymentObject[deploymentNetwork].admin2keyReleaseDate; //1 January 2020
-    const KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN = '0x818E6FECD516Ecc3849DAf6845e3EC868087B755';
+    const maintainerAddresses = deploymentConfig.maintainers;
+    const rewardsReleaseAfter = deploymentConfig.admin2keyReleaseDate; //1 January 2020
     const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
 
     let kyberAddress;
 
     if(deployer.network.startsWith('dev')) {
         kyberAddress = KyberNetworkTestMockContract.address;
-    } else {
-        kyberAddress = KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+    } else if (deployer.network.startsWith('public')) {
+        kyberAddress = deploymentConfig.KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
     }
+
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
         deployer.then(async () => {
+
+
             await new Promise(async (resolve,reject) => {
                 try {
-                    console.log('----------------------------------------------------------------');
                     console.log('Setting initial parameters in contract TwoKeyMaintainersRegistry');
                     let txHash = await TwoKeyMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyMaintainersRegistry"]).setInitialParams(
                         TwoKeySingletonesRegistry.address,
@@ -76,6 +82,7 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             });
+
 
             await new Promise(async (resolve,reject) => {
                 try {
@@ -89,6 +96,7 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             });
+
 
             await new Promise(async(resolve,reject) => {
                 try {
@@ -104,6 +112,7 @@ module.exports = function deploy(deployer) {
                 }
             });
 
+
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
@@ -117,6 +126,7 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             });
+
 
             await new Promise(async(resolve,reject) => {
                 try {
@@ -133,6 +143,7 @@ module.exports = function deploy(deployer) {
                 }
             });
 
+
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
@@ -145,6 +156,7 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             });
+
 
             await new Promise(async(resolve,reject) => {
                 try {
@@ -159,6 +171,7 @@ module.exports = function deploy(deployer) {
                 }
             });
 
+
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
@@ -172,6 +185,7 @@ module.exports = function deploy(deployer) {
                 }
             });
 
+
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
@@ -184,6 +198,7 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             });
+
 
             await new Promise(async(resolve,reject) => {
                 try {
@@ -219,6 +234,7 @@ module.exports = function deploy(deployer) {
                 }
             });
 
+
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyFactory');
@@ -231,6 +247,7 @@ module.exports = function deploy(deployer) {
                     reject(e);
                 }
             });
+
 
             await new Promise(async(resolve,reject) => {
                 try {
@@ -249,7 +266,10 @@ module.exports = function deploy(deployer) {
         })
         .then(() => true);
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+
         deployer.then(async() => {
+
+
                 await new Promise(async (resolve,reject) => {
                     try {
                         console.log('Setting initial params in plasma contract on plasma network');
@@ -264,6 +284,7 @@ module.exports = function deploy(deployer) {
                     }
                 });
 
+
                 await new Promise(async (resolve,reject) => {
                     try {
                         console.log('Setting initial params in plasma registry contract on plasma network');
@@ -277,6 +298,7 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 });
+
 
                 await new Promise(async (resolve,reject) => {
                     try {

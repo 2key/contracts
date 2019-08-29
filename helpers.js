@@ -1,5 +1,6 @@
 const childProcess = require('child_process');
 const rimraf = require('rimraf');
+const simpleGit = require('simple-git/promise');
 
 
 const incrementVersion = ((version) => {
@@ -91,10 +92,29 @@ const rmDir = (dir) => new Promise((resolve) => {
     })
 });
 
+/**
+ *
+ * @returns {Promise<any>}
+ */
+const getGitBranch = () => new Promise(async(resolve,reject) => {
+    try {
+        const currentRepo = simpleGit();
+        let branchStatus = await currentRepo.status();
+        return branchStatus.current;
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+
+
 
 module.exports = {
     incrementVersion,
     runProcess,
     runMigration4,
-    runUpdateMigration
+    runUpdateMigration,
+    rmDir,
+    getGitBranch
 };
