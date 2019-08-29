@@ -865,7 +865,7 @@ async function main() {
             process.exit(0);
             break;
         case '--slack':
-            await slack_message('v1.1.47-develop','v1.1.46-develop','develop');
+            await slack_message('v1.1.48-develop','v1.1.47-develop','develop');
             process.exit(0);
         default:
             await deploy();
