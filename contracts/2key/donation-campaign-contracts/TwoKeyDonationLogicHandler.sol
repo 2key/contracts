@@ -30,7 +30,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
     address twoKeyEventSource;
     address contractor;
     address moderator;
-
+    uint GAP;
     uint public campaignRaisedAlready;
     uint powerLawFactor;
     uint campaignStartTime; // Time when campaign starts
@@ -82,7 +82,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
-
+        GAP = 1000000000000000;
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
     }
@@ -104,7 +104,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         } else {
             uint rate = getRateFromExchange();
             uint conversionAmountConverted = (conversionAmountEthWEI.mul(rate)).div(10**18);
-            if(leftToSpendInCampaignCurrency >= conversionAmountConverted && conversionAmountConverted >= minDonationAmountWei) {
+            if(leftToSpendInCampaignCurrency.add(GAP) >= conversionAmountConverted && conversionAmountConverted.add(GAP) >= minDonationAmountWei) {
                 return true;
             }
         }
@@ -575,7 +575,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
      */
     function canConversionBeCreatedInTermsOfCampaignGoal(uint campaignRaisedIncludingConversion) internal view returns (bool) {
         if(endCampaignOnceGoalReached == true) {
-            require(campaignRaisedIncludingConversion <= campaignGoal + minDonationAmountWei); //small GAP
+            require(campaignRaisedIncludingConversion <= campaignGoal.add(minDonationAmountWei).add(GAP)); //small GAP
         }
         return true;
     }
@@ -588,7 +588,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncent
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignOnceGoalReached == true && campaignRaisedAlready + minDonationAmountWei >= campaignGoal) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedAlready.add(GAP).add(minDonationAmountWei) >= campaignGoal) {
             return true;
         }
         return false;

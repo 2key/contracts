@@ -18,7 +18,6 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
 
     bool initialized;
-
     address public twoKeyDonationConversionHandler; // Contract which will handle all donations
     address public twoKeyDonationLogicHandler;
 

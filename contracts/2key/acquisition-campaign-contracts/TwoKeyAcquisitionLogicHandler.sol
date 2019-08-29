@@ -22,7 +22,7 @@ import "../../openzeppelin-solidity/contracts/ownership/HasNoEther.sol";
 contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncentiveModels {
 
     using SafeMath for uint256;
-
+    uint GAP;
     bool isCampaignInitialized;
 
     bool public IS_CAMPAIGN_ACTIVE;
@@ -126,7 +126,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         ownerPlasma = plasmaOf(contractor);
         twoKeyConversionHandler = _twoKeyConversionHandler;
-
+        GAP = 1000000000000000;
         isCampaignInitialized = true;
     }
 
@@ -241,7 +241,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             (alreadySpentETHWei,alreadySpentFIATWEI,) = ITwoKeyConversionHandler(twoKeyConversionHandler).getConverterPurchasesStats(converter);
 
             uint leftToSpendFiat = checkHowMuchUserCanConvert(alreadySpentETHWei,alreadySpentFIATWEI);
-            if(leftToSpendFiat >= amountWillingToSpendFiatWei && minContributionETHorFiatCurrency <= amountWillingToSpendFiatWei) {
+            if(leftToSpendFiat.add(GAP) >= amountWillingToSpendFiatWei && minContributionETHorFiatCurrency <= amountWillingToSpendFiatWei.add(GAP)) {
                 return (true,leftToSpendFiat);
             } else {
                 return (false,leftToSpendFiat);
@@ -257,7 +257,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         if(keccak256(currency) == keccak256('ETH')) {
             //Adding a deviation of 1000 weis
-            if(leftToSpend.add(1000) > amountWillingToSpendEthWei && minContributionETHorFiatCurrency <= amountWillingToSpendEthWei) {
+            if(leftToSpend.add(GAP) > amountWillingToSpendEthWei && minContributionETHorFiatCurrency <= amountWillingToSpendEthWei) {
                 return(true, leftToSpend);
             } else {
                 return(false, leftToSpend);
@@ -266,7 +266,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
-            if(leftToSpend.add(1000) >= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat) {
+            if(leftToSpend.add(GAP) >= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat.add(GAP)) {
                 return (true,leftToSpend);
             } else {
                 return (false,leftToSpend);
@@ -278,7 +278,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     /**
      * @notice Function to check if campaign has ended
      */
-    function isCampaignEnded() internal view returns (bool) {
+    function isCampaignEnded() public view returns (bool) {
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
