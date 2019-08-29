@@ -649,7 +649,7 @@ async function deploy() {
             }
             await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
             process.chdir('../../');
-            
+
             //Run slack message
             await slack_message(npmVersionTag, oldVersion, branch_to_env[contractsStatus.current]);
         } else {
@@ -686,7 +686,7 @@ const slack_message = async (newVersion, oldVersion, devEnv) => {
         .toString().trim();
 
     let diffData = require('child_process')
-      .execSync(`git --no-pager log --no-color -p -1 ${oldVersion}..${newVersion}`)
+      .execSync(`git --no-pager log --no-color -p -1 ${oldVersion}..${newVersion} .`)
       .toString().trim();
 
     const body = {
@@ -865,7 +865,7 @@ async function main() {
             process.exit(0);
             break;
         case '--slack':
-            await slack_message();
+            await slack_message('v1.1.47-develop','v1.1.46-develop','develop');
             process.exit(0);
         default:
             await deploy();
