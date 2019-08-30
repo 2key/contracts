@@ -1,0 +1,6 @@
+---
+id: test_FungibleMockToken_TestB
+title: TestB
+---
+
+<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> TestB</h2><div class="source">Source: <a href="https://github.com/2keynet/web3-alpha/blob/v0.0.3/contracts/test/FungibleMockToken.sol" target="_blank">contracts/test/FungibleMockToken.sol</a></div></div><div class="index"><h2>Index</h2><ul><li><a href="test_FungibleMockToken_TestB.html#getTokens">getTokens</a></li><li><a href="test_FungibleMockToken_TestB.html#setTestBAndFt">setTestBAndFt</a></li></ul></div><div class="reference"><h2>Reference</h2><div class="functions"><h3>Functions</h3><ul><li><div class="item function"><span id="getTokens" class="anchor-marker"></span><h4 class="name">getTokens</h4><div class="body"><code class="signature">function <strong>getTokens</strong><span>() </span><span>public </span></code><hr/></div></div></li><li><div class="item function"><span id="setTestBAndFt" class="anchor-marker"></span><h4 class="name">setTestBAndFt</h4><div class="body"><code class="signature">function <strong>setTestBAndFt</strong><span>(address _ft) </span><span>public </span></code><hr/><dl><dt><span class="label-parameters">Parameters:</span></dt><dd><div><code>_ft</code> - address</div></dd></dl></div></div></li></ul></div></div></div>

@@ -1,0 +1,6 @@
+---
+id: 2key_upgradability_Upgradeable
+title: Upgradeable
+---
+
+<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> Upgradeable</h2><p class="base-contracts"><span>is</span> <a href="2key_upgradability_UpgradabilityStorage_UpgradeabilityStorage.html">UpgradeabilityStorage</a></p><div class="source">Source: <a href="https://github.com/2keynet/web3-alpha/blob/v0.0.3/contracts/2key/upgradability/Upgradeable.sol" target="_blank">contracts/2key/upgradability/Upgradeable.sol</a></div></div><div class="index"><h2>Index</h2><ul><li><a href="2key_upgradability_Upgradeable.html#initialize">initialize</a></li></ul></div><div class="reference"><h2>Reference</h2><div class="functions"><h3>Functions</h3><ul><li><div class="item function"><span id="initialize" class="anchor-marker"></span><h4 class="name">initialize</h4><div class="body"><code class="signature">function <strong>initialize</strong><span>(address sender) </span><span>public </span><span>payable </span></code><hr/><div class="description"><p>Validates the caller is the versions registry.</p></div><dl><dt><span class="label-parameters">Parameters:</span></dt><dd><div><code>sender</code> - representing the address deploying the initial behavior of the contract</div></dd></dl></div></div></li></ul></div></div></div>
