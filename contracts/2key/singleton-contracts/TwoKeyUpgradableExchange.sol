@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+
+import "../ERC20/ERC20.sol";
 
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
@@ -9,17 +10,16 @@ import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IBancorContract.sol";
 
+import "./ITwoKeySingletonUtils.sol";
+import "../upgradability/Upgradeable.sol";
+
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
-import "../libraries/SafeERC20.sol";
-import "../upgradability/Upgradeable.sol";
-import "./ITwoKeySingletonUtils.sol";
 
 
 contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     using SafeMath for uint256;
-    using SafeERC20 for ERC20;
 
     bool initialized;
 
@@ -142,7 +142,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         //Take the address of token from storage
         address tokenAddress = getAddress(keccak256("TWO_KEY_TOKEN"));
 
-        ERC20(tokenAddress).safeTransfer(_beneficiary, _tokenAmount);
+        ERC20(tokenAddress).transfer(_beneficiary, _tokenAmount);
     }
 
 
@@ -926,7 +926,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
         require(msg.sender == twoKeyAdmin);
-        ERC20(_erc20TokenAddress).safeTransfer(twoKeyAdmin, _tokenAmount);
+        ERC20(_erc20TokenAddress).transfer(twoKeyAdmin, _tokenAmount);
 
     }
 

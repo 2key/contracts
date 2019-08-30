@@ -12,3 +12,4 @@ contract UpgradabilityProxyAcquisition is Proxy, UpgradeabilityStorage {
         _implementation = registry.getVersion(_contractName, _version);
     }
 }
+

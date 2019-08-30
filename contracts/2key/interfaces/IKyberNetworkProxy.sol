@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
+import "../ERC20/ERC20.sol";
 
-import "../libraries/SafeERC20.sol";
 
 contract IKyberNetworkProxy {
     function swapEtherToToken(

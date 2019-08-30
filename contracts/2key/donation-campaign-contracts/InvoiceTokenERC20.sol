@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
-import "./ERC20.sol";
 import "../libraries/SafeMath.sol";
+import "../ERC20/ERC20.sol";
 
 /**
  * @author Nikola Madjarevic

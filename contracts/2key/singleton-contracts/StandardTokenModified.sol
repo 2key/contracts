@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "../../openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol";
 import "../libraries/SafeMath.sol";
+import "../ERC20/ERC20.sol";
 
 
 /**
  * @author Nikola Madjarevic added frozen transfer options
  */
-contract StandardTokenModified is ERC20Basic {
+contract StandardTokenModified is ERC20 {
 
     using SafeMath for uint256;
 
