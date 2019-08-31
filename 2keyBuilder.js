@@ -651,7 +651,7 @@ async function deploy() {
             process.chdir('../../');
 
             //Run slack message
-            await slack_message(npmVersionTag, oldVersion, branch_to_env[contractsStatus.current]);
+            await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
         } else {
             process.exit(0);
         }
