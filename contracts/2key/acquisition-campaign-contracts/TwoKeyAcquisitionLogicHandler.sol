@@ -22,7 +22,6 @@ import "../../openzeppelin-solidity/contracts/ownership/HasNoEther.sol";
 contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignIncentiveModels {
 
     using SafeMath for uint256;
-
     bool isCampaignInitialized;
 
     bool public IS_CAMPAIGN_ACTIVE;
@@ -113,6 +112,14 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
         campaignSoftCapWei = values[10];
 
         currency = _currency;
+        if(keccak256(_currency) == keccak256("ETH")) {
+            // 0.01 ether
+            require(values[0] >= (10**16));
+        } else {
+            // 1 dollar
+            require(values[0] >= (10**18));
+        }
+
         assetContractERC20 = _assetContractERC20;
         moderator = _moderator;
         contractor = _contractor;
@@ -126,7 +133,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
 
         ownerPlasma = plasmaOf(contractor);
         twoKeyConversionHandler = _twoKeyConversionHandler;
-
         isCampaignInitialized = true;
     }
 
@@ -266,7 +272,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei*rate).div(10**18);
             //Adding gap of 100 weis
-            if(leftToSpend.add(1000) >= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat) {
+            if(leftToSpend>= amountToBeSpentInFiat && minContributionETHorFiatCurrency <= amountToBeSpentInFiat) {
                 return (true,leftToSpend);
             } else {
                 return (false,leftToSpend);
@@ -278,7 +284,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignInc
     /**
      * @notice Function to check if campaign has ended
      */
-    function isCampaignEnded() internal view returns (bool) {
+    function isCampaignEnded() public view returns (bool) {
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
