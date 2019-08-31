@@ -296,6 +296,24 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     }
 
     /**
+    * TODO finish this
+  * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
+  * @param amountOfMoney is the ether balance person has on the contract
+  * @param receiver is the address of the person who withdraws money
+  */
+    function selfBuyTokensFromUpgradableExchange(
+        uint amountOfMoney,
+        address receiver
+    )
+    internal
+    returns (uint)
+    {
+        address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
+        uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+        return amountBought;
+    }
+
+    /**
       * @notice Function to delegate call to logic handler and update data, and buy tokens
       * @param _maxReferralRewardETHWei total reward in ether wei
       * @param _converter is the converter address
@@ -314,8 +332,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         uint totalBounty2keys;
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
-            //Buy tokens from upgradable exchange
-            totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+            //estimate how much Buy tokens from upgradable exchange
+            totalBounty2keys = selfBuyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
             //Handle refchain rewards
             ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).updateRefchainRewards(
                 _maxReferralRewardETHWei,
@@ -323,7 +341,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
                 _conversionId,
                 totalBounty2keys);
         }
-        reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
+        // TODO comment this?
+//        reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
         return totalBounty2keys;
     }
 
@@ -345,8 +364,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         // Balance which will go to moderator
         uint balance = moderatorFee.mul(100-networkFee).div(100);
 
-        uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
-        buyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
+        uint moderatorEarnings2key = selfBuyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
+        selfBuyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
 
         moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
     }

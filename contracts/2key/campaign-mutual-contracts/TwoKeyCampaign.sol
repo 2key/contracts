@@ -222,6 +222,17 @@ contract TwoKeyCampaign is ArcERC20 {
 		return amountBought;
 	}
 
+	function estimateBuyTokensFromUpgradableExchange(
+		uint amountOfMoney
+	)
+	internal
+	returns (uint)
+	{
+		address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
+		uint amountBought = 1; // TODO finish this IUpgradableExchange(upgradableExchange)._getTokenAmountToBeSold(amountOfMoney);
+		return amountBought;
+	}
+
 
 	/**
      * @notice Getter for the referral chain
