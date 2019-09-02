@@ -690,7 +690,7 @@ const slack_message = async (newVersion, oldVersion, devEnv) => {
       .toString().trim();
 
     const body = {
-      channel: 'CKL4T7M2S',
+      channel: 'CKKRPNR55',
       attachments: [
         {
           blocks: [
