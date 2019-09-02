@@ -536,6 +536,37 @@ const buildSubmodules = async(contracts) => {
     await updateIPFSHashes(contracts);
 };
 
+const getMigrationsList = () => {
+    const migrationDir = path.join(__dirname, 'migrations');
+    return fs.readdirSync(migrationDir);
+};
+
+const runMigration = async (index, network, updateArchive) => {
+    await runProcess(
+      path.join(__dirname, 'node_modules/.bin/truffle'),
+      ['migrate', '--f', index, '--to', index, '--network', network].concat(process.argv.slice(4))
+    );
+    if (updateArchive) {
+        await archiveBuild();
+        let deploy = {};
+        try {
+            deploy = JSON.parse(fs.readFileSync(path.join(__dirname, 'deploy.json'), { encoding: 'utf-8' }))
+        } catch (e) {
+        }
+        deploy[network] = index;
+        fs.writeFileSync(path.join(__dirname, 'deploy.json'), JSON.stringify(deploy), { encoding: 'utf-8' });
+    }
+};
+
+const getStartMigration = (network) => {
+    let deploy = {};
+    try {
+        deploy = JSON.parse(fs.readFileSync(path.join(__dirname, 'deploy.json'), { encoding: 'utf-8' }))
+    } catch (e) {
+    }
+    return deploy[network] ? deploy[network] + 1 :  1;
+};
+
 async function main() {
     contractsStatus = await contractsGit.status(); // Fetching branch
     const mode = process.argv[2];
@@ -565,10 +596,12 @@ async function main() {
 
                 const l = networks.length;
                 for (let i = 0; i < l; i += 1) {
-                    /* eslint-disable no-await-in-loop */
-                    await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(4)));
+                    for (let j = getStartMigration(networks[i]), m = getMigrationsList().length; j <= m; j += 1) {
+                        /* eslint-disable no-await-in-loop */
+                        await runMigration(j, networks[i], false);
+                        /* eslint-enable no-await-in-loop */
+                    }
                     deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
-                    /* eslint-enable no-await-in-loop */
                 }
 
                 await generateSOLInterface();
@@ -601,6 +634,10 @@ async function main() {
         case '--submodules':
             const contracts = await generateSOLInterface();
             await buildSubmodules(contracts);
+            process.exit(0);
+            break;
+        case '--mig':
+            getMigrationsList();
             process.exit(0);
             break;
         default:
