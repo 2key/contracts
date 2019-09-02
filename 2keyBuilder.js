@@ -25,7 +25,7 @@ const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
 require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
-const { runProcess, runMigration4, runUpdateMigration, rmDir } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir } = require('./helpers');
 
 const deployedTo = {};
 
@@ -380,7 +380,7 @@ async function deploy() {
                 await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
                 deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
             }
-            await runMigration4(networks[i]);
+            await runDeployCampaignMigration(networks[i]);
             /* eslint-enable no-await-in-loop */
         }
 
@@ -580,7 +580,7 @@ async function main() {
         case '--migration3': {
             try {
                 const networks = process.argv[3].split(',');
-                runMigration4(networks[0]);
+                runDeployCampaignMigration(networks[0]);
             } catch (e) {
                 console.log(e);
             }

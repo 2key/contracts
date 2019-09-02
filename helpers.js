@@ -51,10 +51,10 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
  * @param network
  * @returns {Promise<any>}
  */
-const runMigration4 = (network) => new Promise(async(resolve, reject) => {
+const runDeployCampaignMigration = (network) => new Promise(async(resolve, reject) => {
     try {
         if (!process.env.SKIP_4MIGRATION) {
-            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '4', '--network', network]);
+            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '6', '--network', network]);
             resolve(true);
         } else {
             resolve(true);
@@ -73,7 +73,7 @@ const runMigration4 = (network) => new Promise(async(resolve, reject) => {
 const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
     try {
         console.log("Running update migration");
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '5', '--network', network, 'update', contractName]);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '7', '--network', network, 'update', contractName]);
         resolve(true);
     } catch (e) {
         reject(e);
@@ -113,7 +113,7 @@ const getGitBranch = () => new Promise(async(resolve,reject) => {
 module.exports = {
     incrementVersion,
     runProcess,
-    runMigration4,
+    runDeployCampaignMigration: runDeployCampaignMigration,
     runUpdateMigration,
     rmDir,
     getGitBranch
