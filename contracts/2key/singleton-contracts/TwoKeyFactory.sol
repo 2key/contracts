@@ -297,8 +297,8 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
         //Deploying a proxy contract for donation logic handler
         ProxyCampaign proxyDonationLogicHandler = new ProxyCampaign(
-            "TwoKeyDonationLogicHandler",
-            getLatestContractVersion("TwoKeyDonationLogicHandler"),
+            "TwoKeyCPCLogicHandler",
+            getLatestContractVersion("TwoKeyCPCLogicHandler"),
             TWO_KEY_SINGLETON_REGISTRY
         );
 

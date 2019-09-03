@@ -18,4 +18,11 @@ contract IUpgradableExchange {
     )
     public
     payable;
+
+    function getTokenAmountToBeSold(
+        uint256 _weiAmount
+    )
+    public
+    view
+    returns (uint256);
 }

@@ -244,24 +244,25 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         return influencers;
     }
 
-    function convert(
-        bytes signature
-    )
-    public
-    payable
-    {
-        convertConverterValue(signature, msg.sender, msg.value);
-    }
+//    function convert(
+//        bytes signature
+//    )
+//    public
+//    payable
+//    {
+//        convertConverterValue(signature, msg.sender, msg.value);
+//    }
 
     function convertByModeratorSig(
         bytes signature, address plasmaConverter, bytes moderatorSig
     )
     public
-    payable
+//    payable
     {
         address m = Call.recoverHash(keccak256(abi.encodePacked(signature,plasmaConverter)), moderatorSig, 0);
         require(moderator == m || twoKeyEventSource.plasmaOf(moderator)  == m);
-        address[] memory influencers = convertConverterValue(signature, plasmaConverter, msg.value); // 10000000000000000 contract donates 0.01ETH
+        // TODO use maxDonationAmount instead of 1ETH constant below
+        address[] memory influencers = convertConverterValue(signature, plasmaConverter, 100000000000000000); // msg.value  contract donates 1ETH
 
         uint numberOfInfluencers = influencers.length;
         for (uint i = 0; i < numberOfInfluencers-1; i++) {
@@ -295,25 +296,19 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         }
     }
 
-    /**
-    * TODO finish this
-  * @notice Private function which will be executed at the withdraw time to buy 2key tokens from upgradable exchange contract
-  * @param amountOfMoney is the ether balance person has on the contract
-  * @param receiver is the address of the person who withdraws money
-  */
-    function selfBuyTokensFromUpgradableExchange(
-        uint amountOfMoney,
-        address receiver
+    function getTokenAmountToBeSoldFromUpgradableExchange(
+        uint amountOfMoney
     )
     internal
     returns (uint)
     {
         address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
-        uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
+        uint amountBought = IUpgradableExchange(upgradableExchange).getTokenAmountToBeSold(amountOfMoney);
         return amountBought;
     }
 
     /**
+      * called by convertByModeratorSig->convertConverterValue->createConversion->twoKeyDonationConversionHandler.executeConversion
       * @notice Function to delegate call to logic handler and update data, and buy tokens
       * @param _maxReferralRewardETHWei total reward in ether wei
       * @param _converter is the converter address
@@ -333,7 +328,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
             //estimate how much Buy tokens from upgradable exchange
-            totalBounty2keys = selfBuyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+            totalBounty2keys = getTokenAmountToBeSoldFromUpgradableExchange(_maxReferralRewardETHWei);
             //Handle refchain rewards
             ITwoKeyDonationLogicHandler(twoKeyDonationLogicHandler).updateRefchainRewards(
                 _maxReferralRewardETHWei,
@@ -364,8 +359,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         // Balance which will go to moderator
         uint balance = moderatorFee.mul(100-networkFee).div(100);
 
-        uint moderatorEarnings2key = selfBuyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
-        selfBuyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
+        uint moderatorEarnings2key = getTokenAmountToBeSoldFromUpgradableExchange(balance); //  tokens for moderator
+        getTokenAmountToBeSoldFromUpgradableExchange(moderatorFee - balance); //  tokens for deep freeze token pool
 
         moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
     }

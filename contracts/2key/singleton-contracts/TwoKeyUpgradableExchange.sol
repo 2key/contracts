@@ -167,7 +167,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param _weiAmount Value in wei to be converted into tokens
      * @return Number of tokens that can be purchased with the specified _weiAmount
      */
-    function _getTokenAmountToBeSold(
+    function getTokenAmountToBeSold(
         uint256 _weiAmount
     )
     public
@@ -239,7 +239,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         _preValidatePurchase(_beneficiary, weiAmount);
 
         // calculate token amount to be created
-        uint256 tokens = _getTokenAmountToBeSold(weiAmount);
+        uint256 tokens = getTokenAmountToBeSold(weiAmount);
 
         // update state
         uint weiRaised = getUint("weiRaised").add(weiAmount);
