@@ -1,6 +1,7 @@
 const childProcess = require('child_process');
 const rimraf = require('rimraf');
 const simpleGit = require('simple-git/promise');
+const path = require('path');
 
 
 const incrementVersion = ((version) => {

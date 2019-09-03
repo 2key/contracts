@@ -15,7 +15,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     bool isCampaignInitialized; // Once this is set to true can't be modified
 
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-
+    bool boughtRewardsWithEther;
 
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
@@ -187,6 +187,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     onlyContractor
     payable
     {
+        boughtRewardsWithEther = true;
         buyTokensFromUpgradableExchange(msg.value, address(this));
     }
 
@@ -511,22 +512,38 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
 
+    function withdrawRemainingRewardsInventory(
+    )
+    internal
+    {
+        address twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
+        uint tokensBalance = getTokenBalance(twoKeyEconomy);
+        uint rewardsNotSpent = tokensBalance.sub(reservedAmount2keyForRewards);
+        IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
+        if(boughtRewardsWithEther == true) {
+            IUpgradableExchange(twoKeyUpgradableExchangeContract).report2KEYWithdrawnFromNetwork(rewardsNotSpent);
+        }
+    }
+
     /**
      * @notice Function where contractor can withdraw all unsold tokens from his campaign once time has passed
      * @dev This function will throw in case the caller is not contractor
      */
-    function withdrawUnsoldTokens() onlyContractor {
+    function withdrawUnsoldTokens() public onlyContractor {
         require(ITwoKeyAcquisitionLogicHandler(logicHandler).canContractorWithdrawUnsoldTokens() == true);
         uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
         IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
 
         if(assetContractERC20 != twoKeyEconomy) {
-            address twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
-            uint tokensBalance = getTokenBalance(twoKeyEconomy);
-            uint rewardsNotSpent = tokensBalance.sub(reservedAmount2keyForRewards);
-            IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, rewardsNotSpent);
-            IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(rewardsNotSpent, msg.sender);
+            if(boughtRewardsWithEther == false) {
+                withdrawRemainingRewardsInventory();
+            } else {
+                if(block.timestamp >= ITwoKeyAdmin(getContractProxyAddress("TwoKeyAdmin")).getTwoKeyRewardsReleaseDate() == true) {
+                    withdrawRemainingRewardsInventory();
+                }
+            }
         }
     }
+
 }
 

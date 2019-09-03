@@ -119,6 +119,7 @@ contract TwoKeyCampaign is ArcERC20 {
 		address _converter
 	)
 	internal
+	view
 	returns (address[],address[],uint8[],address)
 	{
 		// move ARCs and set public_link keys and weights/cuts based on signature information
@@ -326,7 +327,7 @@ contract TwoKeyCampaign is ArcERC20 {
 		return (referrerPlasma2Balances2key[_influencer]);
 	}
 
-	function getContractProxyAddress(string contractName) internal returns (address) {
+	function getContractProxyAddress(string contractName) internal view returns (address) {
 		return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress(contractName);
 	}
 

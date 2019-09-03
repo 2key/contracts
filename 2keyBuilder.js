@@ -583,7 +583,6 @@ async function main() {
                     fs.unlinkSync(path.join(buildPath, str));
                     await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f', 5,'update',contractName]);
                 }
-                //truffle migrate --network=dev-local --f 4 update
                 await generateSOLInterface();
                 process.exit(0);
             } catch (err) {
@@ -610,10 +609,11 @@ async function main() {
                 process.exit(1);
             }
             break;
-        case '--migration3': {
+        case '--migration6': {
             try {
                 const networks = process.argv[3].split(',');
                 runDeployCampaignMigration(networks[0]);
+                process.exit(0);
             } catch (e) {
                 console.log(e);
             }

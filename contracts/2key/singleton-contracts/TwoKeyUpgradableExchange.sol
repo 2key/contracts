@@ -89,6 +89,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
+        //TODO: INStead of buy rate we need spread in percentages
+//        setUint(keccak256("spread"), 3.mul(10**18));
         setUint(keccak256("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
         setUint(keccak256("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("weiRaised"),0);
@@ -533,8 +535,17 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Take the address of TwoKeyExchangeRateContract
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
-        // This is the case when we buy 2keys in exchange for stable coins
+//        // Campaign active hedge rate from 2key to DAI
+//        uint activeHedgeRate = get2KEY2DAIHedgedRate(_campaign);
+//
+//        uint spread = 3;
+//
+//        uint rate = activeHedgeRate.mul(100+spread).div(100);
+
+
+//         This is the case when we buy 2keys in exchange for stable coins
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD-DAI"); // 1.01
+
         uint lowestAcceptedRate = 96;
         require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
 
@@ -559,15 +570,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyValidatedContracts
     returns (uint)
     {
-        uint256 weiAmount = msg.value;
-        _preValidatePurchase(_beneficiary, weiAmount);
+        _preValidatePurchase(_beneficiary, msg.value);
 
         // calculate token amount to be created
-        uint256 tokens = _getTokenAmountToBeSold(weiAmount);
+        uint256 tokens = _getTokenAmountToBeSold(msg.value);
 
         // update state
         bytes32 weiRaisedKeyHash = keccak256("weiRaised");
-        uint weiRaised = getUint(weiRaisedKeyHash).add(weiAmount);
+        uint weiRaised = getUint(weiRaisedKeyHash).add(msg.value);
         setUint(weiRaisedKeyHash,weiRaised);
 
         // check if contract is first time interacting with this one
@@ -591,7 +601,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         emit TokenPurchase(
             msg.sender,
             _beneficiary,
-            weiAmount,
+            msg.value,
             tokens,
             sellRate2key()
         );
