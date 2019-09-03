@@ -89,8 +89,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
-        //TODO: INStead of buy rate we need spread in percentages
-//        setUint(keccak256("spread"), 3.mul(10**18));
+        setUint(keccak256("spread"), (3).mul(10**18));
         setUint(keccak256("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
         setUint(keccak256("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("weiRaised"),0);
