@@ -58,7 +58,7 @@ let campaignEndTime = 9884748832;
 let minDonationAmount = 1;
 let maxDonationAmount = 100000;
 let campaignGoal = 10000000000000000000000000000000;
-let conversionQuota = 5;
+let referrerQuota = 5;
 let isKYCRequired = true;
 let shouldConvertToRefer = false;
 let acceptsFiat = false;
@@ -89,7 +89,7 @@ let campaignData: ICreateCampaign = {
     minDonationAmount,
     maxDonationAmount,
     campaignGoal,
-    conversionQuota,
+    referrerQuota,
     isKYCRequired,
     shouldConvertToRefer,
     acceptsFiat,

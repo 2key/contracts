@@ -63,22 +63,24 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
+        maxReferralRewardPercent = values[0];
+        conversionQuota = values[1];
+        // KYC
         if(values[2] == 1) {
             isKYCRequired = true;
         }
+        // MCTR
+        if(values[3] == 1) {
+            mustConvertToReferr = true;
+        }
 
-//        if(values[3] == 1) {
-//            mustConvertToReferr = true;
-//        }
-
-        totalSupply_ = 1000000;
+        totalSupply_ = values[4];
 
         ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
 
-        maxReferralRewardPercent = values[0];
-        conversionQuota = values[1];
+
 
         twoKeyAcquisitionLogicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
