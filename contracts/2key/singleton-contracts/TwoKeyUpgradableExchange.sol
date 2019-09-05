@@ -89,7 +89,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
-        setUint(keccak256("spread"), (3).mul(10**18));
+        setUint(keccak256("spreadWei"), 30**18);
         setUint(keccak256("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
         setUint(keccak256("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("weiRaised"),0);
@@ -525,7 +525,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param _2keyAmount is the amount of 2keys sent to the contract
      */
     function _getUSDStableCoinAmountFrom2keyUnits(
-        uint256 _2keyAmount
+        uint256 _2keyAmount,
+        address _campaign
     )
     public
     view
@@ -534,24 +535,23 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Take the address of TwoKeyExchangeRateContract
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
+        uint campaignId = getContractId(_campaign);
 //        // Campaign active hedge rate from 2key to DAI
-//        uint activeHedgeRate = get2KEY2DAIHedgedRate(_campaign);
-//
-//        uint spread = 3;
+        uint activeHedgeRate = get2KEY2DAIHedgedRate(campaignId);
+
+        uint rateWithSpread = activeHedgeRate.add(activeHedgeRate.mul(spreadWei()).div(10**18));
+
 //
 //        uint rate = activeHedgeRate.mul(100+spread).div(100);
 
 
 //         This is the case when we buy 2keys in exchange for stable coins
-        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD-DAI"); // 1.01
 
-        uint lowestAcceptedRate = 96;
-        require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
+//        uint lowestAcceptedRate = 96;
+//        require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
 
-        uint buyRate2keys = buyRate2key();
 
-        uint dollarWeiWorthTokens = _2keyAmount.mul(buyRate2keys).div(1000);  // 100*95/1000 = 9.5
-        uint amountOfDAIs = dollarWeiWorthTokens.mul(rate).div(10**18);      // 9.5 * 1.01 =vOK
+        uint amountOfDAIs = _2keyAmount.mul(rateWithSpread).div(10**18);
 
         return amountOfDAIs;
     }
@@ -710,7 +710,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         ERC20 dai = ERC20(getAddress(keccak256("DAI")));
         ERC20 token = ERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
 
-        uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits);
+        uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits, msg.sender);
         uint etherBalanceOnContractBefore = this.balance;
         uint stableCoinsOnContractBefore = dai.balanceOf(address(this));
         token.transferFrom(msg.sender, address(this), _twoKeyUnits);
@@ -888,6 +888,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         return getUint(keccak256("buyRate2key"));
+    }
+
+    function spreadWei()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256("spreadWei"));
     }
 
     /**
