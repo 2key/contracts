@@ -254,16 +254,18 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
 //    }
 
     function convertByModeratorSig(
-        bytes signature, address plasmaConverter, bytes moderatorSig
+        bytes signature, bytes converterSig, bytes moderatorSig
     )
     public
 //    payable
     {
-        address m = Call.recoverHash(keccak256(abi.encodePacked(signature,plasmaConverter)), moderatorSig, 0);
+        address plasmaConverter = Call.recoverHash(keccak256(signature), converterSig, 0);
+        address m = Call.recoverHash(keccak256(abi.encodePacked(signature,converterSig)), moderatorSig, 0);
         require(moderator == m || twoKeyEventSource.plasmaOf(moderator)  == m);
         // TODO use maxDonationAmount instead of 1ETH constant below
         address[] memory influencers = convertConverterValue(signature, plasmaConverter, 100000000000000000); // msg.value  contract donates 1ETH
 
+        // TODO run this only on plasma (to save gas on mainnet)
         uint numberOfInfluencers = influencers.length;
         for (uint i = 0; i < numberOfInfluencers-1; i++) {
             address influencer = twoKeyEventSource.plasmaOf(influencers[i]);
