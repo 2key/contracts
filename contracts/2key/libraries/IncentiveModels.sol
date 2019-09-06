@@ -56,7 +56,7 @@ library IncentiveModels {
         if(numberOfInfluencers > 0) {
             uint x = calculateX(totalBounty,numberOfInfluencers,factor);
             for(uint i=0; i<numberOfInfluencers;i++) {
-                rewards[numberOfInfluencers.sub(i.add(1))] = x.div(2**i);
+                rewards[numberOfInfluencers.sub(i.add(1))] = x.div(factor**i);
             }
         }
         return rewards;
