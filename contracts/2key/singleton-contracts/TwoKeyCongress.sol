@@ -70,24 +70,6 @@ contract TwoKeyCongress {
         _;
     }
 
-    /// @notice Function to check if the bytecode of passed method is in the whitelist
-    /// @param bytecode is the bytecode of transaction we'd like to execute
-    /// @return true if whitelisted otherwise false
-    function onlyAllowedMethods(
-        bytes bytecode
-    )
-    public
-    view
-    returns (bool)
-    {
-        for(uint i=0; i< allowedMethodSignatures.length; i++) {
-            if(compare(allowedMethodSignatures[i], bytecode)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * @notice Function which will be called only once, immediately after contract deployment
      * @param _minutesForDebate is the number of minutes debate length
@@ -110,71 +92,7 @@ contract TwoKeyCongress {
             addMember(initialMembers[i], initialMemberNames[i], votingPowers[i]);
         }
         initialized = true;
-        addInitialWhitelistedMethods();
     }
-
-
-    /// @notice Function to add initial whitelisted methods during the deployment
-    /// @dev Function is internal, it can't be called outside of the contract
-    function addInitialWhitelistedMethods()
-    internal
-    {
-        hashAllowedMethods("transferByAdmins(address,uint256)");
-        hashAllowedMethods("transferEtherByAdmins(address,uint256)");
-        hashAllowedMethods("destroy");
-        hashAllowedMethods("transfer2KeyTokens(address,uint256)");
-        hashAllowedMethods("addMaintainerForRegistry(address)");
-        hashAllowedMethods("twoKeyEventSourceAddMaintainer(address[])");
-        hashAllowedMethods("twoKeyEventSourceWhitelistContract(address)");
-        hashAllowedMethods("freezeTransfersInEconomy");
-        hashAllowedMethods("unfreezeTransfersInEconomy");
-        hashAllowedMethods("addMaintainersToSelectedSingletone(address,address[])");
-        hashAllowedMethods("deleteMaintainersFromSelectedSingletone(address,address[])");
-        hashAllowedMethods("updateRewardsRelease(uint256)");
-        hashAllowedMethods("updateTwoKeyTokenRate(uint256)");
-        hashAllowedMethods("upgradeContract(string,string)");
-    }
-
-
-    /// @notice Since transaction's bytecode first 10 chars will contain method name and argument types
-    /// @notice This is the way to compare it efficiently
-    /// @dev on contract we will store allowed method name and argument types
-    /// @param x is the already validated method name
-    /// @param y is the bytecode of the transaction
-    /// @return true if same
-    function compare(
-        bytes32 x,
-        bytes y
-    )
-    public
-    pure
-    returns (bool)
-    {
-        for(uint i=0;i<3;i++) {
-            byte a = x[i];
-            byte b = y[i];
-            if(a != b) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-
-    /// @notice Function to hash allowed method
-    /// @param nameAndParams is the name of the function and it's params to hash
-    /// @dev example: 'functionName(address,string)'
-    /// @return hash of allowed methods
-    function hashAllowedMethods(
-        string nameAndParams
-    )
-    internal
-    {
-        bytes32 allowed = keccak256(abi.encodePacked(nameAndParams));
-        allowedMethodSignatures.push(allowed);
-        methodHashToMethodName[allowed] = nameAndParams;
-    }
-
 
     /// @notice Function where member can replace it's own address
     /// @dev member can change only it's own address
@@ -333,7 +251,6 @@ contract TwoKeyCongress {
     onlyMembers
     returns (uint proposalID)
     {
-        require(onlyAllowedMethods(transactionBytecode)); // security layer
         proposalID = proposals.length++;
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;

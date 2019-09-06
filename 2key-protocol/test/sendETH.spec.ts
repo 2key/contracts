@@ -1,3 +1,5 @@
+import {BigNumber} from "bignumber.js";
+
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
@@ -7,6 +9,7 @@ import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import createWeb3 from './_web3';
 import Sign from '../src/sign';
+import {promisify} from "../src/utils/promisify";
 
 const { env } = process;
 
@@ -43,6 +46,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
         reject(err);
     }
 });
+
 
 describe('TwoKeyProtocol LOCAL', () => {
     it('LOCAL: should transfer ether', async () => {

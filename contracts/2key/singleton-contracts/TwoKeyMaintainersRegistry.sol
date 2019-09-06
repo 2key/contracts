@@ -91,7 +91,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
 
         address [] memory newMaintainers = new address[](numberOfExistingMaintainers + numberOfMaintainersToAdd);
 
-        for(uint i=0; i<numberOfExistingMaintainers; i++) {
+        for(i=0; i<numberOfExistingMaintainers; i++) {
             newMaintainers[i] = maintainers[i];
         }
 
@@ -180,7 +180,5 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
-
-
 
 }
