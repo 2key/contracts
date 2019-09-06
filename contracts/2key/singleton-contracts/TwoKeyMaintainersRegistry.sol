@@ -79,12 +79,28 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     public
     {
         require(onlyTwoKeyAdmin(msg.sender) == true);
-        //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
-        uint numberOfMaintainers = _maintainers.length;
 
-        for(uint i=0; i<numberOfMaintainers; i++) {
+        uint numberOfMaintainersToAdd = _maintainers.length;
+
+        address [] memory maintainers = getAllMaintainers();
+        uint numberOfExistingMaintainers = maintainers.length;
+
+        for(uint i=0; i<numberOfMaintainersToAdd; i++) {
             addMaintainer(_maintainers[i]);
         }
+
+        address [] memory newMaintainers = new address[](numberOfExistingMaintainers + numberOfMaintainersToAdd);
+
+        for(uint i=0; i<numberOfExistingMaintainers; i++) {
+            newMaintainers[i] = maintainers[i];
+        }
+
+        // Adding additional maintainers
+        for(i = numberOfExistingMaintainers; i<numberOfExistingMaintainers +  numberOfMaintainersToAdd; i++) {
+            newMaintainers[i] = _maintainers[i - numberOfExistingMaintainers];
+        }
+
+        PROXY_STORAGE_CONTRACT.setAddressArray(keccak256("maintainers"), newMaintainers);
     }
 
     /**
@@ -101,9 +117,9 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
         for(uint i=0; i<numberOfMaintainers; i++) {
-
             removeMaintainer(_maintainers[i]);
         }
+
     }
 
     /**
@@ -156,6 +172,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     {
         bytes32 keyHash = keccak256("isMaintainer", _maintainer);
         PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
+        //TODO: Remove this maintainer from the array
     }
 
     // Internal function to fetch address from TwoKeyRegistry
