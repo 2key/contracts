@@ -13,6 +13,9 @@ spinner() {
 
 
 spinner 2
+echo "Make sure there are builds of the contracts"
+yarn run deploy --generate
+spinner 2
 echo "Sending some eth to addresses"
 yarn run test:one 2key-protocol/test/sendETH.spec.ts
 spinner 2
