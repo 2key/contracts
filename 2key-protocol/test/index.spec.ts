@@ -1135,10 +1135,10 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should get rate from upgradable exchange', async() => {
-        const rate = await twoKeyProtocol.UpgradableExchange.getRate(from);
+        const rate = await twoKeyProtocol.UpgradableExchange.get2keySellRate(from);
 
         console.log('Rate is : ' + rate);
-        expect(rate.toString()).to.be.equal("0.095");
+        expect(rate.toString()).to.be.equal("0.1");
     }).timeout(60000);
 
     it('should print currency', async() => {

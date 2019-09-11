@@ -500,4 +500,9 @@ describe('TwoKeyDonationCampaign', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
+    it('should get stats for the contract from upgradable exchange', async() => {
+        let stats = await twoKeyProtocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
+        console.log(stats);
+    }).timeout(60000);
+
 });

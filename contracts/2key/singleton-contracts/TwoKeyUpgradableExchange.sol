@@ -89,8 +89,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
-        setUint(keccak256("spreadWei"), 30**18);
-        setUint(keccak256("buyRate2key"),95);// When anyone send 2key to contract, 2key in exchange will be calculated on it's buy rate
+        setUint(keccak256("spreadWei"), 30**18); // 3% wei
         setUint(keccak256("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("weiRaised"),0);
         setUint(keccak256("numberOfContracts"), 0); //Number of contracts which have interacted with this contract through buyTokens function
@@ -142,7 +141,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         //Take the address of token from storage
         address tokenAddress = getAddress(keccak256("TWO_KEY_TOKEN"));
-
         ERC20(tokenAddress).transfer(_beneficiary, _tokenAmount);
     }
 
@@ -184,7 +182,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     internal
     {
         uint numberOfContractsCurrently = numberOfContracts();
-        uint sumOfAmounts = calculateSumOnAllContracts(); //Will represent total sum we have on the contract
+        uint sumOfAmounts = calculateSumOnAllContracts(numberOfContractsCurrently); //Will represent total sum we have on the contract
         uint i;
 
         uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedged, sumOfAmounts); // Percentage to deduct in WEI (less than 1)
@@ -194,11 +192,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         for(i=1; i<=numberOfContractsCurrently; i++) {
             if(ethWeiAvailableToHedge(i) > 0) {
-                uint currentEthWEIAvailableForContractI = ethWeiAvailableToHedge(i);
+                uint beforeHedgingAvailableEthWeiForContract = ethWeiAvailableToHedge(i);
                 uint hundredPercentWei = 10**18;
-                uint afterHedgingAvailableEthWei = currentEthWEIAvailableForContractI.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
+                uint afterHedgingAvailableEthWei = beforeHedgingAvailableEthWeiForContract.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
 
-                uint hedgedEthWei = currentEthWEIAvailableForContractI.sub(afterHedgingAvailableEthWei);
+                uint hedgedEthWei = beforeHedgingAvailableEthWeiForContract.sub(afterHedgingAvailableEthWei);
                 uint daisReceived = hedgedEthWei.mul(ratio).div(10**18);
                 updateAccountingValues(daisReceived, hedgedEthWei, afterHedgingAvailableEthWei, i);
             }
@@ -262,17 +260,18 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice Function to calculate available to hedge sum on all contracts
      */
-    function calculateSumOnAllContracts()
+    function calculateSumOnAllContracts(
+        uint _numberOfContractsCurrently
+    )
     internal
     view
     returns (uint)
     {
-        uint numberOfContractsCurrently = numberOfContracts();
         uint sumOfAmounts = 0; //Will represent total sum we have on the contract
         uint i;
 
         // Sum all amounts on all contracts
-        for(i=1; i<=numberOfContractsCurrently; i++) {
+        for(i=1; i<=_numberOfContractsCurrently; i++) {
             sumOfAmounts = sumOfAmounts.add(ethWeiAvailableToHedge(i));
         }
         return sumOfAmounts;
@@ -532,22 +531,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint256)
     {
-        // Take the address of TwoKeyExchangeRateContract
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
         uint campaignId = getContractId(_campaign);
-//        // Campaign active hedge rate from 2key to DAI
         uint activeHedgeRate = get2KEY2DAIHedgedRate(campaignId);
 
-        uint rateWithSpread = activeHedgeRate.add(activeHedgeRate.mul(spreadWei()).div(10**18));
-
-//
-//        uint rate = activeHedgeRate.mul(100+spread).div(100);
-//         This is the case when we buy 2keys in exchange for stable coins
-//        uint lowestAcceptedRate = 96;
-//        require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
-
-
+        uint hundredPercent = 10**18;
+        uint rateWithSpread = activeHedgeRate.mul(hundredPercent.sub(spreadWei())).div(10**18);
         uint amountOfDAIs = _2keyAmount.mul(rateWithSpread).div(10**18);
 
         return amountOfDAIs;
@@ -797,8 +787,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         //dai/eth  / 2key/eth = DAI/2key
-        uint rate = getEth2DaiAverageExchangeRatePerContract(_contractID).mul(10**18).div(getEth2KeyAverageRatePerContract(_contractID));
-        return rate;
+        return getEth2DaiAverageExchangeRatePerContract(_contractID).mul(10**18).div(getEth2KeyAverageRatePerContract(_contractID));
     }
 
     /**
@@ -892,16 +881,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
-    /**
-     * @notice Getter for 2key buy rate
-     */
-    function buyRate2key()
-    public
-    view
-    returns (uint)
-    {
-        return getUint(keccak256("buyRate2key"));
-    }
 
     function spreadWei()
     public
