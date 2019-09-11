@@ -692,6 +692,17 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(amountToBeHedged, stableCoinUnits);
     }
 
+    function reduceDaiWeiAvailableToWithdraw(
+        address contractAddress,
+        uint daiAmount
+    )
+    internal
+    {
+        uint contractId = getContractId(contractAddress);
+        bytes32 keyHashDaiWeiAvailableToWithdraw = keccak256('daiWeiAvailableToWithdraw', contractId);
+        PROXY_STORAGE_CONTRACT.setUint(keyHashDaiWeiAvailableToWithdraw, daiWeiAvailableToWithdraw(contractId).sub(daiAmount));
+    }
+
     /**
      * @notice Function which will be called by 2key campaigns if user wants to withdraw his earnings in stableCoins
      * @param _twoKeyUnits is the amount of 2key tokens which will be taken from campaign
@@ -710,19 +721,19 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits, msg.sender);
         uint etherBalanceOnContractBefore = this.balance;
         uint stableCoinsOnContractBefore = dai.balanceOf(address(this));
-        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
 
-        uint stableCoinsAfter = stableCoinsOnContractBefore.sub(stableCoinUnits);
+        reduceDaiWeiAvailableToWithdraw(msg.sender, stableCoinUnits);
 
         emitEventWithdrawExecuted(
             _beneficiary,
             stableCoinsOnContractBefore,
-            stableCoinsAfter,
+            stableCoinsOnContractBefore.sub(stableCoinUnits),
             etherBalanceOnContractBefore,
             stableCoinUnits,
             _twoKeyUnits
         );
 
+        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
         dai.transfer(_beneficiary, stableCoinUnits);
     }
 
