@@ -49,6 +49,8 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
 
 
 describe('TwoKeyProtocol LOCAL', () => {
+
+
     it('LOCAL: should transfer ether', async () => {
         let error = false;
         const addresses = Object.keys(env).filter(key => key.endsWith('_ADDRESS') && env[key].includes('0x') && env[key].length == 42).map(key => env[key]);
@@ -63,4 +65,14 @@ describe('TwoKeyProtocol LOCAL', () => {
         }
         expect(error).to.be.false;
     }).timeout(600000);
+
+    it('should print referrers per layer', async() => {
+        let arcsForContractor = 1000;
+        let arcsPerReferrer = 5;
+        console.log('ARCS FOR CONTRACTOR: ' + arcsForContractor);
+        console.log('ARCS PER REFERRER: ' + arcsPerReferrer);
+        for(let i=0; i<10;i++) {
+            console.log('Layer: ' + i.toString() + ' = ' + twoKeyProtocol.Utils.getMaxUsersPerLayer(i,arcsForContractor, arcsPerReferrer));
+        }
+    })
 });
