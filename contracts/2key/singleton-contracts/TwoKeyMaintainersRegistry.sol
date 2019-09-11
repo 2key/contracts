@@ -3,11 +3,15 @@ pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/storage-contracts/ITwoKeyMaintainersRegistryStorage.sol";
 import "../upgradability/Upgradeable.sol";
+import "../libraries/SafeMath.sol";
 
 /**
  * @author Nikola Madjarevic
  */
 contract TwoKeyMaintainersRegistry is Upgradeable {
+
+    //For all math operations we use safemath
+    using SafeMath for *;
 
     // Flag which will make function setInitialParams callable only once
     bool initialized;
@@ -15,6 +19,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     address public TWO_KEY_SINGLETON_REGISTRY;
 
     ITwoKeyMaintainersRegistryStorage public PROXY_STORAGE_CONTRACT;
+
 
     /**
      * @notice Function which can be called only once, and is used as replacement for a constructor
@@ -35,12 +40,8 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
 
         PROXY_STORAGE_CONTRACT = ITwoKeyMaintainersRegistryStorage(_proxyStorage);
 
-
         //Deployer is also maintainer
         addMaintainer(msg.sender);
-
-        // Store all maintainers inside array (just for getter purposes)
-        PROXY_STORAGE_CONTRACT.setAddressArray(keccak256("maintainers"), _maintainers);
 
         //Set initial maintainers
         for(uint i=0; i<_maintainers.length; i++) {
@@ -79,28 +80,10 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     public
     {
         require(onlyTwoKeyAdmin(msg.sender) == true);
-
         uint numberOfMaintainersToAdd = _maintainers.length;
-
-        address [] memory maintainers = getAllMaintainers();
-        uint numberOfExistingMaintainers = maintainers.length;
-
         for(uint i=0; i<numberOfMaintainersToAdd; i++) {
             addMaintainer(_maintainers[i]);
         }
-
-        address [] memory newMaintainers = new address[](numberOfExistingMaintainers + numberOfMaintainersToAdd);
-
-        for(i=0; i<numberOfExistingMaintainers; i++) {
-            newMaintainers[i] = maintainers[i];
-        }
-
-        // Adding additional maintainers
-        for(i = numberOfExistingMaintainers; i<numberOfExistingMaintainers +  numberOfMaintainersToAdd; i++) {
-            newMaintainers[i] = _maintainers[i - numberOfExistingMaintainers];
-        }
-
-        PROXY_STORAGE_CONTRACT.setAddressArray(keccak256("maintainers"), newMaintainers);
     }
 
     /**
@@ -116,10 +99,10 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         require(onlyTwoKeyAdmin(msg.sender) == true);
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
+
         for(uint i=0; i<numberOfMaintainers; i++) {
             removeMaintainer(_maintainers[i]);
         }
-
     }
 
     /**
@@ -130,7 +113,19 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     view
     returns (address[])
     {
-        return PROXY_STORAGE_CONTRACT.getAddressArray(keccak256("maintainers"));
+        uint numberOfMaintainersTotal = getNumberOfMaintainers();
+        uint numberOfActiveMaintainers = getNumberOfActiveMaintainers();
+        address [] memory activeMaintainers = new address[](numberOfActiveMaintainers);
+
+        uint counter = 0;
+        for(uint i=0; i<numberOfMaintainersTotal; i++) {
+            address maintainer = getMaintainerPerId(i);
+            if(isMaintainer(maintainer)) {
+                activeMaintainers[counter] = maintainer;
+                counter = counter.add(1);
+            }
+        }
+        return activeMaintainers;
     }
 
     /**
@@ -157,8 +152,22 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     )
     internal
     {
-        bytes32 keyHash = keccak256("isMaintainer", _maintainer);
-        PROXY_STORAGE_CONTRACT.setBool(keyHash, true);
+
+        bytes32 keyHashIsMaintainer = keccak256("isMaintainer", _maintainer);
+
+        // Fetch the id for the new maintainer
+        uint id = getNumberOfMaintainers();
+
+        // Generate keyHash for this maintainer
+        bytes32 keyHashIdToMaintainer = keccak256("idToMaintainer", id);
+
+        // Representing number of different maintainers
+        incrementNumberOfMaintainers();
+        // Representing number of currently active maintainers
+        incrementNumberOfActiveMaintainers();
+
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashIdToMaintainer, _maintainer);
+        PROXY_STORAGE_CONTRACT.setBool(keyHashIsMaintainer, true);
     }
 
     /**
@@ -170,9 +179,9 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     )
     internal
     {
-        bytes32 keyHash = keccak256("isMaintainer", _maintainer);
-        PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
-        //TODO: Remove this maintainer from the array
+        bytes32 keyHashIsMaintainer = keccak256("isMaintainer", _maintainer);
+        decrementNumberOfActiveMaintainers();
+        PROXY_STORAGE_CONTRACT.setBool(keyHashIsMaintainer, false);
     }
 
     // Internal function to fetch address from TwoKeyRegistry
@@ -181,4 +190,59 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
+    function getNumberOfMaintainers()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256("numberOfMaintainers"));
+    }
+
+    function getNumberOfActiveMaintainers()
+    public
+    view
+    returns (uint)
+    {
+       return PROXY_STORAGE_CONTRACT.getUint(keccak256("numberOfActiveMaintainers"));
+    }
+
+    function incrementNumberOfMaintainers()
+    internal
+    {
+        bytes32 keyHashNumberOfMaintainers = keccak256("numberOfMaintainers");
+        PROXY_STORAGE_CONTRACT.setUint(
+            keyHashNumberOfMaintainers,
+            PROXY_STORAGE_CONTRACT.getUint(keyHashNumberOfMaintainers).add(1)
+        );
+    }
+
+    function incrementNumberOfActiveMaintainers()
+    internal
+    {
+        bytes32 keyHashNumberOfActiveMaintainers = keccak256("numberOfActiveMaintainers");
+        PROXY_STORAGE_CONTRACT.setUint(
+            keyHashNumberOfActiveMaintainers,
+            PROXY_STORAGE_CONTRACT.getUint(keyHashNumberOfActiveMaintainers).add(1)
+        );
+    }
+
+    function decrementNumberOfActiveMaintainers()
+    internal
+    {
+        bytes32 keyHashNumberOfActiveMaintainers = keccak256("numberOfActiveMaintainers");
+        PROXY_STORAGE_CONTRACT.setUint(
+            keyHashNumberOfActiveMaintainers,
+            PROXY_STORAGE_CONTRACT.getUint(keyHashNumberOfActiveMaintainers).sub(1)
+        );
+    }
+
+    function getMaintainerPerId(
+        uint _id
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("idToMaintainer",_id));
+    }
 }
