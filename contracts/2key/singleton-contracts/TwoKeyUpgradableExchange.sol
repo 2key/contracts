@@ -692,6 +692,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(amountToBeHedged, stableCoinUnits);
     }
 
+    /**
+     * @notice Function to reduce amount of dai available to be withdrawn from selected contract
+     * @param contractAddress is the address of the contract
+     * @param daiAmount is the amount of dais
+     */
     function reduceDaiWeiAvailableToWithdraw(
         address contractAddress,
         uint daiAmount
