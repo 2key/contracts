@@ -41,6 +41,12 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         campaignGoal = numberValues[5];
         incentiveModel = IncentiveModel(numberValues[7]);
 
+        if(keccak256(_currency) == keccak256('ETH')) {
+            require(numberValues[3] >= (10**16));
+        } else {
+            require(numberValues[3] >= (10**18));
+        }
+
         if(numberValues[8] == 1) {
             endCampaignOnceGoalReached = true;
         }
@@ -55,7 +61,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
 
-        ALLOWED_GAP = 1000000000000000;
 
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
