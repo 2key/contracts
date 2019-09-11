@@ -136,6 +136,10 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     }
 
 
+    /**
+     * @notice Function to get address of non-upgradable contract
+     * @param contractName is the name of the contract
+     */
     function getNonUpgradableContractAddress(
         string contractName
     )
@@ -162,6 +166,11 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     }
 
 
+    /**
+     * @notice Internal function to deploy proxy for the contract
+     * @param contractName is the name of the contract
+     * @param version is the new version
+     */
     function deployProxy(
         string contractName,
         string version
@@ -175,6 +184,11 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         return address(proxy);
     }
 
+    /**
+     * @notice Function to upgrade contract to new version
+     * @param contractName is the name of the contract
+     * @param version is the new version
+     */
     function upgradeContract(
         string contractName,
         string version
