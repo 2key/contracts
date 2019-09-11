@@ -1,6 +1,0 @@
----
-id: ITwoKeyExchangeRateContract
-title: ITwoKeyExchangeRateContract
----
-
-<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> ITwoKeyExchangeRateContract</h2><div class="source">Source: <a href="https://github.com/2keynet/web3-alpha/blob/v0.0.3/contracts/2key/interfaces/ITwoKeyExchangeRateContract.sol" target="_blank">contracts/2key/interfaces/ITwoKeyExchangeRateContract.sol</a></div><div class="author">Author: Nikola Madjarevic</div></div><div class="index"><h2>Index</h2><ul><li><a href="ITwoKeyExchangeRateContract.html#getBaseToTargetRate">getBaseToTargetRate</a></li></ul></div><div class="reference"><h2>Reference</h2><div class="functions"><h3>Functions</h3><ul><li><div class="item function"><span id="getBaseToTargetRate" class="anchor-marker"></span><h4 class="name">getBaseToTargetRate</h4><div class="body"><code class="signature"><span>abstract </span>function <strong>getBaseToTargetRate</strong><span>(string _currency) </span><span>public </span><span>view </span><span>returns  (uint) </span></code><hr/><dl><dt><span class="label-parameters">Parameters:</span></dt><dd><div><code>_currency</code> - string</div></dd><dt><span class="label-return">Returns:</span></dt><dd>uint</dd></dl></div></div></li></ul></div></div></div>

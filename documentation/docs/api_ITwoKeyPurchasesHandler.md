@@ -1,6 +1,0 @@
----
-id: ITwoKeyPurchasesHandler
-title: ITwoKeyPurchasesHandler
----
-
-<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> ITwoKeyPurchasesHandler</h2><div class="source">Source: <a href="https://github.com/2keynet/web3-alpha/blob/v0.0.3/contracts/2key/interfaces/ITwoKeyPurchasesHandler.sol" target="_blank">contracts/2key/interfaces/ITwoKeyPurchasesHandler.sol</a></div><div class="author">Author: Nikola Madjarevic</div></div><div class="index"><h2>Index</h2><ul><li><a href="ITwoKeyPurchasesHandler.html#startVesting">startVesting</a></li></ul></div><div class="reference"><h2>Reference</h2><div class="functions"><h3>Functions</h3><ul><li><div class="item function"><span id="startVesting" class="anchor-marker"></span><h4 class="name">startVesting</h4><div class="body"><code class="signature"><span>abstract </span>function <strong>startVesting</strong><span>(uint _baseTokens, uint _bonusTokens, uint _conversionId, address _converter) </span><span>public </span></code><hr/><dl><dt><span class="label-parameters">Parameters:</span></dt><dd><div><code>_baseTokens</code> - uint</div><div><code>_bonusTokens</code> - uint</div><div><code>_conversionId</code> - uint</div><div><code>_converter</code> - address</div></dd></dl></div></div></li></ul></div></div></div>

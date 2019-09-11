@@ -1,6 +1,0 @@
----
-id: 2key_ERC20CustomToken
-title: ERC20CustomToken
----
-
-<div class="contract-doc"><div class="contract"><h2 class="contract-header"><span class="contract-kind">contract</span> ERC20CustomToken</h2><p class="base-contracts"><span>is</span> <a href="openzeppelin-solidity_contracts_token_ERC20_StandardToken.html">StandardToken</a></p><div class="source">Source: <a href="https://github.com/2keynet/web3-alpha/blob/v0.0.3/contracts/2key/ERC20CustomToken.sol" target="_blank">contracts/2key/ERC20CustomToken.sol</a></div></div><div class="index"><h2>Index</h2><ul><li><a href="2key_ERC20CustomToken.html#">fallback</a></li></ul></div><div class="reference"><h2>Reference</h2><div class="functions"><h3>Functions</h3><ul><li><div class="item function"><span id="fallback" class="anchor-marker"></span><h4 class="name">fallback</h4><div class="body"><code class="signature">function <strong></strong><span>(string _name, string _symbol, uint8 _decimals, uint _totalSupply_) </span><span>public </span></code><hr/><dl><dt><span class="label-parameters">Parameters:</span></dt><dd><div><code>_name</code> - string</div><div><code>_symbol</code> - string</div><div><code>_decimals</code> - uint8</div><div><code>_totalSupply_</code> - uint</div></dd></dl></div></div></li></ul></div></div></div>
