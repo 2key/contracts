@@ -612,7 +612,7 @@ async function main() {
         case '--migration6': {
             try {
                 const networks = process.argv[3].split(',');
-                runDeployCampaignMigration(networks[0]);
+                await runDeployCampaignMigration(networks[0]);
                 process.exit(0);
             } catch (e) {
                 console.log(e);

@@ -55,7 +55,7 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
 const runDeployCampaignMigration = (network) => new Promise(async(resolve, reject) => {
     try {
         if (!process.env.SKIP_4MIGRATION) {
-            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '6', '--network', network]);
+            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '6', '--to', '6', '--network', network]);
             resolve(true);
         } else {
             resolve(true);
