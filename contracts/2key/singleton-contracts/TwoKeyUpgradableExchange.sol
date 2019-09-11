@@ -543,10 +543,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 //
 //        uint rate = activeHedgeRate.mul(100+spread).div(100);
-
-
 //         This is the case when we buy 2keys in exchange for stable coins
-
 //        uint lowestAcceptedRate = 96;
 //        require(rate >= lowestAcceptedRate.mul(10**18).div(100)); // Require that lowest accepted rate is greater than 0.95
 

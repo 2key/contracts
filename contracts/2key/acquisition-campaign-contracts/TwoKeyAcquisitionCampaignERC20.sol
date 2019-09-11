@@ -4,9 +4,8 @@ import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
-
-
 /**
  * @author Nikola Madjarevic
  */
@@ -17,6 +16,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     bool boughtRewardsWithEther;
 
+    uint public twoKeyToken2UsdRateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
 
@@ -187,8 +187,21 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     onlyContractor
     payable
     {
+        //It can be called only ONCE per campaign
+        require(boughtRewardsWithEther == false);
         boughtRewardsWithEther = true;
-        buyTokensFromUpgradableExchange(msg.value, address(this));
+        uint amountOfTwoKeys = buyTokensFromUpgradableExchange(msg.value, address(this));
+        uint rate = ITwoKeyExchangeRateContract(getContractProxyAddress("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
+        twoKeyToken2UsdRateWei = (msg.value).mul(rate).div(amountOfTwoKeys); //0.1 DOLLAR
+    }
+
+    function storeRateBeforeInventoryIsAdded()
+    internal
+    view
+    returns (uint)
+    {
+        require(twoKeyToken2UsdRateWei == 0);
+        twoKeyToken2UsdRateWei = (IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange")).sellRate2key()).mul(10**15);
     }
 
 
@@ -322,11 +335,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
-                address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
-                uint rate = IUpgradableExchange(upgradableExchange).sellRate2key();
-                totalBounty2keys = (_maxReferralRewardETHWei.div(rate)).mul(1000);
+                totalBounty2keys = ((_maxReferralRewardETHWei.mul(10**18)).div(twoKeyToken2UsdRateWei)).mul(1000);
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
-                //TODO: add require that there's enough tokens at this moment
             } else {
                 //Buy tokens from upgradable exchange
                 totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
