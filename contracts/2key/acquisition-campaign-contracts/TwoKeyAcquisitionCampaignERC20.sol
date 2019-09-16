@@ -61,6 +61,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         maxReferralRewardPercent = values[0];
         conversionQuota = values[1];
+
         // KYC
         if(values[2] == 1) {
             isKYCRequired = true;
