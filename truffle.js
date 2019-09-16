@@ -45,200 +45,209 @@ const ledgerOptions = {
 
 console.log("Starting deployment process from address : " + config.address);
 module.exports = {
+
+  plugins: ["truffle-security"],
+
   networks: {
-    'dev-local': {
-      provider: new HDWalletProvider(mnemonic, 'http://localhost:8545'),
-      network_id: 8086, // Match any network id
-      gas: 8000000,
-      gasPrice: 2000000000
-    },
+      'dev-local': {
+          provider: new HDWalletProvider(mnemonic, 'http://localhost:8545'),
+          network_id: 8086, // Match any network id
+          gas: 8000000,
+          gasPrice: 2000000000
+      },
 
-    'development' : {
-        host: "localhost",
-        port: 8545,
-        network_id: "*", // Match any network id
-        gas: 10000000,
-        gasPrice: 2000000000
-    },
+      'development': {
+          host: "localhost",
+          port: 8545,
+          network_id: "*", // Match any network id
+          gas: 10000000,
+          gasPrice: 2000000000
+      },
 
-    'rinkeby' : {
-      provider: () => LedgerProvider(`https://rinkeby.infura.io/v3/${infuraApiKey}`, {
-        networkId: 4,
-        // https://github.com/LedgerHQ/ledgerjs/issues/200
-        path: "44'/60'/0'/0",
-        askConfirm: true,
-        accountsLength: 1,
-        accountsOffset: 0,
-      }),
-      network_id: 4,
-      gas: 7000000,
-      gasPrice: 50000000000,
-    },
+      'rinkeby': {
+          provider: () => LedgerProvider(`https://rinkeby.infura.io/v3/${infuraApiKey}`, {
+              networkId: 4,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              askConfirm: true,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          network_id: 4,
+          gas: 7000000,
+          gasPrice: 50000000000,
+      },
 
-    'public.test.k8s' : {
-      provider: () => LedgerProvider('https://rpc.public.test.k8s.2key.net', {
-        networkId: 3,
-        // https://github.com/LedgerHQ/ledgerjs/issues/200
-        path: "44'/60'/0'/0",
-        // askConfirm: true,
-        askConfirm: false,
-        accountsLength: 1,
-        accountsOffset: 0,
-      }),
-      network_id: 3,
-      gas: 8000000,
-      gasPrice: 50000000000,
-    },
+      'public.test.k8s': {
+          provider: () => LedgerProvider('https://rpc.public.test.k8s.2key.net', {
+              networkId: 3,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              // askConfirm: true,
+              askConfirm: false,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          network_id: 3,
+          gas: 8000000,
+          gasPrice: 50000000000,
+      },
 
-    'private.test.k8s': {
-      provider: () => LedgerProvider('https://rpc.private.test.k8s.2key.net', {
-        networkId: 98052,
-        // https://github.com/LedgerHQ/ledgerjs/issues/200
-        path: "44'/60'/0'/0",
-        // askConfirm: true,
-        askConfirm: false,
-        accountsLength: 1,
-        accountsOffset: 0,
-      }),
-      network_id: 98052,
-      gas: 7000000,
-      gasPrice: 0,
-      // host: 'https://ext.geth.private.test.k8s.2key.net',
-      // port: 8545,
-      // network_id: 98052, // Match any network id
-      //network_id: 98052,
-      //gas: 7000000,
-      //gasPrice: 0,
-      // gasPrice: 100000000000,
-      // gasPrice: 2000000000
-    },
+      'private.test.k8s': {
+          provider: () => LedgerProvider('https://rpc.private.test.k8s.2key.net', {
+              networkId: 98052,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              // askConfirm: true,
+              askConfirm: false,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          network_id: 98052,
+          gas: 7000000,
+          gasPrice: 0,
+          // host: 'https://ext.geth.private.test.k8s.2key.net',
+          // port: 8545,
+          // network_id: 98052, // Match any network id
+          //network_id: 98052,
+          //gas: 7000000,
+          //gasPrice: 0,
+          // gasPrice: 100000000000,
+          // gasPrice: 2000000000
+      },
 
-    'public.test.k8s-hdwallet' : {
-      provider: () => new HDWalletProvider(mnemonic, 'https://rpc.public.test.k8s.2key.net'),
-      network_id: 3,
-      gas: 8000000,
-      gasPrice: 80000000000,
-    },
+      'public.test.k8s-hdwallet': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc.public.test.k8s.2key.net'),
+          network_id: 3,
+          gas: 8000000,
+          gasPrice: 80000000000,
+      },
 
-    'private.test.k8s-hdwallet': {
-      provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
-      network_id: 98052,
-      gas: 8000000,
-      gasPrice: '0x0',
-      // gasPrice: 100000000000,
-      // gasPrice: 2000000000
-    },
+      'private.test.k8s-hdwallet': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
+          network_id: 98052,
+          gas: 8000000,
+          gasPrice: '0x0',
+          // gasPrice: 100000000000,
+          // gasPrice: 2000000000
+      },
 
-    'plasma-test-local': {
-      provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
-      network_id: 98052,
-      gas: 8000000,
-      gasPrice: '0x0',
-      // gasPrice: 100000000000,
-      // gasPrice: 2000000000
-    },
+      'plasma-test-local': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
+          network_id: 98052,
+          gas: 8000000,
+          gasPrice: '0x0',
+          // gasPrice: 100000000000,
+          // gasPrice: 2000000000
+      },
 
-    'rinkeby-test' : {
-        provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c'),
-        network_id: 4,
-        gas: 7000000,
-        gasPrice: 50000000000
-    },
+      'rinkeby-test': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c'),
+          network_id: 4,
+          gas: 7000000,
+          gasPrice: 50000000000
+      },
 
-    'ropsten' : {
-        provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c`),
-        network_id: 3,
-        gas: 8000000,
-        gasPrice: 2500000000000
-    },
+      'ropsten': {
+          provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/904c762bd6984606bf8ae7f30d7cb28c`),
+          network_id: 3,
+          gas: 8000000,
+          gasPrice: 2500000000000
+      },
 
-    'ropsten.staging' : {
-      provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
-        networkId: 3,
-        // https://github.com/LedgerHQ/ledgerjs/issues/200
-        path: "44'/60'/0'/0",
-        askConfirm: false,
-        accountsLength: 1,
-        accountsOffset: 0,
-      }),
-      // provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
-      network_id: 3,
-      gas: 8000000,
-      gasPrice: 50000000000
-    },
+      'ropsten.staging': {
+          provider: () => LedgerProvider(`https://ropsten.infura.io/v3/${infuraApiKey}`, {
+              networkId: 3,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              askConfirm: false,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          // provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
+          network_id: 3,
+          gas: 8000000,
+          gasPrice: 50000000000
+      },
 
-    'staging-2key': {
-      provider: () => LedgerProvider('http://18.233.2.70:8500/ropsten', {
-        networkId: 3,
-        // https://github.com/LedgerHQ/ledgerjs/issues/200
-        path: "44'/60'/0'/0",
-        askConfirm: true,
-        accountsLength: 1,
-        accountsOffset: 0,
-      }),
-      // provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
-      network_id: 3,
-      gas: 8000000,
-      gasPrice: 50000000000
-    },
+      'staging-2key': {
+          provider: () => LedgerProvider('http://18.233.2.70:8500/ropsten', {
+              networkId: 3,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              askConfirm: true,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          // provider: () => new HDWalletProvider(mnemonic, 'https://ropsten.infura.io/v3/71d39c30bc984e8a8a0d8adca84620ad'),
+          network_id: 3,
+          gas: 8000000,
+          gasPrice: 50000000000
+      },
 
-    'kovan': {
-      provider: () => new HDWalletProvider(mnemonic, 'https://kovan.infura.io/6rAARDbMXpJlwODa2kbk'),
-      network_id: 42,
-      gas: 7000000,
-      gasPrice: 3000000000
-    },
+      'kovan': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://kovan.infura.io/6rAARDbMXpJlwODa2kbk'),
+          network_id: 42,
+          gas: 7000000,
+          gasPrice: 3000000000
+      },
 
-    'plasma-local': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
-      network_id: 8087,
-      gas: 8000000,
-      gasPrice: 0
-    },
+      'plasma-local': {
+          provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
+          network_id: 8087,
+          gas: 8000000,
+          gasPrice: 0
+      },
 
-    'dev-ap': {
-      provider: new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
-      network_id: 8086, // Match any network id
-      gas: 8000000,
-      gasPrice: 2000000000
-    },
+      'dev-ap': {
+          provider: new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
+          network_id: 8086, // Match any network id
+          gas: 8000000,
+          gasPrice: 2000000000
+      },
 
-    'plasma-ap': {
-      provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:38545'),
-      network_id: 8087,
-      gas: 7000000,
-      gasPrice: 0
-    },
+      'plasma-ap': {
+          provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:38545'),
+          network_id: 8087,
+          gas: 7000000,
+          gasPrice: 0
+      },
 
-    'plasma-azure': {
-        provider: () => new HDWalletProvider(mnemonic, 'https://test.poa.2key.net'),
-        network_id: 11112222,
-        gas: 8000000,
-        gasPrice: '0x0',
-    },
+      'plasma-azure': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://test.poa.2key.net'),
+          network_id: 11112222,
+          gas: 8000000,
+          gasPrice: '0x0',
+      },
 
-    'plasma-azure-ledger': {
-        provider: () => LedgerProvider('https://test.poa.2key.net', {
-            networkId: 11112222,
-            // https://github.com/LedgerHQ/ledgerjs/issues/200
-            path: "44'/60'/0'/0",
-            // askConfirm: true,
-            askConfirm: false,
-            accountsLength: 1,
-            accountsOffset: 0,
-        }),
-        network_id: 11112222,
-        gas: 8000000,
-        gasPrice: '0x0',
-    },
-    compilers : {
-        solc: {
-            optimizer: {
-                enabled: true,
-                runs: 1000
-            }
-        },
-    },
+      'plasma-azure-ledger': {
+          provider: () => LedgerProvider('https://test.poa.2key.net', {
+              networkId: 11112222,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              // askConfirm: true,
+              askConfirm: false,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          network_id: 11112222,
+          gas: 8000000,
+          gasPrice: '0x0',
+      },
+  },
 
-  }
+    compilers: {
+          solc: {
+              path: "soljson-v0.4.24+commit.e67f0147.js",
+              version: "0.4.24",
+              build: "commit.e67f0147",
+              settings: {
+                  optimizer: {
+                      enabled: true,
+                      runs: 200,
+                      evmVersion: "byzantium"
+                  }
+              }
+          }
+    }
 };
