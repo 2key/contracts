@@ -250,7 +250,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
             totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
             //Handle refchain rewards
             ITwoKeyDonationLogicHandler(logicHandler).updateRefchainRewards(
-                _maxReferralRewardETHWei,
                 _converter,
                 _conversionId,
                 totalBounty2keys);

@@ -4,7 +4,6 @@ contract ITwoKeyDonationLogicHandler {
     function getReferrers(address customer) public view returns (address[]);
 
     function updateRefchainRewards(
-        uint256 _maxReferralRewardETHWei,
         address _converter,
         uint _conversionId,
         uint totalBounty2keys

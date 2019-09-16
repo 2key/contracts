@@ -375,13 +375,11 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     }
 
     /**
- * @notice Update refferal chain with rewards (update state variables)
- * @param _maxReferralRewardETHWei is the max referral reward set
- * @param _converter is the address of the converter
- * @dev This function can only be called by TwoKeyConversionHandler contract
- */
+     * @notice Update refferal chain with rewards (update state variables)
+     * @param _converter is the address of the converter
+     * @dev This function can only be called by TwoKeyConversionHandler contract
+     */
     function updateRefchainRewards(
-        uint256 _maxReferralRewardETHWei,
         address _converter,
         uint _conversionId,
         uint totalBounty2keys

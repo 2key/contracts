@@ -16,7 +16,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     bool boughtRewardsWithEther;
 
-    uint public twoKeyToken2UsdRateWei;
+    uint public usd2KEYrateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
 
@@ -160,19 +160,13 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             } else {
                 require(received_from[new_address] == old_address,'only tree ARCs allowed');
             }
+
             old_address = new_address;
 
-            // TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
-            // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
-            // TODO a possible solution is change public_link_key to address=>address[]
-            // update (only once) the public address used by each influencer
-            // we will need this in case one of the influencers will want to start his own off-chain link
             if (i < keys.length) {
                 setPublicLinkKeyOf(new_address, keys[i]);
             }
 
-            // update (only once) the cut used by each influencer
-            // we will need this in case one of the influencers will want to start his own off-chain link
             if (i < weights.length) {
                 setCutOf(new_address, uint256(weights[i]));
             }
@@ -190,21 +184,23 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     payable
     {
         //It can be called only ONCE per campaign
-        require(boughtRewardsWithEther == false);
+        require(usd2KEYrateWei == 0);
+
         boughtRewardsWithEther = true;
         uint amountOfTwoKeys = buyTokensFromUpgradableExchange(msg.value, address(this));
-        uint rate = ITwoKeyExchangeRateContract(getContractProxyAddress("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
-        twoKeyToken2UsdRateWei = (msg.value).mul(rate).div(amountOfTwoKeys); //0.1 DOLLAR
+        uint rateUsdToEth = ITwoKeyExchangeRateContract(getContractProxyAddress("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
+
+        usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
     }
 
-    function storeRateBeforeInventoryIsAdded()
-    internal
-    view
-    returns (uint)
-    {
-        require(twoKeyToken2UsdRateWei == 0);
-        twoKeyToken2UsdRateWei = (IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange")).sellRate2key()).mul(10**15);
-    }
+//    function storeRateBeforeInventoryIsAdded()
+//    public
+//    onlyContractor
+//    {
+//        require(usd2KEYrateWei == 0);
+//
+//        usd2KEYrateWei = (IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange")).sellRate2key());
+//    }
 
 
     /**
@@ -337,7 +333,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
-                totalBounty2keys = ((_maxReferralRewardETHWei.mul(10**18)).div(twoKeyToken2UsdRateWei)).mul(1000);
+                totalBounty2keys = ((_maxReferralRewardETHWei.mul(10**18)).div(usd2KEYrateWei)).mul(1000);
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
             } else {
                 //Buy tokens from upgradable exchange
@@ -347,7 +343,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             // Update reserved amount
             //Handle refchain rewards
             ITwoKeyAcquisitionLogicHandler(logicHandler).updateRefchainRewards(
-                _maxReferralRewardETHWei,
                 _converter,
                 _conversionId,
                 totalBounty2keys);
@@ -524,18 +519,19 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
 
-    function withdrawRemainingRewardsInventory(
-    )
+    /**
+     * @notice Function to withdraw remaining rewards inventory in the contract
+     */
+    function withdrawRemainingRewardsInventory()
     internal
+    returns (uint)
     {
-        address twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
         uint tokensBalance = getTokenBalance(twoKeyEconomy);
         uint rewardsNotSpent = tokensBalance.sub(reservedAmount2keyForRewards);
         IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
-        if(boughtRewardsWithEther == true) {
-            IUpgradableExchange(twoKeyUpgradableExchangeContract).report2KEYWithdrawnFromNetwork(rewardsNotSpent);
-        }
+        return rewardsNotSpent;
     }
+
 
     /**
      * @notice Function where contractor can withdraw all unsold tokens from his campaign once time has passed
@@ -551,7 +547,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
                 withdrawRemainingRewardsInventory();
             } else {
                 if(block.timestamp >= ITwoKeyAdmin(getContractProxyAddress("TwoKeyAdmin")).getTwoKeyRewardsReleaseDate() == true) {
-                    withdrawRemainingRewardsInventory();
+                    uint rewardsNotSpent = withdrawRemainingRewardsInventory();
+                    IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange"))
+                        .report2KEYWithdrawnFromNetwork(rewardsNotSpent);
                 }
             }
         }

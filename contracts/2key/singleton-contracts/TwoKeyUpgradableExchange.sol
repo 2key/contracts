@@ -90,7 +90,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
         setUint(keccak256("spreadWei"), 30**18); // 3% wei
-        setUint(keccak256("sellRate2key"),100);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
+        // 0.1$ Wei
+        setUint(keccak256("sellRate2key"),10**17);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("weiRaised"),0);
         setUint(keccak256("numberOfContracts"), 0); //Number of contracts which have interacted with this contract through buyTokens function
 
@@ -306,6 +307,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint,uint)
     {
 
+        //TODO use _getUSDStableCoinAmountFrom2keyUnits
         uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
         uint _daiWeiToReduce = get2KEY2DAIHedgedRate(_contractID).mul(amountOfTokensWithdrawn).div(10**18);
 
@@ -369,7 +371,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
-        return (_weiAmount*rate).mul(1000).div(sellRate2key()).div(10**18);
+        return (_weiAmount*rate).div(sellRate2key());
     }
 
     /**
