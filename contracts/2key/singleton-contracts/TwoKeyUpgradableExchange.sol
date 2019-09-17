@@ -293,26 +293,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setUint(ethWeiAvailableToHedgeKeyHash, getUint(ethWeiAvailableToHedgeKeyHash).add(_msgValue));
     }
 
-    /**
-     * @notice Internal helper function
-     * @param _contractID is the id of the contract we'd like to do the math
-     * @param amountOfTokensWithdrawn is the amount of tokens withdrawn from campaign
-     */
-    function getDaiWeiAvailableToWithdrawAndDaiWeiToReduce(
-        uint _contractID,
-        uint amountOfTokensWithdrawn
-    )
-    internal
-    view
-    returns (uint,uint)
-    {
 
-        //TODO use _getUSDStableCoinAmountFrom2keyUnits
-        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
-        uint _daiWeiToReduce = get2KEY2DAIHedgedRate(_contractID).mul(amountOfTokensWithdrawn).div(10**18);
-
-        return (_daiWeiAvailable, _daiWeiToReduce);
-    }
 
     /**
      * @notice Function to register new contract with corresponding ID
@@ -525,18 +506,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @dev This is happening in case we're receiving (buying) 2key
      * @param _2keyAmount is the amount of 2keys sent to the contract
      */
-    function _getUSDStableCoinAmountFrom2keyUnits(
+    function getUSDStableCoinAmountFrom2keyUnits(
         uint256 _2keyAmount,
-        address _campaign
+        uint _campaignID
     )
     public
     view
     returns (uint256)
     {
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
-
-        uint campaignId = getContractId(_campaign);
-        uint activeHedgeRate = get2KEY2DAIHedgedRate(campaignId);
+        uint activeHedgeRate = get2KEY2DAIHedgedRate(_campaignID);
 
         uint hundredPercent = 10**18;
         uint rateWithSpread = activeHedgeRate.mul(hundredPercent.sub(spreadWei())).div(10**18);
@@ -624,11 +602,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
-        uint _daiWeiAvailable;
-        uint _daiWeiToReduce;
+        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
+        uint _daiWeiToReduce = getUSDStableCoinAmountFrom2keyUnits(amountOfTokensWithdrawn, _contractID);
+
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-        (_daiWeiAvailable, _daiWeiToReduce) = getDaiWeiAvailableToWithdrawAndDaiWeiToReduce(_contractID, amountOfTokensWithdrawn);
 
 
         setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiToReduce));
@@ -715,7 +693,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         ERC20 dai = ERC20(getAddress(keccak256("DAI")));
         ERC20 token = ERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
 
-        uint stableCoinUnits = _getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits, msg.sender);
+        uint stableCoinUnits = getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits, getContractId(msg.sender));
         uint etherBalanceOnContractBefore = this.balance;
         uint stableCoinsOnContractBefore = dai.balanceOf(address(this));
 
