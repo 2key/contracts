@@ -14,19 +14,14 @@ contract("TwoKeyEconomy", async (accounts) => {
     const decimals = 18;
     const totalSupply = 1000000000000000000000000000;
 
-    cosole.log('Testing');
 
     it("Test: Admin and SingletonRegistry contract addresses should be properly set", async () => {
         console.log('CAO');
 
         economyContract = await TwoKeyEconomy.new(randomActorAddress1, randomActorAddress2);
         //Validate admin address
-        let admin = await economyContract.twoKeyAdmin();
+        let admin = await economyContract.methods.twoKeyAdmin().call();
         assert.equal(randomActorAddress1, admin, 'admin address is not properly set');
-
-        //Validate singleton registry address
-        let singletonReg = await economyContract.twoKeySingletonRegistry();
-        assert.equal(randomActorAddress2, singletonReg, 'singleton registry address is not properly set');
     });
 
     it('Test: Token name and token symbol should be properly set', async () => {

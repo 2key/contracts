@@ -47,7 +47,6 @@ const fs = require('fs');
 const path = require('path');
 
 const proxyFile = path.join(__dirname, '../configurationFiles/proxyAddresses.json');
-const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
 const addressesFile = path.join(__dirname, '../configurationFiles/contractNamesToProxyAddresses.json');
 
 module.exports = function deploy(deployer) {
@@ -133,8 +132,7 @@ module.exports = function deploy(deployer) {
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
             deployer.then(async () => {
-                let registry = TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
-
+                let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
                 let upgradableLogicContracts = Object.keys(contractLogicArtifacts);
                 let upgradableStorageContracts = Object.keys(contractStorageArtifacts);
 
@@ -188,16 +186,15 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
 
+                let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
                 /**
                  * Here we will add congress contract to the registry
                  */
                 await new Promise(async (resolve, reject) => {
                     try {
-
                         console.log('Adding non-upgradable contracts to the registry');
                         console.log('Adding TwoKeyCongress to the registry as non-upgradable contract');
-                        let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                            .addNonUpgradableContractToAddress('TwoKeyCongress', TwoKeyCongress.address);
+                        let txHash = registry.addNonUpgradableContractToAddress('TwoKeyCongress', TwoKeyCongress.address);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
@@ -210,8 +207,7 @@ module.exports = function deploy(deployer) {
                 await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
-                        let txHash = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address)
-                            .addNonUpgradableContractToAddress('TwoKeyEconomy', TwoKeyEconomy.address);
+                        let txHash = registry.addNonUpgradableContractToAddress('TwoKeyEconomy', TwoKeyEconomy.address);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
@@ -221,7 +217,7 @@ module.exports = function deploy(deployer) {
             .then(() => true)
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.then(async () => {
-                let registry = TwoKeyPlasmaSingletoneRegistry.at(TwoKeyPlasmaSingletoneRegistry.address);
+            let registry = await TwoKeyPlasmaSingletoneRegistry.at(TwoKeyPlasmaSingletoneRegistry.address);
 
             let upgradableLogicContractsPlasma = Object.keys(contractLogicArtifactsPlasma);
             let upgradableStorageContractsPlasma = Object.keys(contractStorageArtifactsPlasma);

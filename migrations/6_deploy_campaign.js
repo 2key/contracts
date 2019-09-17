@@ -46,25 +46,17 @@ module.exports = function deploy(deployer) {
         .then(() => deployer.link(Call, TwoKeyDonationCampaign))
         .then(() => deployer.deploy(TwoKeyDonationCampaign))
         .then(async () => {
-
-            console.log("... Adding implementation versions of Acquisition campaigns");
+            let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+            console.log('... Adding implementation versions of Donation campaigns');
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS).getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
+                    let version = await instance.getLatestContractVersion("TwoKeyDonationCampaign");
 
                     version = incrementVersion(version);
 
-                    let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
-                        .addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
-
-                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
-                        .addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
-
-                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
-                        .addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
-
-                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
-                        .addVersion('TwoKeyPurchasesHandler', version, TwoKeyPurchasesHandler.address);
+                    let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
+                    txHash = await instance.addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
+                    txHash = await instance.addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
 
                     resolve(txHash);
                 } catch (e) {
@@ -73,21 +65,18 @@ module.exports = function deploy(deployer) {
             })
         })
         .then(async () => {
-            console.log('... Adding implementation versions of Donation campaigns');
+            let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+            console.log("... Adding implementation versions of Acquisition campaigns");
             await new Promise(async(resolve,reject) => {
                 try {
-                    let version = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS).getLatestContractVersion("TwoKeyDonationCampaign");
 
+                    let version = await instance.getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
                     version = incrementVersion(version);
 
-                    let txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
-                        .addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
-
-                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
-                        .addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
-
-                    txHash = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS)
-                        .addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
+                    let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
+                    txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
+                    txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
+                    txHash = await instance.addVersion('TwoKeyPurchasesHandler', version, TwoKeyPurchasesHandler.address);
 
                     resolve(txHash);
                 } catch (e) {

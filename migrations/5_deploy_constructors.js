@@ -72,7 +72,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async (resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyMaintainersRegistry');
-                    let txHash = await TwoKeyMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyMaintainersRegistry"]).setInitialParams(
+                    let instance = await TwoKeyMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyMaintainersRegistry"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyMaintainersRegistryStorage"],
                         maintainerAddresses
@@ -87,7 +88,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async (resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeySignatureValidator');
-                    let txHash = await TwoKeySignatureValidator.at(contractNameToProxyAddress["TwoKeySignatureValidator"]).setInitialParams(
+                    let instance = await TwoKeySignatureValidator.at(contractNameToProxyAddress["TwoKeySignatureValidator"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeySignatureValidatorStorage"]
                     );
@@ -101,7 +103,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
-                    let txHash = await TwoKeyCommunityTokenPool.at(contractNameToProxyAddress["TwoKeyCommunityTokenPool"]).setInitialParams(
+                    let instance = await TwoKeyCommunityTokenPool.at(contractNameToProxyAddress["TwoKeyCommunityTokenPool"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyCommunityTokenPoolStorage"]
@@ -116,7 +119,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
-                    let txHash = await TwoKeyLongTermTokenPool.at(contractNameToProxyAddress["TwoKeyLongTermTokenPool"]).setInitialParams(
+                    let instance = await TwoKeyLongTermTokenPool.at(contractNameToProxyAddress["TwoKeyLongTermTokenPool"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyLongTermTokenPoolStorage"]
@@ -131,7 +135,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyDeepFreezeTokenPool');
-                    let txHash = await TwoKeyDeepFreezeTokenPool.at(contractNameToProxyAddress["TwoKeyDeepFreezeTokenPool"]).setInitialParams(
+                    let instance = await TwoKeyDeepFreezeTokenPool.at(contractNameToProxyAddress["TwoKeyDeepFreezeTokenPool"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyCommunityTokenPool"],
@@ -147,7 +152,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyCampaignValidator');
-                    let txHash = await TwoKeyCampaignValidator.at(contractNameToProxyAddress["TwoKeyCampaignValidator"]).setInitialParams(
+                    let instance = await TwoKeyCampaignValidator.at(contractNameToProxyAddress["TwoKeyCampaignValidator"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyCampaignValidatorStorage"]
                     );
@@ -161,7 +167,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyEventSource');
-                    let txHash = await TwoKeyEventSource.at(contractNameToProxyAddress["TwoKeyEventSource"]).setInitialParams(
+                    let instance = await TwoKeyEventSource.at(contractNameToProxyAddress["TwoKeyEventSource"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyEventSourceStorage"]
                     );
@@ -175,7 +182,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyBaseReputationRegistry');
-                    let txHash = await TwoKeyBaseReputationRegistry.at(contractNameToProxyAddress["TwoKeyBaseReputationRegistry"]).setInitialParams(
+                    let instance = await TwoKeyBaseReputationRegistry.at(contractNameToProxyAddress["TwoKeyBaseReputationRegistry"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyBaseReputationRegistryStorage"]
                     );
@@ -189,7 +197,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyExchangeRateContract');
-                    let txHash = await TwoKeyExchangeRateContract.at(contractNameToProxyAddress["TwoKeyExchangeRateContract"]).setInitialParams(
+                    let instance = await TwoKeyExchangeRateContract.at(contractNameToProxyAddress["TwoKeyExchangeRateContract"])
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyExchangeRateStorage"]
                     );
@@ -203,7 +212,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
-                    let txHash = await TwoKeyUpgradableExchange.at(contractNameToProxyAddress["TwoKeyUpgradableExchange"]).setInitialParams(
+                    let instance = await TwoKeyUpgradableExchange.at(contractNameToProxyAddress["TwoKeyUpgradableExchange"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeyEconomy.address,
                         DAI_ROPSTEN_ADDRESS,
                         kyberAddress,
@@ -221,7 +231,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyAdmin');
-                    let txHash = await TwoKeyAdmin.at(contractNameToProxyAddress["TwoKeyAdmin"]).setInitialParams(
+                    let instance = await TwoKeyAdmin.at(contractNameToProxyAddress["TwoKeyAdmin"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyAdminStorage"],
                         TwoKeyCongress.address,
@@ -238,7 +249,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyFactory');
-                    let txHash = await TwoKeyFactory.at(contractNameToProxyAddress["TwoKeyFactory"]).setInitialParams(
+                    let instance = await TwoKeyFactory.at(contractNameToProxyAddress["TwoKeyFactory"]);
+                    let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyFactoryStorage"]
                     );
@@ -252,7 +264,8 @@ module.exports = function deploy(deployer) {
             await new Promise(async(resolve,reject) => {
                 try {
                     console.log('Setting initial parameters in contract TwoKeyRegistry');
-                    let txHash = await TwoKeyRegistry.at(contractNameToProxyAddress["TwoKeyRegistry"]).setInitialParams
+                    let instance = await TwoKeyRegistry.at(contractNameToProxyAddress["TwoKeyRegistry"]);
+                    let txHash = instance.setInitialParams
                     (
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyRegistryStorage"]
@@ -273,7 +286,8 @@ module.exports = function deploy(deployer) {
                 await new Promise(async (resolve,reject) => {
                     try {
                         console.log('Setting initial params in plasma contract on plasma network');
-                        let txHash = await TwoKeyPlasmaEvents.at(contractNameToProxyAddress["TwoKeyPlasmaEvents"]).setInitialParams
+                        let instance = await TwoKeyPlasmaEvents.at(contractNameToProxyAddress["TwoKeyPlasmaEvents"]);
+                        let txHash = instance.setInitialParams
                         (
                             TwoKeyPlasmaSingletoneRegistry.address,
                             contractNameToProxyAddress["TwoKeyPlasmaEventsStorage"],
@@ -288,7 +302,8 @@ module.exports = function deploy(deployer) {
                 await new Promise(async (resolve,reject) => {
                     try {
                         console.log('Setting initial params in plasma registry contract on plasma network');
-                        let txHash = await TwoKeyPlasmaRegistry.at(contractNameToProxyAddress["TwoKeyPlasmaRegistry"]).setInitialParams
+                        let instance = await TwoKeyPlasmaRegistry.at(contractNameToProxyAddress["TwoKeyPlasmaRegistry"]);
+                        let txHash = instance.setInitialParams
                         (
                             TwoKeyPlasmaSingletoneRegistry.address,
                             contractNameToProxyAddress["TwoKeyPlasmaRegistryStorage"]
@@ -303,7 +318,8 @@ module.exports = function deploy(deployer) {
                 await new Promise(async (resolve,reject) => {
                     try {
                         console.log('Setting initial params in Maintainers contract on plasma network');
-                        let txHash = await TwoKeyPlasmaMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyPlasmaMaintainersRegistry"]).setInitialParams
+                        let instance = await TwoKeyPlasmaMaintainersRegistry.at(contractNameToProxyAddress["TwoKeyPlasmaMaintainersRegistry"]);
+                        let txHash = instance.setInitialParams
                         (
                             TwoKeyPlasmaSingletoneRegistry.address,
                             contractNameToProxyAddress["TwoKeyPlasmaMaintainersRegistryStorage"],

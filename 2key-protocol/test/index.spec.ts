@@ -495,7 +495,6 @@ describe('TwoKeyProtocol', () => {
 
     it('should replace acquisition submodule', async() => {
         const src = await twoKeyProtocol.Utils.getSubmodule('bd06b1216ac1af2a09db559590d6ec0a2833b447f410f78574abaef5c5a54cd0', 'acquisition');
-        console.log(src);
         expect(src.length).to.be.gte(0);
     }).timeout(60000);
 

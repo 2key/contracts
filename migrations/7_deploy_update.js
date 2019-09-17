@@ -48,16 +48,17 @@ const { incrementVersion } = require('../helpers');
 const updateContract = (async (registryAddress, contractName, newImplementationAddress) => {
     await new Promise(async(resolve,reject) => {
         try {
+            let instance = await await TwoKeySingletonesRegistry.at(registryAddress);
             // Get current active version to be patched
-            let version = await TwoKeySingletonesRegistry.at(registryAddress).getLatestContractVersion(contractName);
+            let version = await instance.getLatestContractVersion(contractName);
             // Incremented version
             let newVersion = incrementVersion(version);
             //Console log the new version
             console.log('New version is: ' + newVersion);
             // Add contract version
-            let txHash = await TwoKeySingletonesRegistry.at(registryAddress).addVersion(contractName, newVersion, newImplementationAddress);
+            let txHash = instance.addVersion(contractName, newVersion, newImplementationAddress);
             // Upgrade contract proxy to new version
-            let txHash1 = await TwoKeySingletonesRegistry.at(registryAddress).upgradeContract(contractName, newVersion);
+            let txHash1 = instance.upgradeContract(contractName, newVersion);
             resolve({
                 txHash, txHash1
             });

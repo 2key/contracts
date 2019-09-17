@@ -89,7 +89,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
-        setUint(keccak256("spreadWei"), 30**18); // 3% wei
+        setUint(keccak256("spreadWei"), 3**16); // 3% wei
         // 0.1$ Wei
         setUint(keccak256("sellRate2key"),10**17);// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("weiRaised"),0);
