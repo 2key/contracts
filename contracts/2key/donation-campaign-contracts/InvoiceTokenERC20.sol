@@ -4,7 +4,6 @@ import "../libraries/SafeMath.sol";
 import "../ERC20/ERC20.sol";
 
 /**
-
  * @author Nikola Madjarevic
  */
 contract InvoiceTokenERC20 is ERC20 {

@@ -42,7 +42,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         require(initialized == false);
 
         contractor = _contractor;
-        // Moderator address
         moderator = _moderator;
 
         twoKeySingletonesRegistry = _twoKeySingletonRegistry;
