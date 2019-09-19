@@ -364,7 +364,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint balance = moderatorFee.mul(total.sub(networkFee)).div(100);
 
         uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
-        buyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
+        buyTokensFromUpgradableExchange(moderatorFee.sub(balance), twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
 
         moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
     }
@@ -466,9 +466,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         uint inventoryBalance = getTokenBalance(assetContractERC20);
         if(assetContractERC20 == twoKeyEconomy) {
-            return (inventoryBalance - reservedAmountOfTokens - reservedAmount2keyForRewards);
+            return (inventoryBalance.sub(reservedAmountOfTokens.add(reservedAmount2keyForRewards)));
         }
-        return (inventoryBalance - reservedAmountOfTokens);
+        return (inventoryBalance.sub(reservedAmountOfTokens));
     }
 
     /**
