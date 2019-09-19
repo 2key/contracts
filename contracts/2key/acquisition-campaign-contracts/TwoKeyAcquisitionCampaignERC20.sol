@@ -535,8 +535,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
 
     /**
-     * @notice Function where contractor can withdraw all unsold tokens from his campaign once time has passed
-     * @dev This function will throw in case the caller is not contractor
+     * @notice Function where contractor can withdraw all unsold tokens and all inventory which is not spent
+     * from his campaign once time requirement is satisfied
      */
     function withdrawUnsoldTokens() public onlyContractor {
         require(ITwoKeyAcquisitionLogicHandler(logicHandler).canContractorWithdrawUnsoldTokens() == true);
