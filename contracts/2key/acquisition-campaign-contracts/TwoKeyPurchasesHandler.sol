@@ -3,11 +3,14 @@ pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IERC20.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+import "../libraries/SafeMath.sol";
 
 /**
  * @author Nikola Madjarevic
  */
 contract TwoKeyPurchasesHandler is UpgradeableCampaign {
+
+    using SafeMath for *;
 
     enum VestingAmount {BONUS, BASE_AND_BONUS}
     VestingAmount vestingAmount;
@@ -73,16 +76,16 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         uint bonusVestingStartDate;
         // In case vested amounts are both bonus and base, bonusTokensVestingStartShiftInDaysFromDistributionDate is ignored
         if(vestingAmount == VestingAmount.BASE_AND_BONUS) {
-            bonusVestingStartDate = tokenDistributionDate + numberOfDaysBetweenPortions * (1 days);
+            bonusVestingStartDate = tokenDistributionDate.add(numberOfDaysBetweenPortions.mul(1 days));
         } else {
-            bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
+            bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
         }
 
 
         portionToUnlockingDate[0] = tokenDistributionDate;
 
         for(uint i=1; i<numberOfVestingPortions + 1; i++) {
-            portionToUnlockingDate[i] = bonusVestingStartDate + (i-1) * (numberOfDaysBetweenPortions * (1 days));
+            portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
         }
 
         initialized = true;
@@ -118,8 +121,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions+1);
         portionAmounts[0] = _baseTokens;
 
-        uint bonusVestingStartDate = tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate * (1 days);
-        uint bonusPortionAmount = _bonusTokens / numberOfVestingPortions;
+        uint bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
+        uint bonusPortionAmount = _bonusTokens.div(numberOfVestingPortions);
 
         for(uint i=1; i<numberOfVestingPortions + 1; i++) {
             portionAmounts[i] = bonusPortionAmount;
@@ -147,8 +150,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         uint [] memory portionAmounts = new uint[](numberOfVestingPortions);
         bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions);
 
-        uint totalAmount = _baseTokens + _bonusTokens;
-        uint portion = totalAmount / numberOfVestingPortions;
+        uint totalAmount = _baseTokens.add(_bonusTokens);
+        uint portion = totalAmount.div(numberOfVestingPortions);
 
         for(uint i=0; i<numberOfVestingPortions; i++) {
             portionAmounts[i] = portion;
@@ -173,13 +176,13 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     {
         require(msg.sender == contractor);
         require(isDistributionDateChanged == false);
-        require(_newDate - (maxDistributionDateShiftInDays * (1 days)) <= tokenDistributionDate);
+        require(_newDate.sub(maxDistributionDateShiftInDays.mul(1 days)) <= tokenDistributionDate);
         require(now < tokenDistributionDate);
 
-        uint shift = tokenDistributionDate - _newDate;
+        uint shift = tokenDistributionDate.sub(_newDate);
         // If the date is changed shifting all tokens unlocking dates for the difference
         for(uint i=0; i<numberOfVestingPortions+1;i++) {
-            portionToUnlockingDate[i] = portionToUnlockingDate[i] + shift;
+            portionToUnlockingDate[i] = portionToUnlockingDate[i].add(shift);
         }
 
         isDistributionDateChanged = true;
