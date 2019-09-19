@@ -382,7 +382,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         //If there's an amount to be returned and reserved tokens, update state and execute cashback
         if(reservedAmount > 0 && refundAmount > 0) {
             twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
-            twoKeyCampaign.sendBackEthWhenConversionCancelled(_converter, refundAmount);
+            twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(_converter, refundAmount);
         }
 
         emitRejectedEvent(twoKeyCampaign, _converter);
@@ -413,7 +413,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         uint tokensToRefund = conversion.baseTokenUnits.add(conversion.bonusTokenUnits);
 
         twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(tokensToRefund);
-        twoKeyCampaign.sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
+        twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(msg.sender, conversion.conversionAmount);
     }
 
     /**

@@ -17,5 +17,5 @@ contract ITwoKeyDonationCampaign {
 
     function updateReferrerPlasmaBalance(address _influencer, uint _balance) public;
     function updateContractorProceeds(uint value) public;
-    function sendBackEthWhenConversionRejected(address _rejectedConverter, uint _conversionAmount) public;
+    function sendBackEthWhenConversionCancelledOrRejected(address _cancelledConverter, uint _conversionAmount) public;
 }

@@ -57,6 +57,14 @@ contract TwoKeyCampaign is ArcERC20 {
     }
 
 	/**
+	 * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
+	 */
+	modifier onlyTwoKeyConversionHandler() {
+		require(msg.sender == address(conversionHandler));
+		_;
+	}
+
+	/**
      * @dev Transfer tokens from one address to another
      * @param _from address The address which you want to send tokens from ALREADY converted to plasma
      * @param _to address The address which you want to transfer to ALREADY converted to plasma
@@ -258,6 +266,22 @@ contract TwoKeyCampaign is ArcERC20 {
 	returns (address)
 	{
 		return received_from[_receiver];
+	}
+
+	/**
+	 * @notice Function to send ether back to converter if his conversion is cancelled
+	 * @param _cancelledConverter is the address of cancelled converter
+	 * @param _conversionAmount is the amount he sent to the contract
+	 * @dev This function can be called only by conversion handler
+	 */
+	function sendBackEthWhenConversionCancelledOrRejected(
+		address _cancelledConverter,
+		uint _conversionAmount
+	)
+	public
+	onlyTwoKeyConversionHandler
+	{
+		_cancelledConverter.transfer(_conversionAmount);
 	}
 
 	/**

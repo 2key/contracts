@@ -26,6 +26,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         address contractor; // Contractor (creator) of campaign
         uint256 contractorProceedsETHWei; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens -> plasma address
+        uint conversionCreatedAt; // Time when conversion was created
         ConversionState state;
         uint256 conversionAmount; // Amount for conversion (In ETH / FIAT)
         uint256 maxReferralRewardETHWei; // Total referral reward for the conversion
@@ -188,6 +189,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             contractor,
             _contractorProceeds,
             _converterAddress,
+            block.timestamp,
             ConversionState.APPROVED,
             _conversionAmount,
             _maxReferralRewardETHWei,
@@ -280,11 +282,37 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         }
 
         if(refundAmount > 0) {
-            twoKeyCampaign.sendBackEthWhenConversionRejected(_converter, refundAmount);
+            twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(_converter, refundAmount);
         }
 
         emitRejectedEvent(twoKeyCampaign, _converter);
     }
+
+    /**
+     * @notice Function to cancel conversion and get back money
+     * @param _conversionId is the id of the conversion
+     * @dev returns all the funds to the converter back
+     */
+    function converterCancelConversion(
+        uint _conversionId
+    )
+    public
+    {
+        Conversion conversion = conversions[_conversionId];
+
+        uint numberOfDays = 10;
+        require(conversion.conversionCreatedAt.add(numberOfDays.mul(1 days)) < block.timestamp);
+        require(msg.sender == conversion.converter);
+        require(conversion.state == ConversionState.PENDING_APPROVAL);
+
+        counters[0] = counters[0].sub(1); // Reduce number of pending conversions
+        counters[4] = counters[4].add(1); // Increase number of cancelled conversions
+        conversion.state = ConversionState.CANCELLED_BY_CONVERTER;
+
+
+        twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(msg.sender, conversion.conversionAmount);
+    }
+
 
     /**
      * @notice Function to get conversion details by id

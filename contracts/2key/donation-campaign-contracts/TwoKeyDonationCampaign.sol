@@ -329,20 +329,4 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         return reservedAmount2keyForRewards;
     }
 
-    /**
-     * @notice Function to send ether back to converter if his conversion is cancelled
-     * @param _rejectedConverter is the address of cancelled converter
-     * @param _conversionAmount is the amount he sent to the contract
-     * @dev This function can be called only by conversion handler
-     */
-    function sendBackEthWhenConversionRejected(
-        address _rejectedConverter,
-        uint _conversionAmount
-    )
-    public
-    onlyTwoKeyDonationConversionHandler
-    {
-        _rejectedConverter.transfer(_conversionAmount);
-    }
-
 }

@@ -21,14 +21,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
 
     /**
-      * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
-      */
-    modifier onlyTwoKeyConversionHandler() {
-        require(msg.sender == address(conversionHandler));
-        _;
-    }
-
-    /**
      * @notice This function is simulation for the constructor, since we're relying on proxies
      * @param _twoKeySingletonesRegistry is the address of TwoKeySingletonsRegistry contract
      * @param _twoKeyAcquisitionLogicHandler is the address of TwoKeyAcquisitionLogicHandler contract
@@ -375,22 +367,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         buyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
 
         moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
-    }
-
-    /**
-     * @notice Function to send ether back to converter if his conversion is cancelled
-     * @param _cancelledConverter is the address of cancelled converter
-     * @param _conversionAmount is the amount he sent to the contract
-     * @dev This function can be called only by conversion handler
-     */
-    function sendBackEthWhenConversionCancelled(
-        address _cancelledConverter,
-        uint _conversionAmount
-    )
-    public
-    onlyTwoKeyConversionHandler
-    {
-        _cancelledConverter.transfer(_conversionAmount);
     }
 
     /**
