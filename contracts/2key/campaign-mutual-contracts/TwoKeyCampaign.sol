@@ -324,7 +324,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	view
 	returns (uint)
 	{
-		return (referrerPlasma2Balances2key[_influencer]);
+		return (referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_influencer)]);
 	}
 
 	function getContractProxyAddress(string contractName) internal view returns (address) {

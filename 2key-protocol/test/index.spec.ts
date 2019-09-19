@@ -34,7 +34,7 @@ const campaignStartTime = 0;
 const campaignEndTime = 9884748832;
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-let isKYCRequired = true;
+let isKYCRequired = false;
 let isFiatConversionAutomaticallyApproved = true;
 let isFiatOnly = false;
 let incentiveModel = "MANUAL";
@@ -644,7 +644,7 @@ describe('TwoKeyProtocol', () => {
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
-    it('==> should print available amount of tokens before conversion', async() => {
+    it('==> should print available amount of tokens after conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
@@ -1007,8 +1007,8 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         let approvedMinConversionRate = 1000;
-        let amountToBeHedged = 2310000000000000000;
-        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(amountToBeHedged, approvedMinConversionRate, from);
+        let upgradableExchangeBalance = await twoKeyProtocol.getBalance(twoKeyProtocol.twoKeyUpgradableExchange.address);
+        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(parseFloat(upgradableExchangeBalance.balance.ETH.toString()), approvedMinConversionRate, from);
         console.log(hash);
     }).timeout(50000);
 
@@ -1047,6 +1047,11 @@ describe('TwoKeyProtocol', () => {
         });
         let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(campaignAddress, 0, 0, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+    it('==> should print referrer balance after hedging is done so hedge-rate exists', async() => {
+        const referrerBalance = await twoKeyProtocol.AcquisitionCampaign.getAmountReferrerCanWithdraw(campaignAddress, env.GMAIL_ADDRESS, from);
+        console.log(referrerBalance);
     }).timeout(60000);
 
     it('should print balances', printBalances).timeout(15000);

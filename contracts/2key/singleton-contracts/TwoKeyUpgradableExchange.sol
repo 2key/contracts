@@ -329,7 +329,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     function getContractId(
         address _contractAddress
     )
-    internal
+    public
     view
     returns (uint) {
         bytes32 keyHashContractAddressToId = keccak256("contractAddressToId", _contractAddress);

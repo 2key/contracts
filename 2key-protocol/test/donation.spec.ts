@@ -405,8 +405,12 @@ describe('TwoKeyDonationCampaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         let approvedMinConversionRate = 1000;
-        let amountToBeHedged = 70000000000000000;
-        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(amountToBeHedged, approvedMinConversionRate, from);
+
+        let upgradableExchangeBalance = await twoKeyProtocol.getBalance(twoKeyProtocol.twoKeyUpgradableExchange.address);
+        console.log(upgradableExchangeBalance)
+        let balance = parseFloat(upgradableExchangeBalance.balance.ETH.toString());
+
+        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(balance, approvedMinConversionRate, from);
         console.log(hash);
     }).timeout(50000);
 
