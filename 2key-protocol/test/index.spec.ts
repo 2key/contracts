@@ -493,10 +493,10 @@ describe('TwoKeyProtocol', () => {
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(120000);
 
-    it('should replace acquisition submodule', async() => {
-        const src = await twoKeyProtocol.Utils.getSubmodule('bd06b1216ac1af2a09db559590d6ec0a2833b447f410f78574abaef5c5a54cd0', 'acquisition');
-        expect(src.length).to.be.gte(0);
-    }).timeout(60000);
+    // it('should replace acquisition submodule', async() => {
+    //     const src = await twoKeyProtocol.Utils.getSubmodule('bd06b1216ac1af2a09db559590d6ec0a2833b447f410f78574abaef5c5a54cd0', 'acquisition');
+    //     expect(src.length).to.be.gte(0);
+    // }).timeout(60000);
 
     it('should reserve amount for fiat conversion rewards', async() => {
         if(amount) {
