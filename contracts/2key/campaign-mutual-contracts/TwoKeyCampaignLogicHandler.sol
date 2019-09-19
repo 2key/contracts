@@ -211,7 +211,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
             _referrerAddress = recover(_sig);
         }
         else {
-            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+//            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
             _referrerAddress = plasmaOf(_referrerAddress);
         }
 
