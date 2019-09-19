@@ -409,6 +409,10 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         counters[0] = counters[0].sub(1); // Reduce number of pending conversions
         counters[4] = counters[4].add(1); // Increase number of cancelled conversions
         conversion.state = ConversionState.CANCELLED_BY_CONVERTER;
+
+        uint tokensToRefund = conversion.baseTokenUnits.add(conversion.bonusTokenUnits);
+
+        twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(tokensToRefund);
         twoKeyCampaign.sendBackEthWhenConversionCancelled(msg.sender, conversion.conversionAmount);
     }
 
