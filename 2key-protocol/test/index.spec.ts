@@ -86,17 +86,7 @@ const web3switcher = {
     guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrl),
 };
 
-const links = {
-    deployer: '',
-    aydnep: '',
-    gmail: '',
-    test4: '',
-    renata: '',
-    uport: '',
-    gmail2: '',
-    aydnep2: '',
-    test: '',
-};
+const links: any = {};
 
 const users = {
         'deployer': {
@@ -489,7 +479,7 @@ describe('TwoKeyProtocol', () => {
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
         nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
-        links.deployer = campaign.campaignPublicLinkKey;
+        links.deployer = { link: campaign.campaignPublicLinkKey, fSecret: campaign.fSecret };
         return expect(addressRegex.test(campaignAddress)).to.be.true;
     }).timeout(120000);
 
@@ -559,7 +549,7 @@ describe('TwoKeyProtocol', () => {
     it('should get and decrypt ipfs hash', async() => {
         let data: IPrivateMetaInformation = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
         console.log(data);
-        expect(data.campaignPublicLinkKey).to.be.equal(links.deployer);
+        expect(data.campaignPublicLinkKey).to.be.equal(links.deployer.link);
     }).timeout(120000);
 
 
@@ -575,7 +565,7 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
         });
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         console.log(txHash);
         expect(txHash.length).to.be.gt(0);
     }).timeout(60000);
@@ -594,15 +584,16 @@ describe('TwoKeyProtocol', () => {
         });
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
         await tryToRegisterUser('Gmail', from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 50,
-            referralLink: links.deployer
+            referralLink: links.deployer.link,
+            fSecret: links.deployer.fSecret,
         });
         console.log('2) gmail offchain REFLINK', hash);
         links.gmail = hash;
-        expect(hash).to.be.a('string');
+        expect(hash.link).to.be.a('string');
     }).timeout(60000);
 
 
@@ -619,9 +610,9 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         await tryToRegisterUser('Test4', from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.gmail);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
         // console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
-        let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
+        let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail.link, links.gmail.fSecret);
         console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
         // expect(maxReward).to.be.gte(7.5);
     }).timeout(60000);
@@ -635,7 +626,7 @@ describe('TwoKeyProtocol', () => {
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
 
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail, from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
@@ -656,12 +647,13 @@ describe('TwoKeyProtocol', () => {
         // const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, from, refLink, {cut: 33});
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 33,
-            referralLink: links.gmail
+            referralLink: links.gmail.link,
+            fSecret: links.gmail.fSecret
         });
         links.test4 = hash;
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         console.log('3) test4 Cutted REFLINK', links.gmail);
-        expect(hash).to.be.a('string');
+        expect(hash.link).to.be.a('string');
     }).timeout(600000);
 
     it('should print amount of tokens that user want to buy', async () => {
@@ -671,7 +663,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     it('should print joined_from', async () => {
-        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail, { json: true, compress: true });
+        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail.link, { json: true, compress: true });
         console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
     }).timeout(60000);
 
@@ -690,9 +682,9 @@ describe('TwoKeyProtocol', () => {
         });
         await tryToRegisterUser('Renata', from);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
-        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4.link, links.test4.fSecret);
         console.log('VISIT', txHash);
-        const maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4);
+        const maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.test4.link, links.test4.fSecret);
         console.log(`RENATA, Estimated maximum referral reward: ${maxReward}%`);
 
         // expect(maxReward).to.be.gte(5.025);
@@ -701,12 +693,13 @@ describe('TwoKeyProtocol', () => {
     it('should joinOffchain as Renata', async () => {
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 20,
-            referralLink: links.test4
+            referralLink: links.test4.link,
+            fSecret: links.test4.fSecret,
         });
         links.renata = hash;
         // const hash = await twoKeyProtocol.AcquisitionCampaign.joinAndSetPublicLinkWithCut(campaignAddress, refLink, 1);
         console.log('5) Renata offchain REFLINK', links.renata);
-        expect(hash).to.be.a('string');
+        expect(hash.link).to.be.a('string');
     }).timeout(600000);
 
     it('==> should print available amount of tokens before conversion', async() => {
@@ -743,10 +736,10 @@ describe('TwoKeyProtocol', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
         });
         await tryToRegisterUser('Uport', from);
-        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.renata);
+        await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.renata.link, links.renata.fSecret);
 
         console.log('6) uport buy from REFLINK', links.renata);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'), links.renata, from);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'), links.renata.link, from, { fSecret: links.renata.fSecret });
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
         expect(txHash).to.be.a('string');
@@ -759,7 +752,7 @@ describe('TwoKeyProtocol', () => {
 
     it('should transfer arcs to gmail2', async () => {
         console.log('7) transfer to gmail2 REFLINK', links.renata);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata, env.GMAIL2_ADDRESS);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata.link, env.GMAIL2_ADDRESS, { fSecret: links.renata.fSecret });
         console.log(txHash);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
@@ -817,9 +810,9 @@ describe('TwoKeyProtocol', () => {
         });
         await tryToRegisterUser('Aydnep2', from);
 
-        const refReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.renata);
+        const refReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.renata.link, links.renata.fSecret);
         console.log(`Max estimated referral reward: ${refReward}%`);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata, env.TEST_ADDRESS);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata.link, env.TEST_ADDRESS, { fSecret: links.renata.fSecret });
         console.log(txHash);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
@@ -1218,7 +1211,7 @@ describe('TwoKeyProtocol', () => {
             });
 
             console.log(twoKeyProtocol.plasmaAddress);
-            let signature = await twoKeyProtocol.AcquisitionCampaign.getSignatureFromLink(links.renata, twoKeyProtocol.plasmaAddress);
+            let signature = await twoKeyProtocol.AcquisitionCampaign.getSignatureFromLink(links.renata.link, twoKeyProtocol.plasmaAddress, links.renata.fSecret);
             console.log('Trying to perform offline conversion from gmail2');
             let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, signature, from, from, 50);
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
