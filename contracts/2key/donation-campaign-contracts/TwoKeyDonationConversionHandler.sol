@@ -229,11 +229,11 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
 
         // Update reputation points in registry for conversion executed event
-//        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
-//            conversion.converter,
-//            contractor,
-//            twoKeyDonationCampaign
-//        );
+        ITwoKeyBaseReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")).updateOnConversionExecutedEvent(
+            conversion.converter,
+            contractor,
+            twoKeyCampaign
+        );
 
 
         amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
@@ -275,7 +275,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             if(c.state == ConversionState.APPROVED) {
                 counters[1] = counters[1].sub(1); // Reduce number of approved conversions
                 counters[2] = counters[2].add(1); //Increase number of rejected conversions
-//                ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(_converter, contractor, twoKeyAcquisitionCampaignERC20);
+                ITwoKeyBaseReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")).updateOnConversionRejectedEvent(_converter, contractor, twoKeyCampaign);
                 c.state = ConversionState.REJECTED;
                 refundAmount = refundAmount.add(c.conversionAmount);
             }
