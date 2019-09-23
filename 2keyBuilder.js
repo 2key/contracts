@@ -10,7 +10,9 @@ const { networks: truffleNetworks } = require('./truffle');
 const axios = require('axios');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
+const { generateBytecodeForTokenTransfer, generateBytecodeForUpgrading } = require('./generateBytecode');
 const whitelist = require('./ContractDeploymentWhiteList.json');
+
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
 const configPath = path.join(__dirname, 'configurationFiles');
