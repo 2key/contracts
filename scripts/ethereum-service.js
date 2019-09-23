@@ -15,6 +15,7 @@ const ourAddress = process.env.ADDRESS;
 const ourPrivateKey = process.env.PRIV_KEY;
 
 const web3 = new Web3(new Web3.providers.HttpProvider("https://kovan.decenter.com"));
+
 web3.eth.defaultAccount = ourAddress;
 
 const metadataContract = web3.eth.contract(conf.metadataContract.abi).at(testContractAddress);
@@ -24,7 +25,6 @@ let nonce = web3.eth.getTransactionCount(ourAddress);
 const gasPrice = 1502509001;
 
 const addCard = async (rarity, hashFunction, size, ipfsHash, artist) => {
-
     try {
         await sendTransaction(web3, metadataContract.addCardMetadata, ourAddress,
             [rarity, ipfsHash, hashFunction, size, artist], gasPrice, web3.toHex(nonce));
