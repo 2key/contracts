@@ -34,16 +34,16 @@ const web3switcher = {
     guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrl),
 };
 
-const links = {
-    deployer: '',
-    aydnep: '',
-    gmail: '',
-    test4: '',
-    renata: '',
-    uport: '',
-    gmail2: '',
-    aydnep2: '',
-    test: '',
+const links: any = {
+    deployer: {},
+    aydnep: {},
+    gmail: {},
+    test4: {},
+    renata: {},
+    uport: {},
+    gmail2: {},
+    aydnep2: {},
+    test: {},
 };
 /**
  * Donation campaign parameters
@@ -135,7 +135,7 @@ describe('TwoKeyDonationCampaign', () => {
 
 
         campaignAddress = result.campaignAddress;
-        links.deployer = result.campaignPublicLinkKey;
+       links.deployer = { link: result.campaignPublicLinkKey, fSecret: result.fSecret };
         invoiceTokenAddress = result.invoiceToken;
    }).timeout(60000);
 
@@ -184,7 +184,7 @@ describe('TwoKeyDonationCampaign', () => {
     it('should get and decrypt ipfs hash', async() => {
         printTestNumber();
         let data: IPrivateMetaInformation = await twoKeyProtocol.DonationCampaign.getPrivateMetaHash(campaignAddress, from);
-        expect(data.campaignPublicLinkKey).to.be.equal(links.deployer);
+        expect(data.campaignPublicLinkKey).to.be.equal(links.deployer.link);
     }).timeout(120000);
 
     it('should visit campaign as guest', async () => {
@@ -200,7 +200,7 @@ describe('TwoKeyDonationCampaign', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
         });
-        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer);
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         console.log(txHash);
         expect(txHash.length).to.be.gt(0);
     }).timeout(60000);
@@ -219,13 +219,14 @@ describe('TwoKeyDonationCampaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
-        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer);
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         const hash = await twoKeyProtocol.DonationCampaign.join(campaignAddress, from, {
             cut: 50,
-            referralLink: links.deployer
+            referralLink: links.deployer.link,
+            fSecret: links.deployer.fSecret,
         });
         links.gmail = hash;
-        expect(hash).to.be.a('string');
+        expect(links.gmail.link).to.be.a('string');
     }).timeout(60000);
 
     it('should show maximum referral reward after ONE referrer', async() => {
@@ -242,9 +243,9 @@ describe('TwoKeyDonationCampaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
 
-        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail);
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
 
-        let maxReward = await twoKeyProtocol.DonationCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
+        let maxReward = await twoKeyProtocol.DonationCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail.link, links.gmail.fSecret);
         console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
     }).timeout(60000);
 
@@ -252,7 +253,7 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
         console.log('4) buy from test4 REFLINK', links.gmail);
 
-        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail, from);
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
@@ -273,8 +274,8 @@ describe('TwoKeyDonationCampaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
 
-        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail);
-        let maxReward = await twoKeyProtocol.DonationCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail);
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
+        let maxReward = await twoKeyProtocol.DonationCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail.link, links.gmail.fSecret);
         console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
     }).timeout(60000);
 
@@ -282,7 +283,7 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
         console.log('4) buy from test4 REFLINK', links.gmail);
 
-        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth/2, 'ether'), links.gmail, from);
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth/2, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
