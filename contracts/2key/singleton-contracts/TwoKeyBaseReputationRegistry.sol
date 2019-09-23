@@ -44,12 +44,12 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
      * @dev This function can only be called by TwoKeyConversionHandler contract assigned to the Acquisition from method param
      * @param converter is the address of the converter
      * @param contractor is the address of the contractor
-     * @param acquisitionCampaign is the address of the acquisition campaign so we can get referrers from there
+     * @param campaign is the address of the acquisition campaign so we can get referrers from there
      */
     function updateOnConversionExecutedEvent(
         address converter,
         address contractor,
-        address acquisitionCampaign
+        address campaign
     )
     public
     {
@@ -65,7 +65,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + initialRewardWei);
 
-        address[] memory referrers = getReferrers(converter, acquisitionCampaign);
+        address[] memory referrers = getReferrers(converter, campaign);
 
         for(uint i=0; i<referrers.length; i++) {
             bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[i]);
@@ -80,12 +80,12 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
      * @dev This function can only be called by TwoKeyConversionHandler contract assigned to the Acquisition from method param
      * @param converter is the address of the converter
      * @param contractor is the address of the contractor
-     * @param acquisitionCampaign is the address of the acquisition campaign so we can get referrers from there
+     * @param campaign is the address of the acquisition campaign so we can get referrers from there
      */
     function updateOnConversionRejectedEvent(
         address converter,
         address contractor,
-        address acquisitionCampaign
+        address campaign
     )
     public
     {
@@ -102,7 +102,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialRewardWei);
 
-        address[] memory referrers = getReferrers(converter, acquisitionCampaign);
+        address[] memory referrers = getReferrers(converter, campaign);
 
         for(uint i=0; i<referrers.length; i++) {
             bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[i]);
@@ -116,26 +116,26 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
      * @notice Internal getter from Acquisition campaign to fetch logic handler address
      */
     function getLogicHandlerAddress(
-        address acquisitionCampaign
+        address campaign
     )
     internal
     view
     returns (address)
     {
-        return ITwoKeyCampaign(acquisitionCampaign).logicHandler();
+        return ITwoKeyCampaign(campaign).logicHandler();
     }
 
     /**
      * @notice Internal getter from Acquisition campaign to fetch conersion handler address
      */
     function getConversionHandlerAddress(
-        address acquisitionCampaign
+        address campaign
     )
     internal
     view
     returns (address)
     {
-        return ITwoKeyCampaign(acquisitionCampaign).conversionHandler();
+        return ITwoKeyCampaign(campaign).conversionHandler();
     }
 
     /**
@@ -152,18 +152,18 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice Function to get all referrers in the chain for specific converter
      * @param converter is the converter we want to get referral chain
-     * @param acquisitionCampaign is the acquisition campaign contract
+     * @param campaign is the acquisition campaign contract
      * @return array of addresses (referrers)
      */
     function getReferrers(
         address converter,
-        address acquisitionCampaign
+        address campaign
     )
     internal
     view
     returns (address[])
     {
-        address logicHandlerAddress = getLogicHandlerAddress(acquisitionCampaign);
+        address logicHandlerAddress = getLogicHandlerAddress(campaign);
         return ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter);
     }
 

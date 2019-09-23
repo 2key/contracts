@@ -35,6 +35,12 @@ const branch_to_env = {
     "master": "prod"
 };
 
+const env_to_channelCode = {
+    "test": "CKL4T7M2S",
+    "staging": "CKKRPNR55",
+    "prod": "CKHG3LS20"
+};
+
 
 const deployedTo = {};
 
@@ -489,7 +495,7 @@ const slack_message = async (newVersion, oldVersion, devEnv) => {
         .toString().trim();
 
     const body = {
-        channel: 'CKL4T7M2S',
+        channel: env_to_channelCode[devEnv],
         attachments: [
             {
                 blocks: [
