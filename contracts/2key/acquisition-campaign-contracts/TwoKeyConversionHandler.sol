@@ -19,7 +19,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
 
-    uint expiryConversionInHours; // How long converter can be pending before it will be automatically rejected and funds will be returned to convertor (hours)
 
     address assetContractERC20;
 
@@ -401,8 +400,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     {
         Conversion conversion = conversions[_conversionId];
 
-        uint numberOfDays = 10;
-        require(conversion.conversionCreatedAt.add(numberOfDays.mul(1 days)) < block.timestamp);
+        require(conversion.conversionExpiresAt > block.timestamp);
         require(msg.sender == conversion.converter);
         require(conversion.state == ConversionState.PENDING_APPROVAL);
 

@@ -11,6 +11,8 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
 
     using SafeMath for uint256;
 
+    uint expiryConversionInHours; // How long converter can be pending before he can cancel his conversion
+
     event ConversionCreated(uint conversionId);
 
     bool isCampaignInitialized;
@@ -76,7 +78,7 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
         return fee;
     }
 
-    
+
     function getAllConvertersPerState(
         bytes32 state
     )

@@ -68,6 +68,7 @@ let currency = "USD";
 let endCampaignOnceGoalReached = false;
 let campaignAddress: string;
 let invoiceTokenAddress: string;
+let expiryConversionInHours: number;
 
 //Describe structure of invoice token
 let invoiceToken: InvoiceERC20 = {
@@ -95,7 +96,8 @@ let campaignData: ICreateCampaign = {
     acceptsFiat,
     incentiveModel,
     currency,
-    endCampaignOnceGoalReached
+    endCampaignOnceGoalReached,
+    expiryConversionInHours
 };
 
 const progressCallback = (name: string, mined: boolean, transactionResult: string): void => {

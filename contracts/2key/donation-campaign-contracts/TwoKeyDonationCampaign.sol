@@ -27,7 +27,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         _;
     }
 
-
     function setInitialParamsDonationCampaign(
         address _contractor,
         address _moderator,
@@ -66,6 +65,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
 
+        //Because of stack depth
+        ITwoKeyDonationConversionHandler(conversionHandler).setExpiryConversionInHours(numberValues[10]);
 
         initialized = true;
     }

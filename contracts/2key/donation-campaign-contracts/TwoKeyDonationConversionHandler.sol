@@ -27,6 +27,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         uint256 contractorProceedsETHWei; // How much contractor will receive for this conversion
         address converter; // Converter is one who's buying tokens -> plasma address
         uint conversionCreatedAt; // Time when conversion was created
+        uint conversionExpiresAt; // Time when conversion expires
         ConversionState state;
         uint256 conversionAmount; // Amount for conversion (In ETH / FIAT)
         uint256 maxReferralRewardETHWei; // Total referral reward for the conversion
@@ -65,6 +66,15 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(address(erc20InvoiceToken), tokenName, tokenSymbol);
         isCampaignInitialized = true;
+    }
+
+    function setExpiryConversionInHours(
+        uint _expiryConversionInHours
+    )
+    public
+    {
+        require(msg.sender == address(twoKeyCampaign));
+        expiryConversionInHours = _expiryConversionInHours;
     }
 
 
@@ -189,7 +199,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             contractor,
             _contractorProceeds,
             _converterAddress,
-            block.timestamp,
+            now,
+            now.add(expiryConversionInHours.mul(1 hours)),
             ConversionState.APPROVED,
             _conversionAmount,
             _maxReferralRewardETHWei,
@@ -300,8 +311,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     {
         Conversion conversion = conversions[_conversionId];
 
-        uint numberOfDays = 10;
-        require(conversion.conversionCreatedAt.add(numberOfDays.mul(1 days)) < block.timestamp);
+        require(conversion.conversionExpiresAt > block.timestamp);
         require(msg.sender == conversion.converter);
         require(conversion.state == ConversionState.PENDING_APPROVAL);
 

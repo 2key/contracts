@@ -36,4 +36,9 @@ contract ITwoKeyDonationConversionHandler {
     view
     returns (bytes32);
 
+    function setExpiryConversionInHours(
+        uint _expiryConversionInHours
+    )
+    public;
+
 }
