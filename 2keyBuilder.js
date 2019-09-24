@@ -542,7 +542,7 @@ const slack_message = async (newVersion, oldVersion, devEnv) => {
                 ],
             },
         ],
-    }
+    };
 
     await axios.post('https://slack.com/api/chat.postMessage', body, {
         headers: {

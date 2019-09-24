@@ -4,7 +4,7 @@ const abi = require('ethereumjs-abi');
 const web3 = new Web3();
 
 function generateSelector(name) {
-  return web3.sha3(name).substring(0, 4);
+  return web3.sha3(name).substring(2, 10);
 }
 
 function generateBytecode(name, types, values) {
@@ -22,5 +22,10 @@ function generateBytecodeForUpgrading(name, version) {
   return generateBytecode('upgradeContract(string,string)', ['string', 'string'], [name, version]);
 }
 
+
+
 module.exports.generateBytecodeForTokenTransfer = generateBytecodeForTokenTransfer;
 module.exports.generateBytecodeForUpgrading = generateBytecodeForUpgrading;
+
+
+console.log(generateBytecodeForUpgrading("TwoKeyUpgradableExchange", "1.1"));
