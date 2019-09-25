@@ -60,7 +60,7 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
 
             let congressInstance = await TwoKeyCongress.at(congressAddress);
 
-            //Can be only done by members
+            //Can be only done by members of congress
             let { logs } = await congressInstance.newProposal(
                 registryAddress,
                 0,
