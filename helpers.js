@@ -175,6 +175,88 @@ const slack_message_proposal_created = async (contractName, newVersion, proposal
     );
 };
 
+/**
+ * Function to send message to slack channel
+ * @param message
+ */
+const slack_message = async (newVersion, oldVersion, devEnv) => {
+    const token = process.env.SLACK_TOKEN;
+
+    let commitHash = require('child_process')
+        .execSync('git rev-parse HEAD')
+        .toString().trim();
+
+
+    let commitHash2keyProtocol = require('child_process')
+        .execSync('cd 2key-protocol/dist && git rev-parse HEAD')
+        .toString().trim();
+
+    let diffData = require('child_process')
+        .execSync(`git --no-pager log --no-color -p -1 ${oldVersion}..${newVersion} .`)
+        .toString().trim();
+
+    const body = {
+        channel: env_to_channelCode[devEnv],
+        attachments: [
+            {
+                blocks: [
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `[${devEnv.toUpperCase()}] protocol updated, version: ${newVersion}`,
+                        },
+                    },
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `\`\`\`${diffData}\`\`\``,
+                        },
+                    },
+                    {
+                        type: 'divider',
+                    },
+                    {
+                        type: 'context',
+                        elements: [
+                            {
+                                type: 'mrkdwn',
+                                text: `For more info, click <https://github.com/2key/contracts/compare/${oldVersion}...${newVersion}|here>`,
+                            },
+                        ],
+                    },
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `*Last commit contracts repo: * <https://github.com/2key/contracts/commit/${commitHash}|${commitHash}>`,
+                        },
+                    },
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `*Last commit 2key-protocol repo: * <https://github.com/2key/2key-protocol/commit/${commitHash2keyProtocol.toUpperCase()}|${commitHash2keyProtocol.toUpperCase()}>`,
+                        },
+                    },
+                ],
+            },
+        ],
+    };
+
+
+    await axios.post('https://slack.com/api/chat.postMessage', body, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-type': 'application/json; charset=utf-8'
+        }
+    }).then(
+        res => {process.exit(0)},
+        err => {console.log(err);process.exit(1)}
+    );
+};
+
 
 
 
@@ -187,5 +269,6 @@ module.exports = {
     rmDir,
     getGitBranch,
     getConfigForTheBranch,
-    slack_message_proposal_created
+    slack_message_proposal_created,
+    slack_message
 };

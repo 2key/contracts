@@ -27,7 +27,7 @@ const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
 require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message } = require('./helpers');
 
 const branch_to_env = {
     "develop": "test",
@@ -533,88 +533,6 @@ async function deploy() {
     }
 }
 
-
-/**
- * Function to send message to slack channel
- * @param message
- */
-const slack_message = async (newVersion, oldVersion, devEnv) => {
-    const token = process.env.SLACK_TOKEN;
-
-    let commitHash = require('child_process')
-        .execSync('git rev-parse HEAD')
-        .toString().trim();
-
-
-    let commitHash2keyProtocol = require('child_process')
-        .execSync('cd 2key-protocol/dist && git rev-parse HEAD')
-        .toString().trim();
-
-    let diffData = require('child_process')
-        .execSync(`git --no-pager log --no-color -p -1 ${oldVersion}..${newVersion} .`)
-        .toString().trim();
-
-    const body = {
-        channel: env_to_channelCode[devEnv],
-        attachments: [
-            {
-                blocks: [
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `[${devEnv.toUpperCase()}] protocol updated, version: ${newVersion}`,
-                        },
-                    },
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `\`\`\`${diffData}\`\`\``,
-                        },
-                    },
-                    {
-                        type: 'divider',
-                    },
-                    {
-                        type: 'context',
-                        elements: [
-                            {
-                                type: 'mrkdwn',
-                                text: `For more info, click <https://github.com/2key/contracts/compare/${oldVersion}...${newVersion}|here>`,
-                            },
-                        ],
-                    },
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `*Last commit contracts repo: * <https://github.com/2key/contracts/commit/${commitHash}|${commitHash}>`,
-                        },
-                    },
-                    {
-                        type: 'section',
-                        text: {
-                            type: 'mrkdwn',
-                            text: `*Last commit 2key-protocol repo: * <https://github.com/2key/2key-protocol/commit/${commitHash2keyProtocol.toUpperCase()}|${commitHash2keyProtocol.toUpperCase()}>`,
-                        },
-                    },
-                ],
-            },
-        ],
-    };
-
-    await axios.post('https://slack.com/api/chat.postMessage', body, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-type': 'application/json; charset=utf-8'
-        }
-    }).then(
-        res => {process.exit(0)},
-        err => {console.log(err);process.exit(1)}
-    );
-};
-
 const test = () => new Promise(async (resolve, reject) => {
     try {
         await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/test/index.spec.ts']);
@@ -730,7 +648,7 @@ async function main() {
             process.exit(0);
             break;
         case '--slack':
-            await slack_message('v1.1.48-develop','v1.1.47-develop','develop');
+            await slack_message('v1.1.49-develop','v1.1.47-develop','test');
             process.exit(0);
         case '--testfunction':
             await getDiffBetweenLatestTags();

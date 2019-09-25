@@ -4,6 +4,8 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 const LedgerProvider = require('./LedgerProvider');
 const config = require('./configurationFiles/accountsConfig.json');
 
+const LedgerWalletProvider = require('truffle-ledger-provider');
+
 const mnemonic = config.mnemonic;
 const infuraApiKey = config.infuraApiKey;
 
@@ -51,6 +53,21 @@ module.exports = {
   networks: {
       'dev-local': {
           provider: new HDWalletProvider(mnemonic, 'http://localhost:8545'),
+          network_id: 8086, // Match any network id
+          gas: 8000000,
+          gasPrice: 2000000000
+      },
+
+      'dev-local-ledger': {
+          provider: () => new LedgerWalletProvider({
+              networkId:  8086,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              // askConfirm: true,
+              askConfirm: false,
+              accountsLength: 1,
+              accountsOffset: 0,
+            }, 'http://localhost:8545'),
           network_id: 8086, // Match any network id
           gas: 8000000,
           gasPrice: 2000000000

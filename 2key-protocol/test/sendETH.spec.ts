@@ -86,7 +86,8 @@ describe('TwoKeyProtocol LOCAL', () => {
         const addresses = Object.keys(env).filter(key => key.endsWith('_ADDRESS') && env[key].includes('0x') && env[key].length == 42).map(key => env[key]);
         addresses.push(config.address);
         let l = addresses.length;
-        await sendETH('0x9aace881c7a80b596d38eaff66edbb5368d2f2c5');
+        await sendETH('0x9aace881c7a80b596d38eaff66edbb5368d2f2c5'); //To make sure for tests
+        await sendETH('0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2'); //Ledger address
         for (let i = 0; i < l; i++) {
             const receipt = await sendETH(addresses[i]);
             if (!receipt || receipt.status !== '0x1') {
