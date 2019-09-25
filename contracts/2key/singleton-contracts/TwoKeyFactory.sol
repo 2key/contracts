@@ -8,8 +8,8 @@ import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../upgradability/Upgradeable.sol";
-import "./ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyFactoryStorage.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
 /**

@@ -266,13 +266,13 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             conversion.isConversionFiat
         );
 
-//         Update reputation points in registry for conversion executed event
+        //Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
             conversion.converter,
             contractor,
             twoKeyCampaign
         );
-//
+
         // Add total rewards
         counters[8] = counters[8].add(totalReward2keys);
 

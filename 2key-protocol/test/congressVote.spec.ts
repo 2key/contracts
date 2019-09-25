@@ -44,7 +44,7 @@ describe('Start and execute voting' , () => {
         });
 
         let members = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
-        expect(members.length).to.be.equal(3);
+        expect(members.length).to.be.equal(4);
     }).timeout(30000);
 
     it('should get member info from congress', async() => {

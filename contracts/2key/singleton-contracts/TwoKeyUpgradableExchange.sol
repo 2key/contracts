@@ -10,11 +10,11 @@ import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IBancorContract.sol";
 
-import "./ITwoKeySingletonUtils.sol";
 import "../upgradability/Upgradeable.sol";
 
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
 contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {

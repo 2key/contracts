@@ -16,7 +16,8 @@ const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
-
+const TwoKeyCongress = artifacts.require('TwoKeyCongress');
+const StandardTokenModified = artifacts.require('StandardTokenModified');
 const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
 const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
 const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
@@ -35,20 +36,17 @@ const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMa
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
 
-const TWO_KEY_SINGLETON_REGISTRY_ADDRESS = "0x20a20172f22120f966530bb853e395f1682bb414"; //Develop
-const TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS = "0xc83b8a5c607b4d282c1d30a5a350e5529c007737"; //Staging
-
-const { incrementVersion } = require('../helpers');
-
+const { incrementVersion, getConfigForTheBranch } = require('../helpers');
+const { generateBytecodeForUpgrading } = require('../generateBytecode');
 
 /**
  * Function to perform all necessary logic to update smart contract
  * @type {function(*, *=, *=)}
  */
-const updateContract = (async (registryAddress, contractName, newImplementationAddress) => {
+const updateContract = (async (registryAddress, congressAddress, contractName, newImplementationAddress) => {
     await new Promise(async(resolve,reject) => {
         try {
-            let instance = await await TwoKeySingletonesRegistry.at(registryAddress);
+            let instance = await TwoKeySingletonesRegistry.at(registryAddress);
             // Get current active version to be patched
             let version = await instance.getLatestContractVersion(contractName);
             // Incremented version
@@ -57,10 +55,27 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             console.log('New version is: ' + newVersion);
             // Add contract version
             let txHash = instance.addVersion(contractName, newVersion, newImplementationAddress);
+
+            let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
+
+            let congressInstance = await TwoKeyCongress.at(congressAddress);
+
+            //Can be only done by members
+            let { logs } = await congressInstance.newProposal(
+                registryAddress,
+                0,
+                "Upgrade " + contractName + " to version: " + newVersion,
+                bytecodeForUpgradingThisContract
+            );
+
+            let {proposalID, beneficiary, weiAmount, description} = logs.find(l => l.event === 'ProposalAdded').args;
+
+            console.log("Added proposal with ID : " + proposalID + " to do job " + description);
+
             // Upgrade contract proxy to new version
-            let txHash1 = instance.upgradeContract(contractName, newVersion);
+            // let txHash1 = instance.upgradeContract(contractName, newVersion);
             resolve({
-                txHash, txHash1
+                txHash //, txHash1
             });
         } catch (e) {
             reject(e);
@@ -131,7 +146,7 @@ const checkArguments = ((arguments) => {
     return isArgumentFound;
 });
 
-module.exports = function deploy(deployer) {
+module.exports = async function deploy(deployer) {
     if(checkArguments(process.argv) == false) {
         console.log('No update will be performed');
         return;
@@ -141,25 +156,30 @@ module.exports = function deploy(deployer) {
     let contract = getContractPerName(contractName);
     let newImplementationAddress;
     let registryAddress;
-    if(deployer.network.startsWith('dev')) {
-        registryAddress = TwoKeySingletonesRegistry.address;
-    }
-    else if(deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
-        registryAddress = TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
-    } else {
-        registryAddress = TWO_KEY_PLASMA_SINGLETON_REGISTRY_ADDRESS;
-    }
+    let congressAddress;
+
+
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
                 newImplementationAddress = contractInstance.address;
             })
             .then(async () => {
-                console.log();
+                let config = await getConfigForTheBranch();
+
+                if(deployer.network.startsWith('dev')) {
+                    registryAddress = TwoKeySingletonesRegistry.address;
+                    congressAddress = TwoKeyCongress.address;
+                }
+                else {
+                    registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
+                    congressAddress = config.TwoKeyCongress.networks[deployer.network_id].address;
+                }
+
                 await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Updating contract: ' + contractName);
-                        let hashes = await updateContract(registryAddress, contractName, newImplementationAddress);
+                        let hashes = await updateContract(registryAddress, congressAddress, contractName, newImplementationAddress);
                         resolve(hashes);
                     } catch (e) {
                         reject(e);

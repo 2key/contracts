@@ -5,8 +5,8 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyExchangeRateContractStorage.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradability/Upgradeable.sol";
-import "./ITwoKeySingletonUtils.sol";
 import "../libraries/SafeMath.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
 /**

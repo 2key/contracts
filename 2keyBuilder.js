@@ -46,6 +46,56 @@ const deployedTo = {};
 
 let contractsStatus;
 
+const sortMechanism = (versionA,versionB) => {
+    versionA = versionA.split('-')[0].split('.');
+    versionB = versionB.split('-')[0].split('.');
+    if (parseInt(versionA[0]) > parseInt(versionB[0]))
+        return 1;
+    if (parseInt(versionA[0]) < parseInt(versionB[0]))
+        return -1;
+    else {
+        if(parseInt(versionA[1]) > parseInt(versionB[1]))
+            return 1;
+        if(parseInt(versionA[1]) < parseInt(versionB[1]))
+            return -1;
+        else {
+            if(parseInt(versionA[2]) > parseInt(versionB[2]))
+                return 1;
+            if(parseInt(versionA[2]) < parseInt(versionB[2]))
+                return -1;
+            else return 0;
+        }
+    }
+};
+
+/**
+ *
+ * @returns {Promise<void>}
+ */
+const getDiffBetweenLatestTags = async () => {
+    const tagsDevelop = (await contractsGit.tags()).all.filter(item => item.endsWith('-develop')).sort(sortMechanism);
+    let latestTagDev = tagsDevelop[tagsDevelop.length-1];
+
+    const tagsStaging = (await contractsGit.tags()).all.filter(item => item.endsWith('-staging')).sort(sortMechanism);
+    let latestTagStaging = tagsStaging[tagsStaging.length-1];
+
+    console.log('Latest tags: ' + latestTagDev + ' ... ' + latestTagStaging);
+
+    let status = await contractsGit.status();
+    let diffParams = status.current == 'staging' ? [latestTagDev,latestTagStaging] : [latestTagDev];
+
+    let diffAllContracts = (await contractsGit.diffSummary(diffParams)).files.filter(item => item.file.endsWith('.sol')).map(item => item.file);
+
+    let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+    let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/') || item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+
+
+    console.log(singletonsChanged);
+    console.log(campaignsChanged);
+
+    return [singletonsChanged, campaignsChanged];
+};
+
 const getBuildArchPath = () => {
     if(contractsStatus && contractsStatus.current) {
         return buildArchPath.replace('{branch}',`-${contractsStatus.current}`);
@@ -341,6 +391,30 @@ const commitAndPushContractsFolder = async(commitMessage) => {
     await contractsGit.push('origin', contractsStatus.current);
 };
 
+async function deployUpgrade(networks) {
+    console.log(networks);
+    const l = networks.length;
+    for (let i = 0; i < l; i += 1) {
+        /* eslint-disable no-await-in-loop */
+        let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
+        console.log('Contracts to be updated: ' + singletonsToBeUpgraded.length);
+        if(singletonsToBeUpgraded.length > 0) {
+            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+                /* eslint-disable no-await-in-loop */
+                console.log(networks[i], singletonsToBeUpgraded[j]);
+                await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+            }
+        } else {
+            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
+            deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
+        }
+        if(campaignsToBeUpgraded.length > 0) {
+            await runDeployCampaignMigration(networks[i]);
+        }
+        /* eslint-enable no-await-in-loop */
+    }
+}
+
 async function deploy() {
     try {
         deployment = true;
@@ -381,23 +455,8 @@ async function deploy() {
         const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
         const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
 
-        const l = networks.length;
-        for (let i = 0; i < l; i += 1) {
-            /* eslint-disable no-await-in-loop */
-            let contractsToBeUpdated = getAllContractsToBeUpdated(process.argv);
-            console.log('Contracts to be updated: ' + contractsToBeUpdated.length);
-            if(contractsToBeUpdated.length > 0) {
-                for(let j=0; j<contractsToBeUpdated.length; j++) {
-                    /* eslint-disable no-await-in-loop */
-                    await runUpdateMigration(networks[i], contractsToBeUpdated[j]);
-                }
-            } else {
-                await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
-                deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
-            }
-            await runDeployCampaignMigration(networks[i]);
-            /* eslint-enable no-await-in-loop */
-        }
+
+        await deployUpgrade(networks);
 
         const contracts = await generateSOLInterface();
         await archiveBuild();
@@ -609,15 +668,9 @@ async function main() {
         case '--update':
             try {
 
-                await restoreFromArchive();
-                const networks = process.argv[3];
-                for(let i=4; i<process.argv.length; i++) {
-                    let contractName = process.argv[i];
-                    let str = contractName.toString()+".json";
-                    console.log(str);
-                    fs.unlinkSync(path.join(buildPath, str));
-                    await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'),['migrate',`--network=${networks}`,'--f', 5,'update',contractName]);
-                }
+                // await restoreFromArchive();
+                const networks = process.argv[3].split(',');
+                await deployUpgrade(networks);
                 await generateSOLInterface();
                 process.exit(0);
             } catch (err) {
@@ -672,11 +725,14 @@ async function main() {
             process.exit(0);
             break;
         case '--mig':
-            getMigrationsList();
+            getMigrationsList()
             process.exit(0);
             break;
         case '--slack':
             await slack_message('v1.1.48-develop','v1.1.47-develop','develop');
+            process.exit(0);
+        case '--testfunction':
+            await getDiffBetweenLatestTags();
             process.exit(0);
         default:
             await deploy();

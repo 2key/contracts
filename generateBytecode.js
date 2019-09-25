@@ -28,4 +28,3 @@ module.exports.generateBytecodeForTokenTransfer = generateBytecodeForTokenTransf
 module.exports.generateBytecodeForUpgrading = generateBytecodeForUpgrading;
 
 
-console.log(generateBytecodeForUpgrading("TwoKeyUpgradableExchange", "1.1"));

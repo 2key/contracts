@@ -8,8 +8,8 @@ import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyCampaign.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
-import "./ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyBaseReputationRegistryStorage.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 /**
  * @author Nikola Madjarevic

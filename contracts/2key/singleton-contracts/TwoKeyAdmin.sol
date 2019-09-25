@@ -3,8 +3,8 @@ pragma solidity ^0.4.24;
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../upgradability/Upgradeable.sol";
-import "./ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 

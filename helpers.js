@@ -2,7 +2,7 @@ const childProcess = require('child_process');
 const rimraf = require('rimraf');
 const simpleGit = require('simple-git/promise');
 const path = require('path');
-
+const fs = require('fs');
 
 const incrementVersion = ((version) => {
     if(version == "") {
@@ -54,7 +54,7 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
  */
 const runDeployCampaignMigration = (network) => new Promise(async(resolve, reject) => {
     try {
-        if (!process.env.SKIP_4MIGRATION) {
+        if (!process.env.SKIP_6MIGRATION) {
             await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '6', '--to', '6', '--network', network]);
             resolve(true);
         } else {
@@ -81,6 +81,21 @@ const runUpdateMigration = (network, contractName) => new Promise(async(resolve,
     }
 });
 
+/**
+ *
+ * @returns {Promise<any>}
+ */
+const getConfigForTheBranch = () => new Promise(async(resolve,reject) => {
+    try {
+        let branch = await getGitBranch();
+        let filePath = `./2key-protocol/dist/contracts_deployed-${branch}.json`;
+        console.log(filePath);
+        let file = fs.readFileSync(filePath);
+        resolve(JSON.parse(file));
+    } catch (e) {
+        reject(e);
+    }
+});
 
 /**
  * Remove direcotry
@@ -101,7 +116,7 @@ const getGitBranch = () => new Promise(async(resolve,reject) => {
     try {
         const currentRepo = simpleGit();
         let branchStatus = await currentRepo.status();
-        return branchStatus.current;
+        resolve(branchStatus.current);
     } catch (e) {
         reject(e);
     }
@@ -117,5 +132,6 @@ module.exports = {
     runDeployCampaignMigration: runDeployCampaignMigration,
     runUpdateMigration,
     rmDir,
-    getGitBranch
+    getGitBranch,
+    getConfigForTheBranch
 };

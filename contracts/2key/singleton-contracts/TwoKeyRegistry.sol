@@ -4,9 +4,9 @@ import "../libraries/Call.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../libraries/Utils.sol";
 import "../upgradability/Upgradeable.sol";
-import "./ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyRegistryStorage.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
 contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {

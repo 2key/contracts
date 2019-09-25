@@ -12,7 +12,7 @@ import "../interfaces/IStructuredStorage.sol";
 import "../interfaces/storage-contracts/ITwoKeyCampaignValidatorStorage.sol";
 
 import "../upgradability/Upgradeable.sol";
-import "./ITwoKeySingletonUtils.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
 /**

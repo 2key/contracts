@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../2key/singleton-contracts/StandardTokenModified.sol";
+import "../2key/ERC20/StandardTokenModified.sol";
 
 /**
  * @author Nikola Madjarevic

@@ -1,10 +1,10 @@
 pragma solidity ^0.4.24;
 
-import "./ITwoKeySingletonUtils.sol";
 import "../upgradability/Upgradeable.sol";
 import "../libraries/Utils.sol";
 import "../interfaces/storage-contracts/ITwoKeySignatureValidatorStorage.sol";
 import "../libraries/Call.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
 

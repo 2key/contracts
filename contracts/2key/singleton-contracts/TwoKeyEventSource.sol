@@ -6,8 +6,8 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../upgradability/Upgradeable.sol";
-import "./ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyEventSourceStorage.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
 contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {

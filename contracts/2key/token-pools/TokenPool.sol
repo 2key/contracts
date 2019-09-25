@@ -4,7 +4,7 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/IERC20.sol";
 import "../upgradability/Upgradeable.sol";
-import "../singleton-contracts/ITwoKeySingletonUtils.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
