@@ -36,14 +36,14 @@ const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMa
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
 
-const { incrementVersion, getConfigForTheBranch } = require('../helpers');
+const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created } = require('../helpers');
 const { generateBytecodeForUpgrading } = require('../generateBytecode');
 
 /**
  * Function to perform all necessary logic to update smart contract
  * @type {function(*, *=, *=)}
  */
-const updateContract = (async (registryAddress, congressAddress, contractName, newImplementationAddress) => {
+const updateContract = (async (registryAddress, congressAddress, contractName, newImplementationAddress, network) => {
     await new Promise(async(resolve,reject) => {
         try {
             let instance = await TwoKeySingletonesRegistry.at(registryAddress);
@@ -72,8 +72,8 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
 
             console.log("Added proposal with ID : " + proposalID + " to do job " + description);
 
-            // Upgrade contract proxy to new version
-            // let txHash1 = instance.upgradeContract(contractName, newVersion);
+            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, proposalID, network);
+
             resolve({
                 txHash //, txHash1
             });
@@ -179,7 +179,7 @@ module.exports = async function deploy(deployer) {
                 await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Updating contract: ' + contractName);
-                        let hashes = await updateContract(registryAddress, congressAddress, contractName, newImplementationAddress);
+                        let hashes = await updateContract(registryAddress, congressAddress, contractName, newImplementationAddress, deployer.network);
                         resolve(hashes);
                     } catch (e) {
                         reject(e);

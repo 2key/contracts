@@ -533,6 +533,7 @@ async function deploy() {
     }
 }
 
+
 /**
  * Function to send message to slack channel
  * @param message

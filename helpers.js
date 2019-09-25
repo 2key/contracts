@@ -3,6 +3,21 @@ const rimraf = require('rimraf');
 const simpleGit = require('simple-git/promise');
 const path = require('path');
 const fs = require('fs');
+const axios = require('axios');
+
+require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
+
+const env_to_channelCode = {
+    "test": "CKL4T7M2S",
+    "staging": "CKKRPNR55",
+    "prod": "CKHG3LS20"
+};
+
+const branch_to_env = {
+    "develop": "test",
+    "staging": "staging",
+    "master": "prod"
+};
 
 const incrementVersion = ((version) => {
     if(version == "") {
@@ -123,6 +138,44 @@ const getGitBranch = () => new Promise(async(resolve,reject) => {
 });
 
 
+const slack_message_proposal_created = async (contractName, newVersion, proposalBytecode, proposalID, network) => {
+    const token = process.env.SLACK_TOKEN;
+
+    const branch = await getGitBranch();
+    const devEnv = branch_to_env[branch];
+
+    const body = {
+        channel: env_to_channelCode[devEnv],
+        attachments: [
+            {
+                blocks: [
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `*Deployed new version of*  \`${contractName}\` *to network:* ${network} --> <@eiTan> <@Kiki> \n *New version :* \`${newVersion}\` \n *Proposal ID to be voted for:* \`${proposalID}\` \n *Proposal bytecode:* \`${proposalBytecode}\``,
+                        },
+
+                    },
+                ],
+            },
+
+        ],
+
+    };
+
+    await axios.post('https://slack.com/api/chat.postMessage?parse=full&link_names=1', body, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-type': 'application/json; charset=utf-8'
+        }
+    }).then(
+        res => {process.exit(0)},
+        err => {console.log(err);process.exit(1)}
+    );
+};
+
+
 
 
 
@@ -133,5 +186,6 @@ module.exports = {
     runUpdateMigration,
     rmDir,
     getGitBranch,
-    getConfigForTheBranch
+    getConfigForTheBranch,
+    slack_message_proposal_created
 };
