@@ -1,11 +1,15 @@
 // Allows us to use ES6 in our migrations and tests.
 require('babel-register');
+require('regenerator-runtime/runtime');
+
+// const HDWalletProvider = require('truffle-hdwallet-provider');
+const LedgerWalletProvider = require('truffle-ledger-provider');
+
 // const HDWalletProvider = require('truffle-hdwallet-provider');
 const HDWalletProvider = require('./HDWalletProvider');
 const LedgerProvider = require('./LedgerProvider');
-const config = require('./configurationFiles/accountsConfig.json');
 
-const LedgerWalletProvider = require('truffle-ledger-provider');
+const config = require('./configurationFiles/accountsConfig.json');
 
 const mnemonic = config.mnemonic;
 const infuraApiKey = config.infuraApiKey;
