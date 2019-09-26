@@ -1,6 +1,7 @@
 // Allows us to use ES6 in our migrations and tests.
 require('babel-register');
-const HDWalletProvider = require('truffle-hdwallet-provider');
+// const HDWalletProvider = require('truffle-hdwallet-provider');
+const HDWalletProvider = require('./HDWalletProvider');
 const LedgerProvider = require('./LedgerProvider');
 const config = require('./configurationFiles/accountsConfig.json');
 
@@ -59,7 +60,7 @@ module.exports = {
       },
 
       'dev-ledger': {
-          provider: () => LedgerProvider('http://localhost:8545', {
+          provider: LedgerProvider('http://localhost:8545', {
               networkId: 8086,
               // https://github.com/LedgerHQ/ledgerjs/issues/200
               // path: "44'/60'/0'/0",
@@ -70,6 +71,7 @@ module.exports = {
           }),
           network_id: 8086,
           gas: 7000000,
+          gasPrice: 50000000000,
           gasPrice: 50000000000,
       },
 
