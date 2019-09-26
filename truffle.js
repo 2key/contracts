@@ -1,10 +1,13 @@
 // Allows us to use ES6 in our migrations and tests.
 require('babel-register');
-const HDWalletProvider = require('truffle-hdwallet-provider');
-const LedgerProvider = require('./LedgerProvider');
-const config = require('./configurationFiles/accountsConfig.json');
+require('regenerator-runtime/runtime');
 
+const HDWalletProvider = require('truffle-hdwallet-provider');
 const LedgerWalletProvider = require('truffle-ledger-provider');
+
+const LedgerProvider = require('./LedgerProvider');
+
+const config = require('./configurationFiles/accountsConfig.json');
 
 const mnemonic = config.mnemonic;
 const infuraApiKey = config.infuraApiKey;
@@ -111,7 +114,7 @@ module.exports = {
       },
 
       'public.test.k8s': {
-          provider: () => LedgerProvider('https://rpc.public.test.k8s.2key.net', {
+          provider: () => new LedgerWalletProvider({
               networkId: 3,
               // https://github.com/LedgerHQ/ledgerjs/issues/200
               // path: "44'/60'/0'/0",
@@ -120,11 +123,12 @@ module.exports = {
               askConfirm: true,
               accountsLength: 1,
               accountsOffset: 0,
-          }),
+          }, 'https://rpc.public.test.k8s.2key.net'),
           skipDryRun: true,
           network_id: 3,
           gas: 8000000,
           gasPrice: 80000000000,
+          confirmations: 1,
       },
 
       'private.test.k8s': {
