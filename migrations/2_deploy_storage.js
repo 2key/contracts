@@ -19,14 +19,12 @@ const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStora
 module.exports = function deploy(deployer) {
     if(deployer.network.startsWith('public') || deployer.network.startsWith('dev')) {
         deployer.deploy(TwoKeyCampaignValidatorStorage)
-            .then(() => {
-                return TwoKeyCampaignValidatorStorage.deployed();
-            })
+            .then(() =>TwoKeyCampaignValidatorStorage.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchangeStorage))
             .then(() => TwoKeyUpgradableExchangeStorage.deployed())
             .then(() => deployer.deploy(TwoKeyEventSourceStorage))
             .then(() => TwoKeyEventSourceStorage.deployed())
-            .then(() => deployer.deploy(TwoKeyAdminStorage))
+            .then(() => deployer.deployxw(TwoKeyAdminStorage))
             .then(() => TwoKeyAdminStorage.deployed())
             .then(() => deployer.deploy(TwoKeyFactoryStorage))
             .then(() => TwoKeyFactoryStorage.deployed())

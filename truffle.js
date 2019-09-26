@@ -121,9 +121,10 @@ module.exports = {
               accountsLength: 1,
               accountsOffset: 0,
           }),
+          skipDryRun: true,
           network_id: 3,
           gas: 8000000,
-          gasPrice: 50000000000,
+          gasPrice: 80000000000,
       },
 
       'private.test.k8s': {
@@ -138,6 +139,7 @@ module.exports = {
           }),
           network_id: 98052,
           gas: 7000000,
+          skipDryRun: true,
           gasPrice: 0,
           // host: 'https://ext.geth.private.test.k8s.2key.net',
           // port: 8545,
@@ -154,6 +156,7 @@ module.exports = {
           network_id: 3,
           gas: 8000000,
           gasPrice: 80000000000,
+          skipDryRun: true
       },
 
       'private.test.k8s-hdwallet': {
@@ -161,6 +164,7 @@ module.exports = {
           network_id: 98052,
           gas: 8000000,
           gasPrice: '0x0',
+          skipDryRun: true
           // gasPrice: 100000000000,
           // gasPrice: 2000000000
       },
