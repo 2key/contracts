@@ -58,6 +58,21 @@ module.exports = {
           gasPrice: 2000000000
       },
 
+      'dev-ledger': {
+          provider: () => LedgerProvider('http://localhost:8545', {
+              networkId: 8086,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              // path: "44'/60'/0'/0",
+              path: "44\'/60\'/0\'/0/0",
+              askConfirm: true,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          network_id: 8086,
+          gas: 7000000,
+          gasPrice: 50000000000,
+      },
+
       'dev-local-ledger': {
           provider: () => new LedgerWalletProvider({
               networkId:  8086,
@@ -99,9 +114,10 @@ module.exports = {
           provider: () => LedgerProvider('https://rpc.public.test.k8s.2key.net', {
               networkId: 3,
               // https://github.com/LedgerHQ/ledgerjs/issues/200
-              path: "44'/60'/0'/0",
+              // path: "44'/60'/0'/0",
+              path: "44\'/60\'/0\'/0/0",
               // askConfirm: true,
-              askConfirm: false,
+              askConfirm: true,
               accountsLength: 1,
               accountsOffset: 0,
           }),

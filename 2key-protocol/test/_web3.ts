@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime';
+import 'babel-register';
 import Web3 from 'web3';
 import bip39 from 'bip39';
 import * as eth_wallet from 'ethereumjs-wallet';
@@ -29,11 +31,7 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
             if (path) {
                 options.path = path;
             }
-            const getTransport = async () => {
-                const transport = await TransportNodeJs.create();
-                transport.setDebugMode(true);
-                return transport;
-            };
+            const getTransport = async () => TransportNodeJs.create();
             console.log(options);
             const ledger = createLedgerSubprovider(getTransport, options);
             let engine = new ProviderEngine();

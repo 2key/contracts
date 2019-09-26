@@ -88,6 +88,7 @@ describe('TwoKeyProtocol LOCAL', () => {
         let l = addresses.length;
         await sendETH('0x9aace881c7a80b596d38eaff66edbb5368d2f2c5'); //To make sure for tests
         await sendETH('0xfE597d4BFa6D16b3a42510b0b9A5d69E45a2F0E2'); //Ledger address
+        await sendETH('0x11e9Ce4382fF83BD1222D1EB519D5663C2DC1374'); //Ledger address
         for (let i = 0; i < l; i++) {
             const receipt = await sendETH(addresses[i]);
             if (!receipt || receipt.status !== '0x1') {
