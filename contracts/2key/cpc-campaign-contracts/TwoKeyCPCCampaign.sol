@@ -5,6 +5,7 @@ import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 
 import "../libraries/IncentiveModels.sol";
 import "../libraries/Call.sol";
+import "../../openzeppelin-solidity/contracts/MerkleProof.sol";
 import "../TwoKeyConverterStates.sol";
 import "../TwoKeyConversionStates.sol";
 
@@ -23,6 +24,16 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     address public twoKeyDonationConversionHandler; // Contract which will handle all donations
     address public twoKeyDonationLogicHandler;
     address public mirrorCampaign;
+
+    address[] public activeInfluencers;
+    bytes32 public merkle_root;
+
+    // @notice Modifier which allows only moderator to call methods
+    // TODO should be in TwoKeyCampaign.sol
+    modifier onlyModerator() {
+        require(msg.sender == moderator);
+        _;
+    }
 
     bool acceptsFiat; // Will determine if fiat conversion can be created or not
 
@@ -259,6 +270,9 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     public
 //    payable
     {
+        // TODO this can only run on plasma
+        require(merkle_root == 0, 'merkle root already defined, contract is locked');
+
         address plasmaConverter = Call.recoverHash(keccak256(signature), converterSig, 0);
         address m = Call.recoverHash(keccak256(abi.encodePacked(signature,converterSig)), moderatorSig, 0);
         require(moderator == m || twoKeyEventSource.plasmaOf(moderator)  == m);
@@ -411,6 +425,9 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     public
     {
         require(msg.sender == twoKeyDonationLogicHandler);
+        if (referrerPlasma2Balances2key[_influencer] != 0) {
+            activeInfluencers.push(_influencer);
+        }
         referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
     }
 
@@ -461,5 +478,137 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         return (referrerPlasma2Balances2key[_influencer]);
     }
 
+    /**
+     * @notice set a merkle root of the amount each (active) influencer received.
+     *         (active influencer is an influencer that received a bounty)
+     *         the idea is that the contractor calls computeMerkleRoot on plasma and then set the value manually
+     */
+    function setMerkleRoot(
+        bytes32 _merkle_root
+    )
+    public
+    onlyModerator
+    {
+        require(merkle_root == 0, 'merkle root already defined');
+        // TODO this can only run in on mainet
+        merkle_root = _merkle_root;
+    }
 
+    /**
+     * @notice compute a merkle root of the amount each (active) influencer received.
+     *         (active influencer is an influencer that received a bounty)
+     */
+    function computeMerkleRoot(
+    )
+    public
+    onlyModerator
+    {
+        require(merkle_root == 0, 'merkle root already defined');
+        // TODO this can only run in on plasma
+        // TODO on mainnet the contractor can set this value manually
+
+        uint numberOfInfluencers = activeInfluencers.length;
+        if (numberOfInfluencers == 0) {
+            // lock the contract without any influencer
+            merkle_root = 1;
+            return;
+        }
+
+        uint N = 2;
+        while (N<numberOfInfluencers) {
+            N *= 2;
+        }
+        bytes32[] memory hashes = new bytes32[](N);
+        uint i;
+        for (i = 0; i < numberOfInfluencers; i++) {
+            address influencer = activeInfluencers[i];
+            uint amount = getReferrerPlasmaBalance(influencer);
+            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+        }
+        while (N>1) {
+            for (i = 0; i < N; i+=2) {
+                if (hashes[i] < hashes[i+1]) {
+                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i],hashes[i+1]));
+                } else {
+                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i+1],hashes[i]));
+                }
+            }
+            N >>= 1;
+        }
+        merkle_root = hashes[0];
+    }
+
+    /**
+     * @notice compute a merkle proof that influencer and amount are in the merkle root.
+     * @param _influencer the influencer for which we want to get a Merkle proof
+     * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle root,
+     *                 which prove that (_influencer,amount) are inside the root.
+     */
+    function getMerkleProof(
+        address _influencer
+    )
+    public
+    view
+    returns (bytes32[])
+    {
+        // TODO this can only run in on plasma
+        uint numberOfInfluencers = activeInfluencers.length;
+        uint N = 2;
+        uint logN = 1;
+        while (N<numberOfInfluencers) {
+            N *= 2;
+            logN++;
+        }
+        int influencer_idx = -1;
+        bytes32[] memory hashes = new bytes32[](N);
+        uint i;
+        for (i = 0; i < numberOfInfluencers; i++) {
+            address influencer = activeInfluencers[i];
+            uint amount = getReferrerPlasmaBalance(_influencer);
+            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+            if (influencer == _influencer) {
+                influencer_idx = int(i);
+            }
+        }
+        if (influencer_idx == -1) { // covers also the case when numberOfInfluencers==0 and _influencer==0
+            return new bytes32[](0);
+        }
+
+        bytes32[] memory proof = new bytes32[](logN);
+        logN = 0;
+        while (N>1) {
+            for (i = 0; i < N; i+=2) {
+                if (influencer_idx == int(i)) {
+                    proof[logN] = hashes[i+1];
+                } else if  (influencer_idx == int(i+1)) {
+                    proof[logN] = hashes[i];
+                }
+                if (hashes[i] < hashes[i+1]) {
+                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i],hashes[i+1]));
+                } else {
+                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i+1],hashes[i]));
+                }
+            }
+            influencer_idx >>= 1;
+            N >>= 1;
+            logN++;
+        }
+        return proof;
+    }
+
+    /**
+     * @notice validate a merkle proof.
+     */
+    function claimMerkleProof(
+        bytes32[] proof,
+        uint amount
+    )
+    public
+    {
+        // TODO check that this is only on mainnet
+        require(merkle_root != 0, 'merkle root was not yet set by contractor');
+        address influencer = twoKeyEventSource.plasmaOf(msg.sender);
+        require(MerkleProof.verifyProof(proof,merkle_root,keccak256(abi.encodePacked(influencer,amount))), 'proof is invalid');
+        // TODO allocate bount amount to influencer ONLY on mainnet not on plasma
+    }
 }
