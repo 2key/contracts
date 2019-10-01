@@ -599,6 +599,24 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     /**
      * @notice validate a merkle proof.
      */
+    function checkMerkleProof(
+        address influencer,
+        bytes32[] proof,
+        uint amount
+    )
+    public
+    view
+    returns (bool)
+    {
+        if(merkle_root == 0) // merkle root was not yet set by contractor
+            return false;
+        influencer = twoKeyEventSource.plasmaOf(influencer);
+        return MerkleProof.verifyProof(proof,merkle_root,keccak256(abi.encodePacked(influencer,amount)));
+    }
+
+    /**
+     * @notice validate a merkle proof.
+     */
     function claimMerkleProof(
         bytes32[] proof,
         uint amount
@@ -606,9 +624,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     public
     {
         // TODO check that this is only on mainnet
-        require(merkle_root != 0, 'merkle root was not yet set by contractor');
-        address influencer = twoKeyEventSource.plasmaOf(msg.sender);
-        require(MerkleProof.verifyProof(proof,merkle_root,keccak256(abi.encodePacked(influencer,amount))), 'proof is invalid');
+        // TODO check that this is called only once by msg.sender
+        require(checkMerkleProof(msg.sender,proof,amount), 'proof is invalid');
         // TODO allocate bount amount to influencer ONLY on mainnet not on plasma
     }
 }
