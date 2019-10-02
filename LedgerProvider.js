@@ -12,14 +12,13 @@ const DebugSubprovider = require('./DebugProvider');
 module.exports = function (rpcUrl, options) {
   const getTransport = () => TransportNodeJs.create();
   const ledger = createLedgerSubprovider(getTransport, options);
-  ledger.signMessage = ledger.signPersonalMessage;
+  // ledger.signMessage = ledger.signPersonalMessage;
   let engine = new ProviderEngine();
-  engine.addProvider(new DebugSubprovider());
+  // engine.addProvider(new DebugSubprovider());
   engine.addProvider(ledger);
   engine.addProvider(new NonceSubprovider());
   engine.addProvider(new FiltersSubprovider());
   engine.addProvider(new ProviderSubprovider(new Web3.providers.HttpProvider(rpcUrl)));
-  console.log(engine);
   // engine.send = engine.sendAsync;
   engine.start();
   // const web3 = new Web3(engine);

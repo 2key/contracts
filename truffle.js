@@ -5,8 +5,8 @@ require('regenerator-runtime/runtime');
 // const HDWalletProvider = require('truffle-hdwallet-provider');
 const LedgerWalletProvider = require('truffle-ledger-provider');
 
-// const HDWalletProvider = require('truffle-hdwallet-provider');
-const HDWalletProvider = require('./HDWalletProvider');
+const HDWalletProvider = require('truffle-hdwallet-provider');
+// const HDWalletProvider = require('./HDWalletProvider');
 const LedgerProvider = require('./LedgerProvider');
 
 const config = require('./configurationFiles/accountsConfig.json');
@@ -57,14 +57,14 @@ module.exports = {
 
   networks: {
       'dev-local': {
-          provider: new HDWalletProvider(mnemonic, 'http://localhost:8545'),
+          provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
           network_id: 8086, // Match any network id
           gas: 8000000,
           gasPrice: 2000000000
       },
 
       'dev-ledger': {
-          provider: LedgerProvider('http://localhost:8545', {
+          provider: () => LedgerProvider('http://localhost:8545', {
               networkId: 8086,
               // https://github.com/LedgerHQ/ledgerjs/issues/200
               // path: "44'/60'/0'/0",
@@ -123,7 +123,7 @@ module.exports = {
               // path: "44'/60'/0'/0",
               path: "44\'/60\'/0\'/0/0",
               // askConfirm: true,
-              askConfirm: true,
+              askConfirm: false,
               accountsLength: 1,
               accountsOffset: 0,
           }),
@@ -243,7 +243,7 @@ module.exports = {
       },
 
       'dev-ap': {
-          provider: new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
+          provider: () => new HDWalletProvider(mnemonic, 'http://astring.aydnep.com.ua:8545'),
           network_id: 8086, // Match any network id
           gas: 8000000,
           gasPrice: 2000000000
