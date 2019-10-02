@@ -211,6 +211,13 @@ module.exports = function deploy(deployer) {
 
             await new Promise(async(resolve,reject) => {
                 try {
+                    console.log(
+                        TwoKeyEconomy.address,
+                        DAI_ROPSTEN_ADDRESS,
+                        kyberAddress,
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyUpgradableExchangeStorage"]
+                    );
                     console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
                     let instance = await TwoKeyUpgradableExchange.at(contractNameToProxyAddress["TwoKeyUpgradableExchange"]);
                     let txHash = instance.setInitialParams(
