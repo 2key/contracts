@@ -61,7 +61,7 @@ module.exports = function deploy(deployer) {
     if(deployer.network.startsWith('dev')) {
         kyberAddress = KyberNetworkTestMockContract.address;
     } else if (deployer.network.startsWith('public')) {
-        kyberAddress = deploymentConfig.KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+        kyberAddress = deploymentConfig.kyberConfig.KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
     }
 
 
