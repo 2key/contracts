@@ -514,26 +514,50 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
             return;
         }
 
-        uint N = 2;
-        while (N<numberOfInfluencers) {
-            N *= 2;
-        }
-        bytes32[] memory hashes = new bytes32[](N);
+//        uint N = 2;
+//        while (N<numberOfInfluencers) {
+//            N *= 2;
+//        }
+        bytes32[] memory hashes = new bytes32[](numberOfInfluencers);
         uint i;
         for (i = 0; i < numberOfInfluencers; i++) {
             address influencer = activeInfluencers[i];
             uint amount = getReferrerPlasmaBalance(influencer);
             hashes[i] = keccak256(abi.encodePacked(influencer,amount));
         }
-        while (N>1) {
-            for (i = 0; i < N; i+=2) {
-                if (hashes[i] < hashes[i+1]) {
-                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i],hashes[i+1]));
+        while (numberOfInfluencers>1) {
+            for (i = 0; i < numberOfInfluencers; i+=2) {
+                bytes32 h0 = hashes[i];
+                bytes32 h1;
+                if (i+1 < numberOfInfluencers) {
+                    h1 = hashes[i+1];
+                }
+                if (h0 < h1) {
+                    hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
                 } else {
-                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i+1],hashes[i]));
+                    hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
                 }
             }
-            N >>= 1;
+            if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
+                // numberOfInfluencers is not a power of two.
+                // make sure that on the next iteration it will be
+                numberOfInfluencers >>= 1;
+                numberOfInfluencers++;
+                // lets say we start with n=5 so next n will be 3 and then 2 and then 1:
+                // 0 1 2 3 4 n=5
+                // (0,1) (2,3) (Z,4) n=3
+                // ((0,1),(2,3)) (Z,(Z,4)) n=2
+                // (((0,1),(2,3)),(Z,(Z,4))) n=1
+                //
+                // lets say we start with n=7 so next n will be 4 and then 2 and then 1:
+                // 0 1 2 3 4 5 6 n=7
+                // (0,1) (2,3) (4,5) (Z,6) n=4
+                // ((0,1),(2,3)) ((4,5),(Z,6)) n=2
+                // (((0,1),(2,3)),(((4,5),(Z,6))) n=1
+                //
+            } else {
+                numberOfInfluencers >>= 1;
+            }
         }
         merkle_root = hashes[0];
     }
@@ -553,14 +577,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     {
         // TODO this can only run in on plasma
         uint numberOfInfluencers = activeInfluencers.length;
-        uint N = 2;
-        uint logN = 1;
-        while (N<numberOfInfluencers) {
-            N *= 2;
-            logN++;
-        }
         int influencer_idx = -1;
-        bytes32[] memory hashes = new bytes32[](N);
+        bytes32[] memory hashes = new bytes32[](numberOfInfluencers);
         uint i;
         for (i = 0; i < numberOfInfluencers; i++) {
             address influencer = activeInfluencers[i];
@@ -574,23 +592,39 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
             return new bytes32[](0);
         }
 
+        uint logN = 0;
+        while ((1<<logN) < numberOfInfluencers) {
+            logN++;
+        }
         bytes32[] memory proof = new bytes32[](logN);
         logN = 0;
-        while (N>1) {
-            for (i = 0; i < N; i+=2) {
-                if (influencer_idx == int(i)) {
-                    proof[logN] = hashes[i+1];
-                } else if  (influencer_idx == int(i+1)) {
-                    proof[logN] = hashes[i];
+        while (numberOfInfluencers>1) {
+            for (i = 0; i < numberOfInfluencers; i+=2) {
+                bytes32 h0 = hashes[i];
+                bytes32 h1;
+                if (i+1 < numberOfInfluencers) {
+                    h1 = hashes[i+1];
                 }
-                if (hashes[i] < hashes[i+1]) {
-                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i],hashes[i+1]));
+                if (influencer_idx == int(i)) {
+                    proof[logN] = h1;
+                } else if  (influencer_idx == int(i+1)) {
+                    proof[logN] = h0;
+                }
+                if (h0 < h1) {
+                    hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
                 } else {
-                    hashes[i>>1] = keccak256(abi.encodePacked(hashes[i+1],hashes[i]));
+                    hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
                 }
             }
             influencer_idx >>= 1;
-            N >>= 1;
+            if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
+                // numberOfInfluencers is not a power of two.
+                // make sure that on the next iteration it will be
+                numberOfInfluencers >>= 1;
+                numberOfInfluencers++;
+            } else {
+                numberOfInfluencers >>= 1;
+            }
             logN++;
         }
         return proof;
