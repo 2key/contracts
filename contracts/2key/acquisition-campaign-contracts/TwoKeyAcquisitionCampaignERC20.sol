@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
@@ -48,7 +47,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
 
-        twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
+        twoKeyEventSource = ITwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
         maxReferralRewardPercent = values[0];
