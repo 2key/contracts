@@ -404,9 +404,6 @@ async function deployUpgrade(networks) {
                 console.log(networks[i], singletonsToBeUpgraded[j]);
                 await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
             }
-        } else {
-            await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--network', networks[i]].concat(process.argv.slice(3)));
-            deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
         }
         if(campaignsToBeUpgraded.length > 0) {
             await runDeployCampaignMigration(networks[i]);
@@ -433,9 +430,7 @@ async function deploy() {
         await contractsGit.submoduleUpdate();
         await twoKeyProtocolLibGit.reset('hard');
         twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
-        const localChanges = contractsStatus.files
-        // .filter(item => !(item.path.includes('2key-protocol-npm')
-            .filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed')
+        const localChanges = contractsStatus.files.filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed')
                 || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
         if (contractsStatus.behind || localChanges.length) {
             console.log('You have unsynced changes!', localChanges);
@@ -455,8 +450,11 @@ async function deploy() {
         const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
         const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
 
-
-        await deployUpgrade(networks);
+        if(process.argv.includes('--reset')) {
+            await deployContracts(networks, true);
+        } else {
+            await deployUpgrade(networks);
+        }
 
         const contracts = await generateSOLInterface();
         await archiveBuild();
@@ -580,6 +578,19 @@ const getStartMigration = (network) => {
     return deploy[network] ? deploy[network] + 1 :  1;
 };
 
+const deployContracts = async (networks, updateArchive) => {
+    const l = networks.length;
+    for (let i = 0; i < l; i += 1) {
+        for (let j = getStartMigration(networks[i]), m = getMigrationsList().length; j <= m; j += 1) {
+            /* eslint-disable no-await-in-loop */
+            await runMigration(j, networks[i], updateArchive);
+            /* eslint-enable no-await-in-loop */
+        }
+        deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
+    }
+};
+
+
 async function main() {
     contractsStatus = await contractsGit.status(); // Fetching branch
     const mode = process.argv[2];
@@ -600,15 +611,7 @@ async function main() {
             try {
                 const networks = process.argv[3].split(',');
 
-                const l = networks.length;
-                for (let i = 0; i < l; i += 1) {
-                    for (let j = getStartMigration(networks[i]), m = getMigrationsList().length; j <= m; j += 1) {
-                        /* eslint-disable no-await-in-loop */
-                        await runMigration(j, networks[i], false);
-                        /* eslint-enable no-await-in-loop */
-                    }
-                    deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
-                }
+                await deployContracts(networks, false);
 
                 await generateSOLInterface();
                 process.exit(0);
