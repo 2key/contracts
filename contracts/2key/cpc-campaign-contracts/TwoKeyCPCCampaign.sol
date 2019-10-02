@@ -489,21 +489,34 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     public
     onlyModerator
     {
-        require(merkle_root == 0, 'merkle root already defined');
+        // TODO remove comment
+//        require(merkle_root == 0, 'merkle root already defined');
         // TODO this can only run in on mainet
         merkle_root = _merkle_root;
     }
 
-    /**
-     * @notice compute a merkle root of the amount each (active) influencer received.
-     *         (active influencer is an influencer that received a bounty)
-     */
+    function fakeInfluencers(
+        uint n
+    )
+    public
+    onlyModerator
+    {
+        for (uint i = 0; i < n; i++) {
+            activeInfluencers.push(address(i+1000));
+        }
+    }
+
+/**
+ * @notice compute a merkle root of the amount each (active) influencer received.
+ *         (active influencer is an influencer that received a bounty)
+ */
     function computeMerkleRoot(
     )
     public
     onlyModerator
     {
-        require(merkle_root == 0, 'merkle root already defined');
+        // TODO remove comment
+//        require(merkle_root == 0, 'merkle root already defined');
         // TODO this can only run in on plasma
         // TODO on mainnet the contractor can set this value manually
 
@@ -514,10 +527,6 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
             return;
         }
 
-//        uint N = 2;
-//        while (N<numberOfInfluencers) {
-//            N *= 2;
-//        }
         bytes32[] memory hashes = new bytes32[](numberOfInfluencers);
         uint i;
         for (i = 0; i < numberOfInfluencers; i++) {
@@ -573,7 +582,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     )
     public
     view
-    returns (bytes32[])
+    returns (bytes32, int, bytes32[])
     {
         // TODO this can only run in on plasma
         uint numberOfInfluencers = activeInfluencers.length;
@@ -582,14 +591,14 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         uint i;
         for (i = 0; i < numberOfInfluencers; i++) {
             address influencer = activeInfluencers[i];
-            uint amount = getReferrerPlasmaBalance(_influencer);
+            uint amount = getReferrerPlasmaBalance(influencer);
             hashes[i] = keccak256(abi.encodePacked(influencer,amount));
             if (influencer == _influencer) {
                 influencer_idx = int(i);
             }
         }
         if (influencer_idx == -1) { // covers also the case when numberOfInfluencers==0 and _influencer==0
-            return new bytes32[](0);
+            return (1, -1, new bytes32[](0));
         }
 
         uint logN = 0;
@@ -598,6 +607,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         }
         bytes32[] memory proof = new bytes32[](logN);
         logN = 0;
+        uint idx = uint(influencer_idx);
         while (numberOfInfluencers>1) {
             for (i = 0; i < numberOfInfluencers; i+=2) {
                 bytes32 h0 = hashes[i];
@@ -605,9 +615,9 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
                 if (i+1 < numberOfInfluencers) {
                     h1 = hashes[i+1];
                 }
-                if (influencer_idx == int(i)) {
+                if (idx == i) {
                     proof[logN] = h1;
-                } else if  (influencer_idx == int(i+1)) {
+                } else if  (idx == i+1) {
                     proof[logN] = h0;
                 }
                 if (h0 < h1) {
@@ -616,7 +626,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
                     hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
                 }
             }
-            influencer_idx >>= 1;
+            idx >>= 1;
             if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
                 // numberOfInfluencers is not a power of two.
                 // make sure that on the next iteration it will be
@@ -627,7 +637,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
             }
             logN++;
         }
-        return proof;
+        return (hashes[0], influencer_idx, proof);
     }
 
     /**
