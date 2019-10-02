@@ -1,10 +1,9 @@
 pragma solidity ^0.4.24;
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/IERC20.sol";
-import "../interfaces/ITwoKeyEventSource.sol";
-import "../interfaces/ITwoKeyAdmin.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 import "./ArcERC20.sol";
@@ -17,7 +16,7 @@ contract TwoKeyCampaign is ArcERC20 {
 	using SafeMath for uint256;
 	using Call for *;
 
-	ITwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
+	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
 
 	address public conversionHandler; // Contract which will handle all conversions
 	address public logicHandler;  // Contract which will handle logic
@@ -27,10 +26,10 @@ contract TwoKeyCampaign is ArcERC20 {
 	address ownerPlasma; //contractor plasma address
 
 	address public contractor; //contractor address
-	address moderator; //moderator address
+	address public moderator; //moderator address
 
 	bool isKYCRequired;
-//    bool mustConvertToReferr;
+    bool mustConvertToReferr;
 
 	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 	uint256 contractorBalance; // Contractor balance

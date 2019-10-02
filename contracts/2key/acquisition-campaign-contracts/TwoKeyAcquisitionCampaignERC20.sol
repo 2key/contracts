@@ -47,7 +47,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
 
-        twoKeyEventSource = ITwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
+        twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
         maxReferralRewardPercent = values[0];
@@ -57,10 +57,10 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         if(values[2] == 1) {
             isKYCRequired = true;
         }
-//        // MCTR
-//        if(values[3] == 1) {
-////            mustConvertToReferr = true;
-//        }
+        // MCTR
+        if(values[3] == 1) {
+            mustConvertToReferr = true;
+        }
 
         totalSupply_ = values[4];
 
@@ -210,6 +210,28 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
+    function validateRequirements(
+        bool _isFiat
+    )
+    internal
+    {
+        require(ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
+            msg.sender,
+            msg.value,
+            _isFiat
+        ) == true);
+    }
+
+    function distributeArcsIfNecessary(
+        address _converter,
+        bytes signature
+    )
+    internal
+    {
+        if(received_from[twoKeyEventSource.plasmaOf(_converter)] == address(0)) {
+            distributeArcsBasedOnSignature(signature, _converter);
+        }
+    }
 
     /**
      * @notice Function where converter can convert
@@ -222,16 +244,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        require(ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
-            msg.sender,
-            msg.value,
-            false
-        ) == true);
-
-        address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-        if(received_from[_converterPlasma] == address(0)) {
-            distributeArcsBasedOnSignature(signature, msg.sender);
-        }
+        validateRequirements(false);
+        distributeArcsIfNecessary(msg.sender, signature);
         createConversion(msg.value, msg.sender, false, _isAnonymous);
     }
 
@@ -252,16 +266,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        require(ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
-            _converter,
-            conversionAmountFiatWei,
-            true
-        ) == true);
-
-        address _converterPlasma = twoKeyEventSource.plasmaOf(_converter);
-        if(received_from[_converterPlasma] == address(0)) {
-            distributeArcsBasedOnSignature(signature, _converter);
-        }
+        validateRequirements(true);
+        distributeArcsIfNecessary(_converter, signature);
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
     }
 

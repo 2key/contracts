@@ -44,7 +44,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         moderator = _moderator;
 
         twoKeySingletonesRegistry = _twoKeySingletonRegistry;
-        twoKeyEventSource = ITwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
+        twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry)
             .getNonUpgradableContractAddress("TwoKeyEconomy");
         totalSupply_ = 1000000;
@@ -56,7 +56,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         logicHandler = _twoKeyDonationLogicHandler;
 
 
-//        mustConvertToReferr = booleanValues[0];
+        mustConvertToReferr = booleanValues[0];
         isKYCRequired = booleanValues[1];
         acceptsFiat = booleanValues[2];
 
