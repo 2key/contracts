@@ -50,7 +50,6 @@ const ledgerOptions = {
 
 */
 
-console.log("Starting deployment process from address : " + config.address);
 module.exports = {
 
   plugins: ["truffle-security"],
@@ -130,7 +129,7 @@ module.exports = {
           skipDryRun: true,
           network_id: 3,
           gas: 8000000,
-          gasPrice: 80000000000,
+          gasPrice: 120000000000,
       },
 
       'private.test.k8s': {
