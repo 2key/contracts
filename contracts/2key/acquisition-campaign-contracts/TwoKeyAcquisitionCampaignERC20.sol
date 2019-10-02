@@ -58,10 +58,10 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         if(values[2] == 1) {
             isKYCRequired = true;
         }
-        // MCTR
-        if(values[3] == 1) {
-            mustConvertToReferr = true;
-        }
+//        // MCTR
+//        if(values[3] == 1) {
+////            mustConvertToReferr = true;
+//        }
 
         totalSupply_ = values[4];
 

@@ -96,6 +96,24 @@ const runUpdateMigration = (network, contractName) => new Promise(async(resolve,
     }
 });
 
+const checkArgumentsForUpdate = ((argumentsPassed) => {
+    argumentsPassed.forEach((argument) => {
+        if(argument == 'update') {
+            return true;
+        }
+    });
+    return false;
+});
+
+const checkIsHardRedeploy = ((argumentsPassed) => {
+    argumentsPassed.forEach((argument) => {
+        if(argument.toString() == '--reset') {
+            return true;
+        }
+    });
+    return false;
+});
+
 /**
  *
  * @returns {Promise<any>}
@@ -104,7 +122,6 @@ const getConfigForTheBranch = () => new Promise(async(resolve,reject) => {
     try {
         let branch = await getGitBranch();
         let filePath = `./2key-protocol/dist/contracts_deployed-${branch}.json`;
-        console.log(filePath);
         let file = fs.readFileSync(filePath);
         resolve(JSON.parse(file));
     } catch (e) {
@@ -270,5 +287,7 @@ module.exports = {
     getGitBranch,
     getConfigForTheBranch,
     slack_message_proposal_created,
-    slack_message
+    slack_message,
+    checkIsHardRedeploy,
+    checkArgumentsForUpdate
 };

@@ -343,6 +343,28 @@ describe('TwoKeyDonationCampaign', () => {
         }
     }).timeout(60000);
 
+    it('should start hedging some ether', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
+        });
+        let approvedMinConversionRate = 1000;
+
+        let upgradableExchangeBalance = await twoKeyProtocol.getBalance(twoKeyProtocol.twoKeyUpgradableExchange.address);
+        let balance = parseFloat(upgradableExchangeBalance.balance.ETH.toString());
+        console.log(balance);
+        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(balance, approvedMinConversionRate, from);
+        console.log(hash);
+    }).timeout(50000);
+
     it('should proof that the invoice has been issued for executed conversion (Invoice tokens transfered)', async() => {
         printTestNumber();
 
@@ -393,29 +415,6 @@ describe('TwoKeyDonationCampaign', () => {
         let isAddressContractor = await twoKeyProtocol.DonationCampaign.isAddressContractor(campaignAddress, from);
         expect(isAddressContractor).to.be.equal(true);
     }).timeout(60000);
-
-    it('should start hedging some ether', async() => {
-        printTestNumber();
-        const {web3, address} = web3switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-        });
-        let approvedMinConversionRate = 1000;
-
-        let upgradableExchangeBalance = await twoKeyProtocol.getBalance(twoKeyProtocol.twoKeyUpgradableExchange.address);
-        console.log(upgradableExchangeBalance)
-        let balance = parseFloat(upgradableExchangeBalance.balance.ETH.toString());
-
-        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(balance, approvedMinConversionRate, from);
-        console.log(hash);
-    }).timeout(50000);
 
     it('should get contractor balance and total earnings', async() => {
         printTestNumber();
@@ -499,7 +498,10 @@ describe('TwoKeyDonationCampaign', () => {
         console.log('ERC20 TwoKeyEconomy balance on this contract is : ' + balance);
     }).timeout(60000);
 
-
+    it('should get stats for the contract from upgradable exchange', async() => {
+        let stats = await twoKeyProtocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
+        console.log(stats);
+    }).timeout(60000);
 
     it('referrer should withdraw his earnings', async() => {
         printTestNumber();
@@ -507,9 +509,6 @@ describe('TwoKeyDonationCampaign', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
-    it('should get stats for the contract from upgradable exchange', async() => {
-        let stats = await twoKeyProtocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
-        console.log(stats);
-    }).timeout(60000);
+
 
 });

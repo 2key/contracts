@@ -36,7 +36,7 @@ const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMa
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 
 
-const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created } = require('../helpers');
+const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created, checkArgumentsForUpdate } = require('../helpers');
 const { generateBytecodeForUpgrading } = require('../generateBytecode');
 
 /**
@@ -131,23 +131,9 @@ const getContractPerName = ((contractName) => {
     else return 'Wrong name';
 });
 
-/**
- * Validate arguments of method call
- * @type {function(*)}
- */
-const checkArguments = ((arguments) => {
-    let isArgumentFound = false;
-    arguments.forEach((argument) => {
-        if(argument == 'update') {
-            isArgumentFound = true;
-        }
-    });
-
-    return isArgumentFound;
-});
 
 module.exports = async function deploy(deployer) {
-    if(checkArguments(process.argv) == false) {
+    if(checkArgumentsForUpdate(process.argv) == false) {
         console.log('No update will be performed');
         return;
     }
