@@ -25,6 +25,13 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     address public twoKeyDonationLogicHandler;
     address public mirrorCampaign;
 
+    // TODO merkle of > 2K takes too much gas so we need to break the influencers into buckets of size <=2K
+    // TODO and compute merkle root for each bucket
+    // TODO and copy that root from plasma to mainnet
+    // TODO and when generating a proof also return in which bucket the influencer this
+    // TODO and when validating a proof receive the bucket index as an argument
+    // TODO or we can just say bucket size is known and fixed at 2048 for example
+    // TODO in any case it will be good idea to have a mapping from active influencer address to index
     address[] public activeInfluencers;
     bytes32 public merkle_root;
 
