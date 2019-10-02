@@ -145,16 +145,38 @@ module.exports = {
           network_id: 98052,
           gas: 7000000,
           skipDryRun: true,
-          gasPrice: 0,
-          // host: 'https://ext.geth.private.test.k8s.2key.net',
-          // port: 8545,
-          // network_id: 98052, // Match any network id
-          //network_id: 98052,
-          //gas: 7000000,
-          //gasPrice: 0,
+          gasPrice: 0
+      },
+
+
+      'public.test.k8s-dev': {
+          provider: () => LedgerProvider('https://rpc-dev.public.test.k8s.2key.net', {
+              networkId: 3,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              // path: "44'/60'/0'/0",
+              path: "44\'/60\'/0\'/0/0",
+              // askConfirm: true,
+              askConfirm: false,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          skipDryRun: true,
+          network_id: 3,
+          gas: 8000000,
+          gasPrice: 120000000000,
+      },
+
+      'private.test.k8s-hdwallet-dev': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-dev.private.test.k8s.2key.net'),
+          network_id: 98052,
+          gas: 8000000,
+          gasPrice: '0x0',
+          skipDryRun: true
           // gasPrice: 100000000000,
           // gasPrice: 2000000000
       },
+
+
 
       'public.test.k8s-hdwallet': {
           provider: () => new HDWalletProvider(mnemonic, 'https://rpc.public.test.k8s.2key.net'),
