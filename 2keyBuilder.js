@@ -450,10 +450,10 @@ async function deploy() {
         const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
         const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
 
-        if(process.argv.includes('--reset')) {
-            await deployContracts(networks, true);
-        } else {
+        if(process.argv.includes('update')) {
             await deployUpgrade(networks);
+        } else {
+            await deployContracts(networks, true);
         }
 
         const contracts = await generateSOLInterface();
