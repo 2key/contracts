@@ -566,6 +566,7 @@ const runMigration = async (index, network, updateArchive) => {
         }
         deploy[network] = index;
         fs.writeFileSync(path.join(__dirname, 'deploy.json'), JSON.stringify(deploy), { encoding: 'utf-8' });
+        await restoreFromArchive();
     }
 };
 
