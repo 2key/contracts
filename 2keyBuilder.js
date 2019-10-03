@@ -572,6 +572,9 @@ const runMigration = async (index, network, updateArchive) => {
 
 const getStartMigration = (network) => {
     let deploy = {};
+    if (process.argv.includes('--reset')) {
+        return 1;
+    }
     try {
         deploy = JSON.parse(fs.readFileSync(path.join(__dirname, 'deploy.json'), { encoding: 'utf-8' }))
     } catch (e) {

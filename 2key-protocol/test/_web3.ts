@@ -74,6 +74,16 @@ export const generatePlasmaFromMnemonic = (mnemonic) => {
     };
 };
 
+export const generateWalletFromMnemonic = (mnemonic) => {
+    const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
+    const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
+    const address = `0x${wallet.getAddress().toString('hex')}`;
+    const privateKey = wallet.getPrivateKey().toString('hex');
+    return {
+        address,privateKey
+    };
+};
+
 export default function (mnemonic: string, rpcUrl: string, pk?: string): EthereumWeb3 {
     let wallet;
     if (pk) {
