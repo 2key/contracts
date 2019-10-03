@@ -167,7 +167,10 @@ module.exports = {
       },
 
       'private.test.k8s-hdwallet-dev': {
-          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-dev.private.test.k8s.2key.net'),
+          provider: () => {
+              console.log(mnemonic);
+              return new HDWalletProvider(mnemonic, 'https://rpc-dev.private.test.k8s.2key.net');
+          },
           network_id: 98055,
           gas: 8000000,
           gasPrice: '0x0',
