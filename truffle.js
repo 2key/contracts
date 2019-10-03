@@ -11,7 +11,7 @@ const LedgerProvider = require('./LedgerProvider');
 
 const config = require('./configurationFiles/accountsConfig.json');
 
-const mnemonic = config.mnemonic;
+const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 const infuraApiKey = config.infuraApiKey;
 
 const ledgerOptions = {
