@@ -7,7 +7,7 @@ const ProviderSubprovider = require('web3-provider-engine/subproviders/provider'
 const NonceSubprovider = require('web3-provider-engine/subproviders/nonce-tracker');
 const FiltersSubprovider = require('web3-provider-engine/subproviders/filters');
 const createLedgerSubprovider = require('@ledgerhq/web3-subprovider').default;
-const DebugSubprovider = require('./DebugProvider');
+// const DebugSubprovider = require('./DebugProvider');
 
 module.exports = function (rpcUrl, options) {
   const getTransport = () => TransportNodeJs.create();
