@@ -204,7 +204,7 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         };
 
         let singletonAddresses = [];
-        const proxyFile = path.join(configPath, 'proxyAddresses.json');
+        const proxyFile = path.join(buildPath, 'proxyAddresses.json');
         let json = {};
         let data = {};
         let proxyAddresses = {};
