@@ -158,7 +158,7 @@ async function handleExit() {
 const archiveBuild = () => new Promise(async (resolve, reject) => {
     try {
         if (fs.existsSync(buildPath)) {
-            console.log('Archiving current artifacts to', getBuildArchPath());
+            console.log('Archiving current artifacts to', getBuildArchPath(), path.join(__dirname, 'build'));
             tar.c({
                 gzip: true, sync: true, cwd: path.join(__dirname, 'build')
             }, ['contracts'])
@@ -187,7 +187,7 @@ const restoreFromArchive = () => new Promise(async (resolve, reject) => {
             fs.renameSync(buildPath, buildBackupPath);
         }
         if (fs.existsSync(getBuildArchPath())) {
-            console.log('Excracting', getBuildArchPath())
+            console.log('Excracting', getBuildArchPath());
             tar.x({file: getBuildArchPath(), gzip: true, sync: true, cwd: path.join(__dirname, 'build')});
         }
         resolve()
@@ -638,11 +638,11 @@ async function main() {
             process.exit(0);
             break;
         case '--archive':
-            archiveBuild();
+            await archiveBuild();
             process.exit(0);
             break;
         case '--extract':
-            restoreFromArchive();
+            await restoreFromArchive();
             process.exit(0);
             break;
         case '--submodules':
