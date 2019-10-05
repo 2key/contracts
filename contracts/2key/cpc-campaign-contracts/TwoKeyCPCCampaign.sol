@@ -36,7 +36,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     address[] public activeInfluencers;
     mapping(address => uint) activeInfluencer2idx;
     bytes32 public merkle_root;
-    mapping(uint => bytes32[]) merkleLayer2Hashes;
+    bytes32[] public merkle_roots;
+//    mapping(uint => bytes32[]) internal merkleLayer2Hashes;
 
     // @notice Modifier which allows only moderator to call methods
     // TODO should be in TwoKeyCampaign.sol
@@ -498,18 +499,22 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         // TODO this needs to be blocked or used when using Epoches
 
         if (steps == 0) {
-            merkle_root = 0; // on main net. merkle root is just assigned with setMerkleRoot
+            merkle_root = bytes32(0); // on main net. merkle root is just assigned with setMerkleRoot
             return;
         }
-        merkle_root = 3; // indicate we are in the middle of a reset
-        int i;  // important to be int and not uint
-        for (i = 0; merkleLayer2Hashes[uint(i)].length > 0; i++) {
+        merkle_root = bytes32(3); // indicate we are in the middle of a reset
+        if (merkle_roots.length > 0) {
+            delete merkle_roots;
+            return;
         }
-        for(i--; i >= 0; i--) {
-            delete merkleLayer2Hashes[uint(i)];
-            if(--steps == 0) return;
-        }
-        merkle_root = 2; // indicate we are in the process of computing merkle root
+//        int i;  // important to be int and not uint
+//        for (i = 0; merkleLayer2Hashes[uint(i)].length > 0; i++) {
+//        }
+//        for(i--; i >= 0; i--) {
+//            delete merkleLayer2Hashes[uint(i)];
+//            if(--steps == 0) return;
+//        }
+        merkle_root = bytes32(2); // indicate we are in the process of computing merkle root
     }
 
     /**
@@ -543,55 +548,107 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         }
     }
 
-    /**
-     * @notice compute a merkle root of the amount each (active) influencer received.
-     *         (active influencer is an influencer that received a bounty)
-     */
-    function computeMerkleRootCache(
-        uint steps
+//    /**
+//     * @notice compute a merkle root of the amount each (active) influencer received.
+//     *         (active influencer is an influencer that received a bounty)
+//     */
+//    function computeMerkleRootCache(
+//        uint steps
+//    )
+//    public
+//    onlyModerator
+//    {
+//        require(merkle_root == 0 || merkle_root == 2, 'merkle root already defined');
+//        // TODO this can only run in on plasma
+//        // TODO on mainnet the contractor can set this value manually
+//
+//        uint numberOfInfluencers = activeInfluencers.length;
+//        if (numberOfInfluencers == 0) {
+//            // lock the contract without any influencer
+//            merkle_root = bytes32(1);
+//            return;
+//        }
+//        merkle_root = bytes32(2); // indicate that the merkle root is being computed
+//        uint layer = 0;
+//        uint i;
+//        for (i = merkleLayer2Hashes[layer].length; i < numberOfInfluencers; i++) {
+//            address influencer = activeInfluencers[i];
+//            uint amount = getReferrerPlasmaBalance(influencer);
+//            merkleLayer2Hashes[layer].push(keccak256(abi.encodePacked(influencer,amount)));
+//            if(--steps == 0) return;
+//        }
+//        while (numberOfInfluencers>1) {
+//            for (i = 2*merkleLayer2Hashes[layer+1].length; i < numberOfInfluencers; i+=2) {
+//                bytes32 h0 = merkleLayer2Hashes[layer][i];
+//                bytes32 h1;
+//                if (i+1 < numberOfInfluencers) {
+//                    h1 = merkleLayer2Hashes[layer][i+1];
+//                }
+//                if (h0 < h1) {
+//                    merkleLayer2Hashes[layer+1].push(keccak256(abi.encodePacked(h0,h1)));
+//                } else {
+//                    merkleLayer2Hashes[layer+1].push(keccak256(abi.encodePacked(h1,h0)));
+//                }
+//                if(--steps == 0) return;
+//            }
+//            layer++;
+//            if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
+//                // numberOfInfluencers is not a power of two.
+//                // make sure that on the next iteration it will be
+//                numberOfInfluencers >>= 1;
+//                numberOfInfluencers++;
+//                // lets say we start with n=5 so next n will be 3 and then 2 and then 1:
+//                // 0 1 2 3 4 n=5
+//                // (0,1) (2,3) (Z,4) n=3
+//                // ((0,1),(2,3)) (Z,(Z,4)) n=2
+//                // (((0,1),(2,3)),(Z,(Z,4))) n=1
+//                //
+//                // lets say we start with n=7 so next n will be 4 and then 2 and then 1:
+//                // 0 1 2 3 4 5 6 n=7
+//                // (0,1) (2,3) (4,5) (Z,6) n=4
+//                // ((0,1),(2,3)) ((4,5),(Z,6)) n=2
+//                // (((0,1),(2,3)),(((4,5),(Z,6))) n=1
+//                //
+//            } else {
+//                // lets say we start with n=8 so next n will be 4 and then 2 and then 1:
+//                // 0 1 2 3 4 5 6 7 n=8
+//                // (0,1) (2,3) (4,5) (6,7) n=4
+//                // ((0,1),(2,3)) ((4,5),(6,7)) n=2
+//                // (((0,1),(2,3)),(((4,5),(6,7))) n=1
+//                //
+//                numberOfInfluencers >>= 1;
+//            }
+//        }
+//        require(merkleLayer2Hashes[layer].length == 1, 'bad last merkle layer');
+//        merkle_root = merkleLayer2Hashes[layer][0];
+//    }
+//
+//
+    function computeMerkleRootInternal(
+        bytes32[] hashes
     )
-    public
-    onlyModerator
+    internal
+    returns (bytes32)
     {
-        require(merkle_root == 0 || merkle_root == 2, 'merkle root already defined');
-        // TODO this can only run in on plasma
-        // TODO on mainnet the contractor can set this value manually
-
-        uint numberOfInfluencers = activeInfluencers.length;
-        if (numberOfInfluencers == 0) {
-            // lock the contract without any influencer
-            merkle_root = 1;
-            return;
-        }
-        merkle_root = 2; // indicate that the merkle root is being computed
-        uint layer = 0;
-        uint i;
-        for (i = merkleLayer2Hashes[layer].length; i < numberOfInfluencers; i++) {
-            address influencer = activeInfluencers[i];
-            uint amount = getReferrerPlasmaBalance(influencer);
-            merkleLayer2Hashes[layer].push(keccak256(abi.encodePacked(influencer,amount)));
-            if(--steps == 0) return;
-        }
-        while (numberOfInfluencers>1) {
-            for (i = 2*merkleLayer2Hashes[layer+1].length; i < numberOfInfluencers; i+=2) {
-                bytes32 h0 = merkleLayer2Hashes[layer][i];
+        uint n = hashes.length;
+        while (n>1) {
+            for (uint i = 0; i < n; i+=2) {
+                bytes32 h0 = hashes[i];
                 bytes32 h1;
-                if (i+1 < numberOfInfluencers) {
-                    h1 = merkleLayer2Hashes[layer][i+1];
+                if (i+1 < n) {
+                    h1 = hashes[i+1];
                 }
                 if (h0 < h1) {
-                    merkleLayer2Hashes[layer+1].push(keccak256(abi.encodePacked(h0,h1)));
+                    hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
                 } else {
-                    merkleLayer2Hashes[layer+1].push(keccak256(abi.encodePacked(h1,h0)));
+                    hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
                 }
-                if(--steps == 0) return;
             }
-            layer++;
-            if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
+            if ((n & (n - 1)) != 0) {
                 // numberOfInfluencers is not a power of two.
                 // make sure that on the next iteration it will be
-                numberOfInfluencers >>= 1;
-                numberOfInfluencers++;
+                n >>= 1;
+                n++;
                 // lets say we start with n=5 so next n will be 3 and then 2 and then 1:
                 // 0 1 2 3 4 n=5
                 // (0,1) (2,3) (Z,4) n=3
@@ -611,13 +668,11 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
                 // ((0,1),(2,3)) ((4,5),(6,7)) n=2
                 // (((0,1),(2,3)),(((4,5),(6,7))) n=1
                 //
-                numberOfInfluencers >>= 1;
+                n >>= 1;
             }
         }
-        require(merkleLayer2Hashes[layer].length == 1, 'bad last merkle layer');
-        merkle_root = merkleLayer2Hashes[layer][0];
+        return hashes[0];
     }
-
 
     /**
      * @notice compute a merkle root of the amount each (active) influencer received.
@@ -635,7 +690,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         uint numberOfInfluencers = activeInfluencers.length;
         if (numberOfInfluencers == 0) {
             // lock the contract without any influencer
-            merkle_root = 1;
+            merkle_root = bytes32(1);
             return;
         }
 
@@ -643,15 +698,99 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         uint i;
         for (i = 0; i < numberOfInfluencers; i++) {
             address influencer = activeInfluencers[i];
-            uint amount = getReferrerPlasmaBalance(influencer);
+            uint amount = referrerPlasma2Balances2key[influencer];
             hashes[i] = keccak256(abi.encodePacked(influencer,amount));
         }
+        merkle_root = computeMerkleRootInternal(hashes);
+    }
+
+    /**
+     * @notice compute a merkle root of the amount each (active) influencer received.
+     *         (active influencer is an influencer that received a bounty)
+     */
+    function computeMerkleRoots(
+        uint N // maximnal number of leafs we are going to process in each call. for example 2**11
+    )
+    public
+    onlyModerator
+    {
+        require(merkle_root == 0 || merkle_root == 2, 'merkle root already defined');
+        // TODO this can only run in on plasma
+        // TODO on mainnet the contractor can set this value manually
+
+        uint numberOfInfluencers = activeInfluencers.length;
+        if (numberOfInfluencers == 0) {
+            // lock the contract without any influencer
+            merkle_root = bytes32(1);
+            return;
+        }
+        merkle_root = bytes32(2); // indicate that the merkle root is being computed
+
+        uint start = merkle_roots.length * N;
+        if (start >= numberOfInfluencers) {
+          // in this iteration of calling this method we will compute the top merkle root from all the smaller merkle roots
+          // that were computed in previous iterations
+          merkle_root = computeMerkleRootInternal(merkle_roots);
+          return;
+        }
+
+        uint n = numberOfInfluencers - start;
+        if (n > N) {
+            n = N;
+        }
+        bytes32[] memory hashes = new bytes32[](n);
+        for (uint i = 0; i < n; i++) {
+            address influencer = activeInfluencers[i+start];
+            uint amount = referrerPlasma2Balances2key[influencer];
+            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+        }
+        merkle_roots.push(computeMerkleRootInternal(hashes));
+    }
+
+    function numberOfActiveInfluencers(
+    )
+    public
+    view
+    returns (uint)
+    {
+        return activeInfluencers.length;
+    }
+
+    function numberOfMerkleRoots(
+    )
+    public
+    view
+    returns (uint)
+    {
+        return merkle_roots.length;
+    }
+
+    function getMerkleProofInternal(
+        uint influencer_idx,
+        bytes32[] hashes
+    )
+    internal
+    view
+    returns (bytes32[])
+    {
+        uint numberOfInfluencers = hashes.length;
+        uint logN = 0;
+        while ((1<<logN) < numberOfInfluencers) {
+            logN++;
+        }
+        bytes32[] memory proof = new bytes32[](logN);
+        logN = 0;
         while (numberOfInfluencers>1) {
-            for (i = 0; i < numberOfInfluencers; i+=2) {
+            for (uint i = 0; i < numberOfInfluencers; i+=2) {
                 bytes32 h0 = hashes[i];
                 bytes32 h1;
                 if (i+1 < numberOfInfluencers) {
                     h1 = hashes[i+1];
+                }
+                if (influencer_idx == i) {
+                    proof[logN] = h1;
+                } else if  (influencer_idx == i+1) {
+                    proof[logN] = h0;
                 }
                 if (h0 < h1) {
                     hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
@@ -659,53 +798,28 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
                     hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
                 }
             }
+            influencer_idx >>= 1;
             if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
                 // numberOfInfluencers is not a power of two.
                 // make sure that on the next iteration it will be
                 numberOfInfluencers >>= 1;
                 numberOfInfluencers++;
-                // lets say we start with n=5 so next n will be 3 and then 2 and then 1:
-                // 0 1 2 3 4 n=5
-                // (0,1) (2,3) (Z,4) n=3
-                // ((0,1),(2,3)) (Z,(Z,4)) n=2
-                // (((0,1),(2,3)),(Z,(Z,4))) n=1
-                //
-                // lets say we start with n=7 so next n will be 4 and then 2 and then 1:
-                // 0 1 2 3 4 5 6 n=7
-                // (0,1) (2,3) (4,5) (Z,6) n=4
-                // ((0,1),(2,3)) ((4,5),(Z,6)) n=2
-                // (((0,1),(2,3)),(((4,5),(Z,6))) n=1
-                //
             } else {
-                // lets say we start with n=8 so next n will be 4 and then 2 and then 1:
-                // 0 1 2 3 4 5 6 7 n=8
-                // (0,1) (2,3) (4,5) (6,7) n=4
-                // ((0,1),(2,3)) ((4,5),(6,7)) n=2
-                // (((0,1),(2,3)),(((4,5),(6,7))) n=1
-                //
                 numberOfInfluencers >>= 1;
             }
+            logN++;
         }
-        merkle_root = hashes[0];
+        return proof;
     }
 
-    /**
-     * @notice compute a merkle proof that influencer and amount are in the merkle root.
-     * @param _influencer the influencer for which we want to get a Merkle proof
-     * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle root,
-     *                 which prove that (_influencer,amount) are inside the root.
-     */
-    function getMerkleProofCache(
-        address _influencer  // get proof for this influencer
+    function getMerkleProofFromRoots(
+        address _influencer,  // get proof for this influencer
+        uint N // maximnal number of leafs we are going to process in each call. for example 2**11
     )
     public
     view
     returns (bytes32[])
     {
-        if (merkleLayer2Hashes[0].length == 0) {
-          return getMerkleProof(_influencer);
-        }
-
         // TODO this can only run in on plasma
         uint influencer_idx = activeInfluencer2idx[_influencer];
         if (influencer_idx == 0) {
@@ -713,27 +827,79 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         }
         influencer_idx--;
 
-        uint numberOfInfluencers = activeInfluencers.length;
+        uint start = N * (influencer_idx / N);
+        influencer_idx -= start;
 
-        uint logN = 0;
-        while ((1<<logN) < numberOfInfluencers) {
-            logN++;
+        uint n = activeInfluencers.length - start;
+        if (n > N) {
+            n = N;
         }
-        bytes32[] memory proof = new bytes32[](logN);
-        uint layer = 0;
-        while (merkleLayer2Hashes[layer].length >= 2) {
-            require(layer < logN, 'too many layers');
-          if (influencer_idx % 2 == 0) {
-            proof[layer] = merkleLayer2Hashes[layer][influencer_idx + 1];
-          } else {
-            proof[layer] = merkleLayer2Hashes[layer][influencer_idx - 1];
-          }
-          influencer_idx >>= 1;
-          layer++;
+        bytes32[] memory hashes = new bytes32[](n);
+        uint i;
+        for (i = 0; i < n; i++) {
+            address influencer = activeInfluencers[i+start];
+            uint amount = referrerPlasma2Balances2key[influencer];
+            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
         }
+
+        bytes32[] memory proof0 = getMerkleProofInternal(influencer_idx, hashes);
+        bytes32[] memory proof1 = getMerkleProofInternal(start/N, merkle_roots);
+        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
+        for (i = 0; i < proof0.length; i++) {
+            proof[i] = proof0[i];
+        }
+        for (i = 0; i < proof1.length; i++) {
+            proof[i+proof0.length] = proof1[i];
+        }
+
         return proof;
     }
 
+//    /**
+//     * @notice compute a merkle proof that influencer and amount are in the merkle root.
+//     * @param _influencer the influencer for which we want to get a Merkle proof
+//     * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle root,
+//     *                 which prove that (_influencer,amount) are inside the root.
+//     */
+//    function getMerkleProofCache(
+//        address _influencer  // get proof for this influencer
+//    )
+//    public
+//    view
+//    returns (bytes32[])
+//    {
+//        if (merkleLayer2Hashes[0].length == 0) {
+//          return getMerkleProof(_influencer);
+//        }
+//
+//        // TODO this can only run in on plasma
+//        uint influencer_idx = activeInfluencer2idx[_influencer];
+//        if (influencer_idx == 0) {
+//            return new bytes32[](0);
+//        }
+//        influencer_idx--;
+//
+//        uint numberOfInfluencers = activeInfluencers.length;
+//
+//        uint logN = 0;
+//        while ((1<<logN) < numberOfInfluencers) {
+//            logN++;
+//        }
+//        bytes32[] memory proof = new bytes32[](logN);
+//        uint layer = 0;
+//        while (merkleLayer2Hashes[layer].length >= 2) {
+//            require(layer < logN, 'too many layers');
+//          if (influencer_idx % 2 == 0) {
+//            proof[layer] = merkleLayer2Hashes[layer][influencer_idx + 1];
+//          } else {
+//            proof[layer] = merkleLayer2Hashes[layer][influencer_idx - 1];
+//          }
+//          influencer_idx >>= 1;
+//          layer++;
+//        }
+//        return proof;
+//    }
+//
     /**
      * @notice compute a merkle proof that influencer and amount are in the merkle root.
      * @param _influencer the influencer for which we want to get a Merkle proof
@@ -763,43 +929,9 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         hashes[i] = keccak256(abi.encodePacked(influencer,amount));
       }
 
-      uint logN = 0;
-      while ((1<<logN) < numberOfInfluencers) {
-        logN++;
-      }
-      bytes32[] memory proof = new bytes32[](logN);
-      logN = 0;
-      while (numberOfInfluencers>1) {
-        for (i = 0; i < numberOfInfluencers; i+=2) {
-          bytes32 h0 = hashes[i];
-          bytes32 h1;
-          if (i+1 < numberOfInfluencers) {
-            h1 = hashes[i+1];
-          }
-          if (influencer_idx == i) {
-            proof[logN] = h1;
-          } else if  (influencer_idx == i+1) {
-            proof[logN] = h0;
-          }
-          if (h0 < h1) {
-            hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
-          } else {
-            hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
-          }
-        }
-        influencer_idx >>= 1;
-        if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
-          // numberOfInfluencers is not a power of two.
-          // make sure that on the next iteration it will be
-          numberOfInfluencers >>= 1;
-          numberOfInfluencers++;
-        } else {
-          numberOfInfluencers >>= 1;
-        }
-        logN++;
-      }
-      return proof;
+      return getMerkleProofInternal(influencer_idx, hashes);
     }
+
     /**
      * @notice validate a merkle proof.
      */
