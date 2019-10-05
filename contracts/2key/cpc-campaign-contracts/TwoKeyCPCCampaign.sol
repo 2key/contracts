@@ -540,11 +540,11 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     public
     onlyModerator
     {
+        uint L = activeInfluencers.length;
         for (uint i = 0; i < n; i++) {
-            uint L = activeInfluencers.length;
             address fakeInfluencer = address(L+1000);
             activeInfluencers.push(fakeInfluencer);
-            activeInfluencer2idx[fakeInfluencer] = L;
+            activeInfluencer2idx[fakeInfluencer] = L++;
         }
     }
 
