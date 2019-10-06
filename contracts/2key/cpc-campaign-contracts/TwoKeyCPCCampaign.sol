@@ -740,6 +740,10 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
      * @return index to merkle_roots
      * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle_roots[index],
      *                 which prove that (_influencer,amount) are inside the root.
+     *
+     * The returned proof is only the first part of a proof to merkle_root.
+     * The idea is that the code here does some of the work and the dApp code does the rest of the work to get a full proof
+     * See https://github.com/2key/web3-alpha/commit/105b0b17ab3d20662b1e2171d84be25089962b68
      */
     function getMerkleProofBaseFromRoots(
         address _influencer,  // get proof for this influencer
