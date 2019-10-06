@@ -26,16 +26,11 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     address public twoKeyDonationLogicHandler;
     address public mirrorCampaign;
 
-    // TODO merkle of > 2K takes too much gas so we need to break the influencers into buckets of size <=2K
-    // TODO and compute merkle root for each bucket
-    // TODO and copy that root from plasma to mainnet
-    // TODO and when generating a proof also return in which bucket the influencer this
-    // TODO and when validating a proof receive the bucket index as an argument
-    // TODO or we can just say bucket size is known and fixed at 2048 for example
-    // TODO in any case it will be good idea to have a mapping from active influencer address to index
     address[] public activeInfluencers;
     mapping(address => uint) activeInfluencer2idx;
-    bytes32 public merkle_root;  // 0 - undefined, 1 - locked but not computed, 2 - being computed
+    bytes32 public merkle_root;  // merkle root of the entire tree OR 0 - undefined, 1 - tree is empty, 2 - being computed, call computeMerkleRoots again
+    // merkle tree with 2K or more leaves takes too much gas so we need to break the influencers into buckets of size <=2K
+    // and compute merkle root for each bucket by calling computeMerkleRoots many times
     bytes32[] public merkle_roots;
 
     // @notice Modifier which allows only moderator to call methods
@@ -494,7 +489,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     public
     onlyModerator
     {
-        // TODO this needs to be blocked or used when using Epoches
+        // TODO this needs to be blocked or only used when using Epoches
 
         merkle_root = bytes32(0); // on main net. merkle root is just assigned with setMerkleRoot
         if (merkle_roots.length > 0) {
@@ -584,17 +579,18 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     }
 
     /**
-     * @notice compute a merkle root of the amount each (active) influencer received.
+     * @notice compute a merkle root of the active influencers and the amount they received.
      *         (active influencer is an influencer that received a bounty)
+     *         this function does the entire computation in one call. It will take too much gas if there is more than
+     *         2K leaves (active-influencers,reward) pairs
      */
     function computeMerkleRoot(
     )
     public
     onlyModerator
     {
-        require(merkle_root == 0 || merkle_root == 2, 'merkle root already defined');
+        require(merkle_root == 0, 'merkle root already defined');
         // TODO this can only run in on plasma
-        // TODO on mainnet the contractor can set this value manually
 
         uint numberOfInfluencers = activeInfluencers.length;
         if (numberOfInfluencers == 0) {
@@ -614,8 +610,14 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     }
 
     /**
-     * @notice compute a merkle root of the amount each (active) influencer received.
+     * @notice compute a merkle root of the active influencers and the amount they received.
      *         (active influencer is an influencer that received a bounty)
+     *         this function needs to be called many times until merkle_root is not 2.
+     *         In each call a merkle tree of up to N leaves (pair of active-influencer and amount) is
+     *         computed and the result is added to merkle_roots. N should be a power of 2 for example N=2048.
+     *         On all calls you have to use the same N value.
+     *         Once you the leaves are computed you need to call this function one more time to compute the
+     *         merkle_root of the entire tree from the intermidate results in merkle_roots
      */
     function computeMerkleRoots(
         uint N // maximnal number of leafs we are going to process in each call. for example 2**11
@@ -730,6 +732,15 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         return proof;
     }
 
+    /**
+     * @notice compute a merkle proof that influencer and amount are in one of the merkle_roots.
+     *       this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
+     * @param _influencer the influencer for which we want to get a Merkle proof
+     * @param N - the same value that was used when computeMerkleRoots was called
+     * @return index to merkle_roots
+     * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle_roots[index],
+     *                 which prove that (_influencer,amount) are inside the root.
+     */
     function getMerkleProofBaseFromRoots(
         address _influencer,  // get proof for this influencer
         uint N // maximnal number of leafs we are going to process in each call. for example 2**11
@@ -763,6 +774,14 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
         return (start/N, getMerkleProofInternal(influencer_idx, hashes));
     }
 
+    /**
+     * @notice compute a merkle proof that influencer and amount are in the the merkle_root.
+     *       this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
+     * @param _influencer the influencer for which we want to get a Merkle proof
+     * @param N - the same value that was used when computeMerkleRoots was called
+     * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle_root,
+     *                 which prove that (_influencer,amount) are inside the root.
+     */
     function getMerkleProofFromRoots(
     address _influencer,  // get proof for this influencer
     uint N // maximnal number of leafs we are going to process in each call. for example 2**11
