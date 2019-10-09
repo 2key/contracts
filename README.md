@@ -11,5 +11,5 @@ All contracts can be found [here](contracts)
 
 For development instructions, and how to run contracts locally, check [Setup dev-environment instructions](readmes/SetupDevEnv.md)
 
-
+ 
 ![TwoKeyInfrastructure](SC-architecture.png)
