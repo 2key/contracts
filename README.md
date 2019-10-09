@@ -7,7 +7,7 @@ above all methods & contract implementations by [Solidity-docgen](https://github
 and website generated based on the output of Solidity-docgen using [Docosaurus](https://github.com/facebook/Docusaurus)
 
 
-All contracts can be found [here](contracts)
+All contracts can be found [here](contracts/2key)
 
 For development instructions, and how to run contracts locally, check [Setup dev-environment instructions](readmes/SetupDevEnv.md)
 
