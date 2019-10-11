@@ -13,55 +13,28 @@ import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 
 const {env} = process;
 
-// const artifacts = require('../src/contracts_deployed-develop.json');
 const rpcUrl = env.RPC_URL;
 const eventsNetUrl = env.PLASMA_RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
-const destinationAddress = env.AYDNEP_ADDRESS;
-const delay = env.TEST_DELAY;
-// const destinationAddress = env.DESTINATION_ADDRESS  || '0xd9ce6800b997a0f26faffc0d74405c841dfc64b7'
 console.log(mainNetId);
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 15;
 const pricePerUnitInETHOrUSD = 0.095;
 const maxReferralRewardPercent = 20;
-const moderatorFeePercentage = 1;
 const minContributionETHorUSD = 5;
 const maxContributionETHorUSD = 1000000;
-const now = new Date();
 const campaignStartTime = 0;
 const campaignEndTime = 9884748832;
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
 let isKYCRequired = false;
 let isFiatConversionAutomaticallyApproved = true;
-let isFiatOnly = false;
+let isFiatOnly = true;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
 let campaignInventory = 1234000;
-
-
-let testObject = {
-    versionName: 'versionName',
-    contractAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8', //Just arbitrary address
-    contractName: 'ContractName',
-    notMaintainerAddress: '0x15bb774ab9f11a4b08c8ec7b3e51d646e3f64aa8',
-    emptyAddress: '0x0000000000000000000000000000000000000000',
-    fiatWei: 150*10**18
-};
-
-function makeHandle(max: number = 8): string {
-    let text = '';
-    let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-    for (let i = 0; i < max; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return text;
-}
-
 
 console.log(rpcUrl);
 console.log(mainNetId);
@@ -162,14 +135,6 @@ const users = {
             fullname: 'test account',
             walletname: 'test-wallet',
         },
-};
-
-const eventEmited = (error, event) => {
-    if (error) {
-        console.log('Event error', error);
-    } else {
-        console.log('2Key Event', event);
-    }
 };
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
