@@ -79,7 +79,7 @@ const getDiffBetweenLatestTags = async () => {
     const tagsStaging = (await contractsGit.tags()).all.filter(item => item.endsWith('-staging')).sort(sortMechanism);
     let latestTagStaging = tagsStaging[tagsStaging.length-1];
 
-    console.log('Latest tags: ' + latestTagDev + ' ... ' + latestTagStaging);
+    // console.log('Latest tags: ' + latestTagDev + ' ... ' + latestTagStaging);
 
     let status = await contractsGit.status();
     let diffParams = status.current == 'staging' ? [latestTagDev,latestTagStaging] : [latestTagDev];
@@ -651,7 +651,7 @@ async function main() {
             process.exit(0);
             break;
         case '--mig':
-            getMigrationsList()
+            getMigrationsList();
             process.exit(0);
             break;
         case '--slack':
