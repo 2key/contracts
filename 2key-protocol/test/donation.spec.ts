@@ -56,7 +56,7 @@ let maxReferralRewardPercent = 5;
 let campaignStartTime = 0;
 let campaignEndTime = 9884748832;
 let minDonationAmount = 1;
-let maxDonationAmount = 100000;
+let maxDonationAmount = 1;
 let campaignGoal = 10000000000000000000000000000000;
 let referrerQuota = 5;
 let isKYCRequired = true;
@@ -64,7 +64,7 @@ let shouldConvertToRefer = false;
 let acceptsFiat = false;
 let incentiveModel = "MANUAL";
 let conversionAmountEth = 1;
-let currency = "USD";
+let currency = "ETH";
 let endCampaignOnceGoalReached = false;
 let campaignAddress: string;
 let invoiceTokenAddress: string;
@@ -281,11 +281,18 @@ describe('TwoKeyDonationCampaign', () => {
         console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
     }).timeout(60000);
 
-    it('should donate 1 ether to campaign', async() => {
+    it('should get how much user have spent', async() => {
+        printTestNumber();
+        let amountSpent = await twoKeyProtocol.DonationCampaign.getAmountConverterSpent(campaignAddress, env.RENATA_ADDRESS);
+        expect(amountSpent).to.be.equal(0);
+    }).timeout(60000);
+
+
+    it('should donate 0.5 ether to campaign', async() => {
         printTestNumber();
         console.log('4) buy from test4 REFLINK', links.gmail);
 
-        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth/2, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 

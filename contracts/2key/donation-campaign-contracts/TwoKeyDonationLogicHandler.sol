@@ -78,13 +78,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) public view returns (bool) {
         uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpend(converter);
         if(keccak256(currency) == keccak256("ETH")) {
-            if(leftToSpendInCampaignCurrency.add(1000) >= conversionAmountEthWEI && conversionAmountEthWEI >= minContributionAmountWei) {
+            if(leftToSpendInCampaignCurrency.add(1000) >= conversionAmountEthWEI && conversionAmountEthWEI.add(1000) >= minContributionAmountWei) {
                 return true;
             }
         } else {
             uint rate = getRateFromExchange();
-            uint conversionAmountConverted = (conversionAmountEthWEI.mul(rate)).div(10**18);
-            if(leftToSpendInCampaignCurrency.add(ALLOWED_GAP) >= conversionAmountConverted && minContributionAmountWei <= conversionAmountConverted.add(ALLOWED_GAP)) {
+            uint conversionAmountCampaignCurrency = (conversionAmountEthWEI.mul(rate)).div(10**18);
+            if(leftToSpendInCampaignCurrency.add(ALLOWED_GAP) >= conversionAmountCampaignCurrency && minContributionAmountWei <= conversionAmountCampaignCurrency.add(ALLOWED_GAP)) {
                 return true;
             }
         }
