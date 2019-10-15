@@ -61,12 +61,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
 
+        ALLOWED_GAP = 1000000000000000; //0.001 ETH allowed GAP
 
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
     }
 
-    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool) {
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) public returns (bool) {
         require(msg.sender == twoKeyCampaign);
         require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount) == true);
         require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmount) == true);
@@ -74,16 +75,16 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         return true;
     }
 
-    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) internal view returns (bool) {
+    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) public view returns (bool) {
         uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpend(converter);
         if(keccak256(currency) == keccak256("ETH")) {
-            if(leftToSpendInCampaignCurrency >= conversionAmountEthWEI && conversionAmountEthWEI >= minContributionAmountWei) {
+            if(leftToSpendInCampaignCurrency.add(1000) >= conversionAmountEthWEI && conversionAmountEthWEI >= minContributionAmountWei) {
                 return true;
             }
         } else {
             uint rate = getRateFromExchange();
             uint conversionAmountConverted = (conversionAmountEthWEI.mul(rate)).div(10**18);
-            if(leftToSpendInCampaignCurrency >= conversionAmountConverted && conversionAmountConverted >= minContributionAmountWei) {
+            if(leftToSpendInCampaignCurrency.add(ALLOWED_GAP) >= conversionAmountConverted && minContributionAmountWei <= conversionAmountConverted.add(ALLOWED_GAP)) {
                 return true;
             }
         }

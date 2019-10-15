@@ -81,7 +81,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         ownerPlasma = plasmaOf(contractor);
         conversionHandler = _twoKeyConversionHandler;
 
-        ALLOWED_GAP = 1000000000000000;
+        ALLOWED_GAP = 1000000000000000; //0.001 ETH allowed GAP
         initialized = true;
     }
 
@@ -174,8 +174,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         return true;
     }
 
-
-    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint amountWillingToSpend, bool isFiat) internal view returns (bool) {
+//TODO: set internal
+    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool) {
         bool canConvert;
         //If we reach this point means we have reached point that campaign is still active
         if(isFiat) {
@@ -186,7 +186,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         return canConvert;
     }
 
-    function validateMinMaxContributionForFIATConversion(address converter, uint amountWillingToSpendFiatWei) internal view returns (bool,uint) {
+    //TODO: set internal
+    function validateMinMaxContributionForFIATConversion(address converter, uint amountWillingToSpendFiatWei) public view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
         if(keccak256(currency) == keccak256('ETH')) {
@@ -220,7 +221,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei.mul(rate)).div(10**18);
             //Adding gap of 100 weis
-            if(leftToSpend.add(1000) >= amountToBeSpentInFiat && minContributionAmountWei <= amountToBeSpentInFiat) {
+            if(leftToSpend.add(ALLOWED_GAP) >= amountToBeSpentInFiat && minContributionAmountWei <= amountToBeSpentInFiat.add(ALLOWED_GAP)) {
                 return (true,leftToSpend);
             } else {
                 return (false,leftToSpend);
