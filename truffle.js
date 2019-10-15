@@ -166,6 +166,14 @@ module.exports = {
           gasPrice: 120000000000,
       },
 
+      'public.test.k8s-hdwallet-dev': {
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-dev.public.test.k8s.2key.net'),
+          skipDryRun: true,
+          network_id: 3,
+          gas: 8000000,
+          gasPrice: 120000000000,
+      },
+
       'private.test.k8s-hdwallet-dev': {
           provider: () => new HDWalletProvider(mnemonic, 'https://rpc-dev.private.test.k8s.2key.net'),
           network_id: 98055,
