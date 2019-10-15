@@ -127,6 +127,7 @@ describe('Start and execute voting' , () => {
 
     it('should advance time and execute proposal',async() => {
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+        console.log(parseFloat(numberOfProposals.toString()));
         let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals-1, transactionBytecode, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;

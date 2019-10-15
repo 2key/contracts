@@ -211,13 +211,14 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
     function validateRequirements(
-        bool _isFiat
+        bool _isFiat,
+        uint _conversionAmount
     )
     internal
     {
         require(ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
-            msg.value,
+            _conversionAmount,
             _isFiat
         ) == true);
     }
@@ -244,7 +245,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        validateRequirements(false);
+        validateRequirements(false, msg.value);
         distributeArcsIfNecessary(msg.sender, signature);
         createConversion(msg.value, msg.sender, false, _isAnonymous);
     }
@@ -266,7 +267,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        validateRequirements(true);
+        validateRequirements(true, conversionAmountFiatWei);
         distributeArcsIfNecessary(_converter, signature);
         createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
     }
