@@ -359,6 +359,7 @@ describe('TwoKeyDonationCampaign', () => {
         let approvedMinConversionRate = 1000;
         let upgradableExchangeBalance = await twoKeyProtocol.getBalance(twoKeyProtocol.twoKeyUpgradableExchange.address);
         const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(parseFloat(upgradableExchangeBalance.balance.ETH.toString()), approvedMinConversionRate, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
         console.log(hash);
     }).timeout(50000);
 
