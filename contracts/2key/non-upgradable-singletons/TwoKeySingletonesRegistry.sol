@@ -31,9 +31,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         address storageProxy
     );
 
-    /**
-     * @notice Calling super constructor from maintaining pattern
-     */
+
     constructor()
     public
     {
@@ -76,6 +74,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
+        require(implementation != address(0));
         require(versions[contractName][version] == 0x0);
         versions[contractName][version] = implementation;
         contractNameToLatestVersion[contractName] = version;
@@ -198,6 +197,9 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         require(msg.sender == nonUpgradableContractToAddress["TwoKeyCongress"]);
         address proxyAddress = getContractProxyAddress(contractName);
         address _impl = getVersion(contractName, version);
+
+        require(_impl != address(0));
+
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
@@ -213,13 +215,23 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         string version
     )
     public
-    onlyMaintainer
     {
+        require(msg.sender == deployer);
+        require(contractNameToProxyAddress[contractName] == address(0));
         address logicProxy = deployProxy(contractName, version);
         address storageProxy = deployProxy(contractNameStorage, version);
 
         IStructuredStorage(storageProxy).setProxyLogicContractAndDeployer(logicProxy, msg.sender);
         emit ProxiesDeployed(logicProxy, storageProxy);
+    }
+
+    function transferOwnership(
+        address _newOwner
+    )
+    public
+    {
+        require(msg.sender == deployer);
+        deployer = _newOwner;
     }
 
 }

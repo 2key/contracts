@@ -112,19 +112,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         referrerPlasma2cut[plasma] = cut;
     }
 
-    /**
-     * @notice Function to set cut
-     * @param cut is the cut value
-     * @dev Executes internal setCutOf method
-     */
-    function setCut(
-        uint256 cut
-    )
-    public
-    {
-        setCutOf(msg.sender, cut);
-    }
-
 
     /**
      * @notice Function to track arcs and make ref tree

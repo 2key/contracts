@@ -41,7 +41,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice If the conversion executed event occured, 10 points for the converter and contractor + 10/distance to referrer
-     * @dev This function can only be called by TwoKeyConversionHandler contract assigned to the Acquisition from method param
+     * @dev This function can only be called by valid TwoKeyCampaign contract bundle assigned to the Acquisition from method param
      * @param converter is the address of the converter
      * @param contractor is the address of the contractor
      * @param campaign is the address of the acquisition campaign so we can get referrers from there
@@ -77,7 +77,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice If the conversion rejected event occured, giving penalty points
-     * @dev This function can only be called by TwoKeyConversionHandler contract assigned to the Acquisition from method param
+     * @dev This function can only be called by valid TwoKeyCampaign contract bundle assigned to the Acquisition from method param
      * @param converter is the address of the converter
      * @param contractor is the address of the contractor
      * @param campaign is the address of the acquisition campaign so we can get referrers from there

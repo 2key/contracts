@@ -174,18 +174,6 @@ contract TwoKeyCampaign is ArcERC20 {
 		return (influencers, keys, weights, old_address);
 	}
 
-    /**
-     * @notice Function to set public link key
-     * @param new_public_key is the new public key
-     */
-    function setPublicLinkKey(
-		address new_public_key
-	)
-	public
-	{
-        setPublicLinkKeyOf(msg.sender, new_public_key);
-    }
-
 
 	/**
      * @notice Function to set or update public meta hash
@@ -195,15 +183,14 @@ contract TwoKeyCampaign is ArcERC20 {
 	function startCampaignWithInitialParams(
 		string _publicMetaHash,
 		string _privateMetaHash,
-		address new_public_key
+		address _publicKey
 	)
 	public
 	onlyContractor
 	{
-		//TODO: Handle option to update only one of 3 and other setters
 		publicMetaHash = _publicMetaHash;
 		privateMetaHash = _privateMetaHash;
-		setPublicLinkKeyOf(msg.sender, new_public_key);
+		setPublicLinkKeyOf(msg.sender, _publicKey);
 	}
 
 	/**

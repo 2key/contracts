@@ -182,7 +182,7 @@ module.exports = function deploy(deployer) {
                 fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
                 fs.writeFileSync(addressesFile, JSON.stringify(contractNameToProxyAddress, null, 4));
             })
-            .then(() => deployer.deploy(TwoKeyEconomy,contractNameToProxyAddress["TwoKeyAdmin"], TwoKeySingletonesRegistry.address))
+            .then(() => deployer.deploy(TwoKeyEconomy, TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
             .then(async () => {
 

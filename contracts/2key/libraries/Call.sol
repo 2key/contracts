@@ -145,6 +145,8 @@ library Call {
         }
         if (v <= 1) v += 27;
         require(v==27 || v==28,'bad sig v');
+        //https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/cryptography/ECDSA.sol#L57
+        require(uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0, 'bad sig s');
         return ecrecover(hash, v, r, s);
 
     }
