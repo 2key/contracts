@@ -137,7 +137,7 @@ module.exports = function deploy(deployer) {
                 let upgradableStorageContracts = Object.keys(contractStorageArtifacts);
 
                 /* eslint-disable no-await-in-loop */
-                for (let i = 5; i < upgradableLogicContracts.length; i++) {
+                for (let i = 0; i < upgradableLogicContracts.length; i++) {
                     await new Promise(async (resolve, reject) => {
                         try {
                             console.log('-----------------------------------------------------------------------------------');
