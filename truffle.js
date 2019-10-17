@@ -150,16 +150,17 @@ module.exports = {
 
 
       'public.test.k8s-dev': {
-          provider: () => LedgerProvider('https://rpc-dev.public.test.k8s.2key.net', {
-              networkId: 3,
-              // https://github.com/LedgerHQ/ledgerjs/issues/200
-              // path: "44'/60'/0'/0",
-              path: "44\'/60\'/0\'/0/0",
-              // askConfirm: true,
-              askConfirm: false,
-              accountsLength: 1,
-              accountsOffset: 0,
-          }),
+          // provider: () => LedgerProvider('https://rpc-dev.public.test.k8s.2key.net', {
+          //     networkId: 3,
+          //     // https://github.com/LedgerHQ/ledgerjs/issues/200
+          //     // path: "44'/60'/0'/0",
+          //     path: "44\'/60\'/0\'/0/0",
+          //     // askConfirm: true,
+          //     askConfirm: false,
+          //     accountsLength: 1,
+          //     accountsOffset: 0,
+          // }),
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-dev.public.test.k8s.2key.net'),
           skipDryRun: true,
           network_id: 3,
           gas: 8000000,
