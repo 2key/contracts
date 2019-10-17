@@ -34,7 +34,7 @@ const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValida
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
-
+const Call = artifacts.require('Call');
 
 const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created, checkArgumentsForUpdate } = require('../helpers');
 const { generateBytecodeForUpgrading } = require('../generateBytecode');
