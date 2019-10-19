@@ -5,6 +5,7 @@ import "../libraries/SafeMath.sol";
 contract TwoKeyCongress {
 
     event ReceivedEther(address sender, uint amount);
+
     using SafeMath for uint;
 
     bool initialized;
@@ -32,7 +33,7 @@ contract TwoKeyCongress {
 
     event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
     event Voted(uint proposalID, bool position, address voter, string justification);
-    event ProposalTallied(uint proposalID, int result, uint quorum, bool active);
+    event ProposalTallied(uint proposalID, uint quorum, bool active);
     event MembershipChanged(address member, bool isMember);
     event ChangeOfRules(uint256 _newMinimumQuorum, uint256 _newDebatingPeriodInMinutes);
 
@@ -44,7 +45,8 @@ contract TwoKeyCongress {
         bool executed;
         bool proposalPassed;
         uint numberOfVotes;
-        int currentResult;
+        uint againstProposalTotal;
+        uint supportingProposalTotal;
         bytes32 proposalHash;
         bytes transactionBytecode;
         Vote[] votes;
@@ -262,7 +264,8 @@ contract TwoKeyCongress {
         p.executed = false;
         p.proposalPassed = false;
         p.numberOfVotes = 0;
-        p.currentResult = 0;
+        p.againstProposalTotal = 0;
+        p.supportingProposalTotal = 0;
         emit ProposalAdded(proposalID, beneficiary, weiAmount, jobDescription);
         numProposals = proposalID+1;
 
@@ -290,7 +293,7 @@ contract TwoKeyCongress {
     onlyMembers
     returns (uint proposalID)
     {
-        return newProposal(beneficiary, etherAmount * 1 ether, jobDescription, transactionBytecode);
+        return newProposal(beneficiary, etherAmount, jobDescription, transactionBytecode);
     }
 
     /**
@@ -327,7 +330,8 @@ contract TwoKeyCongress {
     function vote(
         uint proposalNumber,
         bool supportsProposal,
-        string justificationText)
+        string justificationText
+    )
     public
     onlyMembers
     returns (uint256 voteID)
@@ -341,9 +345,9 @@ contract TwoKeyCongress {
         p.votes.push(Vote({ inSupport: supportsProposal, voter: msg.sender, justification: justificationText }));
         uint votingPower = getMemberVotingPower(msg.sender);
         if (supportsProposal) {                         // If they support the proposal
-            p.currentResult+= int(votingPower);                          // Increase score
+            p.supportingProposalTotal += votingPower; // Increase score
         } else {                                        // If they don't
-            p.currentResult-= int(votingPower);                          // Decrease the score
+            p.againstProposalTotal += votingPower;                          // Decrease the score
         }
         // Create a log of this event
         emit Voted(proposalNumber,  supportsProposal, msg.sender, justificationText);
@@ -356,11 +360,12 @@ contract TwoKeyCongress {
     onlyMembers
     public
     view
-    returns(uint256 numberOfVotes, int256 currentResult, string description)
+    returns(uint256 numberOfVotes, uint256 supportingProposalTotal, uint256 againstProposalTotal, string description)
     {
         require(proposals[proposalNumber].proposalHash != 0);
         numberOfVotes = proposals[proposalNumber].numberOfVotes;
-        currentResult = proposals[proposalNumber].currentResult;
+        supportingProposalTotal = proposals[proposalNumber].supportingProposalTotal;
+        againstProposalTotal = proposals[proposalNumber].againstProposalTotal;
         description = proposals[proposalNumber].description;
     }
 
@@ -395,8 +400,7 @@ contract TwoKeyCongress {
              !p.executed                                                         // and it has not already been executed
             && p.proposalHash == keccak256(abi.encodePacked(p.recipient, p.amount, transactionBytecode))  // and the supplied code matches the proposal
             && p.numberOfVotes >= minimumQuorum.sub(1) // and a minimum quorum has been reached...
-            && uint(p.currentResult) >= maxVotingPower.mul(51).div(100)
-            && p.currentResult > 0
+            && uint(p.supportingProposalTotal) >= maxVotingPower.mul(51).div(100) // Total support should be >= than 51%
         );
 
         // ...then execute result
@@ -404,7 +408,7 @@ contract TwoKeyCongress {
         p.proposalPassed = true;
 
         // Fire Events
-        emit ProposalTallied(proposalNumber, p.currentResult, p.numberOfVotes, p.proposalPassed);
+        emit ProposalTallied(proposalNumber, p.numberOfVotes, p.proposalPassed);
 
 //         Call external function
         require(p.recipient.call.value(p.amount)(transactionBytecode));
@@ -437,10 +441,6 @@ contract TwoKeyCongress {
         return isMemberInCongress[_member];
     }
 
-    /// @notice Fallback function
-    function () payable public {
-        emit ReceivedEther(msg.sender, msg.value);
-    }
 
     /// @notice Getter for maximum voting power
     /// @return maxVotingPower
@@ -462,27 +462,6 @@ contract TwoKeyCongress {
         return allMembers.length;
     }
 
-    /// @notice Function / Getter for hashes of allowed methods
-    /// @return array of bytes32 hashes
-    function getAllowedMethods()
-    public
-    view
-    returns (bytes32[])
-    {
-        return allowedMethodSignatures;
-    }
-
-    /// @notice Function to fetch method name from method hash
-    /// @return methodname string representation
-    function getMethodNameFromMethodHash(
-        bytes32 _methodHash
-    )
-    public
-    view
-    returns(string)
-    {
-        return methodHashToMethodName[_methodHash];
-    }
 
     /// @notice Function to get major proposal data
     /// @param proposalId is the id of proposal
@@ -492,10 +471,10 @@ contract TwoKeyCongress {
     )
     public
     view
-    returns (uint,string,uint,bool,uint,int,bytes)
+    returns (uint,string,uint,bool,uint,uint,uint,bytes)
     {
         Proposal memory p = proposals[proposalId];
-        return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.currentResult, p.transactionBytecode);
+        return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.supportingProposalTotal, p.againstProposalTotal, p.transactionBytecode);
     }
 
     /// @notice Function to get addresses of all members in congress
@@ -508,5 +487,9 @@ contract TwoKeyCongress {
         return allMembers;
     }
 
+    /// @notice Fallback function
+    function () payable public {
+        emit ReceivedEther(msg.sender, msg.value);
+    }
 }
 

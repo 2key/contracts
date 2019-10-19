@@ -58,7 +58,6 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('should create a proposal', async() => {
-        console.log('Submitting proposal for sending two key tokens');
         let txHash: string = await twoKeyProtocol.Congress.newProposal(
             twoKeyProtocol.twoKeyAdmin.address,
             "Send some tokens to contractor",
@@ -155,7 +154,6 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('should create a proposal', async() => {
-        console.log('Submitting proposal for sending upgrading contract');
         let txHash: string = await twoKeyProtocol.Congress.newProposal(
             twoKeyProtocol.twoKeySingletonesRegistry.address,
             "Upgrade contract to new version",
