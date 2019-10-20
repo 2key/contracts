@@ -96,39 +96,6 @@ contract TwoKeyCongress {
         initialized = true;
     }
 
-    /// @notice Function where member can replace it's own address
-    /// @dev member can change only it's own address
-    /// @param _newMemberAddress is the new address we'd like to set for us
-    function replaceMemberAddress(
-        address _newMemberAddress
-    )
-    public
-    {
-        require(_newMemberAddress != address(0));
-        // Update is member in congress state
-        isMemberInCongress[_newMemberAddress] = true;
-        isMemberInCongress[msg.sender] = false;
-
-        //Update array containing all members addresses
-        uint length = allMembers.length;
-        for(uint i=0; i<length; i++) {
-            if(allMembers[i] == msg.sender) {
-                allMembers[i] = _newMemberAddress;
-            }
-        }
-
-        //Update member object
-        Member memory m = address2Member[msg.sender];
-        address2Member[_newMemberAddress] = m;
-        address2Member[msg.sender] = Member(
-            {
-            memberAddress: address(0),
-            memberSince: block.timestamp,
-            votingPower: 0,
-            name: "0x0"
-            }
-        );
-    }
 
     /**
      * Add member
