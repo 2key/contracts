@@ -3,7 +3,7 @@ pragma solidity ^0.4.24;
 /**
  * @author Nikola Madjarevic
  */
-contract ArcERC20 {
+contract ArcToken {
 
     uint256 internal totalSupply_ = 1000000;
 

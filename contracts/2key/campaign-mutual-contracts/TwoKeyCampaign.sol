@@ -6,12 +6,12 @@ import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/IERC20.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
-import "./ArcERC20.sol";
+import "./ArcToken.sol";
 
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
  */
-contract TwoKeyCampaign is ArcERC20 {
+contract TwoKeyCampaign is ArcToken {
 
 	using SafeMath for uint256;
 	using Call for *;

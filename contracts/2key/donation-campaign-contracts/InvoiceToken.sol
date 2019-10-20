@@ -6,7 +6,7 @@ import "../ERC20/ERC20.sol";
 /**
  * @author Nikola Madjarevic
  */
-contract InvoiceTokenERC20 is ERC20 {
+contract InvoiceToken is ERC20 {
 
     using SafeMath for uint256;
 

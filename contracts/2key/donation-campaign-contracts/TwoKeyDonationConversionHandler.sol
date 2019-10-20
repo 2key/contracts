@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 
-import "./InvoiceTokenERC20.sol";
+import "./InvoiceToken.sol";
 import "../interfaces/ITwoKeyDonationCampaign.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
@@ -12,7 +12,7 @@ import "../campaign-mutual-contracts/TwoKeyCampaignConversionHandler.sol";
 contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversionHandler {
 
     Conversion [] public conversions;
-    InvoiceTokenERC20 public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
+    InvoiceToken public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
 
     ITwoKeyDonationCampaign twoKeyCampaign;
 
@@ -62,7 +62,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         contractor = _contractor;
         currency = _currency;
         // Deploy an ERC20 token which will be used as the Invoice
-        erc20InvoiceToken = new InvoiceTokenERC20(tokenName,tokenSymbol,address(this));
+        erc20InvoiceToken = new InvoiceToken(tokenName,tokenSymbol,address(this));
         // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(address(erc20InvoiceToken), tokenName, tokenSymbol);
         isCampaignInitialized = true;
