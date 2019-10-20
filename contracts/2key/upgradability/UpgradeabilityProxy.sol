@@ -25,6 +25,7 @@ contract UpgradeabilityProxy is Proxy, UpgradeabilityStorage {
     */
     function upgradeTo(string _contractName, string _version, address _impl) public {
         require(msg.sender == address(registry));
+        require(_impl != address(0));
         _implementation = _impl;
     }
 

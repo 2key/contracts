@@ -198,8 +198,6 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         address proxyAddress = getContractProxyAddress(contractName);
         address _impl = getVersion(contractName, version);
 
-        require(_impl != address(0));
-
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
