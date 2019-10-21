@@ -304,7 +304,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     returns (uint, uint,uint,uint)
     {
         uint totalUnitsConverterBought;
-        (totalUnitsConverterBought,,) = ITwoKeyConversionHandler(proxyConversionHandler).getConverterPurchasesStats(_converter);
+        (,,totalUnitsConverterBought) = ITwoKeyConversionHandler(proxyConversionHandler).getConverterPurchasesStats(_converter);
 
         uint[] memory conversionIds = ITwoKeyConversionHandler(proxyConversionHandler).getConverterConversionIds(_converter);
         uint totalAvailable;
