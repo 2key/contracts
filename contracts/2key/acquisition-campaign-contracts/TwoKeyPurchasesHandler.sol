@@ -4,6 +4,7 @@ import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IERC20.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../libraries/SafeMath.sol";
+import "../interfaces/ITwoKeyConversionHandler.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -15,6 +16,9 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     enum VestingAmount {BONUS, BASE_AND_BONUS}
     VestingAmount vestingAmount;
 
+    mapping(uint => uint) public portionToUnlockingDate;
+
+
     bool initialized;
     bool isDistributionDateChanged;
 
@@ -24,7 +28,6 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     address contractor;
     address twoKeyEventSource;
 
-    mapping(uint => uint) public portionToUnlockingDate;
 
     uint numberOfPurchases;
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate;
@@ -34,6 +37,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     uint maxDistributionDateShiftInDays;
 
     mapping(uint => Purchase) conversionIdToPurchase;
+
 
     event TokensWithdrawn(
         uint timestamp,
@@ -233,6 +237,38 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         );
     }
 
+    function getAvailableAndLockedAndWithdrawnTokensPerConversion(
+        uint _conversionId
+    )
+    public
+    view
+    returns (uint,uint,uint)
+    {
+        Purchase memory p = conversionIdToPurchase[_conversionId];
+        uint[] memory unlockingDates = getPortionsUnlockingDates();
+
+        uint availableTokens;
+        uint lockedTokens;
+        uint withdrawnTokens;
+        /**
+         If unlocking date is after block.timestamp, then this portion amount and all after it are locked
+         Otherwise, if the date is before block.timestamp, it's either withdrawn or available to withdraw
+         */
+        for(uint j=0; j<unlockingDates.length; j++) {
+            if(block.timestamp < unlockingDates[j]) {
+                lockedTokens = lockedTokens.add(p.portionAmounts[j]);
+            } else {
+                if(p.isPortionWithdrawn[j] == true) {
+                    withdrawnTokens = withdrawnTokens.add(p.portionAmounts[j]);
+                } else {
+                    availableTokens = availableTokens.add(p.portionAmounts[j]);
+                }
+            }
+        }
+
+        return (availableTokens, lockedTokens, withdrawnTokens);
+    }
+
     function getStaticInfo()
     public
     view
@@ -260,6 +296,35 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         return dates;
     }
 
+    function getMetricsPerConverterPerCampaign(
+        address _converter
+    )
+    public
+    view
+    returns (uint, uint,uint,uint)
+    {
+        uint totalUnitsConverterBought;
+        (totalUnitsConverterBought,,) = ITwoKeyConversionHandler(proxyConversionHandler).getConverterPurchasesStats(_converter);
+
+        uint[] memory conversionIds = ITwoKeyConversionHandler(proxyConversionHandler).getConverterConversionIds(_converter);
+        uint totalAvailable;
+        uint totalLocked;
+        uint totalWithdrawn;
+
+        for(uint i=0; i<conversionIds.length; i++) {
+            uint available;
+            uint locked;
+            uint withdrawn;
+
+            (available,locked,withdrawn) = getAvailableAndLockedAndWithdrawnTokensPerConversion(conversionIds[i]);
+
+            totalAvailable = totalAvailable.add(available);
+            totalLocked = totalLocked.add(locked);
+            totalWithdrawn = totalWithdrawn.add(withdrawn);
+        }
+
+        return (totalUnitsConverterBought, totalAvailable, totalLocked, totalWithdrawn);
+    }
 
 
 }
