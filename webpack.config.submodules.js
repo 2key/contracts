@@ -13,7 +13,7 @@ const config = {
     acquisition: './2key-protocol/src/acquisition/index.ts',
     donation: './2key-protocol/src/donation/index.ts'
   },
-  devtool: 'none',
+  devtool: 'source-map',
   output: {
     path: path.join(__dirname, '2key-protocol', 'dist', 'submodules'),
     filename: '[name].js',
@@ -37,8 +37,9 @@ const config = {
   // externals: [nodeExternals()],
   plugins: [
     new UglifyJsPlugin({
-      sourceMap: false,
+      sourceMap: true,
       uglifyOptions: {
+        sourceMap: true,
         compress: {
           drop_console: true,
         }
