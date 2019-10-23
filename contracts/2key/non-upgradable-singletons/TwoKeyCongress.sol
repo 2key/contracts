@@ -26,8 +26,6 @@ contract TwoKeyCongress {
     mapping(address => Member) public address2Member;
     // Mapping to store all members addresses
     address[] public allMembers;
-    // Array of allowed methods
-    bytes32[] allowedMethodSignatures;
 
     mapping(bytes32 => string) methodHashToMethodName;
 
