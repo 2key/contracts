@@ -53,7 +53,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     public
     {
         validateCall();
-        int d = 1;
         int initialRewardWei = 10*(10**18);
 
         bytes32 keyHashContractorScore = keccak256("address2contractorGlobalReputationScoreWei", contractor);
@@ -69,8 +68,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         for(uint i=0; i<referrers.length; i++) {
             bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[i]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + initialRewardWei/d);
-            d = d + 1;
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + initialRewardWei/(i+1));
         }
     }
 
@@ -88,7 +86,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     public
     {
         validateCall();
-        int d = 1;
         int initialRewardWei = 5*(10**18);
 
 
@@ -105,8 +102,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         for(uint i=0; i<referrers.length; i++) {
             bytes32 keyHashReferrerScore = keccak256("plasmaAddress2referrerGlobalReputationScoreWei", referrers[i]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialRewardWei/d);
-            d = d + 1;
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialRewardWei/(i+1));
         }
     }
 

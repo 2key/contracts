@@ -165,10 +165,10 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     }
 
     /**
- * @notice Function to get balance and total earnings for all referrer addresses passed in arg
- * @param _referrerPlasmaList is the array of plasma addresses of referrer
- * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
- */
+     * @notice Function to get balance and total earnings for all referrer addresses passed in arg
+     * @param _referrerPlasmaList is the array of plasma addresses of referrer
+     * @return two arrays. 1st contains current plasma balance and 2nd contains total plasma balances
+     */
     function getReferrersBalancesAndTotalEarnings(
         address[] _referrerPlasmaList
     )
