@@ -40,6 +40,15 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
+     * @notice Modifier to validate that the call is coming from validated campaign
+     */
+    modifier isCodeValid() {
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
+        _;
+    }
+
+    /**
      * @notice If the conversion executed event occured, 10 points for the converter and contractor + 10/distance to referrer
      * @param converter is the address of the converter
      * @param contractor is the address of the contractor
@@ -51,8 +60,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         address campaign
     )
     public
+    isCodeValid
     {
-        validateCall();
         int initialRewardWei = 10*(10**18);
 
         bytes32 keyHashContractorScore = keccak256("address2contractorGlobalReputationScoreWei", contractor);
@@ -84,8 +93,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         address campaign
     )
     public
+    isCodeValid
     {
-        validateCall();
         int initialRewardWei = 5*(10**18);
 
 
@@ -132,16 +141,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         return ITwoKeyCampaign(campaign).conversionHandler();
     }
 
-    /**
-     * @notice Function to validate that the call is comming from validated campaign
-     */
-    function validateCall()
-    internal
-    view
-    {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
-        require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
-    }
 
     /**
      * @notice Function to get all referrers in the chain for specific converter
