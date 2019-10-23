@@ -27,7 +27,6 @@ contract TwoKeyCongress {
     // Mapping to store all members addresses
     address[] public allMembers;
 
-    mapping(bytes32 => string) methodHashToMethodName;
 
     event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
     event Voted(uint proposalID, bool position, address voter, string justification);
