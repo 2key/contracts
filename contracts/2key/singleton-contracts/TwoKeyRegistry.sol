@@ -21,9 +21,9 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     event UserNameChanged(address owner, string name);
 
 
-    function isMaintainer(address x) internal view returns (bool) {
+    function isMaintainer(address _caller) internal view returns (bool) {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(x);
+        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_caller);
     }
 
 
@@ -85,8 +85,8 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         bytes _signatureWalletName
     )
     public
+    onlyMaintainer
     {
-        require(isMaintainer(msg.sender));
         addName(_name, _sender, _fullName, _email, _signatureName);
         setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
     }

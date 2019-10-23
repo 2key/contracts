@@ -65,7 +65,7 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     /**
      * @notice Function which will determine if address is maintainer
      */
-    function onlyMaintainer(address _sender) public view returns (bool) {
+    function checkIsAddressMaintainer(address _sender) public view returns (bool) {
         return isMaintainer(_sender);
     }
 

@@ -528,7 +528,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     returns (bool)
     {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        bool _isMaintainer = ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(_maintainer);
+        bool _isMaintainer = ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_maintainer);
         return _isMaintainer;
     }
 

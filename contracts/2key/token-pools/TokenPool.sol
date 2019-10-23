@@ -25,11 +25,6 @@ contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
     }
 
-    modifier onlyMaintainer {
-        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-        _;
-    }
 
     modifier onlyTwoKeyAdmin {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
