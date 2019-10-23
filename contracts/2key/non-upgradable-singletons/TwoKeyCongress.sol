@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "../libraries/SafeMath.sol";
+import "./TwoKeyCongressMembersRegistry.sol";
 
 contract TwoKeyCongress {
 
@@ -8,12 +9,6 @@ contract TwoKeyCongress {
 
     using SafeMath for uint;
 
-    bool initialized;
-
-    // The maximum voting power containing sum of voting powers of all active members
-    uint256 maxVotingPower;
-    //The minimum number of voting members that must be in attendance
-    uint256 public minimumQuorum;
     //Period length for voting
     uint256 public debatingPeriodInMinutes;
     //Array of proposals
@@ -21,18 +16,12 @@ contract TwoKeyCongress {
     //Number of proposals
     uint public numProposals;
 
-    mapping (address => bool) public isMemberInCongress;
-    // Mapping address to memberId
-    mapping(address => Member) public address2Member;
-    // Mapping to store all members addresses
-    address[] public allMembers;
-
+    TwoKeyCongressMembersRegistry public twoKeyCongressMembersRegistry;
 
     event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
     event Voted(uint proposalID, bool position, address voter, string justification);
     event ProposalTallied(uint proposalID, uint quorum, bool active);
-    event MembershipChanged(address member, bool isMember);
-    event ChangeOfRules(uint256 _newMinimumQuorum, uint256 _newDebatingPeriodInMinutes);
+    event ChangeOfRules(uint256 _newDebatingPeriodInMinutes);
 
     struct Proposal {
         address recipient;
@@ -50,152 +39,58 @@ contract TwoKeyCongress {
         mapping (address => bool) voted;
     }
 
-    struct Member {
-        address memberAddress;
-        bytes32 name;
-        uint votingPower;
-        uint memberSince;
-    }
-
     struct Vote {
         bool inSupport;
         address voter;
         string justification;
     }
 
-    // Modifier that allows only shareholders to vote and create new proposals
-    modifier onlyMembers {
-        require(isMemberInCongress[msg.sender] == true);
+
+    /**
+     * @notice Modifier to check if the msg.sender is member of the congress
+     */
+    modifier onlyMembers() {
+        require(twoKeyCongressMembersRegistry.isMember(msg.sender) == true);
         _;
     }
 
     /**
-     * @notice Function which will be called only once, immediately after contract deployment
      * @param _minutesForDebate is the number of minutes debate length
-     * @param initialMembers is the array containing addresses of initial members
-     * @param votingPowers is the array of unassigned integers containing voting powers respectively
-     * @dev initialMembers.length must be equal votingPowers.length
      */
     constructor(
-        uint256 _minutesForDebate,
-        address[] initialMembers,
-        bytes32[] initialMemberNames,
-        uint[] votingPowers
+        uint256 _minutesForDebate
     )
     payable
     public
     {
-        changeVotingRules(0, _minutesForDebate);
-        uint length = initialMembers.length;
-        for(uint i=0; i<length; i++) {
-            addMember(initialMembers[i], initialMemberNames[i], votingPowers[i]);
-        }
-        initialized = true;
-    }
-
-
-    /**
-     * Add member
-     *
-     * Make `targetMember` a member named `memberName`
-     *
-     * @param targetMember ethereum address to be added
-     * @param memberName public name for that member
-     */
-    function addMember(
-        address targetMember,
-        bytes32 memberName,
-        uint _votingPower
-    )
-    internal
-    {
-        minimumQuorum = allMembers.length;
-        maxVotingPower += _votingPower;
-        address2Member[targetMember] = Member(
-            {
-                memberAddress: targetMember,
-                memberSince: block.timestamp,
-                votingPower: _votingPower,
-                name: memberName
-            }
-        );
-        allMembers.push(targetMember);
-        isMemberInCongress[targetMember] = true;
-        emit MembershipChanged(targetMember, true);
+        changeVotingRules(_minutesForDebate);
     }
 
     /**
-     * Remove member
-     *
-     * @notice Remove membership from `targetMember`
-     *
-     * @param targetMember ethereum address to be removed
+     * @notice Function which will be called only once immediately after contract is deployed
+     * @param _twoKeyCongressMembers is the address of already deployed contract
      */
-    function removeMember(
-        address targetMember
+    function setTwoKeyCongressMembersContract(
+        address _twoKeyCongressMembers
     )
-    internal
+    public
     {
-        require(isMemberInCongress[targetMember] == true);
-
-        //Remove member voting power from max voting power
-        uint votingPower = getMemberVotingPower(targetMember);
-        maxVotingPower-= votingPower;
-
-        uint length = allMembers.length;
-        uint i=0;
-        //Find selected member
-        while(allMembers[i] != targetMember) {
-            if(i == length) {
-                revert();
-            }
-            i++;
-        }
-        //After member is found, remove his address from all members
-        for (uint j = i; j< length - 1; j++){
-            allMembers[j] = allMembers[j+1];
-        }
-        //After reduce array size
-        delete allMembers[allMembers.length-1];
-
-        uint newLength = allMembers.length.sub(1);
-        allMembers.length = newLength;
-
-        //Remove him from state mapping
-        isMemberInCongress[targetMember] = false;
-
-        //Remove his state to empty member
-        address2Member[targetMember] = Member(
-            {
-                memberAddress: address(0),
-                memberSince: block.timestamp,
-                votingPower: 0,
-                name: "0x0"
-            }
-        );
-        //Reduce 1 member from quorum
-        minimumQuorum -= 1;
+        require(address(twoKeyCongressMembersRegistry) == address(0));
+        twoKeyCongressMembersRegistry = TwoKeyCongressMembersRegistry(_twoKeyCongressMembers);
     }
+
 
     /**
      * Change voting rules
-     *
-     * Make so that proposals need to be discussed for at least `minutesForDebate/60` hours,
-     * have at least `minimumQuorumForProposals` votes, and have 50% + `marginOfVotesForMajority` votes to be executed
-     *
-     * @param minimumQuorumForProposals how many members must vote on a proposal for it to be executed
      * @param minutesForDebate the minimum amount of delay between when a proposal is made and when it can be executed
      */
     function changeVotingRules(
-        uint256 minimumQuorumForProposals,
         uint256 minutesForDebate
     )
     internal
     {
-        minimumQuorum = minimumQuorumForProposals;
         debatingPeriodInMinutes = minutesForDebate;
-
-        emit ChangeOfRules(minimumQuorumForProposals, minutesForDebate);
+        emit ChangeOfRules(minutesForDebate);
     }
 
     /**
@@ -307,7 +202,7 @@ contract TwoKeyCongress {
         p.numberOfVotes++;
         voteID = p.numberOfVotes;                     // Increase the number of votes
         p.votes.push(Vote({ inSupport: supportsProposal, voter: msg.sender, justification: justificationText }));
-        uint votingPower = getMemberVotingPower(msg.sender);
+        uint votingPower = twoKeyCongressMembersRegistry.getMemberVotingPower(msg.sender);
         if (supportsProposal) {                         // If they support the proposal
             p.supportingProposalTotal += votingPower; // Increase score
         } else {                                        // If they don't
@@ -333,15 +228,6 @@ contract TwoKeyCongress {
         description = proposals[proposalNumber].description;
     }
 
-    /// Basic getter function
-    function getMemberInfo()
-    public
-    view
-    returns (address, bytes32, uint, uint)
-    {
-        Member memory member = address2Member[msg.sender];
-        return (member.memberAddress, member.name, member.votingPower, member.memberSince);
-    }
 
     /**
      * Finish vote
@@ -358,7 +244,8 @@ contract TwoKeyCongress {
     public
     {
         Proposal storage p = proposals[proposalNumber];
-
+        uint minimumQuorum = twoKeyCongressMembersRegistry.minimumQuorum();
+        uint maxVotingPower = twoKeyCongressMembersRegistry.maxVotingPower();
         require(
 //            block.timestamp > p.minExecutionDate  &&                             // If it is past the voting deadline
              !p.executed                                                         // and it has not already been executed
@@ -379,54 +266,6 @@ contract TwoKeyCongress {
     }
 
 
-    /// @notice Function getter for voting power for specific member
-    /// @param _memberAddress is the address of the member
-    /// @return integer representing voting power
-    function getMemberVotingPower(
-        address _memberAddress
-    )
-    public
-    view
-    returns (uint)
-    {
-        Member memory _member = address2Member[msg.sender];
-        return _member.votingPower;
-    }
-
-    /// @notice to check if an address is member
-    /// @param _member is the address we're checking for
-    function checkIsMember(
-        address _member
-    )
-    public
-    view
-    returns (bool)
-    {
-        return isMemberInCongress[_member];
-    }
-
-
-    /// @notice Getter for maximum voting power
-    /// @return maxVotingPower
-    function getMaxVotingPower()
-    public
-    view
-    returns (uint)
-    {
-        return maxVotingPower;
-    }
-
-    /// @notice Getter for length for how many members are currently
-    /// @return length of members
-    function getMembersLength()
-    public
-    view
-    returns (uint)
-    {
-        return allMembers.length;
-    }
-
-
     /// @notice Function to get major proposal data
     /// @param proposalId is the id of proposal
     /// @return tuple containing all the data for proposal
@@ -441,15 +280,7 @@ contract TwoKeyCongress {
         return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.supportingProposalTotal, p.againstProposalTotal, p.transactionBytecode);
     }
 
-    /// @notice Function to get addresses of all members in congress
-    /// @return array of addresses
-    function getAllMemberAddresses()
-    public
-    view
-    returns (address[])
-    {
-        return allMembers;
-    }
+
 
     /// @notice Fallback function
     function () payable public {

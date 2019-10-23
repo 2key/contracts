@@ -1091,7 +1091,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     it('should get all whitelisted addresses', async() => {
-        const addresses = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
+        const addresses = await twoKeyProtocol.CongressMembersRegistry.getAllMembersForCongress(from);
         // console.log(addresses);
         expect(addresses.length).to.be.equal(4);
     }).timeout(60000);

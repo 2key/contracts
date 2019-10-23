@@ -4,6 +4,7 @@ const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
+const TwoKeyCongressMembersRegistry = artifacts.require('TwoKeyCongressMembersRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
@@ -214,6 +215,19 @@ module.exports = function deploy(deployer) {
                     try {
                         console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
                         let txHash = registry.addNonUpgradableContractToAddress('TwoKeyEconomy', TwoKeyEconomy.address);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+
+                /**
+                 * Here we will add economy contract to the registry
+                 */
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
+                        let txHash = registry.addNonUpgradableContractToAddress('TwoKeyCongressMembersRegistry', TwoKeyCongressMembersRegistry.address);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);

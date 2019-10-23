@@ -4,6 +4,7 @@ const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
+const TwoKeyCongressMembersRegistry = artifacts.require('TwoKeyCongressMembersRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
@@ -46,6 +47,7 @@ const instantiateConfigs = ((deployer) => {
     return deploymentObject[deploymentNetwork];
 
 });
+
 module.exports = function deploy(deployer) {
 
 
@@ -64,8 +66,24 @@ module.exports = function deploy(deployer) {
     deployer.deploy(IncentiveModels);
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
-        deployer.deploy(TwoKeyCongress, 24 * 60, initialCongressMembers, initialCongressMemberNames, votingPowers)
+        deployer.deploy(TwoKeyCongress, 24 * 60)
             .then(() => TwoKeyCongress.deployed())
+            .then(() => deployer.deploy(TwoKeyCongressMembersRegistry, initialCongressMembers, initialCongressMemberNames, votingPowers, TwoKeyCongress.address))
+            .then(() => TwoKeyCongressMembersRegistry.deployed())
+            .then(async () => {
+                // Just to wire congress with congress members
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        console.log('Here')
+                        let congress = await TwoKeyCongress.at(TwoKeyCongress.address);
+                        let txHash = await congress.setTwoKeyCongressMembersContract(TwoKeyCongressMembersRegistry.address);
+                        console.log('Congress wired with CongressMembersRegistry with transaction : ' + txHash);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            })
             .then(() => deployer.deploy(TwoKeyCampaignValidator))
             .then(() => deployer.link(Call, TwoKeySignatureValidator))
             .then(() => deployer.deploy(TwoKeySignatureValidator))

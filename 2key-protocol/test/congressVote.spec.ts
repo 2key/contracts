@@ -43,12 +43,12 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
-        let members = await twoKeyProtocol.Congress.getAllMembersForCongress(from);
+        let members = await twoKeyProtocol.CongressMembersRegistry.getAllMembersForCongress(from);
         expect(members.length).to.be.equal(4);
     }).timeout(30000);
 
     it('should get member info from congress', async() => {
-        let memberInfo = await twoKeyProtocol.Congress.getMemberInfo(from);
+        let memberInfo = await twoKeyProtocol.CongressMembersRegistry.getMemberInfo(from);
         expect(memberInfo.memberName).to.be.equal('Eitan');
     }).timeout(30000);
 
@@ -140,8 +140,6 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         expect(status).to.be.equal('0x1');
     }).timeout(60000);
 
-    it('should check the balance of 2key-s on deployer address', async() => {
-    }).timeout(50000);
 });
 
 
