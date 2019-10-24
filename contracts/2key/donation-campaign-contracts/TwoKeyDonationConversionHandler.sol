@@ -317,7 +317,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         require(conversion.conversionExpiresAt > block.timestamp);
         require(msg.sender == conversion.converter);
-        require(conversion.state == ConversionState.PENDING_APPROVAL);
+        require(conversion.state == ConversionState.PENDING_APPROVAL || conversion.state == ConversionState.APPROVED);
 
         counters[0] = counters[0].sub(1); // Reduce number of pending conversions
         counters[4] = counters[4].add(1); // Increase number of cancelled conversions
