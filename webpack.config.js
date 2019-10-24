@@ -31,8 +31,9 @@ const config = {
   externals: [nodeExternals()],
   plugins: [
     new UglifyJsPlugin({
-      sourceMap: false,
+      sourceMap: true,
       uglifyOptions: {
+        sourceMap: true,
         compress: {
           drop_console: true,
         }

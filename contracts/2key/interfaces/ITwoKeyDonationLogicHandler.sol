@@ -11,5 +11,5 @@ contract ITwoKeyDonationLogicHandler {
     public;
 
     function getReferrerPlasmaTotalEarnings(address _referrer) public view returns (uint);
-    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool);
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) external returns (bool,uint);
 }

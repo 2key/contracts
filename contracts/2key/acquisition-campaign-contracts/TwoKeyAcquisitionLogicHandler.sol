@@ -106,7 +106,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
      * @param conversionAmount is the amount of conversion
      * @param isFiatConversion is flag if conversion is fiat or ether
      */
-    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, bool isFiatConversion) external returns (bool) {
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, bool isFiatConversion) external returns (bool,uint) {
         require(msg.sender == twoKeyCampaign);
         if(isAcceptingFiat) {
             require(isFiatConversion == true);
@@ -115,9 +115,10 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         }
         require(IS_CAMPAIGN_ACTIVE == true);
         require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount, isFiatConversion) == true);
-        require(updateRaisedFundsAndValidateConversionInTermsOfHardCap(conversionAmount, isFiatConversion) == true);
+        uint conversionAmountCampaignCurrency = convertConversionAmountToCampaignCurrency(conversionAmount, isFiatConversion);
+        require(updateRaisedFundsAndValidateConversionInTermsOfHardCap(conversionAmountCampaignCurrency, isFiatConversion) == true);
         require(checkIsCampaignActiveInTermsOfTime() == true);
-        return true;
+        return (true, conversionAmountCampaignCurrency);
     }
 
 
@@ -135,25 +136,12 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     }
 
 
-
-    /**
-     * @notice Function which will calculate how much will be raised including the conversion which try to be created
-     * @param conversionAmount is the amount of conversion
-     * @param isFiatConversion is flag which determines if conversion is either fiat or ether
-     */
-    function calculateRaisedFundsIncludingNewConversion(uint conversionAmount, bool isFiatConversion) internal view returns (uint) {
-        uint total = 0;
-        if(keccak256(currency) == keccak256('ETH')) {
-            total = campaignRaisedAlready.add(conversionAmount);
-        } else {
-            if(isFiatConversion) {
-                total = campaignRaisedAlready.add(conversionAmount);
-            } else {
-                uint rate = getRateFromExchange();
-                total = ((conversionAmount*rate).div(10**18)).add(campaignRaisedAlready);
-            }
+    function convertConversionAmountToCampaignCurrency(uint conversionAmount, bool isFiatConversion) internal view returns (uint) {
+        if(keccak256(currency) == keccak256('ETH') || isFiatConversion) {
+            return conversionAmount;
         }
-        return total;
+        uint rate = getRateFromExchange();
+        return conversionAmount.mul(rate).div(10**18);
     }
 
     /**
@@ -167,8 +155,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         return true;
     }
 
-    function updateRaisedFundsAndValidateConversionInTermsOfHardCap(uint conversionAmount, bool isFiatConversion) internal returns (bool) {
-        uint newTotalRaisedFunds = calculateRaisedFundsIncludingNewConversion(conversionAmount, isFiatConversion); // calculating new total raised funds
+    function updateRaisedFundsAndValidateConversionInTermsOfHardCap(uint conversionAmountCampaignCurrency, bool isFiatConversion) internal returns (bool) {
+        uint newTotalRaisedFunds = campaignRaisedIncludingPendingConversions.add(conversionAmountCampaignCurrency);
         require(canConversionBeCreatedInTermsOfHardCap(newTotalRaisedFunds)); // checking that criteria is satisfied
         updateTotalRaisedFunds(newTotalRaisedFunds); //updating new total raised funds
         return true;
@@ -237,7 +225,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignOnceGoalReached == true && campaignRaisedAlready.add(minContributionAmountWei) >= campaignHardCapWei) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedIncludingPendingConversions.add(minContributionAmountWei) >= campaignHardCapWei) {
             return true;
         }
         return false;

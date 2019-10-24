@@ -47,6 +47,8 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
     mapping(address => ConverterState) converterToState; //Converter to his state
     mapping(address => bool) isConverterAnonymous;
     mapping(address => bool) doesConverterHaveExecutedConversions;
+    mapping(uint => uint) conversionToCampaignCurrencyAmountAtTimeOfCreation;
+    uint campaignRaised;
 
 
     modifier onlyContractorOrMaintainer {

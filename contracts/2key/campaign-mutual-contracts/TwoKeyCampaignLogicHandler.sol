@@ -43,7 +43,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     uint public ALLOWED_GAP;
     string public currency; // Currency campaign is currently in
 
-    uint public campaignRaisedAlready;
+    uint public campaignRaisedIncludingPendingConversions;
     bool endCampaignOnceGoalReached;
 
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -356,7 +356,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
      * @param newAmount is the value including the new conversion amount
      */
     function updateTotalRaisedFunds(uint newAmount) internal {
-        campaignRaisedAlready = newAmount;
+        campaignRaisedIncludingPendingConversions = newAmount;
     }
 
 

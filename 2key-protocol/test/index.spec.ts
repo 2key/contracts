@@ -946,6 +946,7 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(60000);
 
+
     it('should get purchase information', async() => {
         console.log('Getting purchase information');
         let purchase = await twoKeyProtocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress,0,from);
@@ -1145,6 +1146,12 @@ describe('TwoKeyProtocol', () => {
 
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.GMAIL_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
         console.log(stats);
+    }).timeout(60000);
+
+
+    it('should get converter metrics per campaign', async() => {
+        let metrics = await twoKeyProtocol.AcquisitionCampaign.getConverterMetricsPerCampaign(campaignAddress, env.GMAIL2_ADDRESS);
+        console.log(metrics);
     }).timeout(60000);
 
     it('should print balance of left ERC20 on the Acquisition contract', async() => {

@@ -12,6 +12,7 @@ import "../interfaces/ITwoKeyPurchasesHandler.sol";
 contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversionHandler{
 
     bool public isFiatConversionAutomaticallyApproved;
+    bool isKYCRequired;
 
     Conversion[] conversions;
     ITwoKeyAcquisitionCampaignERC20 twoKeyCampaign;
@@ -59,6 +60,10 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             isFiatConversionAutomaticallyApproved = true;
         }
 
+        if(values[2] == 1) {
+            isKYCRequired = true;
+        }
+
         // Instance of interface
         twoKeyPurchasesHandler = _twoKeyPurchasesHandler;
         twoKeyCampaign = ITwoKeyAcquisitionCampaignERC20(_twoKeyAcquisitionCampaignERC20);
@@ -70,6 +75,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         twoKeyBaseReputationRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry");
         isCampaignInitialized = true;
     }
+
 
 
     function emitExecutedEvent(
@@ -127,11 +133,9 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
-    /// @param _contractor is the address of campaign contractor
     /// @param _converterAddress is the address of the converter
     /// @param _conversionAmount is the amount for conversion in ETH
     function supportForCreateConversion(
-        address _contractor,
         address _converterAddress,
         uint256 _conversionAmount,
         uint256 _maxReferralRewardETHWei,
@@ -139,7 +143,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         uint256 bonusTokensForConverterUnits,
         bool isConversionFiat,
         bool _isAnonymous,
-        bool _isKYCRequired
+        uint conversionAmountCampaignCurrency
     )
     public
     returns (uint)
@@ -147,7 +151,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         require(msg.sender == address(twoKeyCampaign));
 
         //If KYC is required, basic funnel executes and we require that converter is not previously rejected
-        if(_isKYCRequired == true) {
+        if(isKYCRequired == true) {
             require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
             // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
             if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
@@ -188,7 +192,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             }
         }
 
-        Conversion memory c = Conversion(_contractor, _contractorProceeds, _converterAddress,
+        Conversion memory c = Conversion(contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,
             bonusTokensForConverterUnits,
             now, now.add(expiryConversionInHours.mul(1 hours)), isConversionFiat);
@@ -196,6 +200,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         conversions.push(c);
 
         converterToHisConversions[_converterAddress].push(numberOfConversions);
+
+        conversionToCampaignCurrencyAmountAtTimeOfCreation[numberOfConversions] = conversionAmountCampaignCurrency;
 
         emitConvertedEvent(
             _converterAddress,
@@ -303,7 +309,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
         // Transfer tokens to lockup contract
         twoKeyCampaign.moveFungibleAsset(address(twoKeyPurchasesHandler), totalUnits);
-
+        campaignRaised = campaignRaised.add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         conversion.maxReferralReward2key = totalReward2keys;
         conversion.state = ConversionState.EXECUTED;
         counters[3] = counters[3].add(1); //Increase number of executed conversions
@@ -431,5 +437,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             unitsConverterBought[_converter]
         );
     }
+
 
 }
