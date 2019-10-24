@@ -67,12 +67,13 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         initialized = true;
     }
 
-    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) public returns (bool) {
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount) public returns (bool,uint) {
         require(msg.sender == twoKeyCampaign);
         require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount) == true);
-        require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmount) == true);
+        uint conversionAmountInCampaignCurrency = convertConversionAmountToCampaignCurrency(conversionAmount);
+        require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmountInCampaignCurrency) == true);
         require(checkIsCampaignActiveInTermsOfTime() == true);
-        return true;
+        return (true, conversionAmountInCampaignCurrency);
     }
 
     function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint conversionAmountEthWEI) public view returns (bool) {
@@ -175,27 +176,19 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     }
 
 
-
-    /**
-     * @notice Function which will calculate how much will be raised including the conversion which try to be created
-     * @param conversionAmount is the amount of conversion
-     */
-    function calculateRaisedFundsIncludingNewConversion(uint conversionAmount) internal view returns (uint) {
-        uint total = 0;
-        if(keccak256(currency) == keccak256('ETH')) {
-            total = campaignRaisedAlready.add(conversionAmount);
-        } else {
+    function convertConversionAmountToCampaignCurrency(uint conversionAmount) internal view returns (uint) {
+        if(keccak256(currency) != keccak256('ETH')) {
             uint rate = getRateFromExchange();
-            total = ((conversionAmount*rate).div(10**18)).add(campaignRaisedAlready);
+            return conversionAmount.mul(rate).div(10**18);
         }
-        return total;
+        return conversionAmount;
     }
 
     /**
      * @notice Function to update total raised funds and validate conversion in terms of campaign goal
      */
-    function updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(uint conversionAmount) internal returns (bool) {
-        uint newTotalRaisedFunds = calculateRaisedFundsIncludingNewConversion(conversionAmount); // calculating new total raised funds
+    function updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(uint conversionAmountInCampaignCurrency) internal returns (bool) {
+        uint newTotalRaisedFunds = campaignRaisedIncludingPendingConversions.add(conversionAmountInCampaignCurrency);
         require(canConversionBeCreatedInTermsOfCampaignGoal(newTotalRaisedFunds)); // checking that criteria is satisfied
         updateTotalRaisedFunds(newTotalRaisedFunds); //updating new total raised funds
         return true;
@@ -220,7 +213,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         if(checkIsCampaignActiveInTermsOfTime() == false) {
             return true;
         }
-        if(endCampaignOnceGoalReached == true && campaignRaisedAlready.add(minContributionAmountWei) >= campaignGoal) {
+        if(endCampaignOnceGoalReached == true && campaignRaisedIncludingPendingConversions.add(minContributionAmountWei) >= campaignGoal) {
             return true;
         }
         return false;

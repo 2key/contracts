@@ -202,12 +202,17 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint _conversionAmount
     )
     internal
+    returns (uint)
     {
-        require(ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
+        bool canConvert;
+        uint conversionAmountCampaignCurrency;
+        (canConvert, conversionAmountCampaignCurrency) = ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
             _conversionAmount,
-            _isFiat
-        ) == true);
+            _isFiat);
+
+        require(canConvert==true);
+        return conversionAmountCampaignCurrency;
     }
 
     function distributeArcsIfNecessary(
@@ -232,9 +237,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        validateRequirements(false, msg.value);
+        uint conversionAmountCampaignCurrency = validateRequirements(false, msg.value);
         distributeArcsIfNecessary(msg.sender, signature);
-        createConversion(msg.value, msg.sender, false, _isAnonymous);
+        createConversion(msg.value, msg.sender, false, _isAnonymous, conversionAmountCampaignCurrency);
     }
 
     /**
@@ -254,9 +259,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        validateRequirements(true, conversionAmountFiatWei);
+        uint conversionAmountCampaignCurrency = validateRequirements(true, conversionAmountFiatWei);
         distributeArcsIfNecessary(_converter, signature);
-        createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous);
+        createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous, conversionAmountCampaignCurrency);
     }
 
     /*
@@ -268,7 +273,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint conversionAmountETHWeiOrFiat,
         address converterAddress,
         bool isFiatConversion,
-        bool isAnonymous
+        bool isAnonymous,
+        uint conversionAmountCampaignCurrency
     )
     private
     {
@@ -287,9 +293,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         reservedAmountOfTokens = reservedAmountOfTokens.add(totalTokensForConverterUnits);
 
-        uint conversionId = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(contractor, converterAddress,
+        uint conversionId = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(converterAddress,
             conversionAmountETHWeiOrFiat, maxReferralRewardFiatOrETHWei,
-            baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, isKYCRequired);
+            baseTokensForConverterUnits,bonusTokensForConverterUnits, isFiatConversion, isAnonymous, conversionAmountCampaignCurrency);
 
         if(isKYCRequired == false) {
             if(isFiatConversion == false || ITwoKeyConversionHandler(conversionHandler).isFiatConversionAutomaticallyApproved()) {

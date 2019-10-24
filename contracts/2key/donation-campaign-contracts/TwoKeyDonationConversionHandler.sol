@@ -166,7 +166,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         address _converterAddress,
         uint _conversionAmount,
         uint _maxReferralRewardETHWei,
-        bool _isKYCRequired
+        bool _isKYCRequired,
+        uint _conversionAmountCampaignCurrency
     )
     public
     returns (uint)
@@ -187,6 +188,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
                 stateToConverter[bytes32("APPROVED")].push(_converterAddress);
             }
         }
+
 
 
         uint256 _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
@@ -213,6 +215,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         converterToHisConversions[_converterAddress].push(numberOfConversions);
         emitConvertedEvent(_converterAddress, _conversionAmount, numberOfConversions);
 
+        conversionToCampaignCurrencyAmountAtTimeOfCreation[numberOfConversions] = _conversionAmountCampaignCurrency;
         emit ConversionCreated(numberOfConversions);
         numberOfConversions = numberOfConversions.add(1);
 
@@ -263,6 +266,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         conversion.state = ConversionState.EXECUTED;
         counters[3] = counters[3].add(1); //Increase number of executed conversions
 
+        campaignRaised = campaignRaised.add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         transferInvoiceToken(conversion.converter, conversion.conversionAmount);
         emitExecutedEvent(conversion.converter, _conversionId, conversion.tokensBought);
     }

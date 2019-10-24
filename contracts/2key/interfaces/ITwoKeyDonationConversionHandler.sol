@@ -5,7 +5,8 @@ contract ITwoKeyDonationConversionHandler {
         address _converterAddress,
         uint _conversionAmount,
         uint _maxReferralRewardETHWei,
-        bool _isKYCRequired
+        bool _isKYCRequired,
+        uint conversionAmountCampaignCurrency
     )
     public
     returns (uint);

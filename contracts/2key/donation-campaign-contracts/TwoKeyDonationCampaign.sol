@@ -190,7 +190,9 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     public
     payable
     {
-        bool canConvert = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
+        bool canConvert;
+        uint conversionAmountCampaignCurrency;
+        (canConvert, conversionAmountCampaignCurrency) = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
             msg.value
         );
@@ -199,7 +201,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         if(received_from[_converterPlasma] == address(0)) {
             distributeArcsBasedOnSignature(signature, msg.sender);
         }
-        createConversion(msg.value, msg.sender);
+        createConversion(msg.value, msg.sender, conversionAmountCampaignCurrency);
     }
 
     /*
@@ -209,7 +211,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
      */
     function createConversion(
         uint conversionAmountEthWEI,
-        address converterAddress
+        address converterAddress,
+        uint conversionAmountCampaignCurrency
     )
     private
     {
@@ -219,7 +222,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
             converterAddress,
             conversionAmountEthWEI,
             maxReferralRewardFiatOrETHWei,
-            isKYCRequired
+            isKYCRequired,
+            conversionAmountCampaignCurrency
         );
 
         if(isKYCRequired == false) {

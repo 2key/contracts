@@ -5,7 +5,6 @@ contract ITwoKeyConversionHandler {
     bool public isFiatConversionAutomaticallyApproved;
 
     function supportForCreateConversion(
-        address _contractor,
         address _converterAddress,
         uint256 _conversionAmount,
         uint256 _maxReferralRewardETHWei,
@@ -13,7 +12,7 @@ contract ITwoKeyConversionHandler {
         uint256 bonusTokensForConverterUnits,
         bool isConversionFiat,
         bool _isAnonymous,
-        bool _isKYCRequired
+        uint conversionAmountCampaignCurrency
     )
     public
     returns (uint);
