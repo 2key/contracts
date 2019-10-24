@@ -51,7 +51,7 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
 
     modifier onlyContractorOrMaintainer {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
         _;
     }
 
