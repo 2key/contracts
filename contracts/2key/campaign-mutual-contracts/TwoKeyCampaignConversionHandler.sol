@@ -224,7 +224,7 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
     function getCampaignSummary()
     public
     view
-    returns (uint,uint,uint,uint[])
+    returns (uint,uint,uint,uint,uint[])
     {
         bytes32 pending = convertConverterStateToBytes(ConverterState.PENDING_APPROVAL);
         bytes32 approved = convertConverterStateToBytes(ConverterState.APPROVED);
@@ -235,10 +235,11 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
         uint numberOfRejected = stateToConverter[rejected].length;
 
         return (
-        numberOfPending,
-        numberOfApproved,
-        numberOfRejected,
-        counters
+            numberOfPending,
+            numberOfApproved,
+            numberOfRejected,
+            campaignRaised,
+            counters
         );
     }
 
