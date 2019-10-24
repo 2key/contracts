@@ -176,7 +176,9 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     view
     returns (uint256[], uint256[])
     {
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender) ||
+        ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
+        //TODO: Delete once hard redeploy is done
 
         uint numberOfAddresses = _referrerPlasmaList.length;
         uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
