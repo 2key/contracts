@@ -60,7 +60,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             isFiatConversionAutomaticallyApproved = true;
         }
 
-        if(values[2] == 1) {
+        if(values[8] == 1) {
             isKYCRequired = true;
         }
 

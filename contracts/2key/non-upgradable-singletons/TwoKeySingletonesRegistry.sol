@@ -40,7 +40,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 
     modifier onlyMaintainer {
         address twoKeyMaintainersRegistry = contractNameToProxyAddress["TwoKeyMaintainersRegistry"];
-        require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
         _;
     }
 

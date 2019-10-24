@@ -162,7 +162,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         return true;
     }
 
-//TODO: set internal
+    //TODO: set internal
     function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool) {
         bool canConvert;
         //If we reach this point means we have reached point that campaign is still active
