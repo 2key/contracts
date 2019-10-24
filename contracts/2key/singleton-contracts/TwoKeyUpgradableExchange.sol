@@ -766,7 +766,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        //dai/eth  / 2key/eth = DAI/2key
+        //dai/eth  / 2key/eth = dai * eth /2key *eth = dai / 2key
         return getEth2DaiAverageExchangeRatePerContract(_contractID).mul(10**18).div(getEth2KeyAverageRatePerContract(_contractID));
     }
 

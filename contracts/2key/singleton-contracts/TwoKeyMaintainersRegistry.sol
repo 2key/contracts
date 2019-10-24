@@ -10,6 +10,19 @@ import "../libraries/SafeMath.sol";
  */
 contract TwoKeyMaintainersRegistry is Upgradeable {
 
+    /**
+     * All keys used for the storage contract.
+     * Saved as a constants to avoid any potential typos
+     */
+    string constant _isMaintainer = "isMaintainer";
+    string constant _isCoreDev = "isCoreDev";
+    string constant _idToMaintainer = "idToMaintainer";
+    string constant _idToCoreDev = "idToCoreDev";
+    string constant _numberOfMaintainers = "numberOfMaintainers";
+    string constant _numberOfCoreDevs = "numberOfCoreDevs";
+    string constant _numberOfActiveMaintainers = "numberOfActiveMaintainers";
+    string constant _numberOfActiveCoreDevs = "numberOfActiveCoreDevs";
+
     //For all math operations we use safemath
     using SafeMath for *;
 
@@ -56,10 +69,10 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     /**
      * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
      */
-    function onlyTwoKeyAdmin(address sender) public view returns (bool) {
+    modifier onlyTwoKeyAdmin() {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-        require(sender == address(twoKeyAdmin));
-        return true;
+        require(msg.sender == address(twoKeyAdmin));
+        _;
     }
 
     /**
@@ -78,8 +91,8 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         address [] _maintainers
     )
     public
+    onlyTwoKeyAdmin
     {
-        require(onlyTwoKeyAdmin(msg.sender) == true);
         uint numberOfMaintainersToAdd = _maintainers.length;
         for(uint i=0; i<numberOfMaintainersToAdd; i++) {
             addMaintainer(_maintainers[i]);
@@ -95,8 +108,8 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         address [] _maintainers
     )
     public
+    onlyTwoKeyAdmin
     {
-        require(onlyTwoKeyAdmin(msg.sender) == true);
         //If state variable, .balance, or .length is used several times, holding its value in a local variable is more gas efficient.
         uint numberOfMaintainers = _maintainers.length;
 
@@ -128,6 +141,30 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
         return activeMaintainers;
     }
 
+
+    /**
+     * @notice Function to get all maintainers set DURING CAMPAIGN CREATION
+     */
+    function getAllCoreDevs()
+    public
+    view
+    returns (address[])
+    {
+        uint numberOfCoreDevsTotal = getNumberOfCoreDevs();
+        uint numberOfActiveCoreDevs = getNumberOfActiveCoreDevs();
+        address [] memory activeCoreDevs = new address[](numberOfActiveCoreDevs);
+
+        uint counter = 0;
+        for(uint i=0; i<numberOfActiveCoreDevs; i++) {
+            address coreDev= getCoreDevPerId(i);
+            if(isCoreDev(coreDev)) {
+                activeCoreDevs[counter] = coreDev;
+                counter = counter.add(1);
+            }
+        }
+        return activeCoreDevs;
+    }
+
     /**
      * @notice Function to check if address is maintainer
      * @param _address is the address we're checking if it's maintainer or not
@@ -139,7 +176,22 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     view
     returns (bool)
     {
-        bytes32 keyHash = keccak256("isMaintainer", _address);
+        bytes32 keyHash = keccak256(_isMaintainer, _address);
+        return PROXY_STORAGE_CONTRACT.getBool(keyHash);
+    }
+
+    /**
+     * @notice Function to check if address is coreDev
+     * @param _address is the address we're checking if it's coreDev or not
+     */
+    function isCoreDev(
+        address _address
+    )
+    internal
+    view
+    returns (bool)
+    {
+        bytes32 keyHash = keccak256(_isCoreDev, _address);
         return PROXY_STORAGE_CONTRACT.getBool(keyHash);
     }
 
@@ -153,13 +205,13 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     internal
     {
 
-        bytes32 keyHashIsMaintainer = keccak256("isMaintainer", _maintainer);
+        bytes32 keyHashIsMaintainer = keccak256(_isMaintainer, _maintainer);
 
         // Fetch the id for the new maintainer
         uint id = getNumberOfMaintainers();
 
         // Generate keyHash for this maintainer
-        bytes32 keyHashIdToMaintainer = keccak256("idToMaintainer", id);
+        bytes32 keyHashIdToMaintainer = keccak256(_idToMaintainer, id);
 
         // Representing number of different maintainers
         incrementNumberOfMaintainers();
@@ -168,6 +220,34 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
 
         PROXY_STORAGE_CONTRACT.setAddress(keyHashIdToMaintainer, _maintainer);
         PROXY_STORAGE_CONTRACT.setBool(keyHashIsMaintainer, true);
+    }
+
+
+    /**
+     * @notice Function which will add maintainer
+     * @param _coreDev is the address of new maintainer we're adding
+     */
+    function addCoreDev(
+        address _coreDev
+    )
+    internal
+    {
+
+        bytes32 keyHashIsCoreDev = keccak256(_isCoreDev, _coreDev);
+
+        // Fetch the id for the new core dev
+        uint id = getNumberOfCoreDevs();
+
+        // Generate keyHash for this core dev
+        bytes32 keyHashIdToCoreDev= keccak256(_idToCoreDev, id);
+
+        // Representing number of different core devs
+        incrementNumberOfCoreDevs();
+        // Representing number of currently active core devs
+        incrementNumberOfActiveCoreDevs();
+
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashIdToCoreDev, _coreDev);
+        PROXY_STORAGE_CONTRACT.setBool(keyHashIsCoreDev, true);
     }
 
     /**
@@ -179,15 +259,23 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     )
     internal
     {
-        bytes32 keyHashIsMaintainer = keccak256("isMaintainer", _maintainer);
+        bytes32 keyHashIsMaintainer = keccak256(_isMaintainer, _maintainer);
         decrementNumberOfActiveMaintainers();
         PROXY_STORAGE_CONTRACT.setBool(keyHashIsMaintainer, false);
     }
 
-    // Internal function to fetch address from TwoKeyRegistry
-    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
-        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        .getContractProxyAddress(contractName);
+    /**
+     * @notice Function which will remove maintainer
+     * @param _coreDev is the address of the maintainer we're removing
+     */
+    function removeCoreDev(
+        address _coreDev
+    )
+    internal
+    {
+        bytes32 keyHashIsCoreDev = keccak256(_isCoreDev , _coreDev);
+        decrementNumberOfActiveCoreDevs();
+        PROXY_STORAGE_CONTRACT.setBool(keyHashIsCoreDev, false);
     }
 
     function getNumberOfMaintainers()
@@ -195,7 +283,15 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256("numberOfMaintainers"));
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfMaintainers));
+    }
+
+    function getNumberOfCoreDevs()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfCoreDevs));
     }
 
     function getNumberOfActiveMaintainers()
@@ -203,36 +299,77 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     view
     returns (uint)
     {
-       return PROXY_STORAGE_CONTRACT.getUint(keccak256("numberOfActiveMaintainers"));
+       return PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfActiveMaintainers));
     }
+
+    function getNumberOfActiveCoreDevs()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_numberOfActiveCoreDevs));
+    }
+
 
     function incrementNumberOfMaintainers()
     internal
     {
-        bytes32 keyHashNumberOfMaintainers = keccak256("numberOfMaintainers");
+        bytes32 keyHashNumberOfMaintainers = keccak256(_numberOfMaintainers);
         PROXY_STORAGE_CONTRACT.setUint(
             keyHashNumberOfMaintainers,
             PROXY_STORAGE_CONTRACT.getUint(keyHashNumberOfMaintainers).add(1)
         );
     }
 
+
+    function incrementNumberOfCoreDevs()
+    internal
+    {
+        bytes32 keyHashNumberOfCoreDevs = keccak256(_numberOfCoreDevs);
+        PROXY_STORAGE_CONTRACT.setUint(
+            keyHashNumberOfCoreDevs,
+            PROXY_STORAGE_CONTRACT.getUint(keyHashNumberOfCoreDevs).add(1)
+        );
+    }
+
+
     function incrementNumberOfActiveMaintainers()
     internal
     {
-        bytes32 keyHashNumberOfActiveMaintainers = keccak256("numberOfActiveMaintainers");
+        bytes32 keyHashNumberOfActiveMaintainers = keccak256(_numberOfActiveMaintainers);
         PROXY_STORAGE_CONTRACT.setUint(
             keyHashNumberOfActiveMaintainers,
             PROXY_STORAGE_CONTRACT.getUint(keyHashNumberOfActiveMaintainers).add(1)
         );
     }
 
+    function incrementNumberOfActiveCoreDevs()
+    internal
+    {
+        bytes32 keyHashNumberToActiveCoreDevs= keccak256(_numberOfActiveCoreDevs);
+        PROXY_STORAGE_CONTRACT.setUint(
+            keyHashNumberToActiveCoreDevs,
+            PROXY_STORAGE_CONTRACT.getUint(keyHashNumberToActiveCoreDevs).add(1)
+        );
+    }
+
     function decrementNumberOfActiveMaintainers()
     internal
     {
-        bytes32 keyHashNumberOfActiveMaintainers = keccak256("numberOfActiveMaintainers");
+        bytes32 keyHashNumberOfActiveMaintainers = keccak256(_numberOfActiveMaintainers);
         PROXY_STORAGE_CONTRACT.setUint(
             keyHashNumberOfActiveMaintainers,
             PROXY_STORAGE_CONTRACT.getUint(keyHashNumberOfActiveMaintainers).sub(1)
+        );
+    }
+
+    function decrementNumberOfActiveCoreDevs()
+    internal
+    {
+        bytes32 keyHashNumberToActiveCoreDevs = keccak256(_numberOfActiveCoreDevs);
+        PROXY_STORAGE_CONTRACT.setUint(
+            keyHashNumberToActiveCoreDevs,
+            PROXY_STORAGE_CONTRACT.getUint(keyHashNumberToActiveCoreDevs).sub(1)
         );
     }
 
@@ -243,6 +380,24 @@ contract TwoKeyMaintainersRegistry is Upgradeable {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("idToMaintainer",_id));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_idToMaintainer,_id));
+    }
+
+
+    function getCoreDevPerId(
+        uint _id
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_idToCoreDev,_id));
+    }
+
+
+    // Internal function to fetch address from TwoKeyRegistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
     }
 }
