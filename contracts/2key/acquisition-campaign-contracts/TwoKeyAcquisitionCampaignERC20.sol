@@ -239,7 +239,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         uint conversionAmountCampaignCurrency = validateRequirements(false, msg.value);
         distributeArcsIfNecessary(msg.sender, signature);
-        createConversion(msg.value, msg.sender, false, _isAnonymous, msg.value);
+        createConversion(msg.value, msg.sender, false, _isAnonymous, conversionAmountCampaignCurrency);
     }
 
     /**
