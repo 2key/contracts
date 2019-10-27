@@ -1,7 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "../libraries/GetCode.sol";
-
 import "../interfaces/ITwoKeyCampaign.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../interfaces/ITwoKeyCampaignPublicAddresses.sol";
