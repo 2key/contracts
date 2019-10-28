@@ -8,6 +8,11 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
+	string constant _twoKeyIntegratorDefaultFeePercent = "twoKeyIntegratorDefaultFeePercent";
+	string constant _twoKeyNetworkTaxPercent = "twoKeyNetworkTaxPercent";
+	string constant _twoKeyTokenRate = "twoKeyTokenRate";
+	string constant _rewardReleaseAfter = "rewardReleaseAfter";
+
 	bool initialized = false;
 
 	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; //Pointer to storage contract
@@ -51,10 +56,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		twoKeyCongress = _twoKeyCongress;
 		twoKeyEconomy = _economy;
 
-		setUint("twoKeyIntegratorDefaultFeePercent",2);
-		setUint("twoKeyNetworkTaxPercent",25);
-		setUint("twoKeyTokenRate", 95);
-		setUint("rewardReleaseAfter",_twoKeyTokenReleaseDate);
+		setUint(_twoKeyIntegratorDefaultFeePercent,2);
+		setUint(_twoKeyNetworkTaxPercent,25);
+		setUint(_twoKeyTokenRate, 95);
+		setUint(_rewardReleaseAfter, _twoKeyTokenReleaseDate);
 
         initialized = true;
     }
@@ -156,7 +161,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	view
 	returns(uint)
 	{
-		return getUint("rewardReleaseAfter");
+		return getUint(_rewardReleaseAfter);
 	}
 
 	/// @notice Getter function for TwoKeyIntegratorDefaultFeePercent
@@ -165,7 +170,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	view
 	returns (uint)
 	{
-		return getUint("twoKeyIntegratorDefaultFeePercent");
+		return getUint(_twoKeyIntegratorDefaultFeePercent);
 	}
 
 	/// @notice Getter function for TwoKeyNetworkTaxPercent
@@ -174,7 +179,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	view
 	returns (uint)
 	{
-		return getUint("twoKeyNetworkTaxPercent");
+		return getUint(_twoKeyNetworkTaxPercent);
 	}
 
 	/// @notice Getter function for TwoKeyTokenRate
@@ -183,7 +188,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	view
 	returns (uint)
 	{
-		return getUint("twoKeyTokenRate");
+		return getUint(_twoKeyTokenRate);
 	}
 
 	/// Fallback function
