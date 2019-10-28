@@ -8,6 +8,9 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
+	/**
+	 * Storage keys are stored on the top. Here they are in order to avoid any typos
+	 */
 	string constant _twoKeyIntegratorDefaultFeePercent = "twoKeyIntegratorDefaultFeePercent";
 	string constant _twoKeyNetworkTaxPercent = "twoKeyNetworkTaxPercent";
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
