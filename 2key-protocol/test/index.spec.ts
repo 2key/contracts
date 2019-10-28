@@ -924,7 +924,7 @@ describe('TwoKeyProtocol', () => {
             const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
             console.log('All pending after rejection: ', allPendingAfterRejected);
             expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
-            expect(allPendingAfterRejected.length).to.be.equal(1);
+            expect(allPendingAfterRejected.length).to.be.equal(2);
         }
     }).timeout(60000);
 
