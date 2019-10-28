@@ -903,7 +903,6 @@ describe('TwoKeyProtocol', () => {
             console.log('All pending after approval: ' + allPendingAfterApproved);
             expect(allPendingAfterApproved.length).to.be.equal(3);
         }
-
     }).timeout(60000);
 
     it('should get converter conversion ids', async() => {

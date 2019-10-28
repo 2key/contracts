@@ -315,11 +315,16 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     {
         Conversion conversion = conversions[_conversionId];
 
-        require(conversion.conversionExpiresAt > block.timestamp);
+        require(conversion.conversionExpiresAt < block.timestamp);
         require(msg.sender == conversion.converter);
-        require(conversion.state == ConversionState.PENDING_APPROVAL || conversion.state == ConversionState.APPROVED);
 
-        counters[0] = counters[0].sub(1); // Reduce number of pending conversions
+        if(conversion.state == ConversionState.PENDING_APPROVAL) {
+            counters[0] = counters[0].sub(1); // Reduce number of pending conversions
+        } else if (conversion.state == ConversionState.APPROVED) {
+            counters[1] = counters[1].sub(1); // Reduce number of approved conversions
+        } else {
+            revert(); // If conversion is not in either pending or approved state it can't be cancelled
+        }
         counters[4] = counters[4].add(1); // Increase number of cancelled conversions
         conversion.state = ConversionState.CANCELLED_BY_CONVERTER;
 
