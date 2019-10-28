@@ -28,7 +28,7 @@ const campaignStartTime = 0;
 const campaignEndTime = 9884748832;
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 const twoKeyAdmin = singletons.TwoKeyAdmin.networks[mainNetId].address;
-let isKYCRequired = false;
+let isKYCRequired = true;
 let isFiatConversionAutomaticallyApproved = true;
 let isFiatOnly = false;
 let incentiveModel = "MANUAL";
@@ -57,6 +57,7 @@ const web3switcher = {
     aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl),
     test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl),
     guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrl),
+    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrl)
 };
 
 const links: any = {};
@@ -135,6 +136,12 @@ const users = {
             fullname: 'test account',
             walletname: 'test-wallet',
         },
+        'buyer': {
+            name: 'buyer',
+            email: 'buyer@gmail.com',
+            fullname: 'buyer account',
+            walletname: 'buyer-wallet',
+        }
 };
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
@@ -410,7 +417,7 @@ describe('TwoKeyProtocol', () => {
             moderator: from,
             campaignStartTime,
             campaignEndTime,
-            expiryConversion: 1000 * 60 * 60 * 24,
+            expiryConversion: 0,
             maxConverterBonusPercentWei: maxConverterBonusPercent,
             pricePerUnitInETHWei: twoKeyProtocol.Utils.toWei(pricePerUnitInETHOrUSD, 'ether'),
             maxReferralRewardPercentWei: maxReferralRewardPercent,
@@ -724,6 +731,15 @@ describe('TwoKeyProtocol', () => {
         expect(status).to.be.equal('0x1');
     }).timeout(60000);
 
+    it('should transfer arcs to buyer', async () => {
+        console.log('7) transfer to BUYER REFLINK', links.renata);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata.link, env.BUYER_ADDRESS, { fSecret: links.renata.fSecret });
+        console.log(txHash);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
     it('should buy some tokens from gmail2', async () => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
@@ -745,6 +761,36 @@ describe('TwoKeyProtocol', () => {
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
+
+    it('should buy some tokens from buyer address', async() => {
+        const {web3, address} = web3switcher.buyer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
+        });
+        await tryToRegisterUser('Buyer', from);
+
+        const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
+        console.log('BUYER ARCS', arcs);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        console.log('HASH', txHash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+
+    it('buyer should cancel his conversion and ask for refund', async() => {
+        let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.BUYER_ADDRESS, from);
+        console.log('Want to cancel conversion with ID: ' + conversionIds[0]);
+        const txHAsh = await twoKeyProtocol.AcquisitionCampaign.converterCancelConversion(campaignAddress, conversionIds[0], from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
 
     it('should register test', async() => {
         const {web3, address} = web3switcher.test();
@@ -855,9 +901,8 @@ describe('TwoKeyProtocol', () => {
             expect(allApproved[0]).to.be.equal(env.TEST4_ADDRESS);
             const allPendingAfterApproved = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
             console.log('All pending after approval: ' + allPendingAfterApproved);
-            expect(allPendingAfterApproved.length).to.be.equal(2);
+            expect(allPendingAfterApproved.length).to.be.equal(3);
         }
-
     }).timeout(60000);
 
     it('should get converter conversion ids', async() => {
@@ -879,7 +924,7 @@ describe('TwoKeyProtocol', () => {
             const allPendingAfterRejected = await twoKeyProtocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, from);
             console.log('All pending after rejection: ', allPendingAfterRejected);
             expect(allRejected[0]).to.be.equal(env.TEST_ADDRESS);
-            expect(allPendingAfterRejected.length).to.be.equal(1);
+            expect(allPendingAfterRejected.length).to.be.equal(2);
         }
     }).timeout(60000);
 

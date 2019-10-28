@@ -44,6 +44,12 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         _;
     }
 
+    modifier onlyCoreDev {
+        address twoKeyMaintainersRegistry = contractNameToProxyAddress["TwoKeyMaintainersRegistry"];
+        require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressCoreDev(msg.sender));
+        _;
+    }
+
     /**
      * @notice Function to add non upgradable contract in registry of all contracts
      * @param contractName is the name of the contract
@@ -72,7 +78,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         address implementation
     )
     public
-    onlyMaintainer
+    onlyCoreDev
     {
         require(implementation != address(0));
         require(versions[contractName][version] == 0x0);
