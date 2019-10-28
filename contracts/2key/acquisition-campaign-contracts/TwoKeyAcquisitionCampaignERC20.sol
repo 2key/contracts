@@ -41,7 +41,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     {
         require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
-
+        require(values[0] <= 100*(10**18)); // Require that max referral reward is less than 100%
         contractor = _contractor;
         moderator = _moderator;
 

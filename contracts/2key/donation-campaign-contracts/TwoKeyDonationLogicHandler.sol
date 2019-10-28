@@ -55,6 +55,11 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         moderator = _moderator;
         currency = _currency;
 
+        if(keccak256(_currency) == keccak256('ETH')) {
+            require(numberValues[3] >= (10**16));
+        } else {
+            require(numberValues[3] >= (10**18));
+        }
 
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
