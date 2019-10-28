@@ -53,6 +53,7 @@ module.exports = function deploy(deployer) {
     }
 
     const maintainerAddresses = deploymentConfig.maintainers;
+    const coreDevs = deploymentConfig.coreDevs;
     const rewardsReleaseAfter = deploymentConfig.admin2keyReleaseDate; //1 January 2020
     const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
 
@@ -76,7 +77,8 @@ module.exports = function deploy(deployer) {
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyMaintainersRegistryStorage"],
-                        maintainerAddresses
+                        maintainerAddresses,
+                        coreDevs
                     );
                     resolve(txHash);
                 } catch (e) {
