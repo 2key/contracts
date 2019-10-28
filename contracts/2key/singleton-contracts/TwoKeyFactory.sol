@@ -17,6 +17,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
  */
 contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
+    string constant _addressToCampaignType = "addressToCampaignType";
     bool initialized;
 
     ITwoKeyFactoryStorage PROXY_STORAGE_CONTRACT;
@@ -271,7 +272,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
      * @param _campaignType is the type of campaign (String)
      */
     function setAddressToCampaignType(address _campaignAddress, string _campaignType) internal {
-        bytes32 keyHash = keccak256("addressToCampaignType",_campaignAddress);
+        bytes32 keyHash = keccak256(_addressToCampaignType, _campaignAddress);
         PROXY_STORAGE_CONTRACT.setString(keyHash, _campaignType);
     }
 
@@ -280,7 +281,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
      * @param _key is the address of campaign
      */
     function addressToCampaignType(address _key) public view returns (string) {
-        return PROXY_STORAGE_CONTRACT.getString(keccak256("addressToCampaignType", _key));
+        return PROXY_STORAGE_CONTRACT.getString(keccak256(_addressToCampaignType, _key));
     }
 
     function plasmaOf(address _address) internal view returns (address) {

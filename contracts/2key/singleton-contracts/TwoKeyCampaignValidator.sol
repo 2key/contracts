@@ -19,6 +19,12 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
  */
 contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
+    /**
+     * Storage keys are stored on the top. Here they are in order to avoid any typos
+     */
+    string constant _isCampaignValidated = "isCampaignValidated";
+    string constant _campaign2NonSingletonHash = "campaign2NonSingletonHash";
+
     bool initialized;
 
     ITwoKeyCampaignValidatorStorage public PROXY_STORAGE_CONTRACT;
@@ -64,10 +70,10 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         address conversionHandler = ITwoKeyCampaign(campaign).conversionHandler();
         address logicHandler = ITwoKeyCampaign(campaign).logicHandler();
 
-        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", conversionHandler), true);
-        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated", logicHandler), true);
-        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",campaign), true);
-        PROXY_STORAGE_CONTRACT.setString(keccak256("campaign2NonSingletonHash",campaign), nonSingletonHash);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, conversionHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, logicHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated,campaign), true);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_campaign2NonSingletonHash,campaign), nonSingletonHash);
 
         emitCreatedEvent(campaign);
     }
@@ -86,11 +92,11 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyTwoKeyFactory
     {
-        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",campaign), true);
-        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",donationConversionHandler), true);
-        PROXY_STORAGE_CONTRACT.setBool(keccak256("isCampaignValidated",donationLogicHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated,campaign), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated,donationConversionHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated,donationLogicHandler), true);
 
-        PROXY_STORAGE_CONTRACT.setString(keccak256("campaign2NonSingletonHash",campaign), nonSingletonHash);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_campaign2NonSingletonHash,campaign), nonSingletonHash);
 
         emitCreatedEvent(campaign);
     }
@@ -101,7 +107,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
      * @param campaign is any contract deployed during any campaign creation through TwoKeyFactory
      */
     function isCampaignValidated(address campaign) public view returns (bool) {
-        bytes32 hashKey = keccak256("isCampaignValidated", campaign);
+        bytes32 hashKey = keccak256(_isCampaignValidated, campaign);
         return PROXY_STORAGE_CONTRACT.getBool(hashKey);
     }
 
@@ -110,7 +116,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
      * @param campaign is the address of strictly main campaign contract (TwoKeyAcquisitionCampaignERC20, TwoKeyDonationCampaign for now)
      */
     function campaign2NonSingletonHash(address campaign) public view returns (string) {
-        return PROXY_STORAGE_CONTRACT.getString(keccak256("campaign2NonSingletonHash", campaign));
+        return PROXY_STORAGE_CONTRACT.getString(keccak256(_campaign2NonSingletonHash, campaign));
     }
 
     /**
