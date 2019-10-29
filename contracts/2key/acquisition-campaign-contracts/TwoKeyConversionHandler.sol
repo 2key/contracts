@@ -9,7 +9,7 @@ import "../interfaces/ITwoKeyPurchasesHandler.sol";
 /**
  * @author Nikola Madjarevic
  */
-contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversionHandler{
+contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversionHandler {
 
     bool public isFiatConversionAutomaticallyApproved;
     bool isKYCRequired;

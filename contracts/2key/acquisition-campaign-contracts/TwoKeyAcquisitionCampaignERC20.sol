@@ -332,7 +332,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
-                totalBounty2keys = ((_maxReferralRewardETHWei.mul(10**18)).div(usd2KEYrateWei)).mul(1000);
+                totalBounty2keys = ((_maxReferralRewardETHWei.mul(10**18)).div(usd2KEYrateWei));
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
             } else {
                 //Buy tokens from upgradable exchange

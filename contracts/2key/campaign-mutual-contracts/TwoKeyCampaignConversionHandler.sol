@@ -41,15 +41,12 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
 
 
     mapping(address => uint256) internal amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
-
     mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => uint[]) converterToHisConversions;
     mapping(address => ConverterState) converterToState; //Converter to his state
     mapping(address => bool) isConverterAnonymous;
     mapping(address => bool) doesConverterHaveExecutedConversions;
     mapping(uint => uint) conversionToCampaignCurrencyAmountAtTimeOfCreation;
-    uint campaignRaised;
-
 
     modifier onlyContractorOrMaintainer {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");

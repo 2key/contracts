@@ -95,10 +95,11 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         string version
     )
     public
-    onlyMaintainer
     {
+        require(msg.sender == deployer);
         // Can be called only when we're creating first time contracts
         require(keccak256(version) == keccak256("1.0.0"));
+        //TODO: review this function
 
         versions[contractLogicName][version] = contractLogicImplementation;
         versions[contractStorageName][version] = contractStorageImplementation;
