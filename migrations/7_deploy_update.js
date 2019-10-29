@@ -54,8 +54,10 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
             //Console log the new version
             console.log('New version is: ' + newVersion);
             // Add contract version
+            // This can be done only by core dev
             let txHash = instance.addVersion(contractName, newVersion, newImplementationAddress);
 
+            // --------------------------------------------------------------------------------
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
 
             let congressInstance = await TwoKeyCongress.at(congressAddress);

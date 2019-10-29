@@ -26,7 +26,13 @@ def generate_bytecode_for_upgrading_contracts(contract_name, contract_version):
     types = ["string","string"]
     values = [contract_name, contract_version]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
-
+###
+# 1. Add Member
+# 2. Remove member
+# 3. Send eth
+# 4. Set new public trading date
+# TODO: Add in the main examples how to generate the bytecode for each one
+###
 
 if __name__ == "__main__":
     arg1 = sys.argv[1]

@@ -659,6 +659,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
 
+        //emit event with hedged and received
         reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(amountToBeHedged, stableCoinUnits);
     }
 
