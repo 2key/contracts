@@ -12,15 +12,15 @@ import "../interfaces/ITwoKeyPurchasesHandler.sol";
 contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversionHandler {
 
     bool public isFiatConversionAutomaticallyApproved;
-    bool isKYCRequired;
 
     Conversion[] conversions;
     ITwoKeyAcquisitionCampaignERC20 twoKeyCampaign;
+    address public twoKeyPurchasesHandler;
 
     mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
 
-
+    bool isKYCRequired;
     address assetContractERC20;
 
 
@@ -129,7 +129,28 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         );
     }
 
-
+    function handleConversionState(
+        bool isConversionFiat
+    )
+    internal
+    returns (ConversionState)
+    {
+        ConversionState state;
+        if(isConversionFiat == false) {
+            state = ConversionState.APPROVED; // All eth conversions are auto approved
+            counters[1] = counters[1].add(1);
+        } else {
+            //This means fiat conversion is automatically approved
+            if(isFiatConversionAutomaticallyApproved) {
+                state = ConversionState.APPROVED;
+                counters[1] = counters[1].add(1); // Increase the number of approved conversions
+            } else {
+                state = ConversionState.PENDING_APPROVAL; // Fiat conversion state is PENDING_APPROVAL
+                counters[0] = counters[0].add(1); // If conversion is FIAT it will be always first pending and will have to be approved
+            }
+        }
+        return state;
+    }
 
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
@@ -150,47 +171,21 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     {
         require(msg.sender == address(twoKeyCampaign));
 
-        //If KYC is required, basic funnel executes and we require that converter is not previously rejected
-        if(isKYCRequired == true) {
-            require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
-            // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
-            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
-                converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
-                stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
-            }
-        } else {
-            //If KYC is not required converter is automatically approved
-            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
-                converterToState[_converterAddress] = ConverterState.APPROVED;
-                stateToConverter[bytes32("APPROVED")].push(_converterAddress);
-            }
-        }
+        handleConverterState(_converterAddress, isKYCRequired);
 
         // Set if converter want to be anonymous
         isConverterAnonymous[_converterAddress] = _isAnonymous;
 
-
         uint _moderatorFeeETHWei = 0;
         uint256 _contractorProceeds = _conversionAmount; //In case of fiat conversion, this is going to be fiat value
 
-        ConversionState state;
+        ConversionState state = handleConversionState(isConversionFiat);
 
         if(isConversionFiat == false) {
             _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
             _contractorProceeds = _conversionAmount.sub(_maxReferralRewardETHWei.add(_moderatorFeeETHWei));
-            //TODO: Add accounting for fiat proceeds
-            state = ConversionState.APPROVED; // All eth conversions are auto approved
-            counters[1] = counters[1].add(1);
-        } else {
-            //This means fiat conversion is automatically approved
-            if(isFiatConversionAutomaticallyApproved) {
-                state = ConversionState.APPROVED;
-                counters[1] = counters[1].add(1); // Increase the number of approved conversions
-            } else {
-                state = ConversionState.PENDING_APPROVAL; // Fiat conversion state is PENDING_APPROVAL
-                counters[0] = counters[0].add(1); // If conversion is FIAT it will be always first pending and will have to be approved
-            }
         }
+
 
         Conversion memory c = Conversion(contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,

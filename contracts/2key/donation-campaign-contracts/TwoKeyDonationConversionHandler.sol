@@ -173,23 +173,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     returns (uint)
     {
         require(msg.sender == address(twoKeyCampaign));
-        //If KYC is required, basic funnel executes and we require that converter is not previously rejected
-        if(_isKYCRequired == true) {
-            require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
-            // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
-            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
-                converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
-                stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
-            }
-        } else {
-            //If KYC is not required converter is automatically approved
-            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
-                converterToState[_converterAddress] = ConverterState.APPROVED;
-                stateToConverter[bytes32("APPROVED")].push(_converterAddress);
-            }
-        }
 
-
+        handleConverterState(_converterAddress, _isKYCRequired);
 
         uint256 _moderatorFeeETHWei = calculateModeratorFee(_conversionAmount);
         uint256 _contractorProceeds = _conversionAmount.sub(_maxReferralRewardETHWei.add(_moderatorFeeETHWei));
