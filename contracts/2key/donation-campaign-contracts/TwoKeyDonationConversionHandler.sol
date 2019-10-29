@@ -55,7 +55,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     {
         require(isCampaignInitialized == false);
 
-        counters = new uint[](10);
+        counters = new uint[](11);
         twoKeyCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
@@ -266,7 +266,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         conversion.state = ConversionState.EXECUTED;
         counters[3] = counters[3].add(1); //Increase number of executed conversions
 
-        campaignRaised = campaignRaised.add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
+        counters[10] = counters[10].add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         transferInvoiceToken(conversion.converter, conversion.conversionAmount);
         emitExecutedEvent(conversion.converter, _conversionId, conversion.tokensBought);
     }

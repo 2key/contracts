@@ -52,7 +52,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     public
     {
         require(isCampaignInitialized == false);
-        counters = new uint[](10);
+        counters = new uint[](11);
 
         expiryConversionInHours = values[0];
 
@@ -309,7 +309,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
         // Transfer tokens to lockup contract
         twoKeyCampaign.moveFungibleAsset(address(twoKeyPurchasesHandler), totalUnits);
-        campaignRaised = campaignRaised.add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
+        counters[10] = counters[10].add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         conversion.maxReferralReward2key = totalReward2keys;
         conversion.state = ConversionState.EXECUTED;
         counters[3] = counters[3].add(1); //Increase number of executed conversions
