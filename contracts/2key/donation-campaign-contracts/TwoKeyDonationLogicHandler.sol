@@ -139,7 +139,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     function getAddressStatistic(
         address _address,
         bool plasma,
-        bool flag,
         address referrer
     )
     internal

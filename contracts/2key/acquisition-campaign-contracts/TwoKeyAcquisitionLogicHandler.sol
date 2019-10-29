@@ -327,7 +327,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     function getAddressStatistic(
         address _address,
         bool plasma,
-        bool flag,
         address referrer
     )
     internal

@@ -256,15 +256,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
 
         address _address;
 
-        if(msg.sender == contractor || msg.sender == eth_address) {
-            flag = true;
-        } else {
-            _address = recover(signature);
-            if(_address == ownerPlasma) {
-                flag = true;
-            }
-        }
-        bytes memory stats = getAddressStatistic(_user, plasma, flag, _address);
+        bytes memory stats = getAddressStatistic(_user, plasma, _address);
         return abi.encodePacked(userData, isJoined, eth_address, stats);
     }
 
@@ -304,7 +296,6 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     function getAddressStatistic(
         address _address,
         bool plasma,
-        bool flag,
         address referrer
     )
     internal

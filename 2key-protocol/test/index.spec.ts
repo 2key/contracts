@@ -679,6 +679,22 @@ describe('TwoKeyProtocol', () => {
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
     }).timeout(60000);
 
+    it('should register buyer', async() => {
+        const {web3, address} = web3switcher.buyer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
+        });
+        await tryToRegisterUser('Buyer', from);
+    }).timeout(60000);
+
+
     it('should register gmail', async() => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
@@ -774,7 +790,6 @@ describe('TwoKeyProtocol', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
         });
-        await tryToRegisterUser('Buyer', from);
 
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('BUYER ARCS', arcs);
