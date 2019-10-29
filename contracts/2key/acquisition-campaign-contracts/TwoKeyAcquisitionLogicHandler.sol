@@ -38,6 +38,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     {
         require(values[1] >= values[0]);
         require(values[4] > values[3]);
+        require(values[5] <= 100*(10**18));
+
         require(initialized == false);
 
         if(values[0] == values[1]) {
@@ -67,6 +69,15 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         campaignSoftCapWei = values[10];
 
         currency = _currency;
+
+        if(keccak256(_currency) == keccak256("ETH")) {
+            // 0.01 ether
+            require(values[0] >= (10**16));
+        } else {
+            // 1 dollar
+            require(values[0] >= (10**18));
+        }
+
         assetContractERC20 = _assetContractERC20;
         moderator = _moderator;
         contractor = _contractor;

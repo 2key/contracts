@@ -14,6 +14,11 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
  */
 contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
+    /**
+     * Storage keys are stored on the top. Here they are in order to avoid any typos
+     */
+    string constant _currencyName2rate = "currencyName2rate";
+
     using SafeMath for uint;
     bool initialized;
 
@@ -89,7 +94,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     )
     internal
     {
-        bytes32 hashKey = keccak256("currencyName2rate", _currency);
+        bytes32 hashKey = keccak256(_currencyName2rate, _currency);
         PROXY_STORAGE_CONTRACT.setUint(hashKey, _baseToTargetRate);
     }
 
@@ -106,7 +111,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         bytes32 key = stringToBytes32(base_target);
-        bytes32 hashKey = keccak256("currencyName2rate", key);
+        bytes32 hashKey = keccak256(_currencyName2rate, key);
         return PROXY_STORAGE_CONTRACT.getUint(hashKey);
     }
 

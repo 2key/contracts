@@ -39,7 +39,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     public
     {
         require(initialized == false);
-
+        require(numberValues[0] <= 100*(10**18)); //Require that max referral reward percent is less than 100%
         contractor = _contractor;
         moderator = _moderator;
 

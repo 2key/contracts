@@ -68,7 +68,7 @@ let currency = "ETH";
 let endCampaignOnceGoalReached = false;
 let campaignAddress: string;
 let invoiceTokenAddress: string;
-let expiryConversionInHours: number;
+let expiryConversionInHours = 0;
 
 //Describe structure of invoice token
 let invoiceToken: InvoiceERC20 = {
@@ -203,7 +203,6 @@ describe('TwoKeyDonationCampaign', () => {
             plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
         });
         let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
-        console.log(txHash);
         expect(txHash.length).to.be.gt(0);
     }).timeout(60000);
 
@@ -256,7 +255,6 @@ describe('TwoKeyDonationCampaign', () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
 
         let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
-        console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
         expect(txHash).to.be.a('string');
@@ -293,10 +291,41 @@ describe('TwoKeyDonationCampaign', () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
 
         let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
-        console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
         expect(txHash).to.be.a('string');
+    }).timeout(60000);
+
+    it('should visit campaign from same referral link', async() => {
+        printTestNumber();
+        const {web3, address} = web3switcher.uport();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
+        });
+        let txHash = await twoKeyProtocol.DonationCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
+        let maxReward = await twoKeyProtocol.DonationCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail.link, links.gmail.fSecret);
+        console.log(`TEST4, BEFORE JOIN Estimated maximum referral reward: ${maxReward}%`);
+    }).timeout(60000);
+
+    it('should try to donate some ether to campaign', async() => {
+        printTestNumber();
+        let txHash = await twoKeyProtocol.DonationCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(conversionAmountEth, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        expect(txHash).to.be.a('string');
+    }).timeout(60000);
+
+
+    it('should cancel his participation and get money back', async() => {
+        printTestNumber();
+        let txHash = await twoKeyProtocol.DonationCampaign.converterCancelConversion(campaignAddress,2, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
     it('should get all pending converters in case KYC is required', async() => {
@@ -315,7 +344,7 @@ describe('TwoKeyDonationCampaign', () => {
 
         if(isKYCRequired == true) {
             let pendingConverters = await twoKeyProtocol.DonationCampaign.getAllPendingConverters(campaignAddress, from);
-            expect(pendingConverters.length).to.be.equal(2);
+            expect(pendingConverters.length).to.be.equal(3);
         }
 
     }).timeout(60000);
