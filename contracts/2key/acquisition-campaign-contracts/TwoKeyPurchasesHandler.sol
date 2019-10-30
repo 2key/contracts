@@ -151,8 +151,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     )
     internal
     {
-        uint [] memory portionAmounts = new uint[](numberOfVestingPortions);
-        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions);
+        uint [] memory portionAmounts = new uint[](numberOfVestingPortions+1);
+        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions+1);
 
         uint totalAmount = _baseTokens.add(_bonusTokens);
         uint portion = totalAmount.div(numberOfVestingPortions);
