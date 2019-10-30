@@ -26,6 +26,13 @@ def generate_bytecode_for_upgrading_contracts(contract_name, contract_version):
     types = ["string","string"]
     values = [contract_name, contract_version]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_changing_rewards_release_date(newRewardsReleaseDate):
+    method_name_and_params = "setUint(string,uint256)"
+    types = ["string","uint256"]
+    values = [newRewardsReleaseDate]
+    print('Transaction bytecode: ' +generate_bytecode(method_name_and_params, types, values))
+
 ###
 # 1. Add Member
 # 2. Remove member
