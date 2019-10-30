@@ -155,7 +155,7 @@ const getGitBranch = () => new Promise(async(resolve,reject) => {
 });
 
 
-const slack_message_proposal_created = async (contractName, newVersion, proposalBytecode) => {
+const slack_message_proposal_created = async (contractName, newVersion, proposalBytecode, network) => {
     const token = process.env.SLACK_TOKEN;
 
     const branch = await getGitBranch();
