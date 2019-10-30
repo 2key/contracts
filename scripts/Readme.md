@@ -37,5 +37,11 @@ pip install eth_abi
   
 `python generate_bytecode.py addMember <target_member> <member_name> <voting_power>`
 
+##### Generate bytecode for removing a member from congress:
+- Arguments:
+    - target_member (member address)
+ 
+`python generate_bytecode.py removeMember <target_member>`
+
 
 
