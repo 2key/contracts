@@ -27,10 +27,11 @@ def generate_bytecode_for_upgrading_contracts(contract_name, contract_version):
     values = [contract_name, contract_version]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
-def generate_bytecode_for_changing_rewards_release_date(newRewardsReleaseDate):
-    method_name_and_params = "setUint(string,uint256)"
-    types = ["string","uint256"]
-    values = [newRewardsReleaseDate]
+def generate_bytecode_for_changing_rewards_release_date(newDate):
+    newDate = int(newDate)
+    method_name_and_params = "setNewTwoKeyRewardsReleaseDate(uint256)"
+    types = ["uint256"]
+    values = [newDate]
     print('Transaction bytecode: ' +generate_bytecode(method_name_and_params, types, values))
 
 ###
@@ -43,11 +44,13 @@ def generate_bytecode_for_changing_rewards_release_date(newRewardsReleaseDate):
 
 if __name__ == "__main__":
     arg1 = sys.argv[1]
-    arg2 = sys.argv[2]
-    arg3 = sys.argv[3]
+#    arg2 = sys.argv[2]
+#    arg3 = sys.argv[3]
 
-    if(arg3 == "upgrade_contracts"):
-        generate_bytecode_for_upgrading_contracts(arg1,arg2)
-    if(arg3 == "transfer_tokens") :
-        generate_bytecode_for_transfering_tokens(arg1,arg2)
+#    if(arg3 == "upgrade_contracts"):
+#        generate_bytecode_for_upgrading_contracts(arg1,arg2)
+#    if(arg3 == "transfer_tokens") :
+#        generate_bytecode_for_transfering_tokens(arg1,arg2)
+
+    generate_bytecode_for_changing_rewards_release_date(arg1)
 
