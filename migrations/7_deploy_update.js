@@ -60,21 +60,22 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
             // --------------------------------------------------------------------------------
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
 
-            let congressInstance = await TwoKeyCongress.at(congressAddress);
+            //
+            // let congressInstance = await TwoKeyCongress.at(congressAddress);
+            //
+            // //Can be only done by members of congress
+            // let { logs } = await congressInstance.newProposal(
+            //     registryAddress,
+            //     0,
+            //     "Upgrade " + contractName + " to version: " + newVersion,
+            //     bytecodeForUpgradingThisContract
+            // );
+            //
+            // let {proposalID, beneficiary, weiAmount, description} = logs.find(l => l.event === 'ProposalAdded').args;
+            //
+            // console.log("Added proposal with ID : " + proposalID + " to do job " + description);
 
-            //Can be only done by members of congress
-            let { logs } = await congressInstance.newProposal(
-                registryAddress,
-                0,
-                "Upgrade " + contractName + " to version: " + newVersion,
-                bytecodeForUpgradingThisContract
-            );
-
-            let {proposalID, beneficiary, weiAmount, description} = logs.find(l => l.event === 'ProposalAdded').args;
-
-            console.log("Added proposal with ID : " + proposalID + " to do job " + description);
-
-            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, proposalID, network);
+            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
 
             resolve({
                 txHash //, txHash1
