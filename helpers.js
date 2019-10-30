@@ -123,6 +123,7 @@ const getConfigForTheBranch = () => new Promise(async(resolve,reject) => {
         let branch = await getGitBranch();
         let filePath = `./2key-protocol/dist/contracts_deployed-${branch}.json`;
         let file = fs.readFileSync(filePath);
+        console.log(file);
         resolve(JSON.parse(file));
     } catch (e) {
         reject(e);
