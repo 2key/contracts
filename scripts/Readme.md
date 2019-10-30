@@ -12,4 +12,30 @@ pip install eth_abi
     - receiver_address (The one who has to receive tokens)
     - amount 
 
-`python generate_bytecode.py <receiver_address> <amount>`
+`python generate_bytecode.py transfer2KeyTokens <receiver_address> <amount>`
+
+##### Generate bytecode for upgrading contract:
+- Arguments:
+    - contract_name
+    - contract_version
+    
+`python generate_bytecode.py upgradeContract <contract_name> <contract_version>`
+
+
+##### Generate bytecode for changing rewards release date:
+- Arguments:
+    - new_date
+  
+`python generate_bytecode.py setNewTwoKeyRewardsReleaseDate <new_date>`
+
+
+##### Generate bytecode for adding a member to congress:
+- Arguments:
+    - target_member (member address)
+    - member_name (member name --> bytes32 format))
+    - voting_power (member voting power)
+  
+`python generate_bytecode.py addMember <target_member> <member_name> <voting_power>`
+
+
+

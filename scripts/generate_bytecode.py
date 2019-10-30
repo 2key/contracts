@@ -7,12 +7,12 @@ def generate_selector(method_name_and_params):
     return method_selector
 
 
-
 def generate_bytecode(method_name_and_params,types,values):
     method_selector = generate_selector(method_name_and_params)
     packed_args = encode_abi(types,values).hex()
     bytecode = '0x' + method_selector + packed_args
     return (bytecode)
+
 
 def generate_bytecode_for_transfering_tokens(deployer_address, token_amount):
     token_amount = int(token_amount) * (10**18)
@@ -27,30 +27,40 @@ def generate_bytecode_for_upgrading_contracts(contract_name, contract_version):
     values = [contract_name, contract_version]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
-def generate_bytecode_for_changing_rewards_release_date(newDate):
-    newDate = int(newDate)
+def generate_bytecode_for_changing_rewards_release_date(new_date):
+    newDate = int(new_date)
     method_name_and_params = "setNewTwoKeyRewardsReleaseDate(uint256)"
     types = ["uint256"]
-    values = [newDate]
+    values = [new_date]
     print('Transaction bytecode: ' +generate_bytecode(method_name_and_params, types, values))
 
-###
-# 1. Add Member
-# 2. Remove member
-# 3. Send eth
-# 4. Set new public trading date
-# TODO: Add in the main examples how to generate the bytecode for each one
-###
+def generate_bytecode_for_adding_new_member(target_member, member_name, voting_power):
+    voting_power = int(voting_power)
+    method_name_and_params = "addMember(address,bytes32,uint256)"
+    types=["address","bytes32","uint256"]
+    values = [target_member, member_name, voting_power]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_removing_member(target_member):
+    method_name_and_params = "removeMember(address)"
+    types=["address"]
+    values = [target_member]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+
 
 if __name__ == "__main__":
-    arg1 = sys.argv[1]
-#    arg2 = sys.argv[2]
-#    arg3 = sys.argv[3]
+    arg1 = sys.argv[1] #Method name
 
-#    if(arg3 == "upgrade_contracts"):
-#        generate_bytecode_for_upgrading_contracts(arg1,arg2)
-#    if(arg3 == "transfer_tokens") :
-#        generate_bytecode_for_transfering_tokens(arg1,arg2)
+    if(arg1 == "transfer2KeyTokens"):
+        generate_bytecode_for_transfering_tokens(sys.argv[2], sys.argv[3])
+    if(arg1 == "upgradeContract"):
+        generate_bytecode_for_upgrading_contracts(sys.argv[2], sys.argv[3])
+    if(arg1 == "setNewTwoKeyRewardsReleaseDate"):
+        generate_bytecode_for_changing_rewards_release_date(sys.argv[2])
+    if(arg1 == "addMember"):
+        generate_bytecode_for_adding_new_member(sys.argv[2],sys.argv[3],sys.argv[4])
+    if(arg1 == "removeMember"):
+        generate_bytecode_for_removing_member(sys.argv[2])
 
-    generate_bytecode_for_changing_rewards_release_date(arg1)
 
