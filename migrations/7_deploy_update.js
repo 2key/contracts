@@ -136,7 +136,15 @@ const getContractPerName = ((contractName) => {
 
 
 module.exports = async function deploy(deployer) {
-    if(checkArgumentsForUpdate(process.argv) == false) {
+
+    let flag = false;
+    process.argv.forEach((argument) => {
+        if(argument === 'update') {
+            flag = true;
+        }
+    });
+
+    if(flag == false) {
         console.log('No update will be performed');
         return;
     }
