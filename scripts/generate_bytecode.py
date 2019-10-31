@@ -57,10 +57,8 @@ if __name__ == "__main__":
     if(arg1 == "upgradeContract"):
         generate_bytecode_for_upgrading_contracts(sys.argv[2], sys.argv[3])
     if(arg1 == "setNewTwoKeyRewardsReleaseDate"):
-        generate_bytecode_for_changing_rewards_release_date(sys.argv[2])
+        generate_bytecode_for_changing_rewards_release_date(int(sys.argv[2]))
     if(arg1 == "addMember"):
         generate_bytecode_for_adding_new_member(sys.argv[2],sys.argv[3],sys.argv[4])
     if(arg1 == "removeMember"):
         generate_bytecode_for_removing_member(sys.argv[2])
-
-
