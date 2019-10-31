@@ -242,6 +242,7 @@ contract TwoKeyCongress {
         bytes transactionBytecode
     )
     public
+    onlyMembers
     {
         Proposal storage p = proposals[proposalNumber];
         uint minimumQuorum = twoKeyCongressMembersRegistry.minimumQuorum();
