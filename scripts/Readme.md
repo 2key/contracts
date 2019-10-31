@@ -31,7 +31,7 @@ eg. "Lets upgrade TwoKeyUpgradableExchange contract to version 1.0.2"
 
 #### Generate bytecode for changing rewards release date:
 - Arguments:
-    - new_date
+    - new_date (unix timestamp)
   
 `python generate_bytecode.py setNewTwoKeyRewardsReleaseDate <new_date>`
 
