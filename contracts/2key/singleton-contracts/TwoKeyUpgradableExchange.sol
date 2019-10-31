@@ -600,7 +600,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyMaintainer
     {
         ERC20 dai = ERC20(getAddress(keccak256("DAI")));
-
+        if(amountToBeHedged > address(this).balance) {
+            amountToBeHedged = address(this).balance;
+        }
         address kyberProxyContract = getAddress(keccak256("KYBER_NETWORK_PROXY"));
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
