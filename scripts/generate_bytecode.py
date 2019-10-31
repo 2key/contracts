@@ -48,6 +48,7 @@ def generate_bytecode_for_removing_member(target_member):
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 
+### TODO: Add concrete examples and units for each function call
 
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name

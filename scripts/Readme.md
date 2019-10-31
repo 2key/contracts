@@ -9,8 +9,8 @@ pip install eth_abi
 
 ##### Generate bytecode for sending tokens:
 - Arguments: 
-    - receiver_address (The one who has to receive tokens)
-    - amount 
+    - receiver_address (The one who has to receive tokens) (unit -> regular number)
+    - amount
 
 `python generate_bytecode.py transfer2KeyTokens <receiver_address> <amount>`
 
