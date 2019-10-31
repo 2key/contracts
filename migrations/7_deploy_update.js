@@ -55,7 +55,7 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
             console.log('New version is: ' + newVersion);
             // Add contract version
             // This can be done only by core dev
-            let txHash = instance.addVersion(contractName, newVersion, newImplementationAddress);
+            let txHash = await instance.addVersion(contractName, newVersion, newImplementationAddress);
 
             // --------------------------------------------------------------------------------
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
@@ -172,6 +172,8 @@ module.exports = async function deploy(deployer) {
                     registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
                     congressAddress = config.TwoKeyCongress.networks[deployer.network_id].address;
                 }
+
+                console.log(registryAddress);
 
                 await new Promise(async (resolve, reject) => {
                     try {
