@@ -397,7 +397,6 @@ async function deployUpgrade(networks) {
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
         let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
-        singletonsToBeUpgraded = ["TwoKeyAdmin"];
         console.log('Contracts to be updated: ' + singletonsToBeUpgraded.length);
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
