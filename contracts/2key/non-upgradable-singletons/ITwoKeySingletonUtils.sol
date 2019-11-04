@@ -10,7 +10,7 @@ contract ITwoKeySingletonUtils {
     // Modifier to restrict method calls only to maintainers
     modifier onlyMaintainer {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
         _;
     }
 
