@@ -170,8 +170,15 @@ const slack_message_proposal_created = async (contractName, newVersion, proposal
                         type: 'section',
                         text: {
                             type: 'mrkdwn',
-                            text: `*Deployed new version of*  \`${contractName}\` *to network:* ${network} --> <@eiTan> <@Kiki> \n *New version :* \`${newVersion}\` 
-                            \n  *Proposal bytecode:* \`${proposalBytecode}\``,
+                            text: `*Deployed new version of*  \`${contractName}\` *to network:* ${network} --> <@eiTan> <@Kiki> \n *New version :* \`${newVersion}\``
+                        },
+
+                    },
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `*Proposal bytecode:* \`${proposalBytecode}\``,
                         },
 
                     },
