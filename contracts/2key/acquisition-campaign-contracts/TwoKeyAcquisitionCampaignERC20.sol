@@ -511,7 +511,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         uint tokensBalance = getTokenBalance(twoKeyEconomy);
         uint rewardsNotSpent = tokensBalance.sub(reservedAmount2keyForRewards);
-        IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
+        if(rewardsNotSpent > 0) {
+            IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
+        }
         return rewardsNotSpent;
     }
 
