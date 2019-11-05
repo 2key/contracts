@@ -137,10 +137,10 @@ contract TwoKeyCongressMembersRegistry {
             }
             i++;
         }
-        //After member is found, remove his address from all members
-        for (uint j = i; j< length - 1; j++){
-            allMembers[j] = allMembers[j+1];
-        }
+
+        // Move the lest member to this place
+        allMembers[i] = allMembers[length-1];
+
         //After reduce array size
         delete allMembers[allMembers.length-1];
 
