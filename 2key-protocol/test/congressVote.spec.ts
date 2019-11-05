@@ -28,6 +28,9 @@ const web3switcher = {
 let transactionBytecode =
     "0x9ffe94d9000000000000000000000000bae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7000000000000000000000000000000000000000000084595161401484a000000";
 
+let transactionBytecodeForChangingReleaseDate =
+    "0xef33a226000000000000000000000000000000000000000000000000000000000012d687";
+
 describe('TwoKeyCongress contract basic proposal creation, voting, and proposal execution counter.' , () => {
 
     it('should get all members from congress', async() => {
@@ -140,6 +143,116 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         expect(status).to.be.equal('0x1');
     }).timeout(60000);
 
+    /*
+     ****************************************************
+     *          ADMIN CHANGE PUBLIC REWARDS DATE        *
+     ****************************************************
+     */
+
+    it('should submit proposal for changing rewards public trading date to 1234567 timestamp', async() => {
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+
+        const admin = twoKeyProtocol.twoKeyAdmin;
+        let txHash: string = await twoKeyProtocol.Congress.newProposal(
+            admin.address,
+            "Change public trading date",
+            transactionBytecodeForChangingReleaseDate,
+            from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('1. member vote to support proposal', async() => {
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support changing rewards release date", from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('2. member vote to support proposal', async() => {
+        const {web3, address} = web3switcher.aydnep();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support changing rewards release date", from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('3. member vote to support proposal', async() => {
+        const {web3, address} = web3switcher.gmail();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support changing rewards release date", from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should get proposal data', async() => {
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+        numberOfProposals = parseFloat(numberOfProposals.toString());
+        let data = await twoKeyProtocol.Congress.getProposalInformations(numberOfProposals-1,from);
+        expect(data.proposalIsExecuted).to.be.equal(false);
+        expect(data.proposalNumberOfVotes).to.be.equal(3);
+    }).timeout(60000);
+
+    it('should advance time and execute proposal',async() => {
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+        let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals-1, transactionBytecode, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should check in TwoKeyAdmin that new date is properly set', async() => {
+        let rewardsReleaseDate = await twoKeyProtocol.TwoKeyAdmin.getRewardReleaseAfter();
+        console.log(rewardsReleaseDate);
+    })
 });
 
 
