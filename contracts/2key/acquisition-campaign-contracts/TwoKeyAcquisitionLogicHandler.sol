@@ -92,7 +92,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         ownerPlasma = plasmaOf(contractor);
         conversionHandler = _twoKeyConversionHandler;
 
-        ALLOWED_GAP = 1000000000000000; //0.001 ETH allowed GAP
+        ALLOWED_GAP = 1000000000000000000; //1 USD allowed GAP for ETH conversions in case FIAT is campaign currency
+
         initialized = true;
     }
 
