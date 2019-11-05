@@ -243,7 +243,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
 
     it('should advance time and execute proposal',async() => {
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
-        let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals-1, transactionBytecode, from);
+        let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals-1, transactionBytecodeForChangingReleaseDate, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
@@ -251,7 +251,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
 
     it('should check in TwoKeyAdmin that new date is properly set', async() => {
         let rewardsReleaseDate = await twoKeyProtocol.TwoKeyAdmin.getRewardReleaseAfter();
-        console.log(rewardsReleaseDate);
+        expect(parseFloat(rewardsReleaseDate.toString())).to.be.equal(1234567);
     })
 });
 
