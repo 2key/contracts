@@ -66,7 +66,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
 
-        ALLOWED_GAP = 1000000000000000; //0.001 ETH allowed GAP
+        ALLOWED_GAP = 1000000000000000000; //1 USD allowed GAP for ETH conversions in case FIAT is campaign currency
 
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
@@ -139,7 +139,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     function getAddressStatistic(
         address _address,
         bool plasma,
-        bool flag,
         address referrer
     )
     internal

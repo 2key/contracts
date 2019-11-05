@@ -14,4 +14,5 @@ contract ITwoKeyAcquisitionCampaignERC20 {
     function getTotalReferrerEarnings(address _referrer, address eth_address) public view returns (uint);
     function updateReferrerPlasmaBalance(address _influencer, uint _balance) public;
     function getInventoryBalance() public view returns (uint);
+
 }

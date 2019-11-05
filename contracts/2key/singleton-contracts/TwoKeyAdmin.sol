@@ -194,6 +194,25 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint(_twoKeyTokenRate);
 	}
 
+	function setNewTwoKeyRewardsReleaseDate(
+		uint256 newDate
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_rewardReleaseAfter),newDate);
+	}
+
+	function setDefaultIntegratorFeePercent(
+		uint newFeePercent
+	)
+	external
+	onlyTwoKeyCongress
+	{
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_twoKeyIntegratorDefaultFeePercent),newFeePercent);
+	}
+
+
 	/// Fallback function
 	function()
 	external

@@ -18,6 +18,7 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
     bool isCampaignInitialized;
     uint numberOfConversions;
 
+
     /**
      * This array will represent counter values where position will be index (which counter) and value will be actual counter value
      * counters[0] = PENDING_CONVERSIONS
@@ -38,18 +39,16 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
     address twoKeyEventSource;
     address twoKeyBaseReputationRegistry;
     address twoKeySingletonRegistry;
-    address public twoKeyPurchasesHandler;
 
 
-    mapping(address => uint256) internal amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
-
+    mapping(address => uint256) amountConverterSpentEthWEI; // Amount converter put to the contract in Ether
     mapping(bytes32 => address[]) stateToConverter; //State to all converters in that state
     mapping(address => uint[]) converterToHisConversions;
     mapping(address => ConverterState) converterToState; //Converter to his state
+    mapping(address => uint256) public converterToPositionIndex;
     mapping(address => bool) isConverterAnonymous;
     mapping(address => bool) doesConverterHaveExecutedConversions;
     mapping(uint => uint) conversionToCampaignCurrencyAmountAtTimeOfCreation;
-
 
     modifier onlyContractorOrMaintainer {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
@@ -131,16 +130,27 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
     {
         ConverterState state = converterToState[_converter];
         bytes32 key = convertConverterStateToBytes(state);
-        address[] memory pending = stateToConverter[key];
-        for(uint i=0; i< pending.length; i++) {
-            if(pending[i] == _converter) {
-                stateToConverter[destinationState].push(_converter);
-                pending[i] = pending[pending.length-1];
-                delete pending[pending.length-1];
-                stateToConverter[key] = pending;
-                stateToConverter[key].length = stateToConverter[key].length.sub(1);
-                break;
-            }
+        address[] memory current = stateToConverter[key];
+
+        uint index = converterToPositionIndex[_converter]; // Get converter index position in array
+        if(current[index] == _converter) {
+            // Add converter to new array
+            stateToConverter[destinationState].push(_converter);
+            // Set new position in the new array
+            converterToPositionIndex[_converter] = stateToConverter[destinationState].length - 1;
+            // Get the last converter from the array because we're moving him to deleted place and with that action
+            // His new index will be the one of the removed converter
+            address lastConverterInArray = current[current.length-1];
+            // Reduce size of current array
+            current[index] = lastConverterInArray;
+            // Set index to be the position of the last converter in the array
+            converterToPositionIndex[lastConverterInArray] = index;
+            // Delete last element in current array
+            delete current[current.length-1];
+            // Save current array
+            stateToConverter[key] = current;
+            // Change length of the mapping array
+            stateToConverter[key].length = stateToConverter[key].length.sub(1);
         }
     }
 
@@ -164,6 +174,31 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
     {
         require(converterToState[_converter] == ConverterState.PENDING_APPROVAL);
         moveFromPendingToRejectedState(_converter);
+    }
+
+    function handleConverterState(
+        address _converterAddress,
+        bool isKYCRequired
+    )
+    internal
+    {
+        //If KYC is required, basic funnel executes and we require that converter is not previously rejected
+        if(isKYCRequired == true) {
+            require(converterToState[_converterAddress] != ConverterState.REJECTED); // If converter is rejected then can't create conversion
+            // Checking the state for converter, if this is his 1st time, he goes initially to PENDING_APPROVAL
+            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
+                converterToState[_converterAddress] = ConverterState.PENDING_APPROVAL;
+                stateToConverter[bytes32("PENDING_APPROVAL")].push(_converterAddress);
+                converterToPositionIndex[_converterAddress] = stateToConverter[bytes32("PENDING_APPROVAL")].length-1;
+            }
+        } else {
+            //If KYC is not required converter is automatically approved
+            if(converterToState[_converterAddress] == ConverterState.NOT_EXISTING) {
+                converterToState[_converterAddress] = ConverterState.APPROVED;
+                stateToConverter[bytes32("APPROVED")].push(_converterAddress);
+                converterToPositionIndex[_converterAddress] = stateToConverter[bytes32("APPROVED")].length-1;
+            }
+        }
     }
 
     /**

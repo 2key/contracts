@@ -205,12 +205,18 @@ module.exports = {
       },
 
       'plasma-test-local': {
-          provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
-          network_id: 98052,
-          gas: 8000000,
-          gasPrice: '0x0',
+          // provider: () => new HDWalletProvider(mnemonic, 'https://rpc.private.test.k8s.2key.net'),
+          // network_id: 98052,
+          // gas: 8000000,
+          // gasPrice: '0x0',
           // gasPrice: 100000000000,
           // gasPrice: 2000000000
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-dev.private.test.k8s.2key.net'),
+          network_id: 181,
+          gas: 8000000,
+          gasPrice: '0x0',
+          skipDryRun: true
+
       },
 
       'rinkeby-test': {

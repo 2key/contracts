@@ -67,6 +67,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint twoKeyAmount
     );
 
+    event HedgedEther (
+        uint _daisReceived,
+        uint _ratio,
+        uint _numberOfContracts
+    );
+
 
     /**
      * @notice Constructor of the contract, can be called only once
@@ -171,64 +177,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         _twoKeyAdmin.transfer(msg.value);
     }
 
-    /**
-     * @notice Function to reduce available amount to hedge and increase available DAI to withdraw
-     * @param _ethWeiHedged is how much eth was hedged
-     * @param _daiReceived is how much DAI's we got for that hedging
-     */
-    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(
-        uint _ethWeiHedged,
-        uint _daiReceived
-    )
-    internal
-    {
-        uint numberOfContractsCurrently = numberOfContracts();
-        uint sumOfAmounts = calculateSumOnAllContracts(numberOfContractsCurrently); //Will represent total sum we have on the contract
-        uint i;
-
-        uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedged, sumOfAmounts); // Percentage to deduct in WEI (less than 1)
-
-        // Representing how much ETH is 1 DAI (DAI/ETH)
-        uint ratio = calculateRatioBetweenDAIandETH(_ethWeiHedged, _daiReceived);
-
-        for(i=1; i<=numberOfContractsCurrently; i++) {
-            if(ethWeiAvailableToHedge(i) > 0) {
-                uint beforeHedgingAvailableEthWeiForContract = ethWeiAvailableToHedge(i);
-                uint hundredPercentWei = 10**18;
-                uint afterHedgingAvailableEthWei = beforeHedgingAvailableEthWeiForContract.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
-
-                uint hedgedEthWei = beforeHedgingAvailableEthWeiForContract.sub(afterHedgingAvailableEthWei);
-                uint daisReceived = hedgedEthWei.mul(ratio).div(10**18);
-                updateAccountingValues(daisReceived, hedgedEthWei, afterHedgingAvailableEthWei, i);
-            }
-        }
-    }
-
-    /**
-     * @notice Internal function created to update specific values, separated because of stack depth
-     * @param _daisReceived is the amount of received dais
-     * @param _hedgedEthWei is the amount of ethWei hedged
-     * @param _afterHedgingAvailableEthWei is the amount available after hedging
-     * @param _contractID is the ID of the contract
-     */
-    function updateAccountingValues(
-        uint _daisReceived,
-        uint _hedgedEthWei,
-        uint _afterHedgingAvailableEthWei,
-        uint _contractID
-    )
-    internal
-    {
-        bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
-        bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", _contractID);
-        bytes32 ethWeiHedgedPerContractKeyHash = keccak256("ethWeiHedgedPerContract", _contractID);
-        bytes32 daiWeiReceivedFromHedgingPerContractKeyHash = keccak256("daiWeiReceivedFromHedgingPerContract",_contractID);
-
-        setUint(daiWeiReceivedFromHedgingPerContractKeyHash, daiWeiReceivedFromHedgingPerContract(_contractID).add(_daisReceived));
-        setUint(ethWeiHedgedPerContractKeyHash, ethWeiHedgedPerContract(_contractID).add(_hedgedEthWei));
-        setUint(ethWeiAvailableToHedgeKeyHash, _afterHedgingAvailableEthWei);
-        setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(_contractID).add(_daisReceived));
-    }
 
     /**
      * @notice Function to calculate how much pnercentage will be deducted from values
@@ -261,10 +209,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice Function to calculate available to hedge sum on all contracts
      */
-    function calculateSumOnAllContracts(
-        uint _numberOfContractsCurrently
+    function calculateSumOnContracts(
+        uint startIndex,
+        uint endIndex
     )
-    internal
+    public
     view
     returns (uint)
     {
@@ -272,7 +221,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint i;
 
         // Sum all amounts on all contracts
-        for(i=1; i<=_numberOfContractsCurrently; i++) {
+        for(i=startIndex; i<=endIndex; i++) {
             sumOfAmounts = sumOfAmounts.add(ethWeiAvailableToHedge(i));
         }
         return sumOfAmounts;
@@ -651,16 +600,97 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyMaintainer
     {
         ERC20 dai = ERC20(getAddress(keccak256("DAI")));
-
+        if(amountToBeHedged > address(this).balance) {
+            amountToBeHedged = address(this).balance;
+        }
         address kyberProxyContract = getAddress(keccak256("KYBER_NETWORK_PROXY"));
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
         uint minConversionRate = getKyberExpectedRate(amountToBeHedged);
         require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
         uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
-
-        reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(amountToBeHedged, stableCoinUnits);
+        // Get the ratio between ETH and DAI for this hedging
+        uint ratio = calculateRatioBetweenDAIandETH(amountToBeHedged, stableCoinUnits);
+        //Emit event with important data
+        emit HedgedEther(stableCoinUnits, ratio, numberOfContracts());
     }
+
+    function calculateHedgedAndReceivedForDefinedChunk(
+        uint numberOfContractsCurrently,
+        uint amountHedged,
+        uint stableCoinsReceived,
+        uint startIndex,
+        uint endIndex
+    )
+    public
+    view
+    returns (uint,uint)
+    {
+        //We're calculating sum on contracts between start and end index
+        uint sumInRange = calculateSumOnContracts(startIndex,endIndex);
+        //Now we need how much was hedged from this contracts between start and end index
+        uint stableCoinsReceivedForThisChunkOfContracts = (sumInRange.mul(stableCoinsReceived)).div(amountHedged);
+        // Returning for this piece of contracts
+        return (sumInRange, stableCoinsReceivedForThisChunkOfContracts);
+    }
+
+    /**
+     * @notice Function to reduce available amount to hedge and increase available DAI to withdraw
+     * @param _ethWeiHedgedForThisChunk is how much eth was hedged
+     * @param _daiReceivedForThisChunk is how much DAI's we got for that hedging
+     */
+    function reduceHedgedAmountFromContractsAndIncreaseDaiAvailable(
+        uint _ethWeiHedgedForThisChunk,
+        uint _daiReceivedForThisChunk,
+        uint _ratio,
+        uint _startIndex,
+        uint _endIndex
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+        uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedgedForThisChunk, _ethWeiHedgedForThisChunk); // Percentage to deduct in WEI (less than 1)
+
+        for(i=_startIndex; i<=_endIndex; i++) {
+            if(ethWeiAvailableToHedge(i) > 0) {
+                uint beforeHedgingAvailableEthWeiForContract = ethWeiAvailableToHedge(i);
+                uint hundredPercentWei = 10**18;
+                uint afterHedgingAvailableEthWei = beforeHedgingAvailableEthWeiForContract.mul(hundredPercentWei.sub(percentageToDeductWei)).div(10**18);
+
+                uint hedgedEthWei = beforeHedgingAvailableEthWeiForContract.sub(afterHedgingAvailableEthWei);
+                uint daisReceived = hedgedEthWei.mul(_ratio).div(10**18);
+                updateAccountingValues(daisReceived, hedgedEthWei, afterHedgingAvailableEthWei, i);
+            }
+        }
+    }
+
+    /**
+     * @notice Internal function created to update specific values, separated because of stack depth
+     * @param _daisReceived is the amount of received dais
+     * @param _hedgedEthWei is the amount of ethWei hedged
+     * @param _afterHedgingAvailableEthWei is the amount available after hedging
+     * @param _contractID is the ID of the contract
+     */
+    function updateAccountingValues(
+        uint _daisReceived,
+        uint _hedgedEthWei,
+        uint _afterHedgingAvailableEthWei,
+        uint _contractID
+    )
+    internal
+    {
+        bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
+        bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", _contractID);
+        bytes32 ethWeiHedgedPerContractKeyHash = keccak256("ethWeiHedgedPerContract", _contractID);
+        bytes32 daiWeiReceivedFromHedgingPerContractKeyHash = keccak256("daiWeiReceivedFromHedgingPerContract",_contractID);
+
+        setUint(daiWeiReceivedFromHedgingPerContractKeyHash, daiWeiReceivedFromHedgingPerContract(_contractID).add(_daisReceived));
+        setUint(ethWeiHedgedPerContractKeyHash, ethWeiHedgedPerContract(_contractID).add(_hedgedEthWei));
+        setUint(ethWeiAvailableToHedgeKeyHash, _afterHedgingAvailableEthWei);
+        setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(_contractID).add(_daisReceived));
+    }
+
 
     /**
      * @notice Function to reduce amount of dai available to be withdrawn from selected contract

@@ -54,25 +54,28 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
             //Console log the new version
             console.log('New version is: ' + newVersion);
             // Add contract version
-            let txHash = instance.addVersion(contractName, newVersion, newImplementationAddress);
+            // This can be done only by core dev
+            let txHash = await instance.addVersion(contractName, newVersion, newImplementationAddress);
 
+            // --------------------------------------------------------------------------------
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
 
-            let congressInstance = await TwoKeyCongress.at(congressAddress);
+            //
+            // let congressInstance = await TwoKeyCongress.at(congressAddress);
+            //
+            // //Can be only done by members of congress
+            // let { logs } = await congressInstance.newProposal(
+            //     registryAddress,
+            //     0,
+            //     "Upgrade " + contractName + " to version: " + newVersion,
+            //     bytecodeForUpgradingThisContract
+            // );
+            //
+            // let {proposalID, beneficiary, weiAmount, description} = logs.find(l => l.event === 'ProposalAdded').args;
+            //
+            // console.log("Added proposal with ID : " + proposalID + " to do job " + description);
 
-            //Can be only done by members of congress
-            let { logs } = await congressInstance.newProposal(
-                registryAddress,
-                0,
-                "Upgrade " + contractName + " to version: " + newVersion,
-                bytecodeForUpgradingThisContract
-            );
-
-            let {proposalID, beneficiary, weiAmount, description} = logs.find(l => l.event === 'ProposalAdded').args;
-
-            console.log("Added proposal with ID : " + proposalID + " to do job " + description);
-
-            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, proposalID, network);
+            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
 
             resolve({
                 txHash //, txHash1
@@ -133,7 +136,15 @@ const getContractPerName = ((contractName) => {
 
 
 module.exports = async function deploy(deployer) {
-    if(checkArgumentsForUpdate(process.argv) == false) {
+
+    let flag = false;
+    process.argv.forEach((argument) => {
+        if(argument === 'update') {
+            flag = true;
+        }
+    });
+
+    if(flag == false) {
         console.log('No update will be performed');
         return;
     }
@@ -161,6 +172,8 @@ module.exports = async function deploy(deployer) {
                     registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
                     congressAddress = config.TwoKeyCongress.networks[deployer.network_id].address;
                 }
+
+                console.log(registryAddress);
 
                 await new Promise(async (resolve, reject) => {
                     try {

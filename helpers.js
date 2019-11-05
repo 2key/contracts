@@ -155,7 +155,7 @@ const getGitBranch = () => new Promise(async(resolve,reject) => {
 });
 
 
-const slack_message_proposal_created = async (contractName, newVersion, proposalBytecode, proposalID, network) => {
+const slack_message_proposal_created = async (contractName, newVersion, proposalBytecode, network) => {
     const token = process.env.SLACK_TOKEN;
 
     const branch = await getGitBranch();
@@ -170,13 +170,20 @@ const slack_message_proposal_created = async (contractName, newVersion, proposal
                         type: 'section',
                         text: {
                             type: 'mrkdwn',
-                            text: `*Deployed new version of*  \`${contractName}\` *to network:* ${network} --> <@eiTan> <@Kiki> \n *New version :* \`${newVersion}\` \n *Proposal ID to be voted for:* \`${proposalID}\` \n *Proposal bytecode:* \`${proposalBytecode}\``,
+                            text: `*Deployed new version of*  \`${contractName}\` *to network:* ${network} --> <@eiTan> <@Kiki> \n *New version :* \`${newVersion}\``
+                        },
+
+                    },
+                    {
+                        type: 'section',
+                        text: {
+                            type: 'mrkdwn',
+                            text: `*Proposal bytecode:* \`${proposalBytecode}\``,
                         },
 
                     },
                 ],
             },
-
         ],
 
     };
