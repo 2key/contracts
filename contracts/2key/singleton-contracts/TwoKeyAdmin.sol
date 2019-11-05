@@ -195,6 +195,15 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setUint(keccak256("rewardReleaseAfter"),newDate);
     }
 
+    function updateRewardsRelease(
+        uint newDate
+    )
+    external
+    onlyTwoKeyCongress
+    {
+        PROXY_STORAGE_CONTRACT.setUint(keccak256("rewardReleaseAfter"),newDate);
+    }
+
     function setDefaultIntegratorFeePercent(
         uint newFeePercent
     )
