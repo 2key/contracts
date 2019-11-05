@@ -210,7 +210,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyTwoKeyCongress
     {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256("twoKeyIntegratorDefaultFeePercent"),newDate);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256("twoKeyIntegratorDefaultFeePercent"),newFeePercent);
     }
 
 	/// Fallback function
