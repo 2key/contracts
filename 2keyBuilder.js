@@ -398,13 +398,13 @@ async function deployUpgrade(networks) {
         /* eslint-disable no-await-in-loop */
         let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
         console.log('Contracts to be updated: ' + singletonsToBeUpgraded.length);
-        if(singletonsToBeUpgraded.length > 0) {
-            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
-                /* eslint-disable no-await-in-loop */
-                console.log(networks[i], singletonsToBeUpgraded[j]);
-                await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-            }
-        }
+        // if(singletonsToBeUpgraded.length > 0) {
+        //     for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+        //         /* eslint-disable no-await-in-loop */
+        //         console.log(networks[i], singletonsToBeUpgraded[j]);
+        //         await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+        //     }
+        // }
         if(campaignsToBeUpgraded.length > 0) {
             await runDeployCampaignMigration(networks[i]);
         }
