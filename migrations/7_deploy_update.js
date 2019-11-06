@@ -194,7 +194,7 @@ module.exports = async function deploy(deployer) {
                     try {
                         console.log('Updating contract: ' + contractName);
                         if(deployer.network.startsWith('private')) {
-                            let {txHash, txHash1} = updateContractPlasma(registryAddress, contractName, newImplementationAddress);
+                            let {txHash, txHash1} = await updateContractPlasma(registryAddress, contractName, newImplementationAddress);
                         } else if (deployer.network.startsWith('public')){
                             let txHash = await updateContract(registryAddres, congressAddress, contractName, newImplementationAddress, deployer.network);
                         }
