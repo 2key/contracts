@@ -174,6 +174,8 @@ module.exports = async function deploy(deployer) {
                 newImplementationAddress = contractInstance.address;
             })
             .then(async () => {
+                console.log('Finding configuration files addresses for desired network');
+
                 let config = await getConfigForTheBranch();
 
                 if(deployer.network.startsWith('dev')) {
