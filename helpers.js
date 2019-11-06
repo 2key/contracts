@@ -281,6 +281,34 @@ const slack_message = async (newVersion, oldVersion, devEnv) => {
     );
 };
 
+/**
+ * Helper function to perform mechanism of sorting per vesion
+ * @param versionA
+ * @param versionB
+ * @returns {number}
+ */
+const sortMechanism = (versionA,versionB) => {
+    versionA = versionA.split('-')[0].split('.');
+    versionB = versionB.split('-')[0].split('.');
+    if (parseInt(versionA[0]) > parseInt(versionB[0]))
+        return 1;
+    if (parseInt(versionA[0]) < parseInt(versionB[0]))
+        return -1;
+    else {
+        if(parseInt(versionA[1]) > parseInt(versionB[1]))
+            return 1;
+        if(parseInt(versionA[1]) < parseInt(versionB[1]))
+            return -1;
+        else {
+            if(parseInt(versionA[2]) > parseInt(versionB[2]))
+                return 1;
+            if(parseInt(versionA[2]) < parseInt(versionB[2]))
+                return -1;
+            else return 0;
+        }
+    }
+};
+
 
 
 
@@ -296,5 +324,6 @@ module.exports = {
     slack_message_proposal_created,
     slack_message,
     checkIsHardRedeploy,
-    checkArgumentsForUpdate
+    checkArgumentsForUpdate,
+    sortMechanism
 };
