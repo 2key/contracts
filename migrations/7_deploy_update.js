@@ -167,6 +167,7 @@ module.exports = async function deploy(deployer) {
     let congressAddress;
 
 
+    console.log(contractName);
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
