@@ -171,6 +171,7 @@ module.exports = async function deploy(deployer) {
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
+                console.log('Deployed to selected network');
                 newImplementationAddress = contractInstance.address;
             })
             .then(async () => {
