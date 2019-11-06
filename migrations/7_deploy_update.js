@@ -128,7 +128,8 @@ let contractsArtifacts = {
     TwoKeyPlasmaRegistry,
     TwoKeyPlasmaEventsStorage,
     TwoKeyPlasmaMaintainersRegistryStorage,
-    TwoKeyPlasmaRegistryStorage
+    TwoKeyPlasmaRegistryStorage,
+    TwoKeyPlasmaSingletoneRegistry
 };
 
 
