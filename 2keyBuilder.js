@@ -11,6 +11,7 @@ const whitelist = require('./ContractDeploymentWhiteList.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build');
+const contractsBuildPath = path.join(__dirname, 'build', 'contracts');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
@@ -111,12 +112,12 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
         if (fs.existsSync(proxyFile)) {
             proxyAddresses = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf-8' }));
         }
-        readdir(buildPath).then((files) => {
+        readdir(contractsBuildPath).then((files) => {
             try {
                 files.forEach((file) => {
                     const {
                         networks, contractName, bytecode, abi
-                    } = JSON.parse(fs.readFileSync(path.join(buildPath, file), { encoding: 'utf-8' }));
+                    } = JSON.parse(fs.readFileSync(path.join(contractsBuildPath, file), { encoding: 'utf-8' }));
                     if (whitelist[contractName]) {
                         const whiteListedContract = whitelist[contractName];
                         const proxyNetworks = proxyAddresses[contractName] || {};
