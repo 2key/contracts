@@ -346,11 +346,14 @@ async function deploy() {
         const now = moment();
         const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
 
-        if(process.argv.includes('update')) {
-            await deployUpgrade(networks);
-        } else {
-            await deployContracts(networks, true);
+        if(!process.argv.includes('protocol-only')) {
+            if(process.argv.includes('update')) {
+                await deployUpgrade(networks);
+            } else {
+                await deployContracts(networks, true);
+            }
         }
+
 
         const contracts = await generateSOLInterface();
         await archiveBuild();
