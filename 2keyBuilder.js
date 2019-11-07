@@ -403,10 +403,10 @@ async function deploy() {
             }
             await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
             process.chdir('../../');
-            // Add tenderly to CI/CD
-            await runProcess('tenderly',['push', '--tag', npmVersionTag]);
             //Run slack message
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
+            // Add tenderly to CI/CD
+            await runProcess('tenderly',['push', '--tag', npmVersionTag]);
         } else {
             process.exit(0);
         }
