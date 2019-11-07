@@ -10,7 +10,7 @@ const moment = require('moment');
 const whitelist = require('./ContractDeploymentWhiteList.json');
 
 const readdir = util.promisify(fs.readdir);
-const buildPath = path.join(__dirname, 'build', 'contracts');
+const buildPath = path.join(__dirname, 'build');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
@@ -93,18 +93,13 @@ const getVersionsPath = (branch = true) => {
 const archiveBuild = () => new Promise(async (resolve, reject) => {
     try {
         if (fs.existsSync(buildPath)) {
-            console.log('Archiving current artifacts to', getBuildArchPath(), path.join(__dirname, 'build'));
+            console.log(__dirname, buildPath);
             tar.c({
-                gzip: true, sync: true, cwd: path.join(__dirname, 'build')
-            }, ['contracts'])
+                gzip: true, sync: true
+            },
+                ['build']
+            )
                 .pipe(fs.createWriteStream(getBuildArchPath()));
-
-
-            await rmDir(buildPath);
-            if (fs.existsSync(buildBackupPath)) {
-                console.log('Restoring artifacts from backup', buildBackupPath);
-                fs.renameSync(buildBackupPath, buildPath);
-            }
         }
         resolve();
     } catch (err) {
@@ -114,16 +109,10 @@ const archiveBuild = () => new Promise(async (resolve, reject) => {
 
 const restoreFromArchive = () => new Promise(async (resolve, reject) => {
     try {
-        if (fs.existsSync(buildPath)) {
-            console.log('Backup current artifacts to', buildBackupPath);
-            if (fs.existsSync(buildBackupPath)) {
-                await rmDir(buildBackupPath);
-            }
-            fs.renameSync(buildPath, buildBackupPath);
-        }
         if (fs.existsSync(getBuildArchPath())) {
             console.log('Excracting', getBuildArchPath());
-            tar.x({file: getBuildArchPath(), gzip: true, sync: true, cwd: path.join(__dirname, 'build')});
+            console.log(__dirname);
+            tar.x({file: getBuildArchPath(), gzip: true, sync: true, cwd: __dirname });
         }
         resolve()
     } catch (e) {

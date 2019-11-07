@@ -1,5 +1,3 @@
-require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
-
 const childProcess = require('child_process');
 const rimraf = require('rimraf');
 const simpleGit = require('simple-git/promise');
@@ -8,6 +6,8 @@ const fs = require('fs');
 const axios = require('axios');
 const IPFS = require('ipfs-http-client');
 const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
+
+require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
 
 const env_to_channelCode = {
     "test": "CKL4T7M2S",
