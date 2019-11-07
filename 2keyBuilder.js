@@ -3,19 +3,14 @@ const path = require('path');
 const util = require('util');
 const tar = require('tar');
 const sha256 = require('js-sha256');
-const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
-const prompt = require('prompt');
 const { networks: truffleNetworks } = require('./truffle');
-const axios = require('axios');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
-const { generateBytecodeForTokenTransfer, generateBytecodeForUpgrading } = require('./generateBytecode');
 const whitelist = require('./ContractDeploymentWhiteList.json');
 
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build', 'contracts');
-const configPath = path.join(__dirname, 'configurationFiles');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
@@ -26,22 +21,14 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message, sortMechanism } = require('./helpers');
-const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
+
 const branch_to_env = {
     "develop": "test",
     "staging": "staging",
     "master": "prod"
 };
-
-const env_to_channelCode = {
-    "test": "CKL4T7M2S",
-    "staging": "CKKRPNR55",
-    "prod": "CKHG3LS20"
-};
-
 
 const deployedTo = {};
 
@@ -101,24 +88,6 @@ const getVersionsPath = (branch = true) => {
     }
     return result.replace('{branch}', '');
 };
-
-
-
-
-async function handleExit() {
-     console.log('Do you want to accept hard reset of branch? [Y/N]');
-     prompt.start();
-     prompt.get(['option'], async function (err, result) {
-        if(result.option == 'Y') {
-            await contractsGit.reset('hard');
-            await twoKeyProtocolLibGit.reset('hard');
-        } else {
-            console.log('Bye Bye');
-        }
-        process.exit();
-    });
-}
-
 
 
 const archiveBuild = () => new Promise(async (resolve, reject) => {
@@ -240,7 +209,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                 let obj = {
                     'NonSingletonsHash': nonSingletonsHash,
                     'SingletonsHash': singletonsHash,
-                    // 'NetworkHashes': keyHash,
                 };
 
 
@@ -265,26 +233,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     }
 });
 
-
-const ipfsGet = (hash) => new Promise((resolve, reject) => {
-    ipfs.get(hash, (err, res) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(res[0] && res[0].content.toString());
-        }
-    });
-});
-
-const ipfsAdd = (data) => new Promise((resolve, reject) => {
-    ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(res);
-        }
-    });
-});
 
 const updateIPFSHashes = async(contracts) => {
     const nonSingletonHash = contracts.contracts.singletons.NonSingletonsHash;

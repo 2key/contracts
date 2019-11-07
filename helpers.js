@@ -1,11 +1,13 @@
+require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
+
 const childProcess = require('child_process');
 const rimraf = require('rimraf');
 const simpleGit = require('simple-git/promise');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
-
-require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
+const IPFS = require('ipfs-http-client');
+const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
 
 const env_to_channelCode = {
     "test": "CKL4T7M2S",
@@ -311,6 +313,28 @@ const sortMechanism = (versionA,versionB) => {
 
 
 
+const ipfsGet = (hash) => new Promise((resolve, reject) => {
+    ipfs.get(hash, (err, res) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(res[0] && res[0].content.toString());
+        }
+    });
+});
+
+const ipfsAdd = (data) => new Promise((resolve, reject) => {
+    ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(res);
+        }
+    });
+});
+
+
+
 
 
 module.exports = {
@@ -325,5 +349,7 @@ module.exports = {
     slack_message,
     checkIsHardRedeploy,
     checkArgumentsForUpdate,
-    sortMechanism
+    sortMechanism,
+    ipfsAdd,
+    ipfsGet
 };
