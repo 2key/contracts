@@ -319,7 +319,7 @@ const ipfsGet = (hash) => new Promise((resolve, reject) => {
     });
 });
 
-const ipfsAdd = (data) => new Promise((resolve, reject) => {
+const ipfsAdd = (data, deployment) => new Promise((resolve, reject) => {
     ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
         if (err) {
             reject(err);

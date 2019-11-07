@@ -230,12 +230,12 @@ const updateIPFSHashes = async(contracts) => {
         console.timeEnd('Compress');
         console.log(files[i], (js.length / 1024).toFixed(3), (compressedJS.length / 1024).toFixed(3));
         console.time('Upload');
-        const [{ hash }] = await ipfsAdd(compressedJS);
+        const [{ hash }] = await ipfsAdd(compressedJS, deployment);
         console.timeEnd('Upload');
         versionsList[nonSingletonHash][files[i].replace('.js', '')] = hash;
     }
     console.log(versionsList);
-    const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionsList));
+    const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionsList), deployment);
     fs.writeFileSync(getVersionsPath(), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
     fs.writeFileSync(getVersionsPath(false), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
     console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
