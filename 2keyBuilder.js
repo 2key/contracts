@@ -354,18 +354,18 @@ async function deploy() {
             }
         }
 
-
         const contracts = await generateSOLInterface();
         await archiveBuild();
+
         await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
         await commitAndPush2KeyProtocolSrc(`Contracts deployed to ${network} ${now.format('lll')}`);
         console.log('Changes commited');
-        await restoreFromArchive();
+        // await restoreFromArchive();
         await buildSubmodules(contracts);
         if (!local) {
             await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
         }
-        await archiveBuild();
+        // await archiveBuild();
         contractsStatus = await contractsGit.status();
         await commitAndPushContractsFolder(commit);
         await commitAndPush2KeyProtocolSrc(commit);
