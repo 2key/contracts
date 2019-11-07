@@ -88,7 +88,7 @@ const updateContractPlasma = (async (registryAddress, contractName, newImplement
             // Upgrade contract --> can be only done by deployer
             let txHash1 = await instance.upgradeContract(contractName, newVersion);
             resolve({
-                txHash , txHash1
+                txHash1
             });
         } catch (e) {
             reject(e);
@@ -194,10 +194,11 @@ module.exports = async function deploy(deployer) {
                 await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Updating contract: ' + contractName);
+                        let txHash;
                         if(deployer.network.startsWith('private')) {
-                            let {txHash, txHash1} = await updateContractPlasma(registryAddress, contractName, newImplementationAddress);
+                            txHash = await updateContractPlasma(registryAddress, contractName, newImplementationAddress);
                         } else if (deployer.network.startsWith('public')){
-                            let txHash = await updateContract(registryAddres, congressAddress, contractName, newImplementationAddress, deployer.network);
+                            txHash = await updateContract(registryAddres, congressAddress, contractName, newImplementationAddress, deployer.network);
                         }
                         resolve(txHash);
                     } catch (e) {
