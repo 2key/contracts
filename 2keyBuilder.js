@@ -93,9 +93,9 @@ const getVersionsPath = (branch = true) => {
 };
 
 
-const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath() }, ['build']);
+const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath(), cwd: __dirname }, ['build']);
 
-const restoreFromArchive = () => tar.x({file: getBuildArchPath(), gzip: true });
+const restoreFromArchive = () => tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname });
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
     console.log('Generating abi', deployedTo);
