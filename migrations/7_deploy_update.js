@@ -69,6 +69,7 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
     });
 });
 
+
 /**
  * Upgrade contract on plasma network
  * @type {function(*=, *=, *=)}

@@ -43,15 +43,6 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyDonationCampaign))
             .then(async () => {
                 console.log('... Adding implementation versions of Donation campaigns');
-
-                // let config = await getConfigForTheBranch();
-                // if(isHardRedeploy == true) { //deployer.network.startsWith('dev') ||
-                //     TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
-                //     console.log('HARD REDEPLOY');
-                // }
-                // else { //Means this is soft redeploy
-                //     TWO_KEY_SINGLETON_REGISTRY_ADDRESS = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
-                // }
                 TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
                 let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
 

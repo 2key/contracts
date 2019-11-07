@@ -18,6 +18,8 @@ const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
 const twoKeyProtocolSubmodulesDir = path.join(__dirname, '2key-protocol', 'dist', 'submodules');
 const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
+const twoKeyProtocolSrcGit = simpleGit(twoKeyProtocolDir);
+
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
@@ -238,6 +240,11 @@ const updateIPFSHashes = async(contracts) => {
     console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
 };
 
+/**
+ *
+ * @param commitMessage
+ * @returns {Promise<void>}
+ */
 const commitAndPushContractsFolder = async(commitMessage) => {
     const contractsStatus = await contractsGit.status();
     await contractsGit.add(contractsStatus.files.map(item => item.path));
@@ -245,14 +252,51 @@ const commitAndPushContractsFolder = async(commitMessage) => {
     await contractsGit.push('origin', contractsStatus.current);
 };
 
+/**
+ *
+ * @param commitMessage
+ * @returns {Promise<void>}
+ */
+const commitAndPush2KeyProtocolSrc = async(commitMessage) => {
+    const status = await twoKeyProtocolSrcGit.status();
+    await twoKeyProtocolSrcGit.add(status.files.map(item => item.path));
+    await twoKeyProtocolSrcGit.commit(commitMessage);
+    await twoKeyProtocolSrcGit.push('origin', status.current);
+};
+
+/**
+ *
+ * @param commitMessage
+ * @returns {Promise<void>}
+ */
+const commitAndPush2keyProtocolLibGit = async(commitMessage) => {
+    const status = await twoKeyProtocolLibGit.status();
+    await twoKeyProtocolLibGit.add(status.files.map(item => item.path));
+    await twoKeyProtocolLibGit.commit(commitMessage);
+    await twoKeyProtocolLibGit.push('origin', status.current);
+};
+
+const pushTagsToGithub = (async (npmVersionTag) => {
+    await contractsGit.addTag('v'+npmVersionTag.toString());
+    await contractsGit.pushTags('origin');
+
+    await twoKeyProtocolLibGit.addTag('v'+npmVersionTag.toString());
+    await twoKeyProtocolLibGit.pushTags('origin');
+
+    await twoKeyProtocolSrcGit.addTag('v'+npmVersionTag.toString());
+    await twoKeyProtocolSrcGit.pushTags('origin');
+})
+
+
+
 async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
         let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
-        singletonsToBeUpgraded = ["TwoKeyPlasmaEvents"];
-        console.log(singletonsToBeUpgraded);
+        console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
+        console.log('Campaigns to be upgraded: ', campaignsToBeUpgraded);
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */
@@ -284,7 +328,6 @@ async function deploy() {
         }
         await contractsGit.submoduleUpdate();
         await twoKeyProtocolLibGit.reset('hard');
-        twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
         const localChanges = contractsStatus.files.filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed')
                 || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
         if (contractsStatus.behind || localChanges.length) {
@@ -292,10 +335,8 @@ async function deploy() {
             process.exit(1);
         }
         console.log(process.argv);
-        const local = process.argv[2].includes('local');
-        if (!local && !process.env.SKIP_TEST) {
-            await test();
-        }
+
+        const local = process.argv[2].includes('local'); //If we're deploying to local network
 
         await restoreFromArchive();
 
@@ -303,7 +344,6 @@ async function deploy() {
         const network = networks.join('/');
         const now = moment();
         const commit = `SOL Deployed to ${network} ${now.format('lll')}`;
-        const tag = `${network}-${now.format('YYYYMMDDHHmmss')}`;
 
         if(process.argv.includes('update')) {
             await deployUpgrade(networks);
@@ -314,6 +354,7 @@ async function deploy() {
         const contracts = await generateSOLInterface();
         await archiveBuild();
         await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
+        await commitAndPush2KeyProtocolSrc(`Contracts deployed to ${network} ${now.format('lll')}`);
         console.log('Changes commited');
         await restoreFromArchive();
         await buildSubmodules(contracts);
@@ -322,14 +363,9 @@ async function deploy() {
         }
         await archiveBuild();
         contractsStatus = await contractsGit.status();
-        twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
-        console.log(commit, tag);
-
-        await twoKeyProtocolLibGit.add(twoKeyProtocolStatus.files.map(item => item.path));
-        await twoKeyProtocolLibGit.commit(commit);
         await commitAndPushContractsFolder(commit);
-        await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
-
+        await commitAndPush2KeyProtocolSrc(commit);
+        await commitAndPush2keyProtocolLibGit(commit);
         /**
          * Npm patch & public
          * Get version of package
@@ -342,23 +378,19 @@ async function deploy() {
                 await runProcess('npm', ['version', 'patch']);
             } else {
                 const { version } = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDist, 'package.json'), 'utf8'));
-                console.log(version);
                 const versionArray = version.split('-')[0].split('.');
-                console.log(versionArray);
                 const patch = parseInt(versionArray.pop(), 10) + 1;
-                console.log(patch);
                 versionArray.push(patch);
                 const newVersion = `${versionArray.join('.')}-${contractsStatus.current}`;
-                console.log(newVersion);
                 await runProcess('npm', ['version', newVersion])
             }
             const json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
             let npmVersionTag = json.version;
             console.log(npmVersionTag);
             process.chdir('../../');
-            await contractsGit.addTag('v'+npmVersionTag.toString());
-            await twoKeyProtocolLibGit.pushTags('origin');
-            await contractsGit.pushTags('origin');
+            // Push tags
+            await pushTagsToGithub(npmVersionTag);
+
             process.chdir(twoKeyProtocolDist);
             if (process.env.NODE_ENV === 'production') {
                 await runProcess('npm', ['publish']);
@@ -453,40 +485,16 @@ async function main() {
     contractsStatus = await contractsGit.status(); // Fetching branch
     const mode = process.argv[2];
     switch (mode) {
-        case '--update':
-            try {
-
-                // await restoreFromArchive();
-                const networks = process.argv[3].split(',');
-                await deployUpgrade(networks);
-                await generateSOLInterface();
-                process.exit(0);
-            } catch (err) {
-                process.exit(1);
-            }
-            break;
         case '--migrate':
             try {
                 const networks = process.argv[3].split(',');
-
                 await deployContracts(networks, false);
-
                 await generateSOLInterface();
                 process.exit(0);
             } catch (err) {
                 process.exit(1);
             }
             break;
-        case '--migration6': {
-            try {
-                const networks = process.argv[3].split(',');
-                await runDeployCampaignMigration(networks[0]);
-                process.exit(0);
-            } catch (e) {
-                console.log(e);
-            }
-            break;
-        }
         case '--generate':
             await generateSOLInterface();
             process.exit(0);
@@ -504,16 +512,6 @@ async function main() {
             await buildSubmodules(contracts);
             process.exit(0);
             break;
-        case '--mig':
-            getMigrationsList();
-            process.exit(0);
-            break;
-        case '--slack':
-            await slack_message('v1.1.49-develop','v1.1.47-develop','test');
-            process.exit(0);
-        case '--testfunction':
-            await getDiffBetweenLatestTags();
-            process.exit(0);
         default:
             await deploy();
             process.exit(0);
