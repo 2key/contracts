@@ -115,6 +115,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         numberOfPurchases++;
     }
 
+
     function bonusVestingOnly(
         uint _baseTokens,
         uint _bonusTokens,
@@ -144,6 +145,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
 
         conversionIdToPurchase[_conversionId] = purchase;
     }
+
 
     function baseAndBonusVesting(
         uint _baseTokens,
@@ -220,6 +222,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         require(IERC20(assetContractERC20).transfer(p.converter, p.portionAmounts[portion]));
     }
 
+
     function getPurchaseInformation(
         uint _conversionId
     )
@@ -238,6 +241,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
             unlockingDates
         );
     }
+
 
     function getAvailableAndLockedAndWithdrawnTokensPerConversion(
         uint _conversionId
@@ -271,6 +275,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         return (availableTokens, lockedTokens, withdrawnTokens);
     }
 
+
     function getStaticInfo()
     public
     view
@@ -286,6 +291,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         );
     }
 
+
     function getPortionsUnlockingDates()
     public
     view
@@ -297,6 +303,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         }
         return dates;
     }
+
 
     function getMetricsPerConverterPerCampaign(
         address _converter
@@ -327,6 +334,5 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
 
         return (totalUnitsConverterBought, totalAvailable, totalLocked, totalWithdrawn);
     }
-
 
 }
