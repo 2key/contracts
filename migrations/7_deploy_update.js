@@ -53,32 +53,42 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
             let newVersion = incrementVersion(version);
             //Console log the new version
             console.log('New version is: ' + newVersion);
-            // Add contract version
-            // This can be done only by core dev
+            // Add contract version. This can be done only by core dev
             let txHash = await instance.addVersion(contractName, newVersion, newImplementationAddress);
-
-            // --------------------------------------------------------------------------------
+            //Generate bytecode
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
 
-            //
-            // let congressInstance = await TwoKeyCongress.at(congressAddress);
-            //
-            // //Can be only done by members of congress
-            // let { logs } = await congressInstance.newProposal(
-            //     registryAddress,
-            //     0,
-            //     "Upgrade " + contractName + " to version: " + newVersion,
-            //     bytecodeForUpgradingThisContract
-            // );
-            //
-            // let {proposalID, beneficiary, weiAmount, description} = logs.find(l => l.event === 'ProposalAdded').args;
-            //
-            // console.log("Added proposal with ID : " + proposalID + " to do job " + description);
-
-            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
+            // await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
 
             resolve({
                 txHash //, txHash1
+            });
+        } catch (e) {
+            reject(e);
+        }
+    });
+});
+
+/**
+ * Upgrade contract on plasma network
+ * @type {function(*=, *=, *=)}
+ */
+const updateContractPlasma = (async (registryAddress, contractName, newImplementationAddress) => {
+    await new Promise(async(resolve,reject) => {
+        try {
+            let instance = await TwoKeyPlasmaSingletoneRegistry.at(registryAddress);
+            // Get current active version to be patched
+            let version = await instance.getLatestContractVersion(contractName);
+            // Incremented version
+            let newVersion = incrementVersion(version);
+            //Console log the new version
+            console.log('New version is: ' + newVersion);
+            // Add contract version. This can be done only by deployer
+            let txHash = await instance.addVersion(contractName, newVersion, newImplementationAddress);
+            // Upgrade contract --> can be only done by deployer
+            let txHash1 = await instance.upgradeContract(contractName, newVersion);
+            resolve({
+                txHash1
             });
         } catch (e) {
             reject(e);
@@ -118,7 +128,8 @@ let contractsArtifacts = {
     TwoKeyPlasmaRegistry,
     TwoKeyPlasmaEventsStorage,
     TwoKeyPlasmaMaintainersRegistryStorage,
-    TwoKeyPlasmaRegistryStorage
+    TwoKeyPlasmaRegistryStorage,
+    TwoKeyPlasmaSingletoneRegistry
 };
 
 
@@ -156,35 +167,45 @@ module.exports = async function deploy(deployer) {
     let congressAddress;
 
 
+    console.log(contractName);
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
+                console.log('Deployed to selected network');
                 newImplementationAddress = contractInstance.address;
             })
             .then(async () => {
+                console.log('Finding configuration files addresses for desired network');
+
                 let config = await getConfigForTheBranch();
 
                 if(deployer.network.startsWith('dev')) {
                     registryAddress = TwoKeySingletonesRegistry.address;
                     congressAddress = TwoKeyCongress.address;
                 }
-                else {
+                else if(deployer.network.startsWith('private') || deployer.network.startsWith('plasma')) {
+                    registryAddress = config.TwoKeyPlasmaSingletoneRegistry.networks[deployer.network_id].address;
+                }
+                else if(deployer.network.startsWith('public')) {
                     registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
                     congressAddress = config.TwoKeyCongress.networks[deployer.network_id].address;
                 }
 
-                console.log(registryAddress);
-
                 await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Updating contract: ' + contractName);
-                        let hashes = await updateContract(registryAddress, congressAddress, contractName, newImplementationAddress, deployer.network);
-                        resolve(hashes);
+                        let txHash;
+                        if(deployer.network.startsWith('private')) {
+                            txHash = await updateContractPlasma(registryAddress, contractName, newImplementationAddress);
+                        } else if (deployer.network.startsWith('public')){
+                            txHash = await updateContract(registryAddres, congressAddress, contractName, newImplementationAddress, deployer.network);
+                        }
+                        resolve(txHash);
                     } catch (e) {
                         reject(e);
                     }
                 })
             })
-
-        );
+        )
+        .then(() => true);
 };

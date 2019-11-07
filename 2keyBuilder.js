@@ -3,19 +3,14 @@ const path = require('path');
 const util = require('util');
 const tar = require('tar');
 const sha256 = require('js-sha256');
-const IPFS = require('ipfs-http-client');
 const LZString = require('lz-string');
-const prompt = require('prompt');
 const { networks: truffleNetworks } = require('./truffle');
-const axios = require('axios');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
-const { generateBytecodeForTokenTransfer, generateBytecodeForUpgrading } = require('./generateBytecode');
 const whitelist = require('./ContractDeploymentWhiteList.json');
 
 const readdir = util.promisify(fs.readdir);
-const buildPath = path.join(__dirname, 'build', 'contracts');
-const configPath = path.join(__dirname, 'configurationFiles');
+const buildPath = path.join(__dirname, 'build');
 const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
@@ -26,8 +21,8 @@ const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
+
 
 const branch_to_env = {
     "develop": "test",
@@ -35,41 +30,13 @@ const branch_to_env = {
     "master": "prod"
 };
 
-const env_to_channelCode = {
-    "test": "CKL4T7M2S",
-    "staging": "CKKRPNR55",
-    "prod": "CKHG3LS20"
-};
-
-
 const deployedTo = {};
 
 let contractsStatus;
 
-const sortMechanism = (versionA,versionB) => {
-    versionA = versionA.split('-')[0].split('.');
-    versionB = versionB.split('-')[0].split('.');
-    if (parseInt(versionA[0]) > parseInt(versionB[0]))
-        return 1;
-    if (parseInt(versionA[0]) < parseInt(versionB[0]))
-        return -1;
-    else {
-        if(parseInt(versionA[1]) > parseInt(versionB[1]))
-            return 1;
-        if(parseInt(versionA[1]) < parseInt(versionB[1]))
-            return -1;
-        else {
-            if(parseInt(versionA[2]) > parseInt(versionB[2]))
-                return 1;
-            if(parseInt(versionA[2]) < parseInt(versionB[2]))
-                return -1;
-            else return 0;
-        }
-    }
-};
 
 /**
- *
+ * Function which will get the difference between the latest tags depending on current branch we're using. Either on merge requests or on current branch.
  * @returns {Promise<void>}
  */
 const getDiffBetweenLatestTags = async () => {
@@ -79,20 +46,12 @@ const getDiffBetweenLatestTags = async () => {
     const tagsStaging = (await contractsGit.tags()).all.filter(item => item.endsWith('-staging')).sort(sortMechanism);
     let latestTagStaging = tagsStaging[tagsStaging.length-1];
 
-    // console.log('Latest tags: ' + latestTagDev + ' ... ' + latestTagStaging);
-
     let status = await contractsGit.status();
     let diffParams = status.current == 'staging' ? [latestTagDev,latestTagStaging] : [latestTagDev];
-
     let diffAllContracts = (await contractsGit.diffSummary(diffParams)).files.filter(item => item.file.endsWith('.sol')).map(item => item.file);
 
     let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/') || item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
-
-
-    console.log(singletonsChanged);
-    console.log(campaignsChanged);
-
     return [singletonsChanged, campaignsChanged];
 };
 
@@ -131,45 +90,16 @@ const getVersionsPath = (branch = true) => {
 };
 
 
-
-
-async function handleExit() {
-     console.log('Do you want to accept hard reset of branch? [Y/N]');
-     prompt.start();
-     prompt.get(['option'], async function (err, result) {
-        if(result.option == 'Y') {
-            await contractsGit.reset('hard');
-            await twoKeyProtocolLibGit.reset('hard');
-        } else {
-            console.log('Bye Bye');
-        }
-        process.exit();
-    });
-}
-
-// process.on('exit', handleExit);
-// process.on('SIGINT', handleExit);
-// process.on('SIGUSR1', handleExit);
-// process.on('SIGUSR2', handleExit);
-// process.on('uncaughtException', handleExit);
-
-
-
 const archiveBuild = () => new Promise(async (resolve, reject) => {
     try {
         if (fs.existsSync(buildPath)) {
-            console.log('Archiving current artifacts to', getBuildArchPath(), path.join(__dirname, 'build'));
+            console.log(__dirname, buildPath);
             tar.c({
-                gzip: true, sync: true, cwd: path.join(__dirname, 'build')
-            }, ['contracts'])
+                gzip: true, sync: true
+            },
+                ['build']
+            )
                 .pipe(fs.createWriteStream(getBuildArchPath()));
-
-
-            await rmDir(buildPath);
-            if (fs.existsSync(buildBackupPath)) {
-                console.log('Restoring artifacts from backup', buildBackupPath);
-                fs.renameSync(buildBackupPath, buildPath);
-            }
         }
         resolve();
     } catch (err) {
@@ -179,16 +109,10 @@ const archiveBuild = () => new Promise(async (resolve, reject) => {
 
 const restoreFromArchive = () => new Promise(async (resolve, reject) => {
     try {
-        if (fs.existsSync(buildPath)) {
-            console.log('Backup current artifacts to', buildBackupPath);
-            if (fs.existsSync(buildBackupPath)) {
-                await rmDir(buildBackupPath);
-            }
-            fs.renameSync(buildPath, buildBackupPath);
-        }
         if (fs.existsSync(getBuildArchPath())) {
             console.log('Excracting', getBuildArchPath());
-            tar.x({file: getBuildArchPath(), gzip: true, sync: true, cwd: path.join(__dirname, 'build')});
+            console.log(__dirname);
+            tar.x({file: getBuildArchPath(), gzip: true, sync: true, cwd: __dirname });
         }
         resolve()
     } catch (e) {
@@ -274,7 +198,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                 let obj = {
                     'NonSingletonsHash': nonSingletonsHash,
                     'SingletonsHash': singletonsHash,
-                    // 'NetworkHashes': keyHash,
                 };
 
 
@@ -299,49 +222,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
     }
 });
 
-
-/**
- * Parse all arguments to check all contracts to be updated
- * @param arguments
- * @returns {*}
- */
-const getAllContractsToBeUpdated = (arguments) => {
-    let len = arguments.length;
-    let contracts = [];
-    while(arguments[len] != 'update' && len > 0) {
-        contracts.push(arguments[len]);
-        len--;
-    }
-    if(len == 0) {
-        return [];
-    } else if(contracts.length > 1) {
-        return contracts.slice(1);
-    } else {
-        return contracts;
-    }
-};
-
-const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
-
-const ipfsGet = (hash) => new Promise((resolve, reject) => {
-    ipfs.get(hash, (err, res) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(res[0] && res[0].content.toString());
-        }
-    });
-});
-
-const ipfsAdd = (data) => new Promise((resolve, reject) => {
-    ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(res);
-        }
-    });
-});
 
 const updateIPFSHashes = async(contracts) => {
     const nonSingletonHash = contracts.contracts.singletons.NonSingletonsHash;
@@ -397,14 +277,15 @@ async function deployUpgrade(networks) {
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
         let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
-        console.log('Contracts to be updated: ' + singletonsToBeUpgraded.length);
-        // if(singletonsToBeUpgraded.length > 0) {
-        //     for(let j=0; j<singletonsToBeUpgraded.length; j++) {
-        //         /* eslint-disable no-await-in-loop */
-        //         console.log(networks[i], singletonsToBeUpgraded[j]);
-        //         await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-        //     }
-        // }
+        singletonsToBeUpgraded = ["TwoKeyPlasmaEvents"];
+        console.log(singletonsToBeUpgraded);
+        if(singletonsToBeUpgraded.length > 0) {
+            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+                /* eslint-disable no-await-in-loop */
+                console.log(networks[i], singletonsToBeUpgraded[j]);
+                await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+            }
+        }
         if(campaignsToBeUpgraded.length > 0) {
             await runDeployCampaignMigration(networks[i]);
         }
@@ -543,7 +424,6 @@ const test = () => new Promise(async (resolve, reject) => {
 
 const buildSubmodules = async(contracts) => {
     await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'), ['--config', './webpack.config.submodules.js', '--mode production', '--colors']);
-    // TODO: Add implementation for updateIPFSHashes
     await updateIPFSHashes(contracts);
 };
 

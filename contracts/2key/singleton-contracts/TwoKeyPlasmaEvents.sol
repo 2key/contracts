@@ -33,11 +33,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         string handle
     );
 
+    event Joined(
+        address campaignAddress,
+        address fromPlasma,
+        address toPlasma
+    );
 
-//    mapping(address => mapping(address => uint256)) public voted_yes;
-//    mapping(address => mapping(address => uint256)) public weighted_yes;
-//    mapping(address => mapping(address => uint256)) public voted_no;
-//    mapping(address => mapping(address => uint256)) public weighted_no;
 
     modifier onlyTwoKeyPlasmaRegistry {
         address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
@@ -163,23 +164,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return PROXY_STORAGE_CONTRACT.getBytes(keccak256("notes",c, _plasma));
     }
 
-//    function getInfluencersFromSig(address acquisitionCampaignAddress, address contractor, bytes sig) public view returns (address[]) {
-//        address old_address;
-//        assembly
-//        {
-//            old_address := mload(add(sig, 21))
-//        }
-//        old_address = plasmaOf(old_address);
-//        // validate an existing visit path from contractor address to the old_address
-//        require(test_path(acquisitionCampaignAddress, contractor, old_address), 'no path to contractor');
-//        address old_key = publicLinkKeyOf(acquisitionCampaignAddress, contractor, old_address);
-//        address[] memory influencers;
-//        address[] memory keys;
-//        uint8[] memory weights;
-//        address last_address = msg.sender;
-//        (influencers, keys, weights) = Call.recoverSig(sig, old_key, last_address);
-//        return influencers;
-//    }
 
     function joinCampaign(address campaignAddress, address contractor, bytes sig) public {
         address old_address;
@@ -203,9 +187,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         }
         bytes32 keyJoins = keccak256("campaign2numberOfJoins", campaignAddress);
         PROXY_STORAGE_CONTRACT.setUint(keyJoins, PROXY_STORAGE_CONTRACT.getUint(keyJoins) + 1);
+
         setJoinedFrom(campaignAddress, contractor, last_address, referrer);
         setVisitedFrom(campaignAddress, contractor, last_address, referrer);
         setVisitsList(campaignAddress, contractor, referrer, last_address);
+
+        emit Joined(campaignAddress, referrer, last_address);
     }
 
 

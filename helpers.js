@@ -4,6 +4,8 @@ const simpleGit = require('simple-git/promise');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
+const IPFS = require('ipfs-http-client');
+const ipfs = new IPFS('ipfs.2key.net', 443, { protocol: 'https' });
 
 require('dotenv').config({ path: path.resolve(process.cwd(), './.env-slack')});
 
@@ -281,6 +283,56 @@ const slack_message = async (newVersion, oldVersion, devEnv) => {
     );
 };
 
+/**
+ * Helper function to perform mechanism of sorting per vesion
+ * @param versionA
+ * @param versionB
+ * @returns {number}
+ */
+const sortMechanism = (versionA,versionB) => {
+    versionA = versionA.split('-')[0].split('.');
+    versionB = versionB.split('-')[0].split('.');
+    if (parseInt(versionA[0]) > parseInt(versionB[0]))
+        return 1;
+    if (parseInt(versionA[0]) < parseInt(versionB[0]))
+        return -1;
+    else {
+        if(parseInt(versionA[1]) > parseInt(versionB[1]))
+            return 1;
+        if(parseInt(versionA[1]) < parseInt(versionB[1]))
+            return -1;
+        else {
+            if(parseInt(versionA[2]) > parseInt(versionB[2]))
+                return 1;
+            if(parseInt(versionA[2]) < parseInt(versionB[2]))
+                return -1;
+            else return 0;
+        }
+    }
+};
+
+
+
+const ipfsGet = (hash) => new Promise((resolve, reject) => {
+    ipfs.get(hash, (err, res) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(res[0] && res[0].content.toString());
+        }
+    });
+});
+
+const ipfsAdd = (data) => new Promise((resolve, reject) => {
+    ipfs.add(ipfs.types.Buffer.from(data), { pin: deployment }, (err, res) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(res);
+        }
+    });
+});
+
 
 
 
@@ -296,5 +348,8 @@ module.exports = {
     slack_message_proposal_created,
     slack_message,
     checkIsHardRedeploy,
-    checkArgumentsForUpdate
+    checkArgumentsForUpdate,
+    sortMechanism,
+    ipfsAdd,
+    ipfsGet
 };
