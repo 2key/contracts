@@ -90,35 +90,9 @@ const getVersionsPath = (branch = true) => {
 };
 
 
-const archiveBuild = () => new Promise(async (resolve, reject) => {
-    try {
-        if (fs.existsSync(buildPath)) {
-            console.log(__dirname, buildPath);
-            tar.c({
-                gzip: true, sync: true
-            },
-                ['build']
-            )
-                .pipe(fs.createWriteStream(getBuildArchPath()));
-        }
-        resolve();
-    } catch (err) {
-        reject(err);
-    }
-});
+const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath() }, ['build']);
 
-const restoreFromArchive = () => new Promise(async (resolve, reject) => {
-    try {
-        if (fs.existsSync(getBuildArchPath())) {
-            console.log('Excracting', getBuildArchPath());
-            console.log(__dirname);
-            tar.x({file: getBuildArchPath(), gzip: true, sync: true, cwd: __dirname });
-        }
-        resolve()
-    } catch (e) {
-        reject(e);
-    }
-});
+const restoreFromArchive = () => tar.x({file: getBuildArchPath(), gzip: true });
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
     console.log('Generating abi', deployedTo);
