@@ -1,0 +1,406 @@
+{
+  "contractName": "UpgradeabilityStorage",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "implementation",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060ee8061001f6000396000f300608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680635c60da1b146044575b600080fd5b348015604f57600080fd5b5060566098565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6000600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff169050905600a165627a7a7230582079e602714e7427abd0e77e25c1b617ea16b6b859a48c7ba0044ac070068c5ced0029",
+  "deployedBytecode": "0x608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680635c60da1b146044575b600080fd5b348015604f57600080fd5b5060566098565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6000600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff169050905600a165627a7a7230582079e602714e7427abd0e77e25c1b617ea16b6b859a48c7ba0044ac070068c5ced0029",
+  "sourceMap": "218:420:88:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;218:420:88;;;;;;;",
+  "deployedSourceMap": "218:420:88:-;;;;;;;;;;;;;;;;;;;;;;;;541:95;;8:9:-1;5:2;;;30:1;27;20:12;5:2;541:95:88;;;;;;;;;;;;;;;;;;;;;;;;;;;;588:7;614:15;;;;;;;;;;;607:22;;541:95;:::o",
+  "source": "pragma solidity ^0.4.24;\n\nimport '../interfaces/ITwoKeySingletonesRegistry.sol';\n\n/**\n * @author Nikola Madjarevic\n * @dev This contract holds all the necessary state variables to support the upgrade functionality\n */\ncontract UpgradeabilityStorage {\n    // Versions registry\n    ITwoKeySingletonesRegistry internal registry;\n\n    // Address of the current implementation\n    address internal _implementation;\n\n    /**\n    * @dev Tells the address of the current implementation\n    * @return address of the current implementation\n    */\n    function implementation() public view returns (address) {\n        return _implementation;\n    }\n}\n",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/upgradability/UpgradabilityStorage.sol",
+  "ast": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/upgradability/UpgradabilityStorage.sol",
+    "exportedSymbols": {
+      "UpgradeabilityStorage": [
+        22745
+      ]
+    },
+    "id": 22746,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 22731,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:88"
+      },
+      {
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeySingletonesRegistry.sol",
+        "file": "../interfaces/ITwoKeySingletonesRegistry.sol",
+        "id": 22732,
+        "nodeType": "ImportDirective",
+        "scope": 22746,
+        "sourceUnit": 11026,
+        "src": "26:54:88",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@author Nikola Madjarevic\n@dev This contract holds all the necessary state variables to support the upgrade functionality",
+        "fullyImplemented": true,
+        "id": 22745,
+        "linearizedBaseContracts": [
+          22745
+        ],
+        "name": "UpgradeabilityStorage",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 22734,
+            "name": "registry",
+            "nodeType": "VariableDeclaration",
+            "scope": 22745,
+            "src": "280:44:88",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_ITwoKeySingletonesRegistry_$11025",
+              "typeString": "contract ITwoKeySingletonesRegistry"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 22733,
+              "name": "ITwoKeySingletonesRegistry",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 11025,
+              "src": "280:26:88",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ITwoKeySingletonesRegistry_$11025",
+                "typeString": "contract ITwoKeySingletonesRegistry"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "constant": false,
+            "id": 22736,
+            "name": "_implementation",
+            "nodeType": "VariableDeclaration",
+            "scope": 22745,
+            "src": "376:32:88",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 22735,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "376:7:88",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 22743,
+              "nodeType": "Block",
+              "src": "597:39:88",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 22741,
+                    "name": "_implementation",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 22736,
+                    "src": "614:15:88",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "functionReturnParameters": 22740,
+                  "id": 22742,
+                  "nodeType": "Return",
+                  "src": "607:22:88"
+                }
+              ]
+            },
+            "documentation": "@dev Tells the address of the current implementation\n@return address of the current implementation",
+            "id": 22744,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "implementation",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 22737,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "564:2:88"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 22740,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 22739,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 22744,
+                  "src": "588:7:88",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 22738,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "588:7:88",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "587:9:88"
+            },
+            "scope": 22745,
+            "src": "541:95:88",
+            "stateMutability": "view",
+            "superFunction": 22710,
+            "visibility": "public"
+          }
+        ],
+        "scope": 22746,
+        "src": "218:420:88"
+      }
+    ],
+    "src": "0:639:88"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/upgradability/UpgradabilityStorage.sol",
+    "exportedSymbols": {
+      "UpgradeabilityStorage": [
+        22745
+      ]
+    },
+    "id": 22746,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 22731,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:88"
+      },
+      {
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeySingletonesRegistry.sol",
+        "file": "../interfaces/ITwoKeySingletonesRegistry.sol",
+        "id": 22732,
+        "nodeType": "ImportDirective",
+        "scope": 22746,
+        "sourceUnit": 11026,
+        "src": "26:54:88",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@author Nikola Madjarevic\n@dev This contract holds all the necessary state variables to support the upgrade functionality",
+        "fullyImplemented": true,
+        "id": 22745,
+        "linearizedBaseContracts": [
+          22745
+        ],
+        "name": "UpgradeabilityStorage",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 22734,
+            "name": "registry",
+            "nodeType": "VariableDeclaration",
+            "scope": 22745,
+            "src": "280:44:88",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_ITwoKeySingletonesRegistry_$11025",
+              "typeString": "contract ITwoKeySingletonesRegistry"
+            },
+            "typeName": {
+              "contractScope": null,
+              "id": 22733,
+              "name": "ITwoKeySingletonesRegistry",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 11025,
+              "src": "280:26:88",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ITwoKeySingletonesRegistry_$11025",
+                "typeString": "contract ITwoKeySingletonesRegistry"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "constant": false,
+            "id": 22736,
+            "name": "_implementation",
+            "nodeType": "VariableDeclaration",
+            "scope": 22745,
+            "src": "376:32:88",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 22735,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "376:7:88",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 22743,
+              "nodeType": "Block",
+              "src": "597:39:88",
+              "statements": [
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "id": 22741,
+                    "name": "_implementation",
+                    "nodeType": "Identifier",
+                    "overloadedDeclarations": [],
+                    "referencedDeclaration": 22736,
+                    "src": "614:15:88",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "functionReturnParameters": 22740,
+                  "id": 22742,
+                  "nodeType": "Return",
+                  "src": "607:22:88"
+                }
+              ]
+            },
+            "documentation": "@dev Tells the address of the current implementation\n@return address of the current implementation",
+            "id": 22744,
+            "implemented": true,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "implementation",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 22737,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "564:2:88"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 22740,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 22739,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 22744,
+                  "src": "588:7:88",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 22738,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "588:7:88",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "587:9:88"
+            },
+            "scope": 22745,
+            "src": "541:95:88",
+            "stateMutability": "view",
+            "superFunction": 22710,
+            "visibility": "public"
+          }
+        ],
+        "scope": 22746,
+        "src": "218:420:88"
+      }
+    ],
+    "src": "0:639:88"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2019-11-07T08:14:37.339Z"
+}

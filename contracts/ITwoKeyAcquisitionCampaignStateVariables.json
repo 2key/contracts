@@ -1,0 +1,485 @@
+{
+  "contractName": "ITwoKeyAcquisitionCampaignStateVariables",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "twoKeyAcquisitionLogicHandler",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "moderator",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "me",
+          "type": "address"
+        }
+      ],
+      "name": "publicLinkKeyOf",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "conversionHandler",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "twoKeySingletonesRegistry",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "contractor",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getInventoryBalance",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\nimport \"./ITwoKeyCampaignPublicAddresses.sol\";\n\n/**\n * @author Nikola Madjarevic\n * Created at 2/4/19\n */\ncontract ITwoKeyAcquisitionCampaignStateVariables is ITwoKeyCampaignPublicAddresses {\n    address public twoKeyAcquisitionLogicHandler;\n    address public conversionHandler;\n\n    function getInventoryBalance() public view returns (uint);\n}\n",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol",
+  "ast": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol",
+    "exportedSymbols": {
+      "ITwoKeyAcquisitionCampaignStateVariables": [
+        9509
+      ]
+    },
+    "id": 9510,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9496,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:23"
+      },
+      {
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyCampaignPublicAddresses.sol",
+        "file": "./ITwoKeyCampaignPublicAddresses.sol",
+        "id": 9497,
+        "nodeType": "ImportDirective",
+        "scope": 9510,
+        "sourceUnit": 9630,
+        "src": "25:46:23",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 9498,
+              "name": "ITwoKeyCampaignPublicAddresses",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 9629,
+              "src": "184:30:23",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ITwoKeyCampaignPublicAddresses_$9629",
+                "typeString": "contract ITwoKeyCampaignPublicAddresses"
+              }
+            },
+            "id": 9499,
+            "nodeType": "InheritanceSpecifier",
+            "src": "184:30:23"
+          }
+        ],
+        "contractDependencies": [
+          9629
+        ],
+        "contractKind": "contract",
+        "documentation": "@author Nikola Madjarevic\nCreated at 2/4/19",
+        "fullyImplemented": false,
+        "id": 9509,
+        "linearizedBaseContracts": [
+          9509,
+          9629
+        ],
+        "name": "ITwoKeyAcquisitionCampaignStateVariables",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 9501,
+            "name": "twoKeyAcquisitionLogicHandler",
+            "nodeType": "VariableDeclaration",
+            "scope": 9509,
+            "src": "221:44:23",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 9500,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "221:7:23",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 9503,
+            "name": "conversionHandler",
+            "nodeType": "VariableDeclaration",
+            "scope": 9509,
+            "src": "271:32:23",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 9502,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "271:7:23",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 9508,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getInventoryBalance",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9504,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "338:2:23"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 9507,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9506,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9508,
+                  "src": "362:4:23",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9505,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "362:4:23",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "361:6:23"
+            },
+            "scope": 9509,
+            "src": "310:58:23",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 9510,
+        "src": "131:239:23"
+      }
+    ],
+    "src": "0:371:23"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyAcquisitionCampaignStateVariables.sol",
+    "exportedSymbols": {
+      "ITwoKeyAcquisitionCampaignStateVariables": [
+        9509
+      ]
+    },
+    "id": 9510,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9496,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:23"
+      },
+      {
+        "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyCampaignPublicAddresses.sol",
+        "file": "./ITwoKeyCampaignPublicAddresses.sol",
+        "id": 9497,
+        "nodeType": "ImportDirective",
+        "scope": 9510,
+        "sourceUnit": 9630,
+        "src": "25:46:23",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [
+          {
+            "arguments": null,
+            "baseName": {
+              "contractScope": null,
+              "id": 9498,
+              "name": "ITwoKeyCampaignPublicAddresses",
+              "nodeType": "UserDefinedTypeName",
+              "referencedDeclaration": 9629,
+              "src": "184:30:23",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_ITwoKeyCampaignPublicAddresses_$9629",
+                "typeString": "contract ITwoKeyCampaignPublicAddresses"
+              }
+            },
+            "id": 9499,
+            "nodeType": "InheritanceSpecifier",
+            "src": "184:30:23"
+          }
+        ],
+        "contractDependencies": [
+          9629
+        ],
+        "contractKind": "contract",
+        "documentation": "@author Nikola Madjarevic\nCreated at 2/4/19",
+        "fullyImplemented": false,
+        "id": 9509,
+        "linearizedBaseContracts": [
+          9509,
+          9629
+        ],
+        "name": "ITwoKeyAcquisitionCampaignStateVariables",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 9501,
+            "name": "twoKeyAcquisitionLogicHandler",
+            "nodeType": "VariableDeclaration",
+            "scope": 9509,
+            "src": "221:44:23",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 9500,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "221:7:23",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 9503,
+            "name": "conversionHandler",
+            "nodeType": "VariableDeclaration",
+            "scope": 9509,
+            "src": "271:32:23",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 9502,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "271:7:23",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 9508,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": true,
+            "modifiers": [],
+            "name": "getInventoryBalance",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9504,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "338:2:23"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 9507,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9506,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9508,
+                  "src": "362:4:23",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 9505,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "362:4:23",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "361:6:23"
+            },
+            "scope": 9509,
+            "src": "310:58:23",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 9510,
+        "src": "131:239:23"
+      }
+    ],
+    "src": "0:371:23"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.25+commit.59dbf8f1.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.2",
+  "updatedAt": "2019-07-23T12:52:33.012Z"
+}

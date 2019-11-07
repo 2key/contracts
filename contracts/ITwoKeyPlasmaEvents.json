@@ -1,0 +1,464 @@
+{
+  "contractName": "ITwoKeyPlasmaEvents",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_plasma",
+          "type": "address"
+        },
+        {
+          "name": "_ethereum",
+          "type": "address"
+        }
+      ],
+      "name": "emitPlasma2EthereumEvent",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_plasma",
+          "type": "address"
+        },
+        {
+          "name": "_handle",
+          "type": "string"
+        }
+      ],
+      "name": "emitPlasma2HandleEvent",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\n\ncontract ITwoKeyPlasmaEvents {\n    function emitPlasma2EthereumEvent(\n        address _plasma,\n        address _ethereum\n    )\n    public;\n\n    function emitPlasma2HandleEvent(\n        address _plasma,\n        string _handle\n    )\n    public;\n}\n",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyPlasmaEvents.sol",
+  "ast": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyPlasmaEvents.sol",
+    "exportedSymbols": {
+      "ITwoKeyPlasmaEvents": [
+        7733
+      ]
+    },
+    "id": 7734,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 7718,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:33"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 7733,
+        "linearizedBaseContracts": [
+          7733
+        ],
+        "name": "ITwoKeyPlasmaEvents",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7725,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "emitPlasma2EthereumEvent",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7723,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7720,
+                  "name": "_plasma",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7725,
+                  "src": "104:15:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7719,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "104:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7722,
+                  "name": "_ethereum",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7725,
+                  "src": "129:17:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7721,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "129:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "94:58:33"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 7724,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "163:0:33"
+            },
+            "scope": 7733,
+            "src": "61:103:33",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7732,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "emitPlasma2HandleEvent",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7730,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7727,
+                  "name": "_plasma",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7732,
+                  "src": "211:15:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7726,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "211:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7729,
+                  "name": "_handle",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7732,
+                  "src": "236:14:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 7728,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "236:6:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "201:55:33"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 7731,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "267:0:33"
+            },
+            "scope": 7733,
+            "src": "170:98:33",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7734,
+        "src": "26:244:33"
+      }
+    ],
+    "src": "0:271:33"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/ITwoKeyPlasmaEvents.sol",
+    "exportedSymbols": {
+      "ITwoKeyPlasmaEvents": [
+        7733
+      ]
+    },
+    "id": 7734,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 7718,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:33"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 7733,
+        "linearizedBaseContracts": [
+          7733
+        ],
+        "name": "ITwoKeyPlasmaEvents",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7725,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "emitPlasma2EthereumEvent",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7723,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7720,
+                  "name": "_plasma",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7725,
+                  "src": "104:15:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7719,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "104:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7722,
+                  "name": "_ethereum",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7725,
+                  "src": "129:17:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7721,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "129:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "94:58:33"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 7724,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "163:0:33"
+            },
+            "scope": 7733,
+            "src": "61:103:33",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 7732,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "emitPlasma2HandleEvent",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 7730,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 7727,
+                  "name": "_plasma",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7732,
+                  "src": "211:15:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 7726,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "211:7:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 7729,
+                  "name": "_handle",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 7732,
+                  "src": "236:14:33",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_string_memory_ptr",
+                    "typeString": "string"
+                  },
+                  "typeName": {
+                    "id": 7728,
+                    "name": "string",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "236:6:33",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_string_storage_ptr",
+                      "typeString": "string"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "201:55:33"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 7731,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "267:0:33"
+            },
+            "scope": 7733,
+            "src": "170:98:33",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7734,
+        "src": "26:244:33"
+      }
+    ],
+    "src": "0:271:33"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2019-10-21T13:35:19.040Z"
+}

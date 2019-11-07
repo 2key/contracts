@@ -1,0 +1,392 @@
+{
+  "contractName": "IMaintainingPattern",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_maintainers",
+          "type": "address[]"
+        }
+      ],
+      "name": "addMaintainers",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_maintainers",
+          "type": "address[]"
+        }
+      ],
+      "name": "removeMaintainers",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.4.24;\n/**\n * @author Nikola Madjarevic\n * Created at 12/25/18\n */\ncontract IMaintainingPattern {\n    function addMaintainers(address [] _maintainers) public;\n    function removeMaintainers(address [] _maintainers) public;\n}\n",
+  "sourcePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/IMaintainingPattern.sol",
+  "ast": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/IMaintainingPattern.sol",
+    "exportedSymbols": {
+      "IMaintainingPattern": [
+        9656
+      ]
+    },
+    "id": 9657,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9643,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:27"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@author Nikola Madjarevic\nCreated at 12/25/18",
+        "fullyImplemented": false,
+        "id": 9656,
+        "linearizedBaseContracts": [
+          9656
+        ],
+        "name": "IMaintainingPattern",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 9649,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "addMaintainers",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9647,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9646,
+                  "name": "_maintainers",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9649,
+                  "src": "144:23:27",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9644,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "144:7:27",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 9645,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "144:10:27",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "143:25:27"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 9648,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "175:0:27"
+            },
+            "scope": 9656,
+            "src": "120:56:27",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 9655,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "removeMaintainers",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9653,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9652,
+                  "name": "_maintainers",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9655,
+                  "src": "208:23:27",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9650,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "208:7:27",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 9651,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "208:10:27",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "207:25:27"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 9654,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "239:0:27"
+            },
+            "scope": 9656,
+            "src": "181:59:27",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 9657,
+        "src": "85:157:27"
+      }
+    ],
+    "src": "0:243:27"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/nikolamadjarevic/Desktop/2key/contracts/contracts/2key/interfaces/IMaintainingPattern.sol",
+    "exportedSymbols": {
+      "IMaintainingPattern": [
+        9656
+      ]
+    },
+    "id": 9657,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 9643,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:27"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": "@author Nikola Madjarevic\nCreated at 12/25/18",
+        "fullyImplemented": false,
+        "id": 9656,
+        "linearizedBaseContracts": [
+          9656
+        ],
+        "name": "IMaintainingPattern",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": null,
+            "id": 9649,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "addMaintainers",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9647,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9646,
+                  "name": "_maintainers",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9649,
+                  "src": "144:23:27",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9644,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "144:7:27",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 9645,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "144:10:27",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "143:25:27"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 9648,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "175:0:27"
+            },
+            "scope": 9656,
+            "src": "120:56:27",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": null,
+            "id": 9655,
+            "implemented": false,
+            "isConstructor": false,
+            "isDeclaredConst": false,
+            "modifiers": [],
+            "name": "removeMaintainers",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 9653,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 9652,
+                  "name": "_maintainers",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 9655,
+                  "src": "208:23:27",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 9650,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "208:7:27",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 9651,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "208:10:27",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "207:25:27"
+            },
+            "payable": false,
+            "returnParameters": {
+              "id": 9654,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "239:0:27"
+            },
+            "scope": 9656,
+            "src": "181:59:27",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 9657,
+        "src": "85:157:27"
+      }
+    ],
+    "src": "0:243:27"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.1",
+  "updatedAt": "2019-10-15T14:58:15.724Z"
+}
