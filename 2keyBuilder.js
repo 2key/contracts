@@ -284,8 +284,7 @@ const pushTagsToGithub = (async (npmVersionTag) => {
     await contractsGit.addTag('v'+npmVersionTag.toString());
     await contractsGit.pushTags('origin');
 
-    // await twoKeyProtocolLibGit.addTag('v'+npmVersionTag.toString());
-    // await twoKeyProtocolLibGit.pushTags('origin');
+    await twoKeyProtocolLibGit.pushTags('origin');
 
     await twoKeyProtocolSrcGit.addTag('v'+npmVersionTag.toString());
     await twoKeyProtocolSrcGit.pushTags('origin');
