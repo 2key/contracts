@@ -191,7 +191,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         setJoinedFrom(campaignAddress, contractor, last_address, referrer);
         setVisitedFrom(campaignAddress, contractor, last_address, referrer);
         setVisitsList(campaignAddress, contractor, referrer, last_address);
-        //Emit joined event
+        //Emit joined event -->
         emit Joined(campaignAddress, plasmaOf(referrer), last_address);
     }
 
