@@ -39,6 +39,11 @@ const Call = artifacts.require('Call');
 const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created, checkArgumentsForUpdate } = require('../helpers');
 const { generateBytecodeForUpgrading } = require('../generateBytecode');
 
+const fs = require('fs');
+const path = require('path');
+const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
+
+
 /**
  * Function to perform all necessary logic to update smart contract
  * @type {function(*, *=, *=)}
@@ -46,6 +51,16 @@ const { generateBytecodeForUpgrading } = require('../generateBytecode');
 const updateContract = (async (registryAddress, congressAddress, contractName, newImplementationAddress, network) => {
     await new Promise(async(resolve,reject) => {
         try {
+
+            //Open proxyAddresses file
+            let fileObject = {};
+            if (fs.existsSync(proxyFile)) {
+                fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
+            }
+
+            //Override logic address implementation
+            fileObject[contractName]["3"].implementationAddressLogic = newImplementationAddress;
+
             let instance = await TwoKeySingletonesRegistry.at(registryAddress);
             // Get current active version to be patched
             let version = await instance.getLatestContractVersion(contractName);
@@ -77,6 +92,15 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
 const updateContractPlasma = (async (registryAddress, contractName, newImplementationAddress) => {
     await new Promise(async(resolve,reject) => {
         try {
+            //Open proxyAddresses file
+            let fileObject = {};
+            if (fs.existsSync(proxyFile)) {
+                fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
+            }
+
+            //Override logic address implementation
+            fileObject[contractName]["181"].implementationAddressLogic = newImplementationAddress;
+
             let instance = await TwoKeyPlasmaSingletoneRegistry.at(registryAddress);
             // Get current active version to be patched
             let version = await instance.getLatestContractVersion(contractName);
