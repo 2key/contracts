@@ -61,6 +61,8 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
             //Override logic address implementation
             fileObject[contractName]["3"].implementationAddressLogic = newImplementationAddress;
 
+            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+
             let instance = await TwoKeySingletonesRegistry.at(registryAddress);
             // Get current active version to be patched
             let version = await instance.getLatestContractVersion(contractName);
@@ -100,6 +102,7 @@ const updateContractPlasma = (async (registryAddress, contractName, newImplement
 
             //Override logic address implementation
             fileObject[contractName]["181"].implementationAddressLogic = newImplementationAddress;
+            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
 
             let instance = await TwoKeyPlasmaSingletoneRegistry.at(registryAddress);
             // Get current active version to be patched
