@@ -66,9 +66,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     )
     public
     {
-        require(numberOfVestingPortions > 0);
+        require(values[4] > 0 && values[4] <= 100);
         require(initialized == false);
-        require(values[4] <= 100);
 
         tokenDistributionDate = values[2];
         maxDistributionDateShiftInDays = values[3];
