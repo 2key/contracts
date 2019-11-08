@@ -14,6 +14,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     //Safe math for math operations
     using SafeMath for *;
 
+    //Enumerator for vesting amounts
     enum VestingAmount {BONUS, BASE_AND_BONUS}
     VestingAmount vestingAmount;
 
