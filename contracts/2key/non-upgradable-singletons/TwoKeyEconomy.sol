@@ -35,7 +35,7 @@ contract TwoKeyEconomy is StandardTokenModified {
         address twoKeyLongTermTokenPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyLongTermTokenPool");
 
-        totalSupply_= 1000000000000000000000000000; // 1B tokens total minted supply
+        totalSupply_= 600000000000000000000000000; // 600M tokens total minted supply
 
 
         // Updating balances
