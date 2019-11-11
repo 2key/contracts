@@ -6,7 +6,7 @@ const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeyCongress = artifacts.require('TwoKeyCongress');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
-const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
+const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
 const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
@@ -104,12 +104,12 @@ module.exports = function deploy(deployer) {
 
             await new Promise(async(resolve,reject) => {
                 try {
-                    console.log('Setting initial parameters in contract TwoKeyCommunityTokenPool');
-                    let instance = await TwoKeyCommunityTokenPool.at(contractNameToProxyAddress["TwoKeyCommunityTokenPool"]);
+                    console.log('Setting initial parameters in contract TwoKeyParticipationMiningPool');
+                    let instance = await TwoKeyParticipationMiningPool.at(contractNameToProxyAddress["TwoKeyParticipationMiningPool"]);
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         TwoKeyEconomy.address,
-                        contractNameToProxyAddress["TwoKeyCommunityTokenPoolStorage"]
+                        contractNameToProxyAddress["TwoKeyParticipationMiningPoolStorage"]
                     );
                     resolve(txHash);
                 } catch (e) {
@@ -141,7 +141,7 @@ module.exports = function deploy(deployer) {
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         TwoKeyEconomy.address,
-                        contractNameToProxyAddress["TwoKeyCommunityTokenPool"],
+                        contractNameToProxyAddress["TwoKeyParticipationMiningPool"],
                         contractNameToProxyAddress["TwoKeyDeepFreezeTokenPoolStorage"]
                     );
                     resolve(txHash);

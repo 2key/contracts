@@ -8,7 +8,7 @@ const TwoKeyCongressMembersRegistry = artifacts.require('TwoKeyCongressMembersRe
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
-const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
+const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
 const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
@@ -28,7 +28,7 @@ const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
 const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
 const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
 const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
-const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenPoolStorage');
+const TwoKeyParticipationMiningPoolStorage = artifacts.require('TwoKeyParticipationMiningPoolStorage');
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
@@ -69,7 +69,7 @@ module.exports = function deploy(deployer) {
         TwoKeyEventSourceStorage,
         TwoKeyRegistryStorage,
         TwoKeyExchangeRateStorage,
-        TwoKeyCommunityTokenPoolStorage,
+        TwoKeyParticipationMiningPoolStorage,
         TwoKeyDeepFreezeTokenPoolStorage,
         TwoKeyBaseReputationRegistryStorage,
         TwoKeyLongTermTokenPoolStorage,
@@ -85,7 +85,7 @@ module.exports = function deploy(deployer) {
          TwoKeyEventSource,
          TwoKeyRegistry,
          TwoKeyExchangeRateContract,
-         TwoKeyCommunityTokenPool,
+         TwoKeyParticipationMiningPool,
          TwoKeyDeepFreezeTokenPool,
          TwoKeyBaseReputationRegistry,
          TwoKeyLongTermTokenPool,

@@ -2,12 +2,12 @@ pragma solidity ^0.4.24;
 
 import "./TokenPool.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
-import "../interfaces/storage-contracts/ITwoKeyCommunityTokenPoolStorage.sol";
+import "../interfaces/storage-contracts/ITwoKeyParticipationMiningPoolStorage.sol";
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
-contract TwoKeyCommunityTokenPool is TokenPool {
+contract TwoKeyParticipationMiningPool is TokenPool {
 
     /**
      * Constant keys for storage contract
@@ -20,7 +20,7 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
 
 
-    ITwoKeyCommunityTokenPoolStorage public PROXY_STORAGE_CONTRACT;
+    ITwoKeyParticipationMiningPoolStorage public PROXY_STORAGE_CONTRACT;
 
     /**
      * @notice Modifier to restrict calls only to TwoKeyAdmin or
@@ -43,9 +43,10 @@ contract TwoKeyCommunityTokenPool is TokenPool {
 
         setInitialParameters(_twoKeyEconomy, TWO_KEY_SINGLETON_REGISTRY);
 
-        PROXY_STORAGE_CONTRACT = ITwoKeyCommunityTokenPoolStorage(_proxyStorage);
+        PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
 
-        setUint(_totalAmount2keys, 200000000);
+        //TODO: BUG wrong values in WEI
+        setUint(_totalAmount2keys, (120000000) * (10**18));
         setUint(_annualTransferAmountLimit, 20000000);
         setUint(_startingDate, block.timestamp);
 
@@ -104,7 +105,6 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         super.transferTokens(_receiver,_amount);
 
         PROXY_STORAGE_CONTRACT.setUint(keyTransferedThisYear, transferedThisYear + _amount);
-
     }
 
     /**
