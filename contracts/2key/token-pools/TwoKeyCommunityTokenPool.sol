@@ -9,34 +9,49 @@ import "../interfaces/storage-contracts/ITwoKeyCommunityTokenPoolStorage.sol";
  */
 contract TwoKeyCommunityTokenPool is TokenPool {
 
+    /**
+     * Constant keys for storage contract
+     */
+    string constant _totalAmount2keys = "totalAmount2keys";
+    string constant _annualTransferAmountLimit = "annualTransferAmountLimit";
+    string constant _startingDate = "startingDate";
+    string constant _yearToStartingDate = "yearToStartingDate";
+    string constant _yearToTransferedThisYear = "yearToTransferedThisYear";
+    string constant _isAddressWhitelisted = "isAddressWhitelisted";
+
+
     ITwoKeyCommunityTokenPoolStorage public PROXY_STORAGE_CONTRACT;
 
-
-    mapping(uint => uint) yearToStartingDate;
-    mapping(uint => uint) yearToTransferedThisYear;
-
-
+    /**
+     * @notice Modifier to restrict calls only to TwoKeyAdmin or
+     * some of whitelisted addresses inside this contract
+     */
+    modifier onlyTwoKeyAdminOrWhitelistedAddress {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        require(msg.sender == twoKeyAdmin || isAddressWhitelisted(msg.sender));
+        _;
+    }
 
     function setInitialParams(
         address twoKeySingletonesRegistry,
-        address _erc20Address,
+        address _twoKeyEconomy,
         address _proxyStorage
     )
     external
     {
         require(initialized == false);
 
-        setInitialParameters(_erc20Address, TWO_KEY_SINGLETON_REGISTRY);
+        setInitialParameters(_twoKeyEconomy, TWO_KEY_SINGLETON_REGISTRY);
 
         PROXY_STORAGE_CONTRACT = ITwoKeyCommunityTokenPoolStorage(_proxyStorage);
 
-        setUint("totalAmount2keys", 200000000);
-        setUint("annualTransferAmountLimit", 20000000);
-        setUint("startingDate", block.timestamp);
+        setUint(_totalAmount2keys, 200000000);
+        setUint(_annualTransferAmountLimit, 20000000);
+        setUint(_startingDate, block.timestamp);
 
         for(uint i=1; i<=10; i++) {
-            bytes32 key1 = keccak256("yearToStartingDate", i);
-            bytes32 key2 = keccak256("yearToTransferedThisYear", i);
+            bytes32 key1 = keccak256(_yearToStartingDate, i);
+            bytes32 key2 = keccak256(_yearToTransferedThisYear, i);
 
             PROXY_STORAGE_CONTRACT.setUint(key1, block.timestamp + i*(1 years));
             PROXY_STORAGE_CONTRACT.setUint(key2, 0);
@@ -47,6 +62,7 @@ contract TwoKeyCommunityTokenPool is TokenPool {
 
     /**
      * @notice Function to validate if the user is properly registered in TwoKeyRegistry
+     * @param _receiver is the address we want to send tokens to
      */
     function validateRegistrationOfReceiver(
         address _receiver
@@ -63,14 +79,14 @@ contract TwoKeyCommunityTokenPool is TokenPool {
      * @notice Function which does transfer with special requirements with annual limit
      * @param _receiver is the receiver of the tokens
      * @param _amount is the amount of tokens sent
-     * @dev Only TwoKeyAdmin contract can issue this call
+     * @dev Only TwoKeyAdmin or Whitelisted address contract can issue this call
      */
     function transferTokensToAddress(
         address _receiver,
         uint _amount
     )
     public
-    onlyTwoKeyAdmin
+    onlyTwoKeyAdminOrWhitelistedAddress
     {
         require(validateRegistrationOfReceiver(_receiver) == true);
         require(_amount > 0);
@@ -78,8 +94,8 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         uint year = checkInWhichYearIsTheTransfer();
         require(year >= 1 && year <= 10);
 
-        bytes32 keyTransferedThisYear = keccak256("yearToTransferedThisYear",year);
-        bytes32 keyAnnualTransferAmountLimit = keccak256("annualTransferAmountLimit");
+        bytes32 keyTransferedThisYear = keccak256(_yearToTransferedThisYear,year);
+        bytes32 keyAnnualTransferAmountLimit = keccak256(_annualTransferAmountLimit);
 
         uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keyTransferedThisYear);
         uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
@@ -91,12 +107,63 @@ contract TwoKeyCommunityTokenPool is TokenPool {
 
     }
 
+    /**
+     * @notice Function which can only be called by TwoKeyAdmin contract
+     * to add new whitelisted addresses to the contract. Whitelisted address
+     * can send tokens out of this contract
+     * @param _newWhitelistedAddress is the new whitelisted address we want to add
+     */
+    function addWhitelistedAddress(
+        address _newWhitelistedAddress
+    )
+    public
+    onlyTwoKeyAdmin
+    {
+        bytes32 keyHash = keccak256(_isAddressWhitelisted,_newWhitelistedAddress);
+        PROXY_STORAGE_CONTRACT.setBool(keyHash, true);
+    }
+
+    /**
+     * @notice Function which can only be called by TwoKeyAdmin contract
+     * to remove any whitelisted address from the contract.
+     * @param _addressToBeRemovedFromWhitelist is the new whitelisted address we want to remove
+     */
+    function removeWhitelistedAddress(
+        address _addressToBeRemovedFromWhitelist
+    )
+    public
+    onlyTwoKeyAdmin
+    {
+        bytes32 keyHash = keccak256(_isAddressWhitelisted, _addressToBeRemovedFromWhitelist);
+        PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
+    }
+
+    /**
+     * @notice Function to check if the selected address is whitelisted
+     * @param _address is the address we want to get this information
+     * @return result of address being whitelisted
+     */
+    function isAddressWhitelisted(
+        address _address
+    )
+    public
+    view
+    returns (bool)
+    {
+        bytes32 keyHash = keccak256(_isAddressWhitelisted, _address);
+        return PROXY_STORAGE_CONTRACT.getBool(keyHash);
+    }
+
+    /**
+     * @notice Function to check in which year is transfer happening
+     * returns year
+     */
     function checkInWhichYearIsTheTransfer()
     public
     view
     returns (uint)
     {
-        uint startingDate = getUint("startingDate");
+        uint startingDate = getUint(_startingDate);
 
         if(block.timestamp > startingDate && block.timestamp < startingDate + 1 years) {
             return 1;
@@ -111,7 +178,8 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         }
     }
 
-    // Internal wrapper method
+
+    // Internal wrapper method to manipulate storage contract
     function setUint(
         string key,
         uint value
@@ -121,6 +189,7 @@ contract TwoKeyCommunityTokenPool is TokenPool {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
     }
 
+    // Internal wrapper method to manipulate storage contract
     function getUint(
         string key
     )
@@ -130,5 +199,4 @@ contract TwoKeyCommunityTokenPool is TokenPool {
     {
         return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
     }
-
 }
