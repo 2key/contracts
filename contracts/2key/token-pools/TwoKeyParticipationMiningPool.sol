@@ -3,6 +3,9 @@ pragma solidity ^0.4.24;
 import "./TokenPool.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyParticipationMiningPoolStorage.sol";
+import "../interfaces/ITwoKeyParticipationPaymentsManager.sol";
+import "../libraries/SafeMath.sol";
+
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
@@ -18,8 +21,13 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _yearToStartingDate = "yearToStartingDate";
     string constant _yearToTransferedThisYear = "yearToTransferedThisYear";
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
+    string constant _epochInsideYear = "epochInsideYear";
 
+    using SafeMath for *;
 
+    /**
+     * Pointer to it's proxy storage contract
+     */
     ITwoKeyParticipationMiningPoolStorage public PROXY_STORAGE_CONTRACT;
 
     /**
@@ -45,9 +53,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
 
-        //TODO: BUG wrong values in WEI
-        setUint(_totalAmount2keys, (120000000) * (10**18));
-        setUint(_annualTransferAmountLimit, 20000000);
+        uint totalAmountOfTokens = (120000000) * (10**18); //120M WEI's
+
+        setUint(_totalAmount2keys, totalAmountOfTokens);
+        setUint(_annualTransferAmountLimit, totalAmountOfTokens.div(10));
         setUint(_startingDate, block.timestamp);
 
         for(uint i=1; i<=10; i++) {
@@ -61,50 +70,55 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         initialized = true;
     }
 
-    /**
-     * @notice Function to validate if the user is properly registered in TwoKeyRegistry
-     * @param _receiver is the address we want to send tokens to
-     */
-    function validateRegistrationOfReceiver(
-        address _receiver
-    )
-    internal
-    view
-    returns (bool)
-    {
-        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
-        return ITwoKeyRegistry(twoKeyRegistry).checkIfUserExists(_receiver);
-    }
 
     /**
      * @notice Function which does transfer with special requirements with annual limit
-     * @param _receiver is the receiver of the tokens
      * @param _amount is the amount of tokens sent
      * @dev Only TwoKeyAdmin or Whitelisted address contract can issue this call
      */
     function transferTokensToAddress(
-        address _receiver,
         uint _amount
     )
     public
     onlyTwoKeyAdminOrWhitelistedAddress
     {
-        require(validateRegistrationOfReceiver(_receiver) == true);
         require(_amount > 0);
+
 
         uint year = checkInWhichYearIsTheTransfer();
         require(year >= 1 && year <= 10);
 
+
         bytes32 keyTransferedThisYear = keccak256(_yearToTransferedThisYear,year);
         bytes32 keyAnnualTransferAmountLimit = keccak256(_annualTransferAmountLimit);
+        bytes32 keyHashEpochThisYear = keccak256(_epochInsideYear, year);
 
+        //Take the amount transfered this year
         uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keyTransferedThisYear);
+        //Take the annual transfer amount limit
         uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
+        //Take the epoch for this year ==> which time this year we're calling this function
+        uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keyHashEpochThisYear);
 
-        require(transferedThisYear + _amount <= annualTransferAmountLimit);
-        super.transferTokens(_receiver,_amount);
+        //We're always sending tokens to ParticipationPaymentsManager
+        address receiver = getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationPaymentsManager");
 
-        PROXY_STORAGE_CONTRACT.setUint(keyTransferedThisYear, transferedThisYear + _amount);
+        //Check that this transfer will not overflow the annual limit
+        require(transferedThisYear.add(_amount) <= annualTransferAmountLimit);
+        // Transfer the tokens
+        super.transferTokens(receiver,_amount);
+        //Alert that tokens have been transfered
+        ITwoKeyParticipationPaymentsManager(receiver).transferTokensFromParticipationMiningPool(
+            _amount,
+            year,
+            epochThisYear
+        );
+
+        // Increase annual epoch
+        PROXY_STORAGE_CONTRACT.setUint(keyHashEpochThisYear, epochThisYear.add(1));
+
+        // Increase the amount transfered this year
+        PROXY_STORAGE_CONTRACT.setUint(keyTransferedThisYear, transferedThisYear.add(_amount));
     }
 
     /**
@@ -169,9 +183,9 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             return 1;
         } else {
             uint counter = 1;
-            uint start = startingDate + 1 years; //means we're checking for the second year
+            uint start = startingDate.add(1 years); //means we're checking for the second year
             while(block.timestamp > start || counter == 10) {
-                start = start + 1 years;
+                start = start.add(1 years);
                 counter ++;
             }
             return counter;

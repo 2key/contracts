@@ -15,6 +15,8 @@ const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockCont
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
+const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
+
 
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
@@ -27,6 +29,10 @@ const addressesFile = path.join(__dirname, '../configurationFiles/contractNamesT
 const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
 
 
+/**
+ * Function to instantiate config files
+ * @type {function(*)}
+ */
 const instantiateConfigs = ((deployer) => {
     let deploymentObject = {};
     if (fs.existsSync(deploymentConfigFile)) {
@@ -43,6 +49,20 @@ const instantiateConfigs = ((deployer) => {
     return deploymentObject[deploymentNetwork];
 });
 
+
+/**
+ * Get kyber configuration per network
+ * @type {function(*, *)}
+ */
+const setKyberPerNetwork = ((deploymentConfig, network) => {
+    if(network.startsWith('dev')) {
+        return KyberNetworkTestMockContract.address;
+    } else if (network.startsWith('public')) {
+        return deploymentConfig.kyberConfig.KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+    }
+});
+
+
 module.exports = function deploy(deployer) {
 
     let deploymentConfig = instantiateConfigs(deployer);
@@ -57,13 +77,7 @@ module.exports = function deploy(deployer) {
     const rewardsReleaseAfter = deploymentConfig.admin2keyReleaseDate; //1 January 2020
     const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
 
-    let kyberAddress;
-
-    if(deployer.network.startsWith('dev')) {
-        kyberAddress = KyberNetworkTestMockContract.address;
-    } else if (deployer.network.startsWith('public')) {
-        kyberAddress = deploymentConfig.kyberConfig.KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
-    }
+    let kyberAddress = setKyberPerNetwork(deploymentConfig, deployer.network);
 
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
@@ -110,6 +124,20 @@ module.exports = function deploy(deployer) {
                         TwoKeySingletonesRegistry.address,
                         TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyParticipationMiningPoolStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyParticipationPaymentsManager');
+                    let instance = await TwoKeyParticipationPaymentsManager.at(contractNameToProxyAddress["TwoKeyParticipationPaymentsManager"]);
+                    let txHash = instance.setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        contractNameToProxyAddress["TwoKeyParticipationPaymentsManagerStorage"]
                     );
                     resolve(txHash);
                 } catch (e) {

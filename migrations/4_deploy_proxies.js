@@ -16,6 +16,7 @@ const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
+const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
 
 /**
  * Upgradable singleton storage contracts
@@ -33,6 +34,7 @@ const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeToke
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
+const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
 
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
@@ -76,7 +78,8 @@ module.exports = function deploy(deployer) {
         TwoKeyCampaignValidatorStorage,
         TwoKeyFactoryStorage,
         TwoKeyMaintainersRegistryStorage,
-        TwoKeySignatureValidatorStorage
+        TwoKeySignatureValidatorStorage,
+        TwoKeyParticipationPaymentsManagerStorage
     };
 
     let contractLogicArtifacts = {
@@ -92,7 +95,8 @@ module.exports = function deploy(deployer) {
          TwoKeyCampaignValidator,
          TwoKeyFactory,
          TwoKeyMaintainersRegistry,
-         TwoKeySignatureValidator
+         TwoKeySignatureValidator,
+         TwoKeyParticipationPaymentsManager
     };
 
     let contractLogicArtifactsPlasma = {
