@@ -8,7 +8,7 @@ const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
 const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
-const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
+const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
@@ -148,12 +148,13 @@ module.exports = function deploy(deployer) {
 
             await new Promise(async(resolve,reject) => {
                 try {
-                    console.log('Setting initial parameters in contract TwoKeyLongTermTokenPool');
-                    let instance = await TwoKeyLongTermTokenPool.at(contractNameToProxyAddress["TwoKeyLongTermTokenPool"]);
+                    console.log('Setting initial parameters in contract TwoKeyNetworkGrowthFund');
+                    let instance = await TwoKeyNetworkGrowthFund.at(contractNameToProxyAddress["TwoKeyNetworkGrowthFund"]);
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         TwoKeyEconomy.address,
-                        contractNameToProxyAddress["TwoKeyLongTermTokenPoolStorage"]
+                        contractNameToProxyAddress["TwoKeyNetworkGrowthFundStorage"],
+                        deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                     );
                     resolve(txHash);
                 } catch (e) {

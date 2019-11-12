@@ -15,7 +15,7 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
     function setInitialParams(
         address _twoKeySingletonesRegistry,
         address _erc20Address,
-        address _twoKeyCommunityTokenPool,
+        address _twoKeyParticipationMiningPool,
         address _proxyStorage
     )
     public
@@ -25,7 +25,7 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
         setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
 
         PROXY_STORAGE_CONTRACT = ITwoKeyDeepFreezeTokenPoolStorage(_proxyStorage);
-        twoKeyParticipationMiningPool = _twoKeyCommunityTokenPool;
+        twoKeyParticipationMiningPool = _twoKeyParticipationMiningPool;
 
         PROXY_STORAGE_CONTRACT.setUint(keccak256("tokensReleaseDate"), block.timestamp + 10 * (1 years));
 

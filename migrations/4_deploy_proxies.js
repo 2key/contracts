@@ -10,7 +10,7 @@ const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
 const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
-const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
+const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
@@ -31,7 +31,7 @@ const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage')
 const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
 const TwoKeyParticipationMiningPoolStorage = artifacts.require('TwoKeyParticipationMiningPoolStorage');
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
-const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
+const TwoKeyNetworkGrowthFundStorage = artifacts.require('TwoKeyNetworkGrowthFundStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
@@ -74,7 +74,7 @@ module.exports = function deploy(deployer) {
         TwoKeyParticipationMiningPoolStorage,
         TwoKeyDeepFreezeTokenPoolStorage,
         TwoKeyBaseReputationRegistryStorage,
-        TwoKeyLongTermTokenPoolStorage,
+        TwoKeyNetworkGrowthFundStorage,
         TwoKeyCampaignValidatorStorage,
         TwoKeyFactoryStorage,
         TwoKeyMaintainersRegistryStorage,
@@ -91,7 +91,7 @@ module.exports = function deploy(deployer) {
          TwoKeyParticipationMiningPool,
          TwoKeyDeepFreezeTokenPool,
          TwoKeyBaseReputationRegistry,
-         TwoKeyLongTermTokenPool,
+         TwoKeyNetworkGrowthFund,
          TwoKeyCampaignValidator,
          TwoKeyFactory,
          TwoKeyMaintainersRegistry,
