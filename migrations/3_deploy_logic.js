@@ -74,10 +74,8 @@ module.exports = function deploy(deployer) {
                 // Just to wire congress with congress members
                 await new Promise(async(resolve,reject) => {
                     try {
-                        console.log('Here')
                         let congress = await TwoKeyCongress.at(TwoKeyCongress.address);
                         let txHash = await congress.setTwoKeyCongressMembersContract(TwoKeyCongressMembersRegistry.address);
-                        console.log('Congress wired with CongressMembersRegistry with transaction : ' + txHash);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
