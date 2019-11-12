@@ -131,6 +131,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint i;
         address new_address;
         uint numberOfInfluencers = influencers.length;
+        require(numberOfInfluencers <= 40);
         for (i = 0; i < numberOfInfluencers; i++) {
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
 
