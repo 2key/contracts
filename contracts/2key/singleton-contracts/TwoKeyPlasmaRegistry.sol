@@ -9,7 +9,7 @@ import "../interfaces/ITwoKeyPlasmaEvents.sol";
 import "../libraries/Call.sol";
 
 contract TwoKeyPlasmaRegistry is Upgradeable {
-
+    // Call library to use
     using Call for *;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;

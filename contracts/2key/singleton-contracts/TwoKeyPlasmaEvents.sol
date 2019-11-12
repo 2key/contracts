@@ -11,7 +11,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     ITwoKeyPlasmaEventsStorage public PROXY_STORAGE_CONTRACT;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
-
+    //Comment out
     bool initialized;
     //TODO: Join campaign event
     // every event we generate contains both the campaign address and the address of the contractor of that campaign
