@@ -94,69 +94,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
     /**
-     * @notice Function to set cut of
-     * @param me is the address (ethereum)
-     * @param cut is the cut value
-     */
-    function setCutOf(
-        address me,
-        uint256 cut
-    )
-    internal
-    {
-        // what is the percentage of the bounty s/he will receive when acting as an influencer
-        // the value 255 is used to signal equal partition with other influencers
-        // A sender can set the value only once in a contract
-        address plasma = twoKeyEventSource.plasmaOf(me);
-        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut);
-        referrerPlasma2cut[plasma] = cut;
-    }
-
-
-    /**
-     * @notice Function to track arcs and make ref tree
-     * @param sig is the signature user joins from
-     */
-    function distributeArcsBasedOnSignature(
-        bytes sig,
-        address _converter
-    )
-    private
-    {
-        address[] memory influencers;
-        address[] memory keys;
-        uint8[] memory weights;
-        address old_address;
-        (influencers, keys, weights, old_address) = super.getInfluencersKeysAndWeightsFromSignature(sig, _converter);
-
-        uint numberOfInfluencers = influencers.length;
-        require(numberOfInfluencers <= 40);
-
-        uint i;
-        address new_address;
-        for (i = 0; i < numberOfInfluencers; i++) {
-            new_address = twoKeyEventSource.plasmaOf(influencers[i]);
-
-            if (received_from[new_address] == 0) {
-                transferFrom(old_address, new_address, 1);
-            } else {
-                require(received_from[new_address] == old_address,'only tree ARCs allowed');
-            }
-
-            old_address = new_address;
-
-            if (i < keys.length) {
-                setPublicLinkKeyOf(new_address, keys[i]);
-            }
-
-            if (i < weights.length) {
-                setCutOf(new_address, uint256(weights[i]));
-            }
-        }
-    }
-
-
-    /**
      * @notice Function to add fiat inventory for rewards
      * @dev only contractor can add this inventory
      */
@@ -185,21 +122,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 //    }
 
 
-    /**
-     * @notice Function to join with signature and share 1 arc to the receiver
-     * @param signature is the signature
-     * @param receiver is the address we're sending ARCs to
-     */
-    function joinAndShareARC(
-        bytes signature,
-        address receiver
-    )
-    public
-    {
-        distributeArcsBasedOnSignature(signature, msg.sender);
-        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
-    }
-
     function validateRequirements(
         bool _isFiat,
         uint _conversionAmount
@@ -218,16 +140,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         return conversionAmountCampaignCurrency;
     }
 
-    function distributeArcsIfNecessary(
-        address _converter,
-        bytes signature
-    )
-    internal
-    {
-        if(received_from[twoKeyEventSource.plasmaOf(_converter)] == address(0)) {
-            distributeArcsBasedOnSignature(signature, _converter);
-        }
-    }
 
     /**
      * @notice Function where converter can convert
@@ -241,8 +153,15 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     payable
     {
         uint conversionAmountCampaignCurrency = validateRequirements(false, msg.value);
-        distributeArcsIfNecessary(msg.sender, signature);
-        createConversion(msg.value, msg.sender, false, _isAnonymous, conversionAmountCampaignCurrency);
+        uint numberOfInfluencers = distributeArcsIfNecessary(msg.sender, signature);
+        createConversion(
+            msg.value,
+            msg.sender,
+            false,
+            _isAnonymous,
+            conversionAmountCampaignCurrency,
+            numberOfInfluencers
+        );
     }
 
     /**
@@ -263,8 +182,41 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
         uint conversionAmountCampaignCurrency = validateRequirements(true, conversionAmountFiatWei);
-        distributeArcsIfNecessary(_converter, signature);
-        createConversion(conversionAmountFiatWei, _converter, true, _isAnonymous, conversionAmountCampaignCurrency);
+        uint numberOfInfluencers = distributeArcsIfNecessary(_converter, signature);
+        createConversion(
+            conversionAmountFiatWei,
+            _converter,
+            true,
+            _isAnonymous,
+            conversionAmountCampaignCurrency,
+            numberOfInfluencers
+        );
+    }
+
+
+    function validateThatThereIsEnoughTokens(
+        uint totalBoughtUnits
+    )
+    internal
+    view
+    {
+        uint256 _total_units = getAvailableAndNonReservedTokensAmount();
+        require(_total_units >= totalBoughtUnits);
+    }
+
+    /**
+     * @notice Function to join with signature and share 1 arc to the receiver
+     * @param signature is the signature
+     * @param receiver is the address we're sending ARCs to
+     */
+    function joinAndShareARC(
+        bytes signature,
+        address receiver
+    )
+    public
+    {
+        distributeArcsBasedOnSignature(signature, msg.sender);
+        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
     }
 
     /*
@@ -277,7 +229,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         address converterAddress,
         bool isFiatConversion,
         bool isAnonymous,
-        uint conversionAmountCampaignCurrency
+        uint conversionAmountCampaignCurrency,
+        uint numberOfInfluencers
     )
     private
     {
@@ -289,17 +242,14 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         uint totalTokensForConverterUnits = baseTokensForConverterUnits.add(bonusTokensForConverterUnits);
 
-        uint256 _total_units = getAvailableAndNonReservedTokensAmount();
-        require(_total_units >= totalTokensForConverterUnits);
-
-        uint256 maxReferralRewardFiatOrETHWei = conversionAmountETHWeiOrFiat.mul(maxReferralRewardPercent).div(100);
+        validateThatThereIsEnoughTokens(totalTokensForConverterUnits);
 
         reservedAmountOfTokens = reservedAmountOfTokens.add(totalTokensForConverterUnits);
 
         uint conversionId = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(
             converterAddress,
             conversionAmountETHWeiOrFiat,
-            maxReferralRewardFiatOrETHWei,
+            calculateInfluencersFee(conversionAmountETHWeiOrFiat, numberOfInfluencers),
             baseTokensForConverterUnits,
             bonusTokensForConverterUnits,
             isFiatConversion,

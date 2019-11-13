@@ -237,9 +237,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             } else {
                 require(conversion.state == ConversionState.PENDING_APPROVAL);
                 require(msg.sender == contractor); // first check who calls this in order to save gas
-//                uint availableTokens = twoKeyAcquisitionCampaignERC20.getAvailableAndNonReservedTokensAmount();
-//                require(totalUnits < availableTokens);
-                //Sufficient because we reserve tokens at the time of creation, in case we bought all, we'll get 0 which will always throw
                 counters[0] = counters[0].sub(1); //Decrease number of pending conversions
             }
 
@@ -254,18 +251,20 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             counters[1] = counters[1].sub(1); //Decrease number of approved conversions
         }
         //Update bought units
-        unitsConverterBought[conversion.converter] = unitsConverterBought[conversion.converter].add(conversion.baseTokenUnits).add(conversion.bonusTokenUnits);
+        unitsConverterBought[conversion.converter] = unitsConverterBought[conversion.converter].add(totalUnits);
 
         // Total rewards for referrers
         uint totalReward2keys = 0;
 
         // Buy tokens from campaign and distribute rewards between referrers
-        totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
-            conversion.maxReferralRewardETHWei,
-            conversion.converter,
-            _conversionId,
-            conversion.isConversionFiat
-        );
+        if(conversion.maxReferralRewardETHWei > 0) {
+            totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
+                conversion.maxReferralRewardETHWei,
+                conversion.converter,
+                _conversionId,
+                conversion.isConversionFiat
+            );
+        }
 
         //Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
@@ -290,10 +289,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             counters[6] = counters[6].add(conversion.conversionAmount);
         }
 
-        if(doesConverterHaveExecutedConversions[conversion.converter] == false) {
-            counters[5] = counters[5].add(1); //increase number of unique converters
-            doesConverterHaveExecutedConversions[conversion.converter] = true;
-        }
+        checkIsFirstTimeConversion(conversion.converter);
 
         ITwoKeyPurchasesHandler(twoKeyPurchasesHandler).startVesting(
             conversion.baseTokenUnits,
@@ -310,9 +306,19 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         counters[3] = counters[3].add(1); //Increase number of executed conversions
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
 
-        emitExecutedEvent(conversion.converter, _conversionId, conversion.baseTokenUnits.add(conversion.bonusTokenUnits));
+        emitExecutedEvent(conversion.converter, _conversionId, totalUnits);
     }
 
+    function checkIsFirstTimeConversion(
+        address converter
+    )
+    internal
+    {
+        if(doesConverterHaveExecutedConversions[converter] == false) {
+            counters[5] = counters[5].add(1); //increase number of unique converters
+            doesConverterHaveExecutedConversions[converter] = true;
+        }
+    }
 
     /**
      * @notice Function to get conversion details by id

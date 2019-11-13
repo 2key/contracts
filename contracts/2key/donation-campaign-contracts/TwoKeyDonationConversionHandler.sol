@@ -219,13 +219,16 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         counters[1] = counters[1].sub(1); //Decrease number of approved conversions
 
-//         Buy tokens from campaign and distribute rewards between referrers
-        uint totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
-            conversion.maxReferralRewardETHWei,
-            conversion.converter,
-            _conversionId
-        );
+        uint totalReward2keys = 0;
 
+//         Buy tokens from campaign and distribute rewards between referrers
+        if(conversion.maxReferralRewardETHWei > 0) {
+            totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
+                conversion.maxReferralRewardETHWei,
+                conversion.converter,
+                _conversionId
+            );
+        }
 
         // Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")).updateOnConversionExecutedEvent(
@@ -233,7 +236,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             contractor,
             twoKeyCampaign
         );
-
 
         amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[8] = counters[8].add(totalReward2keys);

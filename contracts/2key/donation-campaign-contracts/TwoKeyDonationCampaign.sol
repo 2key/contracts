@@ -71,85 +71,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         initialized = true;
     }
 
-    /**
-      * @notice Function to set cut of
-      * @param me is the address (ethereum)
-      * @param cut is the cut value
-      */
-    function setCutOf(
-        address me,
-        uint256 cut
-    )
-    internal
-    {
-        // what is the percentage of the bounty s/he will receive when acting as an influencer
-        // the value 255 is used to signal equal partition with other influencers
-        // A sender can set the value only once in a contract
-        address plasma = twoKeyEventSource.plasmaOf(me);
-        require(referrerPlasma2cut[plasma] == 0 || referrerPlasma2cut[plasma] == cut);
-        referrerPlasma2cut[plasma] = cut;
-    }
-
-    /**
-     * @notice Function to set cut
-     * @param cut is the cut value
-     * @dev Executes internal setCutOf method
-     */
-    function setCut(
-        uint256 cut
-    )
-    public
-    {
-        setCutOf(msg.sender, cut);
-    }
-
-
-    /**
-     * @notice Function to track arcs and make ref tree
-     * @param sig is the signature user joins from
-     */
-    function distributeArcsBasedOnSignature(
-        bytes sig,
-        address _converter
-    )
-    private
-    {
-        address[] memory influencers;
-        address[] memory keys;
-        uint8[] memory weights;
-        address old_address;
-        (influencers, keys, weights, old_address) = super.getInfluencersKeysAndWeightsFromSignature(sig, _converter);
-        uint i;
-        address new_address;
-        uint numberOfInfluencers = influencers.length;
-        require(numberOfInfluencers <= 40);
-        for (i = 0; i < numberOfInfluencers; i++) {
-            new_address = twoKeyEventSource.plasmaOf(influencers[i]);
-
-            if (received_from[new_address] == 0) {
-                transferFrom(old_address, new_address, 1);
-            } else {
-                require(received_from[new_address] == old_address,'only tree ARCs allowed');
-            }
-            old_address = new_address;
-
-            // TODO Updating the public key of influencers may not be a good idea because it will require the influencers to use
-            // a deterministic private/public key in the link and this might require user interaction (MetaMask signature)
-            // TODO a possible solution is change public_link_key to address=>address[]
-            // update (only once) the public address used by each influencer
-            // we will need this in case one of the influencers will want to start his own off-chain link
-            if (i < keys.length) {
-                setPublicLinkKeyOf(new_address, keys[i]);
-            }
-
-            // update (only once) the cut used by each influencer
-            // we will need this in case one of the influencers will want to start his own off-chain link
-            if (i < weights.length) {
-                setCutOf(new_address, uint256(weights[i]));
-            }
-        }
-    }
-
 
     /**
      * @notice Option to update contractor proceeds
@@ -166,20 +87,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         contractorBalance = contractorBalance.add(value);
     }
 
-    /**
-     * @notice Function to join with signature and share 1 arc to the receiver
-     * @param signature is the signature
-     * @param receiver is the address we're sending ARCs to
-     */
-    function joinAndShareARC(
-        bytes signature,
-        address receiver
-    )
-    public
-    {
-        distributeArcsBasedOnSignature(signature, msg.sender);
-        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
-    }
 
     /**
      * @notice Function where converter can convert
@@ -199,10 +106,8 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         );
         require(canConvert == true);
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-        if(received_from[_converterPlasma] == address(0)) {
-            distributeArcsBasedOnSignature(signature, msg.sender);
-        }
-        createConversion(msg.value, msg.sender, conversionAmountCampaignCurrency);
+        uint numberOfInfluencers = distributeArcsIfNecessary(msg.sender, signature);
+        createConversion(msg.value, msg.sender, conversionAmountCampaignCurrency, numberOfInfluencers);
     }
 
     /*
@@ -213,11 +118,12 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     function createConversion(
         uint conversionAmountEthWEI,
         address converterAddress,
-        uint conversionAmountCampaignCurrency
+        uint conversionAmountCampaignCurrency,
+        uint numberOfInfluencers
     )
     private
     {
-        uint256 maxReferralRewardFiatOrETHWei = conversionAmountEthWEI.mul(maxReferralRewardPercent).div(100);
+        uint maxReferralRewardFiatOrETHWei = calculateInfluencersFee(conversionAmountEthWEI, numberOfInfluencers);
 
         uint conversionId = ITwoKeyDonationConversionHandler(conversionHandler).supportForCreateConversion(
             converterAddress,
@@ -249,16 +155,14 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         require(msg.sender == conversionHandler);
         //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
         uint totalBounty2keys;
-        //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
-        if(maxReferralRewardPercent > 0) {
-            //Buy tokens from upgradable exchange
-            totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
-            //Handle refchain rewards
-            ITwoKeyDonationLogicHandler(logicHandler).updateRefchainRewards(
-                _converter,
-                _conversionId,
-                totalBounty2keys);
-        }
+        //Buy tokens from upgradable exchange
+        totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+        //Handle refchain rewards
+        ITwoKeyDonationLogicHandler(logicHandler).updateRefchainRewards(
+            _converter,
+            _conversionId,
+            totalBounty2keys);
+
         reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
         return totalBounty2keys;
     }
