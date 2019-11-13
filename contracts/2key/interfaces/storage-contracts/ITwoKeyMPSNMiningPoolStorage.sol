@@ -2,6 +2,6 @@ pragma solidity ^0.4.24;
 
 import "../IStructuredStorage.sol";
 
-contract ITwoKeyLongTermTokenPoolStorage is IStructuredStorage {
+contract ITwoKeyMPSNMiningPoolStorage is IStructuredStorage {
 
 }

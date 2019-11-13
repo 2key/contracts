@@ -14,11 +14,6 @@ contract ITwoKeySingletonUtils {
         _;
     }
 
-    function getterChecker(address _address) public view returns (bool) {
-        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_address);
-    }
-
     /**
      * @notice Function to get any singleton contract proxy address from TwoKeySingletonRegistry contract
      * @param contractName is the name of the contract we're looking for

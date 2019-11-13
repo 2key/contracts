@@ -13,11 +13,13 @@ const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
+const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
+
+
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
-const TwoKeyCongress = artifacts.require('TwoKeyCongress');
-const StandardTokenModified = artifacts.require('StandardTokenModified');
+
 const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
 const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
 const TwoKeyEventSourceStorage = artifacts.require("TwoKeyEventSourceStorage");
@@ -31,9 +33,13 @@ const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeToke
 const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
+const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
+
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
+
+
 const Call = artifacts.require('Call');
 
 const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created, checkArgumentsForUpdate } = require('../helpers');
@@ -48,7 +54,7 @@ const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
  * Function to perform all necessary logic to update smart contract
  * @type {function(*, *=, *=)}
  */
-const updateContract = (async (registryAddress, congressAddress, contractName, newImplementationAddress, network) => {
+const updateContract = (async (registryAddress, contractName, newImplementationAddress, network) => {
     await new Promise(async(resolve,reject) => {
         try {
 
@@ -75,10 +81,11 @@ const updateContract = (async (registryAddress, congressAddress, contractName, n
             //Generate bytecode
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
 
-            // await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
+            //Message on slack that proposal should be created for new version
+            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
 
             resolve({
-                txHash //, txHash1
+                txHash
             });
         } catch (e) {
             reject(e);
@@ -138,6 +145,7 @@ let contractsArtifacts = {
     TwoKeyFactory,
     TwoKeyMaintainersRegistry,
     TwoKeySignatureValidator,
+    TwoKeyParticipationPaymentsManager,
     TwoKeyUpgradableExchangeStorage,
     TwoKeyAdminStorage,
     TwoKeyEventSourceStorage,
@@ -151,6 +159,7 @@ let contractsArtifacts = {
     TwoKeyFactoryStorage,
     TwoKeyMaintainersRegistryStorage,
     TwoKeySignatureValidatorStorage,
+    TwoKeyParticipationPaymentsManagerStorage,
     TwoKeyPlasmaEvents,
     TwoKeyPlasmaMaintainersRegistry,
     TwoKeyPlasmaRegistry,
@@ -192,7 +201,6 @@ module.exports = async function deploy(deployer) {
     let contract = getContractPerName(contractName);
     let newImplementationAddress;
     let registryAddress;
-    let congressAddress;
 
 
     console.log(contractName);
@@ -209,14 +217,12 @@ module.exports = async function deploy(deployer) {
 
                 if(deployer.network.startsWith('dev')) {
                     registryAddress = TwoKeySingletonesRegistry.address;
-                    congressAddress = TwoKeyCongress.address;
                 }
                 else if(deployer.network.startsWith('private') || deployer.network.startsWith('plasma')) {
                     registryAddress = config.TwoKeyPlasmaSingletoneRegistry.networks[deployer.network_id].address;
                 }
                 else if(deployer.network.startsWith('public')) {
                     registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
-                    congressAddress = config.TwoKeyCongress.networks[deployer.network_id].address;
                 }
 
                 await new Promise(async (resolve, reject) => {
@@ -226,7 +232,7 @@ module.exports = async function deploy(deployer) {
                         if(deployer.network.startsWith('private')) {
                             txHash = await updateContractPlasma(registryAddress, contractName, newImplementationAddress);
                         } else if (deployer.network.startsWith('public')){
-                            txHash = await updateContract(registryAddres, congressAddress, contractName, newImplementationAddress, deployer.network);
+                            txHash = await updateContract(registryAddres, contractName, newImplementationAddress, deployer.network);
                         }
                         resolve(txHash);
                     } catch (e) {

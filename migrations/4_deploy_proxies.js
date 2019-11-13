@@ -8,14 +8,15 @@ const TwoKeyCongressMembersRegistry = artifacts.require('TwoKeyCongressMembersRe
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
-const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
+const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
-const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
+const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
+const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
 
 /**
  * Upgradable singleton storage contracts
@@ -28,11 +29,12 @@ const TwoKeyFactoryStorage = artifacts.require('TwoKeyFactoryStorage');
 const TwoKeyMaintainersRegistryStorage = artifacts.require('TwoKeyMaintainersRegistryStorage');
 const TwoKeyExchangeRateStorage = artifacts.require('TwoKeyExchangeRateStorage');
 const TwoKeyBaseReputationRegistryStorage = artifacts.require('TwoKeyBaseReputationRegistryStorage');
-const TwoKeyCommunityTokenPoolStorage = artifacts.require('TwoKeyCommunityTokenPoolStorage');
+const TwoKeyParticipationMiningPoolStorage = artifacts.require('TwoKeyParticipationMiningPoolStorage');
 const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeTokenPoolStorage');
-const TwoKeyLongTermTokenPoolStorage = artifacts.require('TwoKeyLongTermTokenPoolStorage');
+const TwoKeyNetworkGrowthFundStorage = artifacts.require('TwoKeyNetworkGrowthFundStorage');
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
+const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
 
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
@@ -69,14 +71,15 @@ module.exports = function deploy(deployer) {
         TwoKeyEventSourceStorage,
         TwoKeyRegistryStorage,
         TwoKeyExchangeRateStorage,
-        TwoKeyCommunityTokenPoolStorage,
+        TwoKeyParticipationMiningPoolStorage,
         TwoKeyDeepFreezeTokenPoolStorage,
         TwoKeyBaseReputationRegistryStorage,
-        TwoKeyLongTermTokenPoolStorage,
+        TwoKeyNetworkGrowthFundStorage,
         TwoKeyCampaignValidatorStorage,
         TwoKeyFactoryStorage,
         TwoKeyMaintainersRegistryStorage,
-        TwoKeySignatureValidatorStorage
+        TwoKeySignatureValidatorStorage,
+        TwoKeyParticipationPaymentsManagerStorage
     };
 
     let contractLogicArtifacts = {
@@ -85,14 +88,15 @@ module.exports = function deploy(deployer) {
          TwoKeyEventSource,
          TwoKeyRegistry,
          TwoKeyExchangeRateContract,
-         TwoKeyCommunityTokenPool,
+         TwoKeyParticipationMiningPool,
          TwoKeyDeepFreezeTokenPool,
          TwoKeyBaseReputationRegistry,
-         TwoKeyLongTermTokenPool,
+         TwoKeyNetworkGrowthFund,
          TwoKeyCampaignValidator,
          TwoKeyFactory,
          TwoKeyMaintainersRegistry,
-         TwoKeySignatureValidator
+         TwoKeySignatureValidator,
+         TwoKeyParticipationPaymentsManager
     };
 
     let contractLogicArtifactsPlasma = {

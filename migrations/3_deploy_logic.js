@@ -9,15 +9,15 @@ const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry')
 const TwoKeyExchangeRateContract = artifacts.require('TwoKeyExchangeRateContract');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegistry');
-const TwoKeyCommunityTokenPool = artifacts.require('TwoKeyCommunityTokenPool');
+const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
-const TwoKeyLongTermTokenPool = artifacts.require('TwoKeyLongTermTokenPool');
+const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
-
+const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
@@ -74,10 +74,8 @@ module.exports = function deploy(deployer) {
                 // Just to wire congress with congress members
                 await new Promise(async(resolve,reject) => {
                     try {
-                        console.log('Here')
                         let congress = await TwoKeyCongress.at(TwoKeyCongress.address);
                         let txHash = await congress.setTwoKeyCongressMembersContract(TwoKeyCongressMembersRegistry.address);
-                        console.log('Congress wired with CongressMembersRegistry with transaction : ' + txHash);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
@@ -103,12 +101,14 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyBaseReputationRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
-            .then(() => deployer.deploy(TwoKeyCommunityTokenPool))
-            .then(() => TwoKeyCommunityTokenPool.deployed())
+            .then(() => deployer.deploy(TwoKeyParticipationMiningPool))
+            .then(() => TwoKeyParticipationMiningPool.deployed())
+            .then(() => deployer.deploy(TwoKeyParticipationPaymentsManager))
+            .then(() => TwoKeyParticipationPaymentsManager.deployed())
             .then(() => deployer.deploy(TwoKeyDeepFreezeTokenPool))
             .then(() => TwoKeyDeepFreezeTokenPool.deployed())
-            .then(() => deployer.deploy(TwoKeyLongTermTokenPool))
-            .then(() => TwoKeyLongTermTokenPool.deployed())
+            .then(() => deployer.deploy(TwoKeyNetworkGrowthFund))
+            .then(() => TwoKeyNetworkGrowthFund.deployed())
             .then(() => deployer.deploy(TwoKeyFactory))
             .then(() => TwoKeyFactory.deployed())
             .then(() => deployer.deploy(TwoKeyMaintainersRegistry))

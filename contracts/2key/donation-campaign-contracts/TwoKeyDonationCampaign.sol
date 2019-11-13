@@ -122,6 +122,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         uint i;
         address new_address;
         uint numberOfInfluencers = influencers.length;
+        require(numberOfInfluencers <= 40);
         for (i = 0; i < numberOfInfluencers; i++) {
             new_address = twoKeyEventSource.plasmaOf(influencers[i]);
 

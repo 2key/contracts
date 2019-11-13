@@ -30,25 +30,29 @@ contract TwoKeyEconomy is StandardTokenModified {
 
         address twoKeyUpgradableExchange = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyUpgradableExchange");
-        address twoKeyCommunityTokenPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
-            getContractProxyAddress("TwoKeyCommunityTokenPool");
+        address twoKeyParticipationMiningPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
+            getContractProxyAddress("TwoKeyParticipationMiningPool");
         address twoKeyLongTermTokenPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyLongTermTokenPool");
+        address twoKeyMPSNMiningPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
+        getContractProxyAddress("TwoKeyMPSNMiningPool");
 
-        totalSupply_= 1000000000000000000000000000; // 1B tokens total minted supply
 
+        totalSupply_= 600000000000000000000000000; // 600M tokens total minted supply
 
-        // Updating balances
         balances[twoKeyUpgradableExchange] = totalSupply_.mul(3).div(100);
         emit Transfer(address(this), twoKeyUpgradableExchange, totalSupply_.mul(3).div(100));
 
-        balances[twoKeyCommunityTokenPool] = totalSupply_.mul(20).div(100);
-        emit Transfer(address(this), twoKeyCommunityTokenPool, totalSupply_.mul(20).div(100));
+        balances[twoKeyParticipationMiningPool] = totalSupply_.mul(20).div(100);
+        emit Transfer(address(this), twoKeyParticipationMiningPool, totalSupply_.mul(20).div(100));
 
-        balances[twoKeyLongTermTokenPool] = totalSupply_.mul(40).div(100);
+        balances[twoKeyLongTermTokenPool] = totalSupply_.mul(16).div(100);
         emit Transfer(address(this), twoKeyLongTermTokenPool, totalSupply_.mul(40).div(100));
 
-        balances[twoKeyAdmin] = totalSupply_.mul(37).div(100);
+        balances[twoKeyMPSNMiningPool] = totalSupply_.mul(10).div(100);
+        emit Transfer(address(this), twoKeyMPSNMiningPool, totalSupply_.mul(10).div(100));
+
+        balances[twoKeyAdmin] = totalSupply_.mul(51).div(100);
         emit Transfer(address(this), twoKeyAdmin, totalSupply_.mul(37).div(100));
     }
 
