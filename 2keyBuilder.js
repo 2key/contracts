@@ -54,7 +54,7 @@ const getDiffBetweenLatestTags = async () => {
     let diffAllContracts = (await contractsGit.diffSummary(diffParams)).files.filter(item => item.file.endsWith('.sol')).map(item => item.file);
 
     let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
-    let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/') || item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+    let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     return [singletonsChanged, campaignsChanged];
 };
 
@@ -300,13 +300,13 @@ async function deployUpgrade(networks) {
         let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
         console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
         console.log('Campaigns to be upgraded: ', campaignsToBeUpgraded);
-        if(singletonsToBeUpgraded.length > 0) {
-            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
-                /* eslint-disable no-await-in-loop */
-                console.log(networks[i], singletonsToBeUpgraded[j]);
-                await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-            }
-        }
+        // if(singletonsToBeUpgraded.length > 0) {
+        //     for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+        //         /* eslint-disable no-await-in-loop */
+        //         console.log(networks[i], singletonsToBeUpgraded[j]);
+        //         await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+        //     }
+        // }
         if(campaignsToBeUpgraded.length > 0) {
             await runDeployCampaignMigration(networks[i]);
         }
@@ -520,6 +520,9 @@ async function main() {
             await buildSubmodules(contracts);
             process.exit(0);
             break;
+        case '--diff':
+            console.log(await getDiffBetweenLatestTags());
+            process.exit(0);
         default:
             await deploy();
             process.exit(0);
