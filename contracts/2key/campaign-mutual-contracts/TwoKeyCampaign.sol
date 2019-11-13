@@ -242,7 +242,7 @@ contract TwoKeyCampaign is ArcToken {
 	view
 	returns (uint)
 	{
-		if(numberOfInfluencers > 0) {
+		if(numberOfInfluencers > 1) {
 			return conversionAmount.mul(maxReferralRewardPercent).div(100);
 		}
 		return 0;
