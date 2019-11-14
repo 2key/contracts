@@ -97,9 +97,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     {
         require(msg.sender == deployer);
-        // Can be called only when we're creating first time contracts
         require(keccak256(version) == keccak256("1.0.0"));
-        //TODO: review this function
 
         versions[contractLogicName][version] = contractLogicImplementation;
         versions[contractStorageName][version] = contractStorageImplementation;
@@ -230,6 +228,10 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         emit ProxiesDeployed(logicProxy, storageProxy);
     }
 
+    /**
+     * @notice Function to transfer deployer privileges to another address
+     * @param _newOwner is the new contract "owner" (called deployer in this case)
+     */
     function transferOwnership(
         address _newOwner
     )
