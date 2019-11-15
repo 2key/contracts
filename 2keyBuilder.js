@@ -24,7 +24,7 @@ const twoKeyProtocolSrcGit = simpleGit(twoKeyProtocolDir);
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
 
 
 const branch_to_env = {
