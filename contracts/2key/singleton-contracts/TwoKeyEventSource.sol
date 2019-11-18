@@ -74,7 +74,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
 
 
-    event ConvertedAcquisitionV2(
+    event ConvertedAcquisition(
         address _campaign,
         address _converterPlasma,
         uint256 _baseTokens,
@@ -84,7 +84,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint _conversionId
     );
 
-    event ConvertedDonationV2(
+    event ConvertedDonation(
         address _campaign,
         address _converterPlasma,
         uint _conversionAmount,
@@ -157,12 +157,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     event Executed(
         address campaignAddress,
         address converterPlasmaAddress,
-        uint conversionId
-    );
-
-    event ExecutedV1(
-        address campaignAddress,
-        address converterPlasmaAddress,
         uint conversionId,
         uint tokens
     );
@@ -230,6 +224,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit Rejected(_campaign, _converter);
     }
 
+
     /**
      * @notice Function to emit event every time conversion gets executed
      * @param _campaignAddress is the main campaign contract address
@@ -239,45 +234,13 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     function executed(
         address _campaignAddress,
         address _converterPlasmaAddress,
-        uint _conversionId
-    )
-    external
-    onlyAllowedContracts
-    {
-        emit Executed(_campaignAddress, _converterPlasmaAddress, _conversionId);
-    }
-
-    /**
-     * @notice Function to emit event every time conversion gets executed
-     * @param _campaignAddress is the main campaign contract address
-     * @param _converterPlasmaAddress is the address of converter plasma
-     * @param _conversionId is the ID of conversion, unique per campaign
-     */
-    function executedV1(
-        address _campaignAddress,
-        address _converterPlasmaAddress,
         uint _conversionId,
         uint tokens
     )
     external
     onlyAllowedContracts
     {
-        emit ExecutedV1(_campaignAddress, _converterPlasmaAddress, _conversionId, tokens);
-    }
-
-    //TODO: DEPRECATED FOR NEW CAMPAIGNS
-    function convertedAcquisition(
-        address _campaign,
-        address _converter,
-        uint256 _baseTokens,
-        uint256 _bonusTokens,
-        uint256 _conversionAmount,
-        bool _isFiatConversion
-    )
-    external
-    onlyAllowedContracts
-    {
-        emit ConvertedAcquisition(_campaign, _converter, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion);
+        emit Executed(_campaignAddress, _converterPlasmaAddress, _conversionId, tokens);
     }
 
 
@@ -292,7 +255,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
      * @param _conversionId is the id of conversion
      * @dev this function updates values in TwoKeyRegistry contract
      */
-    function convertedAcquisitionV2(
+    function convertedAcquisition(
         address _campaign,
         address _converterPlasma,
         uint256 _baseTokens,
@@ -304,20 +267,17 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyAllowedContracts
     {
-        emit ConvertedAcquisitionV2(_campaign, _converterPlasma, _baseTokens, _bonusTokens, _conversionAmount, _isFiatConversion, _conversionId);
+        emit ConvertedAcquisition(
+            _campaign,
+            _converterPlasma,
+            _baseTokens,
+            _bonusTokens,
+            _conversionAmount,
+            _isFiatConversion,
+            _conversionId
+        );
     }
 
-
-    function convertedDonation(
-        address _campaign,
-        address _converter,
-        uint256 _conversionAmount
-    )
-    external
-    onlyAllowedContracts
-    {
-        emit ConvertedDonation(_campaign, _converter, _conversionAmount);
-    }
 
 
     /**
@@ -327,7 +287,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
      * @param _conversionAmount is the amount of conversion
      * @param _conversionId is the id of conversion
      */
-    function convertedDonationV2(
+    function convertedDonation(
         address _campaign,
         address _converterPlasma,
         uint256 _conversionAmount,
@@ -336,7 +296,12 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     external
     onlyAllowedContracts
     {
-        emit ConvertedDonationV2(_campaign, _converterPlasma, _conversionAmount, _conversionId);
+        emit ConvertedDonation(
+            _campaign,
+            _converterPlasma,
+            _conversionAmount,
+            _conversionId
+        );
     }
 
     /**
