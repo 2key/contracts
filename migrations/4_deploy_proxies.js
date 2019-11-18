@@ -17,6 +17,8 @@ const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockCont
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
+const TwoKeyMPSNMiningPool = artifacts.require('TwoKeyMPSNMiningPool');
+const TwoKeyTeamGrowthFund = artifacts.require('TwoKeyTeamGrowthFund');
 
 /**
  * Upgradable singleton storage contracts
@@ -35,6 +37,8 @@ const TwoKeyNetworkGrowthFundStorage = artifacts.require('TwoKeyNetworkGrowthFun
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
+const TwoKeyMPSNMiningPoolStorage = artifacts.require('TwoKeyMPSNMiningPoolStorage');
+const TwoKeyTeamGrowthFundStorage = artifacts.require('TwoKeyTeamGrowthFundStorage');
 
 const TwoKeyPlasmaCongress = artifacts.require('TwoKeyPlasmaCongress');
 const TwoKeyPlasmaCongressMembersRegistry = artifacts.require('TwoKeyPlasmaCongressMembersRegistry');
@@ -82,7 +86,9 @@ module.exports = function deploy(deployer) {
         TwoKeyFactoryStorage,
         TwoKeyMaintainersRegistryStorage,
         TwoKeySignatureValidatorStorage,
-        TwoKeyParticipationPaymentsManagerStorage
+        TwoKeyParticipationPaymentsManagerStorage,
+        TwoKeyMPSNMiningPoolStorage,
+        TwoKeyTeamGrowthFundStorage
     };
 
     let contractLogicArtifacts = {
@@ -99,7 +105,9 @@ module.exports = function deploy(deployer) {
          TwoKeyFactory,
          TwoKeyMaintainersRegistry,
          TwoKeySignatureValidator,
-         TwoKeyParticipationPaymentsManager
+         TwoKeyParticipationPaymentsManager,
+         TwoKeyMPSNMiningPool,
+         TwoKeyTeamGrowthFund
     };
 
     let nonUpgradableContractArtifactsMainchain = {

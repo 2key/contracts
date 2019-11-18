@@ -12,13 +12,14 @@ const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegi
 const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
 const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
+const TwoKeyMPSNMiningPool = artifacts.require('TwoKeyMPSNMiningPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
-
+const TwoKeyTeamGrowthFund = artifacts.require('TwoKeyTeamGrowthFund');
 
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
@@ -117,6 +118,10 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyDeepFreezeTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyNetworkGrowthFund))
             .then(() => TwoKeyNetworkGrowthFund.deployed())
+            .then(() => deployer.deploy(TwoKeyMPSNMiningPool))
+            .then(() => TwoKeyMPSNMiningPool.deployed())
+            .then(() => deployer.deploy(TwoKeyTeamGrowthFund))
+            .then(() => TwoKeyTeamGrowthFund.deployed())
             .then(() => deployer.deploy(TwoKeyFactory))
             .then(() => TwoKeyFactory.deployed())
             .then(() => deployer.deploy(TwoKeyMaintainersRegistry))

@@ -16,7 +16,8 @@ const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry')
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
-
+const TwoKeyMPSNMiningPool = artifacts.require('TwoKeyMPSNMiningPool');
+const TwoKeyTeamGrowthFund = artifacts.require('TwoKeyTeamGrowthFund');
 
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
@@ -179,6 +180,36 @@ module.exports = function deploy(deployer) {
                 }
             });
 
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyMPSNMiningPool');
+                    let instance = await TwoKeyMPSNMiningPool.at(contractNameToProxyAddress["TwoKeyMPSNMiningPool"]);
+                    let txHash = instance.setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        TwoKeyEconomy.address,
+                        contractNameToProxyAddress["TwoKeyMPSNMiningPoolStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
+
+
+            await new Promise(async(resolve,reject) => {
+                try {
+                    console.log('Setting initial parameters in contract TwoKeyTeamGrowthFund');
+                    let instance = await TwoKeyTeamGrowthFund.at(contractNameToProxyAddress["TwoKeyTeamGrowthFund"]);
+                    let txHash = instance.setInitialParams(
+                        TwoKeySingletonesRegistry.address,
+                        TwoKeyEconomy.address,
+                        contractNameToProxyAddress["TwoKeyTeamGrowthFundStorage"]
+                    );
+                    resolve(txHash);
+                } catch (e) {
+                    reject(e);
+                }
+            });
 
             await new Promise(async(resolve,reject) => {
                 try {
