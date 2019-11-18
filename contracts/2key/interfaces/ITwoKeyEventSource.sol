@@ -9,7 +9,7 @@ contract ITwoKeyEventSource {
     function joined(address _campaign, address _from, address _to) external;
     function rejected(address _campaign, address _converter) external;
 
-    function convertedAcquisitionV2(
+    function convertedAcquisition(
         address _campaign,
         address _converterPlasma,
         uint256 _baseTokens,
@@ -25,7 +25,7 @@ contract ITwoKeyEventSource {
     view
     returns (uint);
 
-    function convertedDonationV2(
+    function convertedDonation(
         address _campaign,
         address _converterPlasma,
         uint256 _conversionAmount,
@@ -33,7 +33,7 @@ contract ITwoKeyEventSource {
     )
     external;
 
-    function executedV1(
+    function executed(
         address _campaignAddress,
         address _converterPlasmaAddress,
         uint _conversionId,

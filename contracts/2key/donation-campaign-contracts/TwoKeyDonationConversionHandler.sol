@@ -86,7 +86,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     internal
     view
     {
-        ITwoKeyEventSource(twoKeyEventSource).convertedDonationV2(
+        ITwoKeyEventSource(twoKeyEventSource).convertedDonation(
             twoKeyCampaign,
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(converterAddress),
             conversionAmount,
@@ -102,7 +102,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     internal
     view
     {
-        ITwoKeyEventSource(twoKeyEventSource).executedV1(
+        ITwoKeyEventSource(twoKeyEventSource).executed(
             twoKeyCampaign,
             ITwoKeyEventSource(twoKeyEventSource).plasmaOf(_converterAddress),
             conversionId,
