@@ -32,8 +32,8 @@ contract TwoKeyEconomy is StandardTokenModified {
             getContractProxyAddress("TwoKeyUpgradableExchange");
         address twoKeyParticipationMiningPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyParticipationMiningPool");
-        address twoKeyLongTermTokenPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
-            getContractProxyAddress("TwoKeyLongTermTokenPool");
+        address twoKeyNetworkGrowthFund = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
+            getContractProxyAddress("TwoKeyNetworkGrowthFund");
         address twoKeyMPSNMiningPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyMPSNMiningPool");
         address twoKeyTeamGrowthPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
@@ -48,8 +48,8 @@ contract TwoKeyEconomy is StandardTokenModified {
         balances[twoKeyParticipationMiningPool] = totalSupply_.mul(20).div(100);
         emit Transfer(address(this), twoKeyParticipationMiningPool, totalSupply_.mul(20).div(100));
 
-        balances[twoKeyLongTermTokenPool] = totalSupply_.mul(16).div(100);
-        emit Transfer(address(this), twoKeyLongTermTokenPool, totalSupply_.mul(16).div(100));
+        balances[twoKeyNetworkGrowthFund] = totalSupply_.mul(16).div(100);
+        emit Transfer(address(this), twoKeyNetworkGrowthFund, totalSupply_.mul(16).div(100));
 
         balances[twoKeyMPSNMiningPool] = totalSupply_.mul(10).div(100);
         emit Transfer(address(this), twoKeyMPSNMiningPool, totalSupply_.mul(10).div(100));
