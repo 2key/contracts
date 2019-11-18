@@ -63,6 +63,20 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
+        require(nonUpgradableContractToAddress[contractName] == 0x0);
+        nonUpgradableContractToAddress[contractName] = contractAddress;
+    }
+
+    /**
+     * @notice Function in case of hard fork, or congress replacement
+     */
+    function chanceNonUpgradableContract(
+        string contractName,
+        address contractAddress
+    )
+    public
+    {
+        require(msg.sender == nonUpgradableContractToAddress["TwoKeyCongress"]);
         nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
