@@ -12,15 +12,20 @@ const TwoKeyBaseReputationRegistry = artifacts.require('TwoKeyBaseReputationRegi
 const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
 const TwoKeyDeepFreezeTokenPool = artifacts.require('TwoKeyDeepFreezeTokenPool');
 const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
+const TwoKeyMPSNMiningPool = artifacts.require('TwoKeyMPSNMiningPool');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockContract');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
+const TwoKeyTeamGrowthFund = artifacts.require('TwoKeyTeamGrowthFund');
+
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
+const TwoKeyPlasmaCongress = artifacts.require('TwoKeyPlasmaCongress');
+const TwoKeyPlasmaCongressMembersRegistry = artifacts.require('TwoKeyPlasmaCongressMembersRegistry');
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -47,26 +52,30 @@ const instantiateConfigs = ((deployer) => {
     return deploymentObject[deploymentNetwork];
 
 });
+let votingPowers;
+let initialCongressMembers;
+let initialCongressMemberNames;
+let congressMinutesForDebate;
+
+/**
+ * Initial voting powers for congress members
+ * @type {number[]}
+ */
 
 module.exports = function deploy(deployer) {
-
-
     let deploymentConfig = instantiateConfigs(deployer);
 
-    /**
-     * Initial voting powers for congress members
-     * @type {number[]}
-     */
-    let votingPowers = deploymentConfig.votingPowers;
-    let initialCongressMembers = deploymentConfig.initialCongressMembers;
-    let initialCongressMemberNames = deploymentConfig.initialCongressMembersNames;
+    votingPowers = deploymentConfig.votingPowers;
+    initialCongressMembers = deploymentConfig.initialCongressMembers;
+    initialCongressMemberNames = deploymentConfig.initialCongressMembersNames;
+    congressMinutesForDebate = 24 * 60;
 
 
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
-        deployer.deploy(TwoKeyCongress, 24 * 60)
+        deployer.deploy(TwoKeyCongress, congressMinutesForDebate)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCongressMembersRegistry, initialCongressMembers, initialCongressMemberNames, votingPowers, TwoKeyCongress.address))
             .then(() => TwoKeyCongressMembersRegistry.deployed())
@@ -109,6 +118,10 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyDeepFreezeTokenPool.deployed())
             .then(() => deployer.deploy(TwoKeyNetworkGrowthFund))
             .then(() => TwoKeyNetworkGrowthFund.deployed())
+            .then(() => deployer.deploy(TwoKeyMPSNMiningPool))
+            .then(() => TwoKeyMPSNMiningPool.deployed())
+            .then(() => deployer.deploy(TwoKeyTeamGrowthFund))
+            .then(() => TwoKeyTeamGrowthFund.deployed())
             .then(() => deployer.deploy(TwoKeyFactory))
             .then(() => TwoKeyFactory.deployed())
             .then(() => deployer.deploy(TwoKeyMaintainersRegistry))
@@ -119,7 +132,12 @@ module.exports = function deploy(deployer) {
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.link(Call, TwoKeyPlasmaRegistry);
-        deployer.deploy(TwoKeyPlasmaEvents)
+        deployer.deploy(TwoKeyPlasmaCongress, congressMinutesForDebate)
+            .then(() => TwoKeyPlasmaCongress.deployed())
+            .then(() => deployer.deploy(TwoKeyPlasmaCongressMembersRegistry, initialCongressMembers, initialCongressMemberNames, votingPowers, TwoKeyPlasmaCongress.address))
+            .then(() => TwoKeyPlasmaCongressMembersRegistry.deployed())
+            .then(() => deployer.deploy(TwoKeyPlasmaEvents))
+            .then(() => TwoKeyPlasmaEvents.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaMaintainersRegistry))
             .then(() => TwoKeyPlasmaMaintainersRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaRegistry))

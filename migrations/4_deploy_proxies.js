@@ -17,6 +17,8 @@ const KyberNetworkTestMockContract = artifacts.require('KyberNetworkTestMockCont
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
+const TwoKeyMPSNMiningPool = artifacts.require('TwoKeyMPSNMiningPool');
+const TwoKeyTeamGrowthFund = artifacts.require('TwoKeyTeamGrowthFund');
 
 /**
  * Upgradable singleton storage contracts
@@ -35,7 +37,11 @@ const TwoKeyNetworkGrowthFundStorage = artifacts.require('TwoKeyNetworkGrowthFun
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
+const TwoKeyMPSNMiningPoolStorage = artifacts.require('TwoKeyMPSNMiningPoolStorage');
+const TwoKeyTeamGrowthFundStorage = artifacts.require('TwoKeyTeamGrowthFundStorage');
 
+const TwoKeyPlasmaCongress = artifacts.require('TwoKeyPlasmaCongress');
+const TwoKeyPlasmaCongressMembersRegistry = artifacts.require('TwoKeyPlasmaCongressMembersRegistry');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
@@ -43,6 +49,7 @@ const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStora
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
+
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
@@ -79,7 +86,9 @@ module.exports = function deploy(deployer) {
         TwoKeyFactoryStorage,
         TwoKeyMaintainersRegistryStorage,
         TwoKeySignatureValidatorStorage,
-        TwoKeyParticipationPaymentsManagerStorage
+        TwoKeyParticipationPaymentsManagerStorage,
+        TwoKeyMPSNMiningPoolStorage,
+        TwoKeyTeamGrowthFundStorage
     };
 
     let contractLogicArtifacts = {
@@ -96,7 +105,20 @@ module.exports = function deploy(deployer) {
          TwoKeyFactory,
          TwoKeyMaintainersRegistry,
          TwoKeySignatureValidator,
-         TwoKeyParticipationPaymentsManager
+         TwoKeyParticipationPaymentsManager,
+         TwoKeyMPSNMiningPool,
+         TwoKeyTeamGrowthFund
+    };
+
+    let nonUpgradableContractArtifactsMainchain = {
+        TwoKeyEconomy,
+        TwoKeyCongress,
+        TwoKeyCongressMembersRegistry
+    };
+
+    let nonUpgradableContractArtifactsPlasma = {
+        TwoKeyPlasmaCongress,
+        TwoKeyPlasmaCongressMembersRegistry
     };
 
     let contractLogicArtifactsPlasma = {
@@ -125,8 +147,11 @@ module.exports = function deploy(deployer) {
             return contractLogicArtifactsPlasma[contractName];
         } else if (contractStorageArtifactsPlasma[contractName]) {
             return (contractStorageArtifactsPlasma[contractName]);
-        }
-        else {
+        } else if (nonUpgradableContractArtifactsMainchain[contractName]) {
+            return nonUpgradableContractArtifactsMainchain[contractName];
+        } else if (nonUpgradableContractArtifactsPlasma[contractName]) {
+            return nonUpgradableContractArtifactsPlasma[contractName];
+        } else {
             return "Wrong name";
         }
     });
@@ -150,11 +175,6 @@ module.exports = function deploy(deployer) {
                             let contractName = upgradableLogicContracts[i];
                             let contractStorageName = upgradableStorageContracts[i];
 
-                            console.log(contractName,
-                                contractStorageName,
-                                getContractPerName(contractName).address,
-                                getContractPerName(contractStorageName).address,
-                                INITIAL_VERSION_OF_ALL_SINGLETONS);
 
                             let txHash = await registry.addVersionDuringCreation(
                                 contractName,
@@ -198,45 +218,24 @@ module.exports = function deploy(deployer) {
             .then(async () => {
 
                 let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
-                /**
-                 * Here we will add congress contract to the registry
-                 */
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('Adding non-upgradable contracts to the registry');
-                        console.log('Adding TwoKeyCongress to the registry as non-upgradable contract');
-                        let txHash = registry.addNonUpgradableContractToAddress('TwoKeyCongress', TwoKeyCongress.address);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                /**
-                 * Here we will add economy contract to the registry
-                 */
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
-                        let txHash = registry.addNonUpgradableContractToAddress('TwoKeyEconomy', TwoKeyEconomy.address);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                /**
-                 * Here we will add economy contract to the registry
-                 */
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        console.log('Adding TwoKeyEconomy to the registry as non-upgradable contract');
-                        let txHash = registry.addNonUpgradableContractToAddress('TwoKeyCongressMembersRegistry', TwoKeyCongressMembersRegistry.address);
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
+                let nonUpgradableSingletones = Object.keys(nonUpgradableContractArtifactsMainchain);
+                /* eslint-disable no-await-in-loop */
+                for(let i=0; i<nonUpgradableSingletones.length; i++) {
+                    /**
+                     * Here we will add congress contract to the registry
+                     */
+                    await new Promise(async (resolve, reject) => {
+                        try {
+                            let contractName = nonUpgradableSingletones[i];
+                            let contract = getContractPerName(contractName);
+                            console.log('Adding ' + contractName + 'to the registry as non-upgradable contract');
+                            let txHash = registry.addNonUpgradableContractToAddress(nonUpgradableSingletones[i], contract.address);
+                            resolve(txHash);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                }
             })
             .then(() => true)
     } else if (deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
@@ -291,6 +290,29 @@ module.exports = function deploy(deployer) {
             }
             fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
             fs.writeFileSync(addressesFile, JSON.stringify(contractNameToProxyAddress, null, 4));
+        })
+        .then(async () => {
+            let registry = await TwoKeyPlasmaSingletoneRegistry.at(TwoKeyPlasmaSingletoneRegistry.address);
+            let nonUpgradableSingletones = Object.keys(nonUpgradableContractArtifactsPlasma);
+
+
+            /* eslint-disable no-await-in-loop */
+            for(let i=0; i<nonUpgradableSingletones.length; i++) {
+                /**
+                 * Here we will add congress contract to the registry
+                 */
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        let contractName = nonUpgradableSingletones[i];
+                        let contract = getContractPerName(contractName);
+                        console.log('Adding ' + contractName + ' on address: ' + contract.address + 'to the registry as non-upgradable contract');
+                        let txHash = registry.addNonUpgradableContractToAddress(contractName, contract.address);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+            }
         })
         .then(() => true);
     }
