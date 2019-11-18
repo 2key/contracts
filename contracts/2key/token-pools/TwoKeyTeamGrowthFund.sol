@@ -57,6 +57,7 @@ contract TwoKeyTeamGrowthFund is TokenPool {
     )
     public
     onlyAfterReleaseDatePassed
+    onlyTwoKeyAdmin
     {
         super.transferTokens(_beneficiary, _amount);
     }

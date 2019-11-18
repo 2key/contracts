@@ -72,15 +72,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _amount
     );
 
-    // TODO: DEPRECATED IN NEW DEPLOYMENT
-    event ConvertedAcquisition(
-        address _campaign,
-        address _converter,
-        uint256 _baseTokens,
-        uint256 _bonusTokens,
-        uint256 _conversionAmount,
-        bool _isFiatConversion
-    );
 
 
     event ConvertedAcquisitionV2(
@@ -91,13 +82,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _conversionAmount,
         bool _isFiatConversion,
         uint _conversionId
-    );
-
-    // TODO: DEPRECATED
-    event ConvertedDonation(
-        address _campaign,
-        address _converter,
-        uint _conversionAmount
     );
 
     event ConvertedDonationV2(
