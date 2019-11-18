@@ -94,6 +94,8 @@ contract TwoKeyCongressMembersRegistry {
     )
     internal
     {
+        //Require that this member is not already a member of congress
+        require(isMemberInCongress[targetMember] == false);
         minimumQuorum = allMembers.length;
         maxVotingPower = maxVotingPower.add(_votingPower);
         address2Member[targetMember] = Member(
