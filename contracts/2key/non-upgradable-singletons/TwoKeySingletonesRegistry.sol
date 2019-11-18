@@ -61,7 +61,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         address contractAddress
     )
     public
-    onlyMaintainer
+    onlyCoreDev
     {
         require(nonUpgradableContractToAddress[contractName] == 0x0);
         nonUpgradableContractToAddress[contractName] = contractAddress;
@@ -69,8 +69,10 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 
     /**
      * @notice Function in case of hard fork, or congress replacement
+     * @param contractName is the name of contract we want to add
+     * @param contractAddress is the address of contract
      */
-    function chanceNonUpgradableContract(
+    function changeNonUpgradableContract(
         string contractName,
         address contractAddress
     )
@@ -111,8 +113,11 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     {
         require(msg.sender == deployer);
-        require(keccak256(version) == keccak256("1.0.0"));
+        bytes memory logicVersion = bytes(contractNameToLatestVersion[contractLogicName]);
+        bytes memory storageVersion = bytes(contractNameToLatestVersion[contractStorageName]);
 
+        require(logicVersion.length == 0 && storageVersion.length == 0); //Requiring that this is first time adding a version
+//        require(keccak256(version) == keccak256("1.0.0"));
         versions[contractLogicName][version] = contractLogicImplementation;
         versions[contractStorageName][version] = contractStorageImplementation;
 
