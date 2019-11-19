@@ -117,7 +117,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         bytes memory storageVersion = bytes(contractNameToLatestVersion[contractStorageName]);
 
         require(logicVersion.length == 0 && storageVersion.length == 0); //Requiring that this is first time adding a version
-//        require(keccak256(version) == keccak256("1.0.0"));
+        require(keccak256(version) == keccak256("1.0.0"));
         versions[contractLogicName][version] = contractLogicImplementation;
         versions[contractStorageName][version] = contractStorageImplementation;
 

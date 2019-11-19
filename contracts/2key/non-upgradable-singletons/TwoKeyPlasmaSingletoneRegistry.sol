@@ -49,6 +49,22 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
     public
     onlyMaintainer
     {
+        require(nonUpgradableContractToAddress[contractName] == 0x0);
+        nonUpgradableContractToAddress[contractName] = contractAddress;
+    }
+
+    /**
+     * @notice Function in case of hard fork, or congress replacement
+     * @param contractName is the name of contract we want to add
+     * @param contractAddress is the address of contract
+     */
+    function changeNonUpgradableContract(
+        string contractName,
+        address contractAddress
+    )
+    public
+    {
+        require(msg.sender == nonUpgradableContractToAddress["TwoKeyPlasmaCongress"]);
         nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
@@ -83,6 +99,10 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
     public
     {
         require(msg.sender == deployer);
+        bytes memory logicVersion = bytes(contractNameToLatestVersion[contractLogicName]);
+        bytes memory storageVersion = bytes(contractNameToLatestVersion[contractStorageName]);
+
+        require(logicVersion.length == 0 && storageVersion.length == 0); //Requiring that this is first time adding a version
         require(keccak256(version) == keccak256("1.0.0"));
 
         versions[contractLogicName][version] = contractLogicImplementation;
@@ -171,6 +191,24 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
     }
 
     /**
+     * @notice Function to upgrade contract to new version
+     * @param contractName is the name of the contract
+     * @param version is the new version
+     */
+    function upgradeContract(
+        string contractName,
+        string version
+    )
+    public
+    {
+        require(msg.sender == nonUpgradableContractToAddress["TwoKeyPlasmaCongress"]);
+        address proxyAddress = getContractProxyAddress(contractName);
+        address _impl = getVersion(contractName, version);
+
+        UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
+    }
+
+    /**
      * @dev Creates an upgradeable proxy for both Storage and Logic
      * @param version representing the first version to be set for the proxy
      */
@@ -191,22 +229,7 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
         emit ProxiesDeployed(logicProxy, storageProxy);
     }
 
-    /**
-     * @notice Function to upgrade contract to new version
-     * @param contractName is the name of the contract
-     * @param version is the new version
-     */
-    function upgradeContract(
-        string contractName,
-        string version
-    )
-    public
-    {
-        require(msg.sender == nonUpgradableContractToAddress["TwoKeyPlasmaCongress"]);
-        address proxyAddress = getContractProxyAddress(contractName);
-        address _impl = getVersion(contractName, version);
-        UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
-    }
+
 
     /**
      * @notice Function to transfer deployer privileges to another address
