@@ -84,6 +84,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     {
         require(_amount > 0);
         uint year = checkInWhichYearIsTheTransfer();
+        //TODO if year>10, should return 11, don't think it currently does
 
         bytes32 keyTransferedThisYear = keccak256(_yearToTransferedThisYear,year);
         bytes32 keyAnnualTransferAmountLimit = keccak256(_annualTransferAmountLimit);
@@ -191,6 +192,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
                 counter ++;
             }
             return counter;
+            //TODO counter should return different answer for 10th year and 11th year onwards
         }
     }
 

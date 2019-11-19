@@ -12,7 +12,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized = false;
-
+    //TODO: might be better to move addWhiteListedAddress, removeWhiteListedAddress and the modifier onlyAdminOrWhitelisted to here.. as all pools should use same
     address public TWO_KEY_ECONOMY;
 
     function setInitialParameters(
