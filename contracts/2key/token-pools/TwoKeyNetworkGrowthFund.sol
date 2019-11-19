@@ -52,7 +52,7 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
     public
     onlyTwoKeyAdmin
     {
-
+        //TODO: impl
     }
 
     function getPortionUnlockingDate(

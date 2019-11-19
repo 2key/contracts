@@ -97,6 +97,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keyTransferedThisYear);
         //Take the annual transfer amount limit
         uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
+        //TODO: if we're in one of the first 10 years, yearly allowance is 1/10. If we're after 10 years, there is no yearly allowance, but just the allowance of what was left (Remainder) after the first 10 years
+
         //Take the epoch for this year ==> which time this year we're calling this function
         uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keyHashEpochThisYear);
 
