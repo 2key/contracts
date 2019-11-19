@@ -76,14 +76,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice Constructor of the contract, can be called only once
-     * @param _token is ERC20 2key token
      * @param _daiAddress is the address of DAI on ropsten
      * @param _kyberNetworkProxy is the address of Kyber network contract
      * @param _twoKeySingletonesRegistry is the address of TWO_KEY_SINGLETON_REGISTRY
      * @param _proxyStorageContract is the address of proxy of storage contract
      */
     function setInitialParams(
-        ERC20 _token,
         address _daiAddress,
         address _kyberNetworkProxy,
         address _twoKeySingletonesRegistry,
@@ -101,7 +99,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setUint(keccak256("weiRaised"),0);
         setUint(keccak256("numberOfContracts"), 0); //Number of contracts which have interacted with this contract through buyTokens function
 
-        setAddress(keccak256("TWO_KEY_TOKEN"),address(_token));
         setAddress(keccak256("DAI"), _daiAddress);
         setAddress(keccak256("ETH_TOKEN_ADDRESS"), 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee);
         setAddress(keccak256("KYBER_NETWORK_PROXY"), _kyberNetworkProxy);
@@ -147,7 +144,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     internal
     {
         //Take the address of token from storage
-        address tokenAddress = getAddress(keccak256("TWO_KEY_TOKEN"));
+        address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
         ERC20(tokenAddress).transfer(_beneficiary, _tokenAmount);
     }
 
@@ -721,7 +718,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyValidatedContracts
     {
         ERC20 dai = ERC20(getAddress(keccak256("DAI")));
-        ERC20 token = ERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
+        ERC20 token = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
 
         uint stableCoinUnits = getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits, getContractId(msg.sender));
         uint etherBalanceOnContractBefore = this.balance;
@@ -759,7 +756,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address dai = getAddress(keccak256("DAI"));
         address bancorConverter = getAddress(keccak256("BANCOR_CONVERTER")); //TODO: See how to store this
         address bancorToken = getAddress(keccak256("BNT"));
-
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
         // Approving bancor to take tokens from US
         ERC20(dai).approve(bancorConverter, amountDAI);
 
@@ -768,8 +765,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         path[0] = IERC20(dai);
         path[1] = IERC20(bancorToken);
         path[2] = IERC20(bancorToken);
-        path[3] = IERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
-        path[4] = IERC20(getAddress(keccak256("TWO_KEY_TOKEN")));
+        path[3] = IERC20(twoKeyEconomy);
+        path[4] = IERC20(twoKeyEconomy);
 
         uint receivedTokens = IBancorContract(bancorConverter).quickConvert(path, amountDAI, amount2KEY);
 

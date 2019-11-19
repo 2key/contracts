@@ -12,19 +12,6 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized = false;
-    //TODO: might be better to move addWhiteListedAddress, removeWhiteListedAddress and the modifier onlyAdminOrWhitelisted to here.. as all pools should use same
-    address public TWO_KEY_ECONOMY;
-
-    function setInitialParameters(
-        address _erc20address,
-        address _twoKeySingletonesRegistry
-    )
-    internal
-    {
-        TWO_KEY_ECONOMY = _erc20address;
-        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
-    }
-
 
     modifier onlyTwoKeyAdmin {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
@@ -40,7 +27,8 @@ contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        return IERC20(TWO_KEY_ECONOMY).balanceOf(address(this));
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        return IERC20(twoKeyEconomy).balanceOf(address(this));
     }
 
     /**
@@ -52,7 +40,8 @@ contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
     )
     internal
     {
-        IERC20(TWO_KEY_ECONOMY).transfer(receiver,amount);
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        IERC20(twoKeyEconomy).transfer(receiver,amount);
     }
 
 }

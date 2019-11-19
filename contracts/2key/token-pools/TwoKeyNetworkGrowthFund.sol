@@ -20,7 +20,6 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
 
     function setInitialParams(
         address _twoKeySingletonesRegistry,
-        address _erc20Address,
         address _proxyStorage,
         uint _twoKeyReleaseDate
     )
@@ -30,7 +29,7 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
 
         PROXY_STORAGE_CONTRACT = ITwoKeyNetworkGrowthFundStorage(_proxyStorage);
 
-        setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
         //Total amount is 96M wei
         uint portionAmount = getContractBalance();

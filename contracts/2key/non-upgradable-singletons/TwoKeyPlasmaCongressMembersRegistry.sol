@@ -94,6 +94,7 @@ contract TwoKeyPlasmaCongressMembersRegistry {
     )
     internal
     {
+        require(isMemberInCongress[targetMember] == false);
         minimumQuorum = allMembers.length;
         maxVotingPower = maxVotingPower.add(_votingPower);
         address2Member[targetMember] = Member(

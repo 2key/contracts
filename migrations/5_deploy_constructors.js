@@ -123,7 +123,6 @@ module.exports = function deploy(deployer) {
                     let instance = await TwoKeyParticipationMiningPool.at(contractNameToProxyAddress["TwoKeyParticipationMiningPool"]);
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
-                        TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyParticipationMiningPoolStorage"]
                     );
                     resolve(txHash);
@@ -153,7 +152,6 @@ module.exports = function deploy(deployer) {
                     let instance = await TwoKeyNetworkGrowthFund.at(contractNameToProxyAddress["TwoKeyNetworkGrowthFund"]);
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
-                        TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyNetworkGrowthFundStorage"],
                         deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                     );
@@ -170,7 +168,6 @@ module.exports = function deploy(deployer) {
                     let instance = await TwoKeyDeepFreezeTokenPool.at(contractNameToProxyAddress["TwoKeyDeepFreezeTokenPool"]);
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
-                        TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyParticipationMiningPool"],
                         contractNameToProxyAddress["TwoKeyDeepFreezeTokenPoolStorage"]
                     );
@@ -186,7 +183,6 @@ module.exports = function deploy(deployer) {
                     let instance = await TwoKeyMPSNMiningPool.at(contractNameToProxyAddress["TwoKeyMPSNMiningPool"]);
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
-                        TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyMPSNMiningPoolStorage"]
                     );
                     resolve(txHash);
@@ -202,7 +198,6 @@ module.exports = function deploy(deployer) {
                     let instance = await TwoKeyTeamGrowthFund.at(contractNameToProxyAddress["TwoKeyTeamGrowthFund"]);
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
-                        TwoKeyEconomy.address,
                         contractNameToProxyAddress["TwoKeyTeamGrowthFundStorage"]
                     );
                     resolve(txHash);
@@ -283,7 +278,6 @@ module.exports = function deploy(deployer) {
                     console.log('Setting initial parameters in contract TwoKeyUpgradableExchange');
                     let instance = await TwoKeyUpgradableExchange.at(contractNameToProxyAddress["TwoKeyUpgradableExchange"]);
                     let txHash = instance.setInitialParams(
-                        TwoKeyEconomy.address,
                         DAI_ROPSTEN_ADDRESS,
                         kyberAddress,
                         TwoKeySingletonesRegistry.address,

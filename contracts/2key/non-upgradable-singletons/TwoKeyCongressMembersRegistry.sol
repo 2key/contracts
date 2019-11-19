@@ -155,10 +155,10 @@ contract TwoKeyCongressMembersRegistry {
         //Remove his state to empty member
         address2Member[targetMember] = Member(
             {
-            memberAddress: address(0),
-            memberSince: block.timestamp,
-            votingPower: 0,
-            name: "0x0"
+                memberAddress: address(0),
+                memberSince: block.timestamp,
+                votingPower: 0,
+                name: "0x0"
             }
         );
         //Reduce 1 member from quorum

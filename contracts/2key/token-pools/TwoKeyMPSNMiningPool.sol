@@ -13,14 +13,13 @@ contract TwoKeyMPSNMiningPool is TokenPool {
 
     function setInitialParams(
         address _twoKeySingletonesRegistry,
-        address _erc20Address,
         address _proxyStorage
     )
     public
     {
         require(initialized == false);
 
-        setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyMPSNMiningPoolStorage(_proxyStorage);
 
         initialized = true;

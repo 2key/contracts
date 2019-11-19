@@ -11,14 +11,13 @@ contract TwoKeyTeamGrowthFund is TokenPool {
 
     function setInitialParams(
         address _twoKeySingletonRegistry,
-        address _economy,
         address _proxyStorageContract
     )
     public
     {
         require(initialized == false);
 
-        setInitialParameters(_economy, _twoKeySingletonRegistry);
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyTeamGrowthFundStorage(_proxyStorageContract);
 
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_tokensReleaseDate), block.timestamp + (2 years));

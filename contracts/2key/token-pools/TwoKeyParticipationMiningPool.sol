@@ -42,15 +42,13 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
     function setInitialParams(
         address twoKeySingletonesRegistry,
-        address _twoKeyEconomy,
         address _proxyStorage
     )
     external
     {
         require(initialized == false);
 
-        setInitialParameters(_twoKeyEconomy, TWO_KEY_SINGLETON_REGISTRY);
-
+        TWO_KEY_SINGLETON_REGISTRY = twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
 
         uint totalAmountOfTokens = getContractBalance(); //120M WEI's

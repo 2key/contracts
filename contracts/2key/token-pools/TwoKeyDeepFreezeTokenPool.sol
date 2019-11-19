@@ -14,7 +14,6 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
 
     function setInitialParams(
         address _twoKeySingletonesRegistry,
-        address _erc20Address,
         address _twoKeyParticipationMiningPool,
         address _proxyStorage
     )
@@ -22,7 +21,7 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
     {
         require(initialized == false);
 
-        setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
         PROXY_STORAGE_CONTRACT = ITwoKeyDeepFreezeTokenPoolStorage(_proxyStorage);
         twoKeyParticipationMiningPool = _twoKeyParticipationMiningPool;

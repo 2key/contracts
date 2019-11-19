@@ -109,10 +109,10 @@ contract TwoKeyCongress {
         string jobDescription,
         bytes transactionBytecode)
     public
+    payable
     onlyMembers
-    returns (uint proposalID)
     {
-        proposalID = proposals.length++;
+        uint proposalID = proposals.length++;
         Proposal storage p = proposals[proposalID];
         p.recipient = beneficiary;
         p.amount = weiAmount;
@@ -127,33 +127,8 @@ contract TwoKeyCongress {
         p.supportingProposalTotal = 0;
         emit ProposalAdded(proposalID, beneficiary, weiAmount, jobDescription);
         numProposals = proposalID+1;
-
-        return proposalID;
     }
 
-    /**
-     * Add proposal in Ether
-     *
-     * Propose to send `etherAmount` ether to `beneficiary` for `jobDescription`. `transactionBytecode ? Contains : Does not contain` code.
-     * This is a convenience function to use if the amount to be given is in round number of ether units.
-     *
-     * @param beneficiary who to send the ether to
-     * @param etherAmount amount of ether to send
-     * @param jobDescription Description of job
-     * @param transactionBytecode bytecode of transaction
-     */
-    function newProposalInEther(
-        address beneficiary,
-        uint etherAmount,
-        string jobDescription,
-        bytes transactionBytecode
-    )
-    public
-    onlyMembers
-    returns (uint proposalID)
-    {
-        return newProposal(beneficiary, etherAmount, jobDescription, transactionBytecode);
-    }
 
     /**
      * Check if a proposal code matches
@@ -280,7 +255,6 @@ contract TwoKeyCongress {
         Proposal memory p = proposals[proposalId];
         return (p.amount, p.description, p.minExecutionDate, p.executed, p.numberOfVotes, p.supportingProposalTotal, p.againstProposalTotal, p.transactionBytecode);
     }
-
 
 
     /// @notice Fallback function
