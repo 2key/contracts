@@ -37,8 +37,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
      * @notice Function to set initial parameters in the contract including singletones
      * @param _twoKeySingletonRegistry is the singletons registry contract address
      * @param _proxyStorageContract is the address of proxy for storage for this contract
-     * @param _twoKeyCongress is the address of TwoKeyCongress
-     * @param _economy is the address of TwoKeyEconomy
      * @dev This function can be called only once, which will be done immediately after deployment.
      */
     function setInitialParams(

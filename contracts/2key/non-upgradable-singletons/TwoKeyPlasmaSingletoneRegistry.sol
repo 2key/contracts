@@ -99,8 +99,8 @@ contract TwoKeyPlasmaSingletoneRegistry is ITwoKeySingletonesRegistry {
     public
     {
         require(msg.sender == deployer);
-        bytes memory logicVersion = bytes(contractNameToLatestVersion[contractLogicName]);
-        bytes memory storageVersion = bytes(contractNameToLatestVersion[contractStorageName]);
+        bytes memory logicVersion = bytes(contractNameToLatestVersionName[contractLogicName]);
+        bytes memory storageVersion = bytes(contractNameToLatestVersionName[contractStorageName]);
 
         require(logicVersion.length == 0 && storageVersion.length == 0); //Requiring that this is first time adding a version
         require(keccak256(version) == keccak256("1.0.0"));
