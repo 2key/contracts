@@ -53,7 +53,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
 
-        uint totalAmountOfTokens = (120000000) * (10**18); //120M WEI's
+        uint totalAmountOfTokens = getContractBalance() * (10**18); //120M WEI's
 
         setUint(_totalAmount2keys, totalAmountOfTokens);
         setUint(_annualTransferAmountLimit, totalAmountOfTokens.div(10));
@@ -83,11 +83,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     onlyTwoKeyAdminOrWhitelistedAddress
     {
         require(_amount > 0);
-
-
         uint year = checkInWhichYearIsTheTransfer();
-        require(year >= 1 && year <= 10);
-
 
         bytes32 keyTransferedThisYear = keccak256(_yearToTransferedThisYear,year);
         bytes32 keyAnnualTransferAmountLimit = keccak256(_annualTransferAmountLimit);
@@ -95,9 +91,15 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         //Take the amount transfered this year
         uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keyTransferedThisYear);
-        //Take the annual transfer amount limit
-        uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
-        //TODO: if we're in one of the first 10 years, yearly allowance is 1/10. If we're after 10 years, there is no yearly allowance, but just the allowance of what was left (Remainder) after the first 10 years
+
+        //In case there are <= than 10 years, than we have limits for transfer
+        if(year <= 10) {
+            //Take the annual transfer amount limit
+            uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
+
+            //Check that this transfer will not overflow the annual limit
+            require(transferedThisYear.add(_amount) <= annualTransferAmountLimit);
+        }
 
         //Take the epoch for this year ==> which time this year we're calling this function
         uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keyHashEpochThisYear);
@@ -105,8 +107,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         //We're always sending tokens to ParticipationPaymentsManager
         address receiver = getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationPaymentsManager");
 
-        //Check that this transfer will not overflow the annual limit
-        require(transferedThisYear.add(_amount) <= annualTransferAmountLimit);
         // Transfer the tokens
         super.transferTokens(receiver,_amount);
         //Alert that tokens have been transfered

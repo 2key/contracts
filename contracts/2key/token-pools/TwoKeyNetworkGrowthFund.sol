@@ -33,7 +33,8 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
         setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
 
         //Total amount is 96M wei
-        uint portionAmount = 19200000*(10**18);
+        uint portionAmount = getContractBalance()*(10**18);
+
         for(uint i=1; i<=5; i++) {
             // Getting 2,3,4,5,6 years after release date
             uint releaseDate = _twoKeyReleaseDate.add((i+1).mul(1 years));
@@ -52,7 +53,13 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
     public
     onlyTwoKeyAdmin
     {
-        //TODO: impl
+        require(getPortionUnlockingDate(_portion) <= block.timestamp);
+        require(getAmountLeftForThePortion(_portion) <= _amount);
+
+        super.transferTokens(_receiver, _amount);
+
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_portionAmountToWithdraw, _portion), getAmountLeftForThePortion(_portion)- _amount);
+
     }
 
     function getPortionUnlockingDate(
@@ -73,24 +80,18 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
     view
     returns (bool)
     {
-        uint portionAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_portionAmountToWithdraw, _portion));
+        uint portionAmount = getAmountLeftForThePortion(_portion);
         return portionAmount == 0 ? true : false;
     }
 
-
-
-    /**
-     * @notice Long term pool will hold the tokens for 3 years after that they can be transfered by TwoKeyAdmin
-     * @param _receiver is the receiver of the tokens
-     * @param _amount is the amount of the tokens
-     */
-    function transferTokensFromContract(
-        address _receiver,
-        uint _amount
+    function getAmountLeftForThePortion(
+        uint _portion
     )
     public
-    onlyTwoKeyAdmin
+    view
+    returns (uint)
     {
-        super.transferTokens(_receiver, _amount);
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_portionAmountToWithdraw, _portion));
     }
+
 }
