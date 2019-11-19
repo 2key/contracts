@@ -304,8 +304,6 @@ module.exports = function deploy(deployer) {
                     let txHash = instance.setInitialParams(
                         TwoKeySingletonesRegistry.address,
                         contractNameToProxyAddress["TwoKeyAdminStorage"],
-                        TwoKeyCongress.address,
-                        TwoKeyEconomy.address,
                         deployer.network.startsWith('dev') ? 1 : rewardsReleaseAfter
                     );
                     resolve(txHash);

@@ -20,13 +20,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; //Pointer to storage contract
 
-	address twoKeyCongress; // Address of TwoKeyCongress (logic)
-	address twoKeyEconomy; // Address of TwoKeyEconomy (2KEY ERC20 token)
-
-
     /// @notice Modifier which throws if caller is not TwoKeyCongress
 	modifier onlyTwoKeyCongress {
-		require(msg.sender == twoKeyCongress);
+		require(msg.sender == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyCongress"));
 	    _;
 	}
 
@@ -41,23 +37,17 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
      * @notice Function to set initial parameters in the contract including singletones
      * @param _twoKeySingletonRegistry is the singletons registry contract address
      * @param _proxyStorageContract is the address of proxy for storage for this contract
-     * @param _twoKeyCongress is the address of TwoKeyCongress
-     * @param _economy is the address of TwoKeyEconomy
      * @dev This function can be called only once, which will be done immediately after deployment.
      */
     function setInitialParams(
 		address _twoKeySingletonRegistry,
 		address _proxyStorageContract,
-        address _twoKeyCongress,
-        address _economy,
 		uint _twoKeyTokenReleaseDate
     ) external {
         require(initialized == false);
 
 		TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
 		PROXY_STORAGE_CONTRACT = ITwoKeyAdminStorage(_proxyStorageContract);
-		twoKeyCongress = _twoKeyCongress;
-		twoKeyEconomy = _economy;
 
 		setUint(_twoKeyIntegratorDefaultFeePercent,2);
 		setUint(_twoKeyNetworkTaxPercent,25);
@@ -107,7 +97,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		IERC20(address(twoKeyEconomy)).freezeTransfers();
+		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+		IERC20(twoKeyEconomy).freezeTransfers();
 	}
 
 	/// @notice Function to unfreeze all transfers for 2KEY token
@@ -115,7 +106,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		IERC20(address(twoKeyEconomy)).unfreezeTransfers();
+		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+		IERC20(twoKeyEconomy).unfreezeTransfers();
 	}
 
 	/// @notice Function to transfer 2key tokens
@@ -130,6 +122,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	onlyTwoKeyCongress
 	returns (bool)
 	{
+		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 		bool completed = IERC20(twoKeyEconomy).transfer(_to, _amount);
 		return completed;
 	}
