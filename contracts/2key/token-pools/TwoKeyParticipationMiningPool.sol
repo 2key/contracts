@@ -53,7 +53,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
 
-        uint totalAmountOfTokens = getContractBalance() * (10**18); //120M WEI's
+        uint totalAmountOfTokens = getContractBalance(); //120M WEI's
 
         setUint(_totalAmount2keys, totalAmountOfTokens);
         setUint(_annualTransferAmountLimit, totalAmountOfTokens.div(10));

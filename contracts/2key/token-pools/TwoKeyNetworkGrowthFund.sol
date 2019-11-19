@@ -33,7 +33,7 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
         setInitialParameters(_erc20Address, _twoKeySingletonesRegistry);
 
         //Total amount is 96M wei
-        uint portionAmount = getContractBalance()*(10**18);
+        uint portionAmount = getContractBalance();
 
         for(uint i=1; i<=5; i++) {
             // Getting 2,3,4,5,6 years after release date
