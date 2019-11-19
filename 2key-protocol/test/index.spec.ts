@@ -1161,7 +1161,7 @@ describe('TwoKeyProtocol', () => {
         const rate = await twoKeyProtocol.UpgradableExchange.get2keySellRate(from);
 
         console.log('Rate is : ' + rate);
-        expect(rate.toString()).to.be.equal("0.1");
+        expect(rate.toString()).to.be.equal("0.06");
     }).timeout(60000);
 
     it('should print currency', async() => {

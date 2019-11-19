@@ -423,13 +423,13 @@ describe('TwoKeyDonationCampaign', () => {
     it('should get referrer earnings', async() => {
         printTestNumber();
         let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, env.GMAIL_ADDRESS, from);
-        expect(referrerBalance).to.be.equal(50);
+        expect(referrerBalance).to.be.equal(83.33333333333333);
     }).timeout(60000);
 
     it('should get reserved amount for referrers', async() => {
         printTestNumber();
         let referrerReservedAmount = await twoKeyProtocol.DonationCampaign.getReservedAmount2keyForRewards(campaignAddress);
-        expect(referrerReservedAmount).to.be.equal(50);
+        expect(referrerReservedAmount).to.be.equal(83.33333333333333);
     }).timeout(60000);
 
     it('should check is address contractor', async() => {
