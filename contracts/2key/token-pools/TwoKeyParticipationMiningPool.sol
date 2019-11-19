@@ -187,7 +187,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         } else {
             uint counter = 1;
             uint start = startingDate.add(1 years); //means we're checking for the second year
-            while(block.timestamp > start || counter == 10) {
+            while(block.timestamp > start) {
                 start = start.add(1 years);
                 counter ++;
             }
