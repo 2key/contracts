@@ -149,6 +149,23 @@ module.exports = {
       },
 
 
+      'private.test.k8s-dev': {
+          provider: () => LedgerProvider('https://rpc-dev.private.test.k8s.2key.net', {
+              networkId: 181,
+              // https://github.com/LedgerHQ/ledgerjs/issues/200
+              path: "44'/60'/0'/0",
+              // askConfirm: true,
+              askConfirm: false,
+              accountsLength: 1,
+              accountsOffset: 0,
+          }),
+          network_id: 181,
+          gas: 8000000,
+          skipDryRun: true,
+          gasPrice: 0x0
+      },
+
+
       'public.test.k8s-dev': {
           provider: () => LedgerProvider('https://rpc-dev.public.test.k8s.2key.net', {
               networkId: 3,
