@@ -24,7 +24,7 @@ const twoKeyProtocolSrcGit = simpleGit(twoKeyProtocolDir);
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
 
 
 const branch_to_env = {
@@ -98,7 +98,7 @@ const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath(), cwd: __
 const restoreFromArchive = () => {
     console.log("restore",__dirname);
     return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
-}
+};
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
     console.log('Generating abi', deployedTo);
@@ -341,7 +341,14 @@ async function deploy() {
 
         const local = process.argv[2].includes('local'); //If we're deploying to local network
 
-        await restoreFromArchive();
+        //If reset rm -rf build folder and rm -rf tar.gz
+        if(process.argv.includes('--reset')) {
+            await rmDir(buildPath);
+            await rmDir(buildArchPath);
+        } else {
+            await restoreFromArchive();
+        }
+
 
         const networks = process.argv[2].split(',');
         const network = networks.join('/');
@@ -362,12 +369,10 @@ async function deploy() {
         await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
         await commitAndPush2KeyProtocolSrc(`Contracts deployed to ${network} ${now.format('lll')}`);
         console.log('Changes commited');
-        // await restoreFromArchive();
         await buildSubmodules(contracts);
         if (!local) {
             await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
         }
-        // await archiveBuild();
         contractsStatus = await contractsGit.status();
         await commitAndPushContractsFolder(commit);
         await commitAndPush2KeyProtocolSrc(commit);
