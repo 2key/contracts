@@ -211,19 +211,23 @@ const updateIPFSHashes = async(contracts) => {
     let versionsList = {};
 
     let existingVersionHandlerFile = {};
-    try {
-        existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
-        console.log('EXISTING VERSIONS', existingVersionHandlerFile);
-    } catch (e) {
-        console.log('VERSIONS ERROR', e);
+
+    if(!process.argv.includes('--reset')) {
+        try {
+            existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
+            console.log('EXISTING VERSIONS', existingVersionHandlerFile);
+        } catch (e) {
+            console.log('VERSIONS ERROR', e);
+        }
+
+        const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
+
+        if (currentVersionHandler) {
+            versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
+            console.log('VERSION LIST', versionsList);
+        }
     }
 
-    const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
-
-    if (currentVersionHandler) {
-        versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
-        console.log('VERSION LIST', versionsList);
-    }
     versionsList[nonSingletonHash] = {};
     const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
     for (let i = 0, l = files.length; i < l; i++) {
@@ -345,6 +349,7 @@ async function deploy() {
         if(process.argv.includes('--reset')) {
             await rmDir(buildPath);
             await rmDir(buildArchPath);
+
         } else {
             await restoreFromArchive();
         }
