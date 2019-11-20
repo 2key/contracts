@@ -170,8 +170,8 @@ module.exports = {
           provider: () => LedgerProvider('https://rpc-dev.public.test.k8s.2key.net', {
               networkId: 3,
               // https://github.com/LedgerHQ/ledgerjs/issues/200
-              // path: "44'/60'/0'/0",
-              path: "44\'/60\'/0\'/0/0",
+              path: "44'/60'/0'/0",
+              //path: "44\'/60\'/0\'/0/0",
               // askConfirm: true,
               askConfirm: false,
               accountsLength: 1,
