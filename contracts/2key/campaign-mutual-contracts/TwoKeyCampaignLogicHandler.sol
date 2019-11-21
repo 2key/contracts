@@ -176,16 +176,19 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     view
     returns (uint256[], uint256[])
     {
-        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender) ||
-        ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
-        //TODO: Delete once hard redeploy is done
+        require(
+            ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry)
+                .checkIsAddressMaintainer(msg.sender)
+        );
 
         uint numberOfAddresses = _referrerPlasmaList.length;
         uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = ITwoKeyCampaign(twoKeyCampaign).getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+            referrersPendingPlasmaBalance[i] = ITwoKeyCampaign(twoKeyCampaign)
+                .getReferrerPlasmaBalance(_referrerPlasmaList[i]);
+
             referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
         }
 
