@@ -61,10 +61,11 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             }
 
             //Override logic address implementation
-            fileObject[contractName]["3"].implementationAddressLogic = newImplementationAddress;
+            fileObject[contractName][network.id.toString()].implementationAddressLogic = newImplementationAddress;
 
+            //Write new logic address to proxyAddresses file
             fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-
+            //Get instance of TwoKeySingletonesRegistry
             let instance = await TwoKeySingletonesRegistry.at(registryAddress);
             // Get current active version to be patched
             let version = await instance.getLatestContractVersion(contractName);
@@ -76,7 +77,6 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             let txHash = await instance.addVersion(contractName, newVersion, newImplementationAddress);
             //Generate bytecode
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
-
             //Message on slack that proposal should be created for new version
             await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
 
@@ -90,42 +90,6 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
 });
 
 
-/**
- * Upgrade contract on plasma network
- * @type {function(*=, *=, *=)}
- */
-const updateContractPlasma = (async (registryAddress, contractName, newImplementationAddress) => {
-    await new Promise(async(resolve,reject) => {
-        try {
-            //Open proxyAddresses file
-            let fileObject = {};
-            if (fs.existsSync(proxyFile)) {
-                fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
-            }
-
-            //Override logic address implementation
-            fileObject[contractName]["181"].implementationAddressLogic = newImplementationAddress;
-            fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-
-            let instance = await TwoKeyPlasmaSingletoneRegistry.at(registryAddress);
-            // Get current active version to be patched
-            let version = await instance.getLatestContractVersion(contractName);
-            // Incremented version
-            let newVersion = incrementVersion(version);
-            //Console log the new version
-            console.log('New version is: ' + newVersion);
-            // Add contract version. This can be done only by deployer
-            let txHash = await instance.addVersion(contractName, newVersion, newImplementationAddress);
-            // Upgrade contract --> can be only done by deployer
-            let txHash1 = await instance.upgradeContract(contractName, newVersion);
-            resolve({
-                txHash1
-            });
-        } catch (e) {
-            reject(e);
-        }
-    });
-});
 
 let contractsArtifacts = {
     TwoKeyUpgradableExchange,
@@ -220,12 +184,7 @@ module.exports = async function deploy(deployer) {
                 await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Updating contract: ' + contractName);
-                        let txHash;
-                        if(deployer.network.startsWith('private')) {
-                            txHash = await updateContractPlasma(registryAddress, contractName, newImplementationAddress);
-                        } else if (deployer.network.startsWith('public')){
-                            txHash = await updateContract(registryAddres, contractName, newImplementationAddress, deployer.network);
-                        }
+                        let txHash = await updateContract(registryAddress, contractName, newImplementationAddress, deployer.network);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
