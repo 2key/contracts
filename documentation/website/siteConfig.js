@@ -7,6 +7,19 @@
 
 // See https://docusaurus.io/docs/site-config for all the possible
 // site configuration options.
+const fs = require('fs');
+const path = require('path');
+const configurationFile = path.join(__dirname, '../../2key-protocol/dist/package.json');
+
+const getVersion = () => {
+    //Open configuration file
+    let fileObject = {};
+    if (fs.existsSync(configurationFile)) {
+        fileObject = JSON.parse(fs.readFileSync(configurationFile, { encoding: 'utf8' }));
+    }
+
+    return fileObject.version.toString();
+};
 
 // List of projects/orgs using your project for the users page.
 const users = [
@@ -23,7 +36,7 @@ const users = [
 const siteConfig = {
   noIndex: true,
   title: 'TwoKey documentation' /* title for your website */ ,
-  tagline: 'Smart Contracts API Docs',
+  tagline: 'Smart Contracts Documentation - Following protocol version: ' + getVersion(),
   url: 'https://2key.github.io' /* your website url */ ,
   baseUrl: '/contracts/' /* base url for your project */ ,
   // For github.io type URLs, you would set the url and baseUrl like:
