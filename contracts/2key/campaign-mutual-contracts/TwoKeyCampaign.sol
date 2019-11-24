@@ -63,6 +63,14 @@ contract TwoKeyCampaign is ArcToken {
 		_;
 	}
 
+	modifier onlyContractorOrMaintainer {
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender)
+		|| ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
+		//TODO: Delete once hard redeploy is done
+		_;
+	}
+
 	/**
      * @dev Transfer tokens from one address to another
      * @param _from address The address which you want to send tokens from ALREADY converted to plasma
@@ -172,6 +180,21 @@ contract TwoKeyCampaign is ArcToken {
 		);
 
 		return (influencers, keys, weights, old_address);
+	}
+
+	/**
+     * @notice Function to join with signature and share 1 arc to the receiver
+     * @param signature is the signature
+     * @param receiver is the address we're sending ARCs to
+     */
+	function joinAndShareARC(
+		bytes signature,
+		address receiver
+	)
+	public
+	{
+		distributeArcsBasedOnSignature(signature, msg.sender);
+		transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
 	}
 
 	/**

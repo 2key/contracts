@@ -204,20 +204,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         require(_total_units >= totalBoughtUnits);
     }
 
-    /**
-     * @notice Function to join with signature and share 1 arc to the receiver
-     * @param signature is the signature
-     * @param receiver is the address we're sending ARCs to
-     */
-    function joinAndShareARC(
-        bytes signature,
-        address receiver
-    )
-    public
-    {
-        distributeArcsBasedOnSignature(signature, msg.sender);
-        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
-    }
+
 
     /*
      * @notice Function which is executed to create conversion
