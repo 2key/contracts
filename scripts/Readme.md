@@ -6,7 +6,7 @@ Make sure you're using >= 3.6 python version on your machine
 pip install web3
 pip install eth_abi
 ```
-
+___
 #### Generate bytecode for sending tokens:
 - Arguments: 
     - receiver_address (The one who has to receive tokens)
@@ -17,7 +17,7 @@ pip install eth_abi
 eg. "Lets transfer 500.5 tokens" 
 - `python generate_bytecode.py transfer2KeyTokens 0x380249E32B620fbf2Fa53418B7141770524Da9C5 500.5`
 
-
+___
 #### Generate bytecode for upgrading contract:
 - Arguments:
     - contract_name 
@@ -28,7 +28,7 @@ eg. "Lets transfer 500.5 tokens"
 eg. "Lets upgrade TwoKeyUpgradableExchange contract to version 1.0.2" 
 - `python generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.2`
 
-
+___
 #### Generate bytecode for changing rewards release date:
 - Arguments:
     - new_date (unix timestamp)
@@ -38,7 +38,7 @@ eg. "Lets upgrade TwoKeyUpgradableExchange contract to version 1.0.2"
 eg. "Lets change rewards release date to 12428814231 timestamp"
 - `python generate_bytecode.py setNewTwoKeyRewardsReleaseDate 12428814231`
 
-
+___
 #### Generate bytecode for adding a member to congress:
 - Arguments:
     - target_member (member address)
@@ -50,7 +50,7 @@ eg. "Lets change rewards release date to 12428814231 timestamp"
 eg. "Lets add Nikola Madjarevic to congress and give him voting power 1. His address is 0x380249E32B620fbf2Fa53418B7141770524Da9C5"
 - `python generate_bytecode.py addMember 0x380249E32B620fbf2Fa53418B7141770524Da9C5 0x4e696b6f6c61204d61646a617265766963000000000000000000000000000000 1`
 
-
+___
 #### Generate bytecode for removing a member from congress:
 - Arguments:
     - target_member (member address)
@@ -60,6 +60,7 @@ eg. "Lets add Nikola Madjarevic to congress and give him voting power 1. His add
 eg. "Let's remove member with address 0x380249E32B620fbf2Fa53418B7141770524Da9C5 from congress"
 - `python generate_bytecode.py removeMember 0x380249E32B620fbf2Fa53418B7141770524Da9C5`
 
+___
 #### Generate bytecode for freezeTransfers in TwoKeyEconomy
 - Arguments:
   - /  
@@ -69,6 +70,7 @@ eg. "Let's remove member with address 0x380249E32B620fbf2Fa53418B7141770524Da9C5
 eg. "Let's freeze transfers in TwoKeyEconomy"
 - `python generate_bytecode.py freezeTransfers`
 
+___
 #### Generate bytecode for unfreezeTransfers in TwoKeyEconomy
 - Arguments:
   - /  
@@ -78,7 +80,7 @@ eg. "Let's freeze transfers in TwoKeyEconomy"
 eg. "Let's unfreeze transfers in TwoKeyEconomy"
 - `python generate_bytecode.py unfreezeTransfers`
 
-
+___
 #### Generate bytecode for changing Non-Upgradable contract
 - Arguments:
   - contract_name (name of the contract)
