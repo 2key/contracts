@@ -60,5 +60,34 @@ eg. "Lets add Nikola Madjarevic to congress and give him voting power 1. His add
 eg. "Let's remove member with address 0x380249E32B620fbf2Fa53418B7141770524Da9C5 from congress"
 - `python generate_bytecode.py removeMember 0x380249E32B620fbf2Fa53418B7141770524Da9C5`
 
+#### Generate bytecode for freezeTransfers in TwoKeyEconomy
+- Arguments:
+  - /  
+ 
+`python generate_bytecode.py freezeTransfers`
+
+eg. "Let's freeze transfers in TwoKeyEconomy"
+- `python generate_bytecode.py freezeTransfers`
+
+#### Generate bytecode for unfreezeTransfers in TwoKeyEconomy
+- Arguments:
+  - /  
+ 
+`python generate_bytecode.py unfreezeTransfers`
+
+eg. "Let's unfreeze transfers in TwoKeyEconomy"
+- `python generate_bytecode.py unfreezeTransfers`
+
+
+#### Generate bytecode for changing Non-Upgradable contract
+- Arguments:
+  - contract_name (name of the contract)
+  - new_contract_address (address of new contract)  
+ 
+`python generate_bytecode.py changeNonUpgradableContract <contract_name> <new_contract_address>`
+
+eg. "Let's change TwoKeyCongress to new implementation on address 0x380249E32B620fbf2Fa53418B7141770524Da9C5"
+- `python generate_bytecode.py changeNonUpgradableContract "TwoKeyCongress" "0x380249E32B620fbf2Fa53418B7141770524Da9C5"`
+
 
 

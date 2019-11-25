@@ -47,6 +47,26 @@ def generate_bytecode_for_removing_member(target_member):
     values = [target_member]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_freezing_transfers():
+    method_name_and_params = "freezeTransfersInEconomy()"
+    types = []
+    values = []
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_unfreezing_transfers():
+    method_name_and_params = "unfreezeTransfersInEconomy()"
+    types = []
+    values = []
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_replacing_contract(contract_name, new_contract_address):
+    method_name_and_params = "changeNonUpgradableContract(string,address)"
+    types = ["string","address"]
+    values = [contract_name, new_contract_address]
+    print ('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+
+
 
 ### TODO: Add concrete examples and units for each function call
 if __name__ == "__main__":
@@ -62,3 +82,9 @@ if __name__ == "__main__":
         generate_bytecode_for_adding_new_member(sys.argv[2],sys.argv[3],sys.argv[4])
     if(arg1 == "removeMember"):
         generate_bytecode_for_removing_member(sys.argv[2])
+    if(arg1 == "freezeTransfers"):
+        generate_bytecode_for_freezing_transfers()
+    if(arg1 == "unfreezeTransfers"):
+        generate_bytecode_for_unfreezing_transfers()
+    if(arg1 == "changeNonUpgradableContract"):
+        generate_bytecode_for_replacing_contract(sys.argv[2], sys.argv[3])
