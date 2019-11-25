@@ -38,7 +38,7 @@ const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStora
 
 const Call = artifacts.require('Call');
 
-const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created, checkArgumentsForUpdate } = require('../helpers');
+const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created } = require('../helpers');
 const { generateBytecodeForUpgrading } = require('../generateBytecode');
 
 const fs = require('fs');
