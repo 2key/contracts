@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
+import "../campaign-mutual-contracts/TwoKeyBudgetCampaign.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
 
 import "../libraries/IncentiveModels.sol";
@@ -18,11 +18,10 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
  * @author Udi
  * Created at 10/03/19
  */
-contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaignIncentiveModels {
+contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign, TwoKeyCampaignIncentiveModels {
 
-    bool isCampaignInitialized;
-    bool boughtRewardsWithEther;
-    bool usd2KEYrateWei;
+
+
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
     address[] public activeInfluencers;
@@ -53,8 +52,6 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCampaig
     //===========================================
     //MAIN FUNCTIONS:
     //===========================================
-
-
 
     function setInitialParamsCampaign(
         address _contractor,

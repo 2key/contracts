@@ -2,9 +2,8 @@ pragma solidity ^0.4.24;
 
 import "../campaign-mutual-contracts/TwoKeyCampaignConversionHandler.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
-import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
+import "../interfaces/ITwoKeyCPCCampaign.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
-import "../interfaces/ITwoKeyPurchasesHandler.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -12,8 +11,7 @@ import "../interfaces/ITwoKeyPurchasesHandler.sol";
 contract TwoKeyCPCConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversionHandler {
 
     Conversion[] conversions;
-    ITwoKeyAcquisitionCampaignERC20 twoKeyCampaign;
-    address public twoKeyPurchasesHandler;
+    ITwoKeyCPCCampaign twoKeyCampaign;
 
     mapping(address => uint256) private amountConverterSpentFiatWei; // Amount converter spent for Fiat conversions
     mapping(address => uint256) private unitsConverterBought; // Number of units (ERC20 tokens) bought
