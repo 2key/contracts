@@ -38,7 +38,7 @@ const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStora
 
 const Call = artifacts.require('Call');
 
-const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created } = require('../helpers');
+const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created, } = require('../helpers');
 const { generateBytecodeForUpgrading } = require('../generateBytecode');
 
 const fs = require('fs');
@@ -50,7 +50,7 @@ const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
  * Function to perform all necessary logic to update smart contract
  * @type {function(*, *=, *=)}
  */
-const updateContract = (async (registryAddress, contractName, newImplementationAddress, network) => {
+const updateContract = (async (registryAddress, contractName, newImplementationAddress, deployer) => {
     await new Promise(async(resolve,reject) => {
         try {
 
@@ -61,7 +61,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             }
 
             //Override logic address implementation
-            fileObject[contractName][network.id.toString()].implementationAddressLogic = newImplementationAddress;
+            fileObject[contractName][[deployer.network_id.toString()].implementationAddressLogic = newImplementationAddress;
 
             //Write new logic address to proxyAddresses file
             fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
@@ -78,7 +78,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             //Generate bytecode
             let bytecodeForUpgradingThisContract = generateBytecodeForUpgrading(contractName, newVersion);
             //Message on slack that proposal should be created for new version
-            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, network);
+            await slack_message_proposal_created(contractName, newVersion, bytecodeForUpgradingThisContract, deployer.network);
 
             resolve({
                 txHash
@@ -184,7 +184,7 @@ module.exports = async function deploy(deployer) {
                 await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Updating contract: ' + contractName);
-                        let txHash = await updateContract(registryAddress, contractName, newImplementationAddress, deployer.network);
+                        let txHash = await updateContract(registryAddress, contractName, newImplementationAddress, deployer);
                         resolve(txHash);
                     } catch (e) {
                         reject(e);
