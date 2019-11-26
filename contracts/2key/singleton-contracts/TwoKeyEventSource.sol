@@ -72,8 +72,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint256 _amount
     );
 
-
-
     event ConvertedAcquisition(
         address _campaign,
         address _converterPlasma,
@@ -159,6 +157,12 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address converterPlasmaAddress,
         uint conversionId,
         uint tokens
+    );
+
+    event TokenWithdrawnFromPurchasesHandler(
+        address campaignAddress,
+        uint conversionID,
+        uint tokensAmountWithdrawn
     );
 
     /**
@@ -426,6 +430,26 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         require(isAddressMaintainer(msg.sender) == true);
         emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
     }
+
+    /**
+     * @notice Function which will emit an event every time somebody performs
+     * withdraw of bought tokens in AcquisitionCampaign contracts
+     * @param _campaignAddress is the address of main campaign contract
+     * @param _conversionID is the unique ID of conversion inside one campaign
+     * @param _tokensAmountWithdrawn is the amount of tokens user withdrawn
+     */
+    function tokensWithdrawnFromPurchasesHandler(
+        address _campaignAddress,
+        uint _conversionID,
+        uint _tokensAmountWithdrawn
+    )
+    external
+    onlyAllowedContracts
+    {
+        emit TokenWithdrawnFromPurchasesHandler(_campaignAddress, _conversionID, _tokensAmountWithdrawn);
+    }
+
+
     /**
      * @notice Function to check adequate plasma address for submitted eth address
      * @param me is the ethereum address we request corresponding plasma address for

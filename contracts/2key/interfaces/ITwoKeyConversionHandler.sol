@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 contract ITwoKeyConversionHandler {
 
     bool public isFiatConversionAutomaticallyApproved;
+    address public twoKeyPurchasesHandler;
 
     function supportForCreateConversion(
         address _converterAddress,
@@ -46,5 +47,9 @@ contract ITwoKeyConversionHandler {
     view
     returns (bytes32);
 
+    function getMainCampaignContractAddress()
+    public
+    view
+    returns (address);
 
 }

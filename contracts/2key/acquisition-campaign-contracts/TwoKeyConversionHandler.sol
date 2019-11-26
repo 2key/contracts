@@ -445,5 +445,11 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         );
     }
 
-
+    function getMainCampaignContractAddress()
+    public
+    view
+    returns (address)
+    {
+        return address(twoKeyCampaign);
+    }
 }
