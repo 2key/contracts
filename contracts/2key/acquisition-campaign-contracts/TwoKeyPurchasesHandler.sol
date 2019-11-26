@@ -80,19 +80,20 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         twoKeyEventSource = _twoKeyEventSource;
         proxyConversionHandler = _proxyConversionHandler;
 
+        portionToUnlockingDate[0] = tokenDistributionDate;
         uint bonusVestingStartDate;
+        uint i = 1;
         // In case vested amounts are both bonus and base, bonusTokensVestingStartShiftInDaysFromDistributionDate is ignored
         if(vestingAmount == VestingAmount.BASE_AND_BONUS) {
             bonusVestingStartDate = tokenDistributionDate.add(numberOfDaysBetweenPortions.mul(1 days));
+            for(i=1; i<numberOfVestingPortions; i++) {
+                portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
+            }
         } else {
             bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
-        }
-
-
-        portionToUnlockingDate[0] = tokenDistributionDate;
-
-        for(uint i=1; i<numberOfVestingPortions + 1; i++) {
-            portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
+            for(i=1; i<numberOfVestingPortions+1; i++) {
+                portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
+            }
         }
 
         initialized = true;
@@ -132,7 +133,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         uint bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
         uint bonusPortionAmount = _bonusTokens.div(numberOfVestingPortions);
 
-        for(uint i=1; i<numberOfVestingPortions + 1; i++) {
+        for(uint i=1; i<numberOfVestingPortions+1; i++) {
             portionAmounts[i] = bonusPortionAmount;
         }
 
@@ -156,8 +157,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     )
     internal
     {
-        uint [] memory portionAmounts = new uint[](numberOfVestingPortions+1);
-        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions+1);
+        uint [] memory portionAmounts = new uint[](numberOfVestingPortions);
+        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions);
 
         uint totalAmount = _baseTokens.add(_bonusTokens);
         uint portion = totalAmount.div(numberOfVestingPortions);
@@ -190,7 +191,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
 
         uint shift = tokenDistributionDate.sub(_newDate);
         // If the date is changed shifting all tokens unlocking dates for the difference
-        for(uint i=0; i<numberOfVestingPortions+1;i++) {
+        for(uint i=0; i<numberOfVestingPortions;i++) {
             portionToUnlockingDate[i] = portionToUnlockingDate[i].add(shift);
         }
 
@@ -296,8 +297,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     view
     returns (uint[])
     {
-        uint [] memory dates = new uint[](numberOfVestingPortions+1);
-        for(uint i=0; i< numberOfVestingPortions+1; i++) {
+        uint [] memory dates = new uint[](numberOfVestingPortions);
+        for(uint i=0; i< numberOfVestingPortions; i++) {
             dates[i] = portionToUnlockingDate[i];
         }
         return dates;

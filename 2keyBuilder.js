@@ -316,6 +316,7 @@ async function deployUpgrade(networks) {
         }
         /* eslint-enable no-await-in-loop */
     }
+    await archiveBuild();
 }
 
 async function deploy() {
@@ -368,8 +369,8 @@ async function deploy() {
             }
         }
 
-        const contracts = await generateSOLInterface();
         await archiveBuild();
+        const contracts = await generateSOLInterface();
 
         await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
         await commitAndPush2KeyProtocolSrc(`Contracts deployed to ${network} ${now.format('lll')}`);
