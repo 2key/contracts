@@ -61,7 +61,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             }
 
             //Override logic address implementation
-            fileObject[contractName][[deployer.network_id.toString()].implementationAddressLogic = newImplementationAddress;
+            fileObject[contractName][deployer.network_id.toString()].implementationAddressLogic = newImplementationAddress;
 
             //Write new logic address to proxyAddresses file
             fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
