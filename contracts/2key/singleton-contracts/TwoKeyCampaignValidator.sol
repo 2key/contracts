@@ -8,7 +8,7 @@ import "../interfaces/ITwoKeyDonationCampaignFetchAddresses.sol";
 import "../interfaces/IGetImplementation.sol";
 import "../interfaces/IStructuredStorage.sol";
 import "../interfaces/storage-contracts/ITwoKeyCampaignValidatorStorage.sol";
-
+import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
@@ -69,9 +69,11 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     {
         address conversionHandler = ITwoKeyCampaign(campaign).conversionHandler();
         address logicHandler = ITwoKeyCampaign(campaign).logicHandler();
+        address purchasesHandler = ITwoKeyConversionHandler(conversionHandler).twoKeyPurchasesHandler();
 
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, conversionHandler), true);
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, logicHandler), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, purchasesHandler), true);
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated,campaign), true);
         PROXY_STORAGE_CONTRACT.setString(keccak256(_campaign2NonSingletonHash,campaign), nonSingletonHash);
 

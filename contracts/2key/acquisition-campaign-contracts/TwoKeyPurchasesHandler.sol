@@ -210,11 +210,9 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         require(msg.sender == p.converter || ITwoKeyEventSource(twoKeyEventSource).isAddressMaintainer(msg.sender) == true);
         require(p.isPortionWithdrawn[portion] == false && block.timestamp > portionToUnlockingDate[portion]);
 
-        emit TokensWithdrawn (
-            block.timestamp,
-            msg.sender,
-            converter,
-            portion,
+        ITwoKeyEventSource(twoKeyEventSource).tokensWithdrawnFromPurchasesHandler(
+            ITwoKeyConversionHandler(proxyConversionHandler).getMainCampaignContractAddress(),
+            conversionId,
             p.portionAmounts[portion]
         );
 

@@ -2,11 +2,17 @@ pragma solidity ^0.4.24;
 
 
 contract ITwoKeyEventSource {
+
     function ethereumOf(address me) public view returns (address);
+
     function plasmaOf(address me) public view returns (address);
+
     function isAddressMaintainer(address _maintainer) public view returns (bool);
+
     function getTwoKeyDefaultIntegratorFeeFromAdmin() public view returns (uint);
+
     function joined(address _campaign, address _from, address _to) external;
+
     function rejected(address _campaign, address _converter) external;
 
     function convertedAcquisition(
@@ -38,6 +44,13 @@ contract ITwoKeyEventSource {
         address _converterPlasmaAddress,
         uint _conversionId,
         uint tokens
+    )
+    external;
+
+    function tokensWithdrawnFromPurchasesHandler(
+        address campaignAddress,
+        uint _conversionID,
+        uint _tokensAmountWithdrawn
     )
     external;
 
