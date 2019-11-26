@@ -36,8 +36,8 @@ contract TwoKeyEconomy is StandardTokenModified {
             getContractProxyAddress("TwoKeyNetworkGrowthFund");
         address twoKeyMPSNMiningPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
             getContractProxyAddress("TwoKeyMPSNMiningPool");
-        address twoKeyTeamGrowthPool = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
-            getContractProxyAddress("TwoKeyTeamGrowthPool");
+        address twoKeyTeamGrowthFund = ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonRegistry).
+            getContractProxyAddress("TwoKeyTeamGrowthFund");
 
 
         totalSupply_= 600000000000000000000000000; // 600M tokens total minted supply
@@ -54,8 +54,8 @@ contract TwoKeyEconomy is StandardTokenModified {
         balances[twoKeyMPSNMiningPool] = totalSupply_.mul(10).div(100);
         emit Transfer(address(this), twoKeyMPSNMiningPool, totalSupply_.mul(10).div(100));
 
-        balances[twoKeyTeamGrowthPool] = totalSupply_.mul(4).div(100);
-        emit Transfer(address(this), twoKeyTeamGrowthPool, totalSupply_.mul(4).div(100));
+        balances[twoKeyTeamGrowthFund] = totalSupply_.mul(4).div(100);
+        emit Transfer(address(this), twoKeyTeamGrowthFund, totalSupply_.mul(4).div(100));
 
         balances[twoKeyAdmin] = totalSupply_.mul(47).div(100);
         emit Transfer(address(this), twoKeyAdmin, totalSupply_.mul(47).div(100));
