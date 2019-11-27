@@ -91,5 +91,16 @@ ___
 eg. "Let's change TwoKeyCongress to new implementation on address 0x380249E32B620fbf2Fa53418B7141770524Da9C5"
 - `python generate_bytecode.py changeNonUpgradableContract "TwoKeyCongress" "0x380249E32B620fbf2Fa53418B7141770524Da9C5"`
 
+___
+#### Generate bytecode for approving new version for specific type of campaign 
+- Arguments:
+  - campaign_type (Currently: "TOKEN_SELL","DONATION")
+  - version_to_approve (version we want to approve)  
+ 
+`python generate_bytecode.py approveNewCampaign <campaign_type> <version_to_approve>`
+
+eg. "Let's approve version 1.0.1 for all DONATION type campaigns"
+- `python generate_bytecode.py approveNewCampaign "DONATION" "1.0.1"`
+
 
 
