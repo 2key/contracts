@@ -24,6 +24,7 @@ const branch_to_env = {
 const incrementVersion = ((version) => {
     if(version == "") {
         version = "1.0.0";
+        return version;
     }
     let vParts = version.split('.');
     if(vParts.length < 2) {

@@ -21,9 +21,11 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     address public deployer;
 
     mapping (string => mapping(string => address)) internal versions;
+
     mapping (string => address) contractNameToProxyAddress;
-    mapping (string => string) contractNameToLatestVersion;
+    mapping (string => string) contractNameToLatestAddedVersion;
     mapping (string => address) nonUpgradableContractToAddress;
+    mapping (string => string) campaignTypeToLastApprovedVersion;
 
 
     event ProxiesDeployed(
@@ -49,6 +51,84 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         require(msg.sender == deployer || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressCoreDev(msg.sender));
         _;
     }
+
+    /**
+     * @dev Tells the address of the implementation for a given version
+     * @param version to query the implementation of
+     * @return address of the implementation registered for the given version
+     */
+    function getVersion(
+        string contractName,
+        string version
+    )
+    public
+    view
+    returns (address)
+    {
+        return versions[contractName][version];
+    }
+
+
+
+    /**
+     * @notice Gets the latest contract version
+     * @param contractName is the name of the contract
+     * @return string representation of the last version
+     */
+    function getLatestAddedContractVersion(
+        string contractName
+    )
+    public
+    view
+    returns (string)
+    {
+        return contractNameToLatestAddedVersion[contractName];
+    }
+
+
+    /**
+     * @notice Function to get address of non-upgradable contract
+     * @param contractName is the name of the contract
+     */
+    function getNonUpgradableContractAddress(
+        string contractName
+    )
+    public
+    view
+    returns (address)
+    {
+        return nonUpgradableContractToAddress[contractName];
+    }
+
+    /**
+     * @notice Function to return address of proxy for specific contract
+     * @param _contractName is the name of the contract we'd like to get proxy address
+     * @return is the address of the proxy for the specific contract
+     */
+    function getContractProxyAddress(
+        string _contractName
+    )
+    public
+    view
+    returns (address)
+    {
+        return contractNameToProxyAddress[_contractName];
+    }
+
+    /**
+     * @notice Function to get latest campaign approved version
+     * @param campaignType is type of campaign
+     */
+    function getLatestCampaignApprovedVersion(
+        string campaignType
+    )
+    public
+    view
+    returns (string)
+    {
+        return campaignTypeToLastApprovedVersion[campaignType];
+    }
+
 
     /**
      * @notice Function to add non upgradable contract in registry of all contracts
@@ -96,10 +176,10 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyCoreDev
     {
-        require(implementation != address(0));
-        require(versions[contractName][version] == 0x0);
-        versions[contractName][version] = implementation;
-        contractNameToLatestVersion[contractName] = version;
+        require(implementation != address(0)); //Require that version implementation is not 0x0
+        require(versions[contractName][version] == 0x0); //No overriding of existing versions
+        versions[contractName][version] = implementation; //Save the version for the campaign
+        contractNameToLatestAddedVersion[contractName] = version;
         emit VersionAdded(version, implementation);
     }
 
@@ -113,80 +193,19 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     {
         require(msg.sender == deployer);
-        bytes memory logicVersion = bytes(contractNameToLatestVersion[contractLogicName]);
-        bytes memory storageVersion = bytes(contractNameToLatestVersion[contractStorageName]);
+        bytes memory logicVersion = bytes(contractNameToLatestAddedVersion[contractLogicName]);
+        bytes memory storageVersion = bytes(contractNameToLatestAddedVersion[contractStorageName]);
 
         require(logicVersion.length == 0 && storageVersion.length == 0); //Requiring that this is first time adding a version
-        require(keccak256(version) == keccak256("1.0.0"));
-        versions[contractLogicName][version] = contractLogicImplementation;
-        versions[contractStorageName][version] = contractStorageImplementation;
+        require(keccak256(version) == keccak256("1.0.0")); //Requiring that first version is 1.0.0
 
-        contractNameToLatestVersion[contractLogicName] = version;
-        contractNameToLatestVersion[contractStorageName] = version;
+        versions[contractLogicName][version] = contractLogicImplementation; //Storing version
+        versions[contractStorageName][version] = contractStorageImplementation; //Storing version
+
+        contractNameToLatestAddedVersion[contractLogicName] = version; // Mapping latest contract name to the version
+        contractNameToLatestAddedVersion[contractStorageName] = version; //Mapping latest contract name to the version
     }
 
-    /**
-     * @dev Tells the address of the implementation for a given version
-     * @param version to query the implementation of
-     * @return address of the implementation registered for the given version
-     */
-    function getVersion(
-        string contractName,
-        string version
-    )
-    public
-    view
-    returns (address)
-    {
-        return versions[contractName][version];
-    }
-
-
-
-    /**
-     * @notice Gets the latest contract version
-     * @param contractName is the name of the contract
-     * @return string representation of the last version
-     */
-    function getLatestContractVersion(
-        string contractName
-    )
-    public
-    view
-    returns (string)
-    {
-        return contractNameToLatestVersion[contractName];
-    }
-
-
-    /**
-     * @notice Function to get address of non-upgradable contract
-     * @param contractName is the name of the contract
-     */
-    function getNonUpgradableContractAddress(
-        string contractName
-    )
-    public
-    view
-    returns (address)
-    {
-        return nonUpgradableContractToAddress[contractName];
-    }
-
-    /**
-     * @notice Function to return address of proxy for specific contract
-     * @param _contractName is the name of the contract we'd like to get proxy address
-     * @return is the address of the proxy for the specific contract
-     */
-    function getContractProxyAddress(
-        string _contractName
-    )
-    public
-    view
-    returns (address)
-    {
-        return contractNameToProxyAddress[_contractName];
-    }
 
 
     /**
@@ -225,7 +244,28 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
+    function approveCampaignVersionDuringCreation()
+    public
+    onlyCoreDev
+    {
+        campaignTypeToLastApprovedVersion["DONATION"] = "1.0.0";
+        campaignTypeToLastApprovedVersion["TOKEN_SELL"] = "1.0.0";
+    }
 
+    /**
+     * @notice Function to approve selected version for specific type of campaign
+     * @param campaignType is the type of campaign
+     * @param versionToApprove is the version for that type we want to approve
+     */
+    function approveCampaignVersion(
+        string campaignType,
+        string versionToApprove
+    )
+    public
+    {
+        require(msg.sender == nonUpgradableContractToAddress["TwoKeyCongress"]);
+        campaignTypeToLastApprovedVersion[campaignType] = versionToApprove;
+    }
 
     /**
      * @dev Creates an upgradeable proxy for both Storage and Logic
