@@ -27,6 +27,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized;
 
+    // Pointer to the PROXY storage contract
     ITwoKeyCampaignValidatorStorage public PROXY_STORAGE_CONTRACT;
 
     /**

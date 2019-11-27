@@ -105,7 +105,7 @@ const checkArgumentsForUpdate = ((argumentsPassed) => {
 
 const checkIsHardRedeploy = ((argumentsPassed) => {
     argumentsPassed.forEach((argument) => {
-        if(argument.toString() == '--reset') {
+        if(argument.toString() == '--reset') {s
             return true;
         }
     });

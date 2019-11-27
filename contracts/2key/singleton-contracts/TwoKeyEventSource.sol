@@ -58,6 +58,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     /**
      * Events which will be emitted during use of system
      * All events are emitted from this contract
+     * Every event is monitored in GraphQL
      */
 
     event Created(
