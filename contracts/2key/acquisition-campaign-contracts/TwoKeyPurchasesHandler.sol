@@ -91,7 +91,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
             }
         } else {
             bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
-            for(i=1; i<numberOfVestingPortions+1; i++) {
+            portionToUnlockingDate[1] = bonusVestingStartDate;
+            for(i=2; i<numberOfVestingPortions+1; i++) {
                 portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
             }
         }
