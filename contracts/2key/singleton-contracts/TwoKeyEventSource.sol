@@ -9,7 +9,9 @@ import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyEventSourceStorage.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
-
+/**
+ * @author Nikola Madjarevic
+ */
 contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized;
@@ -53,6 +55,10 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
+    /**
+     * Events which will be emitted during use of system
+     * All events are emitted from this contract
+     */
 
     event Created(
         address _campaign,
