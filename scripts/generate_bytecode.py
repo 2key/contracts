@@ -65,10 +65,13 @@ def generate_bytecode_for_replacing_contract(contract_name, new_contract_address
     values = [contract_name, new_contract_address]
     print ('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_approving_new_campaign_version(campaign_type, version_to_approve):
+    method_name_and_params = "approveCampaignVersion(string,string)"
+    types = ["string","string"]
+    values = [campaign_type, version_to_approve]
+    print ('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 
-
-### TODO: Add concrete examples and units for each function call
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name
 
@@ -76,6 +79,8 @@ if __name__ == "__main__":
         generate_bytecode_for_transfering_tokens(sys.argv[2], sys.argv[3])
     if(arg1 == "upgradeContract"):
         generate_bytecode_for_upgrading_contracts(sys.argv[2], sys.argv[3])
+    if(arg1 == "approveNewCampaign"):
+        generate_bytecode_for_approving_new_campaign_version(sys.argv[2], sys.argv[3])
     if(arg1 == "setNewTwoKeyRewardsReleaseDate"):
         generate_bytecode_for_changing_rewards_release_date(int(sys.argv[2]))
     if(arg1 == "addMember"):
