@@ -403,7 +403,6 @@ describe('TwoKeyDonationCampaign', () => {
         printTestNumber();
 
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(invoiceTokenAddress, env.TEST4_ADDRESS);
-        balance = parseFloat(twoKeyProtocol.Utils.fromWei(balance,'ether').toString());
         let expectedValue = 1;
         if(currency == 'USD') {
             expectedValue = 100;
