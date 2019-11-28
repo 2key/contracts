@@ -147,7 +147,7 @@ contract TwoKeySingletonRegistryAbstract is ITwoKeySingletonesRegistry {
     )
     public
     {
-        require(msg.sender == nonUpgradableContractToAddress["TwoKeyCongress"]);
+        require(msg.sender == nonUpgradableContractToAddress[congress]);
         nonUpgradableContractToAddress[contractName] = contractAddress;
     }
 
@@ -224,7 +224,7 @@ contract TwoKeySingletonRegistryAbstract is ITwoKeySingletonesRegistry {
     )
     public
     {
-        require(msg.sender == nonUpgradableContractToAddress["TwoKeyCongress"]);
+        require(msg.sender == nonUpgradableContractToAddress[congress]);
         address proxyAddress = getContractProxyAddress(contractName);
         address _impl = getVersion(contractName, version);
 
@@ -259,7 +259,7 @@ contract TwoKeySingletonRegistryAbstract is ITwoKeySingletonesRegistry {
     )
     public
     {
-        require(msg.sender == nonUpgradableContractToAddress["TwoKeyCongress"]);
+        require(msg.sender == nonUpgradableContractToAddress[congress]);
         campaignTypeToLastApprovedVersion[campaignType] = versionToApprove;
     }
 
