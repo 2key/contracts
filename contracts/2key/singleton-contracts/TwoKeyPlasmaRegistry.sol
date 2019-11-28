@@ -11,9 +11,18 @@ import "../libraries/Call.sol";
 contract TwoKeyPlasmaRegistry is Upgradeable {
     // Call library to use
     using Call for *;
+    bool initialized;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
-    bool initialized;
+
+    string constant _addressToUsername = "addressToUsername";
+    string constant _usernameToAddress = "usernameToAddress";
+    string constant _plasma2ethereum = "plasma2ethereum";
+    string constant _ethereum2plasma = "ethereum2plasma";
+
+    string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
+    string constant _twoKeyPlasmaEvents = "TwoKeyPlasmaEvents";
+
 
     ITwoKeyPlasmaRegistryStorage public PROXY_STORAGE_CONTRACT;
 
@@ -38,7 +47,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     }
 
     function onlyMaintainer() internal view returns (bool) {
-        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaMaintainersRegistry");
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
         return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).onlyMaintainer(msg.sender);
     }
 
@@ -52,8 +61,8 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         address plasma = Call.recoverHash(hash,signature,0);
         require(plasma == plasma_address);
 
-        PROXY_STORAGE_CONTRACT.setString(keccak256("addressToUsername", plasma_address), username);
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256("usernameToAddress",username), plasma_address);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasma_address), username);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasma_address);
 
         emitPlasma2Handle(plasma_address, username);
     }
@@ -63,21 +72,21 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
         require (sig.length == 65);
         address eth_address = Call.recoverHash(hash,sig,0);
-        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keccak256("plasma2ethereum", plasma_address));
+        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_plasma2ethereum, plasma_address));
         require(ethereum == address(0) || ethereum == eth_address);
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256("plasma2ethereum", plasma_address), eth_address);
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256("ethereum2plasma",eth_address), plasma_address);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_plasma2ethereum, plasma_address), eth_address);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_ethereum2plasma,eth_address), plasma_address);
 
         emitPlasma2Ethereum(plasma_address, eth_address);
     }
 
     function emitPlasma2Ethereum(address plasma, address ethereum) internal {
-        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents");
+        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEvents);
         ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitPlasma2EthereumEvent(plasma, ethereum);
     }
 
     function emitPlasma2Handle(address plasma, string handle) internal {
-        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents");
+        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEvents);
         ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitPlasma2HandleEvent(plasma, handle);
     }
 
@@ -87,7 +96,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     public
     view
     returns (address) {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("plasma2ethereum", _plasma));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_plasma2ethereum, _plasma));
     }
 
     function ethereum2plasma(
@@ -96,7 +105,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     public
     view
     returns (address) {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("ethereum2plasma", _ethereum));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_ethereum2plasma, _ethereum));
     }
 
     function getAddressToUsername(
@@ -106,7 +115,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     view
     returns (string)
     {
-        return PROXY_STORAGE_CONTRACT.getString(keccak256("addressToUsername",_address));
+        return PROXY_STORAGE_CONTRACT.getString(keccak256(_addressToUsername,_address));
     }
 
     function getUsernameToAddress(
@@ -116,7 +125,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("usernameToAddress", _username));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_usernameToAddress, _username));
     }
 
     /**

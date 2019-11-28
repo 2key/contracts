@@ -10,6 +10,24 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
     ITwoKeyPlasmaEventsStorage public PROXY_STORAGE_CONTRACT;
 
+    string constant _publicLinkKey = "public_link_key";
+    string constant _influencer2cut = "influencer2cut";
+    string constant _notes = "notes";
+    string constant _campaign2numberOfJoins = "campaign2numberOfJoins";
+    string constant _campaign2numberOfForwarders = "campaign2numberOfForwarders";
+    string constant _campaign2numberOfVisits = "campaign2numberOfVisits";
+    string constant _campaignToReferrerToCounted = "campaignToReferrerToCounted";
+    string constant _visits = "visits";
+    string constant _visited_from_time = "visited_from_time";
+    string constant _visited_sig = "visited_sig";
+    string constant _visited_from = "visited_from";
+    string constant _joined_from = "joined_from";
+    string constant _visits_list = "visits_list";
+    string constant _visits_list_timestamps = "visits_list_timestamps";
+
+    string constant _twoKeyPlasmaRegistry = "TwoKeyPlasmaRegistry";
+    string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
+
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     //Comment out
     bool initialized;
@@ -41,7 +59,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
 
     modifier onlyTwoKeyPlasmaRegistry {
-        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaRegistry);
         require(msg.sender == twoKeyPlasmaRegistry);
         _;
     }
@@ -61,7 +79,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     }
 
     function onlyMaintainer() internal view returns (bool) {
-        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaMaintainersRegistry");
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
         return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).onlyMaintainer(msg.sender);
     }
 
@@ -73,7 +91,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
 
     function plasmaOf(address me) internal view returns (address) {
-        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaRegistry);
         address plasma = ITwoKeyPlasmaRegistry(twoKeyPlasmaEventsRegistry).ethereum2plasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -83,7 +101,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
 
     function ethereumOf(address me) internal view returns (address) {
-        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaRegistry);
         address ethereum = ITwoKeyPlasmaRegistry(twoKeyPlasmaEventsRegistry).plasma2ethereum(me);
         if (ethereum != address(0)) {
             return ethereum;
@@ -92,12 +110,9 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     }
 
     function setPublicLinkKeyOf(address c, address contractor, address new_address, address new_public_key) private {
-        // TODO keep same as code in TwoKeySignedContract.sol:transferSig
-        // update (only once) the public address used by each influencer
-        // we will need this in case one of the influencers will want to start his own off-chain link
         new_address = plasmaOf(new_address);
 
-        bytes32 keyHashPublicLinkKey = keccak256("public_link_key",c,contractor,new_address);
+        bytes32 keyHashPublicLinkKey = keccak256(_publicLinkKey,c,contractor,new_address);
         address old_address = PROXY_STORAGE_CONTRACT.getAddress(keyHashPublicLinkKey);
         if (old_address == address(0)) {
             PROXY_STORAGE_CONTRACT.setAddress(keyHashPublicLinkKey, new_public_key);
@@ -116,18 +131,9 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         // the value 255 is used to signal equal partition with other influencers
         // A sender can set the value only once in a contract
         address plasma = plasmaOf(me);
-        bytes32 keyHashInfluencerToCut = keccak256("influencer2cut", c, contractor, plasma);
+        bytes32 keyHashInfluencerToCut = keccak256(_influencer2cut, c, contractor, plasma);
         uint cutSaved = PROXY_STORAGE_CONTRACT.getUint(keyHashInfluencerToCut);
         require(cutSaved == 0 || cutSaved == cut);
-//        if (influencer2cut[c][contractor][plasma] == 0) {
-//            if (0 < cut && cut <= 101) {
-//                voted_yes[c][contractor]++;
-//                weighted_yes[c][contractor] += cut-1;
-//            } else if (154 < cut && cut < 255) {
-//                voted_no[c][contractor]++;
-//                weighted_no[c][contractor] += 255-cut;
-//            }
-//        }
         PROXY_STORAGE_CONTRACT.setUint(keyHashInfluencerToCut, cut);
     }
 
@@ -136,7 +142,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     }
 
     function cutOf(address c, address contractor, address me) public view returns (uint256) {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256("influencer2cut", c, contractor, plasmaOf(me)));
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_influencer2cut, c, contractor, plasmaOf(me)));
     }
 
     function test_path(address c, address contractor, address to) private view returns (bool) {
@@ -146,22 +152,21 @@ contract TwoKeyPlasmaEvents is Upgradeable {
             if(to == address(0)) {
                 return false;
             }
-            //TODO: Check with UDI do we need here plasmaOf or ethereum address
             to = plasmaOf(getVisitedFrom(c, contractor, to));
         }
         return true;
     }
 
     function publicLinkKeyOf(address c, address contractor, address me) public view returns (address) {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("public_link_key",c,contractor,plasmaOf(me)));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_publicLinkKey,c,contractor,plasmaOf(me)));
     }
 
     function setNoteByUser(address c, bytes note) public {
-        PROXY_STORAGE_CONTRACT.setBytes(keccak256("notes",c,msg.sender), note);
+        PROXY_STORAGE_CONTRACT.setBytes(keccak256(_notes,c,msg.sender), note);
     }
 
     function notes(address c, address _plasma) public view returns (bytes) {
-        return PROXY_STORAGE_CONTRACT.getBytes(keccak256("notes",c, _plasma));
+        return PROXY_STORAGE_CONTRACT.getBytes(keccak256(_notes,c, _plasma));
     }
 
 
@@ -189,7 +194,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         if (influencers.length > 1) {
             referrer = influencers[influencers.length - 2];
         }
-        bytes32 keyJoins = keccak256("campaign2numberOfJoins", campaignAddress);
+        bytes32 keyJoins = keccak256(_campaign2numberOfJoins, campaignAddress);
         PROXY_STORAGE_CONTRACT.setUint(keyJoins, PROXY_STORAGE_CONTRACT.getUint(keyJoins) + 1);
 
         setJoinedFrom(campaignAddress, contractor, last_address, referrer);
@@ -234,7 +239,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
         if(influencers.length > 1 && getCampaignToReferrerToCounted(c,influencers[influencers.length-2]) == false && influencers[influencers.length-2] != contractor) {
             setCampaignToReferrerToCounted(c, influencers[influencers.length-2]);
-            bytes32 key = keccak256("campaign2numberOfForwarders",c);
+            bytes32 key = keccak256(_campaign2numberOfForwarders,c);
             PROXY_STORAGE_CONTRACT.setUint(key, PROXY_STORAGE_CONTRACT.getUint(key) + 1);
         }
 
@@ -286,14 +291,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return (getVisitsList(c, contractor, from), getVisitsListTimestamps(c, contractor, from));
     }
 
-//    function votes(address c, address contractor) public view returns (uint256, uint256, uint256, uint256, uint256, int) {
-//        return (
-//        voted_yes[c][contractor], weighted_yes[c][contractor], voted_no[c][contractor], weighted_no[c][contractor],
-//        voted_yes[c][contractor] + voted_no[c][contractor], int(weighted_yes[c][contractor]) - int(weighted_no[c][contractor])
-//        );
-//    }
-
-
 
     function getNumberOfVisitsAndJoinsAndForwarders(
         address campaignAddress
@@ -303,65 +300,65 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     returns (uint,uint,uint)
     {
         return (
-            PROXY_STORAGE_CONTRACT.getUint(keccak256("campaign2numberOfVisits",campaignAddress)),
-            PROXY_STORAGE_CONTRACT.getUint(keccak256("campaign2numberOfJoins",campaignAddress)),
-            PROXY_STORAGE_CONTRACT.getUint(keccak256("campaign2numberOfForwarders", campaignAddress))
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaign2numberOfVisits,campaignAddress)),
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaign2numberOfJoins,campaignAddress)),
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaign2numberOfForwarders, campaignAddress))
         );
     }
 
     function getCampaignToReferrerToCounted(address campaign, address influencer) internal view returns (bool) {
-        return PROXY_STORAGE_CONTRACT.getBool(keccak256("campaignToReferrerToCounted", campaign, influencer));
+        return PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignToReferrerToCounted, campaign, influencer));
     }
 
     function setCampaignToReferrerToCounted(address campaign, address influencer) internal {
-        PROXY_STORAGE_CONTRACT.setBool(keccak256("campaignToReferrerToCounted", campaign, influencer), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignToReferrerToCounted, campaign, influencer), true);
     }
 
     function getVisits(address campaign, address contractor, address old_address, address new_address) internal view returns (bool) {
-        return PROXY_STORAGE_CONTRACT.getBool(keccak256("visits",campaign,contractor,old_address,new_address));
+        return PROXY_STORAGE_CONTRACT.getBool(keccak256(_visits,campaign,contractor,old_address,new_address));
     }
 
     function setVisits(address campaign, address contractor, address old_address, address new_address) internal {
-        return PROXY_STORAGE_CONTRACT.setBool(keccak256("visits",campaign,contractor,old_address,new_address), true);
+        return PROXY_STORAGE_CONTRACT.setBool(keccak256(_visits,campaign,contractor,old_address,new_address), true);
     }
 
     function incrementNumberOfVisitsPerCampaign(address campaign) internal {
-        bytes32 key = keccak256("campaign2numberOfVisits",campaign);
+        bytes32 key = keccak256(_campaign2numberOfVisits,campaign);
         PROXY_STORAGE_CONTRACT.setUint(key, PROXY_STORAGE_CONTRACT.getUint(key) + 1);
     }
 
     function setVisitedFromTime(address campaign, address contractor, address new_address, address old_address) internal {
-        bytes32 keyHash = keccak256("visited_from_time", campaign, contractor, new_address, old_address);
+        bytes32 keyHash = keccak256(_visited_from_time, campaign, contractor, new_address, old_address);
         PROXY_STORAGE_CONTRACT.setUint(keyHash, block.timestamp);
     }
 
     function setVisitedSig(address _campaign, address _contractor, address _last_address, bytes _sig) internal {
-        bytes32 keyHash = keccak256("visited_sig", _campaign, _contractor, _last_address);
+        bytes32 keyHash = keccak256(_visited_sig, _campaign, _contractor, _last_address);
         PROXY_STORAGE_CONTRACT.setBytes(keyHash, _sig);
     }
 
     function getVisitedFrom(address c, address contractor, address _address) public view returns (address) {
-        bytes32 keyHash = keccak256("visited_from", c, contractor, _address);
+        bytes32 keyHash = keccak256(_visited_from, c, contractor, _address);
         return ethereumOf(PROXY_STORAGE_CONTRACT.getAddress(keyHash));
     }
 
     function setVisitedFrom(address c, address contractor, address _oldAddress, address _newAddress) internal {
-        bytes32 keyHash = keccak256("visited_from", c, contractor, _oldAddress);
+        bytes32 keyHash = keccak256(_visited_from, c, contractor, _oldAddress);
         PROXY_STORAGE_CONTRACT.setAddress(keyHash, _newAddress);
     }
 
     function setJoinedFrom(address _c, address _contractor, address _old_address, address _new_address) internal {
-        bytes32 keyHash = keccak256("joined_from", _c, _contractor, _old_address);
+        bytes32 keyHash = keccak256(_joined_from, _c, _contractor, _old_address);
         PROXY_STORAGE_CONTRACT.setAddress(keyHash, _new_address);
     }
 
     function getJoinedFrom(address _c, address _contractor, address _address) public view returns (address) {
-        bytes32 keyHash = keccak256("joined_from", _c, _contractor, _address);
+        bytes32 keyHash = keccak256(_joined_from, _c, _contractor, _address);
         return plasmaOf(PROXY_STORAGE_CONTRACT.getAddress(keyHash));
     }
 
     function getVisitsList(address _c, address _contractor, address _referrer) internal view returns (address[]) {
-        bytes32 keyHash = keccak256("visits_list", _c, _contractor, _referrer);
+        bytes32 keyHash = keccak256(_visits_list, _c, _contractor, _referrer);
         return PROXY_STORAGE_CONTRACT.getAddressArray(keyHash);
     }
 
@@ -373,12 +370,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         }
         newVisitsList[visitsList.length] = _visitor;
 
-        bytes32 keyHash = keccak256("visits_list", _c, _contractor, _referrer);
+        bytes32 keyHash = keccak256(_visits_list, _c, _contractor, _referrer);
         PROXY_STORAGE_CONTRACT.setAddressArray(keyHash, newVisitsList);
     }
 
     function getVisitsListTimestamps(address _c, address _contractor, address _referrer) public view returns (uint[]) {
-        bytes32 keyHash = keccak256("visits_list_timestamps", _c, _contractor, _referrer);
+        bytes32 keyHash = keccak256(_visits_list_timestamps, _c, _contractor, _referrer);
         return PROXY_STORAGE_CONTRACT.getUintArray(keyHash);
     }
 
@@ -390,7 +387,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         }
         newVisitListTimestamps[visitListTimestamps.length] = block.timestamp;
 
-        bytes32 keyHash = keccak256("visits_list_timestamps", _c, _contractor, _referrer);
+        bytes32 keyHash = keccak256(_visits_list_timestamps, _c, _contractor, _referrer);
         PROXY_STORAGE_CONTRACT.setUintArray(keyHash, newVisitListTimestamps);
     }
 
