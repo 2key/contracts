@@ -24,6 +24,7 @@ const branch_to_env = {
 const incrementVersion = ((version) => {
     if(version == "") {
         version = "1.0.0";
+        return version;
     }
     let vParts = version.split('.');
     if(vParts.length < 2) {
@@ -105,7 +106,7 @@ const checkArgumentsForUpdate = ((argumentsPassed) => {
 
 const checkIsHardRedeploy = ((argumentsPassed) => {
     argumentsPassed.forEach((argument) => {
-        if(argument.toString() == '--reset') {
+        if(argument.toString() == '--reset') {s
             return true;
         }
     });
@@ -154,6 +155,7 @@ const getGitBranch = () => new Promise(async(resolve,reject) => {
 
 
 const slack_message_proposal_created = async (contractName, newVersion, proposalBytecode, network) => {
+
     const token = process.env.SLACK_TOKEN;
 
     const branch = await getGitBranch();
@@ -186,15 +188,12 @@ const slack_message_proposal_created = async (contractName, newVersion, proposal
 
     };
 
-    await axios.post('https://slack.com/api/chat.postMessage?parse=full&link_names=1', body, {
+    return axios.post('https://slack.com/api/chat.postMessage?parse=full&link_names=1', body, {
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-type': 'application/json; charset=utf-8'
         }
-    }).then(
-        res => {process.exit(0)},
-        err => {console.log(err);process.exit(1)}
-    );
+    });
 };
 
 /**
@@ -268,15 +267,12 @@ const slack_message = async (newVersion, oldVersion, devEnv) => {
     };
 
 
-    await axios.post('https://slack.com/api/chat.postMessage', body, {
+    return axios.post('https://slack.com/api/chat.postMessage?parse=full&link_names=1', body, {
         headers: {
             'Authorization': `Bearer ${token}`,
             'Content-type': 'application/json; charset=utf-8'
         }
-    }).then(
-        res => {process.exit(0)},
-        err => {console.log(err);process.exit(1)}
-    );
+    });
 };
 
 /**

@@ -23,6 +23,7 @@ module.exports = function deploy(deployer) {
     // let isHardRedeploy = checkIsHardRedeploy(process.argv);
     // console.log(isHardRedeploy);
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
+    let version;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.deploy(TwoKeyConversionHandler)
@@ -48,10 +49,11 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-                        let version = await instance.getLatestContractVersion("TwoKeyDonationCampaign");
 
+                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
                         version = incrementVersion(version);
 
+                        console.log('Version :' + version);
                         let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
                         txHash = await instance.addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
                         txHash = await instance.addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
@@ -67,10 +69,6 @@ module.exports = function deploy(deployer) {
                 console.log("... Adding implementation versions of Acquisition campaigns");
                 await new Promise(async(resolve,reject) => {
                     try {
-
-                        let version = await instance.getLatestContractVersion("TwoKeyAcquisitionCampaignERC20");
-                        version = incrementVersion(version);
-
                         let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
                         txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
                         txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
@@ -81,6 +79,24 @@ module.exports = function deploy(deployer) {
                         reject(e);
                     }
                 })
+            })
+            .then(async () => {
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        if(version === "1.0.0") {
+                            let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+                            console.log("Let's approve all initial versions for campaigns");
+
+                            let txHash = await instance.approveCampaignVersionDuringCreation("DONATION");
+                            txHash = await instance.approveCampaignVersionDuringCreation("TOKEN_SELL");
+                            resolve(txHash);
+                        } else {
+                            resolve(true);
+                        }
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
             })
             .then(() => true);
     }

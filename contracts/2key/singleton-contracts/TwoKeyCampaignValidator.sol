@@ -27,6 +27,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized;
 
+    // Pointer to the PROXY storage contract
     ITwoKeyCampaignValidatorStorage public PROXY_STORAGE_CONTRACT;
 
     /**
@@ -71,6 +72,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         address logicHandler = ITwoKeyCampaign(campaign).logicHandler();
         address purchasesHandler = ITwoKeyConversionHandler(conversionHandler).twoKeyPurchasesHandler();
 
+        //Whitelist all campaign associated contracts
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, conversionHandler), true);
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, logicHandler), true);
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated, purchasesHandler), true);

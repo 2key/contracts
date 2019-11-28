@@ -55,8 +55,30 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
-    function getLatestContractVersion(string contractName) internal view returns (string) {
-        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getLatestContractVersion(contractName);
+    function getLatestApprovedCampaignVersion(
+        string campaignType
+    )
+    public
+    view
+    returns (string)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+            .getLatestCampaignApprovedVersion(campaignType);
+    }
+
+    function createProxyForCampaign(
+        string campaignType,
+        string campaignName
+    )
+    internal
+    returns (address)
+    {
+        ProxyCampaign proxy = new ProxyCampaign(
+            campaignName,
+            getLatestApprovedCampaignVersion(campaignType),
+            address(TWO_KEY_SINGLETON_REGISTRY)
+        );
+        return address(proxy);
     }
 
 
@@ -87,39 +109,17 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
     {
 
         //Deploy proxy for Acquisition contract
-        ProxyCampaign proxyAcquisition = new ProxyCampaign(
-            "TwoKeyAcquisitionCampaignERC20",
-            getLatestContractVersion("TwoKeyAcquisitionCampaignERC20"),
-            address(TWO_KEY_SINGLETON_REGISTRY)
-        );
+        address proxyAcquisition = createProxyForCampaign("TOKEN_SELL","TwoKeyAcquisitionCampaignERC20");
 
         //Deploy proxy for ConversionHandler contract
-        ProxyCampaign proxyConversions = new ProxyCampaign(
-            "TwoKeyConversionHandler",
-            getLatestContractVersion("TwoKeyConversionHandler"),
-            address(TWO_KEY_SINGLETON_REGISTRY)
-        );
+        address proxyConversions = createProxyForCampaign("TOKEN_SELL","TwoKeyConversionHandler");
 
         //Deploy proxy for TwoKeyAcquisitionLogicHandler contract
-        ProxyCampaign proxyLogicHandler = new ProxyCampaign(
-            "TwoKeyAcquisitionLogicHandler",
-            getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
-            address(TWO_KEY_SINGLETON_REGISTRY)
-        );
-
+        address proxyLogicHandler = createProxyForCampaign("TOKEN_SELL","TwoKeyAcquisitionLogicHandler");
 
         //Deploy proxy for TwoKeyPurchasesHandler contract
-        ProxyCampaign proxyPurchasesHandler = new ProxyCampaign(
-            "TwoKeyPurchasesHandler",
-            getLatestContractVersion("TwoKeyAcquisitionLogicHandler"),
-            address(TWO_KEY_SINGLETON_REGISTRY)
-        );
+        address proxyPurchasesHandler = createProxyForCampaign("TOKEN_SELL","TwoKeyPurchasesHandler");
 
-
-        //        UpgradeableCampaign(proxyPurchasesHandler).initialize.value(msg.value)(msg.sender);
-        //        UpgradeableCampaign(proxyLogicHandler).initialize.value(msg.value)(msg.sender);
-        //        UpgradeableCampaign(proxyConversions).initialize.value(msg.value)(msg.sender);
-        //        UpgradeableCampaign(proxyAcquisition).initialize.value(msg.value)(msg.sender);
 
         IHandleCampaignDeployment(proxyPurchasesHandler).setInitialParamsPurchasesHandler(
             valuesConversion,
@@ -195,25 +195,13 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
     {
 
         // Deploying a proxy contract for donations
-        ProxyCampaign proxyDonationCampaign = new ProxyCampaign(
-            "TwoKeyDonationCampaign",
-            getLatestContractVersion("TwoKeyDonationCampaign"),
-            TWO_KEY_SINGLETON_REGISTRY
-        );
+        address proxyDonationCampaign = createProxyForCampaign("DONATION","TwoKeyDonationCampaign");
 
         //Deploying a proxy contract for donation conversion handler
-        ProxyCampaign proxyDonationConversionHandler = new ProxyCampaign(
-            "TwoKeyDonationConversionHandler",
-            getLatestContractVersion("TwoKeyDonationConversionHandler"),
-            TWO_KEY_SINGLETON_REGISTRY
-        );
+        address proxyDonationConversionHandler = createProxyForCampaign("DONATION","TwoKeyDonationConversionHandler");
 
         //Deploying a proxy contract for donation logic handler
-        ProxyCampaign proxyDonationLogicHandler = new ProxyCampaign(
-            "TwoKeyDonationLogicHandler",
-            getLatestContractVersion("TwoKeyDonationLogicHandler"),
-            TWO_KEY_SINGLETON_REGISTRY
-        );
+        address proxyDonationLogicHandler = createProxyForCampaign("DONATION","TwoKeyDonationLogicHandler");
 
         IHandleCampaignDeployment(proxyDonationLogicHandler).setInitialParamsDonationLogicHandler(
             numberValues,
