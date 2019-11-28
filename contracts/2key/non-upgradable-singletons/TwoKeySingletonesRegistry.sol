@@ -180,7 +180,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         require(versions[contractName][version] == 0x0); //No overriding of existing versions
         versions[contractName][version] = implementation; //Save the version for the campaign
         contractNameToLatestAddedVersion[contractName] = version;
-        emit VersionAdded(version, implementation); //TODO: add contractName to event
+        emit VersionAdded(version, implementation);
     }
 
     function addVersionDuringCreation(
@@ -248,7 +248,12 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
     public
     onlyCoreDev
     {
-        //TODO: add requirements that will make sure this is only called during creation
+        bytes memory previousDonation = bytes(campaignTypeToLastApprovedVersion["DONATION"]);
+        bytes memory previousTokenSell = bytes(campaignTypeToLastApprovedVersion["TOKEN_SELL"]);
+
+        require(previousDonation.length == 0);
+        require(previousTokenSell.length == 0);
+
         campaignTypeToLastApprovedVersion["DONATION"] = "1.0.0";
         campaignTypeToLastApprovedVersion["TOKEN_SELL"] = "1.0.0";
     }
