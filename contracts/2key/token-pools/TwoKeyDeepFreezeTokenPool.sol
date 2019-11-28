@@ -10,6 +10,7 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
 
     ITwoKeyDeepFreezeTokenPoolStorage public PROXY_STORAGE_CONTRACT;
 
+    string constant _tokensReleaseDate = "tokensReleaseDate";
     address public twoKeyParticipationMiningPool;
 
     function setInitialParams(
@@ -26,7 +27,7 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
         PROXY_STORAGE_CONTRACT = ITwoKeyDeepFreezeTokenPoolStorage(_proxyStorage);
         twoKeyParticipationMiningPool = _twoKeyParticipationMiningPool;
 
-        PROXY_STORAGE_CONTRACT.setUint(keccak256("tokensReleaseDate"), block.timestamp + 10 * (1 years));
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_tokensReleaseDate), block.timestamp + 10 * (1 years));
 
         initialized = true;
     }
@@ -42,7 +43,7 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
     public
     onlyTwoKeyAdmin
     {
-        uint tokensReleaseDate = PROXY_STORAGE_CONTRACT.getUint(keccak256("tokensReleaseDate"));
+        uint tokensReleaseDate = PROXY_STORAGE_CONTRACT.getUint(keccak256(_tokensReleaseDate));
 
         require(getContractBalance() >= amount);
         require(block.timestamp > tokensReleaseDate);
