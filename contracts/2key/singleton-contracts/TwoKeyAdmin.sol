@@ -16,19 +16,28 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
 
+	/**
+	 * Keys for the addresses we're accessing
+	 */
+	string constant _twoKeyCongress = "TwoKeyCongress";
+	string constant _twoKeyUpgradableExchange = "TwoKeyUpgradableExchange";
+	string constant _twoKeyRegistry = "TwoKeyRegistry";
+	string constant _twoKeyEconomy = "TwoKeyEconomy";
+
+
 	bool initialized = false;
 
 	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; //Pointer to storage contract
 
     /// @notice Modifier which throws if caller is not TwoKeyCongress
 	modifier onlyTwoKeyCongress {
-		require(msg.sender == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyCongress"));
+		require(msg.sender == getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyCongress));
 	    _;
 	}
 
     /// @notice Modifier will revert if caller is not TwoKeyUpgradableExchange
     modifier onlyTwoKeyUpgradableExchange {
-		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange);
         require(msg.sender == address(twoKeyUpgradableExchange));
         _;
     }
@@ -87,7 +96,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		string _email,
 		bytes _signature
 	) external {
-		address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+		address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry);
     	ITwoKeyReg(twoKeyRegistry).addName(_name, _addr, _fullName, _email, _signature);
     }
 
@@ -97,7 +106,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
 		IERC20(twoKeyEconomy).freezeTransfers();
 	}
 
@@ -106,7 +115,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
 		IERC20(twoKeyEconomy).unfreezeTransfers();
 	}
 
@@ -122,7 +131,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	onlyTwoKeyCongress
 	returns (bool)
 	{
-		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
 		bool completed = IERC20(twoKeyEconomy).transfer(_to, _amount);
 		return completed;
 	}

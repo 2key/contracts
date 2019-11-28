@@ -10,6 +10,8 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     using Call for *;
     bool initialized;
+    string constant message = "bytes binding to name";
+
     ITwoKeySignatureValidatorStorage public PROXY_STORAGE_CONTRACT;
 
     /**
@@ -50,7 +52,7 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
     returns (address)
     {
         string memory concatenatedValues = strConcat(_name,_fullName,_email);
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked(message)),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
         return message_signer;
@@ -70,7 +72,7 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
     pure
     returns (address)
     {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked(message)),
             keccak256(abi.encodePacked(_name))));
         address eth_address = Call.recoverHash(hash,signature,0);
         return eth_address;
@@ -93,7 +95,7 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
     {
         string memory concatenatedValues = strConcat(username,_username_walletName,"");
 
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked(message)),
             keccak256(abi.encodePacked(concatenatedValues))));
         address message_signer = Call.recoverHash(hash, signature, 0);
         return message_signer;

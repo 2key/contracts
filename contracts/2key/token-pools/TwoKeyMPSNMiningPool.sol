@@ -30,7 +30,7 @@ contract TwoKeyMPSNMiningPool is TokenPool {
      * some of whitelisted addresses inside this contract
      */
     modifier onlyTwoKeyAdminOrWhitelistedAddress {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(msg.sender == twoKeyAdmin || isAddressWhitelisted(msg.sender));
         _;
     }
@@ -96,7 +96,7 @@ contract TwoKeyMPSNMiningPool is TokenPool {
     )
     onlyTwoKeyAdminOrWhitelistedAddress
     {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(ITwoKeyAdmin(twoKeyAdmin).getTwoKeyRewardsReleaseDate() <= block.timestamp);
         super.transferTokens(_receiver,_amount);
     }

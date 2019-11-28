@@ -25,6 +25,13 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
     string constant _isCampaignValidated = "isCampaignValidated";
     string constant _campaign2NonSingletonHash = "campaign2NonSingletonHash";
 
+    /**
+     * Keys for the addresses we're accessing
+     */
+    string constant _twoKeyFactory = "TwoKeyFactory";
+    string constant _twoKeyEventSource = "TwoKeyEventSource";
+
+
     bool initialized;
 
     // Pointer to the PROXY storage contract
@@ -51,7 +58,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
     // Modifier which will make function throw if caller is not TwoKeyFactory proxy contract
     modifier onlyTwoKeyFactory {
-        address twoKeyFactory = getAddressFromTwoKeySingletonRegistry("TwoKeyFactory");
+        address twoKeyFactory = getAddressFromTwoKeySingletonRegistry(_twoKeyFactory);
         require(msg.sender == twoKeyFactory);
         _;
     }
@@ -131,7 +138,7 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         address moderator = ITwoKeyCampaignPublicAddresses(campaign).moderator();
 
         //Get the event source address
-        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource);
         // Emit event
         ITwoKeyEventSourceEvents(twoKeyEventSource).created(campaign,contractor,moderator);
     }

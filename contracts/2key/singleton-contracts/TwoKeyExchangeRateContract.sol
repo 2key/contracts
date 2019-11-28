@@ -19,6 +19,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
      */
     string constant _currencyName2rate = "currencyName2rate";
 
+    string constant _twoKeyEventSource = "TwoKeyEventSource";
+
     using SafeMath for uint;
     bool initialized;
 
@@ -58,7 +60,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     onlyMaintainer
     {
         storeFiatCurrencyDetails(_currency, _baseToTargetRate);
-        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource);
         ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currency, _baseToTargetRate, block.timestamp, msg.sender);
     }
 
@@ -78,7 +80,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         //There's no need for validation of input, because only we can call this and that costs gas
         for(uint i=0; i<numberOfFiats; i++) {
             storeFiatCurrencyDetails(_currencies[i], _baseToTargetRates[i]);
-            address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+            address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource);
             ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currencies[i], _baseToTargetRates[i], block.timestamp, msg.sender);
         }
     }

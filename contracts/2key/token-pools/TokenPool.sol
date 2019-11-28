@@ -13,8 +13,11 @@ contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
 
     bool initialized = false;
 
+    string constant _twoKeyAdmin = "TwoKeyAdmin";
+    string constant _twoKeyEconomy = "TwoKeyEconomy";
+
     modifier onlyTwoKeyAdmin {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(msg.sender == twoKeyAdmin);
         _;
     }
@@ -27,7 +30,7 @@ contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
         return IERC20(twoKeyEconomy).balanceOf(address(this));
     }
 
@@ -40,7 +43,7 @@ contract TokenPool is Upgradeable, ITwoKeySingletonUtils {
     )
     internal
     {
-        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
         IERC20(twoKeyEconomy).transfer(receiver,amount);
     }
 
