@@ -206,8 +206,6 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         contractNameToLatestAddedVersion[contractStorageName] = version; //Mapping latest contract name to the version
     }
 
-
-
     /**
      * @notice Internal function to deploy proxy for the contract
      * @param contractName is the name of the contract
@@ -244,7 +242,13 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
-    function approveCampaignVersionDuringCreation(string campaignType)
+    /**
+     * @notice Function to approve campaign version per type during it's creation
+     * @param campaignType is the type of campaign we want to approve during creation
+     */
+    function approveCampaignVersionDuringCreation(
+        string campaignType
+    )
     public
     onlyCoreDev
     {
@@ -252,7 +256,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
 
         require(campaign.length == 0);
 
-        campaignTypeToLastApprovedVersion[campaign] = "1.0.0";
+        campaignTypeToLastApprovedVersion[campaignType] = "1.0.0";
     }
 
     /**
