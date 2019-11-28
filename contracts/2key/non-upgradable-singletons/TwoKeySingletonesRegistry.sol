@@ -180,7 +180,7 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         require(versions[contractName][version] == 0x0); //No overriding of existing versions
         versions[contractName][version] = implementation; //Save the version for the campaign
         contractNameToLatestAddedVersion[contractName] = version;
-        emit VersionAdded(version, implementation);
+        emit VersionAdded(version, implementation, contractName);
     }
 
     function addVersionDuringCreation(

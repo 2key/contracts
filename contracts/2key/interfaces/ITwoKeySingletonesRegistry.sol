@@ -17,8 +17,9 @@ interface ITwoKeySingletonesRegistry {
     * @dev This event will be emitted every time a new implementation is registered
     * @param version representing the version name of the registered implementation
     * @param implementation representing the address of the registered implementation
+    * @param contractName is the name of the contract we added new version
     */
-    event VersionAdded(string version, address implementation);
+    event VersionAdded(string version, address implementation, string contractName);
 
     /**
     * @dev Registers a new version with its implementation address
