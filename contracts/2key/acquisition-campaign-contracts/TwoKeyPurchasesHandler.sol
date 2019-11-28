@@ -85,11 +85,13 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         uint i = 1;
         // In case vested amounts are both bonus and base, bonusTokensVestingStartShiftInDaysFromDistributionDate is ignored
         if(vestingAmount == VestingAmount.BASE_AND_BONUS) {
+            //in thie case, bonusVestingStartDate is actually just the date of the second portion
             bonusVestingStartDate = tokenDistributionDate.add(numberOfDaysBetweenPortions.mul(1 days));
             for(i=1; i<numberOfVestingPortions; i++) {
                 portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
             }
-        } else {
+        } else { // ONLY BONUS
+            //numberOfVestingPortions == number of portions of bonus only, meaning if numberOfVestingPortions==4, will be total of base + 4 portions of bonus
             bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
             for(i=1; i<numberOfVestingPortions+1; i++) {
                 portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
