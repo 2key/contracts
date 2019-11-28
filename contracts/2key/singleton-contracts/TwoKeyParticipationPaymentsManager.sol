@@ -130,7 +130,7 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
     onlyTwoKeyParticipationMiningPool
     {
         // Store that this contract received this tokens from Mining Pool
-        bytes32 keyHashForTransfer = keccak256("receivedTokens",year,epoch);
+        bytes32 keyHashForTransfer = keccak256(_receivedTokens,year,epoch);
         PROXY_STORAGE_CONTRACT.setUint(keyHashForTransfer, amountOfTokens);
     }
 
