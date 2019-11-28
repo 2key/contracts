@@ -244,18 +244,15 @@ contract TwoKeySingletonesRegistry is ITwoKeySingletonesRegistry {
         UpgradeabilityProxy(proxyAddress).upgradeTo(contractName, version, _impl);
     }
 
-    function approveCampaignVersionDuringCreation()
+    function approveCampaignVersionDuringCreation(string campaignType)
     public
     onlyCoreDev
     {
-        bytes memory previousDonation = bytes(campaignTypeToLastApprovedVersion["DONATION"]);
-        bytes memory previousTokenSell = bytes(campaignTypeToLastApprovedVersion["TOKEN_SELL"]);
+        bytes memory campaign = bytes(campaignTypeToLastApprovedVersion[campaignType]);
 
-        require(previousDonation.length == 0);
-        require(previousTokenSell.length == 0);
+        require(campaign.length == 0);
 
-        campaignTypeToLastApprovedVersion["DONATION"] = "1.0.0";
-        campaignTypeToLastApprovedVersion["TOKEN_SELL"] = "1.0.0";
+        campaignTypeToLastApprovedVersion[campaign] = "1.0.0";
     }
 
     /**

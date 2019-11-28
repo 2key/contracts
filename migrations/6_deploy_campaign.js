@@ -87,7 +87,8 @@ module.exports = function deploy(deployer) {
                             let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
                             console.log("Let's approve all initial versions for campaigns");
 
-                            let txHash = await instance.approveCampaignVersionDuringCreation();
+                            let txHash = await instance.approveCampaignVersionDuringCreation("DONATION");
+                            txHash = await instance.approveCampaignVersionDuringCreation("TOKEN_SELL");
                             resolve(txHash);
                         } else {
                             resolve(true);
