@@ -48,7 +48,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
 
     function onlyMaintainer() internal view returns (bool) {
         address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
-        return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).onlyMaintainer(msg.sender);
+        return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender);
     }
 
     /**
