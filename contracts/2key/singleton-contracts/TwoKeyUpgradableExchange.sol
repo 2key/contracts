@@ -762,7 +762,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         // Firstly we need to approve Bancor converter to take tokens from us
         address dai = getAddress(keccak256(_dai));
-        address bancorConverter = getAddress(keccak256("BANCOR_CONVERTER")); //TODO: See how to store this
+        address bancorConverter = getAddress(keccak256("BANCOR_CONVERTER"));
         address bancorToken = getAddress(keccak256("BNT"));
         address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
         // Approving bancor to take tokens from US
