@@ -61,5 +61,54 @@ describe('Tests for TwoKeyEconomy ERC20 contract' , () => {
         let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
         expect(balance).to.be.equal(totalSupply*(0.03));
     }).timeout(60000);
+
+
+    it('should validate that TwoKeyParticipationMiningPool contract received 20% of total supply',async() => {
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(
+            twoKeyProtocol.twoKeyEconomy.address,
+            twoKeyProtocol.twoKeyParticipationMiningPool.address
+        );
+        let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        expect(balance).to.be.equal(totalSupply*(0.20));
+    }).timeout(60000);
+
+    it('should validate that TwoKeyNetworkGrowthFund contract received 20% of total supply',async() => {
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(
+            twoKeyProtocol.twoKeyEconomy.address,
+            twoKeyProtocol.twoKeyNetworkGrowthFund.address
+        );
+        let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        expect(balance).to.be.equal(totalSupply*(0.16));
+    }).timeout(60000);
+
+    it('should validate that TwoKeyMPSNMiningPool contract received 10% of total supply',async() => {
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(
+            twoKeyProtocol.twoKeyEconomy.address,
+            twoKeyProtocol.twoKeyMPSNMiningPool.address
+        );
+        let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        expect(balance).to.be.equal(totalSupply*(0.10));
+    }).timeout(60000);
+
+    it('should validate that TwoKeyTeamGrowthFund contract received 4% of total supply',async() => {
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(
+            twoKeyProtocol.twoKeyEconomy.address,
+            twoKeyProtocol.twoKeyTeamGrowthFund.address
+        );
+        let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        expect(balance).to.be.equal(totalSupply*(0.04));
+    }).timeout(60000);
+
+    it('should validate that TwoKeyAdmin contract received 47% of total supply',async() => {
+        let balance = await twoKeyProtocol.ERC20.getERC20Balance(
+            twoKeyProtocol.twoKeyEconomy.address,
+            twoKeyProtocol.twoKeyAdmin.address
+        );
+        let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        expect(balance).to.be.equal(totalSupply*(0.47));
+    }).timeout(60000);
+
+
+
 });
 
