@@ -1,10 +1,8 @@
 pragma solidity ^0.4.24;
 
 import "./TwoKeyCampaign.sol";
-import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignLogicHandler.sol";
-import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../interfaces/IERC20.sol";
 
 /**
