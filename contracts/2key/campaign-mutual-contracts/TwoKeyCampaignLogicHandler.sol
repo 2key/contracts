@@ -439,11 +439,4 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         }
     }
 
-    /**
-    * @notice Function to check if contractor can withdraw unsold tokens
-    */
-    function canContractorWithdrawRemainingRewardsInventory() public view returns (bool) {
-        return isCampaignEnded();
-    }
-
 }
