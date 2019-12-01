@@ -39,7 +39,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         target_url = _url;
         mirrorCampaignOnPlasma = _mirrorCampaignOnPlasma;
 
-
+        isCampaignInitialized = true;
     }
+
 
 }

@@ -482,20 +482,5 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 			reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
 		}
 	}
-
-	/**
-	 * @notice Function to join with signature and share 1 arc to the receiver
-	 * @param signature is the signature
-	 * @param receiver is the address we're sending ARCs to
-	 */
-	function joinAndShareARC(
-		bytes signature,
-		address receiver
-	)
-	public
-	{
-		distributeArcsBasedOnSignature(signature, msg.sender);
-		transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
-	}
 }
 
