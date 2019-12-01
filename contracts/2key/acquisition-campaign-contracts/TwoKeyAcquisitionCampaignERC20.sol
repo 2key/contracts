@@ -307,31 +307,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
 
     /**
-     * @notice Function which will buy tokens from upgradable exchange for moderator
-     * @param moderatorFee is the fee in tokens moderator earned
-     */
-    function buyTokensForModeratorRewards(
-        uint moderatorFee
-    )
-    public
-    onlyTwoKeyConversionHandler
-    {
-        //Get deep freeze token pool address
-        address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
-
-        uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
-
-        uint total = 100;
-        // Balance which will go to moderator
-        uint balance = moderatorFee.mul(total.sub(networkFee)).div(100);
-
-        uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
-        buyTokensFromUpgradableExchange(moderatorFee.sub(balance), twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
-
-        moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
-    }
-
-    /**
      * @notice Move some amount of ERC20 from our campaign to someone
      * @param _to address we're sending the amount of ERC20
      * @param _amount is the amount of ERC20's we're going to transfer

@@ -22,11 +22,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
     bool acceptsFiat; // Will determine if fiat conversion can be created or not
 
 
-    modifier onlyTwoKeyDonationConversionHandler {
-        require(msg.sender == conversionHandler);
-        _;
-    }
-
     function setInitialParamsDonationCampaign(
         address _contractor,
         address _moderator,
@@ -167,29 +162,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaign, TwoKeyCa
         return totalBounty2keys;
     }
 
-    /**
-     * @notice Function which will buy tokens from upgradable exchange for moderator
-     * @param moderatorFee is the fee in tokens moderator earned
-     */
-    function buyTokensForModeratorRewards(
-        uint moderatorFee
-    )
-    public
-    onlyTwoKeyDonationConversionHandler
-    {
-        //Get deep freeze token pool address
-        address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
-
-        uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
-
-        // Balance which will go to moderator
-        uint balance = moderatorFee.mul(100-networkFee).div(100);
-
-        uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
-        buyTokensFromUpgradableExchange(moderatorFee - balance, twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
-
-        moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
-    }
 
     /**
      * @notice Function which acts like getter for all cuts in array
