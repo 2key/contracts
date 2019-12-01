@@ -174,8 +174,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         return true;
     }
 
-    //TODO: set internal
-    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint amountWillingToSpend, bool isFiat) public view returns (bool) {
+    function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint amountWillingToSpend, bool isFiat) internal view returns (bool) {
         bool canConvert;
         //If we reach this point means we have reached point that campaign is still active
         if(isFiat) {
@@ -186,8 +185,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         return canConvert;
     }
 
-    //TODO: set internal
-    function validateMinMaxContributionForFIATConversion(address converter, uint amountWillingToSpendFiatWei) public view returns (bool,uint) {
+    function validateMinMaxContributionForFIATConversion(address converter, uint amountWillingToSpendFiatWei) internal view returns (bool,uint) {
         uint alreadySpentETHWei;
         uint alreadySpentFIATWEI;
         if(keccak256(currency) == keccak256('ETH')) {

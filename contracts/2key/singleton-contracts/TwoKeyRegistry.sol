@@ -15,6 +15,8 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     bool initialized;
 
+    string constant _twoKeyMaintainersRegistry = "TwoKeyMaintainersRegistry";
+
     ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
 
     /// @notice Event is emitted when a user's name is changed
@@ -22,7 +24,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
 
     function isMaintainer(address _caller) internal view returns (bool) {
-        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
         return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_caller);
     }
 

@@ -12,6 +12,12 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
     string constant _receivedTokens = "receivedTokens";
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
 
+    string constant _twoKeyParticipationMiningPool = "TwoKeyParticipationMiningPool";
+    string constant _twoKeyAdmin = "TwoKeyAdmin";
+    string constant _twoKeyRegistry = "TwoKeyRegistry";
+    string constant _twoKeyEconomy = "TwoKeyEconomy";
+
+
     ITwoKeyParticipationPaymentsManagerStorage public PROXY_STORAGE_CONTRACT;
 
     bool initialized;
@@ -32,13 +38,13 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
 
 
     modifier onlyTwoKeyParticipationMiningPool {
-        address participationMiningPool = getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationMiningPool");
+        address participationMiningPool = getAddressFromTwoKeySingletonRegistry(_twoKeyParticipationMiningPool);
         require(msg.sender == participationMiningPool);
         _;
     }
 
     modifier onlyTwoKeyAdmin {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(msg.sender == twoKeyAdmin);
         _;
     }
@@ -48,7 +54,7 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
      * some of whitelisted addresses inside this contract
      */
     modifier onlyTwoKeyAdminOrWhitelistedAddress {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(msg.sender == twoKeyAdmin || isAddressWhitelisted(msg.sender));
         _;
     }
@@ -111,7 +117,7 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
     view
     returns (bool)
     {
-        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry);
         return ITwoKeyRegistry(twoKeyRegistry).checkIfUserExists(_receiver);
     }
 
@@ -124,7 +130,7 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
     onlyTwoKeyParticipationMiningPool
     {
         // Store that this contract received this tokens from Mining Pool
-        bytes32 keyHashForTransfer = keccak256("receivedTokens",year,epoch);
+        bytes32 keyHashForTransfer = keccak256(_receivedTokens,year,epoch);
         PROXY_STORAGE_CONTRACT.setUint(keyHashForTransfer, amountOfTokens);
     }
 
@@ -141,8 +147,8 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
     onlyTwoKeyAdminOrWhitelistedAddress
     {
         require(validateRegistrationOfReceiver(_beneficiary) == true);
-        address _twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-            .getNonUpgradableContractAddress("TwoKeyEconomy");
-        IERC20(_twoKeyEconomy).transfer(_beneficiary, _amount);
+        address twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+            .getNonUpgradableContractAddress(_twoKeyEconomy);
+        IERC20(twoKeyEconomy).transfer(_beneficiary, _amount);
     }
 }

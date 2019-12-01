@@ -4,8 +4,10 @@ import "./TwoKeyMaintainersRegistryAbstract.sol";
 
 contract TwoKeyPlasmaMaintainersRegistry is TwoKeyMaintainersRegistryAbstract {
 
+    string constant _twoKeyPlasmaCongress = "TwoKeyPlasmaCongress";
+
     modifier onlyTwoKeyPlasmaCongress {
-        address twoKeyCongress = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCongress");
+        address twoKeyCongress = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCongress);
         require(msg.sender == address(twoKeyCongress));
         _;
     }

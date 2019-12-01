@@ -5,7 +5,6 @@ import "./TwoKeyMaintainersRegistryAbstract.sol";
  * @author Nikola Madjarevic
  */
 contract TwoKeyMaintainersRegistry is TwoKeyMaintainersRegistryAbstract {
-
     /**
      * @notice Modifier to restrict calling the method to anyone but twoKeyAdmin
      */

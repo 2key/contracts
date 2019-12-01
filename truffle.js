@@ -136,7 +136,7 @@ module.exports = {
           skipDryRun: true,
           network_id: 3,
           gas: 8000000,
-          gasPrice: 120000000000,
+          gasPrice: 150000000000, //15 GWEI
       },
 
       'public.test.k8s-hdwallet-dev': {

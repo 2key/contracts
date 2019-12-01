@@ -64,11 +64,11 @@ library Call {
         //    dc = c;
         bytes4 sig = bytes4(keccak256(_method));
         assembly {
-        // move pointer to free memory spot
+            // move pointer to free memory spot
             let ptr := mload(0x40)
-        // put function sig at memory spot
+            // put function sig at memory spot
             mstore(ptr,sig)
-        // append argument after function sig
+            // append argument after function sig
             mstore(add(ptr,0x04), _val1)
             mstore(add(ptr,0x24), _val2)
 
@@ -80,11 +80,6 @@ library Call {
             0x44, // Inputs are 4 bytes for signature and 2 uint256
             ptr,  //Store output over input
             0x20) //Outputs are 1 uint long
-
-        // TODO cause revert
-        //            if eq(result, 0) {
-        //                revert(0, 0)
-        //            }
 
             answer := mload(ptr) // Assign output to answer var
             mstore(0x40,add(ptr,0x20)) // Set storage pointer to new space

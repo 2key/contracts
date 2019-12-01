@@ -7,8 +7,6 @@ import "./TwoKeySingletonRegistryAbstract.sol";
  */
 contract TwoKeyPlasmaSingletoneRegistry is TwoKeySingletonRegistryAbstract {
 
-
-
     constructor()
     public
     {

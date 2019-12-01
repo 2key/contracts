@@ -6,7 +6,7 @@ import "../libraries/SafeMath.sol";
 import "../interfaces/IStructuredStorage.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
-contract TwoKeyMaintainersRegistryAbstract is Upgradeable{
+contract TwoKeyMaintainersRegistryAbstract is Upgradeable {
     /**
      * All keys used for the storage contract.
      * Saved as a constants to avoid any potential typos

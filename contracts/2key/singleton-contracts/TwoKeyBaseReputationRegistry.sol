@@ -23,6 +23,11 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     string constant _address2converterGlobalReputationScoreWei = "address2converterGlobalReputationScoreWei";
     string constant _plasmaAddress2referrerGlobalReputationScoreWei = "plasmaAddress2referrerGlobalReputationScoreWei";
 
+    /**
+     * Keys for the addresses we're accessing
+     */
+    string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
+    string constant _twoKeyRegistry = "TwoKeyRegistry";
     bool initialized;
 
     ITwoKeyBaseReputationRegistryStorage public PROXY_STORAGE_CONTRACT;
@@ -49,7 +54,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
      * @notice Modifier to validate that the call is coming from validated campaign
      */
     modifier isCodeValid() {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator);
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
         _;
     }
@@ -178,7 +183,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (int,int,int)
     {
-        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress("TwoKeyRegistry");
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress(_twoKeyRegistry);
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
 
         bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, _address);

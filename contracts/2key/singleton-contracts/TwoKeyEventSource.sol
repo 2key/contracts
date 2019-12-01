@@ -18,11 +18,18 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyEventSourceStorage public PROXY_STORAGE_CONTRACT;
 
+
+    string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
+    string constant _twoKeyFactory = "TwoKeyFactory";
+    string constant _twoKeyRegistry = "TwoKeyRegistry";
+    string constant _twoKeyAdmin = "TwoKeyAdmin";
+    string constant _twoKeyExchangeRateContract = "TwoKeyExchangeRateContract";
+    string constant _twoKeyMaintainersRegistry = "TwoKeyMaintainersRegistry";
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
      */
     modifier onlyAllowedContracts {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator);
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
         _;
     }
@@ -31,7 +38,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
      * Modifier which will allow only TwoKeyCampaignValidator to make some calls
      */
     modifier onlyTwoKeyCampaignValidator {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator);
         require(msg.sender == twoKeyCampaignValidator);
         _;
     }
@@ -365,7 +372,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     )
     external
     {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry(_twoKeyFactory));
         emit AcquisitionCampaignCreated(
             proxyLogicHandler,
             proxyConversionHandler,
@@ -389,7 +396,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     )
     external
     {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFactory"));
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry(_twoKeyFactory));
         emit DonationCampaignCreated(
             proxyDonationCampaign,
             proxyDonationConversionHandler,
@@ -413,7 +420,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     )
     external
     {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"));
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract));
         emit PriceUpdated(_currency, _newRate, _timestamp, _updater);
     }
 
@@ -468,7 +475,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (address)
     {
-        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry);
         address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(me);
         if (plasma != address(0)) {
             return plasma;
@@ -488,7 +495,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (address)
     {
-        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry");
+        address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry);
         address ethereum = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(me);
         if (ethereum != address(0)) {
             return ethereum;
@@ -507,7 +514,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (bool)
     {
-        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
         bool _isMaintainer = ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_maintainer);
         return _isMaintainer;
     }
@@ -520,7 +527,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         uint integratorFeePercentage = ITwoKeyAdmin(twoKeyAdmin).getDefaultIntegratorFeePercent();
         return integratorFeePercentage;
     }
@@ -533,7 +540,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         uint networkTaxPercent = ITwoKeyAdmin(twoKeyAdmin).getDefaultNetworkTaxPercent();
         return networkTaxPercent;
     }

@@ -23,6 +23,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
     string constant _epochInsideYear = "epochInsideYear";
 
+    string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
+
     using SafeMath for *;
 
     /**
@@ -35,7 +37,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
      * some of whitelisted addresses inside this contract
      */
     modifier onlyTwoKeyAdminOrWhitelistedAddress {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(msg.sender == twoKeyAdmin || isAddressWhitelisted(msg.sender));
         _;
     }
@@ -82,7 +84,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     {
         require(_amount > 0);
         uint year = checkInWhichYearIsTheTransfer();
-        //TODO if year>10, should return 11, don't think it currently does
 
         bytes32 keyTransferedThisYear = keccak256(_yearToTransferedThisYear,year);
         bytes32 keyAnnualTransferAmountLimit = keccak256(_annualTransferAmountLimit);
@@ -104,7 +105,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keyHashEpochThisYear);
 
         //We're always sending tokens to ParticipationPaymentsManager
-        address receiver = getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationPaymentsManager");
+        address receiver = getAddressFromTwoKeySingletonRegistry(_twoKeyParticipationsManager);
 
         // Transfer the tokens
         super.transferTokens(receiver,_amount);
@@ -190,7 +191,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
                 counter ++;
             }
             return counter;
-            //TODO counter should return different answer for 10th year and 11th year onwards
         }
     }
 
@@ -209,7 +209,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     function getUint(
         string key
     )
-    public
+    internal
     view
     returns (uint)
     {

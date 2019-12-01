@@ -212,7 +212,7 @@ const updateIPFSHashes = async(contracts) => {
 
     let existingVersionHandlerFile = {};
 
-    if(!process.argv.includes('--reset')) {
+    // if(!process.argv.includes('--reset')) {
         try {
             existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
             console.log('EXISTING VERSIONS', existingVersionHandlerFile);
@@ -226,7 +226,7 @@ const updateIPFSHashes = async(contracts) => {
             versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
             console.log('VERSION LIST', versionsList);
         }
-    }
+    // }
 
     versionsList[nonSingletonHash] = {};
     const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
@@ -348,13 +348,14 @@ async function deploy() {
 
         //If reset rm -rf build folder and rm -rf tar.gz
         if(process.argv.includes('--reset')) {
-            await rmDir(buildPath);
-            await rmDir(buildArchPath);
+            // await rmDir(buildPath);
+            // await rmDir(buildArchPath);
 
         } else {
-            await restoreFromArchive();
+            // await restoreFromArchive();
         }
 
+        await restoreFromArchive();
 
         const networks = process.argv[2].split(',');
         const network = networks.join('/');

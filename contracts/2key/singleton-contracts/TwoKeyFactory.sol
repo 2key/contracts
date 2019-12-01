@@ -17,8 +17,11 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
  */
 contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
-    string constant _addressToCampaignType = "addressToCampaignType";
     bool initialized;
+
+    string constant _addressToCampaignType = "addressToCampaignType";
+    string constant _twoKeyEventSource = "TwoKeyEventSource";
+    string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
 
     ITwoKeyFactoryStorage PROXY_STORAGE_CONTRACT;
 
@@ -125,7 +128,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             valuesConversion,
             msg.sender,
             addresses[0],
-            getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"),
+            getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource),
             proxyConversions
         );
 
@@ -163,12 +166,12 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         );
 
         // Validate campaign so it will be approved to interact (and write) to/with our singleton contracts
-        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator"))
+        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator))
         .validateAcquisitionCampaign(proxyAcquisition, _nonSingletonHash);
 
         setAddressToCampaignType(proxyAcquisition, "TOKEN_SELL");
 
-        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource))
         .acquisitionCampaignCreated(
             proxyLogicHandler,
             proxyConversions,
@@ -235,7 +238,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         );
 
         // Validate campaign
-        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator"))
+        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator))
         .validateDonationCampaign(
             proxyDonationCampaign,
             proxyDonationConversionHandler,
@@ -245,7 +248,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
         setAddressToCampaignType(proxyDonationCampaign, "DONATION_CAMPAIGN");
 
-        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource))
         .donationCampaignCreated(
             proxyDonationCampaign,
             proxyDonationConversionHandler,
@@ -273,7 +276,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
     }
 
     function plasmaOf(address _address) internal view returns (address) {
-        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
+        address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource);
         address plasma = ITwoKeyEventSourceEvents(twoKeyEventSource).plasmaOf(_address);
         return plasma;
     }
