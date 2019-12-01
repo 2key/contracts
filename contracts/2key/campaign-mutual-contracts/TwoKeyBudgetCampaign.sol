@@ -12,10 +12,23 @@ import "../interfaces/IERC20.sol";
  */
 contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
-	uint public usd2KEYrateWei;
-	bool boughtRewardsWithEther;
+	/**
+	 * This is the BudgetCampaign contract abstraction which will
+	 * be implemented by all budget campaigns in future
+	 */
+
+
+	// Representing if campaign "constructor" was called
 	bool isCampaignInitialized;
+
+	// Constant used for percentage calculations
 	uint constant HUNDRED_PERCENT = 100;
+
+	// Dollar to 2key rate in WEI at the moment of adding inventory
+	uint public usd2KEYrateWei;
+
+	// Variable to let us know if rewards have been bought with Ether
+	bool public boughtRewardsWithEther;
 
 
 
@@ -34,12 +47,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 
-
-	/*
-	**
-	* @notice Function to add fiat inventory for rewards
-	* @dev only contractor can add this inventory
-	*/
+    /**
+	 * @notice Function to add fiat inventory for rewards
+	 * @dev only contractor can add this inventory
+	 */
 	function buyReferralBudgetWithEth()
 	public
 	onlyContractor
@@ -56,9 +67,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 	/**
-        * @notice Function which will buy tokens from upgradable exchange for moderator
-        * @param moderatorFee is the fee in tokens moderator earned
-        */
+     * @notice Function which will buy tokens from upgradable exchange for moderator
+     * @param moderatorFee is the fee in tokens moderator earned
+     */
 	function buyTokensForModeratorRewards(
 		uint moderatorFee
 	)
