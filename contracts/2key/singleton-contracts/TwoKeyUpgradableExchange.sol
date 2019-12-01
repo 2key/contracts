@@ -175,11 +175,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @dev Determines how ETH is stored/forwarded on purchases.
      */
     function _forwardFunds(
-        address _twoKeyAdmin
+        address twoKeyAdminAddress
     )
     internal
     {
-        _twoKeyAdmin.transfer(msg.value);
+        twoKeyAdminAddress.transfer(msg.value);
     }
 
 
