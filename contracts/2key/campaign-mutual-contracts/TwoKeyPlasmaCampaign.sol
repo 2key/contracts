@@ -1,11 +1,19 @@
 pragma solidity ^0.4.24;
 
 import "./TwoKeyCampaignAbstract.sol";
-import "../interfaces/ITwoKeyPlasmaRegistry.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+
 
 contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
 
-    ITwoKeyPlasmaRegistry public twoKeyPlasmaRegistry;
+    address twoKeyPlasmaSingletonRegistry;
+
+    modifier onlyMaintainer {
+        require(isMaintainer(msg.sender));
+        _;
+    }
+
 
     /**
      * @dev Transfer tokens from one address to another
@@ -204,6 +212,30 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
     returns (uint256)
     {
         return referrerPlasma2cut[me];
+    }
+
+    /**
+     * @notice Function to get proxy address of singleton contracts on plasma
+     */
+    function getContractProxyAddress(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(twoKeyPlasmaSingletonRegistry).getContractProxyAddress(contractName);
+    }
+
+    function isMaintainer(
+        address _address
+    )
+    internal
+    view
+    returns (bool)
+    {
+        address twoKeyPlasmaMaintainersRegistry = getContractProxyAddress("TwoKeyPlasmaSingletoneRegistry");
+        return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender);
     }
 
 }

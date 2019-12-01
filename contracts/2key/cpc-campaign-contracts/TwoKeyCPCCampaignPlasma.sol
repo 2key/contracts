@@ -1,9 +1,13 @@
 pragma solidity ^0.4.24;
 
 import "../campaign-mutual-contracts/TwoKeyPlasmaCampaign.sol";
+import "../libraries/MerkleProof.sol";
+
 
 contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
+    uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
+    uint bountyPerConversion; //amount of 2key tokens which are going to be paid per conversion
 
     address public mirrorCampaignOnPublic; // Address of campaign deployed to public eth network
     address[] public activeInfluencers;
@@ -17,6 +21,12 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     string public target_url;
 
 
+    struct Conversion {
+        address converterPlasma;
+        uint bountyPaid;
+        uint conversionTimestamp;
+    }
+
     event ConvertSig(
         address indexed influencer,
         bytes signature,
@@ -26,7 +36,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
 
     function setInitialParamsCPCCampaign(
-        address _moderator,
+        address _twoKeyPlasmaSingletonRegistry,
         string _url
     )
     public
@@ -35,13 +45,16 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
         // Set the contractor of the campaign
         contractor = msg.sender;
-        moderator = _moderator;
-
+        twoKeyPlasmaSingletonRegistry = _twoKeyPlasmaSingletonRegistry;
         target_url = _url;
 
         isCampaignInitialized = true;
     }
 
+    /**
+     * @notice Will be called only once in a lifetime, immediately after campaign on public network is deployed
+     * @param _mirrorCampaign is the campaign address on public network
+     */
     function setMirrorCampaign(
         address _mirrorCampaign
     )
@@ -53,8 +66,23 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     }
 
     /**
+     * @notice Function where maintainer will set on plasma network the total bounty amount
+     * and how many tokens are paid per conversion for the influencers
+     */
+    function setTotalBounty(
+        uint _totalBounty,
+        uint _bountyPerConversion
+    )
+    public
+    onlyMaintainer
+    {
+        totalBountyForCampaign = _totalBounty;
+        bountyPerConversion = _bountyPerConversion;
+    }
+
+    /**
      * @notice Function to return referrers participated in the referral chain
-     * @param customer is the one who converted (bought tokens)
+     * @param customer is the one who converted
      * @return array of referrer addresses
      */
     function getReferrers(
@@ -114,7 +142,8 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
         address plasmaConverter = Call.recoverHash(keccak256(signature), converterSig, 0);
         address m = Call.recoverHash(keccak256(abi.encodePacked(signature,converterSig)), maintainerSig, 0);
-        require(moderator == m);
+
+        require(isMaintainer(m));
 
         convert(signature, plasmaConverter); // msg.value  contract donates 1ETH
 
@@ -154,7 +183,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
     function resetMerkleRoot()
     public
-//    onlyModerator
+    onlyMaintainer
     {
         // TODO this needs to be blocked or only used when using Epoches
         merkle_root = bytes32(0);
@@ -172,47 +201,17 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
         bytes32 _merkle_root
     )
     public
-//    onlyModerator
+    onlyMaintainer
     {
         require(merkle_root == 0, 'merkle root already defined');
         merkle_root = _merkle_root;
     }
 
 
-    function computeMerkleRootInternal(
-        bytes32[] hashes
-    )
-    internal
-    returns (bytes32)
-    {
-        uint n = hashes.length;
-        while (n>1) {
-            for (uint i = 0; i < n; i+=2) {
-                bytes32 h0 = hashes[i];
-                bytes32 h1;
-                if (i+1 < n) {
-                    h1 = hashes[i+1];
-                }
-                if (h0 < h1) {
-                    hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
-                } else {
-                    hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
-                }
-            }
-            if ((n & (n - 1)) != 0) {
-                n >>= 1;
-                n++;
-            } else {
-                n >>= 1;
-            }
-        }
-        return hashes[0];
-    }
-
     function computeMerkleRoot(
     )
     public
-//    onlyModerator
+    onlyMaintainer
     {
         require(merkle_root == 0, 'merkle root already defined');
 
@@ -230,7 +229,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
             uint amount = referrerPlasma2Balances2key[influencer];
             hashes[i] = keccak256(abi.encodePacked(influencer,amount));
         }
-        merkle_root = computeMerkleRootInternal(hashes);
+        merkle_root = MerkleProof.computeMerkleRootInternal(hashes);
     }
 
 
@@ -248,7 +247,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
         uint N // maximnal number of leafs we are going to process in each call. for example 2**11
     )
     public
-//    onlyModerator
+    onlyMaintainer
     {
         require(merkle_root == 0 || merkle_root == 2, 'merkle root already defined');
 
@@ -261,7 +260,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
         uint start = merkle_roots.length * N;
         if (start >= numberOfInfluencers) {
-            merkle_root = computeMerkleRootInternal(merkle_roots);
+            merkle_root = MerkleProof.computeMerkleRootInternal(merkle_roots);
             return;
         }
 
@@ -275,13 +274,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
             uint amount = referrerPlasma2Balances2key[influencer];
             hashes[i] = keccak256(abi.encodePacked(influencer,amount));
         }
-        merkle_roots.push(computeMerkleRootInternal(hashes));
+        merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
     }
-
-
-
-
-
-
 
 }
