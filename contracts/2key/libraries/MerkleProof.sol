@@ -40,4 +40,34 @@ library MerkleProof {
     // Check if the computed hash (root) is equal to the provided root
     return computedHash == _root;
   }
+
+  function computeMerkleRootInternal(
+    bytes32[] hashes
+  )
+  internal
+  returns (bytes32)
+  {
+    uint n = hashes.length;
+    while (n>1) {
+      for (uint i = 0; i < n; i+=2) {
+        bytes32 h0 = hashes[i];
+        bytes32 h1;
+        if (i+1 < n) {
+          h1 = hashes[i+1];
+        }
+        if (h0 < h1) {
+          hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
+        } else {
+          hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
+        }
+      }
+      if ((n & (n - 1)) != 0) {
+        n >>= 1;
+        n++;
+      } else {
+        n >>= 1;
+      }
+    }
+    return hashes[0];
+  }
 }
