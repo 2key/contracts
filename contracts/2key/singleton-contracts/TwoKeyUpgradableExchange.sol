@@ -897,6 +897,24 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+    /**
+     * @notice Getter function to check if campaign has been hedged ever
+     * @param _contractAddress is the campaign address
+     */
+    function isCampaignHedged(
+        address _contractAddress
+    )
+    public
+    view
+    returns (bool)
+    {
+        uint _contractID = getContractId(_contractAddress);
+        return ethWeiHedgedPerContract(_contractID) > 0 ? true : false;
+    }
+
+    /**
+     * @notice Getter to get spreadWei value
+     */
     function spreadWei()
     public
     view
