@@ -168,6 +168,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(120000);
 
     it('should make sure all args are properly set', async() => {
+        printTestNumber();
         let obj = await twoKeyProtocol.DonationCampaign.getConstantInfo(campaignAddress);
         console.log(obj);
     }).timeout(60000);
@@ -382,6 +383,7 @@ describe('TwoKeyDonationCampaign', () => {
     it('should check that campaign is not hedged yet', async() => {
         printTestNumber();
         let isHedged = await twoKeyProtocol.UpgradableExchange.isCampaignHedged(campaignAddress);
+        console.log(isHedged);
         expect(isHedged).to.be.equal(false);
     }).timeout(60000);
 
