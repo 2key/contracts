@@ -379,6 +379,13 @@ describe('TwoKeyDonationCampaign', () => {
         }
     }).timeout(60000);
 
+    it('should check that campaign is not hedged yet', async() => {
+        printTestNumber();
+        let isHedged = await twoKeyProtocol.UpgradableExchange.isCampaignHedged(campaignAddress);
+        expect(isHedged).to.be.equal(false);
+    }).timeout(60000);
+
+
     it('should start hedging some ether', async() => {
         printTestNumber();
         const {web3, address} = web3switcher.aydnep();
@@ -398,6 +405,12 @@ describe('TwoKeyDonationCampaign', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
         console.log(hash);
     }).timeout(50000);
+
+    it('should check that campaign is hedged', async() => {
+        printTestNumber();
+        let isHedged = await twoKeyProtocol.UpgradableExchange.isCampaignHedged(campaignAddress);
+        expect(isHedged).to.be.equal(true);
+    }).timeout(60000);
 
     it('should proof that the invoice has been issued for executed conversion (Invoice tokens transfered)', async() => {
         printTestNumber();
@@ -433,7 +446,6 @@ describe('TwoKeyDonationCampaign', () => {
 
     it('should check is address contractor', async() => {
         printTestNumber();
-
         const {web3, address} = web3switcher.deployer();
         from = address;
         twoKeyProtocol = new TwoKeyProtocol({
@@ -532,6 +544,7 @@ describe('TwoKeyDonationCampaign', () => {
     }).timeout(60000);
 
     it('should get stats for the contract from upgradable exchange', async() => {
+        printTestNumber();
         let stats = await twoKeyProtocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
         console.log(stats);
     }).timeout(60000);
