@@ -66,30 +66,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
 	}
 
-	/**
-     * @notice Function which will buy tokens from upgradable exchange for moderator
-     * @param moderatorFee is the fee in tokens moderator earned
-     */
-	function buyTokensForModeratorRewards(
-		uint moderatorFee
-	)
-	public
-	onlyTwoKeyConversionHandler
-	{
-		//Get deep freeze token pool address
-		address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
-
-		uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
-
-		// Balance which will go to moderator
-		uint balance = moderatorFee.mul(HUNDRED_PERCENT.sub(networkFee)).div(HUNDRED_PERCENT);
-
-		uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
-		buyTokensFromUpgradableExchange(moderatorFee.sub(balance), twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
-
-		moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
-	}
-
 
 	/**
      * @notice Function to withdraw remaining rewards inventory in the contract
