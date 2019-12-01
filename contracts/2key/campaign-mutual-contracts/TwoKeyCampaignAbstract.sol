@@ -9,6 +9,7 @@ contract TwoKeyCampaignAbstract is ArcToken {
     using SafeMath for uint256;
     using Call for *;
 
+    bool isCampaignInitialized; // Representing if campaign "constructor" was called
     uint constant HUNDRED_PERCENT = 100;
 
     address public contractor; //contractor address
