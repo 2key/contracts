@@ -16,6 +16,8 @@ contract TwoKeyCampaign is ArcToken {
 	using SafeMath for uint256;
 	using Call for *;
 
+	uint constant HUNDRED_PERCENT = 100;
+
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
 
 	address public conversionHandler; // Contract which will handle all conversions
@@ -58,8 +60,13 @@ contract TwoKeyCampaign is ArcToken {
 	/**
 	 * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
 	 */
-	modifier onlyTwoKeyConversionHandler() {
-		require(msg.sender == address(conversionHandler));
+	modifier onlyTwoKeyConversionHandler {
+		require(msg.sender == conversionHandler);
+		_;
+	}
+
+	modifier onlyTwoKeyLogicHandler {
+		require(msg.sender == logicHandler);
 		_;
 	}
 
@@ -247,6 +254,30 @@ contract TwoKeyCampaign is ArcToken {
 			return conversionAmount.mul(maxReferralRewardPercent).div(100);
 		}
 		return 0;
+	}
+
+	/**
+	 * @notice Function which will buy tokens from upgradable exchange for moderator
+	 * @param moderatorFee is the fee in tokens moderator earned
+	 */
+	function buyTokensForModeratorRewards(
+		uint moderatorFee
+	)
+	public
+	onlyTwoKeyConversionHandler
+	{
+		//Get deep freeze token pool address
+		address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+
+		uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
+
+		// Balance which will go to moderator
+		uint balance = moderatorFee.mul(HUNDRED_PERCENT.sub(networkFee)).div(HUNDRED_PERCENT);
+
+		uint moderatorEarnings2key = buyTokensFromUpgradableExchange(balance,moderator); // Buy tokens for moderator
+		buyTokensFromUpgradableExchange(moderatorFee.sub(balance), twoKeyDeepFreezeTokenPool); // Buy tokens for deep freeze token pool
+
+		moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorEarnings2key);
 	}
 
 

@@ -5,7 +5,7 @@ pragma solidity ^0.4.24;
  */
 contract ArcToken {
 
-    uint256 internal totalSupply_ = 1000000;
+    uint256 internal totalSupply_;
 
     mapping(address => uint256) internal balances;
 
