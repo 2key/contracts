@@ -31,7 +31,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
         address indexed influencer,
         bytes signature,
         address plasmaConverter,
-        bytes maintainerSig
+        address functionCaller // can be either contractor or maintainer
     );
 
 
@@ -45,7 +45,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
         // Set the contractor of the campaign
         contractor = msg.sender;
-        twoKeyPlasmaSingletonRegistry = _twoKeyPlasmaSingletonRegistry;
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
         target_url = _url;
 
         isCampaignInitialized = true;
@@ -133,8 +133,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
     function convertByMaintainerSig(
         bytes signature,
-        bytes converterSig,
-        //bytes maintainerSig //TODO: we can probably change this for decorator of only maintainer or contractor, not requiring the sig
+        bytes converterSig
     )
     public
     onlyContractorOrMaintainer
@@ -143,11 +142,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
         address plasmaConverter = Call.recoverHash(keccak256(signature), converterSig, 0);
 
-        //address m = Call.recoverHash(keccak256(abi.encodePacked(signature,converterSig)), maintainerSig, 0);
-
-        //require(isMaintainer(m));
-
-        convert(signature, plasmaConverter); // msg.value  contract donates 1ETH
+        convert(signature, plasmaConverter);
 
         address[] memory influencers = getReferrers(plasmaConverter);
 

@@ -24,7 +24,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         address _moderator,
         address _twoKeySingletonRegistry,
         string _url,
-        address _mirrorCampaignOnPlasma  //TODO: are you sure we can completely create the plasma campaign before creating this one?
+        address _mirrorCampaignOnPlasma
     )
     public
     {
