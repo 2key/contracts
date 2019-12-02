@@ -19,6 +19,18 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     string public target_url;
     address public mirrorCampaignOnPlasma; // Address of campaign deployed to plasma network
 
+    bool public isValidated;
+
+    /**
+     * @notice Function to validate that contracts plasma and public are well mirrored
+     */
+    function validateContractFromMaintainer()
+    public
+    onlyMaintainer
+    {
+        isValidated = true;
+    }
+
 
     function setInitialParamsCPCCampaign(
         address _moderator,

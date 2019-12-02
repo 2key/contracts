@@ -9,6 +9,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversion; //amount of 2key tokens which are going to be paid per conversion
 
+
     address public mirrorCampaignOnPublic; // Address of campaign deployed to public eth network
     address[] public activeInfluencers;
 
@@ -50,6 +51,16 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
         target_url = _url;
 
         isCampaignInitialized = true;
+    }
+
+    /**
+     * @notice Function to validate that contracts plasma and public are well mirrored
+     */
+    function validateContractFromMaintainer()
+    public
+    onlyMaintainer
+    {
+        isValidated = true;
     }
 
     /**
@@ -273,6 +284,10 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
             hashes[i] = keccak256(abi.encodePacked(influencer,amount));
         }
         merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
+    }
+
+    function executeConversion(uint conversionID) public onlyMaintainer {
+
     }
 
 }

@@ -46,9 +46,9 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		_;
 	}
 
-	modifier onlyContractorOrMaintainer {
+	modifier onlyMaintainer {
 		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
-		require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
+		require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
 		_;
 	}
 

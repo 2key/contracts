@@ -7,6 +7,8 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
 
+    bool public isValidated;
+
     modifier onlyMaintainer {
         require(isMaintainer(msg.sender));
         _;
@@ -228,6 +230,16 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
     {
         address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaSingletoneRegistry");
         return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender);
+    }
+
+    /**
+     * @notice Function to validate that contracts plasma and public are well mirrored
+     */
+    function validateContractFromMaintainer()
+    public
+    onlyMaintainer
+    {
+        isValidated = true;
     }
 
 }
