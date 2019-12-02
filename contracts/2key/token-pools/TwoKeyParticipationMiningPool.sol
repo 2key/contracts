@@ -209,7 +209,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     function getUint(
         string key
     )
-    internal
+    public
     view
     returns (uint)
     {
