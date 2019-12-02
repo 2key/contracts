@@ -327,12 +327,13 @@ async function deployUpgrade(networks) {
 
             }
         }
+        await runDeployCampaignMigration(networks[i]);
 
-        if(campaignsToBeUpgraded.length > 0) {
-            if(networks[i].includes('public')) {
-                await runDeployCampaignMigration(networks[i]);
-            }
-        }
+        // if(campaignsToBeUpgraded.length > 0) {
+        //     if(networks[i].includes('public')) {
+        //         await runDeployCampaignMigration(networks[i]);
+        //     }
+        // }
         /* eslint-enable no-await-in-loop */
     }
     await archiveBuild();
