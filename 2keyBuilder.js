@@ -327,7 +327,8 @@ async function deployUpgrade(networks) {
 
             }
         }
-        await runDeployCampaignMigration(networks[i]);
+        await runDeployCampaignMigration(networks[i],"acquisition");
+        await runDeployCampaignMigration(networks[i], "donation");
         // if(campaignsToBeUpgraded.length > 0) {
         //     if(networks[i].includes('public')) {
         //         await runDeployCampaignMigration(networks[i]);

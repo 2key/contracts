@@ -70,7 +70,7 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
  * @param network
  * @returns {Promise<any>}
  */
-const runDeployCampaignMigration = (network) => new Promise(async(resolve, reject) => {
+const runDeployCampaignMigration = (network, campaignType) => new Promise(async(resolve, reject) => {
     try {
         await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '6', '--to', '6', '--network', network]);
         resolve(true);

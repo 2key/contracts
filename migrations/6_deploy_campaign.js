@@ -20,31 +20,76 @@ const { incrementVersion, getConfigForTheBranch, checkIsHardRedeploy } = require
 
 module.exports = function deploy(deployer) {
 
-    // let isHardRedeploy = checkIsHardRedeploy(process.argv);
-    // console.log(isHardRedeploy);
+    let acquisitionOnly = false;
+    let donationOnly = false;
+
+    process.argv.forEach((argument) => {
+        if(argument === 'acquisition') {
+            acquisitionOnly = true;
+        } else if (argument == 'donation') {
+            donationOnly = true;
+        }
+    });
+
+
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
     let version;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        deployer.deploy(TwoKeyConversionHandler)
-            .then(() => TwoKeyConversionHandler.deployed())
-            .then(() => deployer.deploy(TwoKeyPurchasesHandler))
-            .then(() => TwoKeyPurchasesHandler.deployed())
-            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
-            .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
-            .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
-            .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
-            .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
-            .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
-            .then(() => true)
-            .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
-            .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
-            .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
-            .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
-            .then(() => TwoKeyDonationLogicHandler.deployed())
-            .then(() => deployer.deploy(TwoKeyDonationCampaign))
-            .then(() => TwoKeyDonationCampaign.deployed())
-            .then(async () => {
+        if(acquisitionOnly) {
+            deployer.deploy(TwoKeyConversionHandler)
+                .then(() => TwoKeyConversionHandler.deployed())
+                .then(() => deployer.deploy(TwoKeyPurchasesHandler))
+                .then(() => TwoKeyPurchasesHandler.deployed())
+                .then(() => deployer.link(Call, TwoKeyDonationCampaign))
+                .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
+                .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
+                .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
+                .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
+                .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
+                .then(() => true)
+                .then(async () => {
+                    let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+                    console.log("... Adding implementation versions of Acquisition campaigns");
+                    await new Promise(async(resolve,reject) => {
+                        try {
+                            let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
+                            txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
+                            txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
+                            txHash = await instance.addVersion('TwoKeyPurchasesHandler', version, TwoKeyPurchasesHandler.address);
+
+                            resolve(txHash);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    })
+                })
+                .then(async () => {
+                    await new Promise(async(resolve,reject) => {
+                        try {
+                            if(version === "1.0.0") {
+                                let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+                                console.log("Let's approve all initial versions for campaigns");
+                                let txHash = await instance.approveCampaignVersionDuringCreation("TOKEN_SELL");
+                                resolve(txHash);
+                            } else {
+                                resolve(true);
+                            }
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                })
+                .then(() => true);
+        } else {
+            deployer.deploy(TwoKeyDonationConversionHandler)
+                .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
+                .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
+                .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
+                .then(() => TwoKeyDonationLogicHandler.deployed())
+                .then(() => deployer.deploy(TwoKeyDonationCampaign))
+                .then(() => TwoKeyDonationCampaign.deployed())
+                .then(async () => {
                 console.log('... Adding implementation versions of Donation campaigns');
                 TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
                 let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
@@ -67,40 +112,22 @@ module.exports = function deploy(deployer) {
                 })
             })
             .then(async () => {
-                let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
-                console.log("... Adding implementation versions of Acquisition campaigns");
-                await new Promise(async(resolve,reject) => {
-                    try {
-                        let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
-                        txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
-                        txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
-                        txHash = await instance.addVersion('TwoKeyPurchasesHandler', version, TwoKeyPurchasesHandler.address);
-
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
-            })
-            .then(async () => {
-                await new Promise(async(resolve,reject) => {
-                    try {
-                        if(version === "1.0.0") {
-                            let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
-                            console.log("Let's approve all initial versions for campaigns");
-
-                            let txHash = await instance.approveCampaignVersionDuringCreation("DONATION");
-                            txHash = await instance.approveCampaignVersionDuringCreation("TOKEN_SELL");
-                            resolve(txHash);
-                        } else {
-                            resolve(true);
+                    await new Promise(async(resolve,reject) => {
+                        try {
+                            if(version === "1.0.0") {
+                                let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+                                console.log("Let's approve all initial versions for campaigns");
+                                let txHash = await instance.approveCampaignVersionDuringCreation("DONATION");
+                                resolve(txHash);
+                            } else {
+                                resolve(true);
+                            }
+                        } catch (e) {
+                            reject(e);
                         }
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            })
-            .then(() => true);
+                    });
+                })
+                .then(() => true);
     }
 
 }
