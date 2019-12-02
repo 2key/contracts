@@ -59,7 +59,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             if (fs.existsSync(proxyFile)) {
                 fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
             }
-
+            console.log('Deployer network ID : ' + deployer.network_id.toString());
             //Override logic address implementation
             fileObject[contractName][deployer.network_id.toString()].implementationAddressLogic = newImplementationAddress;
 
