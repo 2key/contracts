@@ -25,7 +25,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
      * @notice Internal function to check the balance of the specific ERC20 on this contract
      * @param tokenAddress is the ERC20 contract address
      */
-	function getTokenBalance(
+	function getTokenBalance( //TODO probably not required - in these types of campaigns tokens are not being sold
 		address tokenAddress
 	)
 	internal
@@ -40,7 +40,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * @notice Function to add fiat inventory for rewards
 	 * @dev only contractor can add this inventory
 	 */
-	function buyReferralBudgetWithEth()
+	function buyReferralBudgetWithEth()  //TODO where's the function to purchase rewards budget directly by inserting 2KEY?
 	public
 	onlyContractor
 	payable

@@ -134,16 +134,18 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     function convertByMaintainerSig(
         bytes signature,
         bytes converterSig,
-        bytes maintainerSig
+        //bytes maintainerSig //TODO: we can probably change this for decorator of only maintainer or contractor, not requiring the sig
     )
     public
+    onlyContractorOrMaintainer
     {
         require(merkle_root == 0, 'merkle root already defined, contract is locked');
 
         address plasmaConverter = Call.recoverHash(keccak256(signature), converterSig, 0);
-        address m = Call.recoverHash(keccak256(abi.encodePacked(signature,converterSig)), maintainerSig, 0);
 
-        require(isMaintainer(m));
+        //address m = Call.recoverHash(keccak256(abi.encodePacked(signature,converterSig)), maintainerSig, 0);
+
+        //require(isMaintainer(m));
 
         convert(signature, plasmaConverter); // msg.value  contract donates 1ETH
 
@@ -151,7 +153,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
         uint numberOfInfluencers = influencers.length;
         for (uint i = 0; i < numberOfInfluencers-1; i++) {
-            emit ConvertSig(influencers[i], signature, plasmaConverter, maintainerSig);
+            emit ConvertSig(influencers[i], signature, plasmaConverter, msg.sender);
         }
     }
 

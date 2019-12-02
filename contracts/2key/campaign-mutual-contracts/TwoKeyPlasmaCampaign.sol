@@ -14,6 +14,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
         _;
     }
 
+    modifier onlyContractorOrMaintainer {
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaMaintainersRegistry");
+        require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
+        _;
+    }
+
 
     /**
      * @dev Transfer tokens from one address to another

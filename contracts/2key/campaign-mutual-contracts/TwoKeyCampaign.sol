@@ -46,6 +46,12 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		_;
 	}
 
+	modifier onlyContractorOrMaintainer {
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		require(msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
+		_;
+	}
+
 	/**
      * @dev Transfer tokens from one address to another
      * @param _from address The address which you want to send tokens from ALREADY converted to plasma

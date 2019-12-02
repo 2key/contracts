@@ -3,6 +3,10 @@ pragma solidity ^0.4.24;
 import "./ArcToken.sol";
 import "../libraries/Call.sol";
 import "../libraries/SafeMath.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+
+
+
 
 contract TwoKeyCampaignAbstract is ArcToken {
 
@@ -11,6 +15,8 @@ contract TwoKeyCampaignAbstract is ArcToken {
 
     bool isCampaignInitialized; // Representing if campaign "constructor" was called
     uint constant HUNDRED_PERCENT = 100;
+    address public TWO_KEY_SINGLETON_REGISTRY;
+
 
     address public contractor; //contractor address
     address public moderator; //moderator address
@@ -34,6 +40,13 @@ contract TwoKeyCampaignAbstract is ArcToken {
         require(msg.sender == contractor);
         _;
     }
+
+    // Internal function to fetch address from TwoKeyRegistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
+    }
+
 
     /**
      * @notice Function to set or update public meta hash

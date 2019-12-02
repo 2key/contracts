@@ -15,7 +15,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     bytes32 public merkle_root;  // merkle root of the entire tree OR 0 - undefined, 1 - tree is empty, 2 - being computed, call computeMerkleRoots again
     // merkle tree with 2K or more leaves takes too much gas so we need to break the influencers into buckets of size <=2K
     // and compute merkle root for each bucket by calling computeMerkleRoots many times
-    bytes32[] public merkle_roots;
+    bytes32[] public merkle_roots;  //TODO understand better from UDI how to work with this array in case of too many referrers to fit into one merkle tree
     string public target_url;
     address public mirrorCampaignOnPlasma; // Address of campaign deployed to plasma network
 
@@ -24,7 +24,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         address _moderator,
         address _twoKeySingletonRegistry,
         string _url,
-        address _mirrorCampaignOnPlasma
+        address _mirrorCampaignOnPlasma  //TODO: are you sure we can completely create the plasma campaign before creating this one?
     )
     public
     {
