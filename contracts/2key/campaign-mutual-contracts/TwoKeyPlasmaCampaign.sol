@@ -7,8 +7,6 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 
 contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
 
-    address twoKeyPlasmaSingletonRegistry;
-
     modifier onlyMaintainer {
         require(isMaintainer(msg.sender));
         _;
@@ -220,18 +218,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
         return referrerPlasma2cut[me];
     }
 
-    /**
-     * @notice Function to get proxy address of singleton contracts on plasma
-     */
-    function getContractProxyAddress(
-        string contractName
-    )
-    internal
-    view
-    returns (address)
-    {
-        return ITwoKeySingletoneRegistryFetchAddress(twoKeyPlasmaSingletonRegistry).getContractProxyAddress(contractName);
-    }
 
     function isMaintainer(
         address _address
@@ -240,7 +226,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
     view
     returns (bool)
     {
-        address twoKeyPlasmaMaintainersRegistry = getContractProxyAddress("TwoKeyPlasmaSingletoneRegistry");
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaSingletoneRegistry");
         return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender);
     }
 
