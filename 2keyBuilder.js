@@ -315,11 +315,12 @@ async function deployUpgrade(networks) {
                 /* eslint-disable no-await-in-loop */
                 console.log(networks[i], singletonsToBeUpgraded[j]);
                 if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
+                    console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
                     if(networks[i].includes('private') || networks[i].includes('plasma')) {
                         await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 } else {
-                    if(networks[i].includes('dev') || networks[i].includes('public')) {
+                    if(networks[i].includes('public')) {
                         await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 }
