@@ -295,6 +295,12 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 })
 
 
+const checkIfContractIsPlasma = (contractName) => {
+    if(contractName.includes('Plasma')) {
+        return true;
+    }
+    return false;
+};
 
 async function deployUpgrade(networks) {
     console.log(networks);
@@ -308,7 +314,16 @@ async function deployUpgrade(networks) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */
                 console.log(networks[i], singletonsToBeUpgraded[j]);
-                await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
+                    if(networks[i].includes('private') || networks[i].includes('plasma')) {
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                    }
+                } else {
+                    if(networks[i].includes('dev') || networks[i].includes('public')) {
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                    }
+                }
+
             }
         }
         if(campaignsToBeUpgraded.length > 0) {
