@@ -54,5 +54,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         isCampaignInitialized = true;
     }
 
+    function submitProofAndWithdrawRewards(bytes32 proof) public {
+
+    }
 
 }

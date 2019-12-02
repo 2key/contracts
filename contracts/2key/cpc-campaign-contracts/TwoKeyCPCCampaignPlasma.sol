@@ -290,7 +290,5 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
 
     }
 
-    function submitProofAndWithdrawRewards(bytes32 proof) public {
 
-    }
 }
