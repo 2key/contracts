@@ -67,7 +67,7 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
-        let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.create("url", from, {
+        let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.createPlasma({url: "url", publicMetaHash: "", privateMetaHash: ""}, from, {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
