@@ -31,6 +31,8 @@ module.exports = function deploy(deployer) {
         }
     });
 
+    console.log('IS acquisition: ' + acquisitionOnly);
+    console.log('IS donation: ' + donationOnly);
 
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
     let version;
