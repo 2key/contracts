@@ -35,8 +35,9 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     );
 
 
-    function setInitialParamsCPCCampaign(
+    function setInitialParamsCPCCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
+        address _contractor,
         string _url
     )
     public
@@ -44,7 +45,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
         require(isCampaignInitialized == false);
 
         // Set the contractor of the campaign
-        contractor = msg.sender;
+        contractor = _contractor;
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
         target_url = _url;
 

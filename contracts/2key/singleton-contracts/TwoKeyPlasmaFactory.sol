@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaFactoryStorage.sol";
+import "../interfaces/IHandleCampaignDeploymentPlasma.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 
 /**
@@ -64,6 +65,24 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
         return address(proxy);
     }
+
+    function createPlasmaCPCCampaign(
+        string _url
+    )
+    public
+    {
+        address proxyPlasmaCPC = createProxyForCampaign("CPC_PLASMA", "TwoKeyCPCCampaignPlasma");
+
+        IHandleCampaignDeploymentPlasma(proxyPlasmaCPC).setInitialParamsCPCCampaignPlasma(
+            TWO_KEY_PLASMA_SINGLETON_REGISTRY,
+            msg.sender,
+            _url
+        );
+
+        setAddressToCampaignType(proxyPlasmaCPC, "CPC_PLASMA");
+        emit ProxyForCPCCampaign(proxyPlasmaCPC, msg.sender);
+    }
+
 
     /**
      * @notice internal function to set address to campaign type

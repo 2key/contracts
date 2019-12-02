@@ -42,13 +42,21 @@ const TwoKeyTeamGrowthFundStorage = artifacts.require('TwoKeyTeamGrowthFundStora
 
 const TwoKeyPlasmaCongress = artifacts.require('TwoKeyPlasmaCongress');
 const TwoKeyPlasmaCongressMembersRegistry = artifacts.require('TwoKeyPlasmaCongressMembersRegistry');
+
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
+
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
+
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
+
+const TwoKeyPlasmaFactory = artifacts.require('TwoKeyPlasmaFactory');
+const TwoKeyPlasmaFactoryStorage = artifacts.require('TwoKeyPlasmaFactoryStorage');
+
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
+
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
@@ -124,13 +132,15 @@ module.exports = function deploy(deployer) {
     let contractLogicArtifactsPlasma = {
         TwoKeyPlasmaEvents,
         TwoKeyPlasmaMaintainersRegistry,
-        TwoKeyPlasmaRegistry
+        TwoKeyPlasmaRegistry,
+        TwoKeyPlasmaFactory
     };
 
     let contractStorageArtifactsPlasma = {
         TwoKeyPlasmaEventsStorage,
         TwoKeyPlasmaMaintainersRegistryStorage,
         TwoKeyPlasmaRegistryStorage,
+        TwoKeyPlasmaFactoryStorage
     };
 
 
