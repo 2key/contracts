@@ -41,7 +41,9 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
             .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
             .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
+            .then(() => TwoKeyDonationLogicHandler.deployed())
             .then(() => deployer.deploy(TwoKeyDonationCampaign))
+            .then(() => TwoKeyDonationCampaign.deployed())
             .then(async () => {
                 console.log('... Adding implementation versions of Donation campaigns');
                 TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
