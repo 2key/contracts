@@ -51,6 +51,7 @@ module.exports = function deploy(deployer) {
                 .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
                 .then(() => true)
                 .then(async () => {
+                    TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address
                     let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
                     console.log("... Adding implementation versions of Acquisition campaigns");
                     await new Promise(async (resolve, reject) => {
