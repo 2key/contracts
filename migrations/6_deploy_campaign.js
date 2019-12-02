@@ -24,7 +24,7 @@ module.exports = function deploy(deployer) {
     let donationOnly = false;
 
     process.argv.forEach((argument) => {
-        if(argument === 'acquisition') {
+        if (argument === 'acquisition') {
             acquisitionOnly = true;
         } else if (argument == 'donation') {
             donationOnly = true;
@@ -35,8 +35,8 @@ module.exports = function deploy(deployer) {
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
     let version;
 
-    if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        if(acquisitionOnly) {
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
+        if (acquisitionOnly) {
             deployer.deploy(TwoKeyConversionHandler)
                 .then(() => TwoKeyConversionHandler.deployed())
                 .then(() => deployer.deploy(TwoKeyPurchasesHandler))
@@ -51,7 +51,7 @@ module.exports = function deploy(deployer) {
                 .then(async () => {
                     let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
                     console.log("... Adding implementation versions of Acquisition campaigns");
-                    await new Promise(async(resolve,reject) => {
+                    await new Promise(async (resolve, reject) => {
                         try {
                             let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
                             txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
@@ -65,9 +65,9 @@ module.exports = function deploy(deployer) {
                     })
                 })
                 .then(async () => {
-                    await new Promise(async(resolve,reject) => {
+                    await new Promise(async (resolve, reject) => {
                         try {
-                            if(version === "1.0.0") {
+                            if (version === "1.0.0") {
                                 let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
                                 console.log("Let's approve all initial versions for campaigns");
                                 let txHash = await instance.approveCampaignVersionDuringCreation("TOKEN_SELL");
@@ -90,31 +90,30 @@ module.exports = function deploy(deployer) {
                 .then(() => deployer.deploy(TwoKeyDonationCampaign))
                 .then(() => TwoKeyDonationCampaign.deployed())
                 .then(async () => {
-                console.log('... Adding implementation versions of Donation campaigns');
-                TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
-                let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
-
-                await new Promise(async(resolve,reject) => {
-                    try {
-
-                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
-                        version = incrementVersion(version);
-
-                        console.log('Version :' + version);
-                        let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
-                        txHash = await instance.addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
-                        txHash = await instance.addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
-
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
-            })
-            .then(async () => {
-                    await new Promise(async(resolve,reject) => {
+                    console.log('... Adding implementation versions of Donation campaigns');
+                    TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
+                    let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+                    await new Promise(async (resolve, reject) => {
                         try {
-                            if(version === "1.0.0") {
+
+                            version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
+                            version = incrementVersion(version);
+
+                            console.log('Version :' + version);
+                            let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
+                            txHash = await instance.addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
+                            txHash = await instance.addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
+
+                            resolve(txHash);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                })
+                .then(async () => {
+                    await new Promise(async (resolve, reject) => {
+                        try {
+                            if (version === "1.0.0") {
                                 let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
                                 console.log("Let's approve all initial versions for campaigns");
                                 let txHash = await instance.approveCampaignVersionDuringCreation("DONATION");
@@ -128,6 +127,7 @@ module.exports = function deploy(deployer) {
                     });
                 })
                 .then(() => true);
-    }
+        }
 
+    }
 }
