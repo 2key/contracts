@@ -30,6 +30,7 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(TwoKeyPurchasesHandler))
             .then(() => TwoKeyPurchasesHandler.deployed())
+            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
             .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
@@ -40,7 +41,6 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
             .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
             .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
-            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
             .then(() => deployer.deploy(TwoKeyDonationCampaign))
             .then(async () => {
                 console.log('... Adding implementation versions of Donation campaigns');
