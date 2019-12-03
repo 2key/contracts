@@ -53,6 +53,7 @@ const printTestNumber = (): void => {
 };
 
 describe('CPC campaign', () => {
+
     it('should create a CPC campaign', async() => {
         printTestNumber();
         const {web3, address} = web3switcher.deployer();
@@ -67,7 +68,8 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
-        let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.createPlasma({url: "url", publicMetaHash: "", privateMetaHash: ""}, from, {
+        console.log(twoKeyProtocol.plasmaAddress);
+        let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.createPlasma({url: "url", publicMetaHash: "", privateMetaHash: ""}, twoKeyProtocol.plasmaAddress , {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
