@@ -178,7 +178,7 @@ const slack_message_proposal_created = async (contractName, newVersion, proposal
                         type: 'section',
                         text: {
                             type: 'mrkdwn',
-                            text: `*Proposal bytecode:* \`${proposalBytecode}\``,
+                            text: proposalBytecode
                         },
 
                     },

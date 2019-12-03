@@ -105,8 +105,9 @@ module.exports = {
       },
 
 
+      //https://rpc-dev.private.test.k8s.2key.net
       'private.test.k8s-dev': {
-          provider: () => LedgerProvider('https://rpc-dev.private.test.k8s.2key.net', {
+          provider: () => LedgerProvider('158.177.158.46:9145', {
               networkId: 181,
               // https://github.com/LedgerHQ/ledgerjs/issues/200
               path: "44'/60'/0'/0",

@@ -26,7 +26,7 @@ module.exports = function deploy(deployer) {
     // let isHardRedeploy = checkIsHardRedeploy(process.argv);
     // console.log(isHardRedeploy);
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
-    let version;
+    let version = "1.0.2";
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.deploy(TwoKeyConversionHandler)
@@ -39,12 +39,15 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
+            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
+            .then(() => deployer.deploy(TwoKeyDonationCampaign))
+            .then(() => TwoKeyDonationCampaign.deployed())
             .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
+            .then(() => TwoKeyDonationConversionHandler.deployed())
             .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
             .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
             .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
-            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
-            .then(() => deployer.deploy(TwoKeyDonationCampaign))
+            .then(() => TwoKeyDonationLogicHandler.deployed())
             .then(async () => {
                 console.log('... Adding implementation versions of Donation campaigns');
                 TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
@@ -52,9 +55,9 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-
-                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
-                        version = incrementVersion(version);
+                        //
+                        // version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
+                        // version = incrementVersion(version);
 
                         console.log('Version :' + version);
                         let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);

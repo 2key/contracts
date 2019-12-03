@@ -23,4 +23,5 @@ contract IUpgradableExchange {
         uint amountOfTokensWithdrawn
     )
     public;
+
 }

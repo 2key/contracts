@@ -540,7 +540,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyValidatedContracts
     {
         uint _contractID = getContractId(msg.sender);
-        report2KEYWithdrawnFromNetworkInternal(amountOfTokensWithdrawn, _contractID);
+        if(ethReceivedFromContract(_contractID) > 0 ) {
+            report2KEYWithdrawnFromNetworkInternal(amountOfTokensWithdrawn, _contractID);
+        }
     }
 
     /**
@@ -899,9 +901,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice Getter function to check if campaign has been hedged ever
+     * Assuming that this function regarding flow will be called at point where there must be
+     * executed conversions, and in that case, if there are no any ETH received from contract,
+     * that means that this campaign is not hedgeable
      * @param _contractAddress is the campaign address
      */
-    function isCampaignHedged(
+    function isCampaignHedgeable(
         address _contractAddress
     )
     public
@@ -909,8 +914,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (bool)
     {
         uint _contractID = getContractId(_contractAddress);
-        return ethWeiHedgedPerContract(_contractID) > 0 ? true : false;
+        return ethReceivedFromContract(_contractID) > 0 ? true : false;
     }
+
 
     /**
      * @notice Getter to get spreadWei value

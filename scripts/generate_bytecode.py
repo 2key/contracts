@@ -71,6 +71,13 @@ def generate_bytecode_for_approving_new_campaign_version(campaign_type, version_
     values = [campaign_type, version_to_approve]
     print ('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_adding_core_devs(core_dev):
+    core_devs_array = [core_dev]
+    method_name_and_params = "addCoreDevsToMaintainerRegistry(address[])"
+    types = ["address[]"]
+    values = [core_devs_array]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name
@@ -93,3 +100,5 @@ if __name__ == "__main__":
         generate_bytecode_for_unfreezing_transfers()
     if(arg1 == "changeNonUpgradableContract"):
         generate_bytecode_for_replacing_contract(sys.argv[2], sys.argv[3])
+    if(arg1 == "addCoreDevs"):
+        generate_bytecode_for_adding_core_devs(sys.argv[2])

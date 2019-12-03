@@ -59,7 +59,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             if (fs.existsSync(proxyFile)) {
                 fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
             }
-
+            console.log('Deployer network ID : ' + deployer.network_id.toString());
             //Override logic address implementation
             fileObject[contractName][deployer.network_id.toString()].implementationAddressLogic = newImplementationAddress;
 
@@ -68,7 +68,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
             //Get instance of TwoKeySingletonesRegistry
             let instance = await TwoKeySingletonesRegistry.at(registryAddress);
             // Get current active version to be patched
-            let version = await instance.getLatestContractVersion(contractName);
+            let version = await instance.getLatestAddedContractVersion(contractName);
             // Incremented version
             let newVersion = incrementVersion(version);
             //Console log the new version

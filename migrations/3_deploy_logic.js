@@ -138,6 +138,18 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyPlasmaCongress.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaCongressMembersRegistry, initialCongressMembers, initialCongressMemberNames, votingPowers, TwoKeyPlasmaCongress.address))
             .then(() => TwoKeyPlasmaCongressMembersRegistry.deployed())
+            .then(async () => {
+                // Just to wire congress with congress members
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        let congress = await TwoKeyPlasmaCongress.at(TwoKeyPlasmaCongress.address);
+                        let txHash = await congress.setTwoKeyCongressMembersContract(TwoKeyPlasmaCongressMembersRegistry.address);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            })
             .then(() => deployer.deploy(TwoKeyPlasmaEvents))
             .then(() => TwoKeyPlasmaEvents.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaMaintainersRegistry))
