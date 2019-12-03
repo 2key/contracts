@@ -103,4 +103,7 @@ eg. "Let's approve version 1.0.1 for all DONATION type campaigns"
 - `python generate_bytecode.py approveNewCampaign "DONATION" "1.0.1"`
 
 
+## connect remixd:
+1. brave: remixd -s '/Users/eitanlavi/Google Drive/workspace/contracts/contracts' --remix-ide https://remix.ethereum.org
+2. chrome: remixd -s '/Users/eitanlavi/Google Drive/workspace/contracts/contracts' --remix-ide http://remix.ethereum.org
 
