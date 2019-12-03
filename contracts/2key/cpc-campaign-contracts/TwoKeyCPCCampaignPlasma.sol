@@ -45,10 +45,10 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     {
         require(isCampaignInitialized == false);
 
-        // Set the contractor of the campaign
-        contractor = _contractor;
+
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
-        target_url = _url;
+        contractor = _contractor;
+        target_url = _url; // Set the contractor of the campaign
 
         isCampaignInitialized = true;
     }

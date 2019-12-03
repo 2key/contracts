@@ -15,7 +15,8 @@ contract TwoKeyPlasmaFactory is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
     string constant _addressToCampaignType = "addressToCampaignType";
-
+    string public test;
+    address public test_address;
     ITwoKeyPlasmaFactoryStorage PROXY_STORAGE_CONTRACT;
 
     event ProxyForCPCCampaign(
@@ -72,14 +73,15 @@ contract TwoKeyPlasmaFactory is Upgradeable {
     public
     {
         address proxyPlasmaCPC = createProxyForCampaign("CPC_PLASMA", "TwoKeyCPCCampaignPlasma");
-
+        test = "DEPLOYED_PROXY";
+        test_address = proxyPlasmaCPC;
         IHandleCampaignDeploymentPlasma(proxyPlasmaCPC).setInitialParamsCPCCampaignPlasma(
             TWO_KEY_PLASMA_SINGLETON_REGISTRY,
             msg.sender,
             _url
         );
-
-        setAddressToCampaignType(proxyPlasmaCPC, "CPC_PLASMA");
+//
+//        setAddressToCampaignType(proxyPlasmaCPC, "CPC_PLASMA");
         emit ProxyForCPCCampaign(proxyPlasmaCPC, msg.sender);
     }
 

@@ -126,7 +126,7 @@ module.exports = function deploy(deployer) {
                         version = incrementVersion(version);
 
                         console.log('Version :' + version);
-                        let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyCPCCampaignPlasma.address);
+                        let txHash = await instance.addVersion('TwoKeyCPCCampaignPlasma', version, TwoKeyCPCCampaignPlasma.address);
 
                         resolve(txHash);
                     } catch (e) {
