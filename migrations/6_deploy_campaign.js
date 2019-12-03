@@ -76,7 +76,7 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
 
-                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
+                        version = await instance.getLatestAddedContractVersion("TwoKeyAcquisitionCampaignERC20");
                         version = incrementVersion(version);
 
                         let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
