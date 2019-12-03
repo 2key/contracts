@@ -2,6 +2,8 @@ pragma solidity ^0.4.24;
 
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+
 import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
@@ -100,6 +102,15 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     	ITwoKeyReg(twoKeyRegistry).addName(_name, _addr, _fullName, _email, _signature);
     }
 
+	function addCoreDevsToMaintainerRegistry(
+		address [] _coreDevs
+	)
+	external
+	onlyTwoKeyCongress
+	{
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).addCoreDevs(_coreDevs);
+	}
 
 	/// @notice Function to freeze all transfers for 2KEY token
 	function freezeTransfersInEconomy()
