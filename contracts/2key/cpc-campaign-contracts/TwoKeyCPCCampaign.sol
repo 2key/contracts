@@ -46,7 +46,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         contractor = msg.sender;
         moderator = _moderator;
 
-        twoKeySingletonesRegistry = _twoKeySingletonRegistry;
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
 
         target_url = _url;
         mirrorCampaignOnPlasma = _mirrorCampaignOnPlasma;

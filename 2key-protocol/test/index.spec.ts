@@ -17,7 +17,7 @@ const rpcUrl = env.RPC_URL;
 const eventsNetUrl = env.PLASMA_RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
-console.log(mainNetId);
+
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 15;
 const pricePerUnitInETHOrUSD = 0.095;

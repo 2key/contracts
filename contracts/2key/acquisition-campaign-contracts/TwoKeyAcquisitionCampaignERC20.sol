@@ -40,15 +40,15 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     )
     public
     {
-        require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
-        require(values[0] <= 100*(10**18)); // Require that max referral reward is less than 100%
+//        require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
+//        require(values[0] <= 100*(10**18)); // Require that max referral reward is less than 100%
         contractor = _contractor;
         moderator = _moderator;
 
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
-        twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
-        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
+//        twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
+//        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
         maxReferralRewardPercent = values[0];
         conversionQuota = values[1];
@@ -64,9 +64,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         totalSupply_ = values[4];
 
-        ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
-        received_from[ownerPlasma] = ownerPlasma;
-        balances[ownerPlasma] = totalSupply_;
+//        ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
+//        received_from[ownerPlasma] = ownerPlasma;
+//        balances[ownerPlasma] = totalSupply_;
 
 
 
@@ -107,7 +107,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         boughtRewardsWithEther = true;
         uint amountOfTwoKeys = buyTokensFromUpgradableExchange(msg.value, address(this));
-        uint rateUsdToEth = ITwoKeyExchangeRateContract(getContractProxyAddress("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
+        uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
 
         usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
     }
@@ -287,7 +287,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
                 if(usd2KEYrateWei == 0) {
-                    usd2KEYrateWei = (IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange")).sellRate2key());
+                    usd2KEYrateWei = (IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key());
                 }
                 totalBounty2keys = ((_maxReferralRewardETHWei.mul(10**18)).div(usd2KEYrateWei));
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
@@ -463,9 +463,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             if(boughtRewardsWithEther == false) {
                 withdrawRemainingRewardsInventory();
             } else {
-                if(block.timestamp >= ITwoKeyAdmin(getContractProxyAddress("TwoKeyAdmin")).getTwoKeyRewardsReleaseDate() == true) {
+                if(block.timestamp >= ITwoKeyAdmin(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin")).getTwoKeyRewardsReleaseDate() == true) {
                     uint rewardsNotSpent = withdrawRemainingRewardsInventory();
-                    IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange"))
+                    IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange"))
                         .report2KEYWithdrawnFromNetwork(rewardsNotSpent);
                 }
             }

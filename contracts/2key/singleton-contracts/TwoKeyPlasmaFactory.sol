@@ -21,7 +21,7 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
     event ProxyForCPCCampaign(
         address proxyCampaign,
-        address contractorPlasmas
+        address contractorPlasma
     );
 
     function setInitialParams(

@@ -50,7 +50,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		boughtRewardsWithEther = true;
 		uint amountOfTwoKeys = buyTokensFromUpgradableExchange(msg.value, address(this));
-		uint rateUsdToEth = ITwoKeyExchangeRateContract(getContractProxyAddress("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
+		uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
 
 		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
 	}

@@ -16,7 +16,6 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	address public conversionHandler; // Contract which will handle all conversions
 	address public logicHandler;  // Contract which will handle logic
 
-	address twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
 	address twoKeyEconomy; // Address of twoKeyEconomy contract
 	address ownerPlasma; //contractor plasma address
 
@@ -249,7 +248,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	onlyTwoKeyConversionHandler
 	{
 		//Get deep freeze token pool address
-		address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+		address twoKeyDeepFreezeTokenPool = getAddressFromTwoKeySingletonRegistry("TwoKeyDeepFreezeTokenPool");
 
 		uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
 
@@ -325,7 +324,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	internal
 	returns (uint)
 	{
-		address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
+		address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
 		return amountBought;
 	}
@@ -413,10 +412,6 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		return (referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_influencer)]);
 	}
 
-	function getContractProxyAddress(string contractName) internal view returns (address) {
-		return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress(contractName);
-	}
-
 	/**
 	 * @notice Function to get cut for an (ethereum) address
 	 * @param me is the ethereum address
@@ -468,8 +463,8 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
 
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
-			twoKeyAdminAddress = getContractProxyAddress("TwoKeyAdmin");
-			twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
+			twoKeyAdminAddress = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+			twoKeyUpgradableExchangeContract = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
 			balance = referrerPlasma2Balances2key[_referrer];
 			referrerPlasma2Balances2key[_referrer] = 0;
