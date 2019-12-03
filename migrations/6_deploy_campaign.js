@@ -26,7 +26,7 @@ module.exports = function deploy(deployer) {
     // let isHardRedeploy = checkIsHardRedeploy(process.argv);
     // console.log(isHardRedeploy);
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
-    let version = "1.0.2";
+    let version;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.deploy(TwoKeyConversionHandler)
@@ -56,8 +56,8 @@ module.exports = function deploy(deployer) {
                 await new Promise(async(resolve,reject) => {
                     try {
                         //
-                        // version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
-                        // version = incrementVersion(version);
+                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
+                        version = incrementVersion(version);
 
                         console.log('Version :' + version);
                         let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
@@ -75,6 +75,10 @@ module.exports = function deploy(deployer) {
                 console.log("... Adding implementation versions of Acquisition campaigns");
                 await new Promise(async(resolve,reject) => {
                     try {
+
+                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
+                        version = incrementVersion(version);
+
                         let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
                         txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
                         txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
