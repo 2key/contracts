@@ -331,7 +331,7 @@ async function deployUpgrade(networks) {
 
             }
         }
-        if(campaignsToBeUpgraded.length >= 0) {
+        if(campaignsToBeUpgraded.length > 0) {
             if(networks[i].includes('public')) {
                 await runDeployCampaignMigration(networks[i]);
             }
