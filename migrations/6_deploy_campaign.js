@@ -23,7 +23,7 @@ module.exports = function deploy(deployer) {
     // let isHardRedeploy = checkIsHardRedeploy(process.argv);
     // console.log(isHardRedeploy);
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
-    let version;
+    let version = "1.0.2";
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.deploy(TwoKeyConversionHandler)
@@ -52,9 +52,9 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-
-                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
-                        version = incrementVersion(version);
+                        //
+                        // version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
+                        // version = incrementVersion(version);
 
                         console.log('Version :' + version);
                         let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
