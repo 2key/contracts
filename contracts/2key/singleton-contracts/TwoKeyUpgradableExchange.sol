@@ -540,7 +540,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyValidatedContracts
     {
         uint _contractID = getContractId(msg.sender);
-        report2KEYWithdrawnFromNetworkInternal(amountOfTokensWithdrawn, _contractID);
+        if(ethReceivedFromContract(_contractID) > 0 ) {
+            report2KEYWithdrawnFromNetworkInternal(amountOfTokensWithdrawn, _contractID);
+        }
     }
 
     /**
