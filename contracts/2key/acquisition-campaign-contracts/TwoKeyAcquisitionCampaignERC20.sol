@@ -40,15 +40,15 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     )
     public
     {
-//        require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
-//        require(values[0] <= 100*(10**18)); // Require that max referral reward is less than 100%
+        require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
+        require(values[0] <= 100*(10**18)); // Require that max referral reward is less than 100%
         contractor = _contractor;
         moderator = _moderator;
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
-//        twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
-//        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
+        twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
+        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
         maxReferralRewardPercent = values[0];
         conversionQuota = values[1];
@@ -64,10 +64,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         totalSupply_ = values[4];
 
-//        ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
-//        received_from[ownerPlasma] = ownerPlasma;
-//        balances[ownerPlasma] = totalSupply_;
-
+        ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
+        received_from[ownerPlasma] = ownerPlasma;
+        balances[ownerPlasma] = totalSupply_;
 
 
         logicHandler = _twoKeyAcquisitionLogicHandler;

@@ -33,15 +33,15 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
     )
     public
     {
-//        require(initialized == false);
-//        require(numberValues[0] <= 100*(10**18)); //Require that max referral reward percent is less than 100%
+        require(initialized == false);
+        require(numberValues[0] <= 100*(10**18)); //Require that max referral reward percent is less than 100%
         contractor = _contractor;
         moderator = _moderator;
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
-//        twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
-        //        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        //            .getNonUpgradableContractAddress("TwoKeyEconomy");
+        twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
+                twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+                    .getNonUpgradableContractAddress("TwoKeyEconomy");
         totalSupply_ = 1000000;
 
         maxReferralRewardPercent = numberValues[0];
