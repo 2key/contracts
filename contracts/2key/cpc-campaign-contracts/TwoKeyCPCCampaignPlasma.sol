@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../campaign-mutual-contracts/TwoKeyPlasmaCampaign.sol";
 import "../libraries/MerkleProof.sol";
+import "../libraries/IncentiveModels.sol";
 
 
 contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
@@ -9,6 +10,7 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversion; //amount of 2key tokens which are going to be paid per conversion
 
+    IncentiveModel model;
 
     address public mirrorCampaignOnPublic; // Address of campaign deployed to public eth network
     address[] public activeInfluencers;
@@ -39,16 +41,25 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
     function setInitialParamsCPCCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
-        string _url
+        address _moderator,
+        string _url,
+        uint [] numberValues
     )
     public
     {
         require(isCampaignInitialized == false);
 
-
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
         contractor = _contractor;
+        moderator = _moderator;
         target_url = _url; // Set the contractor of the campaign
+
+        campaignStartTime = numberValues[0];
+        campaignEndTime = numberValues[1];
+        maxReferralRewardPercent = numberValues[2];
+        conversionQuota = numberValues[3];
+        totalSupply_ = numberValues[4];
+        incentiveModel = IncentiveModel(numberValues[5]);
 
         isCampaignInitialized = true;
     }

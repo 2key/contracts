@@ -5,7 +5,9 @@ contract IHandleCampaignDeploymentPlasma {
     function setInitialParamsCPCCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
-        string _url
+        address _moderator,
+        string _url,
+        uint [] numberValues
     )
     public;
 }

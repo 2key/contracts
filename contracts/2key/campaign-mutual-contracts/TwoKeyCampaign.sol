@@ -19,7 +19,6 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	address twoKeyEconomy; // Address of twoKeyEconomy contract
 	address ownerPlasma; //contractor plasma address
 
-	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 
 	bool isKYCRequired;
     bool mustConvertToReferr;

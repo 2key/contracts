@@ -3,9 +3,15 @@ pragma solidity ^0.4.24;
 import "./TwoKeyCampaignAbstract.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "./TwoKeyCampaignIncentiveModels.sol";
 
 
-contract TwoKeyPlasmaCampaign is TwoKeyCampaignAbstract {
+contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAbstract {
+
+    IncentiveModel incentiveModel; //Incentive model for rewards
+
+    uint campaignStartTime; // Time when campaign start
+    uint campaignEndTime; // Time when campaign ends
 
     bool public isValidated;
 

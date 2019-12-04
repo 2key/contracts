@@ -17,6 +17,7 @@ contract TwoKeyCampaignAbstract is ArcToken {
     uint constant HUNDRED_PERCENT = 100;
     address public TWO_KEY_SINGLETON_REGISTRY;
 
+    uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 
     address public contractor; //contractor address
     address public moderator; //moderator address

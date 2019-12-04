@@ -52,6 +52,15 @@ const printTestNumber = (): void => {
     i++;
 };
 
+let campaignObject = {
+    url: "nikola@gmail.com",
+    moderator: "",
+    incentiveModel: "VANILLA_AVERAGE",
+    campaignStartTime : 0,
+    campaignEndTime : 9884748832,
+    maxReferralRewardPercent: 20, //TODO: Use round number
+}
+
 describe('CPC campaign', () => {
 
     it('should create a CPC campaign', async() => {
@@ -68,8 +77,9 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
-        console.log(twoKeyProtocol.plasmaAddress);
-        let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.createPlasma({url: "url", publicMetaHash: "", privateMetaHash: ""}, twoKeyProtocol.plasmaAddress , {
+        console.log(campaignObject);
+
+        let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.createPlasma(campaignObject, twoKeyProtocol.plasmaAddress , {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
