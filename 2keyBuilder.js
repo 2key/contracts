@@ -21,10 +21,12 @@ const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 const twoKeyProtocolSrcGit = simpleGit(twoKeyProtocolDir);
 
+const tenderlyDir = path.join(__dirname, 'tenderlyConfigurations');
+
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, getGitBranch, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
 
 
 const branch_to_env = {
@@ -63,6 +65,18 @@ const getBuildArchPath = () => {
         return buildArchPath.replace('{branch}',`-${contractsStatus.current}`);
     }
     return buildArchPath;
+};
+
+const pullTenderlyConfiguration = async () => {
+    let branch = await getGitBranch();
+    let origin = `${tenderlyDir}/tenderly-${branch}.yaml`;
+    let destination = 'tenderly.yaml';
+
+    console.log(`${origin} will be copied to ${destination}`);
+
+    fs.copyFile(origin, 'tenderly.yaml' , (err) => {
+        if (err) throw err;
+    });
 };
 
 const getContractsDeployedPath = () => {
@@ -292,7 +306,7 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
     await twoKeyProtocolSrcGit.addTag('v'+npmVersionTag.toString());
     await twoKeyProtocolSrcGit.pushTags('origin');
-})
+});
 
 
 const checkIfContractIsPlasma = (contractName) => {
@@ -327,7 +341,6 @@ async function deployUpgrade(networks) {
 
             }
         }
-
         if(campaignsToBeUpgraded.length > 0) {
             if(networks[i].includes('public')) {
                 await runDeployCampaignMigration(networks[i]);
@@ -341,7 +354,7 @@ async function deployUpgrade(networks) {
 async function deploy() {
     try {
         deployment = true;
-
+        await pullTenderlyConfiguration();
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
         let twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
@@ -554,6 +567,11 @@ async function main() {
         case '--diff':
             console.log(await getDiffBetweenLatestTags());
             process.exit(0);
+
+        case '--tenderly':
+            await pullTenderlyConfiguration();
+            process.exit(0);
+
         default:
             await deploy();
             process.exit(0);

@@ -61,6 +61,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         address plasma = Call.recoverHash(hash,signature,0);
         require(plasma == plasma_address);
 
+        require(getUsernameToAddress(username) == address(0));
         PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasma_address), username);
         PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasma_address);
 

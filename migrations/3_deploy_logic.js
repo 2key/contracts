@@ -48,10 +48,9 @@ const instantiateConfigs = ((deployer) => {
     } else if (deployer.network.startsWith('public') || deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deploymentNetwork = 'ropsten-environment';
     }
-
     return deploymentObject[deploymentNetwork];
-
 });
+
 let votingPowers;
 let initialCongressMembers;
 let initialCongressMemberNames;
@@ -65,16 +64,19 @@ let congressMinutesForDebate;
 module.exports = function deploy(deployer) {
     let deploymentConfig = instantiateConfigs(deployer);
 
-    votingPowers = deploymentConfig.votingPowers;
-    initialCongressMembers = deploymentConfig.initialCongressMembers;
-    initialCongressMemberNames = deploymentConfig.initialCongressMembersNames;
     congressMinutesForDebate = 24 * 60;
-
 
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
+
+
+        votingPowers = deploymentConfig.votingPowers;
+        initialCongressMembers = deploymentConfig.initialCongressMembers;
+        initialCongressMemberNames = deploymentConfig.initialCongressMembersNames;
+
+
         deployer.deploy(TwoKeyCongress, congressMinutesForDebate)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCongressMembersRegistry, initialCongressMembers, initialCongressMemberNames, votingPowers, TwoKeyCongress.address))
@@ -130,12 +132,30 @@ module.exports = function deploy(deployer) {
             .then(() => true);
     }
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+
+        votingPowers = deploymentConfig.votingPowersPlasma;
+        initialCongressMembers = deploymentConfig.initialCongressMembersPlasma;
+        initialCongressMemberNames = deploymentConfig.initialCongressMembersNamesPlasma;
+
+
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.link(Call, TwoKeyPlasmaRegistry);
         deployer.deploy(TwoKeyPlasmaCongress, congressMinutesForDebate)
             .then(() => TwoKeyPlasmaCongress.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaCongressMembersRegistry, initialCongressMembers, initialCongressMemberNames, votingPowers, TwoKeyPlasmaCongress.address))
             .then(() => TwoKeyPlasmaCongressMembersRegistry.deployed())
+            .then(async () => {
+                // Just to wire congress with congress members
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        let congress = await TwoKeyPlasmaCongress.at(TwoKeyPlasmaCongress.address);
+                        let txHash = await congress.setTwoKeyCongressMembersContract(TwoKeyPlasmaCongressMembersRegistry.address);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            })
             .then(() => deployer.deploy(TwoKeyPlasmaEvents))
             .then(() => TwoKeyPlasmaEvents.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaMaintainersRegistry))

@@ -30,20 +30,21 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyConversionHandler.deployed())
             .then(() => deployer.deploy(TwoKeyPurchasesHandler))
             .then(() => TwoKeyPurchasesHandler.deployed())
-            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
             .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
             .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
             .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
             .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
+            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
+            .then(() => deployer.deploy(TwoKeyDonationCampaign))
+            .then(() => TwoKeyDonationCampaign.deployed())
             .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
+            .then(() => TwoKeyDonationConversionHandler.deployed())
             .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
             .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
             .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
             .then(() => TwoKeyDonationLogicHandler.deployed())
-            .then(() => deployer.deploy(TwoKeyDonationCampaign))
-            .then(() => TwoKeyDonationCampaign.deployed())
             .then(async () => {
                 console.log('... Adding implementation versions of Donation campaigns');
                 TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
@@ -51,7 +52,7 @@ module.exports = function deploy(deployer) {
 
                 await new Promise(async(resolve,reject) => {
                     try {
-
+                        //
                         version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
                         version = incrementVersion(version);
 
@@ -71,6 +72,10 @@ module.exports = function deploy(deployer) {
                 console.log("... Adding implementation versions of Acquisition campaigns");
                 await new Promise(async(resolve,reject) => {
                     try {
+
+                        version = await instance.getLatestAddedContractVersion("TwoKeyAcquisitionCampaignERC20");
+                        version = incrementVersion(version);
+
                         let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
                         txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
                         txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);

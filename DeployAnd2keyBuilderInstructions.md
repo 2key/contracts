@@ -6,7 +6,17 @@
 ### How to test contracts
 1. Make sure you have docker instance on your machine
     -   run `yarn` to install all dependencies
-    -   [Install Docker](https://www.docker.com/get-started)
+    - To run geth in docker please follow next steps:
+      * [Install Docker](https://www.docker.com/get-started)
+      * ```yarn run geth``` - to run build & run docker container
+      * ```yarn run geth:stop``` - to stop docker container
+      * ```yarn run geth:reset``` - to reset geth data folder (be carefull it will destroy all private node data)
+      * Please notice that mining take a lot of hardware recources
+      * Default exposed ports 8585 - rpc, 8546 - websockets
+      * geth runs with 12 addresses if you need more please change ./geth/docker/genesis.2key.json ./geth/docker/key.prv ./geth/docker/passwords and ./geth/docker/geth.bash
+      * First time run takes some time to generate all neccessary data
+      
+
 2. Go to the root of the project and run following command in terminal: `yarn run geth:start`
 3. After that, you should see in terminal that blocks are being mined (1 minute approximately waiting time until that)
 4. Make sure you have file named accountsConfig.json inside configurationFiles folder.
@@ -24,10 +34,20 @@
 9. `yarn run deploy --migrate dev-local,plasma-test-local --reset`
 10. `./test-funnel.sh` will run all the necessary tests
 
+### External dependency
+- Make sure to install all external dependencies
+1. `curl https://raw.githubusercontent.com/Tenderly/tenderly-cli/master/scripts/install-macos.sh | sudo sh`
+
 ### How to do hard reset of network 
 1. Make sure you have did all the steps related to the first title ("How to test contracts")
 2. Make sure your configurationFiles/accountsConfig.json file contains address with enough ether for deploy
-3. Run the command `yarn run deploy network1,network2,...,networkN --reset`
+    - in case you're deploying with Ledger wallet, this file must be present but will be ignored
+3. Make sure all 3 branches are up-to-date.
+    - root
+    - 2key-protocol/src
+    - 2key-protocol/dist
+4. Make sure you have .env-slack file. For content for this file ask @Nikola (necessary because deployment sends slack alerts)
+5. Run the command `yarn run deploy network1,network2,...,networkN --reset`
 
 
 ### How to upgrade system with either 2key-protocol update or contracts patch
@@ -38,7 +58,7 @@
     - Patch of smart contracts (with or without protocol changes) `yarn run deploy <network> update` where network is the network to which contracts are deployed and you want to patch them
 
 
-### Updating Whitelist of contracts
+### Updating Whitelist of contracts during development
 
 * edit `ContractDeploymentWhiteList.json`
 
@@ -49,3 +69,4 @@
 * ```--generate``` - runs generating ```contracts.ts``` abi interface from existing artifacts in ```build/contracts```
 * ```--archive``` - archive current ```build/contracts``` to ```2key-protocol/src/contracts.tar.gz```
 * ```--extract``` - extract from ```2key-protocol/src/contracts.tar.gz``` to ```build/contracts```
+
