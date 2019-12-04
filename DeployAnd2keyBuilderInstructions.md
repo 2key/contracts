@@ -25,7 +25,7 @@
 10. `./test-funnel.sh` will run all the necessary tests
 
 ### Dependency
-1. `curl https://raw.githubusercontent.com/Tenderly/tenderly-cli/master/scripts/install-macos.sh | sh`
+1. `curl https://raw.githubusercontent.com/Tenderly/tenderly-cli/master/scripts/install-macos.sh | sudo sh`
 
 ### How to do hard reset of network 
 1. Make sure you have did all the steps related to the first title ("How to test contracts")
