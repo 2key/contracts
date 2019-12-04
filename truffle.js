@@ -17,7 +17,8 @@ const rpcs = {
     'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
-    'prod-private' : 'https://rpc.private.prod.k8s.2key.net'
+    'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
+    'dev-ganache': 'https://localhost:7545'
 };
 
 const ids = {
@@ -26,7 +27,8 @@ const ids = {
     'staging-public' : 3,
     'staging-private' : 182,
     'prod-public' : 1,
-    'prod-private' : 180
+    'prod-private' : 180,
+    'dev-ganache': 5777,
 };
 
 const createLedgerProvider = (rpc, id) => () =>
@@ -46,6 +48,21 @@ module.exports = {
   plugins: ["truffle-security"],
 
   networks: {
+      'dev-ganache': {
+          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-ganache"]),
+          skipDryRun: true,
+          network_id: ids["dev-ganache"],
+          gas: 8000000,
+          gasPrice: 120000000000,
+      },
+      'plasma-ganache': {
+          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-ganache"]),
+          skipDryRun: true,
+          network_id: ids["dev-ganache"],
+          gas: 8000000,
+          gasPrice: 120000000000,
+      },
+
       'dev-local': {
           provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
           network_id: 8086, // Match any network id
