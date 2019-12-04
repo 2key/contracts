@@ -138,13 +138,6 @@ module.exports = function deploy(deployer) {
         initialCongressMembers = deploymentConfig.initialCongressMembersPlasma;
         initialCongressMemberNames = deploymentConfig.initialCongressMembersNamesPlasma;
 
-        let obj = {
-            votingPowers,
-            initialCongressMembers,
-            initialCongressMemberNames
-        };
-
-        console.log(obj);
 
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.link(Call, TwoKeyPlasmaRegistry);
