@@ -65,16 +65,19 @@ let congressMinutesForDebate;
 module.exports = function deploy(deployer) {
     let deploymentConfig = instantiateConfigs(deployer);
 
-    votingPowers = deploymentConfig.votingPowers;
-    initialCongressMembers = deploymentConfig.initialCongressMembers;
-    initialCongressMemberNames = deploymentConfig.initialCongressMembersNames;
     congressMinutesForDebate = 24 * 60;
-
 
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
+
+
+        votingPowers = deploymentConfig.votingPowers;
+        initialCongressMembers = deploymentConfig.initialCongressMembers;
+        initialCongressMemberNames = deploymentConfig.initialCongressMembersNames;
+
+
         deployer.deploy(TwoKeyCongress, congressMinutesForDebate)
             .then(() => TwoKeyCongress.deployed())
             .then(() => deployer.deploy(TwoKeyCongressMembersRegistry, initialCongressMembers, initialCongressMemberNames, votingPowers, TwoKeyCongress.address))
@@ -130,6 +133,19 @@ module.exports = function deploy(deployer) {
             .then(() => true);
     }
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+
+        votingPowers = deploymentConfig.votingPowersPlasma;
+        initialCongressMembers = deploymentConfig.initialCongressMembersPlasma;
+        initialCongressMemberNames = deploymentConfig.initialCongressMembersNamesPlasma;
+
+        let obj = {
+            votingPowers,
+            initialCongressMembers,
+            initialCongressMemberNames
+        };
+
+        console.log(obj);
+
         deployer.link(Call, TwoKeyPlasmaEvents);
         deployer.link(Call, TwoKeyPlasmaRegistry);
         deployer.deploy(TwoKeyPlasmaCongress, congressMinutesForDebate)
