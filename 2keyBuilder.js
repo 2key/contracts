@@ -111,7 +111,10 @@ const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath(), cwd: __
 
 const restoreFromArchive = () => {
     console.log("restore",__dirname);
-    return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
+    // Restore file only if exists
+    if(fs.existsSync(getBuildArchPath())) {
+        return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
+    }
 };
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
