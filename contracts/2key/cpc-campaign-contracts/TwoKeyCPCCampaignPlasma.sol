@@ -3,9 +3,10 @@ pragma solidity ^0.4.24;
 import "../campaign-mutual-contracts/TwoKeyPlasmaCampaign.sol";
 import "../libraries/MerkleProof.sol";
 import "../libraries/IncentiveModels.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 
 
-contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
+contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
 
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversion; //amount of 2key tokens which are going to be paid per conversion
@@ -60,6 +61,9 @@ contract TwoKeyCPCCampaignPlasma is TwoKeyPlasmaCampaign {
         conversionQuota = numberValues[3];
         totalSupply_ = numberValues[4];
         incentiveModel = IncentiveModel(numberValues[5]);
+
+        received_from[_contractor] = _contractor;
+        balances[_contractor] = totalSupply_;
 
         isCampaignInitialized = true;
     }

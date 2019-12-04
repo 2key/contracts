@@ -1,6 +1,7 @@
 import {TwoKeyProtocol} from "../src";
 import singletons from "../src/contracts/singletons";
 import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
+import {expect} from "chai";
 const { env } = process;
 
 const rpcUrl = env.RPC_URL;
@@ -58,8 +59,10 @@ let campaignObject = {
     incentiveModel: "VANILLA_AVERAGE",
     campaignStartTime : 0,
     campaignEndTime : 9884748832,
-    maxReferralRewardPercent: 20, //TODO: Use round number
-}
+    maxReferralRewardPercent: 20
+};
+
+let campaignAddress;
 
 describe('CPC campaign', () => {
 
@@ -85,6 +88,17 @@ describe('CPC campaign', () => {
             timeout: 600000
         });
 
+        campaignAddress = result.campaignAddress;
+        console.log(campaignAddress);
+
         console.log(result);
     }).timeout(60000);
+
+
+    it('should get campaign from IPFS', async () => {
+        printTestNumber();
+
+        const campaignMeta = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.getPublicMeta(campaignAddress,twoKeyProtocol.plasmaAddress);
+        console.log(campaignMeta);
+    }).timeout(120000);
 });

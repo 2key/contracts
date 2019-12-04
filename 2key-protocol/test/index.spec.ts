@@ -479,7 +479,7 @@ describe('TwoKeyProtocol', () => {
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
-    it('should save campaign to IPFS', async () => {
+    it('should get campaign from IPFS', async () => {
         // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
         // console.log('HASH', hash);
         // txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
