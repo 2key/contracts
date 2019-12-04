@@ -69,11 +69,13 @@ const getBuildArchPath = () => {
 
 const pullTenderlyConfiguration = async () => {
     let branch = await getGitBranch();
-    let filePath = `${tenderlyDir}/tenderly-${branch}.yaml`;
-    console.log(filePath);
-    fs.copyFile(filePath, 'tenderly.yaml' , (err) => {
+    let origin = `${tenderlyDir}/tenderly-${branch}.yaml`;
+    let destination = 'tenderly.yaml';
+
+    console.log(`${origin} will be copied to ${destination}`);
+
+    fs.copyFile(origin, 'tenderly.yaml' , (err) => {
         if (err) throw err;
-        console.log(`${filePath} was copied to destination.txt`);
     });
 };
 
@@ -304,7 +306,7 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
     await twoKeyProtocolSrcGit.addTag('v'+npmVersionTag.toString());
     await twoKeyProtocolSrcGit.pushTags('origin');
-})
+});
 
 
 const checkIfContractIsPlasma = (contractName) => {
