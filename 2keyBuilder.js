@@ -379,14 +379,11 @@ async function deploy() {
 
         //If reset rm -rf build folder and rm -rf tar.gz
         if(process.argv.includes('--reset')) {
-            // await rmDir(buildPath);
-            // await rmDir(buildArchPath);
-
+            await rmDir(buildPath);
+            await rmDir(buildArchPath);
         } else {
-            // await restoreFromArchive();
+            await restoreFromArchive();
         }
-
-        await restoreFromArchive();
 
         const networks = process.argv[2].split(',');
         const network = networks.join('/');
