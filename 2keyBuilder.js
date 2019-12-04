@@ -381,16 +381,15 @@ async function deploy() {
 
         const local = process.argv[2].includes('local'); //If we're deploying to local network
 
+        const isHardReset = process.argv.includes('--reset');
+
         //If reset rm -rf build folder and rm -rf tar.gz
-        if(process.argv.includes('--reset')) {
-            // await rmDir(buildPath);
-            // await rmDir(buildArchPath);
-
+        if(isHardReset) {
+            await rmDir(buildPath);
+            await rmDir(buildArchPath);
         } else {
-            // await restoreFromArchive();
+            await restoreFromArchive();
         }
-
-        await restoreFromArchive();
 
         const networks = process.argv[2].split(',');
         const network = networks.join('/');
@@ -432,8 +431,24 @@ async function deploy() {
             } else {
                 const { version } = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDist, 'package.json'), 'utf8'));
                 const versionArray = version.split('-')[0].split('.');
-                const patch = parseInt(versionArray.pop(), 10) + 1;
-                versionArray.push(patch);
+                let patch;
+                let minor;
+                if(isHardReset) {
+                    //Take the last one, that's patch
+                    versionArray.pop();
+                    // Reset it to be 0
+                    patch = 0;
+                    //Take the middle version and increment by 1
+                    minor = parseInt(versionArray.pop(), 10) + 1;
+                    //Push minor
+                    versionArray.push(minor);
+                    //Push new patch
+                    versionArray.push(patch);
+                } else {
+                    // In case this is just a patch, increment patch number
+                    patch = parseInt(versionArray.pop(), 10) + 1;
+                    versionArray.push(patch);
+                }
                 const newVersion = `${versionArray.join('.')}-${contractsStatus.current}`;
                 await runProcess('npm', ['version', newVersion])
             }
