@@ -48,10 +48,9 @@ const instantiateConfigs = ((deployer) => {
     } else if (deployer.network.startsWith('public') || deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deploymentNetwork = 'ropsten-environment';
     }
-
     return deploymentObject[deploymentNetwork];
-
 });
+
 let votingPowers;
 let initialCongressMembers;
 let initialCongressMemberNames;
