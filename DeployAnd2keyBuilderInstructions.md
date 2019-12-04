@@ -24,6 +24,9 @@
 9. `yarn run deploy --migrate dev-local,plasma-test-local --reset`
 10. `./test-funnel.sh` will run all the necessary tests
 
+### Dependency
+1. `curl https://raw.githubusercontent.com/Tenderly/tenderly-cli/master/scripts/install-macos.sh | sh`
+
 ### How to do hard reset of network 
 1. Make sure you have did all the steps related to the first title ("How to test contracts")
 2. Make sure your configurationFiles/accountsConfig.json file contains address with enough ether for deploy
@@ -49,3 +52,4 @@
 * ```--generate``` - runs generating ```contracts.ts``` abi interface from existing artifacts in ```build/contracts```
 * ```--archive``` - archive current ```build/contracts``` to ```2key-protocol/src/contracts.tar.gz```
 * ```--extract``` - extract from ```2key-protocol/src/contracts.tar.gz``` to ```build/contracts```
+
