@@ -70,3 +70,33 @@
 * ```--archive``` - archive current ```build/contracts``` to ```2key-protocol/src/contracts.tar.gz```
 * ```--extract``` - extract from ```2key-protocol/src/contracts.tar.gz``` to ```build/contracts```
 
+### Deployment procedure
+
+1. check tenderly 
+``` tenderly whoami ```
+
+2. make sure we're on required branches and pull everything:
+```
+cd 2key-protocol/src -> git pull & git reset HEAD --hard
+cd 2key-protocol/dist -> git pull & git reset HEAD --hard
+Same in root git pull & git reset HEAD --hard
+```
+
+3. run the migrations:
+``` yarn run deploy private.staging-ledger,public.staging-ledger --reset ```
+
+4. push everything
+```
+cd 2key-protocol/src -> git add .
+                        git commit -m 'sync-submodules'
+                        git push -u
+cd 2key-protocol/dist -> git add .
+                         git commit -m 'sync-submodules'
+                         git push -u
+Same in root  -> git add .
+                 git commit -m 'sync-submodules'
+                 git push -u
+```
+
+
+
