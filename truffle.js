@@ -126,7 +126,7 @@ module.exports = {
           gasPrice: 0,
       },
 
-      'private.staging-hdwallet': {
+      'private.staging-ledger': {
           provider: createLedgerProvider(rpcs["staging-private"], ids["staging-private"]),
           skipDryRun: true,
           network_id: ids["staging-private"],
@@ -158,7 +158,7 @@ module.exports = {
           gasPrice: 0,
       },
 
-      'private.prod-hdwallet': {
+      'private.prod-ledger': {
           provider: createLedgerProvider(rpcs["prod-private"], ids["prod-private"]),
           skipDryRun: true,
           network_id: ids["prod-private"],
