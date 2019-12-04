@@ -35,6 +35,7 @@
 10. `./test-funnel.sh` will run all the necessary tests
 
 ### External dependency
+- Make sure to install all external dependencies
 1. `curl https://raw.githubusercontent.com/Tenderly/tenderly-cli/master/scripts/install-macos.sh | sudo sh`
 
 ### How to do hard reset of network 
