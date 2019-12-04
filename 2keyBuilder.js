@@ -449,7 +449,9 @@ async function deploy() {
             await twoKeyProtocolLibGit.push('origin', contractsStatus.current);
             process.chdir('../../');
             //Run slack message
-            await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
+            if(oldVersion != '1.2.0-staging') {
+                await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
+            }
             // Add tenderly to CI/CD
             await runProcess('tenderly',['push', '--tag', npmVersionTag]);
         } else {
