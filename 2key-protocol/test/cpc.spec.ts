@@ -77,7 +77,6 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
-        console.log(campaignObject);
 
         let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.createPlasma(campaignObject, campaignObject, {}, twoKeyProtocol.plasmaAddress , {
             progressCallback,
