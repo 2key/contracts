@@ -170,7 +170,7 @@ module.exports = function deploy(deployer) {
     const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
 
 
-    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.')) {
             deployer.then(async () => {
                 let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
                 let upgradableLogicContracts = Object.keys(contractLogicArtifacts);

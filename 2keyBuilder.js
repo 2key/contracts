@@ -3,7 +3,6 @@ const path = require('path');
 const util = require('util');
 const tar = require('tar');
 const sha256 = require('js-sha256');
-const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
@@ -21,10 +20,12 @@ const contractsGit = simpleGit();
 const twoKeyProtocolLibGit = simpleGit(twoKeyProtocolLibDir);
 const twoKeyProtocolSrcGit = simpleGit(twoKeyProtocolDir);
 
+const tenderlyDir = path.join(__dirname, 'tenderlyConfigurations');
+
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, getGitBranch, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
 
 
 const branch_to_env = {
@@ -63,6 +64,18 @@ const getBuildArchPath = () => {
         return buildArchPath.replace('{branch}',`-${contractsStatus.current}`);
     }
     return buildArchPath;
+};
+
+const pullTenderlyConfiguration = async () => {
+    let branch = await getGitBranch();
+    let origin = `${tenderlyDir}/tenderly-${branch}.yaml`;
+    let destination = 'tenderly.yaml';
+
+    console.log(`${origin} will be copied to ${destination}`);
+
+    fs.copyFile(origin, 'tenderly.yaml' , (err) => {
+        if (err) throw err;
+    });
 };
 
 const getContractsDeployedPath = () => {
@@ -232,13 +245,11 @@ const updateIPFSHashes = async(contracts) => {
     const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
     for (let i = 0, l = files.length; i < l; i++) {
         const js = fs.readFileSync(path.join(twoKeyProtocolSubmodulesDir, files[i]), { encoding: 'utf-8' });
-        console.time('Compress');
-        const compressedJS = LZString.compressToUTF16(js);
-        console.timeEnd('Compress');
-        console.log(files[i], (js.length / 1024).toFixed(3), (compressedJS.length / 1024).toFixed(3));
+        console.log(files[i], (js.length / 1024).toFixed(3));
         console.time('Upload');
-        const [{ hash }] = await ipfsAdd(compressedJS, deployment);
+        const [{ hash }] = await ipfsAdd(js, deployment);
         console.timeEnd('Upload');
+        console.log('ipfs hashes',files[i], hash);
         versionsList[nonSingletonHash][files[i].replace('.js', '')] = hash;
     }
     console.log(versionsList);
@@ -296,7 +307,7 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
     await twoKeyProtocolSrcGit.addTag('v'+npmVersionTag.toString());
     await twoKeyProtocolSrcGit.pushTags('origin');
-})
+});
 
 
 const checkIfContractIsPlasma = (contractName) => {
@@ -344,7 +355,9 @@ async function deployUpgrade(networks) {
 async function deploy() {
     try {
         deployment = true;
-
+        console.log("Removing truffle build, the whole folder will be deleted: ", buildPath);
+        rmDir(buildPath);
+        await pullTenderlyConfiguration();
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
         let twoKeyProtocolStatus = await twoKeyProtocolLibGit.status();
@@ -557,6 +570,11 @@ async function main() {
         case '--diff':
             console.log(await getDiffBetweenLatestTags());
             process.exit(0);
+
+        case '--tenderly':
+            await pullTenderlyConfiguration();
+            process.exit(0);
+
         default:
             await deploy();
             process.exit(0);
