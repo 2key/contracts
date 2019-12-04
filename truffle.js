@@ -77,6 +77,14 @@ module.exports = {
           gasPrice: 0,
       },
 
+      'private.test-ledger': {
+          provider: createLedgerProvider(rpcs["test-private"], ids["test-private"]),
+          skipDryRun: true,
+          network_id: ids["test-private"],
+          gas: 8000000,
+          gasPrice: 0,
+      },
+
       'public.staging-ledger': {
           provider: createLedgerProvider(rpcs["staging-public"], ids["staging-public"]),
           skipDryRun: true,
@@ -101,6 +109,14 @@ module.exports = {
           gasPrice: 0,
       },
 
+      'private.staging-hdwallet': {
+          provider: createLedgerProvider(rpcs["staging-private"], ids["staging-private"]),
+          skipDryRun: true,
+          network_id: ids["staging-private"],
+          gas: 8000000,
+          gasPrice: 0,
+      },
+
       'public.prod-ledger': {
           provider: createLedgerProvider(rpcs["prod-public"], ids["prod-public"]),
           skipDryRun: true,
@@ -119,6 +135,14 @@ module.exports = {
 
       'private.prod-hdwallet': {
           provider: () => new HDWalletProvider(mnemonic, rpcs["prod-private"]),
+          skipDryRun: true,
+          network_id: ids["prod-private"],
+          gas: 8000000,
+          gasPrice: 0,
+      },
+
+      'private.prod-hdwallet': {
+          provider: createLedgerProvider(rpcs["prod-private"], ids["prod-private"]),
           skipDryRun: true,
           network_id: ids["prod-private"],
           gas: 8000000,
