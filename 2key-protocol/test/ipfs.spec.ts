@@ -13,6 +13,18 @@ chai.use(promisedChai);
 const ipfsRegex = /Qm[a-zA-Z0-9]{44}/;
 const campaign = require('./campaign.json');
 
+describe('IPFS: Basic scenario. Read  from Gateway QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', () => {
+    const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
+        readUrl: 'https://ipfs.2key.net/ipfs/',
+        readMode: ETwoKeyIPFSMode.GATEWAY,
+    });
+
+    it('get object from ipfs/QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', async () => {
+        const hash = await ipfs.get('QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', { json: true });
+        console.log(hash);
+    }).timeout(30000);
+});
+
 describe('IPFS: Basic scenario. Read from Gateway', () => {
     const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
         readUrl: 'https://ipfs.2key.net/ipfs/',
@@ -127,12 +139,12 @@ describe('IPFS: Basic scenario with compression. Read from GW', () => {
     const now = new Date().toLocaleTimeString();
 
     it('add object to ipfs', async () => {
-        hash = await ipfs.add({ now }, { json: true, compress: true });
+        hash = await ipfs.add({ now }, { json: true });
         expect(ipfsRegex.test(hash)).to.be.equals(true);
     }).timeout(30000);
 
     it('get object from ipfs through gateway', async () => {
-        const obj = await ipfs.get(hash, { json: true, compress: true });
+        const obj = await ipfs.get(hash, { json: true });
         expect(obj.now).to.be.equals(now);
     }).timeout(30000);
 });
@@ -146,12 +158,12 @@ describe('IPFS: Basic scenario with compression. Read from API', () => {
     const now = new Date().toLocaleTimeString();
 
     it('add object to ipfs', async () => {
-        hash = await ipfs.add({ now }, { json: true, compress: true });
+        hash = await ipfs.add({ now }, { json: true });
         expect(ipfsRegex.test(hash)).to.be.equals(true);
     }).timeout(30000);
 
     it('get object from ipfs through gateway', async () => {
-        const obj = await ipfs.get(hash, { json: true, compress: true });
+        const obj = await ipfs.get(hash, { json: true });
         expect(obj.now).to.be.equals(now);
     }).timeout(30000);
 });
@@ -170,7 +182,7 @@ describe('IPFS: Compare sizes', () => {
     }).timeout(30000);
 
     it('add object to ipfs', async () => {
-        compressedHash = await ipfs.add(campaign, { json: true, compress: true });
+        compressedHash = await ipfs.add(campaign, { json: true });
         expect(ipfsRegex.test(compressedHash)).to.be.equals(true);
     }).timeout(30000);
 
@@ -180,7 +192,7 @@ describe('IPFS: Compare sizes', () => {
     }).timeout(30000);
 
     it('get object from ipfs through gateway', async () => {
-        const obj = await ipfs.get(compressedHash, { json: true, compress: true });
+        const obj = await ipfs.get(compressedHash, { json: true });
         expect(obj.erc20_address).to.be.equals('0xaf65314b914a116bc299d97ab01b2fe870046f7a');
     }).timeout(30000);
 });

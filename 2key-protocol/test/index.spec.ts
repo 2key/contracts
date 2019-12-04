@@ -635,7 +635,7 @@ describe('TwoKeyProtocol', () => {
     });
 
     it('should print joined_from', async () => {
-        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail.link, { json: true, compress: true });
+        const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail.link, { json: true });
         console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
     }).timeout(60000);
 

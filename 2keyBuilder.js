@@ -3,7 +3,6 @@ const path = require('path');
 const util = require('util');
 const tar = require('tar');
 const sha256 = require('js-sha256');
-const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
@@ -246,13 +245,11 @@ const updateIPFSHashes = async(contracts) => {
     const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
     for (let i = 0, l = files.length; i < l; i++) {
         const js = fs.readFileSync(path.join(twoKeyProtocolSubmodulesDir, files[i]), { encoding: 'utf-8' });
-        console.time('Compress');
-        const compressedJS = LZString.compressToUTF16(js);
-        console.timeEnd('Compress');
-        console.log(files[i], (js.length / 1024).toFixed(3), (compressedJS.length / 1024).toFixed(3));
+        console.log(files[i], (js.length / 1024).toFixed(3));
         console.time('Upload');
-        const [{ hash }] = await ipfsAdd(compressedJS, deployment);
+        const [{ hash }] = await ipfsAdd(js, deployment);
         console.timeEnd('Upload');
+        console.log('ipfs hashes',files[i], hash);
         versionsList[nonSingletonHash][files[i].replace('.js', '')] = hash;
     }
     console.log(versionsList);
