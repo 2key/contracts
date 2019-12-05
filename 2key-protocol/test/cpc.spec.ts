@@ -89,7 +89,8 @@ describe('CPC campaign', () => {
         });
 
         campaignAddress = result.campaignAddress;
-        console.log(campaignAddress);
+        links.deployer = { link: result.campaignPublicLinkKey, fSecret: result.fSecret };
+        campaignAddress = result.campaignAddress;
 
         console.log(result);
     }).timeout(60000);
@@ -107,5 +108,23 @@ describe('CPC campaign', () => {
 
         const pkl = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.getPublicLinkKey(campaignAddress, twoKeyProtocol.plasmaAddress);
         console.log(pkl);
-    })
+    }).timeout(60000);
+
+    it('should visit campaign from guest', async() => {
+        printTestNumber();
+
+        const {web3, address} = web3switcher.guest();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
+        });
+        let txHash = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
+        console.log(txHash);
+    }).timeout(60000);
 });
