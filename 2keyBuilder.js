@@ -446,6 +446,8 @@ async function deploy() {
                 } else {
                     // In case this is just a patch, increment patch number
                     patch = parseInt(versionArray.pop(), 10) + 1;
+
+                    // Push new patch
                     versionArray.push(patch);
                 }
                 const newVersion = `${versionArray.join('.')}-${contractsStatus.current}`;
