@@ -101,4 +101,11 @@ describe('CPC campaign', () => {
         const campaignMeta = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.getPublicMeta(campaignAddress,twoKeyProtocol.plasmaAddress);
         console.log(campaignMeta);
     }).timeout(120000);
+
+    it('should get public link key of contractor', async() => {
+        printTestNumber();
+
+        const pkl = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.getPublicLinkKey(campaignAddress, twoKeyProtocol.plasmaAddress);
+        console.log(pkl);
+    })
 });
