@@ -85,7 +85,15 @@ Same in root git pull & git reset HEAD --hard
 3. run the migrations:
 ``` yarn run deploy private.staging-ledger,public.staging-ledger --reset ```
 
-4. push everything
+4. if pushing npm failed, you will need to continue the following manually:
+```
+cd 2key-protocol/dist
+npm publish --tag staging (if you're on staging) OR npm publish --tag prod (if you're on prod)
+cd ...  (back to root)
+tenderly push --tag 1.2.0-staging   (or whatever git tag was created during the deploy)
+```
+
+5. push everything
 ```
 cd 2key-protocol/src -> git add .
                         git commit -m 'sync-submodules'
@@ -98,5 +106,10 @@ Same in root  -> git add .
                  git push -u
 ```
 
-
+6. in case tenderly push didn't succeed:
+```
+rm -rf build
+yarn run deploy --extract
+tenderly push --tag 1.2.0-staging
+```
 
