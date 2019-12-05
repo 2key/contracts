@@ -13,7 +13,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
 
     IncentiveModel model;
 
+    string public targetUrl;
     address public mirrorCampaignOnPublic; // Address of campaign deployed to public eth network
+
     address[] public activeInfluencers;
 
     mapping(address => bool) isConverter;
@@ -21,8 +23,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
 
     bytes32 public merkle_root;
     bytes32[] public merkle_roots;
-
-    string public target_url;
 
 
     struct Conversion {
@@ -53,7 +53,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
         contractor = _contractor;
         moderator = _moderator;
-        target_url = _url; // Set the contractor of the campaign
+        targetUrl = _url; // Set the contractor of the campaign
 
         campaignStartTime = numberValues[0];
         campaignEndTime = numberValues[1];
@@ -103,8 +103,13 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
     public
     onlyMaintainer
     {
-        totalBountyForCampaign = _totalBounty;
-        bountyPerConversion = _bountyPerConversion;
+        // So if contractor adds more bounty we can increase it
+        totalBountyForCampaign = totalBountyForCampaign.add(_totalBounty);
+        if(bountyPerConversion == 0) {
+            // Bounty per conversion can't be changed
+            bountyPerConversion = _bountyPerConversion;
+        }
+
     }
 
     /**

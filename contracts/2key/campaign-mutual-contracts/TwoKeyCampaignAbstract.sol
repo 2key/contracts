@@ -48,6 +48,11 @@ contract TwoKeyCampaignAbstract is ArcToken {
         .getContractProxyAddress(contractName);
     }
 
+    // Internal function to fetch non upgradable from TwoKeyRegistry
+    function getNonUpgradableContractAddressFromRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+        .getNonUpgradableContractAddress(contractName);
+    }
 
     /**
      * @notice Function to set or update public meta hash

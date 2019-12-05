@@ -21,11 +21,15 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	// Variable to let us know if rewards have been bought with Ether
 	bool public boughtRewardsWithEther;
 
+
+	//Amount for rewards inventory
+	uint public rewardsInventoryAmount;
+
 	/**
      * @notice Internal function to check the balance of the specific ERC20 on this contract
      * @param tokenAddress is the ERC20 contract address
      */
-	function getTokenBalance( //TODO probably not required - in these types of campaigns tokens are not being sold
+	function getTokenBalance(
 		address tokenAddress
 	)
 	internal
@@ -40,7 +44,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * @notice Function to add fiat inventory for rewards
 	 * @dev only contractor can add this inventory
 	 */
-	function buyReferralBudgetWithEth()  //TODO where's the function to purchase rewards budget directly by inserting 2KEY?
+	function buyReferralBudgetWithEth()
 	public
 	onlyContractor
 	payable
@@ -53,6 +57,25 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
 
 		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
+	}
+
+	/**
+	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
+	 * @param _amount is the amount he called previously approve with
+	 */
+	function addDirectly2KEYAsInventory(
+		uint _amount
+	)
+	public
+	onlyContractor
+	{
+		require(_amount > 0);
+
+		address twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
+		IERC20(twoKeyEconomy).transferFrom(msg.sender, address(this), _amount);
+
+		rewardsInventoryAmount = _amount;
+
 	}
 
 
