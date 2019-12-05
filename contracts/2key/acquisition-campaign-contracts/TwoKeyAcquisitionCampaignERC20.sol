@@ -15,6 +15,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     bool boughtRewardsWithEther;
 
+    uint public X;
+
     uint public usd2KEYrateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
@@ -203,6 +205,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         uint256 _total_units = getAvailableAndNonReservedTokensAmount();
         require(_total_units >= totalBoughtUnits);
     }
+
 
     /**
      * @notice Function to join with signature and share 1 arc to the receiver

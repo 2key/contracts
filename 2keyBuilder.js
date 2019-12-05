@@ -3,7 +3,6 @@ const path = require('path');
 const util = require('util');
 const tar = require('tar');
 const sha256 = require('js-sha256');
-const LZString = require('lz-string');
 const { networks: truffleNetworks } = require('./truffle');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
@@ -111,7 +110,10 @@ const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath(), cwd: __
 
 const restoreFromArchive = () => {
     console.log("restore",__dirname);
-    return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
+    // Restore file only if exists
+    if(fs.existsSync(getBuildArchPath())) {
+        return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
+    }
 };
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
@@ -246,13 +248,11 @@ const updateIPFSHashes = async(contracts) => {
     const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
     for (let i = 0, l = files.length; i < l; i++) {
         const js = fs.readFileSync(path.join(twoKeyProtocolSubmodulesDir, files[i]), { encoding: 'utf-8' });
-        console.time('Compress');
-        const compressedJS = LZString.compressToUTF16(js);
-        console.timeEnd('Compress');
-        console.log(files[i], (js.length / 1024).toFixed(3), (compressedJS.length / 1024).toFixed(3));
+        console.log(files[i], (js.length / 1024).toFixed(3));
         console.time('Upload');
-        const [{ hash }] = await ipfsAdd(compressedJS, deployment);
+        const [{ hash }] = await ipfsAdd(js, deployment);
         console.timeEnd('Upload');
+        console.log('ipfs hashes',files[i], hash);
         versionsList[nonSingletonHash][files[i].replace('.js', '')] = hash;
     }
     console.log(versionsList);
@@ -380,16 +380,15 @@ async function deploy() {
 
         const local = process.argv[2].includes('local'); //If we're deploying to local network
 
+        const isHardReset = process.argv.includes('--reset');
+
         //If reset rm -rf build folder and rm -rf tar.gz
-        if(process.argv.includes('--reset')) {
-            // await rmDir(buildPath);
-            // await rmDir(buildArchPath);
-
+        if(isHardReset) {
+            await rmDir(buildPath);
+            await rmDir(buildArchPath);
         } else {
-            // await restoreFromArchive();
+            await restoreFromArchive();
         }
-
-        await restoreFromArchive();
 
         const networks = process.argv[2].split(',');
         const network = networks.join('/');
@@ -431,8 +430,26 @@ async function deploy() {
             } else {
                 const { version } = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDist, 'package.json'), 'utf8'));
                 const versionArray = version.split('-')[0].split('.');
-                const patch = parseInt(versionArray.pop(), 10) + 1;
-                versionArray.push(patch);
+                let patch;
+                let minor;
+                if(isHardReset) {
+                    //Take the last one, that's patch
+                    versionArray.pop();
+                    // Reset it to be 0
+                    patch = 0;
+                    //Take the middle version and increment by 1
+                    minor = parseInt(versionArray.pop(), 10) + 1;
+                    //Push minor
+                    versionArray.push(minor);
+                    //Push new patch
+                    versionArray.push(patch);
+                } else {
+                    // In case this is just a patch, increment patch number
+                    patch = parseInt(versionArray.pop(), 10) + 1;
+
+                    // Push new patch
+                    versionArray.push(patch);
+                }
                 const newVersion = `${versionArray.join('.')}-${contractsStatus.current}`;
                 await runProcess('npm', ['version', newVersion])
             }

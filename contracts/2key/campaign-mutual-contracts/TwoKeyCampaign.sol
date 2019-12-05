@@ -51,6 +51,7 @@ contract TwoKeyCampaign is ArcToken {
 	mapping(address => address) public public_link_key;
 	mapping(address => address) internal received_from; // referral graph, who did you receive the referral from
 
+
     // @notice Modifier which allows only contractor to call methods
     modifier onlyContractor() {
         require(msg.sender == contractor);
@@ -82,7 +83,6 @@ contract TwoKeyCampaign is ArcToken {
 		uint256 _value
 	)
 	internal
-	returns (bool)
 	{
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1);
@@ -97,7 +97,6 @@ contract TwoKeyCampaign is ArcToken {
 		}
 
 		received_from[_to] = _from;
-		return true;
 	}
 
 
