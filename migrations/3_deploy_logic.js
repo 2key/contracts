@@ -43,11 +43,22 @@ const instantiateConfigs = ((deployer) => {
     }
 
     let deploymentNetwork;
+
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
         deploymentNetwork = 'dev-local-environment'
-    } else if (deployer.network.startsWith('public') || deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+    }
+    else if (
+        deployer.network.startsWith('public.test') ||
+        deployer.network.startsWith('public.staging') ||
+        deployer.network.startsWith('private.test') ||
+        deployer.network.startsWith('private.staging'))
+    {
         deploymentNetwork = 'ropsten-environment';
     }
+    else if(deployer.network.startsWith('public.prod') ||deployer.network.startsWith('private.prod')) {
+        deploymentNetwork = 'production'
+    }
+
     return deploymentObject[deploymentNetwork];
 });
 
