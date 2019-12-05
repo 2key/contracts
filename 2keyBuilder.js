@@ -110,7 +110,10 @@ const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath(), cwd: __
 
 const restoreFromArchive = () => {
     console.log("restore",__dirname);
-    return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
+    // Restore file only if exists
+    if(fs.existsSync(getBuildArchPath())) {
+        return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
+    }
 };
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
@@ -447,6 +450,8 @@ async function deploy() {
                 } else {
                     // In case this is just a patch, increment patch number
                     patch = parseInt(versionArray.pop(), 10) + 1;
+
+                    // Push new patch
                     versionArray.push(patch);
                 }
                 const newVersion = `${versionArray.join('.')}-${contractsStatus.current}`;
