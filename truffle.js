@@ -173,6 +173,14 @@ module.exports = {
           gasPrice: '0x0',
           skipDryRun: true
       },
+
+      'public.prod-ropsten-hdwallet': {
+          provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
+          skipDryRun: true,
+          network_id: ids["staging-public"],
+          gas: 8000000,
+          gasPrice: 120000000000,
+      },
   },
 
     compilers: {
