@@ -169,7 +169,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
         bytes converterSig
     )
     public
-    onlyContractorOrMaintainer
+    onlyMaintainer
     {
         require(merkle_root == 0, 'merkle root already defined, contract is locked');
 
@@ -201,9 +201,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
         address _influencer,
         uint _balance
     )
-    public
+    internal
     {
-//        require(msg.sender == twoKeyDonationLogicHandler);
         if (activeInfluencer2idx[_influencer] == 0) {
             activeInfluencers.push(_influencer);
             activeInfluencer2idx[_influencer] = activeInfluencers.length;
