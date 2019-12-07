@@ -10,6 +10,7 @@ const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const eventsNetUrl = env.PLASMA_RPC_URL;
 
+const TIMEOUT_LENGTH = 60000;
 let i = 1;
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
@@ -96,23 +97,25 @@ describe('CPC campaign', () => {
         campaignAddress = result.campaignAddress;
 
         console.log(result);
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should validate mirroring on plasma', async() => {
         printTestNumber();
 
         const publicMirrorOnPlasma = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPlasma(campaignAddress);
         expect(publicMirrorOnPlasma).to.be.equal(campaignPublicAddress);
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should validate mirroring on public', async() => {
         printTestNumber();
 
         const plasmaMirrorOnPublic = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPublic(campaignPublicAddress);
         expect(plasmaMirrorOnPublic).to.be.equal(campaignAddress);
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should set that plasma contract is valid from maintainer', async() => {
+        printTestNumber();
+
         const {web3, address} = web3switcher.buyer();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -125,21 +128,40 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
         });
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.validatePlasmaContract(campaignAddress, twoKeyProtocol.plasmaAddress);
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should proof that plasma contract is validated well from maintainer side', async() => {
+        printTestNumber();
+        let isContractValid = await twoKeyProtocol.TwoKeyCPCCampaign.checkIsPlasmaContractValid(campaignAddress);
+        expect(isContractValid).to.be.equal(true);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should get campaign from IPFS', async () => {
         printTestNumber();
 
         const campaignMeta = await twoKeyProtocol.TwoKeyCPCCampaign.getPublicMeta(campaignAddress,twoKeyProtocol.plasmaAddress);
         expect(campaignMeta.meta.url).to.be.equal(campaignObject.url);
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should get public link key of contractor', async() => {
         printTestNumber();
 
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol = new TwoKeyProtocol({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+
         const pkl = await twoKeyProtocol.TwoKeyCPCCampaign.getPublicLinkKey(campaignAddress, twoKeyProtocol.plasmaAddress);
+        expect(pkl.length).to.be.greaterThan(0);
         console.log(pkl);
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should visit campaign from guest', async() => {
         printTestNumber();
@@ -157,7 +179,7 @@ describe('CPC campaign', () => {
         });
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         console.log(txHash);
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should create a join link', async () => {
         printTestNumber();
@@ -184,6 +206,6 @@ describe('CPC campaign', () => {
 
         console.log('Gmail link is: ' + links.gmail.link);
         expect(links.gmail.link).to.be.a('string');
-    }).timeout(60000);
+    }).timeout(TIMEOUT_LENGTH);
 
 });
