@@ -29,6 +29,7 @@ const web3switcher = {
     aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl),
     test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl),
     guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrl),
+    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrl)
 };
 
 const links: any = {
@@ -111,6 +112,21 @@ describe('CPC campaign', () => {
         expect(plasmaMirrorOnPublic).to.be.equal(campaignAddress);
     }).timeout(60000);
 
+    it('should set that plasma contract is valid from maintainer', async() => {
+        const {web3, address} = web3switcher.buyer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
+        });
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.validatePlasmaContract(campaignAddress, twoKeyProtocol.plasmaAddress);
+    }).timeout(60000);
+
     it('should get campaign from IPFS', async () => {
         printTestNumber();
 
@@ -165,7 +181,9 @@ describe('CPC campaign', () => {
             fSecret: links.deployer.fSecret,
         });
         links.gmail = hash;
+
         console.log('Gmail link is: ' + links.gmail.link);
         expect(links.gmail.link).to.be.a('string');
     }).timeout(60000);
+
 });
