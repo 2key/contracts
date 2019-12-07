@@ -230,7 +230,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     function isMaintainer(
         address _address
     )
-    public
+    internal
     view
     returns (bool)
     {
