@@ -31,8 +31,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
         uint conversionTimestamp;
     }
 
+    //TODO: This event should be removed, unnecessary spending gas especially since it's called in a loop. Consider with Udi
     event ConvertSig(
-        address indexed influencer,
+        address influencer,
         bytes signature,
         address plasmaConverter,
         address functionCaller // can be either contractor or maintainer
