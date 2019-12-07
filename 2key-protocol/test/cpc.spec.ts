@@ -9,7 +9,6 @@ const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 const eventsNetUrl = env.PLASMA_RPC_URL;
-const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 
 let i = 1;
 let twoKeyProtocol: TwoKeyProtocol;
@@ -82,7 +81,7 @@ describe('CPC campaign', () => {
         });
 
 
-        let result = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.createPlasma(campaignObject, campaignObject, {}, twoKeyProtocol.plasmaAddress , {
+        let result = await twoKeyProtocol.TwoKeyCPCCampaign.createCPCCampaign(campaignObject, campaignObject, {}, twoKeyProtocol.plasmaAddress, from, {
             progressCallback,
             gasPrice: 150000000000,
             interval: 500,
@@ -100,14 +99,14 @@ describe('CPC campaign', () => {
     it('should get campaign from IPFS', async () => {
         printTestNumber();
 
-        const campaignMeta = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.getPublicMeta(campaignAddress,twoKeyProtocol.plasmaAddress);
+        const campaignMeta = await twoKeyProtocol.TwoKeyCPCCampaign.getPublicMeta(campaignAddress,twoKeyProtocol.plasmaAddress);
         expect(campaignMeta.meta.url).to.be.equal(campaignObject.url);
     }).timeout(120000);
 
     it('should get public link key of contractor', async() => {
         printTestNumber();
 
-        const pkl = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.getPublicLinkKey(campaignAddress, twoKeyProtocol.plasmaAddress);
+        const pkl = await twoKeyProtocol.TwoKeyCPCCampaign.getPublicLinkKey(campaignAddress, twoKeyProtocol.plasmaAddress);
         console.log(pkl);
     }).timeout(60000);
 
@@ -125,7 +124,7 @@ describe('CPC campaign', () => {
             eventsNetUrl,
             plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
         });
-        let txHash = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         console.log(txHash);
     }).timeout(60000);
 
@@ -144,8 +143,8 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
 
-        let txHash = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
-        const hash = await twoKeyProtocol.TwoKeyPlasmaCPCCampaign.join(campaignAddress, twoKeyProtocol.plasmaAddress, {
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
+        const hash = await twoKeyProtocol.TwoKeyCPCCampaign.join(campaignAddress, twoKeyProtocol.plasmaAddress, {
             cut: 50,
             referralLink: links.deployer.link,
             fSecret: links.deployer.fSecret,

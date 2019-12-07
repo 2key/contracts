@@ -110,5 +110,16 @@ contract IHandleCampaignDeployment {
         address twoKeyDonationCampaign,
         address twokeyDonationConversionHandler
     ) public;
+
+
+    /**
+     * @notice Function to set initial arguments on CPC campaign on PUBLIC network
+     */
+    function setInitialParamsCPCCampaign(
+        address _twoKeySingletonRegistry,
+        string _url,
+        address _mirrorCampaignOnPlasma
+    )
+    public;
 }
 

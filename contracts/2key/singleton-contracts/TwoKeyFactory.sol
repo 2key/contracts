@@ -246,7 +246,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             nonSingletonHash
         );
 
-        setAddressToCampaignType(proxyDonationCampaign, "DONATION_CAMPAIGN");
+        setAddressToCampaignType(proxyDonationCampaign, "DONATION");
 
         ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource))
         .donationCampaignCreated(
@@ -254,6 +254,38 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             proxyDonationConversionHandler,
             proxyDonationLogicHandler,
             plasmaOf(msg.sender)
+        );
+    }
+
+    function createProxyForCPCCampaign(
+        string _url,
+        address _mirrorCampaignOnPlasma,
+        string _nonSingletonHash
+    )
+    public
+    {
+        address proxyCPC = createProxyForCampaign("CPC_PUBLIC","TwoKeyCPCCampaign");
+
+        IHandleCampaignDeployment(proxyCPC).setInitialParamsCPCCampaign(
+            TWO_KEY_SINGLETON_REGISTRY,
+            _url,
+            _mirrorCampaignOnPlasma
+        );
+
+        setAddressToCampaignType(proxyCPC, "CPC_PUBLIC");
+
+        //Validate campaign
+        ITwoKeyCampaignValidator(getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator))
+        .validateCPCCampaign(
+            proxyCPC,
+            _nonSingletonHash
+        );
+
+        //Emit event that TwoKeyCPCCampaign contract is created
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource))
+        .cpcCampaignCreated(
+            proxyCPC,
+            msg.sender
         );
     }
 

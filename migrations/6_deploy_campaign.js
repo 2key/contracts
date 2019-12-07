@@ -12,19 +12,16 @@ const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
 const TwoKeyDonationConversionHandler = artifacts.require('TwoKeyDonationConversionHandler');
 const TwoKeyPurchasesHandler = artifacts.require('TwoKeyPurchasesHandler');
 const TwoKeyDonationLogicHandler = artifacts.require('TwoKeyDonationLogicHandler');
-const TwoKeyCPCCampaignPlasma = artifacts.require('TwoKeyCPCCampaignPlasma');
 
 const MerkleProof = artifacts.require('MerkleProof');
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
-const { incrementVersion, getConfigForTheBranch, checkIsHardRedeploy } = require('../helpers');
+const { incrementVersion } = require('../helpers');
 
 
 module.exports = function deploy(deployer) {
 
-    // let isHardRedeploy = checkIsHardRedeploy(process.argv);
-    // console.log(isHardRedeploy);
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
     let version;
 
@@ -106,47 +103,6 @@ module.exports = function deploy(deployer) {
             })
             .then(() => true);
     } else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
-        deployer.link(Call, TwoKeyCPCCampaignPlasma);
-        deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma);
-            deployer.deploy(TwoKeyCPCCampaignPlasma)
-            .then(() => TwoKeyCPCCampaignPlasma.deployed())
-            .then(async() => {
-                console.log('... Adding implementation versions of CPC Campaign');
-                TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeyPlasmaSingletoneRegistry.address;
-                let instance = await TwoKeyPlasmaSingletoneRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
-
-                await new Promise(async(resolve,reject) => {
-                    try {
-
-                        version = await instance.getLatestAddedContractVersion("TwoKeyCPCCampaignPlasma");
-                        version = incrementVersion(version);
-
-                        console.log('Version :' + version);
-                        let txHash = await instance.addVersion('TwoKeyCPCCampaignPlasma', version, TwoKeyCPCCampaignPlasma.address);
-
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                })
-            })
-            .then(async () => {
-                await new Promise(async(resolve,reject) => {
-                    try {
-                        if(version === "1.0.0") {
-                            let instance = await TwoKeyPlasmaSingletoneRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
-                            console.log("Let's approve all initial versions for campaigns");
-
-                            let txHash = await instance.approveCampaignVersionDuringCreation("CPC_PLASMA");
-                            resolve(txHash);
-                        } else {
-                            resolve(true);
-                        }
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-            })
-            .then(() => true);
+        console.log('No contracts for selected network');
     }
 }

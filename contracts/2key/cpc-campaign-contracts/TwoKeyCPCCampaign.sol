@@ -31,7 +31,6 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
 
     function setInitialParamsCPCCampaign(
-        address _moderator,
         address _twoKeySingletonRegistry,
         string _url,
         address _mirrorCampaignOnPlasma
@@ -42,15 +41,21 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
         // Set the contractor of the campaign
         contractor = msg.sender;
-        moderator = _moderator;
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
 
+        // Set the moderator of the campaign
+        moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+        // Set target url to be visited
         targetUrl = _url;
+
+        //Set mirror campaign on plasma
         mirrorCampaignOnPlasma = _mirrorCampaignOnPlasma;
 
         isCampaignInitialized = true;
     }
+
 
     function submitProofAndWithdrawRewards(bytes32 proof) public {
 
