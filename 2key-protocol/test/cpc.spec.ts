@@ -97,11 +97,18 @@ describe('CPC campaign', () => {
         console.log(result);
     }).timeout(60000);
 
-    it('should validate mirroring', async() => {
+    it('should validate mirroring on plasma', async() => {
         printTestNumber();
 
         const publicMirrorOnPlasma = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPlasma(campaignAddress);
         expect(publicMirrorOnPlasma).to.be.equal(campaignPublicAddress);
+    }).timeout(60000);
+
+    it('should validate mirroring on public', async() => {
+        printTestNumber();
+
+        const plasmaMirrorOnPublic = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPublic(campaignPublicAddress);
+        expect(plasmaMirrorOnPublic).to.be.equal(campaignAddress);
     }).timeout(60000);
 
     it('should get campaign from IPFS', async () => {
@@ -109,7 +116,7 @@ describe('CPC campaign', () => {
 
         const campaignMeta = await twoKeyProtocol.TwoKeyCPCCampaign.getPublicMeta(campaignAddress,twoKeyProtocol.plasmaAddress);
         expect(campaignMeta.meta.url).to.be.equal(campaignObject.url);
-    }).timeout(120000);
+    }).timeout(60000);
 
     it('should get public link key of contractor', async() => {
         printTestNumber();
