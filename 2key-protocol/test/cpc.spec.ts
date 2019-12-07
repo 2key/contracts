@@ -63,7 +63,7 @@ let campaignObject = {
 };
 
 let campaignAddress;
-
+let campaignPublicAddress;
 describe('CPC campaign', () => {
 
     it('should create a CPC campaign', async() => {
@@ -88,13 +88,21 @@ describe('CPC campaign', () => {
             timeout: 600000
         });
 
+        campaignPublicAddress = result.campaignAddressPublic;
         campaignAddress = result.campaignAddress;
+
         links.deployer = { link: result.campaignPublicLinkKey, fSecret: result.fSecret };
         campaignAddress = result.campaignAddress;
 
         console.log(result);
     }).timeout(60000);
 
+    it('should validate mirroring', async() => {
+        printTestNumber();
+
+        const publicMirrorOnPlasma = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPlasma(campaignAddress);
+        expect(publicMirrorOnPlasma).to.be.equal(campaignPublicAddress);
+    }).timeout(60000);
 
     it('should get campaign from IPFS', async () => {
         printTestNumber();
