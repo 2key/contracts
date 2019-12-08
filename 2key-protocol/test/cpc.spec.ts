@@ -62,7 +62,8 @@ let campaignObject = {
     incentiveModel: "VANILLA_AVERAGE",
     campaignStartTime : 0,
     campaignEndTime : 9884748832,
-    maxReferralRewardPercent: 20
+    maxReferralRewardPercent: 20,
+    bountyPerConversion: 3
 };
 
 let campaignAddress;
@@ -134,6 +135,7 @@ describe('CPC campaign', () => {
 
         expect(amountOfTokensReceived*boughtRate).to.be.equal(etherForRewards*eth2usd);
     }).timeout(TIMEOUT_LENGTH);
+
 
     it('should set that plasma contract is valid from maintainer', async() => {
         printTestNumber();

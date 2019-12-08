@@ -61,7 +61,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
         conversionQuota = numberValues[3];
         totalSupply_ = numberValues[4];
         incentiveModel = IncentiveModel(numberValues[5]);
-
+        bountyPerConversion = numberValues[6];
         received_from[_contractor] = _contractor;
         balances[_contractor] = totalSupply_;
 
