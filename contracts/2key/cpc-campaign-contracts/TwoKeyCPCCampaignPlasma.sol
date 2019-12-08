@@ -20,7 +20,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
 
     mapping(address => bool) isConverter;
     mapping(address => uint) activeInfluencer2idx;
-
+    mapping(address => bool) isApprovedConverter;
     bytes32 public merkle_root;
     bytes32[] public merkle_roots;
 
@@ -35,8 +35,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
     event ConvertSig(
         address influencer,
         bytes signature,
-        address plasmaConverter,
-        address functionCaller // can be either contractor or maintainer
+        address plasmaConverter
     );
 
 
@@ -146,10 +145,23 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
         return influencers;
     }
 
+    function approveConverterAndExecuteConversion(
+        address converter
+    )
+    public
+    onlyMaintainer
+    {
+        //Restricting this method to 1 call per converter
+        require(isApprovedConverter[converter] == false);
+        isApprovedConverter[converter] = true;
+
+        //TODO: This is going to be something like approve and execute
+    }
+
     /**
      * @notice Function where converter can convert
      */
-    function convert(
+    function convertInternal(
         bytes signature,
         address converter
     )
@@ -164,24 +176,19 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
     }
 
 
-    function convertFromMaintainer(
-        bytes signature,
-        bytes converterSig
+    function convert(
+        bytes signature
     )
     public
-    onlyMaintainer
     {
         require(merkle_root == 0, 'merkle root already defined, contract is locked');
 
-        address plasmaConverter = Call.recoverHash(keccak256(signature), converterSig, 0);
+        convertInternal(signature, msg.sender);
 
-        convert(signature, plasmaConverter);
-
-        address[] memory influencers = getReferrers(plasmaConverter);
-
+        address[] memory influencers = getReferrers(msg.sender);
         uint numberOfInfluencers = influencers.length;
         for (uint i = 0; i < numberOfInfluencers-1; i++) {
-            emit ConvertSig(influencers[i], signature, plasmaConverter, msg.sender);
+            emit ConvertSig(influencers[i], signature, msg.sender);
         }
     }
 

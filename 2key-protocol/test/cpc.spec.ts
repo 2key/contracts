@@ -3,6 +3,7 @@ import singletons from "../src/contracts/singletons";
 import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {expect} from "chai";
 import {promisify} from "../src/utils/promisify";
+import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 const { env } = process;
 
 const rpcUrl = env.RPC_URL;
@@ -66,6 +67,8 @@ let campaignObject = {
 
 let campaignAddress;
 let campaignPublicAddress;
+let converterPlasma;
+
 describe('CPC campaign', () => {
 
     it('should create a CPC campaign', async() => {
@@ -95,18 +98,16 @@ describe('CPC campaign', () => {
 
         links.deployer = { link: result.campaignPublicLinkKey, fSecret: result.fSecret };
         campaignAddress = result.campaignAddress;
-
-        console.log(result);
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should validate mirroring on plasma', async() => {
+    it('should validate that mirroring is done well on plasma', async() => {
         printTestNumber();
 
         const publicMirrorOnPlasma = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPlasma(campaignAddress);
         expect(publicMirrorOnPlasma).to.be.equal(campaignPublicAddress);
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should validate mirroring on public', async() => {
+    it('should validate that mirroring is done well on public', async() => {
         printTestNumber();
 
         const plasmaMirrorOnPublic = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPublic(campaignPublicAddress);
@@ -130,9 +131,34 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.validatePlasmaContract(campaignAddress, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should set that public contract is valid from maintainer', async() => {
+        printTestNumber();
+
+        const {web3, address} = web3switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+        });
+
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.validatePublicContract(campaignPublicAddress, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(TIMEOUT_LENGTH);
+
     it('should proof that plasma contract is validated well from maintainer side', async() => {
         printTestNumber();
         let isContractValid = await twoKeyProtocol.TwoKeyCPCCampaign.checkIsPlasmaContractValid(campaignAddress);
+        expect(isContractValid).to.be.equal(true);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should proof that public contract is validated well from maintainer side', async() => {
+        printTestNumber();
+        let isContractValid = await twoKeyProtocol.TwoKeyCPCCampaign.checkIsPublicContractValid(campaignPublicAddress);
         expect(isContractValid).to.be.equal(true);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -160,13 +186,12 @@ describe('CPC campaign', () => {
 
         const pkl = await twoKeyProtocol.TwoKeyCPCCampaign.getPublicLinkKey(campaignAddress, twoKeyProtocol.plasmaAddress);
         expect(pkl.length).to.be.greaterThan(0);
-        console.log(pkl);
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should visit campaign from guest', async() => {
+    it('should visit and join campaign from test user', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.guest();
+        const {web3, address} = web3switcher.test();
         from = address;
         twoKeyProtocol.setWeb3({
             web3,
@@ -175,13 +200,22 @@ describe('CPC campaign', () => {
                 syncTwoKeyNetId,
             },
             eventsNetUrl,
-            plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
         });
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
-        console.log(txHash);
+
+        const hash = await twoKeyProtocol.TwoKeyCPCCampaign.join(campaignAddress, twoKeyProtocol.plasmaAddress, {
+            cut: 15,
+            referralLink: links.deployer.link,
+            fSecret: links.deployer.fSecret,
+        });
+        links.test = hash;
+
+        expect(links.test.link).to.be.a('string');
+
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should create a join link', async () => {
+    it('should create a join link by gmail', async () => {
         printTestNumber();
 
         const {web3, address} = web3switcher.gmail();
@@ -196,16 +230,63 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
 
-        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.test.link, links.test.fSecret);
         const hash = await twoKeyProtocol.TwoKeyCPCCampaign.join(campaignAddress, twoKeyProtocol.plasmaAddress, {
-            cut: 50,
-            referralLink: links.deployer.link,
-            fSecret: links.deployer.fSecret,
+            cut: 17,
+            referralLink: links.test.link,
+            fSecret: links.test.fSecret,
         });
         links.gmail = hash;
 
-        console.log('Gmail link is: ' + links.gmail.link);
         expect(links.gmail.link).to.be.a('string');
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should visit campaign', async() => {
+        printTestNumber();
+
+        const {web3, address} = web3switcher.test4();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
+        });
+
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
+    }).timeout(TIMEOUT_LENGTH);
+
+
+    it('should convert', async() => {
+        printTestNumber();
+        converterPlasma = twoKeyProtocol.plasmaAddress;
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.joinAndConvert(campaignAddress, links.gmail.link, twoKeyProtocol.plasmaAddress, {fSecret: links.gmail.fSecret});
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should get both influencers involved in conversion from plasma contract', async() => {
+        printTestNumber();
+        let influencers = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrers(campaignAddress, twoKeyProtocol.plasmaAddress);
+        expect(influencers.length).to.be.equal(2);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should approve converter from maintainer and distribute rewards', async() => {
+        printTestNumber();
+
+        const {web3, address} = web3switcher.buyer();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            networks: {
+                mainNetId,
+                syncTwoKeyNetId,
+            },
+            eventsNetUrl,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
+        });
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.approveConverterAndExecuteConversion(campaignAddress, converterPlasma, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
 });
