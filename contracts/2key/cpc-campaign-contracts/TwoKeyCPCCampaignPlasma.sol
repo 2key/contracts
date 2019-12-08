@@ -164,7 +164,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
     }
 
 
-    function convertByMaintainerSig(
+    function convertFromMaintainer(
         bytes signature,
         bytes converterSig
     )
