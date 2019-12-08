@@ -25,9 +25,11 @@
 {
   "address" : "",
   "mnemonic" : "",
-  "mnemonic_private" : ""
+  "mnemonic_private" : "",
+  "infura_id" : "" //Note that infura_id field can be empty if not deploying through infura nodes
 }
 ```
+    
 6. This file should be filled with the address you want to use for tests, and the corresponding mnemonic
 7. Once you have this file, you should run: `yarn run test:one 2key-protocol/test/sendETH.spec.ts` to get some test ether on local network
 8. After this step you are ready to deploy contracts locally and run all the test over them
