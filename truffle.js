@@ -18,7 +18,8 @@ const rpcs = {
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
     'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
-    'dev-ganache': 'https://localhost:7545'
+    'dev-ganache': 'https://localhost:7545',
+    'infura-ropsten' : `https://ropsten.infura.io/v3/${config.infura_id}`
 };
 
 const ids = {
@@ -29,6 +30,7 @@ const ids = {
     'prod-public' : 1,
     'prod-private' : 180,
     'dev-ganache': 5777,
+    'infura-ropsten': 3
 };
 
 const createLedgerProvider = (rpc, id) => () =>
@@ -43,8 +45,8 @@ const createLedgerProvider = (rpc, id) => () =>
         accountsOffset: 0,
     });
 
-module.exports = {
 
+module.exports = {
   plugins: ["truffle-security"],
 
   networks: {
@@ -167,12 +169,20 @@ module.exports = {
       },
 
       'plasma-test-local': {
-          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-dev.private.test.k8s.2key.net'),
-          network_id: 181,
+          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-staging.private.test.k8s.2key.net'),
+          network_id: 182,
           gas: 8000000,
           gasPrice: '0x0',
           skipDryRun: true
       },
+
+      'infura-test-ropsten': {
+          provider: () => new HDWalletProvider(mnemonic, rpcs["infura-ropsten"]),
+          skipDryRun: true,
+          network_id: ids["infura-ropsten"],
+          gas: 8000000,
+          gasPrice: 100000000000,
+      }
   },
 
     compilers: {
