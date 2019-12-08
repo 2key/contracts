@@ -154,6 +154,19 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.validatePlasmaContract(campaignAddress, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
+
+    it('should set on plasma contract inventory amount from maintainer', async() => {
+        printTestNumber();
+        let amountOfTokensAdded = await twoKeyProtocol.TwoKeyCPCCampaign.getTokensAvailableInInventory(campaignPublicAddress);
+        await twoKeyProtocol.TwoKeyCPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), twoKeyProtocol.plasmaAddress);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should get total bounty and bounty per conversion from plasma', async() => {
+        printTestNumber();
+        let bounties = await twoKeyProtocol.TwoKeyCPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
+        expect(bounties.bountyPerConversion).to.be.equal(campaignObject.bountyPerConversion);
+    }).timeout(TIMEOUT_LENGTH);
+
     it('should set that public contract is valid from maintainer', async() => {
         printTestNumber();
 

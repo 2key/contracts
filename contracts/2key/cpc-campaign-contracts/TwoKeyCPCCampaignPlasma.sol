@@ -97,19 +97,26 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
      * and how many tokens are paid per conversion for the influencers
      */
     function setTotalBounty(
-        uint _totalBounty,
-        uint _bountyPerConversion
+        uint _totalBounty
     )
     public
     onlyMaintainer
     {
         // So if contractor adds more bounty we can increase it
         totalBountyForCampaign = totalBountyForCampaign.add(_totalBounty);
-        if(bountyPerConversion == 0) {
-            // Bounty per conversion can't be changed
-            bountyPerConversion = _bountyPerConversion;
-        }
+    }
 
+
+    /**
+     * @notice Function to get total bounty available and bounty per conversion
+     * @return tuple
+     */
+    function getTotalBountyAndBountyPerConversion()
+    public
+    view
+    returns (uint,uint)
+    {
+        return (totalBountyForCampaign, bountyPerConversion);
     }
 
     /**
