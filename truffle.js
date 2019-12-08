@@ -176,7 +176,7 @@ module.exports = {
           skipDryRun: true
       },
 
-      'infura-test-ropsten': {
+      'public-infura-ropsten': {
           provider: () => new HDWalletProvider(mnemonic, rpcs["infura-ropsten"]),
           skipDryRun: true,
           network_id: ids["infura-ropsten"],
