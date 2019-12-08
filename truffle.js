@@ -45,7 +45,6 @@ const createLedgerProvider = (rpc, id) => () =>
         accountsOffset: 0,
     });
 
-console.log(rpcs["infura-ropsten"]);
 
 module.exports = {
   plugins: ["truffle-security"],
