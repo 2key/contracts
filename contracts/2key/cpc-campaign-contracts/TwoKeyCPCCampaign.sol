@@ -31,6 +31,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
 
     function setInitialParamsCPCCampaign(
+        address _contractor,
         address _twoKeySingletonRegistry,
         string _url,
         address _mirrorCampaignOnPlasma
@@ -40,7 +41,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         require(isCampaignInitialized == false);
 
         // Set the contractor of the campaign
-        contractor = msg.sender;
+        contractor = _contractor;
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
 

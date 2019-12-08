@@ -267,6 +267,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         address proxyCPC = createProxyForCampaign("CPC_PUBLIC","TwoKeyCPCCampaign");
 
         IHandleCampaignDeployment(proxyCPC).setInitialParamsCPCCampaign(
+            msg.sender,
             TWO_KEY_SINGLETON_REGISTRY,
             _url,
             _mirrorCampaignOnPlasma

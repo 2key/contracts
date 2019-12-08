@@ -112,10 +112,8 @@ contract IHandleCampaignDeployment {
     ) public;
 
 
-    /**
-     * @notice Function to set initial arguments on CPC campaign on PUBLIC network
-     */
     function setInitialParamsCPCCampaign(
+        address _contractor,
         address _twoKeySingletonRegistry,
         string _url,
         address _mirrorCampaignOnPlasma

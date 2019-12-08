@@ -57,7 +57,7 @@ const printTestNumber = (): void => {
 };
 
 let campaignObject = {
-    url: "nikola@gmail.com",
+    url: "https://2key.network",
     moderator: "",
     incentiveModel: "VANILLA_AVERAGE",
     campaignStartTime : 0,
@@ -68,6 +68,9 @@ let campaignObject = {
 let campaignAddress;
 let campaignPublicAddress;
 let converterPlasma;
+
+// 3 ETHER will be staked as rewards pool
+const etherForRewards = 3;
 
 describe('CPC campaign', () => {
 
@@ -112,6 +115,24 @@ describe('CPC campaign', () => {
 
         const plasmaMirrorOnPublic = await twoKeyProtocol.TwoKeyCPCCampaign.getMirrorContractPublic(campaignPublicAddress);
         expect(plasmaMirrorOnPublic).to.be.equal(campaignAddress);
+    }).timeout(TIMEOUT_LENGTH);
+
+
+    it('should buy referral rewards on public contract by sending ether', async() => {
+        printTestNumber();
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.buyTokensForReferralRewards(campaignPublicAddress, twoKeyProtocol.Utils.toWei(etherForRewards, 'ether'), from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(TIMEOUT_LENGTH);
+
+
+    it('should show the rate of 2key at the moment bought and the amount of tokens in the inventory received', async() => {
+        printTestNumber();
+        let amountOfTokensReceived = await twoKeyProtocol.TwoKeyCPCCampaign.getTokensAvailableInInventory(campaignPublicAddress);
+
+        let boughtRate = await twoKeyProtocol.TwoKeyCPCCampaign.getBought2keyRate(campaignPublicAddress);
+        let eth2usd = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
+
+        expect(amountOfTokensReceived*boughtRate).to.be.equal(etherForRewards*eth2usd);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should set that plasma contract is valid from maintainer', async() => {
