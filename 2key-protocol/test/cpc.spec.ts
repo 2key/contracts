@@ -348,6 +348,4 @@ describe('CPC campaign', () => {
         expect(conversion.bountyPaid).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString()));
     }).timeout(TIMEOUT_LENGTH);
 
-
-
 });
