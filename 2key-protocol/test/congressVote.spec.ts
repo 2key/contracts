@@ -6,8 +6,6 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
 const rpcUrls = [env.RPC_URL];
-const mainNetId = env.MAIN_NET_ID;
-const syncTwoKeyNetId = env.SYNC_NET_ID;
 const eventsNetUrls = [env.PLASMA_RPC_URL];
 
 let twoKeyProtocol: TwoKeyProtocol;
