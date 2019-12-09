@@ -34,7 +34,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         address _contractor,
         address _twoKeySingletonRegistry,
         string _url,
-        address _mirrorCampaignOnPlasma
+        address _mirrorCampaignOnPlasma,
+        uint _bountyPerConversion
     )
     public
     {
