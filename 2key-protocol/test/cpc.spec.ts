@@ -331,9 +331,9 @@ describe('CPC campaign', () => {
         printTestNumber();
 
         let conversion = await twoKeyProtocol.TwoKeyCPCCampaign.getConversion(campaignAddress, 0);
-        console.log(conversion);
         expect(conversion.converterPlasma).to.be.equal(converterPlasma);
         expect(conversion.conversionState).to.be.equal("EXECUTED");
+        expect(conversion.bountyPaid).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString()));
     }).timeout(TIMEOUT_LENGTH);
 
 });
