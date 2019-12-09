@@ -21,6 +21,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	// Variable to let us know if rewards have been bought with Ether
 	bool public boughtRewardsWithEther;
 
+	// Bounty how contractor wants referrers to split per conversion
+	uint public bountyPerConversion;
 
 	//Amount for rewards inventory
 	uint public rewardsInventoryAmount;
@@ -54,6 +56,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		boughtRewardsWithEther = true;
 		rewardsInventoryAmount = buyTokensFromUpgradableExchange(msg.value, address(this));
+
+
 		uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
 		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(rewardsInventoryAmount); //0.1 DOLLAR
 	}

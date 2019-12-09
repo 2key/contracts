@@ -4,9 +4,10 @@ import "../campaign-mutual-contracts/TwoKeyPlasmaCampaign.sol";
 import "../libraries/MerkleProof.sol";
 import "../libraries/IncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+import "../TwoKeyConversionStates.sol";
 
 
-contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
+contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
 
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversion; //amount of 2key tokens which are going to be paid per conversion
@@ -29,15 +30,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
         address converterPlasma;
         uint bountyPaid;
         uint conversionTimestamp;
+        ConversionState state;
     }
 
-    //TODO: This event should be removed, unnecessary spending gas especially since it's called in a loop. Consider with Udi
-    event ConvertSig(
-        address influencer,
-        bytes signature,
-        address plasmaConverter
-    );
+    Conversion [] conversions;
 
+    mapping(address => uint) converterToConversionId;
 
     function setInitialParamsCPCCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
@@ -188,15 +186,21 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
     )
     public
     {
-        require(merkle_root == 0, 'merkle root already defined, contract is locked');
-
+        require(merkle_root == 0);
         convertInternal(signature, msg.sender);
 
-        address[] memory influencers = getReferrers(msg.sender);
-        uint numberOfInfluencers = influencers.length;
-        for (uint i = 0; i < numberOfInfluencers-1; i++) {
-            emit ConvertSig(influencers[i], signature, msg.sender);
-        }
+        // Create conversion
+        Conversion memory c = Conversion (
+            msg.sender,
+            0,
+            block.timestamp,
+            ConversionState.PENDING_APPROVAL
+        );
+
+        // Get the ID and update mappings
+        uint conversionId = conversions.length;
+        conversions.push(c);
+        converterToConversionId[msg.sender] = conversionId;
     }
 
     /**
@@ -322,6 +326,22 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign {
 
     function executeConversion(uint conversionID) public onlyMaintainer {
 
+    }
+
+    function getConversion(
+        uint _conversionId
+    )
+    public
+    view
+    returns (address, uint, uint, ConversionState)
+    {
+        Conversion memory c = conversions[_conversionId];
+        return (
+            c.converterPlasma,
+            c.bountyPaid,
+            c.conversionTimestamp,
+            c.state
+        );
     }
 
 

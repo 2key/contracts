@@ -52,6 +52,9 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         // Set target url to be visited
         targetUrl = _url;
 
+        // Set bounty per conversion
+        bountyPerConversion = _bountyPerConversion;
+
         //Set mirror campaign on plasma
         mirrorCampaignOnPlasma = _mirrorCampaignOnPlasma;
 

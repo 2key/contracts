@@ -308,6 +308,14 @@ describe('CPC campaign', () => {
         expect(influencers.length).to.be.equal(2);
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should get conversion object from the plasma chain', async() => {
+        printTestNumber();
+
+        let conversion = await twoKeyProtocol.TwoKeyCPCCampaign.getConversion(campaignAddress, 0);
+        expect(conversion.converterPlasma).to.be.equal(converterPlasma);
+        expect(conversion.conversionState).to.be.equal("PENDING_APPROVAL");
+    }).timeout(TIMEOUT_LENGTH);
+
     it('should approve converter from maintainer and distribute rewards', async() => {
         printTestNumber();
 
