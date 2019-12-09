@@ -11,7 +11,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversionWei; //amount of 2key tokens which are going to be paid per conversion
-    uint maxNumberOfConversions;
+    uint public maxNumberOfConversions;
     uint numberOfExecutedConversions;
 
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -23,10 +23,11 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     string public targetUrl;
     address public mirrorCampaignOnPublic; // Address of campaign deployed to public eth network
 
+    //Active influencer means that he has at least on participation in successful conversion
     address[] public activeInfluencers;
+    mapping(address => bool) isActiveInfluencer;
 
     mapping(address => bool) isConverter;
-    mapping(address => uint) activeInfluencer2idx;
     mapping(address => bool) isApprovedConverter;
 
     bytes32 public merkle_root;
@@ -198,7 +199,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
         }
 
-        uint referrerBalance = referrerBalance[_referrerAddress];
+        uint referrerBalance = referrerPlasma2Balances2key[_referrerAddress];
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
 
@@ -350,6 +351,17 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     }
 
+    function checkIsActiveInfluencerAndAddToQueue(
+        address _influencer
+    )
+    internal
+    {
+        if(!isActiveInfluencer[_influencer]) {
+            activeInfluencers.push(_influencer);
+            isActiveInfluencer[_influencer] = true;
+        }
+    }
+
     function getConversion(
         uint _conversionId
     )
@@ -415,6 +427,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     )
     internal
     {
+        checkIsActiveInfluencerAndAddToQueue(referrerPlasma);
         referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
