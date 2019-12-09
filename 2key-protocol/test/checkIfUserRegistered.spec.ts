@@ -23,12 +23,9 @@ describe(`TwoKeyProtocol ${network}`, () => {
         const userAddress = process.argv[7];
         const userName = process.argv[8];
         const { web3 } = createWeb3('laundry version question endless august scatter desert crew memory toy attract cruel', rpcUrl);
-        const twoKeyProtocol = new TwoKeyProtocol({
+        const twoKeyProtocol = new TwoKeyProtocol();
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
             plasmaPK: Sign.generatePrivateKey(),
         });
         const isAddressRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(userAddress);
