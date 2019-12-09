@@ -22,7 +22,6 @@ const rpcs = {
     'infura-ropsten' : `https://ropsten.infura.io/v3/${config.infura_id}`
 };
 
-console.log(rpcs["infura-ropsten"]);
 const ids = {
     'test-public' : 3,
     'test-private' : 181,
