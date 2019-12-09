@@ -170,6 +170,13 @@ describe('CPC campaign', () => {
         expect(bounties.bountyPerConversion).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString()));
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should get max number of conversions', async() => {
+        printTestNumber();
+        let maxNumberOfConversions = await twoKeyProtocol.TwoKeyCPCCampaign.getMaxNumberOfConversions(campaignAddress);
+        console.log('Max number of conversions: ' + maxNumberOfConversions);
+    }).timeout(TIMEOUT_LENGTH);
+
+
     it('should set that public contract is valid from maintainer', async() => {
         printTestNumber();
 
