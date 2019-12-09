@@ -9,7 +9,6 @@ const { env } = process;
 
 const rpcUrls = [env.RPC_URL];
 const mainNetId = env.MAIN_NET_ID;
-const syncTwoKeyNetId = env.SYNC_NET_ID;
 const eventsNetUrls = [env.PLASMA_RPC_URL];
 const twoKeyEconomy = singletons.TwoKeyEconomy.networks[mainNetId].address;
 

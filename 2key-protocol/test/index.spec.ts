@@ -38,7 +38,6 @@ let campaignInventory = 1234000;
 
 console.log(rpcUrls);
 console.log(mainNetId);
-console.log(syncTwoKeyNetId);
 console.log(singletons.TwoKeyEventSource.networks[mainNetId].address);
 console.log(singletons.TwoKeyEconomy.networks[mainNetId].address);
 
@@ -220,13 +219,15 @@ const tryToRegisterUser = async (username, from) => {
     }
     try {
         registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
-    } catch {
+    } catch (e) {
         console.log('Error Plasma.signEthereum');
+        console.log(e);
     }
     try {
         registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
-    } catch {
+    } catch (e) {
         console.log('Error Plasma.signedUsername');
+        console.log(e);
     }
     let registerReceipts;
     try {
