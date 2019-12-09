@@ -511,8 +511,7 @@ const getMigrationsList = () => {
 
 const runMigration = async (index, network, updateArchive) => {
     await runProcess(
-        //node_modules/.bin/
-      path.join(__dirname, 'truffle'),
+      path.join(__dirname, 'node_modules/.bin/truffle'),
       ['migrate', '--f', index, '--to', index, '--network', network].concat(process.argv.slice(4))
     );
     if (updateArchive) {
