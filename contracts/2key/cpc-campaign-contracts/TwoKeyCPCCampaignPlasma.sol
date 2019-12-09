@@ -10,7 +10,9 @@ import "../TwoKeyConversionStates.sol";
 contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
 
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
-    uint bountyPerConversion; //amount of 2key tokens which are going to be paid per conversion
+    uint bountyPerConversionWei; //amount of 2key tokens which are going to be paid per conversion
+    uint maxNumberOfConversions;
+    uint numberOfExecutedConversions;
 
     IncentiveModel model;
 
@@ -59,7 +61,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         conversionQuota = numberValues[3];
         totalSupply_ = numberValues[4];
         incentiveModel = IncentiveModel(numberValues[5]);
-        bountyPerConversion = numberValues[6];
+        bountyPerConversionWei = numberValues[6];
         received_from[_contractor] = _contractor;
         balances[_contractor] = totalSupply_;
 
@@ -102,6 +104,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
         // So if contractor adds more bounty we can increase it
         totalBountyForCampaign = totalBountyForCampaign.add(_totalBounty);
+        maxNumberOfConversions = totalBountyForCampaign.div(bountyPerConversionWei);
     }
 
 
@@ -114,7 +117,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     view
     returns (uint,uint)
     {
-        return (totalBountyForCampaign, bountyPerConversion);
+        return (totalBountyForCampaign, bountyPerConversionWei);
     }
 
     /**
@@ -160,7 +163,20 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         require(isApprovedConverter[converter] == false);
         isApprovedConverter[converter] = true;
 
-        //TODO: This is going to be something like approve and execute
+        //Get the conversion and modify the state
+        uint conversionId = converterToConversionId[converter];
+        Conversion c = conversions[conversionId];
+        c.state = ConversionState.EXECUTED;
+
+        if(numberOfExecutedConversions < maxNumberOfConversions) {
+            //TODO: Here distribute rewards between influencers
+            c.bountyPaid = bountyPerConversionWei;
+        }
+
+        //Increment number of executed conversions
+        numberOfExecutedConversions = numberOfExecutedConversions.add(1);
+
+
     }
 
     /**

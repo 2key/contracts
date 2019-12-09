@@ -63,7 +63,7 @@ let campaignObject = {
     campaignStartTime : 0,
     campaignEndTime : 9884748832,
     maxReferralRewardPercent: 20,
-    bountyPerConversion: 3
+    bountyPerConversionWei: 3
 };
 
 let campaignAddress;
@@ -89,6 +89,8 @@ describe('CPC campaign', () => {
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
+        //Convert bounty per conversion to be in WEI
+        campaignObject.bountyPerConversionWei = parseFloat(twoKeyProtocol.Utils.toWei(campaignObject.bountyPerConversionWei,'ether').toString());
 
         let result = await twoKeyProtocol.TwoKeyCPCCampaign.createCPCCampaign(campaignObject, campaignObject, {}, twoKeyProtocol.plasmaAddress, from, {
             progressCallback,
@@ -164,7 +166,7 @@ describe('CPC campaign', () => {
     it('should get total bounty and bounty per conversion from plasma', async() => {
         printTestNumber();
         let bounties = await twoKeyProtocol.TwoKeyCPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
-        expect(bounties.bountyPerConversion).to.be.equal(campaignObject.bountyPerConversion);
+        expect(bounties.bountyPerConversion).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString()));
     }).timeout(TIMEOUT_LENGTH);
 
     it('should set that public contract is valid from maintainer', async() => {
