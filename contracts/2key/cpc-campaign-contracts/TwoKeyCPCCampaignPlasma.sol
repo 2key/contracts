@@ -14,6 +14,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     uint maxNumberOfConversions;
     uint numberOfExecutedConversions;
 
+    mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
+    mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
+
     IncentiveModel model;
 
     string public targetUrl;
@@ -171,12 +175,11 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         if(numberOfExecutedConversions < maxNumberOfConversions) {
             //TODO: Here distribute rewards between influencers
             c.bountyPaid = bountyPerConversionWei;
+            updateRewardsBetweenInfluencers(converter, conversionId);
         }
 
         //Increment number of executed conversions
         numberOfExecutedConversions = numberOfExecutedConversions.add(1);
-
-
     }
 
     /**
@@ -226,23 +229,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return referrerPlasma2Balances2key[_referrer];
     }
 
-    /**
-     * @notice Function to update referrer plasma balance
-     * @param _influencer is the plasma address of referrer
-     * @param _balance is the new balance
-     */
-    function updateReferrerPlasmaBalance(
-        address _influencer,
-        uint _balance
-    )
-    internal
-    {
-        if (activeInfluencer2idx[_influencer] == 0) {
-            activeInfluencers.push(_influencer);
-            activeInfluencer2idx[_influencer] = activeInfluencers.length;
-        }
-        referrerPlasma2Balances2key[_influencer] = referrerPlasma2Balances2key[_influencer].add(_balance);
-    }
 
     function resetMerkleRoot()
     public
@@ -358,6 +344,61 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             c.conversionTimestamp,
             c.state
         );
+    }
+
+    function updateRewardsBetweenInfluencers(
+        address _converter,
+        uint _conversionId
+    )
+    internal
+    {
+
+        //Get all the influencers
+        address[] memory influencers = getReferrers(_converter);
+
+        //Get array length
+        uint numberOfInfluencers = influencers.length;
+
+        uint i;
+        uint reward;
+        if(incentiveModel == IncentiveModel.VANILLA_AVERAGE) {
+            reward = IncentiveModels.averageModelRewards(bountyPerConversionWei, numberOfInfluencers);
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], reward, _conversionId);
+            }
+        } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
+            uint rewardForLast;
+            // Calculate reward for regular ones and for the last
+            (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(bountyPerConversionWei, numberOfInfluencers);
+            if(numberOfInfluencers > 0) {
+                //Update equal rewards to all influencers but last
+                for(i=0; i<numberOfInfluencers - 1; i++) {
+                    updateReferrerMappings(influencers[i], reward, _conversionId);
+                }
+                //Update reward for last
+                updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
+            }
+        } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
+            // Get rewards per referrer
+            uint [] memory rewards = IncentiveModels.powerLawRewards(bountyPerConversionWei, numberOfInfluencers, 2);
+            //Iterate through all referrers and distribute rewards
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], rewards[i], _conversionId);
+            }
+        }
+    }
+
+    function updateReferrerMappings(
+        address referrerPlasma,
+        uint reward,
+        uint conversionId
+    )
+    internal
+    {
+        referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
+        referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
+        referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
+        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
     }
 
 
