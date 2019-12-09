@@ -173,13 +173,32 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         c.state = ConversionState.EXECUTED;
 
         if(numberOfExecutedConversions < maxNumberOfConversions) {
-            //TODO: Here distribute rewards between influencers
             c.bountyPaid = bountyPerConversionWei;
             updateRewardsBetweenInfluencers(converter, conversionId);
         }
 
         //Increment number of executed conversions
         numberOfExecutedConversions = numberOfExecutedConversions.add(1);
+    }
+
+    function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
+        address _referrerAddress,
+        bytes _sig,
+        uint[] _conversionIds
+    )
+    public
+    view
+    returns (uint,uint,uint,uint[],address)
+    {
+        uint len = _conversionIds.length;
+        uint[] memory earnings = new uint[](len);
+
+        for(uint i=0; i<len; i++) {
+            earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
+        }
+
+        uint referrerBalance = referrerBalance[_referrerAddress];
+        return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
 
     /**

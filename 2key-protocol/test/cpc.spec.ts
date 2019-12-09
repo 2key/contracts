@@ -69,6 +69,7 @@ let campaignObject = {
 let campaignAddress;
 let campaignPublicAddress;
 let converterPlasma;
+let influencers;
 
 // 3 ETHER will be staked as rewards pool
 const etherForRewards = 3;
@@ -304,12 +305,6 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.joinAndConvert(campaignAddress, links.gmail.link, twoKeyProtocol.plasmaAddress, {fSecret: links.gmail.fSecret});
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should get both influencers involved in conversion from plasma contract', async() => {
-        printTestNumber();
-        let influencers = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrers(campaignAddress, twoKeyProtocol.plasmaAddress);
-        expect(influencers.length).to.be.equal(2);
-    }).timeout(TIMEOUT_LENGTH);
-
     it('should approve converter from maintainer and distribute rewards', async() => {
         printTestNumber();
 
@@ -327,6 +322,23 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.approveConverterAndExecuteConversion(campaignAddress, converterPlasma, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
+
+    it('should get both influencers involved in conversion from plasma contract and their balances', async() => {
+        printTestNumber();
+        influencers = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrers(campaignAddress, converterPlasma);
+        expect(influencers.length).to.be.equal(2);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should get rewards received by influencers', async() => {
+        printTestNumber();
+
+        let balanceA = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress,influencers[0]);
+        let balanceB = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress,influencers[1]);
+
+        expect(balanceA).to.be.equal(1.5);
+        expect(balanceB).to.be.equal(1.5);
+    }).timeout(TIMEOUT_LENGTH);
+
     it('should get conversion object from the plasma chain', async() => {
         printTestNumber();
 
@@ -335,5 +347,7 @@ describe('CPC campaign', () => {
         expect(conversion.conversionState).to.be.equal("EXECUTED");
         expect(conversion.bountyPaid).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString()));
     }).timeout(TIMEOUT_LENGTH);
+
+
 
 });

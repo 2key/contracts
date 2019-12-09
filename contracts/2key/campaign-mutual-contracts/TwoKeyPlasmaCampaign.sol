@@ -111,21 +111,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice Function to set cut of
-     * @param me is the address (plasma)
-     * @param cut is the cut value
-     */
-    function setCutOf(
-        address me,
-        uint256 cut
-    )
-    internal
-    {
-        require(referrerPlasma2cut[me] == 0 || referrerPlasma2cut[me] == cut);
-        referrerPlasma2cut[me] = cut;
-    }
-
-    /**
      * @notice Function to track arcs and make ref tree
      * @param sig is the signature user joins from
      */
@@ -159,10 +144,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
             if (i < keys.length) {
                 setPublicLinkKeyOf(new_address, keys[i]);
-            }
-
-            if (i < weights.length) {
-                setCutOf(new_address, uint256(weights[i]));
             }
         }
         return numberOfInfluencers;
@@ -210,20 +191,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     returns (uint)
     {
         return (referrerPlasma2Balances2key[_influencer]);
-    }
-
-    /**
-     * @notice Function to get cut for an (ethereum) address
-     * @param me is the ethereum address
-     */
-    function getReferrerCut(
-        address me
-    )
-    public
-    view
-    returns (uint256)
-    {
-        return referrerPlasma2cut[me];
     }
 
 
