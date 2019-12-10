@@ -88,7 +88,7 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
 const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
     try {
         console.log("Running update migration");
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '7', '--network', network, 'update', contractName]);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '7', '--to', '7', '--network', network, 'update', contractName]);
         resolve(true);
     } catch (e) {
         reject(e);
