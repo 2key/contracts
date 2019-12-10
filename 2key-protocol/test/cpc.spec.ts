@@ -6,10 +6,11 @@ import {promisify} from "../src/utils/promisify";
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 const { env } = process;
 
-const rpcUrl = env.RPC_URL;
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
-const eventsNetUrl = env.PLASMA_RPC_URL;
+
+const rpcUrls = [env.RPC_URL];
+const eventsNetUrls = [env.PLASMA_RPC_URL];
 
 const TIMEOUT_LENGTH = 60000;
 let i = 1;
@@ -21,17 +22,17 @@ require('isomorphic-fetch');
 require('isomorphic-form-data');
 
 const web3switcher = {
-    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
-    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
-    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl),
-    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl),
-    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrl),
-    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrl),
-    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrl),
-    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl),
-    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl),
-    guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrl),
-    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrl)
+    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
+    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
+    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrls),
+    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrls),
+    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrls),
+    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrls),
+    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrls),
+    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrls),
+    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
+    guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrls),
+    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrls)
 };
 
 const links: any = {
@@ -80,13 +81,10 @@ describe('CPC campaign', () => {
         printTestNumber();
         const {web3, address} = web3switcher.deployer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
+        twoKeyProtocol = new TwoKeyProtocol();
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
@@ -135,7 +133,6 @@ describe('CPC campaign', () => {
 
         let boughtRate = await twoKeyProtocol.TwoKeyCPCCampaign.getBought2keyRate(campaignPublicAddress);
         let eth2usd = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
-
         expect(amountOfTokensReceived*boughtRate).to.be.equal(etherForRewards*eth2usd);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -145,13 +142,10 @@ describe('CPC campaign', () => {
 
         const {web3, address} = web3switcher.buyer();
         from = address;
-        twoKeyProtocol.setWeb3({
+        twoKeyProtocol = new TwoKeyProtocol();
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
         });
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.validatePlasmaContract(campaignAddress, twoKeyProtocol.plasmaAddress);
@@ -182,13 +176,9 @@ describe('CPC campaign', () => {
 
         const {web3, address} = web3switcher.deployer();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
@@ -220,13 +210,9 @@ describe('CPC campaign', () => {
 
         const {web3, address} = web3switcher.deployer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
         });
 
@@ -239,13 +225,9 @@ describe('CPC campaign', () => {
 
         const {web3, address} = web3switcher.test();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
         });
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
@@ -266,13 +248,9 @@ describe('CPC campaign', () => {
 
         const {web3, address} = web3switcher.gmail();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
 
@@ -292,13 +270,9 @@ describe('CPC campaign', () => {
 
         const {web3, address} = web3switcher.test4();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
 
@@ -317,13 +291,9 @@ describe('CPC campaign', () => {
 
         const {web3, address} = web3switcher.buyer();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
         });
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.approveConverterAndExecuteConversion(campaignAddress, converterPlasma, twoKeyProtocol.plasmaAddress);

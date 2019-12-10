@@ -23,7 +23,7 @@ const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
-const TwoKeyPlasmaFactory = artifacts.require('TwoKeyPlasmaFactory');
+
 
 const fs = require('fs');
 const path = require('path');
@@ -396,21 +396,6 @@ module.exports = function deploy(deployer) {
                             contractNameToProxyAddress["TwoKeyPlasmaMaintainersRegistryStorage"],
                             maintainerAddresses,
                             []
-                        );
-                        resolve(txHash);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-
-                await new Promise(async (resolve,reject) => {
-                    try {
-                        console.log('Setting initial params in TwoKeyPlasmaFactory contract on plasma network');
-                        let instance = await TwoKeyPlasmaFactory.at(contractNameToProxyAddress["TwoKeyPlasmaFactory"]);
-                        let txHash = instance.setInitialParams
-                        (
-                            TwoKeyPlasmaSingletoneRegistry.address,
-                            contractNameToProxyAddress["TwoKeyPlasmaFactoryStorage"],
                         );
                         resolve(txHash);
                     } catch (e) {

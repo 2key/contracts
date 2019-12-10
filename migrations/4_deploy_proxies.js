@@ -52,8 +52,6 @@ const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStora
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 
-const TwoKeyPlasmaFactory = artifacts.require('TwoKeyPlasmaFactory');
-const TwoKeyPlasmaFactoryStorage = artifacts.require('TwoKeyPlasmaFactoryStorage');
 
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 
@@ -133,14 +131,12 @@ module.exports = function deploy(deployer) {
         TwoKeyPlasmaEvents,
         TwoKeyPlasmaMaintainersRegistry,
         TwoKeyPlasmaRegistry,
-        TwoKeyPlasmaFactory
     };
 
     let contractStorageArtifactsPlasma = {
         TwoKeyPlasmaEventsStorage,
         TwoKeyPlasmaMaintainersRegistryStorage,
         TwoKeyPlasmaRegistryStorage,
-        TwoKeyPlasmaFactoryStorage
     };
 
 

@@ -17,8 +17,6 @@ const TwoKeyTeamGrowthFundStorage = artifacts.require('TwoKeyTeamGrowthFundStora
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
-const TwoKeyPlasmaFactoryStorage = artifacts.require('TwoKeyPlasmaFactoryStorage');
-
 
 module.exports = function deploy(deployer) {
     if(deployer.network.startsWith('public') || deployer.network.startsWith('dev')) {
@@ -62,8 +60,6 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyPlasmaMaintainersRegistryStorage.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaRegistryStorage))
             .then(() => TwoKeyPlasmaRegistryStorage.deployed())
-            .then(() => deployer.deploy(TwoKeyPlasmaFactoryStorage))
-            .then(() => TwoKeyPlasmaFactoryStorage.deployed())
             .then(() => true);
     } else {
         console.log('No deployment configuration for selected network');

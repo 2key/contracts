@@ -6,10 +6,50 @@ const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletone
 const TwoKeyCPCCampaignPlasma = artifacts.require('TwoKeyCPCCampaignPlasma');
 const TwoKeyCPCCampaign = artifacts.require('TwoKeyCPCCampaign');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
-
-
+const TwoKeyPlasmaFactoryStorage = artifacts.require('TwoKeyPlasmaFactoryStorage');
+const TwoKeyPlasmaFactory = artifacts.require('TwoKeyPlasmaFactory');
 
 const { incrementVersion } = require('../helpers');
+
+const fs = require('fs');
+const path = require('path');
+
+const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
+const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
+
+const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
+
+let fileObject = {};
+if (fs.existsSync(proxyFile)) {
+    fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
+}
+
+const instantiateConfigs = ((deployer) => {
+    let deploymentObject = {};
+    if (fs.existsSync(deploymentConfigFile)) {
+        deploymentObject = JSON.parse(fs.readFileSync(deploymentConfigFile, {encoding: 'utf8'}));
+    }
+
+    let deploymentNetwork;
+
+    if (deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
+        deploymentNetwork = 'dev-local-environment'
+    }
+    else if (
+        deployer.network.startsWith('public.test') ||
+        deployer.network.startsWith('public.staging') ||
+        deployer.network.startsWith('private.test') ||
+        deployer.network.startsWith('private.staging'))
+    {
+        deploymentNetwork = 'ropsten-environment';
+    }
+    else if(deployer.network.startsWith('public.prod') ||deployer.network.startsWith('private.prod')) {
+        deploymentNetwork = 'production'
+    }
+
+    return deploymentObject[deploymentNetwork];
+});
+
 
 const addNewContractVersion = (async (campaignName, deployedAddress, twoKeySingletonRegistryAddress) => {
     console.log('... Adding implementation versions of CPC Campaign');
@@ -54,8 +94,10 @@ const approveVersion = (async(campaignName, contractType, twoKeySingletonesRegis
 
 
 module.exports = function deploy(deployer) {
-
+    const { network_id } = deployer;
     let version;
+
+    deployer.deploy(MerkleProof);
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.link(Call, TwoKeyCPCCampaign);
@@ -71,10 +113,77 @@ module.exports = function deploy(deployer) {
             .then(() => true);
     }
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
-        //Deploy CPC on plasma network
-        deployer.link(Call, TwoKeyCPCCampaignPlasma);
-        deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma);
-        deployer.deploy(TwoKeyCPCCampaignPlasma)
+        let proxyLogic;
+        let proxyStorage;
+
+        deployer.deploy(TwoKeyPlasmaFactory)
+            .then(() => TwoKeyPlasmaFactory.deployed())
+            .then(() => deployer.deploy(TwoKeyPlasmaFactoryStorage))
+            .then(() => TwoKeyPlasmaFactoryStorage.deployed())
+            .then(async() => {
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        let registry = await TwoKeyPlasmaSingletoneRegistry.at(TwoKeyPlasmaSingletoneRegistry.address);
+
+                        console.log('-----------------------------------------------------------------------------------');
+                        console.log('... Adding TwoKeyplasmaFactory to Proxy registry as valid implementation');
+                        let contractName = "TwoKeyPlasmaFactory";
+                        let contractStorageName = "TwoKeyPlasmaFactoryStorage";
+
+                        let txHash = await registry.addVersionDuringCreation(
+                            contractName,
+                            contractStorageName,
+                            TwoKeyPlasmaFactory.address,
+                            TwoKeyPlasmaFactoryStorage.address,
+                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                        );
+
+                        let { logs } = await registry.createProxy(
+                            contractName,
+                            contractStorageName,
+                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                        );
+
+                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+
+                        proxyLogic = logicProxy;
+                        proxyStorage = storageProxy;
+
+                        const jsonObject = fileObject[contractName] || {};
+                        jsonObject[network_id] = {
+                            'implementationAddressLogic': TwoKeyPlasmaFactory.address,
+                            'Proxy': logicProxy,
+                            'implementationAddressStorage': TwoKeyPlasmaFactoryStorage.address,
+                            'StorageProxy': storageProxy,
+                        };
+
+                        fileObject[contractName] = jsonObject;
+                        resolve(logicProxy);
+                    } catch (e) {
+                        reject(e);
+                    }
+                });
+                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+            })
+            .then(async() => {
+                await new Promise(async (resolve,reject) => {
+                    try {
+                        console.log('Setting initial params in TwoKeyPlasmaFactory contract on plasma network');
+                        let instance = await TwoKeyPlasmaFactory.at(proxyLogic);
+                        let txHash = instance.setInitialParams
+                        (
+                            TwoKeyPlasmaSingletoneRegistry.address,
+                            proxyStorage,
+                        );
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                    })
+            })
+            .then(() => deployer.link(Call, TwoKeyCPCCampaignPlasma))
+            .then(() => deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma))
+            .then(() => deployer.deploy(TwoKeyCPCCampaignPlasma))
             .then(() => TwoKeyCPCCampaignPlasma.deployed())
             .then(async() => {
                 await addNewContractVersion("TwoKeyCPCCampaignPlasma", TwoKeyCPCCampaignPlasma.address, TwoKeyPlasmaSingletoneRegistry.address);
@@ -86,3 +195,4 @@ module.exports = function deploy(deployer) {
     }
 
 }
+

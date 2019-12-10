@@ -26,11 +26,9 @@ const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 const TwoKeyPlasmaCongress = artifacts.require('TwoKeyPlasmaCongress');
 const TwoKeyPlasmaCongressMembersRegistry = artifacts.require('TwoKeyPlasmaCongressMembersRegistry');
-const TwoKeyPlasmaFactory = artifacts.require('TwoKeyPlasmaFactory');
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
-const MerkleProof = artifacts.require('MerkleProof');
 
 const fs = require('fs');
 const path = require('path');
@@ -80,7 +78,6 @@ module.exports = function deploy(deployer) {
 
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
-    deployer.deploy(MerkleProof);
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
 
@@ -177,8 +174,6 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyPlasmaRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry)) //adding empty admin address
             .then(() => TwoKeyPlasmaSingletoneRegistry.deployed())
-            .then(() => deployer.deploy(TwoKeyPlasmaFactory))
-            .then(() => TwoKeyPlasmaFactory.deployed())
             .then(() => true);
     }
 }
