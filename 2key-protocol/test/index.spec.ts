@@ -13,8 +13,8 @@ import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 
 const {env} = process;
 
-const rpcUrl = env.RPC_URL;
-const eventsNetUrl = env.PLASMA_RPC_URL;
+const rpcUrls = [env.RPC_URL];
+const eventsNetUrls = [env.PLASMA_RPC_URL];
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
 
@@ -36,9 +36,8 @@ let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
 let campaignInventory = 1234000;
 
-console.log(rpcUrl);
+console.log(rpcUrls);
 console.log(mainNetId);
-console.log(syncTwoKeyNetId);
 console.log(singletons.TwoKeyEventSource.networks[mainNetId].address);
 console.log(singletons.TwoKeyEconomy.networks[mainNetId].address);
 
@@ -47,17 +46,17 @@ const progressCallback = (name: string, mined: boolean, transactionResult: strin
 };
 
 const web3switcher = {
-    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl),
-    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrl),
-    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrl),
-    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrl),
-    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrl),
-    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrl),
-    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrl),
-    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrl),
-    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrl),
-    guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrl),
-    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrl)
+    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
+    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
+    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrls),
+    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrls),
+    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrls),
+    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrls),
+    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrls),
+    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrls),
+    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
+    guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrls),
+    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrls)
 };
 
 const links: any = {};
@@ -220,13 +219,15 @@ const tryToRegisterUser = async (username, from) => {
     }
     try {
         registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
-    } catch {
+    } catch (e) {
         console.log('Error Plasma.signEthereum');
+        console.log(e);
     }
     try {
         registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
-    } catch {
+    } catch (e) {
         console.log('Error Plasma.signedUsername');
+        console.log(e);
     }
     let registerReceipts;
     try {
@@ -248,13 +249,10 @@ describe('TwoKeyProtocol', () => {
             try {
                 const {web3, address} = web3switcher.deployer();
                 from = address;
-                twoKeyProtocol = new TwoKeyProtocol({
+                twoKeyProtocol = new TwoKeyProtocol();
+                await twoKeyProtocol.setWeb3({
                     web3,
-                    networks: {
-                        mainNetId,
-                        syncTwoKeyNetId,
-                    },
-                    eventsNetUrl,
+                    eventsNetUrls,
                     plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
                 });
 
@@ -373,13 +371,9 @@ describe('TwoKeyProtocol', () => {
     it('should return a balance for address', async () => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         await tryToRegisterUser('Aydnep', from);
@@ -528,13 +522,9 @@ describe('TwoKeyProtocol', () => {
     it('should visit campaign as guest', async () => {
         const {web3, address} = web3switcher.guest();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic('mnemonic words should be here but for some reason they are missing').privateKey,
         });
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
@@ -545,13 +535,9 @@ describe('TwoKeyProtocol', () => {
     it('should create a join link', async () => {
         const {web3, address} = web3switcher.gmail();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
@@ -572,13 +558,9 @@ describe('TwoKeyProtocol', () => {
     it('should show maximum referral reward after ONE referrer', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         await tryToRegisterUser('Test4', from);
@@ -643,13 +625,9 @@ describe('TwoKeyProtocol', () => {
     it('should show maximum referral reward after TWO referrer', async() => {
         const {web3, address} = web3switcher.renata();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         await tryToRegisterUser('Renata', from);
@@ -682,13 +660,9 @@ describe('TwoKeyProtocol', () => {
     it('should register buyer', async() => {
         const {web3, address} = web3switcher.buyer();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
         });
         await tryToRegisterUser('Buyer', from);
@@ -698,13 +672,9 @@ describe('TwoKeyProtocol', () => {
     it('should register gmail', async() => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
         await tryToRegisterUser('Gmail2', from);
@@ -714,13 +684,9 @@ describe('TwoKeyProtocol', () => {
     it('should buy some tokens from uport', async () => {
         const {web3, address} = web3switcher.uport();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
         });
         await tryToRegisterUser('Uport', from);
@@ -759,13 +725,9 @@ describe('TwoKeyProtocol', () => {
     it('should buy some tokens from gmail2', async () => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
         });
         await tryToRegisterUser('Gmail2', from);
@@ -781,13 +743,9 @@ describe('TwoKeyProtocol', () => {
     it('should buy some tokens from buyer address', async() => {
         const {web3, address} = web3switcher.buyer();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
         });
 
@@ -810,13 +768,9 @@ describe('TwoKeyProtocol', () => {
     it('should register test', async() => {
         const {web3, address} = web3switcher.test();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
         });
         await tryToRegisterUser('Test', from);
@@ -825,13 +779,9 @@ describe('TwoKeyProtocol', () => {
     it('should transfer arcs from new user to test', async () => {
         const {web3, address} = web3switcher.aydnep2();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP2).privateKey,
         });
         await tryToRegisterUser('Aydnep2', from);
@@ -848,13 +798,9 @@ describe('TwoKeyProtocol', () => {
     it('should buy some tokens from test', async () => {
         const {web3, address} = web3switcher.test();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
         });
         await tryToRegisterUser('Test', from);
@@ -873,13 +819,9 @@ describe('TwoKeyProtocol', () => {
     it('should return all pending converters from contractor', async () => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
@@ -891,13 +833,9 @@ describe('TwoKeyProtocol', () => {
         console.log('Test where contractor can approve converter to execute lockup');
         const {web3, address} = web3switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
@@ -975,13 +913,9 @@ describe('TwoKeyProtocol', () => {
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         // const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
@@ -991,13 +925,9 @@ describe('TwoKeyProtocol', () => {
     it('should execute conversion and create purchase', async () => {
         const {web3, address} = web3switcher.test4();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         if(isKYCRequired) {
@@ -1016,13 +946,9 @@ describe('TwoKeyProtocol', () => {
     it('should start hedging some ether', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         let approvedMinConversionRate = 1000;
@@ -1034,13 +960,9 @@ describe('TwoKeyProtocol', () => {
     it('should show campaign summary', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         const summary = await twoKeyProtocol.AcquisitionCampaign.getCampaignSummary(campaignAddress, from);
@@ -1055,13 +977,9 @@ describe('TwoKeyProtocol', () => {
     it('should pull down base tokens amount from purchases handler contract', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(campaignAddress, 0, 0, from);
@@ -1078,13 +996,9 @@ describe('TwoKeyProtocol', () => {
     it('==> should contractor withdraw his earnings', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
 
@@ -1106,13 +1020,9 @@ describe('TwoKeyProtocol', () => {
     it('==> should get address statistics', async() => {
         const {web3, address} = web3switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
         });
         let hexedValues = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress, env.RENATA_ADDRESS,'0x0000000000000000000000000000000000000000',{from});
@@ -1128,13 +1038,9 @@ describe('TwoKeyProtocol', () => {
     it('==> should referrer withdraw his balances in 2key-tokens', async() => {
         const {web3, address} = web3switcher.renata();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress, false ,from);
@@ -1178,13 +1084,9 @@ describe('TwoKeyProtocol', () => {
     it('should get statistics for the address from the contract', async() => {
         const {web3, address} = web3switcher.renata();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
         });
         let stats = await twoKeyProtocol.AcquisitionCampaign.getAddressStatistic(campaignAddress,env.RENATA_ADDRESS, '0x0000000000000000000000000000000000000000',{from});
@@ -1194,13 +1096,9 @@ describe('TwoKeyProtocol', () => {
     it('should get stats for 1 more referrer', async() => {
         const {web3, address} = web3switcher.gmail();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
         });
 
@@ -1232,13 +1130,9 @@ describe('TwoKeyProtocol', () => {
         it('should create an offline(fiat) conversion', async () => {
             const {web3, address} = web3switcher.gmail2();
             from = address;
-            twoKeyProtocol.setWeb3({
+            await twoKeyProtocol.setWeb3({
                 web3,
-                networks: {
-                    mainNetId,
-                    syncTwoKeyNetId,
-                },
-                eventsNetUrl,
+                eventsNetUrls,
                 plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
             });
 
@@ -1265,13 +1159,9 @@ describe('TwoKeyProtocol', () => {
     it('should check conversion object', async() => {
         const {web3, address} = web3switcher.test4();
         from = address;
-        twoKeyProtocol.setWeb3({
+        await twoKeyProtocol.setWeb3({
             web3,
-            networks: {
-                mainNetId,
-                syncTwoKeyNetId,
-            },
-            eventsNetUrl,
+            eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
         });
         console.log('Regular executed conversion is: ');
@@ -1283,13 +1173,9 @@ describe('TwoKeyProtocol', () => {
         it('should execute conversion from contractor', async() => {
             const {web3, address} = web3switcher.aydnep();
             from = address;
-            twoKeyProtocol.setWeb3({
+            await twoKeyProtocol.setWeb3({
                 web3,
-                networks: {
-                    mainNetId,
-                    syncTwoKeyNetId,
-                },
-                eventsNetUrl,
+                eventsNetUrls,
                 plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
             });
             if(!(isFiatConversionAutomaticallyApproved == true && isKYCRequired ==false)) {

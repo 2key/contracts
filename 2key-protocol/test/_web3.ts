@@ -84,7 +84,7 @@ export const generateWalletFromMnemonic = (mnemonic) => {
     };
 };
 
-export default function (mnemonic: string, rpcUrl: string, pk?: string): EthereumWeb3 {
+export default function (mnemonic: string, rpcUrls: string[], pk?: string): EthereumWeb3 {
     let wallet;
     if (pk) {
         const private_key = Buffer.from(pk, 'hex');
@@ -95,10 +95,14 @@ export default function (mnemonic: string, rpcUrl: string, pk?: string): Ethereu
     }
 
     const engine = new ProviderEngine();
-    const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
     engine.addProvider(new WalletSubprovider(wallet, {}));
     engine.addProvider(new NonceSubprovider());
-    engine.addProvider(mainProvider);
+    rpcUrls.forEach(rpcUrl => {
+        const mainProvider = rpcUrl.startsWith('http')
+            ? new RpcSubprovider({ rpcUrl })
+            : new WSSubprovider({ rpcUrl });
+        engine.addProvider(mainProvider);
+    });
     engine.start();
     const web3 = new Web3(engine);
     const address = `0x${wallet.getAddress().toString('hex')}`;
