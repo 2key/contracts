@@ -11,6 +11,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 /**
  * @author Nikola Madjarevic
+ * @notice Contract to emit all events
  */
 contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 

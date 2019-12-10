@@ -14,6 +14,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 /**
  * @author Nikola Madjarevic
+ * @notice Contract to deploy all contracts
  */
 contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
 
