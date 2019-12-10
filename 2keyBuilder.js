@@ -63,10 +63,13 @@ const getDiffBetweenLatestTags = async () => {
     //Restore from archive the latest build so we can check which contracts are new
     restoreFromArchive();
 
-    return [singletonsChanged, campaignsChanged];
+    //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        console.log(singletonsChanged[i] + ' is existing? ' + checkIfFileExistsInDir(singletonsChanged[i]));
+        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
+            singletonsChanged.splice(i,1);
+        }
     }
+    return [singletonsChanged, campaignsChanged];
 };
 
 const checkIfFileExistsInDir = (contractName) => {
