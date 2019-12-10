@@ -338,9 +338,11 @@ const checkIfContractIsPlasma = (contractName) => {
 async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
+
+    let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
+
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
-        let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
         console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
         console.log('Campaigns to be upgraded: ', campaignsToBeUpgraded);
         if(singletonsToBeUpgraded.length > 0) {
