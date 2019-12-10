@@ -109,7 +109,7 @@ module.exports = {
           provider: createLedgerProvider(rpcs["staging-public"], ids["staging-public"]),
           skipDryRun: true,
           network_id: ids["staging-public"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 120000000000,
       },
 
@@ -117,7 +117,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
           skipDryRun: true,
           network_id: ids["staging-public"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 120000000000,
       },
 
