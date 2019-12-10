@@ -6,8 +6,6 @@ import "../libraries/SafeMath.sol";
 import "../interfaces/IStructuredStorage.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
-
-
 contract TwoKeyMaintainersRegistryAbstract is Upgradeable {
     /**
      * All keys used for the storage contract.
@@ -361,10 +359,9 @@ contract TwoKeyMaintainersRegistryAbstract is Upgradeable {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_idToCoreDev,_id));
     }
 
+
     // Internal function to fetch address from TwoKeyRegistry
     function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
-
-}
