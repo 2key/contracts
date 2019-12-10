@@ -25,7 +25,7 @@ const tenderlyDir = path.join(__dirname, 'tenderlyConfigurations');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, getGitBranch, slack_message, sortMechanism, ipfsAdd, ipfsGet } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, getGitBranch, slack_message, sortMechanism, ipfsAdd, ipfsGet, runCPCMigration } = require('./helpers');
 
 
 const branch_to_env = {
@@ -372,6 +372,19 @@ async function deployUpgrade(networks) {
     await archiveBuild();
 }
 
+async function deployCPC(networks) {
+    console.log(networks);
+    const l = networks.length;
+
+    for(let i = 0; i<l ; i++) {
+        console.log('Deploying CPC contracts to: ' + networks[i]);
+        /* eslint-disable no-await-in-loop */
+        await runCPCMigration(networks[i]);
+    }
+
+    await archiveBuild();
+}
+
 async function deploy() {
     try {
         deployment = true;
@@ -411,6 +424,7 @@ async function deploy() {
             await restoreFromArchive();
         }
 
+
         const networks = process.argv[2].split(',');
         const network = networks.join('/');
         const now = moment();
@@ -419,7 +433,10 @@ async function deploy() {
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
                 await deployUpgrade(networks);
-            } else {
+            } else if(process.argv.includes('cpc')) {
+                await deployCPC(networks);
+            }
+            else {
                 await deployContracts(networks, true);
             }
         }
@@ -571,7 +588,6 @@ const deployContracts = async (networks, updateArchive) => {
         deployedTo[truffleNetworks[networks[i]].network_id.toString()] = truffleNetworks[networks[i]].network_id;
     }
 };
-
 
 async function main() {
     contractsStatus = await contractsGit.status(); // Fetching branch

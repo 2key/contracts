@@ -95,6 +95,23 @@ const runUpdateMigration = (network, contractName) => new Promise(async(resolve,
     }
 });
 
+
+/**
+ *
+ * @param network
+ * @param contractName
+ * @returns {Promise<any>}
+ */
+const runCPCMigration = (network) => new Promise(async(resolve,reject) => {
+    try {
+        console.log("Running update migration");
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '8', '--to', '8', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
 const checkArgumentsForUpdate = ((argumentsPassed) => {
     argumentsPassed.forEach((argument) => {
         if(argument == 'update') {
@@ -343,5 +360,6 @@ module.exports = {
     checkArgumentsForUpdate,
     sortMechanism,
     ipfsAdd,
-    ipfsGet
+    ipfsGet,
+    runCPCMigration
 };
