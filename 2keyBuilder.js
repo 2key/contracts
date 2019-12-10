@@ -57,9 +57,6 @@ const getDiffBetweenLatestTags = async () => {
     let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/')|| item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
 
-    //Remove current build
-    rmDir(buildPath);
-
     //Restore from archive the latest build so we can check which contracts are new
     restoreFromArchive();
 
