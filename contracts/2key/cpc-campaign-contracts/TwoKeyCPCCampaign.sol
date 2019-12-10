@@ -1,0 +1,69 @@
+pragma solidity ^0.4.24;
+
+import "../campaign-mutual-contracts/TwoKeyBudgetCampaign.sol";
+import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
+
+/**
+ * @author Nikola Madjarevic
+ * @author Ehud Ben-Reuven
+ * Date added : 1st December 2019
+ */
+contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
+
+    address[] public activeInfluencers;
+    mapping(address => uint) activeInfluencer2Index;
+    bytes32 public merkleRoot;
+    bytes32[] public merkleRoots;
+    string public targetUrl;
+    address public mirrorCampaignOnPlasma; // Address of campaign deployed to plasma network
+
+    bool public isValidated;
+
+    /**
+     * @notice Function to validate that contracts plasma and public are well mirrored
+     */
+    function validateContractFromMaintainer()
+    public
+    onlyMaintainer
+    {
+        isValidated = true;
+    }
+
+
+    function setInitialParamsCPCCampaign(
+        address _contractor,
+        address _twoKeySingletonRegistry,
+        string _url,
+        address _mirrorCampaignOnPlasma,
+        uint _bountyPerConversion
+    )
+    public
+    {
+        require(isCampaignInitialized == false);
+
+        // Set the contractor of the campaign
+        contractor = _contractor;
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
+
+        // Set the moderator of the campaign
+        moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+        // Set target url to be visited
+        targetUrl = _url;
+
+        // Set bounty per conversion
+        bountyPerConversion = _bountyPerConversion;
+
+        //Set mirror campaign on plasma
+        mirrorCampaignOnPlasma = _mirrorCampaignOnPlasma;
+
+        isCampaignInitialized = true;
+    }
+
+
+    function submitProofAndWithdrawRewards(bytes32 proof) public {
+
+    }
+
+}

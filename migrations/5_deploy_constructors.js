@@ -24,6 +24,7 @@ const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 
+
 const fs = require('fs');
 const path = require('path');
 const addressesFile = path.join(__dirname, '../configurationFiles/contractNamesToProxyAddresses.json');

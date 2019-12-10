@@ -298,6 +298,10 @@ const commitAndPush2keyProtocolLibGit = async(commitMessage) => {
     await twoKeyProtocolLibGit.push('origin', status.current);
 };
 
+/**
+ *
+ * @type {function(*)}
+ */
 const pushTagsToGithub = (async (npmVersionTag) => {
     await contractsGit.addTag('v'+npmVersionTag.toString());
     await contractsGit.pushTags('origin');

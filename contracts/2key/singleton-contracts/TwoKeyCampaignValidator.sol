@@ -112,6 +112,20 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
         emitCreatedEvent(campaign);
     }
 
+    function validateCPCCampaign(
+        address campaign,
+        string nonSingletonHash
+    )
+    public
+    onlyTwoKeyFactory
+    {
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated,campaign), true);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_campaign2NonSingletonHash,campaign), nonSingletonHash);
+
+        //Emit event that is created with moderator contractor and campaign address
+        emitCreatedEvent(campaign);
+    }
+
 
     /**
      * @notice Function which will return either is or not one of the campaign contracts validated

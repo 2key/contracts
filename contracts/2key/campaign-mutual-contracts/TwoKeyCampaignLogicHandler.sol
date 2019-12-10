@@ -21,7 +21,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
      */
     bool initialized;
 
-    IncentiveModel incentiveModel; //Incentive model for rewardsaddress twoKeyMaintainersRegistry;
+    IncentiveModel incentiveModel; //Incentive model for rewards address twoKeyMaintainersRegistry;
 
     address twoKeyMaintainersRegistry;
     address twoKeyRegistry;

@@ -385,10 +385,13 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
                 }
             }
         }
-        //If there's an amount to be returned and reserved tokens, update state and execute cashback
-        if(reservedAmount > 0 && refundAmount > 0) {
-            twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
+
+        if(reservedAmount > 0) {
             twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(_converter, refundAmount);
+        }
+
+        if(refundAmount > 0) {
+            twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
         }
 
         emitRejectedEvent(twoKeyCampaign, _converter);

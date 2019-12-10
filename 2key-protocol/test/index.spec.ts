@@ -17,7 +17,7 @@ const rpcUrls = [env.RPC_URL];
 const eventsNetUrls = [env.PLASMA_RPC_URL];
 const mainNetId = env.MAIN_NET_ID;
 const syncTwoKeyNetId = env.SYNC_NET_ID;
-console.log(mainNetId);
+
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 const maxConverterBonusPercent = 15;
 const pricePerUnitInETHOrUSD = 0.095;
@@ -473,7 +473,7 @@ describe('TwoKeyProtocol', () => {
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
-    it('should save campaign to IPFS', async () => {
+    it('should get campaign from IPFS', async () => {
         // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
         // console.log('HASH', hash);
         // txHash = await twoKeyProtocol.AcquisitionCampaign.updateOrSetIpfsHashPublicMeta(campaignAddress, hash, from);
