@@ -365,3 +365,4 @@ contract TwoKeyMaintainersRegistryAbstract is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
+}
