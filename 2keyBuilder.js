@@ -56,8 +56,23 @@ const getDiffBetweenLatestTags = async () => {
 
     let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/')|| item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+
+    //Restore from archive the latest build so we can check which contracts are new
+    restoreFromArchive();
+
+    //Check the files which have never been deployed and exclude them from script
+    for(let i=0; i<singletonsChanged.length; i++) {
+        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
+            singletonsChanged.splice(i,1);
+        }
+    }
     return [singletonsChanged, campaignsChanged];
 };
+
+const checkIfFileExistsInDir = (contractName) => {
+    let artifactPath = `./build/contracts/${contractName}.json`
+    return fs.existsSync(artifactPath);
+}
 
 const getBuildArchPath = () => {
     if(contractsStatus && contractsStatus.current) {
@@ -323,9 +338,11 @@ const checkIfContractIsPlasma = (contractName) => {
 async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
+
+    let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
+
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
-        let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
         console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
         console.log('Campaigns to be upgraded: ', campaignsToBeUpgraded);
         if(singletonsToBeUpgraded.length > 0) {
