@@ -278,8 +278,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     }
 
 
-    function computeMerkleRoot(
-    )
+    function computeMerkleRoot()
     public
     onlyMaintainer
     {
@@ -433,6 +432,18 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
     }
+
+    /**
+     * @notice Function to get all active influencers
+     */
+    function getActiveInfluencers()
+    public
+    view
+    returns (address[])
+    {
+        return activeInfluencers;
+    }
+
 
 
 }
