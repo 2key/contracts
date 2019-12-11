@@ -126,7 +126,7 @@ module.exports = function deploy(deployer) {
                         let registry = await TwoKeyPlasmaSingletoneRegistry.at(TwoKeyPlasmaSingletoneRegistry.address);
 
                         console.log('-----------------------------------------------------------------------------------');
-                        console.log('... Adding TwoKeyplasmaFactory to Proxy registry as valid implementation');
+                        console.log('... Adding TwoKeyPlasmaFactory to Proxy registry as valid implementation');
                         let contractName = "TwoKeyPlasmaFactory";
                         let contractStorageName = "TwoKeyPlasmaFactoryStorage";
 
