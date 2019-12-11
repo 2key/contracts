@@ -8,6 +8,7 @@ import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 
 contract TwoKeyPlasmaEvents is Upgradeable {
 
+    //Plasma contract to emit events
     ITwoKeyPlasmaEventsStorage public PROXY_STORAGE_CONTRACT;
 
     string constant _publicLinkKey = "public_link_key";

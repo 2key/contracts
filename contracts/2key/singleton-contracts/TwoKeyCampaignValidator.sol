@@ -15,6 +15,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 /**
  * @author Nikola Madjarevic
+ * @notice Contract to validate and whitelist campaigns
  * Created at 2/12/19
  */
 contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {

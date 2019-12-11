@@ -45,6 +45,8 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     const deployerMnemonic = process.env.MNEMONIC_AYDNEP;
     const eventsNetUrls = [process.env.PLASMA_RPC_URL];
     const deployerPK = process.env.MNEMONIC_AYDNEP ? null : '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec';
+    const networkId = parseInt(process.env.MAIN_NET_ID, 10);
+    const privateNetworkId = parseInt(process.env.SYNC_NET_ID, 10);
 
     const rpcUrl = process.env.RPC_URL;
     let wallet;
@@ -65,11 +67,12 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     const address = `0x${wallet.getAddress().toString('hex')}`;
     const privateKey = wallet.getPrivateKey().toString('hex');
     console.log('new Web3', address, privateKey);
-    const twoKeyProtocol = new TwoKeyProtocol();
-    await twoKeyProtocol.setWeb3({
+    const twoKeyProtocol = new TwoKeyProtocol({
         web3,
         eventsNetUrls,
         plasmaPK: '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec',
+        networkId,
+        privateNetworkId,
     });
 
     console.log('TWOKEY', twoKeyProtocol.plasmaNetworkId, twoKeyProtocol.networkId);

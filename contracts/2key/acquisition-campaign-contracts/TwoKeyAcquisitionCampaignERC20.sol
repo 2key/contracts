@@ -306,6 +306,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         return totalBounty2keys;
     }
 
+    // comment
 
     /**
      * @notice Move some amount of ERC20 from our campaign to someone
