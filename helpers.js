@@ -80,6 +80,20 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
 });
 
 /**
+ * This is function to run when we want to update our cpc campaigns
+ * @param network
+ * @returns {Promise<any>}
+ */
+const runDeployCPCCampaignMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '9', '--to', '9', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+/**
  * If there's a need to update, we'll run this function
  * @param network
  * @param contractName
@@ -361,5 +375,6 @@ module.exports = {
     sortMechanism,
     ipfsAdd,
     ipfsGet,
-    runCPCMigration
+    runCPCMigration,
+    runDeployCPCCampaignMigration
 };

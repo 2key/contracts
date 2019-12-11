@@ -25,7 +25,7 @@ const tenderlyDir = path.join(__dirname, 'tenderlyConfigurations');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, getGitBranch, slack_message, sortMechanism, ipfsAdd, ipfsGet, runCPCMigration } = require('./helpers');
+const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, getGitBranch, slack_message, sortMechanism, ipfsAdd, ipfsGet, runCPCMigration, runDeployCPCCampaignMigration } = require('./helpers');
 
 
 const branch_to_env = {
@@ -56,6 +56,7 @@ const getDiffBetweenLatestTags = async () => {
 
     let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/')|| item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+    let cpcChanged = diffAllContracts.filter(item => item.includes('/cpc-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
 
     //Restore from archive the latest build so we can check which contracts are new
     restoreFromArchive();
@@ -66,7 +67,7 @@ const getDiffBetweenLatestTags = async () => {
             singletonsChanged.splice(i,1);
         }
     }
-    return [singletonsChanged, campaignsChanged];
+    return [singletonsChanged, campaignsChanged, cpcChanged];
 };
 
 const checkIfFileExistsInDir = (contractName) => {
@@ -339,12 +340,13 @@ async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
 
-    let [singletonsToBeUpgraded, campaignsToBeUpgraded] = await getDiffBetweenLatestTags();
+    let [singletonsToBeUpgraded, campaignsToBeUpgraded, cpcChanged] = await getDiffBetweenLatestTags();
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
         console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
         console.log('Campaigns to be upgraded: ', campaignsToBeUpgraded);
+        console.log('CPC contracts changed: ', cpcChanged);
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */
@@ -366,6 +368,10 @@ async function deployUpgrade(networks) {
             if(networks[i].includes('public')) {
                 await runDeployCampaignMigration(networks[i]);
             }
+        }
+
+        if(cpcChanged.length > 0) {
+            await runDeployCPCCampaignMigration(networks[i]);
         }
         /* eslint-enable no-await-in-loop */
     }
