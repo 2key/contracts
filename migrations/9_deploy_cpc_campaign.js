@@ -3,6 +3,8 @@ const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletone
 const TwoKeyCPCCampaignPlasma = artifacts.require('TwoKeyCPCCampaignPlasma');
 const TwoKeyCPCCampaign = artifacts.require('TwoKeyCPCCampaign');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
+const IncentiveModels = artifacts.require('IncentiveModels');
+const Call = artifacts.require('Call');
 
 const { incrementVersion } = require('../helpers');
 
@@ -45,6 +47,7 @@ module.exports = function deploy(deployer) {
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyCPCCampaignPlasma)
         deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma)
+        deployer.link(IncentiveModels)
         deployer.deploy(TwoKeyCPCCampaignPlasma)
             .then(() => TwoKeyCPCCampaignPlasma.deployed())
             .then(async() => {
