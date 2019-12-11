@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "./TwoKeyCampaign.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignLogicHandler.sol";
 import "../interfaces/IERC20.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)

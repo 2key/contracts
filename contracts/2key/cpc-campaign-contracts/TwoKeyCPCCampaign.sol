@@ -1,8 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "../campaign-mutual-contracts/TwoKeyBudgetCampaign.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../libraries/MerkleProof.sol";
+import "./TwoKeyBudgetCampaign.sol";
 /**
  * @author Nikola Madjarevic
  * @author Ehud Ben-Reuven
