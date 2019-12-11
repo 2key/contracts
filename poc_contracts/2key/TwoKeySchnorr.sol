@@ -240,6 +240,7 @@ contract SECP2561k {
   //
   // Based on the original idea of Vitalik Buterin:
   // https://ethresear.ch/t/you-can-kinda-abuse-ecrecover-to-do-ecmul-in-secp256k1-today/2384/9
+  // validates that the eliptical point (x1,y1) times scalar is indeed the eliptical point (qx, qy)
   //
   function ecmulVerify(uint256 x1, uint256 y1, uint256 scalar, uint256 qx, uint256 qy) public pure
   returns(bool)
@@ -272,13 +273,14 @@ contract SECP2561k {
 }
 
 contract TwoKeySchnorr is SECP2561k, Ownable {
-  mapping(uint => uint) private Pxs;
-  mapping(uint => uint) private Pys;
+  mapping(uint => uint) private Pxs; // x component of #hope => Public of link secret for that hope
+  mapping(uint => uint) private Pys; // y component of #hope => Public of link secret for that hope
+  uint N; // maximal number of hopes allowed (number of public keys stored in Pxs, Pys)
   mapping(address => mapping(uint => uint)) private convert;  // address(R) => hope => #converstions
-  uint N;
 
   function setPi(uint i, uint Px, uint Py) public onlyOwner
   {
+    // set a specific public key of a link secret
 //    require(Pxs[i] == 0 && Pys[i] == 0,'P already defined for i');
     require(i == 1 || Pxs[i-1] != 0 || Pys[i-1] != 0,'P not defined for i-1');
     Pxs[i] = Px;
@@ -290,6 +292,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
 
   function setPs(bytes Ps) public onlyOwner
   {
+    // set all public keys of all link secrets
     uint i = 1;
     for(uint idx = 0; idx < Ps.length; idx+=64) {
       uint256 Px = Call.loadUint256(Ps,idx);
@@ -302,6 +305,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   function getPi(uint i) public view
   returns(uint256 x, uint256 y)
   {
+    // get the public key of a specific index
     x = Pxs[i];
     y = Pys[i];
     require(x != 0 || y != 0,'P not defined for i');
@@ -310,19 +314,27 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   function verify(uint256 s, uint256[2] R, uint256[2] P, bytes32 m) public pure
   returns(bool)
   {
+    // verify Schnorr signature: s*G = R + m*P
     // gas 39433
     address Ra = point_hash(R);
     uint256 h = uint256(m);
-    h = (Q - h) % Q; // TODO we can remove this by negating R and not negating s inside sbmul_add_mul
-    return Ra == sbmul_add_mul(s, P, h);
+    h = (Q - h) % Q; // -h TODO we can remove this by negating R and not negating s inside sbmul_add_mul
+    return Ra == sbmul_add_mul(s, P, h);  // hash(s*G + h*P)
   }
 
   function verifyQ(bytes Rs, bytes Qs, bytes cuts, uint n) private view
   returns(address[] influencers)
   {
-    // instead of computing h(R[i]|cut[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i]|cut[i])*P[i]
-    // and the code will verify that the computation is true
+    // verify eliptical points in the array of Rs and their cuts do indeed match the points in the array Qs
+    // such that Qs[i] == h(Rs[i]|cuts[i])*P[i]
+    // params:
+    //   Rs - array of the R values of all the influencers in the link
+    //   Q - instead of computing h(R[i]|cut[i])*P[i] the sender needs to supply a precomputed value Qs[i]
+    //       and the code will verify that the computation is true
+    //   cuts - the cut of each R value in Rs
+    //   n - from which hope the R starts
+    // returns:
+    //   array of fake address of the R,cut pairs (the lower 20 bytes of h(Rs[i]|cuts[i]) )
     require(Rs.length%64 == 0 && Rs.length == Qs.length, 'Rs/Qs bad length');
     influencers = new address[](Rs.length/64);
     uint i = 0;
@@ -343,9 +355,10 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
 
   function convertVerify(uint256 s, uint256[2] R, bytes Rs, bytes Qs, address a) private view
   {
-    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i])*P[i]
-    // and the code will verify that the computation is true
+    // verify convertion of a using aggregated signature s, masking R and array of Rs and Qs for all influencers
+    // verify s*G = R + hash(R|a)*P[n] + sum Rs + sum Qs
+    // n is taken from the length of Rs
+    // Qs are the precomputed h(Rs[i]|cuts[i])*P[i] of each influencer
     uint n = Rs.length / 64 + 1;
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
@@ -357,14 +370,17 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
       R = ecadd2(R, Call.loadPair(Qs,idx));
     }
 
+    // verify s*G = R + m*P
     require(verify(s, R, [Px, Py], m), 'signature failed');
   }
 
   function convertTest(uint256 s, uint256[2] R, bytes Rs, bytes Qs, bytes cuts, address a) public
   {
-    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i])*P[i]
-    // and the code will verify that the computation is true
+    // convert user a by using aggregated signature s, masking R and array of Rs, cuts and Qs for all influencers
+    // for each influencer 'i' verify Qs[i]=h(Rs[i]|cuts[i])*P[i] and then verify that
+    // s*G = R + hash(R|a)*P[n] + sum Rs[i]+h(Rs[i]|cuts[i])*P[i]
+    // Qs are the precomputed h(Rs[i]|cuts[i])*P[i] of each influencer
+    // the convert count of each influencer 'i' is incremented for hope location 'i+1'
     address[] memory influencers = verifyQ(Rs, Qs, cuts, 1);
     convertVerify(s, R, Rs, Qs, a);
     for(uint i = 0; i < Rs.length>>6; i++) {
@@ -375,7 +391,12 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   // dont say its pure so we can measure gas
   function claimTest(uint256[2] R, uint256[2] R_bar, uint256[2] P_bar, uint256[2] Q, address a) public
   {
+    // influencer 'a' wants to claim he is associated with R
     // a can be anything that identifies the influencer. address or the ecdsa made by the influencer
+    // R_bar, P_bar public of random k_bar, x_bar
+    // Q is a precomputed h(R_bar,P_bar,a)*P_bar
+    // k = r_bar + h(R_bar,P_bar,a) * x_bar so we validate that
+    // R =? R_bar + h(R_bar,P_bar,a) * P_bar or R_bar + Q after verifying that Q is valid
     uint256 h = uint256(keccak256(abi.encodePacked(R_bar,P_bar,a))); // same as abi.encodePacked(R_bar[0],R_bar[1],P_bar[0],P_bar[1],a)
     require(ecmulVerify(P_bar[0],P_bar[1],h,Q[0],Q[1]),'Q != h(R_bar,P_bar,a)*P_bar');
     (R_bar[0], R_bar[1]) = ecadd(R_bar[0], R_bar[1], Q[0], Q[1]);
@@ -385,6 +406,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   function getConvertions(address R_a) public view
   returns(uint)
   {
+    // sum how many convertions R has identified by his address R_a
     uint cnt = 0;
     for(uint i = 1; i <= N; i++) {
       cnt += convert[R_a][i];
@@ -392,27 +414,21 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return cnt;
   }
 
-  function convertTestVerify(uint256 s, uint256[2] S, uint n, bytes32 m) private view
-  {
-    uint256 Px = Pxs[n];
-    uint256 Py = Pys[n];
-    require(Px != 0 || Py != 0, 'P not defined for n');
-    require(verify(s, S, [Px, Py], m), 'signature failed');
-  }
-
   /////////// Cache code
   struct SaInfo {
-    uint256[2] S;
-    uint n;
-    address from;
-    address influencer;
-    uint8 cut;
+    uint256[2] S;  // s*G of an aggregated signature s
+    uint n; // the number of hopes aggregated in s
+    address from; // the fake address of the influencer that came before the last
+    address influencer; // the fake address of the last influencer that contributed to s
+    uint8 cut; // the cut of the last influencer
   }
-  mapping(address => SaInfo) public Sa2Info;
+  mapping(address => SaInfo) public Sa2Info;  // map from Sa, address of S, to a structure
 
   function getSa(bytes Rs, bytes Qs, address Sa0) public view
   returns(address Sa, uint n)
   {
+    // return the Sa, Sn of the last Sa stored in contract
+    // Sa starts with Sa0 and add all the following influencers in Rs, each with their precomputed Qs
     uint256[2] memory S;
     if (Sa0 != address(0)) {
       SaInfo info = Sa2Info[Sa0];
@@ -438,17 +454,17 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
   function setSa2Info(bytes Rs, bytes Qs, bytes cuts, address Sa) private
   returns (uint256[2] memory S, uint n, address Sa1)
   {
-    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i])*P[i]
-    // and the code will verify that the computation is true
-
+    // Set all the SaInfo structure starting from pre existing Sa (that was at hope Sn) and then adding elements from:
+    // Rs,Qs and cuts (after verifying Qs[i]=h(Rs[i]|cuts[i])*P[i+Sn])
+    // computing a new Sa and its new SaInfo
+    // returning the last Sa, its hope n, and its address Sa1
     if (Sa != address(0)) {
       SaInfo info = Sa2Info[Sa];
       n = info.n+1;
       S = info.S;
     } else {
-      S[1] = 0;
-      S[1] = 0;
+//      S[0] = 0;
+//      S[1] = 0;
       n = 1;
     }
     address[] memory influencers = verifyQ(Rs, Qs, cuts, n);
@@ -466,11 +482,25 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     }
   }
 
+  function convertTestVerify(uint256 s, uint256[2] S, uint n, bytes32 m) private view
+  {
+    // verify that s*G =? S + m*P[n]
+    uint256 Px = Pxs[n];
+    uint256 Py = Pys[n];
+    require(Px != 0 || Py != 0, 'P not defined for n');
+    require(verify(s, S, [Px, Py], m), 'signature failed');
+  }
+
   function convertTestCache(uint256 s, uint256[2] R, bytes Rs, bytes Qs, bytes cuts, address Sa, address a) public
   {
-    // instead of computing h(R[i])*P[i] the sender needs to supply a precomputed value
-    // Qs[i] = h(R[i])*P[i]
-    // and the code will verify that the computation is true
+    // convert user a by using aggregated signature s, masking R and array of Rs, cuts and Qs for all influencers
+    // that came after Sa (that was at hope Sn)
+    // populate all the SaInfo for all Sa of the influencers in Rs this will verify that Qs[i]=h(Rs[i]|cuts[i])*P[i+Sn]
+    // and get the final S (sum of Rs and Qs)
+    // and then verify that
+    // s*G = R + hash(R|a)*P[n+Sn] + S
+    // Qs are the precomputed h(Rs[i]|cuts[i])*P[i] of each influencer
+    // the convert count of each influencer 'i' is incremented for hope location 'i+1'
     uint n;
     uint256[2] memory S;
     (S, n, Sa) = setSa2Info(Rs, Qs, cuts, Sa);
