@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const plasmaPK = crypto.randomBytes(32).toString('hex');
             const address = web3.eth.defaultAccount;
             // web3.eth.defaultBlock = 'pending';
-            const twoKey = new TwoKeyProtocol();
-            await twoKey.setWeb3({
+            const twoKey = new TwoKeyProtocol({
                 web3,
                 // @ts-ignore
                 eventsNetUrl: [plasmaInput.value],

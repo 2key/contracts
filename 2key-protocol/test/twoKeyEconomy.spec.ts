@@ -6,8 +6,8 @@ require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
 const rpcUrls = [env.RPC_URL];
-const mainNetId = env.MAIN_NET_ID;
-const syncTwoKeyNetId = env.SYNC_NET_ID;
+const networkId = parseInt(env.MAIN_NET_ID, 10);
+const privateNetworkId = parseInt(env.SYNC_NET_ID, 10);
 const eventsNetUrls = [env.PLASMA_RPC_URL];
 
 let twoKeyProtocol: TwoKeyProtocol;
@@ -34,11 +34,12 @@ describe('Tests for TwoKeyEconomy ERC20 contract' , () => {
     it('should check token name', async() => {
         const {web3, address} = web3switcher.deployer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol();
-        await twoKeyProtocol.setWeb3({
+        twoKeyProtocol = new TwoKeyProtocol({
             web3,
             eventsNetUrls,
             plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
+            networkId,
+            privateNetworkId,
         });
 
         let tokenName = await twoKeyProtocol.ERC20.getTokenName(twoKeyProtocol.twoKeyEconomy.address);
