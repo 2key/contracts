@@ -49,7 +49,7 @@ module.exports = function deploy(deployer) {
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyCPCCampaignPlasma);
         deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma);
-        deployer.link(IncentiveModels);
+        deployer.link(IncentiveModels, TwoKeyCPCCampaignPlasma);
         deployer.deploy(TwoKeyCPCCampaignPlasma)
             .then(() => TwoKeyCPCCampaignPlasma.deployed())
             .then(async() => {
