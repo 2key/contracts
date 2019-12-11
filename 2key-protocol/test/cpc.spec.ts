@@ -298,6 +298,15 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.joinAndConvert(campaignAddress, links.gmail.link, twoKeyProtocol.plasmaAddress, {fSecret: links.gmail.fSecret});
     }).timeout(TIMEOUT_LENGTH);
 
+
+    it('should get active influencers before conversion is approved', async() => {
+        printTestNumber();
+
+        let activeInfluencers = await twoKeyProtocol.TwoKeyCPCCampaign.getActiveInfluencers(campaignAddress);
+        expect(activeInfluencers.length).to.be.equal(0);
+    }).timeout(TIMEOUT_LENGTH);
+
+
     it('should approve converter from maintainer and distribute rewards', async() => {
         printTestNumber();
 
@@ -320,6 +329,7 @@ describe('CPC campaign', () => {
         expect(influencers.length).to.be.equal(2);
     }).timeout(TIMEOUT_LENGTH);
 
+
     it('should get rewards received by influencers', async() => {
         printTestNumber();
 
@@ -330,6 +340,7 @@ describe('CPC campaign', () => {
         expect(balanceB).to.be.equal(1.5);
     }).timeout(TIMEOUT_LENGTH);
 
+
     it('should get conversion object from the plasma chain', async() => {
         printTestNumber();
 
@@ -339,4 +350,11 @@ describe('CPC campaign', () => {
         expect(conversion.bountyPaid).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString()));
     }).timeout(TIMEOUT_LENGTH);
 
+
+    it('should get active influencers', async() => {
+        printTestNumber();
+
+        let activeInfluencers = await twoKeyProtocol.TwoKeyCPCCampaign.getActiveInfluencers(campaignAddress);
+        expect(activeInfluencers.length).to.be.equal(2);
+    }).timeout(TIMEOUT_LENGTH);
 });
