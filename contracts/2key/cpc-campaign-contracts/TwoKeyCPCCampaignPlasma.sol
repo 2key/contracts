@@ -192,7 +192,16 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     view
     returns (uint,uint,uint,uint[],address)
     {
-        uint len = _conversionIds.length;
+
+        if(_sig.length > 0) {
+            _referrerAddress = recover(_sig);
+        }
+        else {
+//            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
+            _referrerAddress = plasmaOf(_referrerAddress);
+        }
+
+    uint len = _conversionIds.length;
         uint[] memory earnings = new uint[](len);
 
         for(uint i=0; i<len; i++) {
