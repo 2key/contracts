@@ -18,6 +18,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
+    uint constant public N = 2048;
+
     IncentiveModel model;
 
     string public targetUrl;
@@ -26,11 +28,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     //Active influencer means that he has at least on participation in successful conversion
     address[] public activeInfluencers;
     mapping(address => bool) isActiveInfluencer;
+    mapping(address => uint) activeInfluencer2idx;
 
     mapping(address => bool) isConverter;
     mapping(address => bool) isApprovedConverter;
 
-    bytes32 public merkle_root;
+    bytes32 public merkleRoot;
     bytes32[] public merkle_roots;
 
 
@@ -72,6 +75,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         balances[_contractor] = totalSupply_;
 
         isCampaignInitialized = true;
+    }
+
+
+    modifier contractNotLocked {
+        require(merkleRoot == 0);
+        _;
     }
 
     /**
@@ -163,6 +172,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         address converter
     )
     public
+    contractNotLocked
     onlyMaintainer
     {
         //Restricting this method to 1 call per converter
@@ -194,11 +204,11 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
 
         if(_sig.length > 0) {
-            _referrerAddress = recover(_sig);
+//            _referrerAddress = recover(_sig);
         }
         else {
 //            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
-            _referrerAddress = plasmaOf(_referrerAddress);
+            _referrerAddress = _referrerAddress;
         }
 
     uint len = _conversionIds.length;
@@ -233,9 +243,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     function convert(
         bytes signature
     )
+    contractNotLocked
     public
     {
-        require(merkle_root == 0);
+        require(merkleRoot == 0);
         convertInternal(signature, msg.sender);
 
         // Create conversion
@@ -260,57 +271,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     }
 
 
-    function resetMerkleRoot()
-    public
-    onlyMaintainer
-    {
-        // TODO this needs to be blocked or only used when using Epoches
-        merkle_root = bytes32(0);
-        if (merkle_roots.length > 0) {
-            delete merkle_roots;
-        }
-    }
-
-    /**
-     * @notice set a merkle root of the amount each (active) influencer received.
-     *         (active influencer is an influencer that received a bounty)
-     *         the idea is that the contractor calls computeMerkleRoot on plasma and then set the value manually
-     */
-    function setMerkleRoot(
-        bytes32 _merkle_root
-    )
-    public
-    onlyMaintainer
-    {
-        require(merkle_root == 0, 'merkle root already defined');
-        merkle_root = _merkle_root;
-    }
-
-
-    function computeMerkleRoot()
-    public
-    onlyMaintainer
-    {
-        require(merkle_root == 0, 'merkle root already defined');
-
-        uint numberOfInfluencers = activeInfluencers.length;
-        if (numberOfInfluencers == 0) {
-            // lock the contract without any influencer
-            merkle_root = bytes32(1);
-            return;
-        }
-
-        bytes32[] memory hashes = new bytes32[](numberOfInfluencers);
-        uint i;
-        for (i = 0; i < numberOfInfluencers; i++) {
-            address influencer = activeInfluencers[i];
-            uint amount = referrerPlasma2Balances2key[influencer];
-            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-        }
-        merkle_root = MerkleProof.computeMerkleRootInternal(hashes);
-    }
-
-
     /**
      * @notice compute a merkle root of the active influencers and the amount they received.
      *         (active influencer is an influencer that received a bounty)
@@ -321,24 +281,22 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
      *         Once you the leaves are computed you need to call this function one more time to compute the
      *         merkle_root of the entire tree from the intermidate results in merkle_roots
      */
-    function computeMerkleRoots(
-        uint N // maximnal number of leafs we are going to process in each call. for example 2**11
-    )
+    function computeMerkleRoots()
     public
     onlyMaintainer
     {
-        require(merkle_root == 0 || merkle_root == 2, 'merkle root already defined');
+        require(merkleRoot == 0 || merkleRoot == 2, 'merkle root already defined');
 
         uint numberOfInfluencers = activeInfluencers.length;
         if (numberOfInfluencers == 0) {
-            merkle_root = bytes32(1);
+            merkleRoot = bytes32(1);
             return;
         }
-        merkle_root = bytes32(2); // indicate that the merkle root is being computed
+        merkleRoot = bytes32(2); // indicate that the merkle root is being computed
 
         uint start = merkle_roots.length * N;
         if (start >= numberOfInfluencers) {
-            merkle_root = MerkleProof.computeMerkleRootInternal(merkle_roots);
+            merkleRoot = MerkleProof.computeMerkleRootInternal(merkle_roots);
             return;
         }
 
@@ -365,6 +323,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     internal
     {
         if(!isActiveInfluencer[_influencer]) {
+            activeInfluencer2idx[_influencer] = activeInfluencers.length;
             activeInfluencers.push(_influencer);
             isActiveInfluencer[_influencer] = true;
         }
@@ -428,6 +387,86 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         }
     }
 
+    /**
+     * @notice compute a merkle proof that influencer and amount are in one of the merkle_roots.
+     *       this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
+     * @param _influencer the influencer for which we want to get a Merkle proof
+     * @return index to merkle_roots
+     * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle_roots[index],
+     *                 which prove that (_influencer,amount) are inside the root.
+     *
+     * The returned proof is only the first part of a proof to merkle_root.
+     * The idea is that the code here does some of the work and the dApp code does the rest of the work to get a full proof
+     * See https://github.com/2key/web3-alpha/commit/105b0b17ab3d20662b1e2171d84be25089962b68
+     */
+    function getMerkleProofBaseFromRoots(
+        address _influencer // get proof for this influencer
+    )
+    internal
+    view
+    returns (uint, bytes32[])
+    {
+
+        if (isActiveInfluencer[_influencer] == false) {
+            return (0, new bytes32[](0));
+        }
+
+        uint influencer_idx = activeInfluencer2idx[_influencer];
+
+        uint start = N * (influencer_idx / N);
+
+        influencer_idx = influencer_idx.sub(start);
+
+        uint n = activeInfluencers.length.sub(start);
+
+        if (n > N) {
+            n = N;
+        }
+
+        bytes32[] memory hashes = new bytes32[](n);
+        uint i;
+
+        for (i = 0; i < n; i++) {
+            address influencer = activeInfluencers[i+start];
+            uint amount = referrerPlasma2Balances2key[influencer];
+            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+        }
+
+        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
+    }
+
+    /**
+     * @notice compute a merkle proof that influencer and amount are in the the merkle_root.
+     *       this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
+     * @return proof - array of hashes that can be used with _influencer and amount to compute the merkle_root,
+     *                 which prove that (_influencer,amount) are inside the root.
+     */
+    function getMerkleProofFromRoots()
+    public
+    view
+    returns (bytes32[])
+    {
+        address _influencer = msg.sender;
+        bytes32[] memory proof0;
+        uint start;
+        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
+        if (proof0.length == 0) {
+            return proof0; // return failury
+        }
+        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
+        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
+        uint i;
+        for (i = 0; i < proof0.length; i++) {
+            proof[i] = proof0[i];
+        }
+        for (i = 0; i < proof1.length; i++) {
+            proof[i+proof0.length] = proof1[i];
+        }
+
+        return proof;
+    }
+
+
     function updateReferrerMappings(
         address referrerPlasma,
         uint reward,
@@ -453,6 +492,13 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return activeInfluencers;
     }
 
+    function getProofForWithdrawingRewards()
+    public
+    view
+    returns (bytes32[])
+    {
+
+    }
 
 
 }

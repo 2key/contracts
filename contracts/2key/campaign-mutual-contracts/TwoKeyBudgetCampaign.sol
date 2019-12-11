@@ -14,6 +14,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
 	 */
+	mapping(address => bool) areRewardsWithdrawn;
+	mapping(address => uint) amountInfluencerEarned;
 
 	// Dollar to 2key rate in WEI at the moment of adding inventory
 	uint public usd2KEYrateWei;
@@ -27,18 +29,27 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	//Amount for rewards inventory
 	uint public rewardsInventoryAmount;
 
+
 	/**
      * @notice Internal function to check the balance of the specific ERC20 on this contract
-     * @param tokenAddress is the ERC20 contract address
      */
-	function getTokenBalance(
-		address tokenAddress
-	)
+	function getTokenBalance()
 	internal
 	view
 	returns (uint)
 	{
-		return IERC20(tokenAddress).balanceOf(address(this));
+		address twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
+		return IERC20(twoKeyEconomy).balanceOf(address(this));
+	}
+
+	function transferERC20(
+		address receiver,
+		uint amount
+	)
+	internal
+	{
+		address twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
+		IERC20(twoKeyEconomy).transfer(receiver, amount);
 	}
 
 
@@ -72,8 +83,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyContractor
 	{
-		address twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
-		require(getTokenBalance(twoKeyEconomy) == 0);
+		require(getTokenBalance() == 0);
 
 		IERC20(twoKeyEconomy).transferFrom(msg.sender, address(this), _amount);
 
@@ -89,7 +99,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	returns (uint)
 	{
 		require(ITwoKeyCampaignLogicHandler(logicHandler).canContractorWithdrawRemainingRewardsInventory() == true);
-		uint campaignRewardsBalance = getTokenBalance(twoKeyEconomy);
+		uint campaignRewardsBalance = getTokenBalance();
 
 		uint rewardsNotSpent = campaignRewardsBalance.sub(reservedAmount2keyForRewards);
 		if(rewardsNotSpent > 0) {

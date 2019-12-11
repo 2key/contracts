@@ -70,4 +70,51 @@ library MerkleProof {
     }
     return hashes[0];
   }
+
+  function getMerkleProofInternal(
+    uint influencer_idx,
+    bytes32[] hashes
+  )
+  internal
+  view
+  returns (bytes32[])
+  {
+    uint numberOfInfluencers = hashes.length;
+    uint logN = 0;
+    while ((1<<logN) < numberOfInfluencers) {
+      logN++;
+    }
+    bytes32[] memory proof = new bytes32[](logN);
+    logN = 0;
+    while (numberOfInfluencers>1) {
+      for (uint i = 0; i < numberOfInfluencers; i+=2) {
+        bytes32 h0 = hashes[i];
+        bytes32 h1;
+        if (i+1 < numberOfInfluencers) {
+          h1 = hashes[i+1];
+        }
+        if (influencer_idx == i) {
+          proof[logN] = h1;
+        } else if  (influencer_idx == i+1) {
+          proof[logN] = h0;
+        }
+        if (h0 < h1) {
+          hashes[i>>1] = keccak256(abi.encodePacked(h0,h1));
+        } else {
+          hashes[i>>1] = keccak256(abi.encodePacked(h1,h0));
+        }
+      }
+      influencer_idx >>= 1;
+      if ((numberOfInfluencers & (numberOfInfluencers - 1)) != 0) {
+        // numberOfInfluencers is not a power of two.
+        // make sure that on the next iteration it will be
+        numberOfInfluencers >>= 1;
+        numberOfInfluencers++;
+      } else {
+        numberOfInfluencers >>= 1;
+      }
+      logN++;
+    }
+    return proof;
+  }
 }

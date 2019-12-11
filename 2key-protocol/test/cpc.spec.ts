@@ -253,7 +253,7 @@ describe('CPC campaign', () => {
 
     it('should create a join link by gmail', async () => {
         printTestNumber();
-
+        console.log('CMP', campaignAddress);
         const {web3, address} = web3switcher.gmail();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -333,8 +333,8 @@ describe('CPC campaign', () => {
     it('should get rewards received by influencers', async() => {
         printTestNumber();
 
-        let balanceA = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress,influencers[0]);
-        let balanceB = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress,influencers[1]);
+        let balanceA = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalanceInFloat(campaignAddress,influencers[0]);
+        let balanceB = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalanceInFloat(campaignAddress,influencers[1]);
 
         expect(balanceA).to.be.equal(1.5);
         expect(balanceB).to.be.equal(1.5);
@@ -356,5 +356,53 @@ describe('CPC campaign', () => {
 
         let activeInfluencers = await twoKeyProtocol.TwoKeyCPCCampaign.getActiveInfluencers(campaignAddress);
         expect(activeInfluencers.length).to.be.equal(2);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should lock contract (end campaign) from maintainer', async() => {
+        printTestNumber();
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.lockContractFromMaintainer(campaignAddress, twoKeyProtocol.plasmaAddress);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should copy the merkle root from plasma to the mainchain by maintainer', async() => {
+        printTestNumber();
+        let root = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleRootFromPlasma(campaignAddress);
+        console.log('Plasma root:', root)
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.setMerkleRootOnMainchain(campaignPublicAddress,root, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        let rootOnPublic = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleRootFromPublic(campaignPublicAddress);
+        expect(root).to.be.equal(rootOnPublic);
+    }).timeout(TIMEOUT_LENGTH);
+
+
+    it('should get merklee proof from roots as an influencer', async() => {
+        printTestNumber();
+
+        const {web3, address} = web3switcher.test();
+        from = address;
+        twoKeyProtocol.setWeb3({
+            web3,
+            eventsNetUrls,
+            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
+            networkId,
+            privateNetworkId,
+        });
+
+        let proofs = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
+        expect(proofs.length).to.be.greaterThan(0);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should check merkle proof on the main chain from influencer address', async() => {
+        printTestNumber();
+        let isProofValid = await twoKeyProtocol.TwoKeyCPCCampaign.checkMerkleProofAsInfluencer(campaignAddress, campaignPublicAddress, twoKeyProtocol.plasmaAddress);
+        expect(isProofValid).to.be.equal(true);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should withdraw tokens as an influencer with his proof', async() => {
+        printTestNumber();
+        let influencerEarnings = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
+        let proofs = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
+
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, twoKeyProtocol.plasmaAddress, influencerEarnings, from);
+
     }).timeout(TIMEOUT_LENGTH);
 });
