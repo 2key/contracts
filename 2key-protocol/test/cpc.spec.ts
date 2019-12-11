@@ -253,7 +253,6 @@ describe('CPC campaign', () => {
 
     it('should create a join link by gmail', async () => {
         printTestNumber();
-        console.log('CMP', campaignAddress);
         const {web3, address} = web3switcher.gmail();
         from = address;
         twoKeyProtocol.setWeb3({
@@ -366,7 +365,6 @@ describe('CPC campaign', () => {
     it('should copy the merkle root from plasma to the mainchain by maintainer', async() => {
         printTestNumber();
         let root = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleRootFromPlasma(campaignAddress);
-        console.log('Plasma root:', root)
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.setMerkleRootOnMainchain(campaignPublicAddress,root, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         let rootOnPublic = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleRootFromPublic(campaignPublicAddress);
