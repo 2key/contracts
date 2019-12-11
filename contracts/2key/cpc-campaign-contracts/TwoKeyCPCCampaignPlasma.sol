@@ -492,13 +492,5 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return activeInfluencers;
     }
 
-    function getProofForWithdrawingRewards()
-    public
-    view
-    returns (bytes32[])
-    {
-
-    }
-
 
 }
