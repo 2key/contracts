@@ -33,6 +33,7 @@ module.exports = function deploy(deployer) {
 
     deployer.deploy(MerkleProof);
     deployer.deploy(Call);
+    deployer.deploy(IncentiveModels);
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.link(Call, TwoKeyCPCCampaign);
