@@ -32,6 +32,7 @@ const addNewContractVersion = (async (campaignName, deployedAddress, twoKeySingl
 module.exports = function deploy(deployer) {
 
     deployer.deploy(MerkleProof);
+    deployer.deploy(Call);
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.link(Call, TwoKeyCPCCampaign);
@@ -45,9 +46,9 @@ module.exports = function deploy(deployer) {
             .then(() => true);
     }
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
-        deployer.link(Call, TwoKeyCPCCampaignPlasma)
-        deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma)
-        deployer.link(IncentiveModels)
+        deployer.link(Call, TwoKeyCPCCampaignPlasma);
+        deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma);
+        deployer.link(IncentiveModels);
         deployer.deploy(TwoKeyCPCCampaignPlasma)
             .then(() => TwoKeyCPCCampaignPlasma.deployed())
             .then(async() => {
