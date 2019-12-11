@@ -7,27 +7,6 @@ const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry')
 const { incrementVersion } = require('../helpers');
 
 
-const approveVersion = (async(campaignName, contractType, twoKeySingletonesRegistryAddress) => {
-    await new Promise(async(resolve,reject) => {
-        try {
-            let instance = await TwoKeyPlasmaSingletoneRegistry.at(twoKeySingletonesRegistryAddress);
-            let version = await instance.getLatestAddedContractVersion(campaignName);
-
-            console.log('Last version: ' + version);
-            if(version === "1.0.0") {
-                let instance = await TwoKeyPlasmaSingletoneRegistry.at(twoKeySingletonesRegistryAddress);
-                console.log("Let's approve all initial versions for campaigns");
-                let txHash = await instance.approveCampaignVersionDuringCreation(contractType);
-                resolve(txHash);
-            } else {
-                resolve(true);
-            }
-        } catch (e) {
-            reject(e);
-        }
-    });
-});
-
 const addNewContractVersion = (async (campaignName, deployedAddress, twoKeySingletonRegistryAddress) => {
     console.log('... Adding implementation versions of CPC Campaign');
 
@@ -60,9 +39,7 @@ module.exports = function deploy(deployer) {
             .then(async () => {
                 await addNewContractVersion("TwoKeyCPCCampaign", TwoKeyCPCCampaign.address, TwoKeySingletonesRegistry.address);
             })
-            .then(async () => {
-                await approveVersion("TwoKeyCPCCampaign", "CPC_PUBLIC", TwoKeySingletonesRegistry.address);
-            })
+
             .then(() => true);
     }
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
@@ -73,12 +50,8 @@ module.exports = function deploy(deployer) {
             .then(async() => {
                 await addNewContractVersion("TwoKeyCPCCampaignPlasma", TwoKeyCPCCampaignPlasma.address, TwoKeyPlasmaSingletoneRegistry.address);
             })
-            .then(async () => {
-                await approveVersion("TwoKeyCPCCampaignPlasma", "CPC_PLASMA", TwoKeyPlasmaSingletoneRegistry.address);
-            })
             .then(() => true);
     }
-
 }
 
 
