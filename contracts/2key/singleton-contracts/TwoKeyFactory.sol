@@ -285,7 +285,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             _nonSingletonHash
         );
 
-        //Emit event that CPCCampaign contract is created
+        //Emit event that TwoKeyCPCCampaign contract is created
         ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource))
         .cpcCampaignCreated(
             proxyCPC,
