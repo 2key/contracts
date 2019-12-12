@@ -395,12 +395,24 @@ describe('CPC campaign', () => {
         expect(isProofValid).to.be.equal(true);
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should withdraw tokens as an influencer with his proof', async() => {
+    it('should withdraw more than he earned tokens as an influencer with his proof', async() => {
+        printTestNumber();
+        let influencerEarnings = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
+        let proofs = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
+        influencerEarnings = influencerEarnings + "0";
+        try {
+            let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, influencerEarnings, from);
+        } catch (e) {
+            console.log('Failed as expected');
+            expect(1).to.be.equal(1);
+        }
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should try to withdraw invalid amount of tokens', async() => {
         printTestNumber();
         let influencerEarnings = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
         let proofs = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
 
         let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, influencerEarnings, from);
-
     }).timeout(TIMEOUT_LENGTH);
 });
