@@ -414,5 +414,12 @@ describe('CPC campaign', () => {
         let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
 
         let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, influencerEarnings, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
+
+    it('should check the amount of the tokens withdrawn', async() => {
+        printTestNumber();
+        let addressBalance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, from);
+        console.log(addressBalance);
+    })
 });
