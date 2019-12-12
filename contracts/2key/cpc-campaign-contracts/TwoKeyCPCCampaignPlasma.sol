@@ -11,6 +11,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversionWei; //amount of 2key tokens which are going to be paid per conversion
+
     uint public maxNumberOfConversions;
     uint numberOfExecutedConversions;
 
@@ -25,6 +26,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     string public targetUrl;
     address public mirrorCampaignOnPublic; // Address of campaign deployed to public eth network
 
+
     //Active influencer means that he has at least on participation in successful conversion
     address[] public activeInfluencers;
     mapping(address => bool) isActiveInfluencer;
@@ -34,7 +36,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     mapping(address => bool) isApprovedConverter;
 
     bytes32 public merkleRoot;
-    bytes32[] public merkle_roots;
+    bytes32[] merkle_roots;
 
 
     struct Conversion {

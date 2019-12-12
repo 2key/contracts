@@ -93,7 +93,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     }
 
     function getPlasmaOf(address _a)
-    public
+    internal
     view
     returns (address)
     {
