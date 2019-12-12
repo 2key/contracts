@@ -43,6 +43,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
 
+        twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
+
         // Set the moderator of the campaign
         moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
@@ -90,13 +92,22 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         merkleRoot = _merkleRoot;
     }
 
+    function getPlasmaOf(address _a)
+    public
+    view
+    returns (address)
+    {
+        return twoKeyEventSource.plasmaOf(_a);
+    }
+
     function submitProofAndWithdrawRewards(
         bytes32 [] proof,
-        address influencerPlasma,
         uint amount
     )
     public
     {
+        address influencerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+
         //Validating that this is the amount he earned
         require(checkMerkleProof(influencerPlasma,proof,amount), 'proof is invalid');
 

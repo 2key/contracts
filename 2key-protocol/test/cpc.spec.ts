@@ -400,7 +400,7 @@ describe('CPC campaign', () => {
         let influencerEarnings = await twoKeyProtocol.TwoKeyCPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
         let proofs = await twoKeyProtocol.TwoKeyCPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
 
-        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, twoKeyProtocol.plasmaAddress, influencerEarnings, from);
+        let txHash = await twoKeyProtocol.TwoKeyCPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, influencerEarnings, from);
 
     }).timeout(TIMEOUT_LENGTH);
 });
