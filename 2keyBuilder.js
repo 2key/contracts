@@ -25,7 +25,19 @@ const tenderlyDir = path.join(__dirname, 'tenderlyConfigurations');
 const buildArchPath = path.join(twoKeyProtocolDir, 'contracts{branch}.tar.gz');
 let deployment = process.env.FORCE_DEPLOYMENT || false;
 
-const { runProcess, runDeployCampaignMigration, runUpdateMigration, rmDir, getGitBranch, slack_message, sortMechanism, ipfsAdd, ipfsGet, runCPCMigration, runDeployCPCCampaignMigration } = require('./helpers');
+const {
+    runProcess,
+    runDeployCampaignMigration,
+    runUpdateMigration,
+    rmDir,
+    getGitBranch,
+    slack_message,
+    sortMechanism,
+    ipfsAdd,
+    ipfsGet,
+    runCPCMigration,
+    runDeployCPCCampaignMigration
+} = require('./helpers');
 
 
 const branch_to_env = {
@@ -50,8 +62,22 @@ const getDiffBetweenLatestTags = async () => {
     const tagsStaging = (await contractsGit.tags()).all.filter(item => item.endsWith('-staging')).sort(sortMechanism);
     let latestTagStaging = tagsStaging[tagsStaging.length-1];
 
+
+    const tagsMaster = (await contractsGit.tags()).all.filter(item => item.endsWith('-master')).sort(sortMechanism);
+    let latestTagMaster = tagsMaster[tagsMaster.length-1];
+
     let status = await contractsGit.status();
-    let diffParams = status.current == 'staging' ? [latestTagDev,latestTagStaging] : [latestTagDev];
+    let diffParams;
+
+    if(status.current == 'staging') {
+        diffParams = latestTagStaging;
+    } else if(status.current == 'develop') {
+        diffParams = latestTagDev;
+    } else if(status.current == 'master') {
+        diffParams = latestTagMaster;
+    }
+
+
     let diffAllContracts = (await contractsGit.diffSummary(diffParams)).files.filter(item => item.file.endsWith('.sol')).map(item => item.file);
 
     let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
