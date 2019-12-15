@@ -30,7 +30,6 @@ const TwoKeyPlasmaCongressMembersRegistry = artifacts.require('TwoKeyPlasmaCongr
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
-
 const fs = require('fs');
 const path = require('path');
 
@@ -175,5 +174,6 @@ module.exports = function deploy(deployer) {
             .then(() => TwoKeyPlasmaRegistry.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaSingletoneRegistry)) //adding empty admin address
             .then(() => TwoKeyPlasmaSingletoneRegistry.deployed())
+            .then(() => true);
     }
 }

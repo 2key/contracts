@@ -14,9 +14,7 @@ import {ITxReceiptOpts} from "../src/utils/interfaces";
 
 const { env } = process;
 
-const rpcUrl = env.RPC_URL;
-const mainNetId = env.MAIN_NET_ID;
-const syncTwoKeyNetId = env.SYNC_NET_ID;
+const rpcUrls = [env.RPC_URL];
 
 let web3: any;
 let from: string;
@@ -63,7 +61,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         if (!web3) {
             console.log('Creating TwoKeyProtocol instance');
-            const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrl);
+            const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls);
             from = address;
             web3 = web3Instance;
         }

@@ -15,8 +15,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     bool boughtRewardsWithEther;
 
-    uint public X;
-
+    uint BUG_FIX_VAR; //TODO: DELETE THIS ONCE ANDRII FINISHES TESTING
     uint public usd2KEYrateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
@@ -47,9 +46,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         contractor = _contractor;
         moderator = _moderator;
 
-        twoKeySingletonesRegistry = _twoKeySingletonesRegistry;
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
-        twoKeyEventSource = TwoKeyEventSource(getContractProxyAddress("TwoKeyEventSource"));
+        twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
         twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
 
         maxReferralRewardPercent = values[0];
@@ -69,7 +68,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         ownerPlasma = twoKeyEventSource.plasmaOf(contractor);
         received_from[ownerPlasma] = ownerPlasma;
         balances[ownerPlasma] = totalSupply_;
-
 
 
         logicHandler = _twoKeyAcquisitionLogicHandler;
@@ -109,7 +107,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         boughtRewardsWithEther = true;
         uint amountOfTwoKeys = buyTokensFromUpgradableExchange(msg.value, address(this));
-        uint rateUsdToEth = ITwoKeyExchangeRateContract(getContractProxyAddress("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
+        uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
 
         usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
     }
@@ -142,6 +140,20 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         return conversionAmountCampaignCurrency;
     }
 
+    /**
+     * @notice Function to join with signature and share 1 arc to the receiver
+     * @param signature is the signature
+     * @param receiver is the address we're sending ARCs to
+     */
+    function joinAndShareARC(
+        bytes signature,
+        address receiver
+    )
+    public
+    {
+        distributeArcsBasedOnSignature(signature, msg.sender);
+        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
+    }
 
     /**
      * @notice Function where converter can convert
@@ -207,20 +219,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
 
-    /**
-     * @notice Function to join with signature and share 1 arc to the receiver
-     * @param signature is the signature
-     * @param receiver is the address we're sending ARCs to
-     */
-    function joinAndShareARC(
-        bytes signature,
-        address receiver
-    )
-    public
-    {
-        distributeArcsBasedOnSignature(signature, msg.sender);
-        transferFrom(twoKeyEventSource.plasmaOf(msg.sender), twoKeyEventSource.plasmaOf(receiver), 1);
-    }
 
     /*
      * @notice Function which is executed to create conversion
@@ -289,7 +287,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
                 if(usd2KEYrateWei == 0) {
-                    usd2KEYrateWei = (IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange")).sellRate2key());
+                    usd2KEYrateWei = (IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key());
                 }
                 totalBounty2keys = ((_maxReferralRewardETHWei.mul(10**18)).div(usd2KEYrateWei));
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
@@ -308,6 +306,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         return totalBounty2keys;
     }
 
+    // comment
 
     /**
      * @notice Move some amount of ERC20 from our campaign to someone
@@ -465,9 +464,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
             if(boughtRewardsWithEther == false) {
                 withdrawRemainingRewardsInventory();
             } else {
-                if(block.timestamp >= ITwoKeyAdmin(getContractProxyAddress("TwoKeyAdmin")).getTwoKeyRewardsReleaseDate() == true) {
+                if(block.timestamp >= ITwoKeyAdmin(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin")).getTwoKeyRewardsReleaseDate() == true) {
                     uint rewardsNotSpent = withdrawRemainingRewardsInventory();
-                    IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange"))
+                    IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange"))
                         .report2KEYWithdrawnFromNetwork(rewardsNotSpent);
                 }
             }

@@ -15,6 +15,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 /**
  * @author Nikola Madjarevic
+ * @notice Contract to validate and whitelist campaigns
  * Created at 2/12/19
  */
 contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
@@ -109,6 +110,20 @@ contract TwoKeyCampaignValidator is Upgradeable, ITwoKeySingletonUtils {
 
         PROXY_STORAGE_CONTRACT.setString(keccak256(_campaign2NonSingletonHash,campaign), nonSingletonHash);
 
+        emitCreatedEvent(campaign);
+    }
+
+    function validateCPCCampaign(
+        address campaign,
+        string nonSingletonHash
+    )
+    public
+    onlyTwoKeyFactory
+    {
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignValidated,campaign), true);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_campaign2NonSingletonHash,campaign), nonSingletonHash);
+
+        //Emit event that is created with moderator contractor and campaign address
         emitCreatedEvent(campaign);
     }
 

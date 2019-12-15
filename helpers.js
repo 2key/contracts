@@ -80,6 +80,20 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
 });
 
 /**
+ * This is function to run when we want to update our cpc campaigns
+ * @param network
+ * @returns {Promise<any>}
+ */
+const runDeployCPCCampaignMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '9', '--to', '9', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+/**
  * If there's a need to update, we'll run this function
  * @param network
  * @param contractName
@@ -88,7 +102,24 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
 const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
     try {
         console.log("Running update migration");
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '7', '--network', network, 'update', contractName]);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '7', '--to', '7', '--network', network, 'update', contractName]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+/**
+ *
+ * @param network
+ * @param contractName
+ * @returns {Promise<any>}
+ */
+const runCPCMigration = (network) => new Promise(async(resolve,reject) => {
+    try {
+        console.log("Running update migration");
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '8', '--to', '8', '--network', network]);
         resolve(true);
     } catch (e) {
         reject(e);
@@ -343,5 +374,7 @@ module.exports = {
     checkArgumentsForUpdate,
     sortMechanism,
     ipfsAdd,
-    ipfsGet
+    ipfsGet,
+    runCPCMigration,
+    runDeployCPCCampaignMigration
 };

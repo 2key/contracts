@@ -35,7 +35,7 @@ Create file named `accountsConfig.json` in the ./configurationFiles directory an
   "address" : "0xb3fa520368f2df7bed4df5185101f303f6c7decc",
   "mnemonic" : "laundry version question endless august scatter desert crew memory toy attract cruel",
   "mnemonic_private" : "<EMPTY_FOR_NOW>",
-  "infuraApiKey" : "<EMPTY_FOR_NOW>"
+  "infura_id" : "<EMPTY_FOR_NOW>"
 }
 ```
 
