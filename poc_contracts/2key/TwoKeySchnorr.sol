@@ -222,6 +222,9 @@ contract SECP2561k {
   function point_hash( uint256[2] point )
   public pure returns(address)
   {
+    if (point[0] == 0 && point[1] == 0) {
+      return address(0);
+    }
     return address(uint256(keccak256(abi.encodePacked(point[0], point[1]))) & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
   }
 
@@ -248,6 +251,11 @@ contract SECP2561k {
     address signer = sbmul_add_mul(0, [x1, y1], scalar);
     return point_hash([qx, qy]) == signer;
   }
+  function ecmulVerify1(uint256[2] x, uint256 scalar, uint256[2] q) public pure
+  returns(bool)
+  {
+    return point_hash(q) == sbmul_add_mul(0, x, scalar);
+  }
 
   function publicKey(uint256 privKey) public pure
   returns(uint256 qx, uint256 qy)
@@ -273,6 +281,10 @@ contract SECP2561k {
 }
 
 contract TwoKeySchnorr is SECP2561k, Ownable {
+  event Log1iB(string s, uint256 units, bytes b);
+  event Log1A(string s, address a);
+  event Log1iA(string s, uint i, address a);
+
   mapping(uint => uint) private Pxs; // x component of #hope => Public of link secret for that hope
   mapping(uint => uint) private Pys; // y component of #hope => Public of link secret for that hope
   uint N; // maximal number of hopes allowed (number of public keys stored in Pxs, Pys)
@@ -353,25 +365,48 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     }
   }
 
-  function convertVerify(uint256 s, uint256[2] R, bytes Rs, bytes Qs, address a) private view
+  function convertVerify(uint256 s, uint256[2] R, bytes Rs, bytes Qs, address a, bytes cuts) private view
+  returns(address[] influencers)
   {
     // verify convertion of a using aggregated signature s, masking R and array of Rs and Qs for all influencers
     // verify s*G = R + hash(R|a)*P[n] + sum Rs + sum Qs
     // n is taken from the length of Rs
     // Qs are the precomputed h(Rs[i]|cuts[i])*P[i] of each influencer
-    uint n = Rs.length / 64 + 1;
+//    address Sa;
+    uint256[2] memory S;
+    uint n = 1;
+//    require(Rs.length%64 == 0 && Rs.length == Qs.length, 'Rs/Qs bad length');
+    influencers = new address[](Rs.length/64);
+//    uint i = 0;
+    for(uint idx = 0; idx < Rs.length; idx+=64) {
+//      uint256[2] memory Ri = Call.loadPair(Rs,idx);
+//      uint256[2] memory Qi = Call.loadPair(Qs,idx);
+//      uint8 cut = Call.loadUint8(cuts,n-1);
+
+      uint256 h = uint256(keccak256(abi.encodePacked(Call.loadPair(Rs,idx),Call.loadUint8(cuts,n-1))));
+      influencers[n-1] = address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+//      emit Log1iA('h', idx, point_hash(S));
+      h = uint256(keccak256(abi.encodePacked(point_hash(S),h)));  // [uint256(0),uint256(0)] point_hash(S)
+      require(ecmulVerify1([Pxs[n],Pys[n]],h,Call.loadPair(Qs,idx)),'Qs[i] != h(Rs[i]|cuts[i])*P[i]');
+
+      S = ecadd2(S, Call.loadPair(Rs,idx));
+      S = ecadd2(S, Call.loadPair(Qs,idx));
+//      Sa = point_hash(S);
+
+//      i++;
+      n++;
+    }
+    S = ecadd2(S, R);
+
+//    uint n = Rs.length / 64 + 1;
     uint256 Px = Pxs[n];
     uint256 Py = Pys[n];
     require(Px != 0 || Py != 0, 'P not defined for n');
+
     bytes32 m = keccak256(abi.encodePacked(R,a));
 
-    for(uint idx = 0; idx < Rs.length; idx+=64) {
-      R = ecadd2(R, Call.loadPair(Rs,idx));
-      R = ecadd2(R, Call.loadPair(Qs,idx));
-    }
-
     // verify s*G = R + m*P
-    require(verify(s, R, [Px, Py], m), 'signature failed');
+    require(verify(s, S, [Px, Py], m), 'signature failed');
   }
 
   function convertTest(uint256 s, uint256[2] R, bytes Rs, bytes Qs, bytes cuts, address a) public
@@ -381,8 +416,8 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     // s*G = R + hash(R|a)*P[n] + sum Rs[i]+h(Rs[i]|cuts[i])*P[i]
     // Qs are the precomputed h(Rs[i]|cuts[i])*P[i] of each influencer
     // the convert count of each influencer 'i' is incremented for hope location 'i+1'
-    address[] memory influencers = verifyQ(Rs, Qs, cuts, 1);
-    convertVerify(s, R, Rs, Qs, a);
+    address[] memory influencers = convertVerify(s, R, Rs, Qs, a, cuts); // verifyQ(Rs, Qs, cuts, 1);
+
     for(uint i = 0; i < Rs.length>>6; i++) {
       convert[influencers[i]][i+1]++;  // record that Ri|cut contributed to a convertion at hope i
     }
@@ -414,7 +449,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     return cnt;
   }
 
-  /////////// Cache code
+/////////// Cache code
   struct SaInfo {
     uint256[2] S;  // s*G of an aggregated signature s
     uint n; // the number of hopes aggregated in s
@@ -423,6 +458,13 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     uint8 cut; // the cut of the last influencer
   }
   mapping(address => SaInfo) public Sa2Info;  // map from Sa, address of S, to a structure
+
+  function getSa2Sxy(address Sa) public view
+  returns(bytes32 Sx, bytes32 Sy)
+  {
+    Sx = bytes32(Sa2Info[Sa].S[0]);
+    Sy = bytes32(Sa2Info[Sa].S[1]);
+  }
 
   function getSa(bytes Rs, bytes Qs, address Sa0) public view
   returns(address Sa, uint n)
@@ -467,17 +509,26 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
 //      S[1] = 0;
       n = 1;
     }
-    address[] memory influencers = verifyQ(Rs, Qs, cuts, n);
+//    address[] memory influencers = verifyQ(Rs, Qs, cuts, n);
+//    address[] memory influencers = new address[](Rs.length/64);
 
     for(uint idx = 0; idx < Rs.length; idx+=64) {
       uint256[2] memory R = Call.loadPair(Rs,idx);
       uint256[2] memory Q = Call.loadPair(Qs,idx);
+
+      uint256 h = uint256(keccak256(abi.encodePacked(R,Call.loadUint8(cuts,idx/64))));
+      address influencer = address(h & 0x00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+//      emit Log1iA('Sa last', n, Sa);
+      h = uint256(keccak256(abi.encodePacked(Sa,h)));  // address(0x00523e17232fdc5657625128ec06216eb07debe531) [uint256(0),uint256(0)] point_hash(S)
+      require(ecmulVerify1([Pxs[n],Pys[n]],h,Q),'Qs[i] != h(Rs[i]|cuts[i])*P[i]');
+
       S = ecadd2(S, R);
       S = ecadd2(S, Q);
       Sa1 = point_hash(S);
-      Sa2Info[Sa1] = SaInfo(S, n, Sa, influencers[idx/64], uint8(cuts[idx/64]));
+      Sa2Info[Sa1] = SaInfo(S, n, Sa, influencer, uint8(cuts[idx/64]));
 
       Sa = Sa1;
+//      emit Log1iA('Sa next', n, Sa);
       n++;
     }
   }
@@ -506,7 +557,7 @@ contract TwoKeySchnorr is SECP2561k, Ownable {
     (S, n, Sa) = setSa2Info(Rs, Qs, cuts, Sa);
     S = ecadd2(S, R);
 
-    convertTestVerify(s, S, n, keccak256(abi.encodePacked(R,a)));
+//    convertTestVerify(s, S, n, keccak256(abi.encodePacked(R,a)));
 
     while (Sa != address(0)) {
       SaInfo info = Sa2Info[Sa];
