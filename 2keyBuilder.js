@@ -387,7 +387,6 @@ async function deployUpgrade(networks) {
                         await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 }
-
             }
         }
         if(campaignsToBeUpgraded.length > 0) {
