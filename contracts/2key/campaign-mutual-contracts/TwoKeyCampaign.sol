@@ -278,25 +278,6 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 
 	/**
-     * @notice Function to set or update public meta hash
-     * @param _publicMetaHash is the hash of the campaign
-     * @dev Only contractor can call this
-     */
-	function startCampaignWithInitialParams(
-		string _publicMetaHash,
-		string _privateMetaHash,
-		address _publicKey
-	)
-	public
-	onlyContractor
-	{
-		publicMetaHash = _publicMetaHash;
-		privateMetaHash = _privateMetaHash;
-		setPublicLinkKeyOf(msg.sender, _publicKey);
-	}
-
-
-	/**
      * @notice Function to update referrer plasma balance
      * @param _influencer is the plasma address of referrer
      * @param _balance is the new balance
