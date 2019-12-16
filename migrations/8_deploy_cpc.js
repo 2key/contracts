@@ -24,32 +24,6 @@ if (fs.existsSync(proxyFile)) {
     fileObject = JSON.parse(fs.readFileSync(proxyFile, { encoding: 'utf8' }));
 }
 
-const instantiateConfigs = ((deployer) => {
-    let deploymentObject = {};
-    if (fs.existsSync(deploymentConfigFile)) {
-        deploymentObject = JSON.parse(fs.readFileSync(deploymentConfigFile, {encoding: 'utf8'}));
-    }
-
-    let deploymentNetwork;
-
-    if (deployer.network.startsWith('dev') || deployer.network.startsWith('plasma-test')) {
-        deploymentNetwork = 'dev-local-environment'
-    }
-    else if (
-        deployer.network.startsWith('public.test') ||
-        deployer.network.startsWith('public.staging') ||
-        deployer.network.startsWith('private.test') ||
-        deployer.network.startsWith('private.staging'))
-    {
-        deploymentNetwork = 'ropsten-environment';
-    }
-    else if(deployer.network.startsWith('public.prod') ||deployer.network.startsWith('private.prod')) {
-        deploymentNetwork = 'production'
-    }
-
-    return deploymentObject[deploymentNetwork];
-});
-
 
 const addNewContractVersion = (async (campaignName, deployedAddress, twoKeySingletonRegistryAddress) => {
     console.log('... Adding implementation versions of CPC Campaign');

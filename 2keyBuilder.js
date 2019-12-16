@@ -395,9 +395,9 @@ async function deployUpgrade(networks) {
             }
         }
 
-        if(cpcChanged.length > 0) {
-            await runDeployCPCCampaignMigration(networks[i]);
-        }
+        // if(cpcChanged.length > 0) {
+        //     await runDeployCPCCampaignMigration(networks[i]);
+        // }
         /* eslint-enable no-await-in-loop */
     }
     await archiveBuild();
