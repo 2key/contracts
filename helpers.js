@@ -86,7 +86,7 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
  */
 const runDeployCPCCampaignMigration = (network) => new Promise(async(resolve, reject) => {
     try {
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '9', '--to', '9', '--network', network]);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '9', '--to', '9', '--network', network, 'update_cpc']);
         resolve(true);
     } catch (e) {
         reject(e);

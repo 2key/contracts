@@ -31,6 +31,19 @@ const addNewContractVersion = (async (campaignName, deployedAddress, twoKeySingl
 
 module.exports = function deploy(deployer) {
 
+    let flag = false;
+    process.argv.forEach((argument) => {
+        if(argument === 'update_cpc') {
+            flag = true;
+        }
+    });
+
+    if(flag == false) {
+        console.log('No update will be performed');
+        return;
+    }
+
+
     deployer.deploy(MerkleProof);
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
