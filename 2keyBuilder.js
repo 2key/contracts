@@ -373,6 +373,8 @@ async function deployUpgrade(networks) {
         console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
         console.log('Campaigns to be upgraded: ', campaignsToBeUpgraded);
         console.log('CPC contracts changed: ', cpcChanged);
+
+
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */
@@ -395,9 +397,9 @@ async function deployUpgrade(networks) {
             }
         }
 
-        // if(cpcChanged.length > 0) {
-        //     await runDeployCPCCampaignMigration(networks[i]);
-        // }
+        if(cpcChanged.length > 0) {
+            await runDeployCPCCampaignMigration(networks[i]);
+        }
         /* eslint-enable no-await-in-loop */
     }
     await archiveBuild();
