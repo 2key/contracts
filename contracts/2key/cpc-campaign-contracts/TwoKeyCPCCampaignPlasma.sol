@@ -68,11 +68,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         campaignStartTime = numberValues[0];
         campaignEndTime = numberValues[1];
-        maxReferralRewardPercent = numberValues[2];
-        conversionQuota = numberValues[3];
-        totalSupply_ = numberValues[4];
-        incentiveModel = IncentiveModel(numberValues[5]);
-        bountyPerConversionWei = numberValues[6];
+        conversionQuota = numberValues[2];
+        totalSupply_ = numberValues[3];
+        incentiveModel = IncentiveModel(numberValues[4]);
+        bountyPerConversionWei = numberValues[5];
         received_from[_contractor] = _contractor;
         balances[_contractor] = totalSupply_;
 

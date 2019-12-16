@@ -63,7 +63,6 @@ let campaignObject = {
     incentiveModel: "VANILLA_AVERAGE",
     campaignStartTime : 0,
     campaignEndTime : 9884748832,
-    maxReferralRewardPercent: 20,
     bountyPerConversionWei: 3
 };
 
