@@ -362,7 +362,7 @@ const checkIfContractIsPlasma = (contractName) => {
     return false;
 };
 
-async function deployUpgrade(networks) {
+async function deployUpgrade(networks, args) {
     console.log(networks);
     const l = networks.length;
 
@@ -465,7 +465,7 @@ async function deploy() {
 
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
-                await deployUpgrade(networks);
+                await deployUpgrade(networks, process.argv);
             } else if(process.argv.includes('cpc')) {
                 await deployCPC(networks);
             }
