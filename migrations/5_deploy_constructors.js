@@ -395,7 +395,7 @@ module.exports = function deploy(deployer) {
                             TwoKeyPlasmaSingletoneRegistry.address,
                             contractNameToProxyAddress["TwoKeyPlasmaMaintainersRegistryStorage"],
                             maintainerAddresses,
-                            []
+                            coreDevs
                         );
                         resolve(txHash);
                     } catch (e) {
