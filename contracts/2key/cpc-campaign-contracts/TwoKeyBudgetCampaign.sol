@@ -10,6 +10,7 @@ import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
  */
 contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
+	bool isInventoryAdded;
 	/**
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
@@ -63,7 +64,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	payable
 	{
 		//It can be called only ONCE per campaign
-		require(usd2KEYrateWei == 0);
+		require(isInventoryAdded == false);
 
 		boughtRewardsWithEther = true;
 		rewardsInventoryAmount = buyTokensFromUpgradableExchange(msg.value, address(this));
@@ -71,6 +72,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
 		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(rewardsInventoryAmount); //0.1 DOLLAR
+
+		isInventoryAdded = true;
 	}
 
 	/**
@@ -83,12 +86,11 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyContractor
 	{
-		require(getTokenBalance() == 0);
-
+		require(isInventoryAdded == false);
 		IERC20(twoKeyEconomy).transferFrom(msg.sender, address(this), _amount);
 
 		rewardsInventoryAmount = _amount;
-
+		isInventoryAdded = true;
 	}
 
 
