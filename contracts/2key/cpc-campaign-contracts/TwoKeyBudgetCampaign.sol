@@ -87,7 +87,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyContractor
 	{
 		require(isInventoryAdded == false);
-		IERC20(twoKeyEconomy).transferFrom(msg.sender, address(this), _amount);
+		require(getTokenBalance() == _amount);
 
 		rewardsInventoryAmount = _amount;
 		isInventoryAdded = true;
