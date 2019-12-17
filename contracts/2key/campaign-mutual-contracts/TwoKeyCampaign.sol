@@ -4,59 +4,30 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/IERC20.sol";
-import "../libraries/SafeMath.sol";
-import "../libraries/Call.sol";
-import "./ArcToken.sol";
+import "./TwoKeyCampaignAbstract.sol";
 
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
  */
-contract TwoKeyCampaign is ArcToken {
-
-	using SafeMath for uint256;
-	using Call for *;
-
-	uint constant HUNDRED_PERCENT = 100;
+contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 	TwoKeyEventSource twoKeyEventSource; // Address of TwoKeyEventSource contract
 
 	address public conversionHandler; // Contract which will handle all conversions
 	address public logicHandler;  // Contract which will handle logic
 
-	address twoKeySingletonesRegistry; // Address of Registry of all singleton contracts
 	address twoKeyEconomy; // Address of twoKeyEconomy contract
 	address ownerPlasma; //contractor plasma address
 
-	address public contractor; //contractor address
-	address public moderator; //moderator address
 
 	bool isKYCRequired;
     bool mustConvertToReferr;
 
-	uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
+
 	uint256 contractorBalance; // Contractor balance
 	uint256 contractorTotalProceeds; // Contractor total earnings
-	uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
-	uint256 reservedAmount2keyForRewards; //Reserved amount of 2key tokens for rewards distribution
 
-	string public publicMetaHash; // Ipfs hash of json campaign object
-	string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
-
-
-	//Referral accounting stuff
-	mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
-	mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
-
-	mapping(address => address) public public_link_key;
-	mapping(address => address) internal received_from; // referral graph, who did you receive the referral from
-
-
-    // @notice Modifier which allows only contractor to call methods
-    modifier onlyContractor() {
-        require(msg.sender == contractor);
-        _;
-    }
 
 	/**
 	 * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
@@ -65,9 +36,17 @@ contract TwoKeyCampaign is ArcToken {
 		require(msg.sender == conversionHandler);
 		_;
 	}
-
+	/**
+	 * @notice Modifier to restrict access to logic handler for specific methods
+	 */
 	modifier onlyTwoKeyLogicHandler {
 		require(msg.sender == logicHandler);
+		_;
+	}
+
+	modifier onlyMaintainer {
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
 		_;
 	}
 
@@ -83,6 +62,7 @@ contract TwoKeyCampaign is ArcToken {
 		uint256 _value
 	)
 	internal
+	returns (bool)
 	{
 		// _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
 		require(_value == 1);
@@ -97,6 +77,7 @@ contract TwoKeyCampaign is ArcToken {
 		}
 
 		received_from[_to] = _from;
+		return true;
 	}
 
 
@@ -179,6 +160,7 @@ contract TwoKeyCampaign is ArcToken {
 
 		return (influencers, keys, weights, old_address);
 	}
+
 
 	/**
 	 * @notice Function to set cut of
@@ -265,7 +247,7 @@ contract TwoKeyCampaign is ArcToken {
 	onlyTwoKeyConversionHandler
 	{
 		//Get deep freeze token pool address
-		address twoKeyDeepFreezeTokenPool = getContractProxyAddress("TwoKeyDeepFreezeTokenPool");
+		address twoKeyDeepFreezeTokenPool = getAddressFromTwoKeySingletonRegistry("TwoKeyDeepFreezeTokenPool");
 
 		uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
 
@@ -313,19 +295,6 @@ contract TwoKeyCampaign is ArcToken {
 		setPublicLinkKeyOf(msg.sender, _publicKey);
 	}
 
-	/**
-	 * @notice Function to allow updating public meta hash
-	 * @param _newPublicMetaHash is the new meta hash
-	 */
-	function updateIpfsHashOfCampaign(
-		string _newPublicMetaHash
-	)
-	public
-	onlyContractor
-	{
-		publicMetaHash = _newPublicMetaHash;
-	}
-
 
 	/**
      * @notice Function to update referrer plasma balance
@@ -354,24 +323,9 @@ contract TwoKeyCampaign is ArcToken {
 	internal
 	returns (uint)
 	{
-		address upgradableExchange = getContractProxyAddress("TwoKeyUpgradableExchange");
+		address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
 		return amountBought;
-	}
-
-
-	/**
-     * @notice Getter for the referral chain
-     * @param _receiver is address we want to check who he has received link from
-     */
-	function getReceivedFrom(
-		address _receiver
-	)
-	public
-	view
-	returns (address)
-	{
-		return received_from[_receiver];
 	}
 
 	/**
@@ -457,10 +411,6 @@ contract TwoKeyCampaign is ArcToken {
 		return (referrerPlasma2Balances2key[twoKeyEventSource.plasmaOf(_influencer)]);
 	}
 
-	function getContractProxyAddress(string contractName) internal view returns (address) {
-		return ITwoKeySingletoneRegistryFetchAddress(twoKeySingletonesRegistry).getContractProxyAddress(contractName);
-	}
-
 	/**
 	 * @notice Function to get cut for an (ethereum) address
 	 * @param me is the ethereum address
@@ -512,8 +462,8 @@ contract TwoKeyCampaign is ArcToken {
 		address _referrer = twoKeyEventSource.plasmaOf(_address);
 
 		if(referrerPlasma2Balances2key[_referrer] != 0) {
-			twoKeyAdminAddress = getContractProxyAddress("TwoKeyAdmin");
-			twoKeyUpgradableExchangeContract = getContractProxyAddress("TwoKeyUpgradableExchange");
+			twoKeyAdminAddress = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+			twoKeyUpgradableExchangeContract = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
 			balance = referrerPlasma2Balances2key[_referrer];
 			referrerPlasma2Balances2key[_referrer] = 0;

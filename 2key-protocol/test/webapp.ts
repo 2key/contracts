@@ -6,27 +6,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const plasmaInput = document.getElementById('plasma');
     const mainNet = document.getElementById('mainNet');
     const plasmaNet = document.getElementById('plasmaNet');
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async(e) => {
         // @ts-ignore
         const { web3 } = window;
         if (web3 && web3.currentProvider && web3.eth.defaultAccount) {
             const plasmaPK = crypto.randomBytes(32).toString('hex');
             const address = web3.eth.defaultAccount;
             // web3.eth.defaultBlock = 'pending';
-            // @ts-ignore
-            window.TWOKEY = new TwoKeyProtocol({
+            const twoKey = new TwoKeyProtocol({
                 web3,
-                networks: {
-                    // @ts-ignore
-                    mainNetId: mainNet.value,
-                    // @ts-ignore
-                    syncTwoKeyNetId: plasmaNet.value,
-                },
                 // @ts-ignore
-                eventsNetUrl: plasmaInput.value,
+                eventsNetUrl: [plasmaInput.value],
                 plasmaPK,
                 log: console.log,
             });
+            // @ts-ignore
+            window.TWOKEY = twoKey;
             alert('Now you can user TWOKEY');
         } else {
             alert('Metamask plugin not found')

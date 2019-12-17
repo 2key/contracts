@@ -110,5 +110,15 @@ contract IHandleCampaignDeployment {
         address twoKeyDonationCampaign,
         address twokeyDonationConversionHandler
     ) public;
+
+
+    function setInitialParamsCPCCampaign(
+        address _contractor,
+        address _twoKeySingletonRegistry,
+        string _url,
+        address _mirrorCampaignOnPlasma,
+        uint _bountyPerConversion
+    )
+    public;
 }
 

@@ -5,6 +5,7 @@ const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAcquisitionLogicHandler = artifacts.require('TwoKeyAcquisitionLogicHandler');
 const TwoKeyRegistry = artifacts.require('TwoKeyRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
+const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeyCampaignValidator = artifacts.require('TwoKeyCampaignValidator');
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyDonationCampaign = artifacts.require('TwoKeyDonationCampaign');
@@ -12,16 +13,15 @@ const TwoKeyDonationConversionHandler = artifacts.require('TwoKeyDonationConvers
 const TwoKeyPurchasesHandler = artifacts.require('TwoKeyPurchasesHandler');
 const TwoKeyDonationLogicHandler = artifacts.require('TwoKeyDonationLogicHandler');
 
+const MerkleProof = artifacts.require('MerkleProof');
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
 
-const { incrementVersion, getConfigForTheBranch, checkIsHardRedeploy } = require('../helpers');
+const { incrementVersion } = require('../helpers');
 
 
 module.exports = function deploy(deployer) {
 
-    // let isHardRedeploy = checkIsHardRedeploy(process.argv);
-    // console.log(isHardRedeploy);
     let TWO_KEY_SINGLETON_REGISTRY_ADDRESS;
     let version;
 
@@ -72,10 +72,6 @@ module.exports = function deploy(deployer) {
                 console.log("... Adding implementation versions of Acquisition campaigns");
                 await new Promise(async(resolve,reject) => {
                     try {
-
-                        version = await instance.getLatestAddedContractVersion("TwoKeyAcquisitionCampaignERC20");
-                        version = incrementVersion(version);
-
                         let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
                         txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
                         txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
@@ -106,6 +102,7 @@ module.exports = function deploy(deployer) {
                 });
             })
             .then(() => true);
+    } else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+        console.log('No contracts for selected network');
     }
-
 }

@@ -7,7 +7,7 @@ contract TwoKeyPlasmaMaintainersRegistry is TwoKeyMaintainersRegistryAbstract {
     string constant _twoKeyPlasmaCongress = "TwoKeyPlasmaCongress";
 
     modifier onlyTwoKeyPlasmaCongress {
-        address twoKeyCongress = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCongress);
+        address twoKeyCongress = getCongressAddress();
         require(msg.sender == address(twoKeyCongress));
         _;
     }
@@ -84,4 +84,12 @@ contract TwoKeyPlasmaMaintainersRegistry is TwoKeyMaintainersRegistryAbstract {
         }
     }
 
+    function getCongressAddress()
+    public
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+        .getNonUpgradableContractAddress(_twoKeyPlasmaCongress);
+    }
 }

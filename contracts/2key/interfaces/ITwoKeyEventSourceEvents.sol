@@ -56,6 +56,12 @@ contract ITwoKeyEventSourceEvents {
     )
     external;
 
+    function cpcCampaignCreated(
+        address proxyCPC,
+        address contractor
+    )
+    external;
+
 
 
 }
