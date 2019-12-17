@@ -97,7 +97,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	/**
      * @notice Function to withdraw remaining rewards inventory in the contract
      */
-	function withdrawRemainingRewardsInventory() public onlyContractor
+	function withdrawRemainingRewardsInventory()
+    public
+    onlyContractor
 	returns (uint)
 	{
 		require(ITwoKeyCampaignLogicHandler(logicHandler).canContractorWithdrawRemainingRewardsInventory() == true);
