@@ -102,7 +102,6 @@ describe('CPC campaign', () => {
         campaignAddress = result.campaignAddress;
 
         links.deployer = { link: result.campaignPublicLinkKey, fSecret: result.fSecret };
-        campaignAddress = result.campaignAddress;
     }).timeout(TIMEOUT_LENGTH);
 
     it('should validate that mirroring is done well on plasma', async() => {
@@ -115,23 +114,23 @@ describe('CPC campaign', () => {
     it('should validate that mirroring is done well on public', async() => {
         printTestNumber();
 
-        const plasmaMirrorOnPublic = await twoKeyProtocol.CPCCampaign.getMirrorContractPublic(campaignPublicAddress);
+        const plasmaMirrorOnPublic = await twoKeyProtocol.CPCCampaign.getMirrorContractPublic(campaignAddress);
         expect(plasmaMirrorOnPublic).to.be.equal(campaignAddress);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should buy referral rewards on public contract by sending ether', async() => {
         printTestNumber();
-        let txHash = await twoKeyProtocol.CPCCampaign.buyTokensForReferralRewards(campaignPublicAddress, twoKeyProtocol.Utils.toWei(etherForRewards, 'ether'), from);
+        let txHash = await twoKeyProtocol.CPCCampaign.buyTokensForReferralRewards(campaignAddress, twoKeyProtocol.Utils.toWei(etherForRewards, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should show the rate of 2key at the moment bought and the amount of tokens in the inventory received', async() => {
         printTestNumber();
-        let amountOfTokensReceived = await twoKeyProtocol.CPCCampaign.getTokensAvailableInInventory(campaignPublicAddress);
+        let amountOfTokensReceived = await twoKeyProtocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
 
-        let boughtRate = await twoKeyProtocol.CPCCampaign.getBought2keyRate(campaignPublicAddress);
+        let boughtRate = await twoKeyProtocol.CPCCampaign.getBought2keyRate(campaignAddress);
         let eth2usd = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
         expect(amountOfTokensReceived*boughtRate).to.be.equal(etherForRewards*eth2usd);
     }).timeout(TIMEOUT_LENGTH);
@@ -155,7 +154,7 @@ describe('CPC campaign', () => {
 
     it('should set on plasma contract inventory amount from maintainer', async() => {
         printTestNumber();
-        let amountOfTokensAdded = await twoKeyProtocol.CPCCampaign.getTokensAvailableInInventory(campaignPublicAddress);
+        let amountOfTokensAdded = await twoKeyProtocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
         await twoKeyProtocol.CPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -185,7 +184,7 @@ describe('CPC campaign', () => {
             privateNetworkId,
         });
 
-        let txHash = await twoKeyProtocol.CPCCampaign.validatePublicContract(campaignPublicAddress, from);
+        let txHash = await twoKeyProtocol.CPCCampaign.validatePublicContract(campaignAddress, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -197,7 +196,7 @@ describe('CPC campaign', () => {
 
     it('should proof that public contract is validated well from maintainer side', async() => {
         printTestNumber();
-        let isContractValid = await twoKeyProtocol.CPCCampaign.checkIsPublicContractValid(campaignPublicAddress);
+        let isContractValid = await twoKeyProtocol.CPCCampaign.checkIsPublicContractValid(campaignAddress);
         expect(isContractValid).to.be.equal(true);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -364,9 +363,9 @@ describe('CPC campaign', () => {
     it('should copy the merkle root from plasma to the mainchain by maintainer', async() => {
         printTestNumber();
         let root = await twoKeyProtocol.CPCCampaign.getMerkleRootFromPlasma(campaignAddress);
-        let txHash = await twoKeyProtocol.CPCCampaign.setMerkleRootOnMainchain(campaignPublicAddress,root, from);
+        let txHash = await twoKeyProtocol.CPCCampaign.setMerkleRootOnMainchain(campaignAddress,root, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        let rootOnPublic = await twoKeyProtocol.CPCCampaign.getMerkleRootFromPublic(campaignPublicAddress);
+        let rootOnPublic = await twoKeyProtocol.CPCCampaign.getMerkleRootFromPublic(campaignAddress);
         expect(root).to.be.equal(rootOnPublic);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -390,7 +389,7 @@ describe('CPC campaign', () => {
 
     it('should check merkle proof on the main chain from influencer address', async() => {
         printTestNumber();
-        let isProofValid = await twoKeyProtocol.CPCCampaign.checkMerkleProofAsInfluencer(campaignAddress, campaignPublicAddress, twoKeyProtocol.plasmaAddress);
+        let isProofValid = await twoKeyProtocol.CPCCampaign.checkMerkleProofAsInfluencer(campaignAddress, twoKeyProtocol.plasmaAddress);
         expect(isProofValid).to.be.equal(true);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -400,19 +399,19 @@ describe('CPC campaign', () => {
         let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
         influencerEarnings = influencerEarnings + "0";
         try {
-            let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, influencerEarnings, from);
+            let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
         } catch (e) {
             console.log('Failed as expected');
             expect(1).to.be.equal(1);
         }
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should try to withdraw invalid amount of tokens', async() => {
+    it('should try to withdraw valid amount of tokens', async() => {
         printTestNumber();
         let influencerEarnings = await twoKeyProtocol.CPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
         let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
 
-        let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignPublicAddress, proofs, influencerEarnings, from);
+        let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
 
