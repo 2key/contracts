@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
-import "../campaign-mutual-contracts/TwoKeyPlasmaCampaign.sol";
 import "../libraries/MerkleProof.sol";
 import "../libraries/IncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../TwoKeyConversionStates.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
+import "./TwoKeyPlasmaCampaign.sol";
 
 
 contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {

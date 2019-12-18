@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "./TwoKeyCampaignAbstract.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-import "./TwoKeyCampaignIncentiveModels.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaignIncentiveModels.sol";
+import "../campaign-mutual-contracts/TwoKeyCampaignAbstract.sol";
 
 
 contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAbstract {
