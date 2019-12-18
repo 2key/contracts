@@ -20,6 +20,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         _;
     }
 
+    modifier isCampaignValidated {
+        require(isValidated == true);
+        _;
+    }
+
     /**
      * @dev Transfer tokens from one address to another
      * @param _from address The address which you want to send tokens from ALREADY converted to plasma

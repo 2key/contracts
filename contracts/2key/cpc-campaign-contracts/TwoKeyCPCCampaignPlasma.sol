@@ -175,6 +175,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     public
     contractNotLocked
     onlyMaintainer
+    isCampaignValidated
     {
         //Restricting this method to 1 call per converter
         require(isApprovedConverter[converter] == false);
@@ -245,6 +246,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         bytes signature
     )
     contractNotLocked
+    isCampaignValidated
     public
     {
         require(merkleRoot == 0);
@@ -314,9 +316,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
     }
 
-    function executeConversion(uint conversionID) public onlyMaintainer {
-
-    }
 
     function checkIsActiveInfluencerAndAddToQueue(
         address _influencer
