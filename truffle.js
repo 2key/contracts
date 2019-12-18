@@ -177,7 +177,7 @@ module.exports = {
       },
 
       'public.prod-ropsten-hdwallet': {
-          provider: () => new HDWalletProvider(mnemonic, rpcs["infura-ropsten"]),
+          provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
           skipDryRun: true,
           network_id: ids["staging-public"],
           gas: 8000000,
