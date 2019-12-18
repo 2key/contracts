@@ -16,7 +16,7 @@ const TIMEOUT_LENGTH = 60000;
 let i = 1;
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
-
+let addressBalanceBeforeConversion;
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
@@ -410,7 +410,6 @@ describe('CPC campaign', () => {
         try {
             let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
         } catch (e) {
-            console.log('Failed as expected');
             expect(1).to.be.equal(1);
         }
     }).timeout(TIMEOUT_LENGTH);
@@ -419,7 +418,8 @@ describe('CPC campaign', () => {
         printTestNumber();
         let influencerEarnings = await twoKeyProtocol.CPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
         let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
-
+        addressBalanceBeforeConversion = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, from);
+        addressBalanceBeforeConversion = parseInt(addressBalanceBeforeConversion,10);
         let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
@@ -427,6 +427,7 @@ describe('CPC campaign', () => {
     it('should check the amount of the tokens withdrawn', async() => {
         printTestNumber();
         let addressBalance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, from);
-        console.log(addressBalance);
+
+        expect(addressBalance).to.be.equal(addressBalanceBeforeConversion+1.5);
     }).timeout(TIMEOUT_LENGTH);
 });
