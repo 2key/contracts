@@ -22,14 +22,19 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     uint constant public N = 2048;
 
+    // Incentive model selected for campaign
     IncentiveModel model;
 
+    // Url being tracked
     string public targetUrl;
-    address public mirrorCampaignOnPublic; // Address of campaign deployed to public eth network
+
+    // Address of campaign deployed to public eth network
+    address public mirrorCampaignOnPublic;
 
 
     //Active influencer means that he has at least on participation in successful conversion
     address[] public activeInfluencers;
+
     mapping(address => bool) isActiveInfluencer;
     mapping(address => uint) activeInfluencer2idx;
 
