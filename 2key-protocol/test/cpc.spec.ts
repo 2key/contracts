@@ -128,6 +128,13 @@ describe('CPC campaign', () => {
     }).timeout(TIMEOUT_LENGTH);
 
 
+    it('should get private meta hash', async() => {
+        printTestNumber();
+
+        let privateMeta = await twoKeyProtocol.CPCCampaign.getPrivateMetaHash(campaignAddress, twoKeyProtocol.plasmaAddress);
+        expect(privateMeta.campaignPublicLinkKey).to.be.equal(links.deployer.link);
+    }).timeout(TIMEOUT_LENGTH);
+
     it('should buy referral rewards on public contract by sending ether', async() => {
         printTestNumber();
         let txHash = await twoKeyProtocol.CPCCampaign.buyTokensForReferralRewards(campaignAddress, twoKeyProtocol.Utils.toWei(etherForRewards, 'ether'), from);
