@@ -15,7 +15,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     bool boughtRewardsWithEther;
 
-    uint BUG_FIX_VAR; //TODO: DELETE THIS ONCE ANDRII FINISHES TESTING
     uint public usd2KEYrateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
 
