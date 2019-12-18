@@ -104,6 +104,15 @@ describe('CPC campaign', () => {
         links.deployer = { link: result.campaignPublicLinkKey, fSecret: result.fSecret };
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should get contractor plasma and public address', async() => {
+        printTestNumber();
+
+        const addresses = await twoKeyProtocol.CPCCampaign.getContractorAddresses(campaignAddress);
+        expect(addresses.contractorPlasma).to.be.equal(twoKeyProtocol.plasmaAddress);
+        expect(addresses.contractorPublic).to.be.equal(from);
+    }).timeout(TIMEOUT_LENGTH);
+
+
     it('should validate that mirroring is done well on plasma', async() => {
         printTestNumber();
 
@@ -114,7 +123,7 @@ describe('CPC campaign', () => {
     it('should validate that mirroring is done well on public', async() => {
         printTestNumber();
 
-        const plasmaMirrorOnPublic = await twoKeyProtocol.CPCCampaign.getMirrorContractPublic(campaignAddress);
+        const plasmaMirrorOnPublic = await twoKeyProtocol.CPCCampaign.getMirrorContractPublic(campaignPublicAddress);
         expect(plasmaMirrorOnPublic).to.be.equal(campaignAddress);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -419,5 +428,5 @@ describe('CPC campaign', () => {
         printTestNumber();
         let addressBalance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, from);
         console.log(addressBalance);
-    })
+    }).timeout(TIMEOUT_LENGTH);
 });

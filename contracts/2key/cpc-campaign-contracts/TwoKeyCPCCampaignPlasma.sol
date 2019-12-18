@@ -5,6 +5,7 @@ import "../libraries/MerkleProof.sol";
 import "../libraries/IncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../TwoKeyConversionStates.sol";
+import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 
 
 contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
@@ -65,7 +66,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         contractor = _contractor;
         moderator = _moderator;
         targetUrl = _url; // Set the contractor of the campaign
-
+        contractorPublicAddress = ethereumOf(_contractor);
         campaignStartTime = numberValues[0];
         campaignEndTime = numberValues[1];
         conversionQuota = numberValues[2];
@@ -492,5 +493,15 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return activeInfluencers;
     }
 
+    function ethereumOf(
+        address _address
+    )
+    internal
+    view
+    returns (address)
+    {
+        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        return ITwoKeyPlasmaRegistry(twoKeyPlasmaEventsRegistry).plasma2ethereum(_address);
+    }
 
 }

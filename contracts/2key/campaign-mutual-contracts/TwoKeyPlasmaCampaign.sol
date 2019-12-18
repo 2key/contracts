@@ -10,6 +10,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     IncentiveModel incentiveModel; //Incentive model for rewards
 
+    address public contractorPublicAddress;
+
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
 
