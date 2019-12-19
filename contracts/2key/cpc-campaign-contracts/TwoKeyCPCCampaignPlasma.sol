@@ -10,6 +10,7 @@ import "./TwoKeyPlasmaCampaign.sol";
 
 contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
 
+
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversionWei; //amount of 2key tokens which are going to be paid per conversion
 
@@ -20,7 +21,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
-    uint constant public N = 2048;
+    uint constant public N = 2048; //constant number
 
     // Incentive model selected for campaign
     IncentiveModel model;
