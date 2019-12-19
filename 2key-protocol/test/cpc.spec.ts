@@ -4,6 +4,7 @@ import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {expect} from "chai";
 import {promisify} from "../src/utils/promisify";
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
+import {TIMEOUT} from "dns";
 const { env } = process;
 
 const networkId = parseInt(env.MAIN_NET_ID, 10);
@@ -112,6 +113,13 @@ describe('CPC campaign', () => {
         expect(addresses.contractorPublic).to.be.equal(from);
     }).timeout(TIMEOUT_LENGTH);
 
+
+    it('should check if address is contractor', async() => {
+        printTestNumber();
+
+        let isContractor = await twoKeyProtocol.CPCCampaign.isAddressContractor(campaignPublicAddress, from);
+        expect(isContractor).to.be.equal(true);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should validate that mirroring is done well on plasma', async() => {
         printTestNumber();
