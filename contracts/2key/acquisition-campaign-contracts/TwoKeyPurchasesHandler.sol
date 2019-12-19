@@ -31,6 +31,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     address twoKeyEventSource;
 
 
+    uint maxConverterBonusPercent; // Maximal bonus percent per converter
     uint numberOfPurchases;
     uint bonusTokensVestingStartShiftInDaysFromDistributionDate;
     uint tokenDistributionDate; // Start of token distribution
@@ -71,10 +72,17 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
 
         tokenDistributionDate = values[2];
         maxDistributionDateShiftInDays = values[3];
-        numberOfVestingPortions = values[4];
         numberOfDaysBetweenPortions = values[5];
         bonusTokensVestingStartShiftInDaysFromDistributionDate = values[6];
         vestingAmount = VestingAmount(values[7]);
+        maxConverterBonusPercent = values[9];
+        if(vestingAmount == VestingAmount.BONUS && maxConverterBonusPercent > 0) {
+            numberOfVestingPortions = values[4] + 1;
+        } else if (vestingAmount == VestingAmount.BONUS) {
+            numberOfVestingPortions = 0;
+        } else {
+            numberOfVestingPortions = values[4];
+        }
         contractor = _contractor;
         assetContractERC20 = _assetContractERC20;
         twoKeyEventSource = _twoKeyEventSource;
@@ -90,7 +98,8 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
             for(i=1; i<numberOfVestingPortions; i++) {
                 portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
             }
-        } else { // ONLY BONUS
+        } else if(vestingAmount == VestingAmount.BONUS && maxConverterBonusPercent > 0) {
+            // ONLY BONUS
             //numberOfVestingPortions == number of portions of bonus only, meaning if numberOfVestingPortions==4, will be total of base + 4 portions of bonus
             bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
             for(i=1; i<numberOfVestingPortions+1; i++) {
@@ -127,13 +136,13 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     )
     internal
     {
-        uint [] memory portionAmounts = new uint[](numberOfVestingPortions+1);
-        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions+1);
+        uint [] memory portionAmounts = new uint[](numberOfVestingPortions);
+        bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions);
         portionAmounts[0] = _baseTokens;
 
         uint bonusPortionAmount = _bonusTokens.div(numberOfVestingPortions);
 
-        for(uint i=1; i<numberOfVestingPortions+1; i++) {
+        for(uint i=1; i<numberOfVestingPortions; i++) {
             portionAmounts[i] = bonusPortionAmount;
         }
 
@@ -190,6 +199,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         require(now < tokenDistributionDate);
 
         uint shift = tokenDistributionDate.sub(_newDate);
+
         // If the date is changed shifting all tokens unlocking dates for the difference
         for(uint i=0; i<numberOfVestingPortions;i++) {
             portionToUnlockingDate[i] = portionToUnlockingDate[i].add(shift);
