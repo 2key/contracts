@@ -445,4 +445,11 @@ describe('CPC campaign', () => {
 
         expect(addressBalance).to.be.equal(addressBalanceBeforeConversion+1.5);
     }).timeout(TIMEOUT_LENGTH);
+
+    it('should get counters from the campaign', async() => {
+        printTestNumber();
+
+        let counters = await twoKeyProtocol.CPCCampaign.getCampaignSummary(campaignAddress);
+        console.log(counters);
+    })
 });

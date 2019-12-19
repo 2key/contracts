@@ -15,8 +15,17 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     uint bountyPerConversionWei; //amount of 2key tokens which are going to be paid per conversion
 
     uint public maxNumberOfConversions;
-    uint numberOfExecutedConversions;
 
+    /**
+     pendingConverters
+     approvedConverters
+     rejectedConverters
+     pendingConversions
+     rejectedConversions
+     executedConversions
+     totalBounty
+     */
+    uint [] counters;
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
     mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
@@ -82,6 +91,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         received_from[_contractor] = _contractor;
         balances[_contractor] = totalSupply_;
 
+        counters = new uint[](8);
         isCampaignInitialized = true;
     }
 
@@ -193,13 +203,39 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         Conversion c = conversions[conversionId];
         c.state = ConversionState.EXECUTED;
 
-        if(numberOfExecutedConversions < maxNumberOfConversions) {
+        if(counters[5] < maxNumberOfConversions) {
             c.bountyPaid = bountyPerConversionWei;
             updateRewardsBetweenInfluencers(converter, conversionId);
         }
 
+        counters[0]--; //Decrement number of pending conversions
         //Increment number of executed conversions
-        numberOfExecutedConversions = numberOfExecutedConversions.add(1);
+        counters[1]++; //increment number approved converters
+        counters[5]++; //increment number of executed conversions
+        counters[6] = counters[6] + c.bountyPaid; // Total bounty paid
+    }
+
+
+    function rejectConverterAndConversion(
+        address converter
+    )
+    public
+    contractNotLocked
+    onlyMaintainer
+    isCampaignValidated
+    {
+        require(isApprovedConverter[converter] == false);
+
+        uint conversionId = converterToConversionId[converter];
+        Conversion c = conversions[conversionId];
+
+        require(c.state == ConversionState.PENDING_APPROVAL);
+        c.state = ConversionState.REJECTED;
+
+        counters[0]--; //reduce number of pending converters
+        counters[2]++; //increase number of rejected converters
+        counters[3]--; //reduce number of pending conversions
+        counters[4]++; //increase number of rejected conversions
     }
 
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
@@ -271,6 +307,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         uint conversionId = conversions.length;
         conversions.push(c);
         converterToConversionId[msg.sender] = conversionId;
+        counters[0]++; //Increase number of pending converters and conversions
+        counters[3]++; //Increase number of pending conversions
     }
 
     /**
@@ -508,6 +546,14 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
         address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
         return ITwoKeyPlasmaRegistry(twoKeyPlasmaEventsRegistry).plasma2ethereum(_address);
+    }
+
+    function getCounters()
+    public
+    view
+    returns (uint[])
+    {
+        return counters;
     }
 
 }
