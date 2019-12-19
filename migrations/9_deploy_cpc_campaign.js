@@ -43,11 +43,6 @@ module.exports = function deploy(deployer) {
         return;
     }
 
-
-    deployer.deploy(MerkleProof);
-    deployer.deploy(Call);
-    deployer.deploy(IncentiveModels);
-
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
         deployer.link(Call, TwoKeyCPCCampaign);
         deployer.link(MerkleProof, TwoKeyCPCCampaign);
@@ -60,7 +55,6 @@ module.exports = function deploy(deployer) {
             .then(() => true);
     }
     else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
-        console.log(deployer);
         deployer.link(Call, TwoKeyCPCCampaignPlasma);
         deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma);
         deployer.link(IncentiveModels, TwoKeyCPCCampaignPlasma);
