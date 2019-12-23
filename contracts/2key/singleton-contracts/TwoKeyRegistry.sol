@@ -23,6 +23,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     event UserNameChanged(address owner, string name);
 
 
+    // Internal function to check if address is maintainer
     function isMaintainer(address _caller) internal view returns (bool) {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
         return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_caller);

@@ -12,6 +12,7 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
     bool initialized;
     string constant message = "bytes binding to name";
 
+    // Pointer to storage contract
     ITwoKeySignatureValidatorStorage public PROXY_STORAGE_CONTRACT;
 
     /**
