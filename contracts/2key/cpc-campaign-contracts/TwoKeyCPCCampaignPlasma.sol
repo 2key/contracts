@@ -48,7 +48,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     mapping(address => bool) isActiveInfluencer;
     mapping(address => uint) activeInfluencer2idx;
 
-    mapping(address => bool) isConverter;
+    mapping(address => bool) public isConverter;
     mapping(address => bool) isApprovedConverter;
 
     bytes32 public merkleRoot;
