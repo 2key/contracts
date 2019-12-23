@@ -120,6 +120,9 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
         //Incrementing amount he has earned
         amountInfluencerEarned[msg.sender] = amount;
+
+        //TODO: Add event withdrawn msg.sender + amount
+        //TODO: Maintainer availability to submit withdraw instead of maintainer (meta tx)
     }
 
 }

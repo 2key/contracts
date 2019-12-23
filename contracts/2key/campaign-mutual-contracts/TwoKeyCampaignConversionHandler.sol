@@ -6,6 +6,7 @@ import "../libraries/SafeMath.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeyCampaignLogicHandler.sol";
 
 contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConverterStates {
 

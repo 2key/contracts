@@ -355,6 +355,15 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         campaignRaisedIncludingPendingConversions = newAmount;
     }
 
+    /**
+     * @notice Function to reduce total raised funds after the conversion is rejected
+     * @param amountToReduce is the amount of money we'll reduce from conversion total raised
+     */
+    function reduceTotalRaisedFundsAfterConversionRejected(uint amountToReduce) public {
+        require(msg.sender == conversionHandler);
+        campaignRaisedIncludingPendingConversions = campaignRaisedIncludingPendingConversions.sub(amountToReduce);
+    }
+
 
     function updateReferrerMappings(
         address referrerPlasma,

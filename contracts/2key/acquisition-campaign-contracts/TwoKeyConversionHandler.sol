@@ -364,8 +364,11 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     onlyContractorOrMaintainer
     {
         rejectConverterInternal(_converter);
+
         uint reservedAmount = 0;
-        uint refundAmount = 0;
+        uint ethRefundAmount = 0;
+        uint reservedInCampaignCurrencyAmount = 0;
+
         uint len = converterToHisConversions[_converter].length;
         for(uint i=0; i< len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
@@ -381,17 +384,26 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
                 c.state = ConversionState.REJECTED;
                 reservedAmount += c.baseTokenUnits.add(c.bonusTokenUnits);
                 if(c.isConversionFiat == false) {
-                    refundAmount = refundAmount.add(c.conversionAmount);
+                    ethRefundAmount = ethRefundAmount.add(c.conversionAmount);
                 }
+                reservedInCampaignCurrencyAmount = reservedInCampaignCurrencyAmount.add(conversionToCampaignCurrencyAmountAtTimeOfCreation[conversionId]);
             }
         }
 
+        // Return paid eth
         if(reservedAmount > 0) {
             twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
         }
 
-        if(refundAmount > 0) {
-            twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(_converter, refundAmount);
+        // Return tokens for refund
+        if(ethRefundAmount > 0) {
+            twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(_converter, ethRefundAmount);
+        }
+
+        // Release for Total raised requirement
+        if(reservedInCampaignCurrencyAmount > 0) {
+            address logicHandler = twoKeyCampaign.logicHandler();
+            ITwoKeyCampaignLogicHandler(logicHandler).reduceTotalRaisedFundsAfterConversionRejected(reservedInCampaignCurrencyAmount);
         }
 
         emitRejectedEvent(twoKeyCampaign, _converter);
