@@ -10,6 +10,7 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     using Call for *;
     bool initialized;
+    // using constants to avoid typos
     string constant message = "bytes binding to name";
 
     // Pointer to storage contract

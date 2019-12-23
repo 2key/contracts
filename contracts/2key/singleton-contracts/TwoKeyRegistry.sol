@@ -32,6 +32,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     /**
      * @notice Function which can be called only once
+     * used as a constructor
      */
     function setInitialParams(
         address _twoKeySingletonesRegistry,
