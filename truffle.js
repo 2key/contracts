@@ -15,7 +15,6 @@ const rpcs = {
     'test-public' : 'https://rpc-dev.public.test.k8s.2key.net',
     'test-private' : 'https://rpc-dev.private.test.k8s.2key.net',
     'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
-    // 'staging-public' : 'https://ropsten.tenderly.dev',
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
     'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
@@ -125,7 +124,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-private"]),
           skipDryRun: true,
           network_id: ids["staging-private"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 0,
       },
 
@@ -133,7 +132,7 @@ module.exports = {
           provider: createLedgerProvider(rpcs["staging-private"], ids["staging-private"]),
           skipDryRun: true,
           network_id: ids["staging-private"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 0,
       },
 
@@ -141,7 +140,7 @@ module.exports = {
           provider: createLedgerProvider(rpcs["prod-public"], ids["prod-public"]),
           skipDryRun: true,
           network_id: ids["prod-public"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 120000000000,
       },
 
@@ -149,7 +148,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["prod-public"]),
           skipDryRun: true,
           network_id: ids["prod-public"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 120000000000,
       },
 
@@ -157,7 +156,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["prod-private"]),
           skipDryRun: true,
           network_id: ids["prod-private"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 0,
       },
 
@@ -165,25 +164,25 @@ module.exports = {
           provider: createLedgerProvider(rpcs["prod-private"], ids["prod-private"]),
           skipDryRun: true,
           network_id: ids["prod-private"],
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: 0,
       },
 
       'plasma-test-local': {
           provider: () => new HDWalletProvider(mnemonic, 'https://rpc-staging.private.test.k8s.2key.net'),
           network_id: 182,
-          gas: 8000000,
+          gas: 7900000,
           gasPrice: '0x0',
           skipDryRun: true
       },
 
-      'public-infura-ropsten': {
-          provider: () => new HDWalletProvider(mnemonic, rpcs["infura-ropsten"]),
+      'public.prod-ropsten-hdwallet': {
+          provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
           skipDryRun: true,
-          network_id: ids["infura-ropsten"],
-          gas: 8000000,
-          gasPrice: 100000000000,
-      }
+          network_id: ids["staging-public"],
+          gas: 7900000,
+          gasPrice: 120000000000,
+      },
   },
 
     compilers: {
