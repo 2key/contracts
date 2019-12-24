@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 contract ITwoKeyDonationCampaign {
-
+    address public logicHandler;
     function buyTokensForModeratorRewards(
         uint moderatorFee
     )
