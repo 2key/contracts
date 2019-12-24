@@ -2,6 +2,10 @@ from web3 import Web3
 from eth_abi import encode_abi
 import sys
 
+def print_line():
+    print('--------------------------------------------------------------------------------------------------------')
+
+
 def generate_selector(method_name_and_params):
     method_selector = Web3.sha3(text = method_name_and_params)[0:4].hex()
     return method_selector
@@ -89,6 +93,8 @@ def generate_bytecode_for_adding_core_devs_plasma(core_dev):
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name
 
+    print('\n')
+
     if(arg1 == "transfer2KeyTokens"):
         generate_bytecode_for_transfering_tokens(sys.argv[2], sys.argv[3])
     if(arg1 == "upgradeContract"):
@@ -111,3 +117,5 @@ if __name__ == "__main__":
         generate_bytecode_for_adding_core_devs(sys.argv[2])
     if(arg1 == "addCoreDevsPlasma"):
         generate_bytecode_for_adding_core_devs_plasma(sys.argv[2])
+
+    print_line()
