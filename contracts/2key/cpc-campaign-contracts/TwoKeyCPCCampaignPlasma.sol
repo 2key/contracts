@@ -556,4 +556,35 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return counters;
     }
 
+    function getAddressJoinedStatus(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (bool)
+    {
+        if (
+            _plasmaAddress == contractor ||
+            getReceivedFrom(_plasmaAddress) != address(0) ||
+            balanceOf(_plasmaAddress) > 0
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    function getSuperStatistics(
+        address _address
+    )
+    public
+    view
+    returns (bool,bool,bool,address)
+    {
+        bool isReferrer = referrerPlasma2TotalEarnings2key[_address] > 0 ? true : false;
+        bool isAddressConverter = isApprovedConverter[_address];
+        bool isJoined = getAddressJoinedStatus(_address);
+
+        return (isReferrer, isAddressConverter, isJoined, ethereumOf(_address));
+    }
+
 }
