@@ -45,6 +45,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     //Active influencer means that he has at least on participation in successful conversion
     address[] public activeInfluencers;
 
+    // Mapping active influencers
     mapping(address => bool) isActiveInfluencer;
     mapping(address => uint) activeInfluencer2idx;
 
