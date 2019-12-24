@@ -268,6 +268,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         rejectConverterInternal(_converter);
         uint refundAmount = 0;
         uint len = converterToHisConversions[_converter].length;
+        uint reservedInCampaignCurrencyAmount = 0;
 
         for(uint i=0; i<len; i++) {
             uint conversionId = converterToHisConversions[_converter][i];
@@ -280,11 +281,18 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
                 ITwoKeyBaseReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")).updateOnConversionRejectedEvent(_converter, contractor, twoKeyCampaign);
                 c.state = ConversionState.REJECTED;
                 refundAmount = refundAmount.add(c.conversionAmount);
+                reservedInCampaignCurrencyAmount = reservedInCampaignCurrencyAmount.add(conversionToCampaignCurrencyAmountAtTimeOfCreation[conversionId]);
             }
         }
 
         if(refundAmount > 0) {
             twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(_converter, refundAmount);
+        }
+
+        // Release for Total raised requirement
+        if(reservedInCampaignCurrencyAmount > 0) {
+            address logicHandler = twoKeyCampaign.logicHandler();
+            ITwoKeyCampaignLogicHandler(logicHandler).reduceTotalRaisedFundsAfterConversionRejected(reservedInCampaignCurrencyAmount);
         }
 
         emitRejectedEvent(twoKeyCampaign, _converter);

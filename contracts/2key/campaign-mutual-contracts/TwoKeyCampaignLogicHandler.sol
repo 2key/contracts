@@ -257,9 +257,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         bool isJoined = getAddressJoinedStatus(_user);
         bool flag;
 
-        address _address;
-
-        bytes memory stats = getAddressStatistic(_user, plasma, _address);
+        bytes memory stats = getAddressStatistic(_user, plasma);
         return abi.encodePacked(userData, isJoined, eth_address, stats);
     }
 
@@ -298,8 +296,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
 
     function getAddressStatistic(
         address _address,
-        bool plasma,
-        address referrer
+        bool plasma
     )
     internal
     view

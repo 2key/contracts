@@ -451,5 +451,12 @@ describe('CPC campaign', () => {
 
         let counters = await twoKeyProtocol.CPCCampaign.getCampaignSummary(campaignAddress);
         console.log(counters);
-    })
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should get address stats', async() => {
+        printTestNumber();
+
+        let stats = await twoKeyProtocol.CPCCampaign.getAddressStatistic(campaignAddress, twoKeyProtocol.plasmaAddress);
+        console.log(stats);
+    }).timeout(TIMEOUT_LENGTH);
 });
