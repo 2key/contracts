@@ -12,7 +12,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
     ITwoKeyPlasmaEventsStorage public PROXY_STORAGE_CONTRACT;
 
-
     string constant _publicLinkKey = "public_link_key";
     string constant _influencer2cut = "influencer2cut";
     string constant _notes = "notes";
@@ -38,7 +37,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     bool initialized;
 
     event Visited(address indexed to, address indexed c, address indexed contractor, address from);  // the to is a plasma address, you should lookit up in plasma2ethereum
-
 
 
     event Plasma2Ethereum(
