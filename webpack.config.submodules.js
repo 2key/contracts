@@ -1,17 +1,12 @@
 const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-const nodeExternals = require('webpack-node-externals');
-
-const libraryName = {
-  acquisition: 'Acquisition',
-    donation: 'Donation'
-};
 
 const config = {
   entry: {
     acquisition: './2key-protocol/src/acquisition/index.ts',
-    donation: './2key-protocol/src/donation/index.ts'
+    donation: './2key-protocol/src/donation/index.ts',
+    cpc: './2key-protocol/src/cpc/index.ts'
   },
   devtool: 'source-map',
   output: {
@@ -33,8 +28,6 @@ const config = {
   resolve: {
     extensions: ['.ts', '.js'],
   },
-  // target: 'node',
-  // externals: [nodeExternals()],
   plugins: [
     new UglifyJsPlugin({
       sourceMap: true,

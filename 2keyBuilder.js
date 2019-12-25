@@ -496,7 +496,7 @@ async function deploy() {
         if(!local || process.env.FORCE_NPM) {
             process.chdir(twoKeyProtocolDist);
             const oldVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
-            if (process.env.NODE_ENV === 'production') {
+            if (process.env.NODE_ENV === 'production' || contractsStatus.current === 'master') {
                 await runProcess('npm', ['version', 'patch']);
             } else {
                 const { version } = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDist, 'package.json'), 'utf8'));
@@ -532,7 +532,7 @@ async function deploy() {
             await pushTagsToGithub(npmVersionTag);
 
             process.chdir(twoKeyProtocolDist);
-            if (process.env.NODE_ENV === 'production') {
+            if (process.env.NODE_ENV === 'production' || contractsStatus.current === 'master') {
                 await runProcess('npm', ['publish']);
             } else {
                 await runProcess('npm', ['publish', '--tag', contractsStatus.current]);
