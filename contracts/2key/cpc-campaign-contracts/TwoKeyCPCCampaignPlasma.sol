@@ -4,8 +4,9 @@ import "../libraries/MerkleProof.sol";
 import "../libraries/IncentiveModels.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../TwoKeyConversionStates.sol";
-import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 import "./TwoKeyPlasmaCampaign.sol";
+import "../interfaces/ITwoKeyPlasmaRegistry.sol";
+import "../interfaces/ITwoKeyPlasmaEvents.sol";
 
 
 contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
@@ -16,14 +17,16 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     uint public maxNumberOfConversions;
 
+    event ConversionCreated(uint conversionId);
+
     /**
-     pendingConverters
-     approvedConverters
-     rejectedConverters
-     pendingConversions
-     rejectedConversions
-     executedConversions
-     totalBounty
+     0 pendingConverters
+     1 approvedConverters
+     2 rejectedConverters
+     3 pendingConversions
+     4 rejectedConversions
+     5 executedConversions
+     6 totalBounty
      */
     uint [] counters;
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
@@ -43,7 +46,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
 
     //Active influencer means that he has at least on participation in successful conversion
-    address[] public activeInfluencers;
+    address[] activeInfluencers;
 
     // Mapping active influencers
     mapping(address => bool) isActiveInfluencer;
@@ -65,7 +68,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     Conversion [] conversions;
 
-    mapping(address => uint) converterToConversionId;
+    mapping(address => uint) public converterToConversionId;
 
     function setInitialParamsCPCCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
@@ -214,6 +217,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         counters[1]++; //increment number approved converters
         counters[5]++; //increment number of executed conversions
         counters[6] = counters[6] + c.bountyPaid; // Total bounty paid
+
+
+        //Emit event through TwoKeyEventSource that conversion is approved and executed
+        ITwoKeyPlasmaEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents")).emitConversionExecutedEvent(
+            conversionId
+        );
     }
 
 
@@ -310,6 +319,14 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         converterToConversionId[msg.sender] = conversionId;
         counters[0]++; //Increase number of pending converters and conversions
         counters[3]++; //Increase number of pending conversions
+
+        //Emit conversion event through TwoKeyPlasmaEvents
+        ITwoKeyPlasmaEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents")).emitConversionCreatedEvent(
+            mirrorCampaignOnPublic,
+            conversionId,
+            contractor,
+            msg.sender
+        );
     }
 
     /**
@@ -390,6 +407,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             c.state
         );
     }
+
 
     function updateRewardsBetweenInfluencers(
         address _converter,
@@ -564,11 +582,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     view
     returns (bool)
     {
-        if (
-            _plasmaAddress == contractor ||
-            getReceivedFrom(_plasmaAddress) != address(0) ||
-            balanceOf(_plasmaAddress) > 0
-        ) {
+        if (_plasmaAddress == contractor
+        || received_from[_plasmaAddress] != address(0)
+        || balanceOf(_plasmaAddress) > 0) {
             return true;
         }
         return false;

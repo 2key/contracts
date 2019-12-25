@@ -4,6 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaFactoryStorage.sol";
 import "../interfaces/IHandleCampaignDeploymentPlasma.sol";
+import "../interfaces/ITwoKeyPlasmaEvents.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 
 /**
@@ -15,13 +16,9 @@ contract TwoKeyPlasmaFactory is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
     string constant _addressToCampaignType = "addressToCampaignType";
-
+    string constant _isCampaignCreatedThroughFactory = "isCampaignCreatedThroughFactory";
     ITwoKeyPlasmaFactoryStorage PROXY_STORAGE_CONTRACT;
 
-    event ProxyForCPCCampaign(
-        address proxyCampaign,
-        address contractorPlasma
-    );
 
     function setInitialParams(
         address _twoKeyPlasmaSingletonRegistry,
@@ -83,10 +80,39 @@ contract TwoKeyPlasmaFactory is Upgradeable {
             numberValuesArray
         );
 
+        setCampaignCreatedThroughFactory(proxyPlasmaCPC);
         setAddressToCampaignType(proxyPlasmaCPC, "CPC_PLASMA");
-        emit ProxyForCPCCampaign(proxyPlasmaCPC, msg.sender);
+        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents");
+        ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitCPCCampaignCreatedEvent(proxyPlasmaCPC, msg.sender);
     }
 
+    /**
+     * @notice Internal function which will set that campaign is created through the factory
+     * and whitelist that address
+     * @param _campaignAddress is the campaign we want to set this rule
+     */
+    function setCampaignCreatedThroughFactory(
+        address _campaignAddress
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isCampaignCreatedThroughFactory, _campaignAddress), true);
+    }
+
+    /**
+     * @notice Getter to check if the campaign is created through TwoKeyPlasmaFactory
+     * which will whitelist it to emit all the events through TwoKeyPlasmaEvents
+     * @param _campaignAddress is the address of the campaign we want to check
+     */
+    function isCampaignCreatedThroughFactory(
+        address _campaignAddress
+    )
+    public
+    view
+    returns (bool)
+    {
+        return PROXY_STORAGE_CONTRACT.getBool(keccak256(_isCampaignCreatedThroughFactory, _campaignAddress));
+    }
 
     /**
      * @notice internal function to set address to campaign type
@@ -94,8 +120,7 @@ contract TwoKeyPlasmaFactory is Upgradeable {
      * @param _campaignType is the type of campaign (String)
      */
     function setAddressToCampaignType(address _campaignAddress, string _campaignType) internal {
-        bytes32 keyHash = keccak256(_addressToCampaignType, _campaignAddress);
-        PROXY_STORAGE_CONTRACT.setString(keyHash, _campaignType);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToCampaignType, _campaignAddress), _campaignType);
     }
 
     /**
@@ -104,6 +129,13 @@ contract TwoKeyPlasmaFactory is Upgradeable {
      */
     function addressToCampaignType(address _key) public view returns (string) {
         return PROXY_STORAGE_CONTRACT.getString(keccak256(_addressToCampaignType, _key));
+    }
+
+
+    // Internal function to fetch address from TwoKeySingletonRegistry
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
     }
 
 
