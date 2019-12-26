@@ -68,6 +68,19 @@ const approveVersion = (async(campaignName, contractType, twoKeySingletonesRegis
 
 
 module.exports = function deploy(deployer) {
+
+    let flag = false;
+    process.argv.forEach((argument) => {
+        if(argument === 'create_cpc') {
+            flag = true;
+        }
+    });
+
+    if(flag == false) {
+        console.log('No update will be performed');
+        return;
+    }
+
     const { network_id } = deployer;
     let version;
 
