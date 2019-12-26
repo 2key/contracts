@@ -68,8 +68,11 @@ const instantiateConfigs = ((deployer) => {
 const setKyberPerNetwork = ((deploymentConfig, network) => {
     if(network.startsWith('dev')) {
         return KyberNetworkTestMockContract.address;
+    } else if (network.startsWith('public.prod')) {
+        return deploymentConfig.kyberConfig.KYBER_NETWORK_PROXY_ADDRESS_MAINNET;
     } else if (network.startsWith('public')) {
         return deploymentConfig.kyberConfig.KYBER_NETWORK_PROXY_ADDRESS_ROPSTEN;
+
     }
 });
 
@@ -86,7 +89,7 @@ module.exports = function deploy(deployer) {
     const maintainerAddresses = deploymentConfig.maintainers;
     const coreDevs = deploymentConfig.coreDevs;
     const rewardsReleaseAfter = deploymentConfig.admin2keyReleaseDate; //1 January 2020
-    const DAI_ROPSTEN_ADDRESS = '0xaD6D458402F60fD3Bd25163575031ACDce07538D';
+    const DAI_ROPSTEN_ADDRESS = deploymentConfig.kyberConfig.DAI;
 
     let kyberAddress = setKyberPerNetwork(deploymentConfig, deployer.network);
 
