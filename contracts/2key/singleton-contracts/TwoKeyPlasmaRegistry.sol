@@ -5,7 +5,7 @@ import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaRegistryStorage.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
-import "../interfaces/ITwoKeyPlasmaEvents.sol";
+import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 import "../libraries/Call.sol";
 
 contract TwoKeyPlasmaRegistry is Upgradeable {
@@ -21,7 +21,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     string constant _ethereum2plasma = "ethereum2plasma";
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
-    string constant _twoKeyPlasmaEvents = "TwoKeyPlasmaEvents";
+    string constant _twoKeyPlasmaEventSource = "TwoKeyPlasmaEventSource";
 
 
     ITwoKeyPlasmaRegistryStorage public PROXY_STORAGE_CONTRACT;
@@ -82,13 +82,13 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     }
 
     function emitPlasma2Ethereum(address plasma, address ethereum) internal {
-        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEvents);
-        ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitPlasma2EthereumEvent(plasma, ethereum);
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2EthereumEvent(plasma, ethereum);
     }
 
     function emitPlasma2Handle(address plasma, string handle) internal {
-        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEvents);
-        ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitPlasma2HandleEvent(plasma, handle);
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2HandleEvent(plasma, handle);
     }
 
     function plasma2ethereum(

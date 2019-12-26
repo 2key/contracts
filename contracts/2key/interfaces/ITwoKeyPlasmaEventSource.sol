@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-contract ITwoKeyPlasmaEvents {
+contract ITwoKeyPlasmaEventSource {
     function emitPlasma2EthereumEvent(address _plasma, address _ethereum) public;
     function emitPlasma2HandleEvent(address _plasma, string _handle) public;
     function emitCPCCampaignCreatedEvent(address proxyCPCCampaignPlasma, address contractorPlasma) public;

@@ -4,7 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaFactoryStorage.sol";
 import "../interfaces/IHandleCampaignDeploymentPlasma.sol";
-import "../interfaces/ITwoKeyPlasmaEvents.sol";
+import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 import "../upgradable-pattern-campaigns/ProxyCampaign.sol";
 
 /**
@@ -82,8 +82,8 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
         setCampaignCreatedThroughFactory(proxyPlasmaCPC);
         setAddressToCampaignType(proxyPlasmaCPC, "CPC_PLASMA");
-        address twoKeyPlasmaEvents = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents");
-        ITwoKeyPlasmaEvents(twoKeyPlasmaEvents).emitCPCCampaignCreatedEvent(proxyPlasmaCPC, msg.sender);
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPC, msg.sender);
     }
 
     /**

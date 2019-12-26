@@ -14,7 +14,6 @@ const { incrementVersion } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
 
-const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
 const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
 
 const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
@@ -68,18 +67,6 @@ const approveVersion = (async(campaignName, contractType, twoKeySingletonesRegis
 
 
 module.exports = function deploy(deployer) {
-
-    let flag = false;
-    process.argv.forEach((argument) => {
-        if(argument === 'create_cpc') {
-            flag = true;
-        }
-    });
-
-    if(flag == false) {
-        console.log('No update will be performed');
-        return;
-    }
 
     const { network_id } = deployer;
     let version;

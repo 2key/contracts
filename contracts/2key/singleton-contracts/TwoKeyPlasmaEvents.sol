@@ -6,7 +6,6 @@ import "../interfaces/storage-contracts/ITwoKeyPlasmaEventsStorage.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
-import "../interfaces/ITwoKeyPlasmaFactory.sol";
 
 contract TwoKeyPlasmaEvents is Upgradeable {
 
@@ -36,21 +35,12 @@ contract TwoKeyPlasmaEvents is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     bool initialized;
 
-    event Visited(address indexed to, address indexed c, address indexed contractor, address from);  // the to is a plasma address, you should lookit up in plasma2ethereum
-
-
-    event Plasma2Ethereum(
-        address plasma,
-        address eth
-    );
-
-
-
-    event Plasma2Handle(
-        address plasma,
-        string handle
-    );
-
+    event Visited(
+        address indexed to,
+        address indexed c,
+        address indexed contractor,
+        address from
+    );  // the to is a plasma address, you should lookit up in plasma2ethereum
 
 
     event Joined(
@@ -58,56 +48,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         address fromPlasma,
         address toPlasma
     );
-
-
-
-    event ConversionCreated(
-        address campaignAddressPlasma,
-        address campaignAddressPublic,
-        uint conversionID,
-        address contractor,
-        address converter
-    );
-
-
-
-    event ConversionExecuted(
-        address campaignAddressPlasma,
-        uint conversionID
-    );
-
-
-
-    event CPCCampaignCreated(
-        address proxyCPCCampaignPlasma,
-        address contractorPlasma
-    );
-
-
-
-    modifier onlyTwoKeyPlasmaRegistry {
-        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaRegistry);
-        require(msg.sender == twoKeyPlasmaRegistry);
-        _;
-    }
-
-
-
-    modifier onlyTwoKeyPlasmaFactory {
-        address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaFactory");
-        require(msg.sender == twoKeyPlasmaFactory);
-        _;
-    }
-
-
-
-    modifier onlyWhitelistedCampaigns {
-        address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaFactory");
-        require(ITwoKeyPlasmaFactory(twoKeyPlasmaFactory).isCampaignCreatedThroughFactory(msg.sender) == true);
-        _;
-    }
-
-
 
 
     function setInitialParams(
@@ -472,75 +412,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
 
 
-    function emitPlasma2EthereumEvent(
-        address _plasma,
-        address _ethereum
-    )
-    public
-    onlyTwoKeyPlasmaRegistry
-    {
-
-        emit Plasma2Ethereum(_plasma, _ethereum);
-    }
 
 
-
-    function emitPlasma2HandleEvent(
-        address _plasma,
-        string _handle
-    )
-    public
-    onlyTwoKeyPlasmaRegistry
-    {
-        emit Plasma2Handle(_plasma, _handle);
-    }
-
-
-
-    function emitConversionCreatedEvent(
-        address campaignAddressPublic,
-        uint conversionID,
-        address contractor,
-        address converter
-    )
-    public
-    onlyWhitelistedCampaigns
-    {
-        emit ConversionCreated(
-            msg.sender,
-            campaignAddressPublic,
-            conversionID,
-            contractor,
-            converter
-        );
-    }
-
-
-
-    function emitConversionExecutedEvent(
-        uint conversionID
-    )
-    public
-    onlyWhitelistedCampaigns
-    {
-        emit ConversionExecuted(
-            msg.sender,
-            conversionID
-        );
-    }
-
-
-
-    function emitCPCCampaignCreatedEvent(
-        address proxyCPCCampaignPlasma,
-        address contractorPlasma
-    )
-    public
-    onlyTwoKeyPlasmaFactory
-    {
-        emit CPCCampaignCreated(
-            proxyCPCCampaignPlasma,
-            contractorPlasma
-        );
-    }
 }

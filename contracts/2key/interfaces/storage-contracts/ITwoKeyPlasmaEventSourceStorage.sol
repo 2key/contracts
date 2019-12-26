@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
-contract ITwoKeyPlasmaEventSourceStorage {
+import "../../upgradability/StructuredStorage.sol";
+
+contract ITwoKeyPlasmaEventSourceStorage is StructuredStorage {
 
 }

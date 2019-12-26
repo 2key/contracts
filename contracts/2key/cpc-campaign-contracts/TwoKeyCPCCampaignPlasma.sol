@@ -6,7 +6,7 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../TwoKeyConversionStates.sol";
 import "./TwoKeyPlasmaCampaign.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
-import "../interfaces/ITwoKeyPlasmaEvents.sol";
+import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 
 
 contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
@@ -220,7 +220,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
 
         //Emit event through TwoKeyEventSource that conversion is approved and executed
-        ITwoKeyPlasmaEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents")).emitConversionExecutedEvent(
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionExecutedEvent(
             conversionId
         );
     }
@@ -321,7 +321,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         counters[3]++; //Increase number of pending conversions
 
         //Emit conversion event through TwoKeyPlasmaEvents
-        ITwoKeyPlasmaEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEvents")).emitConversionCreatedEvent(
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
             mirrorCampaignOnPublic,
             conversionId,
             contractor,
