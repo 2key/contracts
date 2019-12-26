@@ -408,4 +408,4 @@ module.exports = function deploy(deployer) {
             })
             .then(() => true)
     }
-}
+};
