@@ -69,7 +69,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
           network_id: 8086, // Match any network id
           gas: 8000000,
-          gasPrice: 2000000000
+          gasPrice: 15500000000
       },
 
       'public.test-ledger': {
@@ -141,7 +141,7 @@ module.exports = {
           skipDryRun: true,
           network_id: ids["prod-public"],
           gas: 7900000,
-          gasPrice: 120000000000,
+          gasPrice: 8000000000,
       },
 
       'public.prod-hdwallet': {
@@ -149,7 +149,7 @@ module.exports = {
           skipDryRun: true,
           network_id: ids["prod-public"],
           gas: 7900000,
-          gasPrice: 120000000000,
+          gasPrice: 8000000000,
       },
 
       'private.prod-hdwallet': {

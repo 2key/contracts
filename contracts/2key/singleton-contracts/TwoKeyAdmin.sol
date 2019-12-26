@@ -28,8 +28,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 	bool initialized = false;
-
 	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; //Pointer to storage contract
+
 
     /// @notice Modifier which throws if caller is not TwoKeyCongress
 	modifier onlyTwoKeyCongress {
@@ -37,12 +37,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	    _;
 	}
 
-    /// @notice Modifier will revert if caller is not TwoKeyUpgradableExchange
-    modifier onlyTwoKeyUpgradableExchange {
-		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange);
-        require(msg.sender == address(twoKeyUpgradableExchange));
-        _;
-    }
+
 
     /**
      * @notice Function to set initial parameters in the contract including singletones
@@ -69,6 +64,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+
     /// @notice Function where only TwoKeyCongress can transfer ether to an address
     /// @dev We're recurring to address different from address 0
     /// @param to receiver's address
@@ -85,6 +81,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+
     /// @notice Function to add/update name - address pair from twoKeyAdmin
 	/// @param _name is name of user
 	/// @param _addr is address of user
@@ -97,11 +94,19 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		string _fullName,
 		string _email,
 		bytes _signature
-	) external {
+	)
+	external
+	{
 		address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry);
     	ITwoKeyReg(twoKeyRegistry).addName(_name, _addr, _fullName, _email, _signature);
     }
 
+
+
+	/**
+	 * @notice Function to forward call from congress to the Maintainers Registry and add core devs
+	 * @param _coreDevs is the array of core devs to be added to the system
+	 */
 	function addCoreDevsToMaintainerRegistry(
 		address [] _coreDevs
 	)
@@ -112,6 +117,56 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).addCoreDevs(_coreDevs);
 	}
 
+
+
+	/**
+	 * @notice Function to forward call from congress to the Maintainers Registry and add maintainers
+	 * @param _maintainers is the array of core devs to be added to the system
+	 */
+	function addMaintainersToMaintainersRegistry(
+		address [] _maintainers
+	)
+	external
+	onlyTwoKeyCongress
+	{
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).addMaintainers(_maintainers);
+	}
+
+
+
+	/**
+	 * @notice Function to forward call from congress to the Maintainers Registry and remove core devs
+	 * @param _coreDevs is the array of core devs to be removed from the system
+	 */
+	function removeCoreDevsFromMaintainersRegistry(
+		address [] _coreDevs
+	)
+	external
+	onlyTwoKeyCongress
+	{
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).removeCoreDevs(_coreDevs);
+	}
+
+
+
+	/**
+	 * @notice Function to forward call from congress to the Maintainers Registry and remove maintainers
+	 * @param _maintainers is the array of maintainers to be removed from the system
+	 */
+	function removeMaintainersFromMaintainersRegistry(
+		address [] _maintainers
+	)
+	external
+	onlyTwoKeyCongress
+	{
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).removeMaintainers(_maintainers);
+	}
+
+
+
 	/// @notice Function to freeze all transfers for 2KEY token
 	function freezeTransfersInEconomy()
 	external
@@ -121,6 +176,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		IERC20(twoKeyEconomy).freezeTransfers();
 	}
 
+
+
 	/// @notice Function to unfreeze all transfers for 2KEY token
 	function unfreezeTransfersInEconomy()
 	external
@@ -129,6 +186,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
 		IERC20(twoKeyEconomy).unfreezeTransfers();
 	}
+
+
 
 	/// @notice Function to transfer 2key tokens
 	/// @dev only TwoKeyCongress can call this function
@@ -147,6 +206,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return completed;
 	}
 
+
+
 	/// @notice Getter for all integers we'd like to store
 	/// @param key is the key (var name)
 	function getUint(
@@ -158,6 +219,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
 	}
+
+
 
 	/// @notice Setter for all integers we'd like to store
 	/// @param key is the key (var name)
@@ -171,6 +234,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
 	}
 
+
+
 	/// @notice Getter function for TwoKeyRewardsReleaseDate
 	function getTwoKeyRewardsReleaseDate()
 	external
@@ -179,6 +244,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return getUint(_rewardReleaseAfter);
 	}
+
+
 
 	/// @notice Getter function for TwoKeyIntegratorDefaultFeePercent
 	function getDefaultIntegratorFeePercent()
@@ -189,6 +256,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint(_twoKeyIntegratorDefaultFeePercent);
 	}
 
+
+
 	/// @notice Getter function for TwoKeyNetworkTaxPercent
 	function getDefaultNetworkTaxPercent()
 	public
@@ -197,6 +266,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return getUint(_twoKeyNetworkTaxPercent);
 	}
+
+
 
 	/// @notice Getter function for TwoKeyTokenRate
 	function getTwoKeyTokenRate()
@@ -207,6 +278,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint(_twoKeyTokenRate);
 	}
 
+
+
 	function setNewTwoKeyRewardsReleaseDate(
 		uint256 newDate
 	)
@@ -215,6 +288,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_rewardReleaseAfter),newDate);
 	}
+
+
 
 	function setDefaultIntegratorFeePercent(
 		uint newFeePercent
