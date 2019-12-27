@@ -466,10 +466,11 @@ async function deploy() {
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
                 await deployUpgrade(networks, process.argv);
-            } else if(process.argv.includes('cpc')) {
+            }
+            if(process.argv.includes('cpc')) {
                 await deployCPC(networks);
             }
-            else {
+            if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);
             }
         }
