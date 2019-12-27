@@ -1,10 +1,6 @@
 import {TwoKeyProtocol} from "../src";
-import singletons from "../src/contracts/singletons";
 import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {expect} from "chai";
-import {promisify} from "../src/utils/promisify";
-import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
-import {TIMEOUT} from "dns";
 const { env } = process;
 
 const networkId = parseInt(env.MAIN_NET_ID, 10);
@@ -461,13 +457,22 @@ describe('CPC campaign', () => {
         printTestNumber();
 
         let counters = await twoKeyProtocol.CPCCampaign.getCampaignSummary(campaignAddress);
-        console.log(counters);
+        expect(counters.totalBounty).to.be.equal(3);
     }).timeout(TIMEOUT_LENGTH);
+
+    it('should get number of forwarders for the campaign', async() => {
+        printTestNumber();
+
+        let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);
+        expect(numberOfForwarders).to.be.equal(2);
+    }).timeout(TIMEOUT_LENGTH);
+
 
     it('should get address stats', async() => {
         printTestNumber();
 
         let stats = await twoKeyProtocol.CPCCampaign.getAddressStatistic(campaignAddress, twoKeyProtocol.plasmaAddress);
-        console.log(stats);
+        expect(stats.ethereum).to.be.equal(from);
+        expect(stats.username).to.be.equal('test');
     }).timeout(TIMEOUT_LENGTH);
 });
