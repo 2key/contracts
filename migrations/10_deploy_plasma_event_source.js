@@ -63,9 +63,9 @@ module.exports = function deploy(deployer) {
 
                         const jsonObject = fileObject[contractName] || {};
                         jsonObject[network_id] = {
-                            'implementationAddressLogic': TwoKeyPlasmaFactory.address,
+                            'implementationAddressLogic': TwoKeyPlasmaEventSource.address,
                             'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyPlasmaFactoryStorage.address,
+                            'implementationAddressStorage': TwoKeyPlasmaEventSourceStorage.address,
                             'StorageProxy': storageProxy,
                         };
 

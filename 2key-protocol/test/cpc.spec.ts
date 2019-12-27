@@ -312,13 +312,11 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.CPCCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
     }).timeout(TIMEOUT_LENGTH);
 
-
     it('should convert', async() => {
         printTestNumber();
         converterPlasma = twoKeyProtocol.plasmaAddress;
         let txHash = await twoKeyProtocol.CPCCampaign.joinAndConvert(campaignAddress, links.gmail.link, twoKeyProtocol.plasmaAddress, {fSecret: links.gmail.fSecret});
     }).timeout(TIMEOUT_LENGTH);
-
 
     it('should get active influencers before conversion is approved', async() => {
         printTestNumber();
@@ -327,6 +325,13 @@ describe('CPC campaign', () => {
         expect(activeInfluencers.length).to.be.equal(0);
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should get available bounty before conversion is executed and make sure it is equal to total bounty', async() => {
+        printTestNumber();
+
+        let bountyAvailable = await twoKeyProtocol.CPCCampaign.getAvailableBountyOnCampaign(campaignAddress);
+        let bounty = await twoKeyProtocol.CPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
+        expect(bounty.totalBounty).to.be.equal(bountyAvailable);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should approve converter from maintainer and distribute rewards', async() => {
         printTestNumber();
@@ -343,6 +348,12 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.CPCCampaign.approveConverterAndExecuteConversion(campaignAddress, converterPlasma, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should get bounty available after conversion and it should be equal totalBounty-bountyPerConversion', async() => {
+        printTestNumber();
+        let bounty = await twoKeyProtocol.CPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
+        let bountyAvailable = await twoKeyProtocol.CPCCampaign.getAvailableBountyOnCampaign(campaignAddress);
+        expect(bountyAvailable).to.be.equal(bounty.totalBounty - bounty.bountyPerConversion);
+    }).timeout(TIMEOUT_LENGTH);
 
     it('should get both influencers involved in conversion from plasma contract and their balances', async() => {
         printTestNumber();

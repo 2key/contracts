@@ -604,4 +604,13 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return (isReferrer, isAddressConverter, isJoined, ethereumOf(_address));
     }
 
+    function getAvailableBounty()
+    public
+    view
+    returns (uint)
+    {
+        // Total bounty - bounty PAID for executed conversions
+        return totalBountyForCampaign.sub(counters[6]);
+    }
+
 }
