@@ -470,6 +470,8 @@ async function deploy() {
             if(process.argv.includes('cpc')) {
                 await deployCPC(networks);
             }
+            if(process.argv.includes('--reset')) {
+                await deployContracts(networks, true);
             }
         }
 
@@ -557,7 +559,7 @@ async function deploy() {
         }
         await contractsGit.reset('hard');
     }
-}
+
 
 const test = () => new Promise(async (resolve, reject) => {
     try {
