@@ -470,8 +470,6 @@ async function deploy() {
             if(process.argv.includes('cpc')) {
                 await deployCPC(networks);
             }
-            if(process.argv.includes('--reset')) {
-                await deployContracts(networks, true);
             }
         }
 
