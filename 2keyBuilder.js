@@ -271,19 +271,19 @@ const updateIPFSHashes = async(contracts) => {
     let existingVersionHandlerFile = {};
 
     // if(!process.argv.includes('--reset')) {
-        try {
-            existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
-            console.log('EXISTING VERSIONS', existingVersionHandlerFile);
-        } catch (e) {
-            console.log('VERSIONS ERROR', e);
-        }
+    try {
+        existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
+        console.log('EXISTING VERSIONS', existingVersionHandlerFile);
+    } catch (e) {
+        console.log('VERSIONS ERROR', e);
+    }
 
-        const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
+    const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
 
-        if (currentVersionHandler) {
-            versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
-            console.log('VERSION LIST', versionsList);
-        }
+    if (currentVersionHandler) {
+        versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
+        console.log('VERSION LIST', versionsList);
+    }
     // }
 
     versionsList[nonSingletonHash] = {};
@@ -438,7 +438,7 @@ async function deploy() {
         await contractsGit.submoduleUpdate();
         await twoKeyProtocolLibGit.reset('hard');
         const localChanges = contractsStatus.files.filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed')
-                || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
+            || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
         if (contractsStatus.behind || localChanges.length) {
             console.log('You have unsynced changes!', localChanges);
             process.exit(1);
@@ -559,7 +559,7 @@ async function deploy() {
         }
         await contractsGit.reset('hard');
     }
-
+}
 
 const test = () => new Promise(async (resolve, reject) => {
     try {
@@ -583,8 +583,8 @@ const getMigrationsList = () => {
 
 const runMigration = async (index, network, updateArchive) => {
     await runProcess(
-      path.join(__dirname, 'node_modules/.bin/truffle'),
-      ['migrate', '--f', index, '--to', index, '--network', network].concat(process.argv.slice(4))
+        path.join(__dirname, 'node_modules/.bin/truffle'),
+        ['migrate', '--f', index, '--to', index, '--network', network].concat(process.argv.slice(4))
     );
     if (updateArchive) {
         await archiveBuild();
