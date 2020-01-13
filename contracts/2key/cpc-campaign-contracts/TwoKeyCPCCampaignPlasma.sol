@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../libraries/MerkleProof.sol";
 import "../libraries/IncentiveModels.sol";
+import "../libraries/Call.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../TwoKeyConversionStates.sol";
 import "./TwoKeyPlasmaCampaign.sol";
@@ -259,14 +260,13 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
 
         if(_sig.length > 0) {
-//            _referrerAddress = recover(_sig);
+            _referrerAddress = recover(_sig);
         }
         else {
-//            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
             _referrerAddress = _referrerAddress;
         }
 
-    uint len = _conversionIds.length;
+        uint len = _conversionIds.length;
         uint[] memory earnings = new uint[](len);
 
         for(uint i=0; i<len; i++) {
@@ -276,6 +276,22 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         uint referrerBalance = referrerPlasma2Balances2key[_referrerAddress];
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
+
+    /**
+     * @notice Internal helper function
+     */
+    function recover(
+        bytes signature
+    )
+    internal
+    view
+    returns (address)
+    {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
+            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
+        return Call.recoverHash(hash, signature, 0);
+    }
+
 
     /**
      * @notice Function where converter can convert
