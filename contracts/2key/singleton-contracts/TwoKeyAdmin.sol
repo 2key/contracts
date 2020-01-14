@@ -82,27 +82,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 
-    /// @notice Function to add/update name - address pair from twoKeyAdmin
-	/// @param _name is name of user
-	/// @param _addr is address of user
-	/// @param _fullName is full name of the user
-	/// @param _email is the email of the user
-	/// @param _signature is the signature generated on client side
-    function addNameToReg(
-		string _name,
-		address _addr,
-		string _fullName,
-		string _email,
-		bytes _signature
-	)
-	external
-	{
-		address twoKeyRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry);
-    	ITwoKeyReg(twoKeyRegistry).addName(_name, _addr, _fullName, _email, _signature);
-    }
-
-
-
 	/**
 	 * @notice Function to forward call from congress to the Maintainers Registry and add core devs
 	 * @param _coreDevs is the array of core devs to be added to the system

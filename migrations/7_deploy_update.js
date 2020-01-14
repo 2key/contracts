@@ -17,6 +17,7 @@ const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipatio
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
+const TwoKeyPlasmaFactory = artifacts.require('TwoKeyPlasmaFactory');
 
 const TwoKeyUpgradableExchangeStorage = artifacts.require('TwoKeyUpgradableExchangeStorage');
 const TwoKeyCampaignValidatorStorage = artifacts.require('TwoKeyCampaignValidatorStorage');
@@ -122,7 +123,8 @@ let contractsArtifacts = {
     TwoKeyPlasmaEventsStorage,
     TwoKeyPlasmaMaintainersRegistryStorage,
     TwoKeyPlasmaRegistryStorage,
-    TwoKeyPlasmaSingletoneRegistry
+    TwoKeyPlasmaSingletoneRegistry,
+    TwoKeyPlasmaFactory
 };
 
 

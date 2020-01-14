@@ -79,7 +79,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         if(vestingAmount == VestingAmount.BONUS && maxConverterBonusPercent > 0) {
             numberOfVestingPortions = values[4] + 1;
         } else if (vestingAmount == VestingAmount.BONUS) {
-            numberOfVestingPortions = 0;
+            numberOfVestingPortions = 1;
         } else {
             numberOfVestingPortions = values[4];
         }

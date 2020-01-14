@@ -249,7 +249,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     }
 
 
-    /**recover
+    /**
      * @notice Function to get investment rules
      * @return tuple containing if investment amount is fixed
      */

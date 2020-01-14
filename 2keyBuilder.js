@@ -271,19 +271,19 @@ const updateIPFSHashes = async(contracts) => {
     let existingVersionHandlerFile = {};
 
     // if(!process.argv.includes('--reset')) {
-        try {
-            existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
-            console.log('EXISTING VERSIONS', existingVersionHandlerFile);
-        } catch (e) {
-            console.log('VERSIONS ERROR', e);
-        }
+    try {
+        existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
+        console.log('EXISTING VERSIONS', existingVersionHandlerFile);
+    } catch (e) {
+        console.log('VERSIONS ERROR', e);
+    }
 
-        const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
+    const { TwoKeyVersionHandler: currentVersionHandler } = existingVersionHandlerFile;
 
-        if (currentVersionHandler) {
-            versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
-            console.log('VERSION LIST', versionsList);
-        }
+    if (currentVersionHandler) {
+        versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
+        console.log('VERSION LIST', versionsList);
+    }
     // }
 
     versionsList[nonSingletonHash] = {};
@@ -438,7 +438,7 @@ async function deploy() {
         await contractsGit.submoduleUpdate();
         await twoKeyProtocolLibGit.reset('hard');
         const localChanges = contractsStatus.files.filter(item => !(item.path.includes('dist') || item.path.includes('contracts.ts') || item.path.includes('contracts_deployed')
-                || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
+            || (process.env.NODE_ENV === 'development' && item.path.includes(process.argv[1].split('/').pop()))));
         if (contractsStatus.behind || localChanges.length) {
             console.log('You have unsynced changes!', localChanges);
             process.exit(1);
@@ -466,10 +466,11 @@ async function deploy() {
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
                 await deployUpgrade(networks, process.argv);
-            } else if(process.argv.includes('cpc')) {
+            }
+            if(process.argv.includes('cpc')) {
                 await deployCPC(networks);
             }
-            else {
+            if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);
             }
         }
@@ -496,7 +497,7 @@ async function deploy() {
         if(!local || process.env.FORCE_NPM) {
             process.chdir(twoKeyProtocolDist);
             const oldVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
-            if (process.env.NODE_ENV === 'production') {
+            if (process.env.NODE_ENV === 'production' || contractsStatus.current === 'master') {
                 await runProcess('npm', ['version', 'patch']);
             } else {
                 const { version } = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDist, 'package.json'), 'utf8'));
@@ -532,7 +533,7 @@ async function deploy() {
             await pushTagsToGithub(npmVersionTag);
 
             process.chdir(twoKeyProtocolDist);
-            if (process.env.NODE_ENV === 'production') {
+            if (process.env.NODE_ENV === 'production' || contractsStatus.current === 'master') {
                 await runProcess('npm', ['publish']);
             } else {
                 await runProcess('npm', ['publish', '--tag', contractsStatus.current]);
@@ -582,8 +583,8 @@ const getMigrationsList = () => {
 
 const runMigration = async (index, network, updateArchive) => {
     await runProcess(
-      path.join(__dirname, 'node_modules/.bin/truffle'),
-      ['migrate', '--f', index, '--to', index, '--network', network].concat(process.argv.slice(4))
+        path.join(__dirname, 'node_modules/.bin/truffle'),
+        ['migrate', '--f', index, '--to', index, '--network', network].concat(process.argv.slice(4))
     );
     if (updateArchive) {
         await archiveBuild();
