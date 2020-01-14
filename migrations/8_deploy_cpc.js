@@ -14,7 +14,6 @@ const { incrementVersion } = require('../helpers');
 const fs = require('fs');
 const path = require('path');
 
-const deploymentConfigFile = path.join(__dirname, '../configurationFiles/deploymentConfig.json');
 const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
 
 const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";

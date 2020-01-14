@@ -28,6 +28,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	uint256 contractorTotalProceeds; // Contractor total earnings
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 
+	mapping(address => uint) converterToNumberOfInfluencers;
 
 	/**
 	 * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
@@ -269,11 +270,10 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	internal
 	returns (uint)
 	{
-		uint numberOfInfluencers = 0;
 		if(received_from[twoKeyEventSource.plasmaOf(_converter)] == address(0)) {
-			numberOfInfluencers = distributeArcsBasedOnSignature(signature, _converter);
+			converterToNumberOfInfluencers[_converter] = distributeArcsBasedOnSignature(signature, _converter);
 		}
-		return numberOfInfluencers;
+		return converterToNumberOfInfluencers[_converter];
 	}
 
 
