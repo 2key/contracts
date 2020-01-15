@@ -498,7 +498,7 @@ async function deploy() {
         if(!local || process.env.FORCE_NPM) {
             process.chdir(twoKeyProtocolDist);
             const oldVersion = JSON.parse(fs.readFileSync('package.json', 'utf8')).version;
-            if (process.env.NODE_ENV === 'production' || contractsStatus.current === 'master') {
+            if (process.env.NODE_ENV === 'production') {
                 await runProcess('npm', ['version', 'patch']);
             } else {
                 const { version } = JSON.parse(fs.readFileSync(path.join(twoKeyProtocolDist, 'package.json'), 'utf8'));
