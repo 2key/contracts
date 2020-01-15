@@ -38,7 +38,7 @@ const createLedgerProvider = (rpc, id) => () =>
         networkId: id,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
         // path: "44'/60'/0'/0",
-        path: "m/44'/60'/0'/0'/0",
+        path: "44'/60'/0'/0'/0",
         // askConfirm: true,
         askConfirm: false,
         accountsLength: 1,
