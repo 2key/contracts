@@ -42,22 +42,22 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
         require(values[0] <= 100*(10**18)); // Require that max referral reward is less than 100%
+
         contractor = _contractor;
         moderator = _moderator;
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
         twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
-        twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(_twoKeySingletonesRegistry).getNonUpgradableContractAddress("TwoKeyEconomy");
+        twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
 
         maxReferralRewardPercent = values[0];
         conversionQuota = values[1];
 
-        // KYC
         if(values[2] == 1) {
             isKYCRequired = true;
         }
-        // MCTR
+
         if(values[3] == 1) {
             mustConvertToReferr = true;
         }
@@ -165,10 +165,14 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        uint conversionAmountCampaignCurrency = validateRequirements(false, msg.value);
+        uint conversionAmount = ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWhenConvertingOrWithdrawingProceeds(
+            ownerPlasma,
+            msg.value
+        );
+        uint conversionAmountCampaignCurrency = validateRequirements(false, conversionAmount);
         uint numberOfInfluencers = distributeArcsIfNecessary(msg.sender, signature);
         createConversion(
-            msg.value,
+            conversionAmount,
             msg.sender,
             false,
             _isAnonymous,

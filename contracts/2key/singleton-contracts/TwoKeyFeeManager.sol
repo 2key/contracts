@@ -2,7 +2,9 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/storage-contracts/ITwoKeyFeeManagerStorage.sol";
+import "../libraries/SafeMath.sol";
 
 /**
  * @author Nikola Madjarevic (@madjarevicn)
@@ -14,21 +16,40 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
      * users contribution amount / earnings / proceeds, in order to cover transactions
      * paid by 2key.network for users registration
      */
+    using SafeMath for *;
 
     bool initialized;
     ITwoKeyFeeManagerStorage PROXY_STORAGE_CONTRACT;
 
-    string constant _userPlasmaToDebt = "userPlasmaToDebt";
-    string constant _totalDebts = "totalDebts";
-    string constant _totalPaid = "totalPaid";
+    //Debt will be stored in ETH
+    string constant _userPlasmaToDebtInETH = "userPlasmaToDebtInETH";
+    string constant _totalDebtsInETH = "totalDebtsInETH";
+
+    string constant _totalPaidInETH = "totalPaidInETH";
+    string constant _totalPaidInDAI = "totalPaidInDAI";
+    string constant _totalPaidIn2Key = "totalPaidIn2Key";
 
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
      */
     modifier onlyAllowedContracts {
-        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator);
+        address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry("TwoKeyCampaignValidator");
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
         _;
+    }
+
+    function setInitialParams(
+        address _twoKeySingletonRegistry,
+        address _proxyStorage
+    )
+    public
+    {
+        require(initialized == false);
+
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyFeeManagerStorage(_proxyStorage);
+
+        initialized = true;
     }
 
     /**
@@ -48,20 +69,20 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint total = 0;
         // Iterate through all addresses and store the registration fees paid for them
         for(i = 0; i < usersPlasmas.length; i++) {
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(usersPlasmas[i], _userPlasmaToDebt), fees[i]);
-            total = total + fees[i];
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(usersPlasmas[i], _userPlasmaToDebtInETH), fees[i]);
+            total = total.add(fees[i]);
         }
 
         // Increase total debts
-        bytes32 key = keccak256(_totalDebts);
-        uint totalDebts = PROXY_STORAGE_CONTRACT.getUint(key) + total;
+        bytes32 key = keccak256(_totalDebtsInETH);
+        uint totalDebts = total.add(PROXY_STORAGE_CONTRACT.getUint(key));
         PROXY_STORAGE_CONTRACT.setUint(key, totalDebts);
     }
 
 
 
     /**
-     * @notice Getter where we can check how much user owes to 2key.network
+     * @notice Getter where we can check how much ETH user owes to 2key.network for his registration
      * @param _userPlasma is user plasma address
      */
     function getDebtForUser(
@@ -71,36 +92,76 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userPlasma, _userPlasmaToDebt));
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userPlasma, _userPlasmaToDebtInETH));
     }
 
 
     /**
-     * @notice Function to get current debt users are owing to 2key.network
+     * @notice Internal function to cover paying debt in eth and take care of accounting for that payments
+     * @param _userPlasma is the plasma address of user who is paying debt
+     * @param _debt is the amount user owed to the contract
      */
-    function getDebtTo2key()
-    public
-    view
-    returns (uint,uint)
+    function payDebtInEth(
+        address _userPlasma,
+        uint _debt
+    )
+    internal
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalDebts)) - PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalPaid));
+        //Set that user's debt is now 0
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userPlasma, _userPlasmaToDebtInETH), 0);
+
+
+        // Increase amount of total debts paid to 2Key network in ETH
+        bytes32 key = keccak256(_totalPaidInETH);
+        uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(key);
+        PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debt));
     }
 
-//    function checkIfUserHaveAnyDebt(
-//        address plasma
-//    )
 
-
-
-    function payDebt(
-        address ethereumAddress
+    /**
+     * @notice Function to check if user has some debts and if yes, take them from _amount
+     * @param _plasmaAddress is the plasma address of the user
+     * @param _amount is the amount of ETH involved in the action (either conversion or contractor withdraw proceeds)
+     * @return leftover which user can convert with or in case of contractor -> withdraw
+     */
+    function payDebtWhenConvertingOrWithdrawingProceeds(
+        address _plasmaAddress,
+        uint _amount
     )
     public
-    onlyValidatedContracts
+    onlyAllowedContracts
+    returns (uint)
     {
+        uint debt = getDebtForUser(_plasmaAddress);
+        require(_amount > debt);
 
+        if(debt == 0) {
+            return _amount;
+        } else {
+            payDebtInEth(_plasmaAddress, debt);
+            return _amount.sub(debt);
+        }
     }
 
+    /**
+     * @notice Function to get status of the debts
+     */
+    function getDebtsSummary()
+    public
+    view
+    returns (uint,uint,uint,uint)
+    {
+        uint totalDebts = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalDebtsInETH));
+        uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalPaidInETH));
+        uint totalPaidInDAI = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalPaidInDAI));
+        uint totalPaidIn2Key = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalPaidIn2Key));
 
+        return (
+            totalDebts,
+            totalPaidInEth,
+            totalPaidInDAI,
+            totalPaidIn2Key
+        );
+    }
 
 }

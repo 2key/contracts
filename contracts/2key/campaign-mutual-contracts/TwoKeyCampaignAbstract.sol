@@ -32,7 +32,7 @@ contract TwoKeyCampaignAbstract is ArcToken {
     mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
 
-    mapping(address => address) public public_link_key;
+    mapping(address => address) internal public_link_key;
     mapping(address => address) internal received_from; // referral graph, who did you receive the referral from
 
 

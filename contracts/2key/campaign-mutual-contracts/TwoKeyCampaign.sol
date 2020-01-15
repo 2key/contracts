@@ -5,7 +5,7 @@ import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/IERC20.sol";
 import "./TwoKeyCampaignAbstract.sol";
-
+import "../interfaces/ITwoKeyFeeManager.sol";
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
  */
@@ -435,6 +435,13 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	{
 		uint balance = contractorBalance;
 		contractorBalance = 0;
+
+		// Check if contractor has any debts
+		balance = ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWhenConvertingOrWithdrawingProceeds(
+			ownerPlasma,
+			balance
+		);
+
 		/**
          * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
          * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer

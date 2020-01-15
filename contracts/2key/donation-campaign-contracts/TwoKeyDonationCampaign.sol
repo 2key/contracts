@@ -95,14 +95,22 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
     {
         bool canConvert;
         uint conversionAmountCampaignCurrency;
-        (canConvert, conversionAmountCampaignCurrency) = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
-            msg.sender,
+
+        uint conversionAmount = ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWhenConvertingOrWithdrawingProceeds(
+            ownerPlasma,
             msg.value
         );
+
+        (canConvert, conversionAmountCampaignCurrency) = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
+            msg.sender,
+            conversionAmount
+        );
+
         require(canConvert == true);
+
         address _converterPlasma = twoKeyEventSource.plasmaOf(msg.sender);
         uint numberOfInfluencers = distributeArcsIfNecessary(msg.sender, signature);
-        createConversion(msg.value, msg.sender, conversionAmountCampaignCurrency, numberOfInfluencers);
+        createConversion(conversionAmount, msg.sender, conversionAmountCampaignCurrency, numberOfInfluencers);
     }
 
     /*
