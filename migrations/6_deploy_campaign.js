@@ -26,56 +26,54 @@ module.exports = function deploy(deployer) {
     let version;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        // deployer.deploy(TwoKeyConversionHandler)
-        //     .then(() => TwoKeyConversionHandler.deployed())
-        //     .then(() => deployer.deploy(TwoKeyPurchasesHandler))
-        //     .then(() => TwoKeyPurchasesHandler.deployed())
-        //     .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
-        //     .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
-        //     .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
-        //     .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
-        //     .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
-        //     .then(() => true)
-        //     .then(() => deployer.link(Call, TwoKeyDonationCampaign))
-        //     .then(() => deployer.deploy(TwoKeyDonationCampaign))
-        //     .then(() => TwoKeyDonationCampaign.deployed())
-        //     .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
-        //     .then(() => TwoKeyDonationConversionHandler.deployed())
-        //     .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
-        //     .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
-        //     .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
-        //     .then(() => TwoKeyDonationLogicHandler.deployed())
-        //     deployer.then(async () => {
-        //         console.log('... Adding implementation versions of Donation campaigns');
-        //         TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
-        //         let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
-        //
-        //         await new Promise(async(resolve,reject) => {
-        //             try {
-        //                 //
-        //                 version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
-        //                 version = incrementVersion(version);
-        //
-        //                 console.log('Version :' + version);
-        //                 let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
-        //                 txHash = await instance.addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
-        //                 txHash = await instance.addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
-        //
-        //                 resolve(txHash);
-        //             } catch (e) {
-        //                 reject(e);
-        //             }
-        //         })
-        //     })
-            deployer.then(async () => {
+        deployer.deploy(TwoKeyConversionHandler)
+            .then(() => TwoKeyConversionHandler.deployed())
+            .then(() => deployer.deploy(TwoKeyPurchasesHandler))
+            .then(() => TwoKeyPurchasesHandler.deployed())
+            .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
+            .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
+            .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
+            .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
+            .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
+            .then(() => true)
+            .then(() => deployer.link(Call, TwoKeyDonationCampaign))
+            .then(() => deployer.deploy(TwoKeyDonationCampaign))
+            .then(() => TwoKeyDonationCampaign.deployed())
+            .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
+            .then(() => TwoKeyDonationConversionHandler.deployed())
+            .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
+            .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
+            .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
+            .then(() => TwoKeyDonationLogicHandler.deployed())
+            .then(async () => {
+                console.log('... Adding implementation versions of Donation campaigns');
                 TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
                 let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
-                let version = "1.0.1";
+
+                await new Promise(async(resolve,reject) => {
+                    try {
+                        //
+                        version = await instance.getLatestAddedContractVersion("TwoKeyDonationCampaign");
+                        version = incrementVersion(version);
+
+                        console.log('Version :' + version);
+                        let txHash = await instance.addVersion('TwoKeyDonationCampaign', version, TwoKeyDonationCampaign.address);
+                        txHash = await instance.addVersion('TwoKeyDonationConversionHandler', version, TwoKeyDonationConversionHandler.address);
+                        txHash = await instance.addVersion('TwoKeyDonationLogicHandler', version, TwoKeyDonationLogicHandler.address);
+
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
+                })
+            })
+            .then(async () => {
+                let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
                 console.log("... Adding implementation versions of Acquisition campaigns");
                 await new Promise(async(resolve,reject) => {
                     try {
-                        // let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
-                        let txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
+                        let txHash = await instance.addVersion('TwoKeyAcquisitionLogicHandler', version, TwoKeyAcquisitionLogicHandler.address);
+                        txHash = await instance.addVersion('TwoKeyConversionHandler', version, TwoKeyConversionHandler.address);
                         txHash = await instance.addVersion('TwoKeyAcquisitionCampaignERC20', version, TwoKeyAcquisitionCampaignERC20.address);
                         txHash = await instance.addVersion('TwoKeyPurchasesHandler', version, TwoKeyPurchasesHandler.address);
 
