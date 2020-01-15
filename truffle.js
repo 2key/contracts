@@ -37,7 +37,8 @@ const createLedgerProvider = (rpc, id) => () =>
     LedgerProvider(rpc, {
         networkId: id,
         // https://github.com/LedgerHQ/ledgerjs/issues/200
-        // path: "44'/60'/0'/0",
+        // path: "44'/60'/0'/0", --> Legacy / MEW derivation path
+        // path: "44\'/60\'/[index]\'/0/0", --> Ledger-Live derivation path
         path: "44\'/60\'/0\'/0/0",
         // askConfirm: true,
         askConfirm: false,
