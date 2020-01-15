@@ -16,6 +16,8 @@ spinner 2
 echo "Patching TOKEN_SELL, DONATION campaigns, and TwoKeyAdmin to 1.0.1 version"
 echo "Destination for execution: 0x60ece4a5be3fd7594e9f24c2948cce5ce3c6dde7"
 
+cd ../..
+
 python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.1
 python3 generate_bytecode.py approveNewCampaign DONATION 1.0.1
 python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.1
