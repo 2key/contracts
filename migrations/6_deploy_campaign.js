@@ -70,6 +70,7 @@ module.exports = function deploy(deployer) {
             deployer.then(async () => {
                 TWO_KEY_SINGLETON_REGISTRY_ADDRESS = TwoKeySingletonesRegistry.address;
                 let instance = await TwoKeySingletonesRegistry.at(TWO_KEY_SINGLETON_REGISTRY_ADDRESS);
+                let version = "1.0.1";
                 console.log("... Adding implementation versions of Acquisition campaigns");
                 await new Promise(async(resolve,reject) => {
                     try {
