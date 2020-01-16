@@ -721,24 +721,6 @@ describe('TwoKeyProtocol', () => {
         console.log('Available amount of tokens after conversion is: ' + availableAmountOfTokens);
     }).timeout(60000);
 
-    it('should transfer arcs to gmail2', async () => {
-        console.log('7) transfer to gmail2 REFLINK', links.renata);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata.link, env.GMAIL2_ADDRESS, { fSecret: links.renata.fSecret });
-        console.log(txHash);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
-    }).timeout(60000);
-
-    it('should transfer arcs to buyer', async () => {
-        console.log('7) transfer to BUYER REFLINK', links.renata);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata.link, env.BUYER_ADDRESS, { fSecret: links.renata.fSecret });
-        console.log(txHash);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
-    }).timeout(60000);
-
     it('should buy some tokens from gmail2', async () => {
         const {web3, address} = web3switcher.gmail2();
         from = address;
@@ -753,7 +735,7 @@ describe('TwoKeyProtocol', () => {
 
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('GMAIL2 ARCS', arcs);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), links.renata.link, from, { fSecret: links.renata.fSecret });
         // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -772,7 +754,7 @@ describe('TwoKeyProtocol', () => {
 
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('BUYER ARCS', arcs);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), links.renata.link, from, { fSecret: links.renata.fSecret });
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
@@ -799,26 +781,6 @@ describe('TwoKeyProtocol', () => {
         await tryToRegisterUser('Test', from);
     }).timeout(60000);
 
-    it('should transfer arcs from new user to test', async () => {
-        const {web3, address} = web3switcher.aydnep2();
-        from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP2).privateKey,
-            networkId,
-            privateNetworkId,
-        });
-        await tryToRegisterUser('Aydnep2', from);
-
-        const refReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.renata.link, links.renata.fSecret);
-        console.log(`Max estimated referral reward: ${refReward}%`);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndShareARC(campaignAddress, from, links.renata.link, env.TEST_ADDRESS, { fSecret: links.renata.fSecret });
-        console.log(txHash);
-        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
-    }).timeout(60000);
 
     it('should buy some tokens from test', async () => {
         const {web3, address} = web3switcher.test();
@@ -833,7 +795,7 @@ describe('TwoKeyProtocol', () => {
         await tryToRegisterUser('Test', from);
 
         // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.convert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), links.renata.link, from, { fSecret: links.renata.fSecret });
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
