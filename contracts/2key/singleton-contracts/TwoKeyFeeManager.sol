@@ -120,6 +120,17 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debtPaying));
     }
 
+    function payDebtWhenWithdrawingRewards(
+        address _plasmaAddress,
+        uint _amountInDAIor2KEY,
+        uint currencyIndex
+    )
+    public
+    onlyAllowedContracts
+    {
+
+    }
+
     /**
      * @notice Function to get status of the debts
      */
