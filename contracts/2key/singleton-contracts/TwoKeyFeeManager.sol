@@ -97,50 +97,27 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Internal function to cover paying debt in eth and take care of accounting for that payments
-     * @param _userPlasma is the plasma address of user who is paying debt
-     * @param _debt is the amount user owed to the contract
+     * @notice Function to check if user has some debts and if yes, take them from _amount
+     * @param _plasmaAddress is the plasma address of the user
+     * @param _debtPaying is the part or full debt user is paying
      */
-    function payDebtInEth(
-        address _userPlasma,
-        uint _debt
+    function payDebtWhenConvertingOrWithdrawingProceeds(
+        address _plasmaAddress,
+        uint _debtPaying
     )
-    internal
+    public
+    payable
+    onlyAllowedContracts
     {
-        //Set that user's debt is now 0
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userPlasma, _userPlasmaToDebtInETH), 0);
+        bytes32 keyHashForDebt = keccak256(_plasmaAddress, _userPlasmaToDebtInETH);
+        uint totalDebtForUser = PROXY_STORAGE_CONTRACT.getUint(keyHashForDebt);
 
+        PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, totalDebtForUser.sub(_debtPaying));
 
         // Increase amount of total debts paid to 2Key network in ETH
         bytes32 key = keccak256(_totalPaidInETH);
         uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(key);
-        PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debt));
-    }
-
-
-    /**
-     * @notice Function to check if user has some debts and if yes, take them from _amount
-     * @param _plasmaAddress is the plasma address of the user
-     * @param _amount is the amount of ETH involved in the action (either conversion or contractor withdraw proceeds)
-     * @return leftover which user can convert with or in case of contractor -> withdraw
-     */
-    function payDebtWhenConvertingOrWithdrawingProceeds(
-        address _plasmaAddress,
-        uint _amount
-    )
-    public
-    onlyAllowedContracts
-    returns (uint)
-    {
-        uint debt = getDebtForUser(_plasmaAddress);
-        require(_amount > debt);
-
-        if(debt == 0) {
-            return _amount;
-        } else {
-            payDebtInEth(_plasmaAddress, debt);
-            return _amount.sub(debt);
-        }
+        PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debtPaying));
     }
 
     /**
@@ -151,13 +128,13 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint,uint,uint,uint)
     {
-        uint totalDebts = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalDebtsInETH));
+        uint totalDebtsInEth = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalDebtsInETH));
         uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalPaidInETH));
         uint totalPaidInDAI = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalPaidInDAI));
         uint totalPaidIn2Key = PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalPaidIn2Key));
 
         return (
-            totalDebts,
+            totalDebtsInEth,
             totalPaidInEth,
             totalPaidInDAI,
             totalPaidIn2Key

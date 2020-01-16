@@ -151,10 +151,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        uint conversionAmount = ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWhenConvertingOrWithdrawingProceeds(
-            ownerPlasma,
-            msg.value
-        );
+        uint conversionAmount = payFeesForUser(twoKeyEventSource.plasmaOf(msg.sender), msg.value);
         uint conversionAmountCampaignCurrency = validateRequirements(false, conversionAmount);
         uint numberOfInfluencers = distributeArcsIfNecessary(msg.sender, signature);
         createConversion(

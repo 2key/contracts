@@ -35,6 +35,7 @@ let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
 let campaignInventory = 1234000;
+let registrationDebt = 0.001; //0.001 ETH is the debt for the registration
 
 console.log(rpcUrls);
 console.log(networkId);
@@ -198,8 +199,14 @@ const printBalances = (done) => {
         done();
     });
 };
+
 const tryToRegisterUser = async (username, from) => {
     console.log('REGISTERING', username);
+    let isRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
+    if(isRegistered) {
+        return;
+    }
+
     const user = users[username.toLowerCase()];
     const registerData: IRegistryData = {};
     try  {
@@ -240,7 +247,6 @@ const tryToRegisterUser = async (username, from) => {
     // console.log('REGISTER RESULT', register);
 };
 
-
 describe('TwoKeyProtocol', () => {
     let from: string;
     before(function () {
@@ -273,7 +279,43 @@ describe('TwoKeyProtocol', () => {
     let campaignAddress: string;
     let nonSingletonHash: string;
     let aydnepBalance;
+
     let txHash;
+
+    it('should get few plasma addresses and add debts for them', async() => {
+        let plasmaAddresses = [
+            generatePlasmaFromMnemonic(env.MNEMONIC_TEST).address,
+            generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).address,
+            generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).address,
+            generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).address,
+            generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).address
+        ];
+
+        let debts = [
+            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString())
+        ];
+
+        console.log(debts);
+        console.log(plasmaAddresses);
+        let txHash = await twoKeyProtocol.TwoKeyFeeManager.setDebtsForAddresses(plasmaAddresses, debts, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
+
+    it('should get stats for the debts', async() => {
+        let stats = await twoKeyProtocol.TwoKeyFeeManager.getDebtsSummary();
+        console.log(stats);
+    }).timeout(60000);
+
+
+    it('should get total supply of economy contract' ,async() => {
+        console.log("Check total supply on 2key-economy contract");
+        let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
+        console.log(totalSup);
+    }).timeout(60000);
 
     it('should return a balance for address', async () => {
         const business = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(twoKeyAdmin), {
@@ -322,12 +364,6 @@ describe('TwoKeyProtocol', () => {
         console.log('aydnep2 balance', aydnep2.balance);
         console.log('test balance', test.balance);
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
-    }).timeout(60000);
-
-    it('should get total supply of economy contract' ,async() => {
-        console.log("Check total supply on 2key-economy contract");
-        let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
-        console.log(totalSup);
     }).timeout(60000);
 
     it('should save balance to ipfs', () => {
@@ -600,7 +636,7 @@ describe('TwoKeyProtocol', () => {
 
     it('==> should print available amount of tokens after conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
-        const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
+        const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei((minContributionETHorUSD-registrationDebt), 'ether'));
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
         expect(availableAmountOfTokens).to.be.lte(1234000 - amount - totalTokens);
     }).timeout(60000);
@@ -1018,8 +1054,8 @@ describe('TwoKeyProtocol', () => {
         const contractorBalance = await twoKeyProtocol.AcquisitionCampaign.getContractorBalance(campaignAddress,from);
         console.log('Contractor balance: ' + contractorBalance.available);
 
-        // const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
-        // await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
+        const hash = await twoKeyProtocol.AcquisitionCampaign.contractorWithdraw(campaignAddress,from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
 
     it('==> should get address statistics', async() => {
@@ -1264,6 +1300,11 @@ describe('TwoKeyProtocol', () => {
 
     it('should get stats for the contract from upgradable exchange', async() => {
         let stats = await twoKeyProtocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
+        console.log(stats);
+    }).timeout(60000);
+
+    it('should get stats for the debts', async() => {
+        let stats = await twoKeyProtocol.TwoKeyFeeManager.getDebtsSummary();
         console.log(stats);
     }).timeout(60000);
 

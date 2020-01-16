@@ -96,10 +96,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
         bool canConvert;
         uint conversionAmountCampaignCurrency;
 
-        uint conversionAmount = ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWhenConvertingOrWithdrawingProceeds(
-            ownerPlasma,
-            msg.value
-        );
+        uint conversionAmount = payFeesForUser(twoKeyEventSource.plasmaOf(msg.sender), msg.value);
 
         (canConvert, conversionAmountCampaignCurrency) = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,

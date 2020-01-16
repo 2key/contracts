@@ -328,6 +328,26 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		return amountBought;
 	}
 
+	//TODO: Event for this debt paid
+	function payFeesForUser(
+		address _userPlasma,
+		uint _amount
+	)
+	internal
+	returns (uint)
+	{
+		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+		uint debt = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_userPlasma);
+		uint amountToPay = debt;
+		if(debt > 0) {
+			if(_amount < 3 * debt) {
+				amountToPay = debt / 2;
+			}
+			ITwoKeyFeeManager(twoKeyFeeManager).payDebtWhenConvertingOrWithdrawingProceeds.value(amountToPay)(_userPlasma, amountToPay);
+		}
+		return _amount.sub(amountToPay);
+	}
+
 	/**
 	 * @notice Function to send ether back to converter if his conversion is cancelled
 	 * @param _cancelledConverter is the address of cancelled converter
@@ -436,11 +456,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		uint balance = contractorBalance;
 		contractorBalance = 0;
 
-		// Check if contractor has any debts
-		balance = ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWhenConvertingOrWithdrawingProceeds(
-			ownerPlasma,
-			balance
-		);
+		balance = payFeesForUser(msg.sender, balance);
 
 		/**
          * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
