@@ -4,6 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/storage-contracts/ITwoKeyFeeManagerStorage.sol";
+import "../interfaces/IUpgradableExchange.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -28,6 +29,9 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     string constant _totalPaidInETH = "totalPaidInETH";
     string constant _totalPaidInDAI = "totalPaidInDAI";
     string constant _totalPaidIn2Key = "totalPaidIn2Key";
+
+    uint debtIn2Key;
+    address plasmaOfUser;
 
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
@@ -120,16 +124,38 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debtPaying));
     }
 
-    function payDebtWhenWithdrawingRewards(
-        address _plasmaAddress,
-        uint _amountInDAIor2KEY,
-        uint currencyIndex
+    function payDebtWithDAI(
+        address _plasmaAddress
     )
     public
     onlyAllowedContracts
     {
+        uint usersDebt = getDebtForUser(_plasmaAddress);
+        address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
+        uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
+        uint eth2DAI = IUpgradableExchange(upgradableExchange).getEth2DaiAverageExchangeRatePerContract(contractID);
+
+//        debtInDAI = (usersDebt.mul(eth2DAI)).div(10**18);
+//        plasmaOfUser = _plasmaAddress;
     }
+
+    function payDebtWith2Key(
+        address _plasmaAddress
+    )
+    public
+    onlyAllowedContracts
+    {
+        uint usersDebt = getDebtForUser(_plasmaAddress);
+        address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+
+        uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
+        uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
+
+        debtIn2Key = (usersDebt.mul(ethTo2key)).div(10**18);
+        plasmaOfUser = _plasmaAddress;
+    }
+
 
     /**
      * @notice Function to get status of the debts

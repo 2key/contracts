@@ -24,4 +24,25 @@ contract IUpgradableExchange {
     )
     public;
 
+    function getEth2DaiAverageExchangeRatePerContract(
+        uint _contractID
+    )
+    public
+    view
+    returns (uint);
+
+    function getContractId(
+        address _contractAddress
+    )
+    public
+    view
+    returns (uint);
+
+    function getEth2KeyAverageRatePerContract(
+        uint _contractID
+    )
+    public
+    view
+    returns (uint);
+
 }

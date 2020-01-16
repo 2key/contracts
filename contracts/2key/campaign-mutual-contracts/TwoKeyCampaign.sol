@@ -498,6 +498,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).report2KEYWithdrawnFromNetwork(balance);
 				IERC20(twoKeyEconomy).transfer(_address, balance);
+//				ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWith2Key(_referrer);
 			}
 			else {
 				revert();
