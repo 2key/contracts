@@ -30,8 +30,6 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     string constant _totalPaidInDAI = "totalPaidInDAI";
     string constant _totalPaidIn2Key = "totalPaidIn2Key";
 
-    uint debtIn2Key;
-    address plasmaOfUser;
 
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
@@ -152,8 +150,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
         uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
 
-        debtIn2Key = (usersDebt.mul(ethTo2key)).div(10**18);
-        plasmaOfUser = _plasmaAddress;
+        uint debtIn2Key = (usersDebt.mul(ethTo2key)).div(10**18);
     }
 
 
