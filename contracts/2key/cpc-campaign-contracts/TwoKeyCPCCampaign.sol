@@ -17,6 +17,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     // Flag to determine if campaign is validated
     bool public isValidated;
 
+
     /**
      * @notice Function to validate that contracts plasma and public are well mirrored
      */
@@ -27,7 +28,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         isValidated = true;
     }
 
-
+    //Replacement for constructor
     function setInitialParamsCPCCampaign(
         address _contractor,
         address _twoKeySingletonRegistry,
