@@ -93,6 +93,15 @@ const runDeployCPCCampaignMigration = (network) => new Promise(async(resolve, re
     }
 });
 
+const runDeployFeeManagerMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '11', '--to', '11', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
 /**
  * If there's a need to update, we'll run this function
  * @param network
@@ -376,5 +385,6 @@ module.exports = {
     ipfsAdd,
     ipfsGet,
     runCPCMigration,
-    runDeployCPCCampaignMigration
+    runDeployCPCCampaignMigration,
+    runDeployFeeManagerMigration
 };

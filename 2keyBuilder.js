@@ -1,3 +1,5 @@
+import {runDeployFeeManagerMigration} from "./helpers";
+
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
@@ -400,6 +402,9 @@ async function deployUpgrade(networks, args) {
         if(cpcChanged.length > 0) {
             await runDeployCPCCampaignMigration(networks[i]);
         }
+
+
+        await runDeployFeeManagerMigration(networks[i]);
         /* eslint-enable no-await-in-loop */
     }
     await archiveBuild();
