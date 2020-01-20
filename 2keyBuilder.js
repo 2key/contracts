@@ -1,5 +1,3 @@
-import {runDeployFeeManagerMigration} from "./helpers";
-
 const fs = require('fs');
 const path = require('path');
 const util = require('util');
@@ -38,7 +36,8 @@ const {
     ipfsAdd,
     ipfsGet,
     runCPCMigration,
-    runDeployCPCCampaignMigration
+    runDeployCPCCampaignMigration,
+    runDeployFeeManagerMigration
 } = require('./helpers');
 
 
