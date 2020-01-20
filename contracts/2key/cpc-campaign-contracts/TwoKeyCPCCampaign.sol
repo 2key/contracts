@@ -47,6 +47,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
         twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
 
+        twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
         // Set the moderator of the campaign
         moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
@@ -94,12 +95,42 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         merkleRoot = _merkleRoot;
     }
 
+
+    /**
+     * @notice Allow maintainers to push balances table
+     */
+    function pushBalancesForInfluencers(
+        address [] influencers,
+        uint [] balances
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+        for(i = 0; i < influencers.length; i++) {
+            referrerPlasma2Balances2key[influencers[i]] = balances[i];
+        }
+    }
+
+
     function getPlasmaOf(address _a)
     internal
     view
     returns (address)
     {
         return twoKeyEventSource.plasmaOf(_a);
+    }
+
+    function distributeRewardsBetweenInfluencers(
+        address [] influencers
+    )
+    public
+    onlyMaintainer
+    {
+        for(uint i=0; i<influencers.length; i++) {
+            transferERC20(influencers[i], referrerPlasma2Balances2key[influencers[i]]);
+            referrerPlasma2Balances2key[influencers[i]] = 0;
+        }
     }
 
     function submitProofAndWithdrawRewards(

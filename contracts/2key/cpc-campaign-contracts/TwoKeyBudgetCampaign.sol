@@ -49,7 +49,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	)
 	internal
 	{
-		address twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
 		IERC20(twoKeyEconomy).transfer(receiver, amount);
 	}
 
