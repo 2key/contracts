@@ -47,6 +47,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
         twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
 
+        twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
         // Set the moderator of the campaign
         moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
@@ -120,11 +121,16 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         return twoKeyEventSource.plasmaOf(_a);
     }
 
-    //TODO implement withdraw for all
-    function withdrawWithoutProof()
+    function distributeRewardsBetweenInfluencers(
+        address [] influencers
+    )
     public
+    onlyMaintainer
     {
-
+        for(uint i=0; i<influencers.length; i++) {
+            transferERC20(influencers[i], referrerPlasma2Balances2key[influencers[i]]);
+            referrerPlasma2Balances2key[influencers[i]] = 0;
+        }
     }
 
     function submitProofAndWithdrawRewards(
