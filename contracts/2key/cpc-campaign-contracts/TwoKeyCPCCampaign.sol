@@ -94,12 +94,37 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         merkleRoot = _merkleRoot;
     }
 
+
+    /**
+     * @notice Allow maintainers to push balances table
+     */
+    function pushBalancesForInfluencers(
+        address [] influencers,
+        uint [] balances
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+        for(i = 0; i < influencers.length; i++) {
+            referrerPlasma2Balances2key[influencers[i]] = balances[i];
+        }
+    }
+
+
     function getPlasmaOf(address _a)
     internal
     view
     returns (address)
     {
         return twoKeyEventSource.plasmaOf(_a);
+    }
+
+    //TODO implement withdraw for all
+    function withdrawWithoutProof()
+    public
+    {
+
     }
 
     function submitProofAndWithdrawRewards(
