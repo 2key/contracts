@@ -12,7 +12,7 @@ const TwoKeyFactory = artifacts.require('TwoKeyFactory');
 const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry');
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
-
+const TwoKeyFeeManager = artifacts.require('TwoKeyFeeManager');
 
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
@@ -31,6 +31,7 @@ const TwoKeyDeepFreezeTokenPoolStorage = artifacts.require('TwoKeyDeepFreezeToke
 const TwoKeyRegistryStorage = artifacts.require('TwoKeyRegistryStorage');
 const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValidatorStorage');
 const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
+const TwoKeyFeeManagerStorage = artifacts.require('TwoKeyFeeManagerStorage');
 
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
@@ -105,6 +106,7 @@ let contractsArtifacts = {
     TwoKeyMaintainersRegistry,
     TwoKeySignatureValidator,
     TwoKeyParticipationPaymentsManager,
+    TwoKeyFeeManager,
     TwoKeyUpgradableExchangeStorage,
     TwoKeyAdminStorage,
     TwoKeyEventSourceStorage,
@@ -117,6 +119,7 @@ let contractsArtifacts = {
     TwoKeyMaintainersRegistryStorage,
     TwoKeySignatureValidatorStorage,
     TwoKeyParticipationPaymentsManagerStorage,
+    TwoKeyFeeManagerStorage,
     TwoKeyPlasmaEvents,
     TwoKeyPlasmaMaintainersRegistry,
     TwoKeyPlasmaRegistry,
