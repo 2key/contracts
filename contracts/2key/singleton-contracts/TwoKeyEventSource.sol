@@ -5,8 +5,9 @@ import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyEventSourceStorage.sol";
+import "../interfaces/ITwoKeyFeeManager.sol";
+import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 /**
@@ -462,11 +463,14 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         address _address,
         string _fullName,
         string _email,
-        string _username_walletName
+        string _username_walletName,
+        uint _registrationFee
     )
     external
     {
         require(isAddressMaintainer(msg.sender) == true);
+
+        ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setRegistrationFeeForUser(_address, _registrationFee);
         emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
     }
 

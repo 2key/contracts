@@ -328,7 +328,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		return amountBought;
 	}
 
-	//TODO: Event for this debt paid
+
 	function payFeesForUser(
 		address _userPlasma,
 		uint _amount

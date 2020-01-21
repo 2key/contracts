@@ -24,6 +24,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
     //Debt will be stored in ETH
     string constant _userPlasmaToDebtInETH = "userPlasmaToDebtInETH";
+    string constant _isDebtSubmitted = "isDebtSubmitted";
     string constant _totalDebtsInETH = "totalDebtsInETH";
 
     string constant _totalPaidInETH = "totalPaidInETH";
@@ -54,6 +55,44 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
+
+    /**
+     * @notice Function which will submit registration fees
+     * It can be called only once par _address
+     * @param _plasmaAddress is the address of the user
+     * @param _registrationFee is the amount paid for the registration
+     */
+    function setRegistrationFeeForUser(
+        address _plasmaAddress,
+        uint _registrationFee
+    )
+    public
+    {
+        //Check that this function can be called only by TwoKeyEventSource
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
+
+        // Generate the key for the storage
+        bytes32 keyHashIsDebtSubmitted = keccak256(_isDebtSubmitted, _plasmaAddress);
+
+        //Check that for this user we have never submitted the debt in the past
+        require(PROXY_STORAGE_CONTRACT.getBool(keyHashIsDebtSubmitted) == false);
+
+        //Set that debt is submitted
+        PROXY_STORAGE_CONTRACT.setBool(keyHashIsDebtSubmitted, true);
+
+        //Set the debt for the user
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userPlasmaToDebtInETH, _plasmaAddress), _registrationFee);
+
+        //Get the key for the total debts in eth
+        bytes32 key = keccak256(_totalDebtsInETH);
+
+        //Get the total debts from storage contract and increase by _registrationFee
+        uint totalDebts = _registrationFee.add(PROXY_STORAGE_CONTRACT.getUint(key));
+
+        //Set new value for totalDebts
+        PROXY_STORAGE_CONTRACT.setUint(key, totalDebts);
+    }
+
     /**
      * @notice Function where maintainer can set debts per user
      * @param usersPlasmas is the array of user plasma addresses
@@ -71,7 +110,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint total = 0;
         // Iterate through all addresses and store the registration fees paid for them
         for(i = 0; i < usersPlasmas.length; i++) {
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(usersPlasmas[i], _userPlasmaToDebtInETH), fees[i]);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_userPlasmaToDebtInETH, usersPlasmas[i]), fees[i]);
             total = total.add(fees[i]);
         }
 
@@ -94,7 +133,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userPlasma, _userPlasmaToDebtInETH));
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userPlasmaToDebtInETH, _userPlasma));
     }
 
 

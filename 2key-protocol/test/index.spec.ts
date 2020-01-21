@@ -35,7 +35,7 @@ let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
 let campaignInventory = 1234000;
-let registrationDebt = 0.001; //0.001 ETH is the debt for the registration
+let registrationDebt = 0; //0.001 ETH is the debt for the registration
 
 console.log(rpcUrls);
 console.log(networkId);
@@ -282,34 +282,34 @@ describe('TwoKeyProtocol', () => {
 
     let txHash;
 
-    it('should get few plasma addresses and add debts for them', async() => {
-        let plasmaAddresses = [
-            generatePlasmaFromMnemonic(env.MNEMONIC_TEST).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).address
-        ];
-
-        let debts = [
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString())
-        ];
-
-        console.log(debts);
-        console.log(plasmaAddresses);
-        let txHash = await twoKeyProtocol.TwoKeyFeeManager.setDebtsForAddresses(plasmaAddresses, debts, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
-
-    it('should get stats for the debts', async() => {
-        let stats = await twoKeyProtocol.TwoKeyFeeManager.getDebtsSummary();
-        console.log(stats);
-    }).timeout(60000);
-
+    // it('should get few plasma addresses and add debts for them', async() => {
+    //     let plasmaAddresses = [
+    //         generatePlasmaFromMnemonic(env.MNEMONIC_TEST).address,
+    //         generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).address,
+    //         generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).address,
+    //         generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).address,
+    //         generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).address
+    //     ];
+    //
+    //     let debts = [
+    //         parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+    //         parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+    //         parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+    //         parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
+    //         parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString())
+    //     ];
+    //
+    //     console.log(debts);
+    //     console.log(plasmaAddresses);
+    //     let txHash = await twoKeyProtocol.TwoKeyFeeManager.setDebtsForAddresses(plasmaAddresses, debts, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(60000);
+    //
+    // it('should get stats for the debts', async() => {
+    //     let stats = await twoKeyProtocol.TwoKeyFeeManager.getDebtsSummary();
+    //     console.log(stats);
+    // }).timeout(60000);
+    //
 
     it('should get total supply of economy contract' ,async() => {
         console.log("Check total supply on 2key-economy contract");
@@ -628,9 +628,6 @@ describe('TwoKeyProtocol', () => {
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-
-        // const campaigns = await twoKeyProtocol.getCampaignsWhereConverter(from);
-        // console.log(campaigns);
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
