@@ -273,23 +273,17 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     view
     returns (address[])
     {
+
         address influencer = plasmaOf(customer);
-        uint n_influencers = 0;
 
-        while (true) {
-            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
-            if (influencer == plasmaOf(contractor)) {
-                break;
-            }
-            n_influencers = n_influencers.add(1);
-        }
-        address[] memory influencers = new address[](n_influencers);
-        influencer = plasmaOf(customer);
+        uint numberOfInfluencers = ITwoKeyCampaign(twoKeyCampaign).converterToNumberOfInfluencers(customer) - 1;
 
-        while (n_influencers > 0) {
-            influencer = plasmaOf(ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer));
-            n_influencers = n_influencers.sub(1);
-            influencers[n_influencers] = influencer;
+        address[] memory influencers = new address[](numberOfInfluencers);
+
+        while(numberOfInfluencers > 0) {
+            influencer = ITwoKeyCampaign(twoKeyCampaign).getReceivedFrom(influencer);
+            numberOfInfluencers--;
+            influencers[numberOfInfluencers] = influencer;
         }
         return influencers;
     }

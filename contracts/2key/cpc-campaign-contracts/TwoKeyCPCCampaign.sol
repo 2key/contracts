@@ -34,7 +34,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         address _twoKeySingletonRegistry,
         string _url,
         address _mirrorCampaignOnPlasma,
-        uint _bountyPerConversion
+        uint _bountyPerConversion,
+        address _twoKeyEconomy
     )
     public
     {
@@ -47,7 +48,8 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
         twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
 
-        twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
+        twoKeyEconomy = _twoKeyEconomy;
+
         // Set the moderator of the campaign
         moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 

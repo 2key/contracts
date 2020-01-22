@@ -5,16 +5,13 @@ import "../libraries/Call.sol";
 import "../libraries/SafeMath.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
-
-
-
 contract TwoKeyCampaignAbstract is ArcToken {
 
     using SafeMath for uint256;
     using Call for *;
 
     bool isCampaignInitialized; // Representing if campaign "constructor" was called
-    uint constant HUNDRED_PERCENT = 100;
+
     address public TWO_KEY_SINGLETON_REGISTRY;
 
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
@@ -46,12 +43,6 @@ contract TwoKeyCampaignAbstract is ArcToken {
     function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
-    }
-
-    // Internal function to fetch non upgradable from TwoKeyRegistry
-    function getNonUpgradableContractAddressFromRegistry(string contractName) internal view returns (address) {
-        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
-        .getNonUpgradableContractAddress(contractName);
     }
 
     /**

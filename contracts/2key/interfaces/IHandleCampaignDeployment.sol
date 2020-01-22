@@ -18,6 +18,7 @@ contract IHandleCampaignDeployment {
         address _moderator,
         address _assetContractERC20,
         address _contractor,
+        address _twoKeyEconomy,
         uint [] values
     ) public;
 
@@ -117,7 +118,8 @@ contract IHandleCampaignDeployment {
         address _twoKeySingletonRegistry,
         string _url,
         address _mirrorCampaignOnPlasma,
-        uint _bountyPerConversion
+        uint _bountyPerConversion,
+        address _twoKeyEconomy
     )
     public;
 }

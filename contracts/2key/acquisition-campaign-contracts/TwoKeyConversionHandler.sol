@@ -5,6 +5,7 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../interfaces/ITwoKeyBaseReputationRegistry.sol";
 import "../interfaces/ITwoKeyPurchasesHandler.sol";
+import "../interfaces/ITwoKeyAcquisitionLogicHandler.sol";
 
 /**
  * @author Nikola Madjarevic
@@ -152,6 +153,17 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         return state;
     }
 
+    function reserveTokens(
+        uint baseTokensForConverterUnits,
+        uint bonusTokensForConverterUnits
+    )
+    internal
+    {
+        uint totalTokensForConverterUnits = baseTokensForConverterUnits.add(bonusTokensForConverterUnits);
+        twoKeyCampaign.validateThatThereIsEnoughTokensAndIncreaseReserved(totalTokensForConverterUnits);
+    }
+
+
     /// @notice Support function to create conversion
     /// @dev This function can only be called from TwoKeyAcquisitionCampaign contract address
     /// @param _converterAddress is the address of the converter
@@ -160,8 +172,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         address _converterAddress,
         uint256 _conversionAmount,
         uint256 _maxReferralRewardETHWei,
-        uint256 baseTokensForConverterUnits,
-        uint256 bonusTokensForConverterUnits,
         bool isConversionFiat,
         bool _isAnonymous,
         uint conversionAmountCampaignCurrency
@@ -175,6 +185,14 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
         // Set if converter want to be anonymous
         isConverterAnonymous[_converterAddress] = _isAnonymous;
+
+        uint baseTokensForConverterUnits;
+        uint bonusTokensForConverterUnits;
+
+        (baseTokensForConverterUnits, bonusTokensForConverterUnits)
+        = ITwoKeyAcquisitionLogicHandler(twoKeyCampaign.logicHandler()).getEstimatedTokenAmount(_conversionAmount, isConversionFiat);
+
+        reserveTokens(baseTokensForConverterUnits, bonusTokensForConverterUnits);
 
         uint _moderatorFeeETHWei = 0;
         uint256 _contractorProceeds = _conversionAmount; //In case of fiat conversion, this is going to be fiat value

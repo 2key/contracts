@@ -9,8 +9,6 @@ contract ITwoKeyConversionHandler {
         address _converterAddress,
         uint256 _conversionAmount,
         uint256 _maxReferralRewardETHWei,
-        uint256 baseTokensForConverterUnits,
-        uint256 bonusTokensForConverterUnits,
         bool isConversionFiat,
         bool _isAnonymous,
         uint conversionAmountCampaignCurrency

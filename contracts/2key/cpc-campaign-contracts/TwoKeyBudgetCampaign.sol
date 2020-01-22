@@ -39,7 +39,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	view
 	returns (uint)
 	{
-		address twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
 		return IERC20(twoKeyEconomy).balanceOf(address(this));
 	}
 

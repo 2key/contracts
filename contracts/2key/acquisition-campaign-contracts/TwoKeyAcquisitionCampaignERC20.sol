@@ -36,6 +36,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         address _moderator,
         address _assetContractERC20,
         address _contractor,
+        address _twoKeyEconomy,
         uint [] values
     )
     public
@@ -49,7 +50,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
 
         twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
-        twoKeyEconomy = getNonUpgradableContractAddressFromRegistry("TwoKeyEconomy");
+        twoKeyEconomy = _twoKeyEconomy;
 
         maxReferralRewardPercent = values[0];
         conversionQuota = values[1];
@@ -110,15 +111,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
         usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
     }
-
-//    function storeRateBeforeInventoryIsAdded()
-//    public
-//    onlyContractor
-//    {
-//        require(usd2KEYrateWei == 0);
-//
-//        usd2KEYrateWei = (IUpgradableExchange(getContractProxyAddress("TwoKeyUpgradableExchange")).sellRate2key());
-//    }
 
 
     function validateRequirements(
@@ -194,14 +186,16 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
 
-    function validateThatThereIsEnoughTokens(
+    function validateThatThereIsEnoughTokensAndIncreaseReserved(
         uint totalBoughtUnits
     )
-    internal
-    view
+    public
+    onlyTwoKeyConversionHandler
     {
         uint256 _total_units = getAvailableAndNonReservedTokensAmount();
         require(_total_units >= totalBoughtUnits);
+
+        reservedAmountOfTokens = reservedAmountOfTokens.add(totalBoughtUnits);
     }
 
 
@@ -221,24 +215,11 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     )
     private
     {
-        uint baseTokensForConverterUnits;
-        uint bonusTokensForConverterUnits;
-
-        (baseTokensForConverterUnits, bonusTokensForConverterUnits)
-        = ITwoKeyAcquisitionLogicHandler(logicHandler).getEstimatedTokenAmount(conversionAmountETHWeiOrFiat, isFiatConversion);
-
-        uint totalTokensForConverterUnits = baseTokensForConverterUnits.add(bonusTokensForConverterUnits);
-
-        validateThatThereIsEnoughTokens(totalTokensForConverterUnits);
-
-        reservedAmountOfTokens = reservedAmountOfTokens.add(totalTokensForConverterUnits);
 
         uint conversionId = ITwoKeyConversionHandler(conversionHandler).supportForCreateConversion(
             converterAddress,
             conversionAmountETHWeiOrFiat,
             calculateInfluencersFee(conversionAmountETHWeiOrFiat, numberOfInfluencers),
-            baseTokensForConverterUnits,
-            bonusTokensForConverterUnits,
             isFiatConversion,
             isAnonymous,
             conversionAmountCampaignCurrency
@@ -292,7 +273,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         return totalBounty2keys;
     }
 
-    // comment
 
     /**
      * @notice Move some amount of ERC20 from our campaign to someone

@@ -163,6 +163,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             addresses[1], //moderator
             addresses[0], //asset contract
             msg.sender, //contractor
+            getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"),
             values
         );
 
@@ -273,7 +274,8 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             TWO_KEY_SINGLETON_REGISTRY,
             _url,
             _mirrorCampaignOnPlasma,
-            _bountyPerConversion
+            _bountyPerConversion,
+            getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")
         );
 
         setAddressToCampaignType(proxyCPC, "CPC_PUBLIC");
