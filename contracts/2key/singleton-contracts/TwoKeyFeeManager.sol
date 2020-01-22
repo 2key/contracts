@@ -24,6 +24,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
     //Debt will be stored in ETH
     string constant _userPlasmaToDebtInETH = "userPlasmaToDebtInETH";
+
+    //This refferrs only to registration debt
     string constant _isDebtSubmitted = "isDebtSubmitted";
     string constant _totalDebtsInETH = "totalDebtsInETH";
 
@@ -68,6 +70,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
+
         //Check that this function can be called only by TwoKeyEventSource
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
 
