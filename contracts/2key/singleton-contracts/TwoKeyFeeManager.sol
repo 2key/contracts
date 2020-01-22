@@ -5,6 +5,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/storage-contracts/ITwoKeyFeeManagerStorage.sol";
 import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -70,7 +71,6 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
-
         //Check that this function can be called only by TwoKeyEventSource
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
 
@@ -162,6 +162,12 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         bytes32 key = keccak256(_totalPaidInETH);
         uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(key);
         PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debtPaying));
+
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
+            _plasmaAddress,
+            _debtPaying,
+            false
+        );
     }
 
     function payDebtWithDAI(

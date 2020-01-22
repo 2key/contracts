@@ -186,6 +186,12 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint tokensAmountWithdrawn
     );
 
+    event Debt (
+        address plasmaAddress,
+        uint weiAmount,
+        bool addition //If true means debt increasing otherwise it means that event emitted when user paid part of the debt
+    );
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -472,6 +478,22 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
         ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setRegistrationFeeForUser(_address, _registrationFee);
         emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
+        emit Debt(_address, _registrationFee, true);
+    }
+
+    function emitDebtEvent(
+        address _plasmaAddress,
+        uint _amount,
+        bool _isAddition
+    )
+    external
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager"));
+        emit Debt(
+            _plasmaAddress,
+            _amount,
+            _isAddition
+        );
     }
 
     /**
