@@ -406,6 +406,12 @@ describe('TwoKeyDonationCampaign', () => {
         expect(conversion.conversionState).to.be.equal("EXECUTED");
     }).timeout(60000);
 
+    it('should print referrers', async() => {
+        printTestNumber();
+        let influencers = await twoKeyProtocol.DonationCampaign.getRefferrersToConverter(campaignAddress,  env.TEST4_ADDRESS, from);
+        console.log(influencers);
+    }).timeout(60000);
+
     it('should get referrer earnings', async() => {
         printTestNumber();
         let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, env.GMAIL_ADDRESS, from);
