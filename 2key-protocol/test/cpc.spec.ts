@@ -475,4 +475,16 @@ describe('CPC campaign', () => {
         expect(stats.ethereum).to.be.equal(from);
         expect(stats.username).to.be.equal('test');
     }).timeout(TIMEOUT_LENGTH);
+
+    it('should print number of active influencers and get referrers and earnings', async() => {
+        printTestNumber();
+        let numberOfActiveInfluencers = await twoKeyProtocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
+        console.log(numberOfActiveInfluencers);
+
+        let obj = await twoKeyProtocol.CPCCampaign.getInfluencersAndBalances(campaignAddress, 0, numberOfActiveInfluencers);
+        console.log(obj);
+
+    }).timeout(TIMEOUT_LENGTH);
+
+
 });

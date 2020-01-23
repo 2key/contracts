@@ -572,6 +572,15 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return activeInfluencers;
     }
 
+
+    function getNumberOfActiveInfluencers()
+    public
+    view
+    returns (uint)
+    {
+        return activeInfluencers.length;
+    }
+
     function ethereumOf(
         address _address
     )
@@ -627,6 +636,27 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
         // Total bounty - bounty PAID for executed conversions
         return totalBountyForCampaign.sub(counters[6]);
+    }
+
+    function getInfluencersAndBalances(
+        uint start,
+        uint end
+    )
+    public
+    view
+    returns (address[], uint[])
+    {
+        uint[] memory balances = new uint[](end-start);
+        address[] memory influencers = new address[](end-start);
+
+        uint index = 0;
+        for(index = start; index < end; index++) {
+            address influencer = activeInfluencers[index];
+            balances[index] = referrerPlasma2Balances2key[influencer];
+            influencers[index] = influencer;
+        }
+
+        return (influencers, balances);
     }
 
 }
