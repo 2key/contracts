@@ -252,9 +252,14 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		// Calculate how much tokens are going to the moderator
 		uint moderatorTokens = totalTokens.mul(100 - networkFee).div(100);
 
+		//TODO: add to admin contract mapping from contract address to fees collected (base moderator only), and
+		//TODO: update as part of senidng them
 		// Transfer tokens to moderator
 		IERC20(twoKeyEconomy).transfer(moderator, moderatorTokens);
 
+		//TODO: add to deep freeze pool similar accounting so we know how much fees were paid by
+		//TODO: (A) contract_address --> fees frozen , (B) integrator/moderator_address --> fees frozen
+		//TODO update both mappings each time we send fees there
 		// Transfer the rest of the tokens to TwoKeyDeepFreezeTokenPool
 		IERC20(twoKeyEconomy).transfer(twoKeyDeepFreezeTokenPool, totalTokens.sub(moderatorTokens));
 
