@@ -16,7 +16,7 @@ spinner 2
 
 echo "Generating bytecodes for patching plasma contracts"
 cd ../..
-echo "Patch CPC_PLASMA campaign to 1.0.14"
+echo "Patch CPC_PLASMA campaign to 1.0.15"
 echo "Destination for execution: 0xc96a16b5064797a883f12780400a5e8e5d5d4d20"
 
-python3 generate_bytecode.py approveNewCampaign CPC_PLASMA 1.0.14
+python3 generate_bytecode.py approveNewCampaign CPC_PLASMA 1.0.15
