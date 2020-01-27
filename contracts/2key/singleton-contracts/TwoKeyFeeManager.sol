@@ -153,7 +153,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     payable
     onlyAllowedContracts
     {
-        bytes32 keyHashForDebt = keccak256(_plasmaAddress, _userPlasmaToDebtInETH);
+        bytes32 keyHashForDebt = keccak256(_userPlasmaToDebtInETH, _plasmaAddress);
         uint totalDebtForUser = PROXY_STORAGE_CONTRACT.getUint(keyHashForDebt);
 
         PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, totalDebtForUser.sub(_debtPaying));
