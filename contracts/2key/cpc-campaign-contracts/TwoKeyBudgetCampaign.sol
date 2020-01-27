@@ -10,6 +10,7 @@ import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
  */
 contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
+	//Selector if inventory is added
 	bool isInventoryAdded;
 	/**
 	 * This is the BudgetCampaign contract abstraction which will
