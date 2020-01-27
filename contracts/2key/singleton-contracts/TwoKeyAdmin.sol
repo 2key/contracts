@@ -3,9 +3,9 @@ pragma solidity ^0.4.24;
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
-
-import "../upgradability/Upgradeable.sol";
+import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
+import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
@@ -17,6 +17,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyNetworkTaxPercent = "twoKeyNetworkTaxPercent";
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
+	string constant _rewardsReceivedAsModerator = "rewardsReceivedAsModerator";
 
 	/**
 	 * Keys for the addresses we're accessing
@@ -25,6 +26,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyUpgradableExchange = "TwoKeyUpgradableExchange";
 	string constant _twoKeyRegistry = "TwoKeyRegistry";
 	string constant _twoKeyEconomy = "TwoKeyEconomy";
+	string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
 
 
 	bool initialized = false;
@@ -37,6 +39,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	    _;
 	}
 
+	modifier onlyAllowedContracts {
+		address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator);
+		require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
+		_;
+	}
 
 
     /**
@@ -186,6 +193,16 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+	function updateReceivedTokensAsModerator(
+		uint amountOfTokens
+	)
+	public
+	onlyAllowedContracts
+	{
+		bytes32 key = keccak256(_rewardsReceivedAsModerator);
+		PROXY_STORAGE_CONTRACT.setUint(key, amountOfTokens + (PROXY_STORAGE_CONTRACT.getUint(key)));
+	}
+
 
 	/// @notice Getter for all integers we'd like to store
 	/// @param key is the key (var name)
@@ -279,6 +296,13 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_twoKeyIntegratorDefaultFeePercent),newFeePercent);
 	}
 
+	function getAmountOfTokensReceivedAsModerator()
+	public
+	view
+	returns (uint)
+	{
+		PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModerator));
+	}
 
 	/// Fallback function
 	function()
