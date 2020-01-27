@@ -38,6 +38,11 @@ contract ITwoKeyCampaign {
     )
     public;
 
+    function updateModeratorRewards(
+        uint moderatorTokens
+    )
+    public;
+
     address public logicHandler;
     address public conversionHandler;
 

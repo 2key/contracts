@@ -27,6 +27,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     string constant _twoKeyAdmin = "TwoKeyAdmin";
     string constant _twoKeyExchangeRateContract = "TwoKeyExchangeRateContract";
     string constant _twoKeyMaintainersRegistry = "TwoKeyMaintainersRegistry";
+    string constant _deepFreezeTokenPool = "TwoKeyDeepFreezeTokenPool";
+
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
      */
@@ -191,6 +193,18 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint weiAmount,
         bool addition //If true means debt increasing otherwise it means that event emitted when user paid part of the debt
     );
+
+    event ReceivedTokensAsModerator(
+        address campaignAddress,
+        uint amountOfTokens
+    );
+
+    event ReceivedTokensDeepFreezeTokenPool(
+        address campaignAddress,
+        uint amountOfTokens
+    );
+
+
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -481,6 +495,12 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit Debt(_address, _registrationFee, true);
     }
 
+    /**
+     * @notice Function which will emit every time some debt is increased or paid
+     * @param _plasmaAddress is the address of the user we are increasing/decreasing debt for
+     * @param _amount is the amount of ETH he paid/increased
+     * @param _isAddition is stating either debt increased or paid
+     */
     function emitDebtEvent(
         address _plasmaAddress,
         uint _amount,
@@ -495,6 +515,45 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
             _isAddition
         );
     }
+
+    /**
+     * @notice Function which will be called by TwoKeyAdmin every time it receives 2KEY tokens
+     * as a moderator on TwoKeyCampaigns
+     * @param _campaignAddress is the address of the campaign sending tokens
+     * @param _amountOfTokens is the amount of tokens sent
+     */
+    function emitReceivedTokensAsModerator(
+        address _campaignAddress,
+        uint _amountOfTokens
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin));
+        emit ReceivedTokensAsModerator(
+            _campaignAddress,
+            _amountOfTokens
+        );
+    }
+
+    /**
+     * @notice Function which will be called by TwoKeyDeepFreezeTokenPool every time it receives 2KEY tokens
+     * from moderator rewards on the conversion event
+     * @param _campaignAddress is the address of the campaign sending tokens
+     * @param _amountOfTokens is the amount of tokens sent
+     */
+    function emitReceivedTokensToDeepFreezeTokenPool(
+        address _campaignAddress,
+        uint _amountOfTokens
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry(_deepFreezeTokenPool));
+        emit ReceivedTokensDeepFreezeTokenPool(
+            _campaignAddress,
+            _amountOfTokens
+        );
+    }
+
 
     /**
      * @notice Function which will emit an event every time somebody performs

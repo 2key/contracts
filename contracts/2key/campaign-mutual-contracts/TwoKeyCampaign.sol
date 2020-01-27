@@ -3,9 +3,9 @@ pragma solidity ^0.4.24;
 import "../singleton-contracts/TwoKeyEventSource.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/IERC20.sol";
-import "./TwoKeyCampaignAbstract.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
-import "../token-pools/TwoKeyDeepFreezeTokenPool.sol";
+import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
+import "./TwoKeyCampaignAbstract.sol";
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
  */
@@ -37,6 +37,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		require(msg.sender == conversionHandler);
 		_;
 	}
+
 	/**
 	 * @notice Modifier to restrict access to logic handler for specific methods
 	 */
@@ -241,27 +242,22 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	public
 	onlyTwoKeyConversionHandler
 	{
-		//Get deep freeze token pool address
-		address twoKeyDeepFreezeTokenPool = getAddressFromTwoKeySingletonRegistry("TwoKeyDeepFreezeTokenPool");
-
-		uint networkFee = twoKeyEventSource.getTwoKeyDefaultNetworkTaxPercent();
-
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 		// Get the total tokens bought
-		uint totalTokens = buyTokensFromUpgradableExchange(moderatorFee,address(this)); // Buy tokens for moderator and twoKeyDeepFreezeTokenPool
+		uint totalTokens = buyTokensFromUpgradableExchange(moderatorFee, twoKeyAdmin); // Buy tokens for moderator and twoKeyDeepFreezeTokenPool
 
-		// Calculate how much tokens are going to the moderator
-		uint moderatorTokens = totalTokens.mul(100 - networkFee).div(100);
+		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(totalTokens);
+	}
 
-		//TODO: add to admin contract mapping from contract address to fees collected (base moderator only), and
-		//TODO: update as part of senidng them
-		// Transfer tokens to moderator
-		IERC20(twoKeyEconomy).transfer(moderator, moderatorTokens);
 
-		//TODO: add to deep freeze pool similar accounting so we know how much fees were paid by
-		//TODO: (A) contract_address --> fees frozen , (B) integrator/moderator_address --> fees frozen
-		//TODO update both mappings each time we send fees there
-		// Transfer the rest of the tokens to TwoKeyDeepFreezeTokenPool
-		IERC20(twoKeyEconomy).transfer(twoKeyDeepFreezeTokenPool, totalTokens.sub(moderatorTokens));
+
+	function updateModeratorRewards(
+		uint moderatorTokens
+	)
+	public
+	{
+		require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"));
 
 		// Update moderator earnings
 		moderatorTotalEarnings2key = moderatorTotalEarnings2key.add(moderatorTokens);

@@ -4,11 +4,17 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
+import "../interfaces/ITwoKeyCampaign.sol";
 import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+import "../libraries/SafeMath.sol";
 
 contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
+
+	using SafeMath for *;
 
 	/**
 	 * Storage keys are stored on the top. Here they are in order to avoid any typos
@@ -17,7 +23,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyNetworkTaxPercent = "twoKeyNetworkTaxPercent";
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
-	string constant _rewardsReceivedAsModerator = "rewardsReceivedAsModerator";
+	string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
+	string constant _rewardsReceivedAsModeratorFromCampaign = "rewardsReceivedAsModeratorFromCampaign";
 
 	/**
 	 * Keys for the addresses we're accessing
@@ -27,6 +34,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyRegistry = "TwoKeyRegistry";
 	string constant _twoKeyEconomy = "TwoKeyEconomy";
 	string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
+	string constant _twoKeyEventSource = "TwoKeyEventSource";
 
 
 	bool initialized = false;
@@ -199,8 +207,29 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyAllowedContracts
 	{
-		bytes32 key = keccak256(_rewardsReceivedAsModerator);
-		PROXY_STORAGE_CONTRACT.setUint(key, amountOfTokens + (PROXY_STORAGE_CONTRACT.getUint(key)));
+
+		uint networkFee = getDefaultIntegratorFeePercent();
+		uint moderatorTokens = amountOfTokens.mul(100 - networkFee).div(100);
+
+		bytes32 keyHashTotalRewards = keccak256(_rewardsReceivedAsModeratorTotal);
+		PROXY_STORAGE_CONTRACT.setUint(keyHashTotalRewards, moderatorTokens.add((PROXY_STORAGE_CONTRACT.getUint(keyHashTotalRewards))));
+
+		//Emit event through TwoKeyEventSource for the campaign
+		ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource)).emitReceivedTokensAsModerator(msg.sender, moderatorTokens);
+
+		//Update moderator earnings to campaign
+		ITwoKeyCampaign(msg.sender).updateModeratorRewards(moderatorTokens);
+
+		//Now update twoKeyDeepFreezeTokenPool
+		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
+		address deepFreezeTokenPool = getAddressFromTwoKeySingletonRegistry("TwoKeyDeepFreezeTokenPool");
+
+		uint tokensForDeepFreezeTokenPool = amountOfTokens.sub(moderatorTokens);
+		//Transfer tokens to deep freeze token pool
+		IERC20(twoKeyEconomy).transfer(deepFreezeTokenPool, tokensForDeepFreezeTokenPool);
+
+//		//Update contract on receiving tokens
+		ITwoKeyDeepFreezeTokenPool(deepFreezeTokenPool).updateReceivedTokensForSuccessfulConversions(tokensForDeepFreezeTokenPool, msg.sender);
 	}
 
 
@@ -301,7 +330,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	view
 	returns (uint)
 	{
-		PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModerator));
+		PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
 	}
 
 	/// Fallback function

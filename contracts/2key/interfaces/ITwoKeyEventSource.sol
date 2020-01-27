@@ -60,4 +60,16 @@ contract ITwoKeyEventSource {
         bool _isAddition
     )
     external;
+
+    function emitReceivedTokensToDeepFreezeTokenPool(
+        address _campaignAddress,
+        uint _amountOfTokens
+    )
+    public;
+
+    function emitReceivedTokensAsModerator(
+        address _campaignAddress,
+        uint _amountOfTokens
+    )
+    public;
 }

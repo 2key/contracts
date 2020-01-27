@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./TokenPool.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/storage-contracts/ITwoKeyDeepFreezeTokenPoolStorage.sol";
 
@@ -13,7 +14,10 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
     ITwoKeyDeepFreezeTokenPoolStorage public PROXY_STORAGE_CONTRACT;
 
     string constant _tokensReleaseDate = "tokensReleaseDate";
-    string constant _twoKeyCampaignValidator = "twoKeyCampaignValidator";
+    string constant _tokensReceivedFromModeratorRewards = "tokensReceivedFromModeratorRewards";
+
+    string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
+    string constant _twoKeyEventSource = "TwoKeyEventSource";
 
     address public twoKeyParticipationMiningPool;
 
@@ -61,12 +65,17 @@ contract TwoKeyDeepFreezeTokenPool is TokenPool {
     }
 
     function updateReceivedTokensForSuccessfulConversions(
-        uint amount
+        uint amountOfTokens,
+        address campaignAddress
     )
     public
-    onlyAllowedContracts
+    onlyTwoKeyAdmin
     {
+        bytes32 keyHashTotalRewards = keccak256(_tokensReceivedFromModeratorRewards);
+        PROXY_STORAGE_CONTRACT.setUint(keyHashTotalRewards, amountOfTokens + (PROXY_STORAGE_CONTRACT.getUint(keyHashTotalRewards)));
 
+        //Emit event through TwoKeyEventSource for the campaign
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource)).emitReceivedTokensToDeepFreezeTokenPool(campaignAddress, amountOfTokens);
     }
 
 
