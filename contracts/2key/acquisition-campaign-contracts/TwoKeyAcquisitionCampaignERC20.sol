@@ -6,12 +6,11 @@ import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 /**
- * @author Nikola Madjarevic
+ * @author Nikola Madjarevicconvert=
  */
 contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     bool isCampaignInitialized; // Once this is set to true can't be modified
-
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     bool boughtRewardsWithEther;
 

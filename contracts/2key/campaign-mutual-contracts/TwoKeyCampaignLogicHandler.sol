@@ -441,7 +441,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         }
     }
 
-    function updateConverterToLastDebt(
+    function updateConverterToLastDebtPaid(
         address _converter,
         uint _amountPaid
     )

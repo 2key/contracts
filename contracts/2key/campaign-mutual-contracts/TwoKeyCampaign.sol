@@ -344,14 +344,24 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 		uint debt = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_userPlasma);
 		uint amountToPay = debt;
-		if(debt > 0) {
-			if(_amount < 3 * debt) {
-				amountToPay = debt / 2;
+		uint updatedAmount = _amount;
+		if(debt > 0){
+			if (_amount > debt){
+				if(_amount < 3 * debt) {
+					amountToPay = debt / 2;
+				}
+			}
+			else{
+				amountToPay = _amount / 4;
 			}
 			ITwoKeyFeeManager(twoKeyFeeManager).payDebtWhenConvertingOrWithdrawingProceeds.value(amountToPay)(_userPlasma, amountToPay);
+			ITwoKeyCampaignLogicHandler(logicHandler).updateConverterToLastDebtPaid(_userAddress, amountToPay);
+			updatedAmount = _amount.sub(amountToPay);
 		}
-        ITwoKeyCampaignLogicHandler(logicHandler).updateConverterToLastDebt(_userAddress, amountToPay);
-		return _amount.sub(amountToPay);
+		else{
+			amountToPay = 0;
+		}
+		return updatedAmount;
 	}
 
 	/**
