@@ -268,11 +268,14 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
             counters[1] = counters[1].sub(1); //Decrease number of approved conversions
         }
+
         //Update bought units
         unitsConverterBought[conversion.converter] = unitsConverterBought[conversion.converter].add(totalUnits);
 
         // Total rewards for referrers
         uint totalReward2keys = 0;
+
+        emitExecutedEvent(conversion.converter, _conversionId, totalUnits);
 
         // Buy tokens from campaign and distribute rewards between referrers
         if(conversion.maxReferralRewardETHWei > 0) {
@@ -323,8 +326,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         conversion.state = ConversionState.EXECUTED;
         counters[3] = counters[3].add(1); //Increase number of executed conversions
         counters[7] = counters[7].add(totalUnits); //update sold tokens once conversion is executed
-
-        emitExecutedEvent(conversion.converter, _conversionId, totalUnits);
     }
 
     function checkIsFirstTimeConversion(

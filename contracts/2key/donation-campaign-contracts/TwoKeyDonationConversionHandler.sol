@@ -221,6 +221,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         uint totalReward2keys = 0;
 
+        emitExecutedEvent(conversion.converter, _conversionId, conversion.tokensBought);
+
 //         Buy tokens from campaign and distribute rewards between referrers
         if(conversion.maxReferralRewardETHWei > 0) {
             totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
@@ -255,7 +257,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         counters[10] = counters[10].add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         transferInvoiceToken(conversion.converter, conversion.conversionAmount);
-        emitExecutedEvent(conversion.converter, _conversionId, conversion.tokensBought);
     }
 
 
