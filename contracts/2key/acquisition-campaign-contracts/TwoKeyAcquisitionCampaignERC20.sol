@@ -114,7 +114,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     function validateRequirements(
         bool _isFiat,
-        uint _conversionAmount
+        uint _conversionAmount,
+        uint _debtPaid
     )
     internal
     returns (uint)
@@ -124,7 +125,8 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         (canConvert, conversionAmountCampaignCurrency) = ITwoKeyAcquisitionLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
             _conversionAmount,
-            _isFiat);
+            _isFiat,
+            _debtPaid);
 
         require(canConvert==true);
         return conversionAmountCampaignCurrency;
@@ -142,8 +144,10 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     public
     payable
     {
-        uint conversionAmount = payFeesForUser(msg.sender, msg.value);
-        uint conversionAmountCampaignCurrency = validateRequirements(false, conversionAmount);
+        uint conversionAmount;
+        unit debtPaid;
+        (conversionAmount, debtPaid) = payFeesForUser(msg.sender, msg.value);
+        uint conversionAmountCampaignCurrency = validateRequirements(false, conversionAmount, debtPaid);
         uint numberOfInfluencers = distributeArcsIfNecessary(msg.sender, signature);
         createConversion(
             conversionAmount,
@@ -172,7 +176,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     {
         // Validate that sender is either _converter or maintainer
         require(msg.sender == _converter || twoKeyEventSource.isAddressMaintainer(msg.sender));
-        uint conversionAmountCampaignCurrency = validateRequirements(true, conversionAmountFiatWei);
+        uint conversionAmountCampaignCurrency = validateRequirements(true, conversionAmountFiatWei, 0);
         uint numberOfInfluencers = distributeArcsIfNecessary(_converter, signature);
         createConversion(
             conversionAmountFiatWei,

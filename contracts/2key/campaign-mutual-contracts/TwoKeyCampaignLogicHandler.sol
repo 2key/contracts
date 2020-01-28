@@ -441,14 +441,14 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         }
     }
 
-    function updateConverterToLastDebtPaid(
-        address _converter,
-        uint _amountPaid
-    )
-    public
-    {
-        require(msg.sender == twoKeyCampaign);
-        converterToLastDebtPaid[_converter] = _amountPaid;
-    }
+//    function updateConverterToLastDebtPaid(
+//        address _converter,
+//        uint _amountPaid
+//    )
+//    public
+//    {
+//        require(msg.sender == twoKeyCampaign);
+//        converterToLastDebtPaid[_converter] = _amountPaid;
+//    }
 
 }

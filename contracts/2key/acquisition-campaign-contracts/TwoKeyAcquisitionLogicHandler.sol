@@ -118,7 +118,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
      * @param conversionAmount is the amount of conversion
      * @param isFiatConversion is flag if conversion is fiat or ether
      */
-    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, bool isFiatConversion) external returns (bool,uint) {
+    function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, bool isFiatConversion, uint debtPaid) external returns (bool,uint) {
         require(msg.sender == twoKeyCampaign);
         if(isAcceptingFiat) {
             require(isFiatConversion == true);
@@ -126,7 +126,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             require(isFiatConversion == false);
         }
         require(IS_CAMPAIGN_ACTIVE == true);
-        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount, isFiatConversion) == true);
+        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount+debtPaid, isFiatConversion) == true);
         uint conversionAmountCampaignCurrency = convertConversionAmountToCampaignCurrency(conversionAmount, isFiatConversion);
         require(updateRaisedFundsAndValidateConversionInTermsOfHardCap(conversionAmountCampaignCurrency, isFiatConversion) == true);
         require(checkIsCampaignActiveInTermsOfTime() == true);
@@ -177,11 +177,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     function canConversionBeCreatedInTermsOfMinMaxContribution(address converter, uint amountWillingToSpend, bool isFiat) internal view returns (bool) {
         bool canConvert;
         //If we reach this point means we have reached point that campaign is still active
-        if(isFiat) {
-            (canConvert,)= validateMinMaxContributionForFIATConversion(converter, amountWillingToSpend);
-        } else {
-            (canConvert,) = validateMinMaxContributionForETHConversion(converter, amountWillingToSpend + converterToLastDebtPaid[converter]);
-        }
+        (canConvert,)= validateMinMaxContributionForFIATConversion(converter, amountWillingToSpend);
         return canConvert;
     }
 

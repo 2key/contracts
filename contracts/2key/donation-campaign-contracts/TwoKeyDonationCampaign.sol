@@ -96,11 +96,14 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
         bool canConvert;
         uint conversionAmountCampaignCurrency;
 
-        uint conversionAmount = payFeesForUser(msg.sender, msg.value);
+        uint conversionAmount;
+        uint debtPaid;
+        (conversionAmount,debtPaid) = payFeesForUser(msg.sender, msg.value);
 
         (canConvert, conversionAmountCampaignCurrency) = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,
-            conversionAmount
+            conversionAmount,
+            debtPaid
         );
 
         require(canConvert == true);

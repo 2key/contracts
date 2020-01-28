@@ -337,7 +337,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		uint _amount
 	)
 	internal
-	returns (uint)
+	returns (uint,uint)
 	{
 		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
         address _userPlasma = twoKeyEventSource.plasmaOf(_userAddress);
@@ -355,13 +355,13 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 				amountToPay = _amount / 4;
 			}
 			ITwoKeyFeeManager(twoKeyFeeManager).payDebtWhenConvertingOrWithdrawingProceeds.value(amountToPay)(_userPlasma, amountToPay);
-			ITwoKeyCampaignLogicHandler(logicHandler).updateConverterToLastDebtPaid(_userAddress, amountToPay);
+			//ITwoKeyCampaignLogicHandler(logicHandler).updateConverterToLastDebtPaid(_userAddress, amountToPay);
 			updatedAmount = _amount.sub(amountToPay);
 		}
 		else{
 			amountToPay = 0;
 		}
-		return updatedAmount;
+		return (updatedAmount, amountToPay);
 	}
 
 	/**
@@ -471,8 +471,9 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	{
 		uint balance = contractorBalance;
 		contractorBalance = 0;
-
-		balance = payFeesForUser(msg.sender, balance);
+		uint balance;
+		uint debtPaid;
+		(balance, debtPaid) = payFeesForUser(msg.sender, balance);
 
 		/**
          * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
