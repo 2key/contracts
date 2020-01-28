@@ -28,6 +28,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         isValidated = true;
     }
 
+
     //Replacement for constructor
     function setInitialParamsCPCCampaign(
         address _contractor,
