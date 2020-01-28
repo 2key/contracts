@@ -145,7 +145,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     payable
     {
         uint conversionAmount;
-        unit debtPaid;
+        uint debtPaid;
         (conversionAmount, debtPaid) = payFeesForUser(msg.sender, msg.value);
         uint conversionAmountCampaignCurrency = validateRequirements(false, conversionAmount, debtPaid);
         uint numberOfInfluencers = distributeArcsIfNecessary(msg.sender, signature);
