@@ -344,8 +344,8 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 		uint debt = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_userPlasma);
 		uint amountToPay = debt;
-		uint updatedAmount = _amount;
-		if(debt > 0){
+		uint updatedConversionAmount = _amount;
+		if(debt > 0) {
 			if (_amount > debt){
 				if(_amount < 3 * debt) {
 					amountToPay = debt / 2;
@@ -355,13 +355,12 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 				amountToPay = _amount / 4;
 			}
 			ITwoKeyFeeManager(twoKeyFeeManager).payDebtWhenConvertingOrWithdrawingProceeds.value(amountToPay)(_userPlasma, amountToPay);
-			//ITwoKeyCampaignLogicHandler(logicHandler).updateConverterToLastDebtPaid(_userAddress, amountToPay);
-			updatedAmount = _amount.sub(amountToPay);
+            updatedConversionAmount = _amount.sub(amountToPay);
 		}
 		else{
 			amountToPay = 0;
 		}
-		return (updatedAmount, amountToPay);
+		return (updatedConversionAmount, amountToPay);
 	}
 
 	/**
@@ -471,7 +470,6 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	{
 		uint balance = contractorBalance;
 		contractorBalance = 0;
-		uint balance;
 		uint debtPaid;
 		(balance, debtPaid) = payFeesForUser(msg.sender, balance);
 

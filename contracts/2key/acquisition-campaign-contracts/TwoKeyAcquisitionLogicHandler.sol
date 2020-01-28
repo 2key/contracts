@@ -126,7 +126,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             require(isFiatConversion == false);
         }
         require(IS_CAMPAIGN_ACTIVE == true);
-        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount+debtPaid, isFiatConversion) == true);
+        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount.add(debtPaid), isFiatConversion) == true);
         uint conversionAmountCampaignCurrency = convertConversionAmountToCampaignCurrency(conversionAmount, isFiatConversion);
         require(updateRaisedFundsAndValidateConversionInTermsOfHardCap(conversionAmountCampaignCurrency, isFiatConversion) == true);
         require(checkIsCampaignActiveInTermsOfTime() == true);

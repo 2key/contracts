@@ -74,7 +74,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
 
     function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, uint debtPaid) public returns (bool,uint) {
         require(msg.sender == twoKeyCampaign);
-        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount + debtPaid) == true);
+        require(canConversionBeCreatedInTermsOfMinMaxContribution(converter, conversionAmount.add(debtPaid)) == true);
         uint conversionAmountInCampaignCurrency = convertConversionAmountToCampaignCurrency(conversionAmount);
         require(updateRaisedFundsAndValidateConversionInTermsOfCampaignGoal(conversionAmountInCampaignCurrency) == true);
         require(checkIsCampaignActiveInTermsOfTime() == true);
