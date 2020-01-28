@@ -16,12 +16,12 @@ echo "Generating bytecodes for changes on public network"
 echo "Destination for execution: 0xf4797416e6b6835114390591d3ac6a531a061396"
 cd ../..
 
-python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.5
+python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.6
 python3 generate_bytecode.py upgradeContract TwoKeyEventSource 1.0.6
 python3 generate_bytecode.py upgradeContract TwoKeyDeepFreezeTokenPool 1.0.1
-python3 generate_bytecode.py approveNewCampaign DONATION 1.0.12
-python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.12
-python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.15
+python3 generate_bytecode.py approveNewCampaign DONATION 1.0.13
+python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.13
+python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.16
 
 
 
