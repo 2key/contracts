@@ -5,6 +5,7 @@ import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
+import "../interfaces/ITwoKeyCampaignLogicHandler.sol";
 import "./TwoKeyCampaignAbstract.sol";
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
@@ -332,13 +333,15 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 
 	function payFeesForUser(
-		address _userPlasma,
+		address _userAddress,
 		uint _amount
 	)
 	internal
 	returns (uint)
 	{
 		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+        address _userPlasma = twoKeyEventSource.plasmaOf(_userAddress);
+
 		uint debt = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_userPlasma);
 		uint amountToPay = debt;
 		if(debt > 0) {
@@ -347,6 +350,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 			}
 			ITwoKeyFeeManager(twoKeyFeeManager).payDebtWhenConvertingOrWithdrawingProceeds.value(amountToPay)(_userPlasma, amountToPay);
 		}
+        ITwoKeyCampaignLogicHandler(logicHandler).updateConverterToLastDebt(_userAddress, amountToPay);
 		return _amount.sub(amountToPay);
 	}
 

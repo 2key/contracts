@@ -49,6 +49,8 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
     mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
+    mapping(address => uint) converterToLastDebtPaid;
+
 
     modifier onlyContractor {
         require(msg.sender == contractor);
@@ -437,6 +439,16 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
                 totalBounty2keys = totalBounty2keys.sub(b);
             }
         }
+    }
+
+    function updateConverterToLastDebt(
+        address _converter,
+        uint _amountPaid
+    )
+    public
+    {
+        require(msg.sender == twoKeyCampaign);
+        converterToLastDebtPaid[_converter] = _amountPaid;
     }
 
 }

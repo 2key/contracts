@@ -96,7 +96,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
         bool canConvert;
         uint conversionAmountCampaignCurrency;
 
-        uint conversionAmount = payFeesForUser(twoKeyEventSource.plasmaOf(msg.sender), msg.value);
+        uint conversionAmount = payFeesForUser(msg.sender, msg.value);
 
         (canConvert, conversionAmountCampaignCurrency) = ITwoKeyDonationLogicHandler(logicHandler).checkAllRequirementsForConversionAndTotalRaised(
             msg.sender,

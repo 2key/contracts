@@ -180,7 +180,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         if(isFiat) {
             (canConvert,)= validateMinMaxContributionForFIATConversion(converter, amountWillingToSpend);
         } else {
-            (canConvert,) = validateMinMaxContributionForETHConversion(converter, amountWillingToSpend);
+            (canConvert,) = validateMinMaxContributionForETHConversion(converter, amountWillingToSpend + converterToLastDebtPaid[converter]);
         }
         return canConvert;
     }

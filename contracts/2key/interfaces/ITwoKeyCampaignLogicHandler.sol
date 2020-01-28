@@ -6,4 +6,5 @@ pragma solidity ^0.4.24;
 contract ITwoKeyCampaignLogicHandler {
     function canContractorWithdrawRemainingRewardsInventory() public view returns (bool);
     function reduceTotalRaisedFundsAfterConversionRejected(uint amountToReduce) public;
+    function updateConverterToLastDebt(address _converter, uint _amountPaid) public;
 }
