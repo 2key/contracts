@@ -722,7 +722,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      */
     function buyStableCoinWith2key(
         uint _twoKeyUnits,
-        address _beneficiary
+        address _beneficiary,
+        address _beneficiaryPlasma
     )
     external
     onlyValidatedContracts
@@ -730,11 +731,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         ERC20 dai = ERC20(getAddress(keccak256(_dai)));
         ERC20 token = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy));
 
-        uint stableCoinUnits = getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits, getContractId(msg.sender));
-        uint etherBalanceOnContractBefore = this.balance;
-        uint stableCoinsOnContractBefore = dai.balanceOf(address(this));
+        uint contractId = getContractId(msg.sender); // Get the contract ID
 
-        reduceDaiWeiAvailableToWithdraw(msg.sender, stableCoinUnits);
+        uint stableCoinUnits = getUSDStableCoinAmountFrom2keyUnits(_twoKeyUnits, contractId); // Calculate how much stable coins he's getting
+        uint etherBalanceOnContractBefore = this.balance; // get ether balance on contract
+        uint stableCoinsOnContractBefore = dai.balanceOf(address(this)); // get dai balance on contract
+
+        reduceDaiWeiAvailableToWithdraw(msg.sender, stableCoinUnits); // reducing amount of DAI available for withdrawal
 
         emitEventWithdrawExecuted(
             _beneficiary,
@@ -745,8 +748,24 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             _twoKeyUnits
         );
 
-        token.transferFrom(msg.sender, address(this), _twoKeyUnits);
-        dai.transfer(_beneficiary, stableCoinUnits);
+        token.transferFrom(msg.sender, address(this), _twoKeyUnits); //Take all 2key tokens from campaign contract
+
+        // Handle if there's any existing debt
+        address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+        uint usersDebtInEth = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_beneficiaryPlasma);
+
+        if(usersDebtInEth > 0) {
+            uint eth2DAI = getEth2DaiAverageExchangeRatePerContract(contractID); // DAI / ETH
+            uint debtInDAI = (usersDebtInEth.mul(eth2DAI)).div(10**18); // ETH * (DAI/ETH) = DAI
+            /**
+             * TODO:
+             */
+            dai.transfer(twoKeyFeeManager, debtInDAI);
+            ITwoKeyFeeManager(twoKeyFeeManager).payDebtInDAI(_beneficiaryPlasma, debtInDAI);
+        }
+
+
+        dai.transfer(_beneficiary, stableCoinUnits); // Transfer the rest of the DAI to user
     }
 
     /**

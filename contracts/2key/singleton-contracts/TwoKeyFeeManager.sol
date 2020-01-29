@@ -171,20 +171,20 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     }
 
     function payDebtWithDAI(
-        address _plasmaAddress
+        address _plasmaAddress,
+        uint _debtAmountPaidDAI
     )
     public
     onlyAllowedContracts
     {
-        uint usersDebt = getDebtForUser(_plasmaAddress);
-        address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange"));
 
-        uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
-        uint eth2DAI = IUpgradableExchange(upgradableExchange).getEth2DaiAverageExchangeRatePerContract(contractID);
+        bytes32 keyHashForDebt = keccak256(_userPlasmaToDebtInETH, _plasmaAddress);
+        uint totalDebtForUser = PROXY_STORAGE_CONTRACT.getUint(keyHashForDebt);
 
-//        debtInDAI = (usersDebt.mul(eth2DAI)).div(10**18);
-//        plasmaOfUser = _plasmaAddress;
+
     }
+
 
     function payDebtWith2Key(
         address _plasmaAddress
@@ -192,13 +192,16 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyAllowedContracts
     {
-        uint usersDebt = getDebtForUser(_plasmaAddress);
+        uint usersDebtInEth = getDebtForUser(_plasmaAddress);
         address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
         uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
         uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
 
-        uint debtIn2Key = (usersDebt.mul(ethTo2key)).div(10**18);
+        // 2KEY / ETH
+        uint debtIn2Key = (usersDebtInEth.mul(ethTo2key)).div(10**18); // ETH * (2KEY / ETH) = 2KEY
+
+
     }
 
 
