@@ -216,6 +216,9 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 				setCutOf(new_address, uint256(weights[i]));
 			}
 		}
+        if(numberOfInfluencers > 0) {
+            return numberOfInfluencers - 1;
+        }
 		return numberOfInfluencers;
 	}
 
@@ -227,7 +230,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	view
 	returns (uint)
 	{
-		if(numberOfInfluencers > 1) {
+		if(numberOfInfluencers >= 1) {
 			return conversionAmount.mul(maxReferralRewardPercent).div(100);
 		}
 		return 0;
