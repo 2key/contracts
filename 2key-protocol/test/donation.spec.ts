@@ -428,6 +428,11 @@ describe('TwoKeyDonationCampaign', () => {
         expect(referrerReservedAmount).to.be.equal(250);
     }).timeout(60000);
 
+    it('should get number of influencers to converter', async() => {
+        let numberOfInfluencers = await twoKeyProtocol.DonationCampaign.getNumberOfInfluencersForConverter(campaignAddress, env.TEST4_ADDRESS);
+        expect(numberOfInfluencers).to.be.equal(1);
+    }).timeout(60000);
+
     it('should check is address contractor', async() => {
         printTestNumber();
         const {web3, address} = web3switcher.deployer();
