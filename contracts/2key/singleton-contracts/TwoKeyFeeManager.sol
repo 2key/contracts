@@ -99,6 +99,21 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
+     * @notice Function to check for the user if registration debt is submitted
+     * @param _plasmaAddress is users plasma address
+     */
+    function isRegistrationDebtSubmittedForTheUser(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (bool)
+    {
+        bytes32 keyHashIsDebtSubmitted = keccak256(_isDebtSubmitted, _plasmaAddress);
+        return PROXY_STORAGE_CONTRACT.getBool(keyHashIsDebtSubmitted);
+    }
+
+    /**
      * @notice Function where maintainer can set debts per user
      * @param usersPlasmas is the array of user plasma addresses
      * @param fees is the array containing fees which 2key paid for user
