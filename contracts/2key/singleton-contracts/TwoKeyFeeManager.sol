@@ -130,7 +130,17 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint total = 0;
         // Iterate through all addresses and store the registration fees paid for them
         for(i = 0; i < usersPlasmas.length; i++) {
+            // Generate the key for the storage
+            bytes32 keyHashIsDebtSubmitted = keccak256(_isDebtSubmitted, usersPlasmas[i]);
+
+            //Check that for this user we have never submitted the debt in the past
+            require(PROXY_STORAGE_CONTRACT.getBool(keyHashIsDebtSubmitted) == false);
+
+            //Set that debt is submitted
+            PROXY_STORAGE_CONTRACT.setBool(keyHashIsDebtSubmitted, true);
+
             PROXY_STORAGE_CONTRACT.setUint(keccak256(_userPlasmaToDebtInETH, usersPlasmas[i]), fees[i]);
+
             total = total.add(fees[i]);
         }
 
