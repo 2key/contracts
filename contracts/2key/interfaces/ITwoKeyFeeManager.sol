@@ -5,4 +5,5 @@ contract ITwoKeyFeeManager {
     function getDebtForUser(address _userPlasma) public view returns (uint);
     function payDebtWith2Key(address _plasmaAddress) public;
     function setRegistrationFeeForUser(address _plasmaAddress, uint _registrationFee) public;
+    function withdrawEtherCollected() public;
 }

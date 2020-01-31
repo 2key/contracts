@@ -34,6 +34,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     string constant _totalPaidInDAI = "totalPaidInDAI";
     string constant _totalPaidIn2Key = "totalPaidIn2Key";
 
+    string constant _totalWithdrawnInETH = "totalWithdrawnInETH";
+
 
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
@@ -221,6 +223,20 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
             totalPaidInDAI,
             totalPaidIn2Key
         );
+    }
+
+    function withdrawEtherCollected()
+    public
+    {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        require(msg.sender == twoKeyAdmin);
+
+        uint balance = address(this).balance;
+
+        bytes32 keyHash = keccak256(_totalWithdrawnInETH);
+        PROXY_STORAGE_CONTRACT.setUint(keyHash, balance.add(PROXY_STORAGE_CONTRACT.getUint(keyHash)));
+
+        twoKeyAdmin.transfer(balance);
     }
 
 }
