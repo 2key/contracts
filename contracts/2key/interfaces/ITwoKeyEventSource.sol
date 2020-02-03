@@ -57,7 +57,8 @@ contract ITwoKeyEventSource {
     function emitDebtEvent(
         address _plasmaAddress,
         uint _amount,
-        bool _isAddition
+        bool _isAddition,
+        string _currency
     )
     external;
 

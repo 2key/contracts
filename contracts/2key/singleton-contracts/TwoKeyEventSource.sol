@@ -191,7 +191,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     event Debt (
         address plasmaAddress,
         uint weiAmount,
-        bool addition //If true means debt increasing otherwise it means that event emitted when user paid part of the debt
+        bool addition, //If true means debt increasing otherwise it means that event emitted when user paid part of the debt
+        string currency
     );
 
     event ReceivedTokensAsModerator(
@@ -504,7 +505,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     function emitDebtEvent(
         address _plasmaAddress,
         uint _amount,
-        bool _isAddition
+        bool _isAddition,
+        string _currency
     )
     external
     {
@@ -512,7 +514,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit Debt(
             _plasmaAddress,
             _amount,
-            _isAddition
+            _isAddition,
+            _currency
         );
     }
 

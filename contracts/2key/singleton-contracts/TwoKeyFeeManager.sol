@@ -193,7 +193,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
             _plasmaAddress,
             _debtPaying,
-            false
+            false,
+            "ETH"
         );
     }
 
@@ -217,6 +218,13 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         totalDebtForUser = totalDebtForUser - totalDebtForUser.mul(_debtAmountPaidDAI.mul(10**18).div(_totalDebtDAI)).div(10**18);
 
         PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, totalDebtForUser);
+
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
+            _plasmaAddress,
+            _debtAmountPaidDAI,
+            false,
+            "DAI"
+        );
 
     }
 
