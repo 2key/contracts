@@ -135,7 +135,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
             isKYCRequired,
             conversionAmountCampaignCurrency
         );
-
+        //If KYC is not required conversion is automatically executed
         if(isKYCRequired == false) {
             ITwoKeyDonationConversionHandler(conversionHandler).executeConversion(conversionId);
         }
