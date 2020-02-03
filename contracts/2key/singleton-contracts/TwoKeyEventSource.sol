@@ -493,7 +493,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
         ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setRegistrationFeeForUser(_address, _registrationFee);
         emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
-        emit Debt(_address, _registrationFee, true);
+        emit Debt(_address, _registrationFee, true, "ETH");
     }
 
     /**
