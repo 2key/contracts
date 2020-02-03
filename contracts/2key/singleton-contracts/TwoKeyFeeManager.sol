@@ -34,6 +34,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     string constant _totalPaidInDAI = "totalPaidInDAI";
     string constant _totalPaidIn2Key = "totalPaidIn2Key";
 
+    string constant _totalWithdrawnInETH = "totalWithdrawnInETH";
+
 
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
@@ -97,6 +99,21 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
+     * @notice Function to check for the user if registration debt is submitted
+     * @param _plasmaAddress is users plasma address
+     */
+    function isRegistrationDebtSubmittedForTheUser(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (bool)
+    {
+        bytes32 keyHashIsDebtSubmitted = keccak256(_isDebtSubmitted, _plasmaAddress);
+        return PROXY_STORAGE_CONTRACT.getBool(keyHashIsDebtSubmitted);
+    }
+
+    /**
      * @notice Function where maintainer can set debts per user
      * @param usersPlasmas is the array of user plasma addresses
      * @param fees is the array containing fees which 2key paid for user
@@ -113,7 +130,17 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint total = 0;
         // Iterate through all addresses and store the registration fees paid for them
         for(i = 0; i < usersPlasmas.length; i++) {
+            // Generate the key for the storage
+            bytes32 keyHashIsDebtSubmitted = keccak256(_isDebtSubmitted, usersPlasmas[i]);
+
+            //Check that for this user we have never submitted the debt in the past
+            require(PROXY_STORAGE_CONTRACT.getBool(keyHashIsDebtSubmitted) == false);
+
+            //Set that debt is submitted
+            PROXY_STORAGE_CONTRACT.setBool(keyHashIsDebtSubmitted, true);
+
             PROXY_STORAGE_CONTRACT.setUint(keccak256(_userPlasmaToDebtInETH, usersPlasmas[i]), fees[i]);
+
             total = total.add(fees[i]);
         }
 
@@ -221,6 +248,20 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
             totalPaidInDAI,
             totalPaidIn2Key
         );
+    }
+
+    function withdrawEtherCollected()
+    public
+    {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        require(msg.sender == twoKeyAdmin);
+
+        uint balance = address(this).balance;
+
+        bytes32 keyHash = keccak256(_totalWithdrawnInETH);
+        PROXY_STORAGE_CONTRACT.setUint(keyHash, balance.add(PROXY_STORAGE_CONTRACT.getUint(keyHash)));
+
+        twoKeyAdmin.transfer(balance);
     }
 
 }

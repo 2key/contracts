@@ -8,6 +8,7 @@ import "../interfaces/ITwoKeyCampaign.sol";
 import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
+import "../interfaces/ITwoKeyFeeManager.sol";
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../libraries/SafeMath.sol";
@@ -198,6 +199,18 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		bool completed = IERC20(twoKeyEconomy).transfer(_to, _amount);
 		return completed;
 	}
+
+    /**
+     * @notice Function to withdraw collected ether from TwoKeyFeeManager contract
+     * and it can be done only when TwoKeyCongress does voting on that
+     */
+    function withdrawEtherCollectedFromFeeManager()
+    public
+    onlyTwoKeyCongress
+    {
+        address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+        ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
+    }
 
 
 	function updateReceivedTokensAsModerator(
