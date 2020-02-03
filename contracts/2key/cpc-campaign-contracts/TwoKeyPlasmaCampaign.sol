@@ -15,6 +15,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
 
+    mapping(address => uint) public converterToNumberOfInfluencers;
     bool public isValidated;
 
     modifier onlyMaintainer {
@@ -146,8 +147,14 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
                 setPublicLinkKeyOf(new_address, keys[i]);
             }
         }
+
+        if(numberOfInfluencers > 0) {
+            return numberOfInfluencers - 1;
+        }
+
         return numberOfInfluencers;
     }
+
 
     function distributeArcsIfNecessary(
         address _converter,
@@ -156,11 +163,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     internal
     returns (uint)
     {
-        uint numberOfInfluencers = 0;
         if(received_from[_converter] == address(0)) {
-            numberOfInfluencers = distributeArcsBasedOnSignature(signature, _converter);
+            converterToNumberOfInfluencers[_converter] = distributeArcsBasedOnSignature(signature, _converter);
         }
-        return numberOfInfluencers;
+        return converterToNumberOfInfluencers[_converter];
     }
 
 

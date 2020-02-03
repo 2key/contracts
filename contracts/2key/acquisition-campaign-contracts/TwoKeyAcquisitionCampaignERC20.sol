@@ -6,7 +6,7 @@ import "../interfaces/ITwoKeyConversionHandler.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 /**
- * @author Nikola Madjarevicconvert=
+ * @author Nikola Madjarevic
  */
 contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 

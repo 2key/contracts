@@ -181,6 +181,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         } else {
             (canConvert,) = validateMinMaxContributionForETHConversion(converter, amountWillingToSpend);
         }
+        return canConvert;
     }
 
     function validateMinMaxContributionForFIATConversion(address converter, uint amountWillingToSpendFiatWei) internal view returns (bool,uint) {

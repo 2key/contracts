@@ -171,25 +171,19 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     returns (address[])
     {
         address influencer = customer;
-        uint n_influencers = 0;
+        uint numberOfInfluencers = converterToNumberOfInfluencers[customer];
 
-        while (true) {
-            influencer = getReceivedFrom(influencer);
-            if (influencer == contractor) {
-                break;
-            }
-            n_influencers = n_influencers.add(1);
-        }
-        address[] memory influencers = new address[](n_influencers);
-        influencer = customer;
+        address[] memory influencers = new address[](numberOfInfluencers);
 
-        while (n_influencers > 0) {
+
+        while (numberOfInfluencers > 0) {
             influencer = getReceivedFrom(influencer);
-            n_influencers = n_influencers.sub(1);
-            influencers[n_influencers] = influencer;
+            numberOfInfluencers--;
+            influencers[numberOfInfluencers] = influencer;
         }
         return influencers;
     }
+
 
     function approveConverterAndExecuteConversion(
         address converter
@@ -305,9 +299,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         require(isConverter[converter] == false); // Requiring that user can convert only 1 time
         isConverter[converter] = true;
 
-        if(received_from[converter] == address(0)) {
-            distributeArcsBasedOnSignature(signature, converter);
-        }
+        distributeArcsIfNecessary(converter, signature);
     }
 
 

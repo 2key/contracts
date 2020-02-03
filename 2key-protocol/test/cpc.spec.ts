@@ -312,6 +312,7 @@ describe('CPC campaign', () => {
         printTestNumber();
         converterPlasma = twoKeyProtocol.plasmaAddress;
         let txHash = await twoKeyProtocol.CPCCampaign.joinAndConvert(campaignAddress, links.gmail.link, twoKeyProtocol.plasmaAddress, {fSecret: links.gmail.fSecret});
+        console.log('Converter plasma: ' + converterPlasma)
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get active influencers before conversion is approved', async() => {
@@ -349,6 +350,13 @@ describe('CPC campaign', () => {
         let bounty = await twoKeyProtocol.CPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
         let bountyAvailable = await twoKeyProtocol.CPCCampaign.getAvailableBountyOnCampaign(campaignAddress);
         expect(bountyAvailable).to.be.equal(bounty.totalBounty - bounty.bountyPerConversion);
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should get number of influencers behind converter', async() => {
+        printTestNumber();
+
+        let numberOfReferrers = await twoKeyProtocol.CPCCampaign.getNumberOfInfluencersForConverter(campaignAddress, converterPlasma);
+        console.log('Referrers: ' + numberOfReferrers);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get both influencers involved in conversion from plasma contract and their balances', async() => {

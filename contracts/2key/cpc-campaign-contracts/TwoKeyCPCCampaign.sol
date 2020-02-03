@@ -40,6 +40,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     )
     public
     {
+        // Requirement for campaign initialization
         require(isCampaignInitialized == false);
 
         // Set the contractor of the campaign

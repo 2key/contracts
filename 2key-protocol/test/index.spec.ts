@@ -631,6 +631,11 @@ describe('TwoKeyProtocol', () => {
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
+    it('should get number of influencers to converter', async() => {
+        let numberOfInfluencers = await twoKeyProtocol.AcquisitionCampaign.getNumberOfInfluencersForConverter(campaignAddress, from);
+        expect(numberOfInfluencers).to.be.equal(1);
+    }).timeout(60000);
+
     it('==> should print available amount of tokens after conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei((minContributionETHorUSD-registrationDebt), 'ether'));

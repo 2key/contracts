@@ -89,6 +89,12 @@ def generate_bytecode_for_adding_core_devs_plasma(core_dev):
     values = [core_devs_array]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_taking_fees_from_manager():
+    method_name_and_params = "withdrawEtherCollectedFromFeeManager()"
+    types = []
+    values = []
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name
@@ -117,5 +123,6 @@ if __name__ == "__main__":
         generate_bytecode_for_adding_core_devs(sys.argv[2])
     if(arg1 == "addCoreDevsPlasma"):
         generate_bytecode_for_adding_core_devs_plasma(sys.argv[2])
-
+    if(arg1 == "withdrawRewardsFromFeeManager"):
+        generate_bytecode_for_taking_fees_from_manager()
     print_line()

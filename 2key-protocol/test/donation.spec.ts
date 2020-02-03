@@ -60,7 +60,7 @@ let minDonationAmount = 1;
 let maxDonationAmount = 1;
 let campaignGoal = 10000000000000000000000000000000;
 let referrerQuota = 5;
-let isKYCRequired = true;
+let isKYCRequired = false;
 let shouldConvertToRefer = false;
 let acceptsFiat = false;
 let incentiveModel = "MANUAL";
@@ -314,8 +314,10 @@ describe('TwoKeyDonationCampaign', () => {
 
     it('should cancel his participation and get money back', async() => {
         printTestNumber();
-        let txHash = await twoKeyProtocol.DonationCampaign.converterCancelConversion(campaignAddress,2, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        if(isKYCRequired == true) {
+            let txHash = await twoKeyProtocol.DonationCampaign.converterCancelConversion(campaignAddress,2, from);
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }
     }).timeout(60000);
 
     it('should get all pending converters in case KYC is required', async() => {
@@ -414,14 +416,21 @@ describe('TwoKeyDonationCampaign', () => {
 
     it('should get referrer earnings', async() => {
         printTestNumber();
-        let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, env.GMAIL_ADDRESS, from);
-        expect(referrerBalance).to.be.equal(83.33333333333333);
+        let refPlasma = generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).address;
+        console.log('Referrer plasma address: ' + refPlasma);
+        let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, refPlasma, from);
+        expect(referrerBalance).to.be.equal(250);
     }).timeout(60000);
 
     it('should get reserved amount for referrers', async() => {
         printTestNumber();
         let referrerReservedAmount = await twoKeyProtocol.DonationCampaign.getReservedAmount2keyForRewards(campaignAddress);
-        expect(referrerReservedAmount).to.be.equal(83.33333333333333);
+        expect(referrerReservedAmount).to.be.equal(250);
+    }).timeout(60000);
+
+    it('should get number of influencers to converter', async() => {
+        let numberOfInfluencers = await twoKeyProtocol.DonationCampaign.getNumberOfInfluencersForConverter(campaignAddress, env.TEST4_ADDRESS);
+        expect(numberOfInfluencers).to.be.equal(1);
     }).timeout(60000);
 
     it('should check is address contractor', async() => {
