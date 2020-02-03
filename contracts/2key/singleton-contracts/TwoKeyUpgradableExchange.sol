@@ -9,7 +9,7 @@ import "../interfaces/IKyberNetworkProxy.sol";
 import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IBancorContract.sol";
-
+import "../interfaces/ITwoKeyFeeManager.sol";
 import "../upgradability/Upgradeable.sol";
 
 import "../libraries/SafeMath.sol";
@@ -749,32 +749,44 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
 
         token.transferFrom(msg.sender, address(this), _twoKeyUnits); //Take all 2key tokens from campaign contract
+        payFeesToManagerAndTransferTokens(_beneficiaryPlasma, _beneficiary, contractId, stableCoinUnits, dai);
+    }
 
+    function payFeesToManagerAndTransferTokens(
+        address _userPlasma,
+        address _beneficiary,
+        uint _contractId,
+        uint _totalStableCoins,
+        ERC20 dai
+    )
+    internal
+    returns (uint)
+    {
         // Handle if there's any existing debt
         address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
-        uint usersDebtInEth = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_beneficiaryPlasma);
+        uint usersDebtInEth = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_userPlasma);
         uint amountToPay = 0;
+
         if(usersDebtInEth > 0) {
-            uint eth2DAI = getEth2DaiAverageExchangeRatePerContract(contractID); // DAI / ETH
+            uint eth2DAI = getEth2DaiAverageExchangeRatePerContract(_contractId); // DAI / ETH
             uint totalDebtInDAI = (usersDebtInEth.mul(eth2DAI)).div(10**18); // ETH * (DAI/ETH) = DAI
 
             amountToPay = totalDebtInDAI;
 
-            if (stableCoinUnits > totalDebtInDAI){
-                if(stableCoinUnits < 3 * totalDebtInDAI) {
+            if (_totalStableCoins > totalDebtInDAI){
+                if(_totalStableCoins < 3 * totalDebtInDAI) {
                     amountToPay = totalDebtInDAI / 2;
                 }
             }
-            else{
-                amountToPay = stableCoinUnits / 4;
+            else {
+                amountToPay = _totalStableCoins / 4;
             }
 
             dai.transfer(twoKeyFeeManager, amountToPay);
-            ITwoKeyFeeManager(twoKeyFeeManager).payDebtInDAI(_beneficiaryPlasma, totalDebtInDAI, amountToPay);
+            ITwoKeyFeeManager(twoKeyFeeManager).payDebtWithDAI(_userPlasma, totalDebtInDAI, amountToPay);
         }
 
-
-        dai.transfer(_beneficiary, stableCoinUnits.sub(amountToPay)); // Transfer the rest of the DAI to users
+        dai.transfer(_beneficiary, _totalStableCoins.sub(amountToPay)); // Transfer the rest of the DAI to users
     }
 
     /**
@@ -917,12 +929,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint _contractID = getContractId(_contractAddress);
         return (
-        ethWeiAvailableToHedge(_contractID),
-        daiWeiAvailableToWithdraw(_contractID),
-        daiWeiReceivedFromHedgingPerContract(_contractID),
-        ethWeiHedgedPerContract(_contractID),
-        sent2keyToContract(_contractID),
-        ethReceivedFromContract(_contractID)
+            ethWeiAvailableToHedge(_contractID),
+            daiWeiAvailableToWithdraw(_contractID),
+            daiWeiReceivedFromHedgingPerContract(_contractID),
+            ethWeiHedgedPerContract(_contractID),
+            sent2keyToContract(_contractID),
+            ethReceivedFromContract(_contractID)
         );
     }
 

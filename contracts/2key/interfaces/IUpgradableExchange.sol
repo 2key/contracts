@@ -14,7 +14,8 @@ contract IUpgradableExchange {
 
     function buyStableCoinWith2key(
         uint _twoKeyUnits,
-        address _beneficiary
+        address _beneficiary,
+        address _beneficiaryPlasma
     )
     public
     payable;

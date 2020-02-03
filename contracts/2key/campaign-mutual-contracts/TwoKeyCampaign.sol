@@ -216,6 +216,9 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 				setCutOf(new_address, uint256(weights[i]));
 			}
 		}
+        if(numberOfInfluencers > 0) {
+            return numberOfInfluencers - 1;
+        }
 		return numberOfInfluencers;
 	}
 
@@ -227,7 +230,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	view
 	returns (uint)
 	{
-		if(numberOfInfluencers > 1) {
+		if(numberOfInfluencers >= 1) {
 			return conversionAmount.mul(maxReferralRewardPercent).div(100);
 		}
 		return 0;
@@ -508,7 +511,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 			if(_withdrawAsStable == true) {
 				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
-				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
+				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address, _referrer);
 			}
 			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).report2KEYWithdrawnFromNetwork(balance);

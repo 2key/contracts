@@ -214,10 +214,9 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         // Set total paid in DAI
         PROXY_STORAGE_CONTRACT.setUint(keyHashTotalPaidInDAI, _debtAmountPaidDAI.add(PROXY_STORAGE_CONTRACT.getUint(keyHashTotalPaidInDAI)));
 
-        totalDebtForUser = totalDebtForUser - totalDebtForUser.mul(_debtAmountPaidDAI.mul(10**18).div(_totaldebtDAI)).div(10**18);
+        totalDebtForUser = totalDebtForUser - totalDebtForUser.mul(_debtAmountPaidDAI.mul(10**18).div(_totalDebtDAI)).div(10**18);
+
         PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, totalDebtForUser);
-
-
 
     }
 
