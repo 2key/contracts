@@ -38,7 +38,7 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
             // Getting 2,3,4,5,6 years after release date
             uint releaseDate = _twoKeyReleaseDate.add((i+1).mul(1 years));
             PROXY_STORAGE_CONTRACT.setUint(keccak256(_portionWithdrawUnlockDate, i), releaseDate);
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_portionAmountToWithdraw,i), portionAmount);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_portionAmountToWithdraw,i), portionAmount); //TODO: Nikola - make sure this is supposed to be balance/number of portions - per year
         }
 
         initialized = true;
