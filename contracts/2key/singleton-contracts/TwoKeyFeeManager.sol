@@ -204,7 +204,6 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint _debtAmountPaidDAI
     )
     public
-    onlyAllowedContracts
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange"));
 
