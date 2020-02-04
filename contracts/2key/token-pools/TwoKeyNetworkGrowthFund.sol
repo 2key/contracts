@@ -44,6 +44,18 @@ contract TwoKeyNetworkGrowthFund is TokenPool {
         initialized = true;
     }
 
+    function overrideStoredPortionsWithRightValues()
+    public
+    {
+        //TODO: Update contract, patch, and delete this function + patch again
+        uint portionsTotal = getContractBalance();
+        uint portionAmount = portionsTotal.div(5);
+
+        for(uint i=1; i<=5; i++) {
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_portionAmountToWithdraw,i), portionAmount);
+        }
+    }
+
     function transferPortion(
         address _receiver,
         uint _amount,
