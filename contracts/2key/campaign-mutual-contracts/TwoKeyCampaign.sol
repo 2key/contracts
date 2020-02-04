@@ -514,9 +514,12 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address, _referrer);
 			}
 			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
+				//Report that we're withdrawing 2key from network
 				IUpgradableExchange(twoKeyUpgradableExchangeContract).report2KEYWithdrawnFromNetwork(balance);
-				IERC20(twoKeyEconomy).transfer(_address, balance);
-//				ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).payDebtWith2Key(_referrer);
+				// Get the address of fee manager
+				address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+				IERC20(twoKeyEconomy).approve(twoKeyFeeManager, balance);
+				ITwoKeyFeeManager(twoKeyFeeManager).payDebtWith2Key(_address, _referrer, balance);
 			}
 			else {
 				revert();

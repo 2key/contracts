@@ -6,6 +6,7 @@ import "../interfaces/ITwoKeyCampaignValidator.sol";
 import "../interfaces/storage-contracts/ITwoKeyFeeManagerStorage.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/IERC20.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -229,21 +230,60 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
 
     function payDebtWith2Key(
-        address _plasmaAddress
+        address _beneficiaryPublic,
+        address _plasmaAddress,
+        uint _amountOf2keyForRewards
     )
     public
     onlyAllowedContracts
     {
         uint usersDebtInEth = getDebtForUser(_plasmaAddress);
-        address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        uint amountToPay = 0;
 
-        uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
-        uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
+        if(usersDebtInEth > 0) {
+            address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+            uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
+            uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
 
-        // 2KEY / ETH
-        uint debtIn2Key = (usersDebtInEth.mul(ethTo2key)).div(10**18); // ETH * (2KEY / ETH) = 2KEY
+            // 2KEY / ETH
+            uint debtIn2Key = (usersDebtInEth.mul(ethTo2key)).div(10**18); // ETH * (2KEY / ETH) = 2KEY
+
+            if (_amountOf2keyForRewards > debtIn2Key){
+                if(_amountOf2keyForRewards < 3 * debtIn2Key) {
+                    amountToPay = debtIn2Key / 2;
+                }
+            }
+            else {
+                amountToPay = _amountOf2keyForRewards / 4;
+            }
+
+            // Emit event that debt is paid it's inside this if because if there's no debt it will just continue and transfer all tokens to the influencer
+            ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
+                _plasmaAddress,
+                amountToPay,
+                false,
+                "2KEY"
+            );
 
 
+            // Get keyhash for debt
+            bytes32 keyHashForDebt = keccak256(_userPlasmaToDebtInETH, _plasmaAddress);
+
+            bytes32 keyHashTotalPaidIn2Key = keccak256(_totalPaidIn2Key);
+
+            // Set total paid in DAI
+            PROXY_STORAGE_CONTRACT.setUint(keyHashTotalPaidIn2Key, amountToPay.add(PROXY_STORAGE_CONTRACT.getUint(keyHashTotalPaidIn2Key)));
+
+            usersDebtInEth = usersDebtInEth - usersDebtInEth.mul(amountToPay.mul(10**18).div(debtIn2Key)).div(10**18);
+
+            PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, usersDebtInEth);
+        }
+
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        // Take tokens from campaign contract
+        IERC20(twoKeyEconomy).transferFrom(msg.sender, address(this), _amountOf2keyForRewards);
+        // Transfer tokens - debt to influencer
+        IERC20(twoKeyEconomy).transfer(_beneficiaryPublic, _amountOf2keyForRewards.sub(amountToPay));
     }
 
 
