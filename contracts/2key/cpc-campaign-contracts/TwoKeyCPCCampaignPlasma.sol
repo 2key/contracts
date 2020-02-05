@@ -30,9 +30,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
      6 totalBounty
      */
     uint [] counters;
-    mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
-    mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
-    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
     uint constant public N = 2048; //constant number
 

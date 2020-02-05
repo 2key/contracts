@@ -10,6 +10,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     IncentiveModel incentiveModel; //Incentive model for rewards
 
+    mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
+    mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
+
     address public contractorPublicAddress;
 
     uint campaignStartTime; // Time when campaign start
