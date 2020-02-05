@@ -16,7 +16,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     uint totalBountyForCampaign; //total 2key tokens amount staked for the campaign
     uint bountyPerConversionWei; //amount of 2key tokens which are going to be paid per conversion
 
-    uint public maxNumberOfConversions;
+    uint public maxNumberOfConversions; // maximal number of conversions campaign can support
 
     event ConversionCreated(uint conversionId);
 
