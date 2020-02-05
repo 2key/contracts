@@ -10,6 +10,7 @@ import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IBancorContract.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
+import "../interfaces/ITwoKeyReg.sol";
 import "../upgradability/Upgradeable.sol";
 
 import "../libraries/SafeMath.sol";
@@ -722,8 +723,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      */
     function buyStableCoinWith2key(
         uint _twoKeyUnits,
-        address _beneficiary,
-        address _beneficiaryPlasma
+        address _beneficiary
     )
     external
     onlyValidatedContracts
@@ -749,19 +749,18 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
 
         token.transferFrom(msg.sender, address(this), _twoKeyUnits); //Take all 2key tokens from campaign contract
-        payFeesToManagerAndTransferTokens(_beneficiaryPlasma, _beneficiary, contractId, stableCoinUnits, dai);
+        payFeesToManagerAndTransferTokens(_beneficiary, contractId, stableCoinUnits, dai);
     }
 
     function payFeesToManagerAndTransferTokens(
-        address _userPlasma,
         address _beneficiary,
         uint _contractId,
         uint _totalStableCoins,
         ERC20 dai
     )
     internal
-    returns (uint)
     {
+        address _userPlasma = ITwoKeyReg(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry")).getEthereumToPlasma(_beneficiary);
         // Handle if there's any existing debt
         address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
         uint usersDebtInEth = ITwoKeyFeeManager(twoKeyFeeManager).getDebtForUser(_userPlasma);

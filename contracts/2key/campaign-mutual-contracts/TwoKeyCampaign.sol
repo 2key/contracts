@@ -511,7 +511,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 			if(_withdrawAsStable == true) {
 				IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchangeContract, balance);
-				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address, _referrer);
+				IUpgradableExchange(twoKeyUpgradableExchangeContract).buyStableCoinWith2key(balance, _address);
 			}
 			else if (block.timestamp >= ITwoKeyAdmin(twoKeyAdminAddress).getTwoKeyRewardsReleaseDate()) {
 				//Report that we're withdrawing 2key from network
