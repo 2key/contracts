@@ -259,7 +259,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         counters[10] = counters[10].add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         transferInvoiceToken(conversion.converter, conversion.conversionAmount);
-        counters[12] = counters[12].add(conversion.tokensBought);
+        counters[11] = counters[11].add(conversion.tokensBought);
 
     }
 
