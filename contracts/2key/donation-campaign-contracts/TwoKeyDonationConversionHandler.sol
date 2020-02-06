@@ -14,7 +14,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     Conversion [] public conversions;
     InvoiceToken public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
 
-    uint public totalTokensGiven;
+
 
     ITwoKeyDonationCampaign twoKeyCampaign;
 
@@ -57,7 +57,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     {
         require(isCampaignInitialized == false);
 
-        counters = new uint[](11);
+        counters = new uint[](12);
         twoKeyCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
         twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
@@ -259,7 +259,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         counters[10] = counters[10].add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         transferInvoiceToken(conversion.converter, conversion.conversionAmount);
-        totalTokensGiven = totalTokensGiven.add(conversion.tokensBought);
+        counters[12] = counters[12].add(conversion.tokensBought);
 
     }
 
