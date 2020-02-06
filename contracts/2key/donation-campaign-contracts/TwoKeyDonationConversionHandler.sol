@@ -14,6 +14,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     Conversion [] public conversions;
     InvoiceToken public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
 
+    uint public totalTokensGiven;
+
     ITwoKeyDonationCampaign twoKeyCampaign;
 
     string currency;
@@ -257,6 +259,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         counters[10] = counters[10].add(conversionToCampaignCurrencyAmountAtTimeOfCreation[_conversionId]);
         transferInvoiceToken(conversion.converter, conversion.conversionAmount);
+        totalTokensGiven = totalTokensGiven.add(conversion.tokensBought);
+
     }
 
 
