@@ -16,8 +16,8 @@ echo "Generating bytecodes for changes on public network"
 echo "Destination for execution: 0xf4797416e6b6835114390591d3ac6a531a061396"
 cd ../..
 
-python3 generate_bytecode.py approveNewCampaign DONATION 1.0.21
-python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.21
+python3 generate_bytecode.py approveNewCampaign DONATION 1.0.22
+python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.22
 
 
 
