@@ -35,7 +35,7 @@ const {
     sortMechanism,
     ipfsAdd,
     ipfsGet,
-    runCPCMigration,
+    runDeployPlasmaEventSourceMigration,
     runDeployCPCCampaignMigration,
     runDeployFeeManagerMigration
 } = require('./helpers');
@@ -376,6 +376,10 @@ async function deployUpgrade(networks, args) {
         console.log('CPC contracts changed: ', cpcChanged);
 
 
+        if(process.argv.includes('merge-deploy')) {
+            await runDeployFeeManagerMigration(networks[i]);
+            await runDeployPlasmaEventSourceMigration(networks[i]);
+        }
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */
@@ -406,19 +410,6 @@ async function deployUpgrade(networks, args) {
         // await runDeployFeeManagerMigration(networks[i]);
         /* eslint-enable no-await-in-loop */
     }
-    await archiveBuild();
-}
-
-async function deployCPC(networks) {
-    console.log(networks);
-    const l = networks.length;
-
-    for(let i = 0; i<l ; i++) {
-        console.log('Deploying CPC contracts to: ' + networks[i]);
-        /* eslint-disable no-await-in-loop */
-        await runCPCMigration(networks[i]);
-    }
-
     await archiveBuild();
 }
 
@@ -470,9 +461,6 @@ async function deploy() {
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
                 await deployUpgrade(networks, process.argv);
-            }
-            if(process.argv.includes('cpc')) {
-                await deployCPC(networks);
             }
             if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);

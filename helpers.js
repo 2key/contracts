@@ -125,7 +125,7 @@ const runUpdateMigration = (network, contractName) => new Promise(async(resolve,
  * @param contractName
  * @returns {Promise<any>}
  */
-const runCPCMigration = (network) => new Promise(async(resolve,reject) => {
+const runDeployPlasmaEventSourceMigration = (network) => new Promise(async(resolve, reject) => {
     try {
         console.log("Running update migration");
         await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '10', '--to', '10', '--network', network]);
@@ -384,7 +384,7 @@ module.exports = {
     sortMechanism,
     ipfsAdd,
     ipfsGet,
-    runCPCMigration,
+    runDeployPlasmaEventSourceMigration,
     runDeployCPCCampaignMigration,
     runDeployFeeManagerMigration
 };
