@@ -44,14 +44,14 @@ module.exports = function deploy(deployer) {
 
                         let txHash = await registry.addVersion(
                             contractName,
-                            TwoKeyFeeManager.address,
-                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                            INITIAL_VERSION_OF_ALL_SINGLETONS,
+                            TwoKeyFeeManager.address
                         );
 
                         txHash = await registry.addVersion(
                             contractStorageName,
-                            TwoKeyFeeManagerStorage.address,
-                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                            INITIAL_VERSION_OF_ALL_SINGLETONS,
+                            TwoKeyFeeManagerStorage.address
                         );
 
                         let { logs } = await registry.createProxy(
