@@ -48,7 +48,7 @@ module.exports = function deploy(deployer) {
                             INITIAL_VERSION_OF_ALL_SINGLETONS
                         );
 
-                        let txHash = await registry.addVersion(
+                        txHash = await registry.addVersion(
                             contractStorageName,
                             TwoKeyPlasmaEventSourceStorage.address,
                             INITIAL_VERSION_OF_ALL_SINGLETONS
