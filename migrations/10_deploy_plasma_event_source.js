@@ -42,10 +42,14 @@ module.exports = function deploy(deployer) {
                         let contractName = "TwoKeyPlasmaEventSource";
                         let contractStorageName = "TwoKeyPlasmaEventSourceStorage";
 
-                        let txHash = await registry.addVersionDuringCreation(
+                        let txHash = await registry.addVersion(
                             contractName,
-                            contractStorageName,
                             TwoKeyPlasmaEventSource.address,
+                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                        );
+
+                        let txHash = await registry.addVersion(
+                            contractStorageName,
                             TwoKeyPlasmaEventSourceStorage.address,
                             INITIAL_VERSION_OF_ALL_SINGLETONS
                         );
