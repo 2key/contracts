@@ -95,7 +95,6 @@ const getDiffBetweenLatestTags = async () => {
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
-    console.log(singletonsChanged);
     return [singletonsChanged, campaignsChanged, cpcChanged];
 };
 
