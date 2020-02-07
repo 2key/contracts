@@ -90,7 +90,7 @@ const getDiffBetweenLatestTags = async () => {
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
+        if(!checkIfFileExistsInDir(singletonsChanged[i]) || singletonsChanged[i] == "TwoKeyPlasmaFactory") {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
