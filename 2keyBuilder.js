@@ -92,8 +92,10 @@ const getDiffBetweenLatestTags = async () => {
     for(let i=0; i<singletonsChanged.length; i++) {
         if(!checkIfFileExistsInDir(singletonsChanged[i])) {
             singletonsChanged.splice(i,1);
+            i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
+    console.log(singletonsChanged);
     return [singletonsChanged, campaignsChanged, cpcChanged];
 };
 
@@ -387,9 +389,7 @@ async function deployUpgrade(networks, args) {
                 if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
                     console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
                     if(networks[i].includes('private') || networks[i].includes('plasma')) {
-                        if(singletonsToBeUpgraded[j] != "TwoKeyPlasmaEventSource") {
-                            await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-                        }
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 } else {
                     if(networks[i].includes('public')) {
