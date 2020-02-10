@@ -377,10 +377,11 @@ async function deployUpgrade(networks, args) {
         console.log('CPC contracts changed: ', cpcChanged);
 
 
-        // if(process.argv.includes('merge-deploy')) {
-        //     await runDeployFeeManagerMigration(networks[i]);
-        //     await runDeployPlasmaEventSourceMigration(networks[i]);
-        // }
+        if(process.argv.includes('merge-deploy')) {
+            console.log("Deploying new contracts: \n (1) TwoKeyFeeManager \n (2) TwoKeyPlasmaEventSource");
+            await runDeployFeeManagerMigration(networks[i]);
+            await runDeployPlasmaEventSourceMigration(networks[i]);
+        }
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */
