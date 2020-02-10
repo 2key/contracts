@@ -48,11 +48,11 @@ module.exports = function deploy(deployer) {
                         //     TwoKeyFeeManager.address
                         // );
 
-                        let txHash = await registry.addVersion(
-                            contractStorageName,
-                            INITIAL_VERSION_OF_ALL_SINGLETONS,
-                            TwoKeyFeeManagerStorage.address
-                        );
+                        // let txHash = await registry.addVersion(
+                        //     contractStorageName,
+                        //     INITIAL_VERSION_OF_ALL_SINGLETONS,
+                        //     TwoKeyFeeManagerStorage.address
+                        // );
 
                         let { logs } = await registry.createProxy(
                             contractName,
