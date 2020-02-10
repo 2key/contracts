@@ -42,12 +42,16 @@ module.exports = function deploy(deployer) {
                         let contractName = "TwoKeyFeeManager";
                         let contractStorageName = "TwoKeyFeeManagerStorage";
 
-                        let txHash = await registry.addVersionDuringCreation(
-                            contractName,
+                        // let txHash = await registry.addVersion(
+                        //     contractName,
+                        //     INITIAL_VERSION_OF_ALL_SINGLETONS,
+                        //     TwoKeyFeeManager.address
+                        // );
+
+                        let txHash = await registry.addVersion(
                             contractStorageName,
-                            TwoKeyFeeManager.address,
-                            TwoKeyFeeManagerStorage.address,
-                            INITIAL_VERSION_OF_ALL_SINGLETONS
+                            INITIAL_VERSION_OF_ALL_SINGLETONS,
+                            TwoKeyFeeManagerStorage.address
                         );
 
                         let { logs } = await registry.createProxy(
