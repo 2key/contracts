@@ -140,7 +140,10 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         bool [] memory isPortionWithdrawn = new bool[](numberOfVestingPortions);
         portionAmounts[0] = _baseTokens;
 
-        uint bonusPortionAmount = _bonusTokens.div(numberOfVestingPortions.sub(1));
+        uint bonusPortionAmount = 0;
+        if(numberOfVestingPortions > 1) {
+            bonusPortionAmount = _bonusTokens.div(numberOfVestingPortions.sub(1));
+        }
 
         for(uint i=1; i<numberOfVestingPortions; i++) {
             portionAmounts[i] = bonusPortionAmount;

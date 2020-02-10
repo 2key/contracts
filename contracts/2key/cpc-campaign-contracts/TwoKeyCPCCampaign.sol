@@ -131,10 +131,13 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     public
     onlyMaintainer
     {
+        //TODO: add fee manager for claiming fee debt
+        //TODO: influencers are plasma addresses, need to convert to public address
         for(uint i=0; i<influencers.length; i++) {
             transferERC20(influencers[i], referrerPlasma2Balances2key[influencers[i]]);
             referrerPlasma2Balances2key[influencers[i]] = 0;
         }
+        //TODO: add here a return of which plasmas where successfully
     }
 
     function submitProofAndWithdrawRewards(
