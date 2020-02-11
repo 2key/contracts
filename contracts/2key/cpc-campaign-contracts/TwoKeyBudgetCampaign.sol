@@ -75,6 +75,19 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isInventoryAdded = true;
 	}
 
+	function distributeRewardsBetweenInfluencers(
+		address [] influencers
+	)
+	public
+	onlyMaintainer
+	{
+		//TODO: add fee manager for claiming fee debt
+		for(uint i=0; i<influencers.length; i++) {
+			transferERC20(twoKeyEventSource.ethereumOf(influencers[i]), referrerPlasma2Balances2key[influencers[i]]);
+			referrerPlasma2Balances2key[influencers[i]] = 0;
+		}
+	}
+
 	/**
 	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
 	 * @param _amount is the amount he called previously approve with
