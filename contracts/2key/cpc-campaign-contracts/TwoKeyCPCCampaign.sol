@@ -17,6 +17,14 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     // Flag to determine if campaign is validated
     bool public isValidated;
 
+    //Active influencer means that he has at least on participation in successful conversion
+    address[] activeInfluencers;
+
+    // Mapping active influencers
+    mapping(address => bool) isActiveInfluencer;
+
+    // His index position in the array
+    mapping(address => uint) activeInfluencer2idx;
 
     /**
      * @notice Function to validate that contracts plasma and public are well mirrored
@@ -112,8 +120,35 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     {
         uint i;
         for(i = 0; i < influencers.length; i++) {
-            referrerPlasma2Balances2key[influencers[i]] = balances[i];
+            if(isActiveInfluencer[influencers[i]]  == false) {
+                activeInfluencer2idx[influencers[i]] = activeInfluencers.length;
+                activeInfluencers.push(influencers[i]);
+                isActiveInfluencer[influencers[i]] = true;
+            }
+            referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(balances[i]);
         }
+    }
+
+
+    function getInfluencersWithPendingRewards(
+        uint start,
+        uint end
+    )
+    public
+    view
+    returns (address[], uint[])
+    {
+        uint[] memory balances = new uint[](end-start);
+        address[] memory influencers = new address[](end-start);
+
+        uint index = 0;
+        for(index = start; index < end; index++) {
+            address influencer = activeInfluencers[index];
+            balances[index] = referrerPlasma2Balances2key[influencer];
+            influencers[index] = influencer;
+        }
+
+        return (influencers, balances);
     }
 
 
