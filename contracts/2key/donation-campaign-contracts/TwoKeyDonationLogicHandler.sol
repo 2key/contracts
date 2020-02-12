@@ -109,6 +109,26 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         return leftToSpend;
     }
 
+
+
+    function checkHowMuchUserCanContributeIncludingGoalAndMaxConversionAmount(
+        address _converter
+    )
+    public
+    view
+    returns (uint)
+    {
+        //Get how much user can spend in terms of min/max contribution
+        uint leftToSpendInCampaignCurrency = checkHowMuchUserCanSpend(_converter);
+        if(endCampaignOnceGoalReached == true) {
+            if(campaignRaisedIncludingPendingConversions.add(leftToSpendInCampaignCurrency) > campaignGoal) {
+                return campaignGoal.sub(campaignRaisedIncludingPendingConversions);
+            }
+        } else {
+            return leftToSpendInCampaignCurrency;
+        }
+    }
+
     /**
      * @notice Function to check for some user how much he can donate
      */

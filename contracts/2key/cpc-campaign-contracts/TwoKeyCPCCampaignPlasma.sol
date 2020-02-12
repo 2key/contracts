@@ -181,7 +181,24 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return influencers;
     }
 
+    /**
+     * @notice Internal function to make converter approved if it's his 1st conversion
+     * @param _converter is the plasma address of the converter
+     */
+    function oneTimeApproveConverter(
+        address _converter
+    )
+    internal
+    {
+        require(isApprovedConverter[_converter] == false);
+        isApprovedConverter[_converter] = true;
+    }
 
+
+    /**
+     * @notice Function to approve converter and execute conversion, can be called once per converter
+     * @param converter is the plasma address of the converter
+     */
     function approveConverterAndExecuteConversion(
         address converter
     )
@@ -190,28 +207,29 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     onlyMaintainer
     isCampaignValidated
     {
-        //Restricting this method to 1 call per converter
-        require(isApprovedConverter[converter] == false);
-        isApprovedConverter[converter] = true;
-
-        //Get the conversion and modify the state
+        //Check if converter don't have any executed conversions before and approve him
+        oneTimeApproveConverter(converter);
+        //Get the conversion id
         uint conversionId = converterToConversionId[converter];
+        // Get the conversion object
         Conversion c = conversions[conversionId];
+        // Update state of conversion to EXECUTED
         c.state = ConversionState.EXECUTED;
 
-        if(counters[5] < maxNumberOfConversions) {
-            uint numberOfInfluencers = updateRewardsBetweenInfluencers(converter, conversionId);
-            if(numberOfInfluencers > 0) {
-                c.bountyPaid = bountyPerConversionWei;
-            }
+        // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
+        if(converterToNumberOfInfluencers[converter] > 0 && counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign) {
+            //Distribute rewards between referrers
+            updateRewardsBetweenInfluencers(converter, conversionId);
+            //Update paid bounty
+            c.bountyPaid = bountyPerConversionWei;
+            //Increment how much bounty is paid
+            counters[6] = counters[6] + c.bountyPaid; // Total bounty paid
         }
 
         counters[0]--; //Decrement number of pending conversions
         //Increment number of executed conversions
         counters[1]++; //increment number approved converters
         counters[5]++; //increment number of executed conversions
-        counters[6] = counters[6] + c.bountyPaid; // Total bounty paid
-
 
         //Emit event through TwoKeyEventSource that conversion is approved and executed
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionExecutedEvent(
