@@ -200,8 +200,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         c.state = ConversionState.EXECUTED;
 
         if(counters[5] < maxNumberOfConversions) {
-            c.bountyPaid = bountyPerConversionWei;
-            updateRewardsBetweenInfluencers(converter, conversionId);
+            uint numberOfInfluencers = updateRewardsBetweenInfluencers(converter, conversionId);
+            if(numberOfInfluencers > 0) {
+                c.bountyPaid = bountyPerConversionWei;
+            }
         }
 
         counters[0]--; //Decrement number of pending conversions
@@ -419,6 +421,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         uint _conversionId
     )
     internal
+    returns (uint)
     {
 
         //Get all the influencers
@@ -454,6 +457,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 updateReferrerMappings(influencers[i], rewards[i], _conversionId);
             }
         }
+
+        return numberOfInfluencers;
     }
 
     /**

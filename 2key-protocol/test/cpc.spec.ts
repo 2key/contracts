@@ -394,6 +394,13 @@ describe('CPC campaign', () => {
         expect(activeInfluencers.length).to.be.equal(2);
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should test if influencers are joined', async() => {
+        printTestNumber();
+        let activeInfluencers = await twoKeyProtocol.CPCCampaign.getActiveInfluencers(campaignAddress);
+        let isJoined = await twoKeyProtocol.CPCCampaign.isAddressJoined(campaignAddress, activeInfluencers[0]);
+        expect(isJoined).to.be.equal(true);
+    }).timeout(TIMEOUT_LENGTH);
+
     it('should lock contract (end campaign) from maintainer', async() => {
         printTestNumber();
         let txHash = await twoKeyProtocol.CPCCampaign.lockContractFromMaintainer(campaignAddress, twoKeyProtocol.plasmaAddress);
