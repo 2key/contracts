@@ -203,8 +203,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             uint numberOfInfluencers = updateRewardsBetweenInfluencers(converter, conversionId);
             if(numberOfInfluencers > 0) {
                 c.bountyPaid = bountyPerConversionWei;
-            } else {
-                c.bountyPaid = 0;
             }
         }
 
