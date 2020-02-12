@@ -15,7 +15,7 @@ spinner() {
 spinner 2
 
 echo "Generating bytecodes for changes on public network"
-echo "Acquisition and Donation patch to 1.0.9"
+echo "Acquisition and Donation patch to 1.0.11"
 echo "Destination for execution: 0x178a57d07d77bd6e2de7236d67a399e2f10c46d9"
 cd ../..
 
