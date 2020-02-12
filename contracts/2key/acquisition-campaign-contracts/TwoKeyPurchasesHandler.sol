@@ -311,9 +311,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     returns (uint[])
     {
         uint portions = numberOfVestingPortions;
-        if(vestingAmount == VestingAmount.BONUS) {
-            portions += 1;
-        }
+
         uint [] memory dates = new uint[](portions);
         for(uint i=0; i< portions; i++) {
             dates[i] = portionToUnlockingDate[i];
