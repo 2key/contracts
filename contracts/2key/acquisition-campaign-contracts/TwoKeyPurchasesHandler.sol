@@ -102,7 +102,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
             // ONLY BONUS
             //numberOfVestingPortions == number of portions of bonus only, meaning if numberOfVestingPortions==4, will be total of base + 4 portions of bonus
             bonusVestingStartDate = tokenDistributionDate.add(bonusTokensVestingStartShiftInDaysFromDistributionDate.mul(1 days));
-            for(i=1; i<numberOfVestingPortions+1; i++) {
+            for(i=1; i<numberOfVestingPortions; i++) {
                 portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
             }
         }
@@ -311,7 +311,9 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     returns (uint[])
     {
         uint portions = numberOfVestingPortions;
-
+        if(vestingAmount == VestingAmount.BONUS) {
+            portions += 1;
+        }
         uint [] memory dates = new uint[](portions);
         for(uint i=0; i< portions; i++) {
             dates[i] = portionToUnlockingDate[i];
