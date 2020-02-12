@@ -124,9 +124,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
             if(campaignRaisedIncludingPendingConversions.add(leftToSpendInCampaignCurrency) > campaignGoal) {
                 return campaignGoal.sub(campaignRaisedIncludingPendingConversions);
             }
-        } else {
-            return leftToSpendInCampaignCurrency;
         }
+        return leftToSpendInCampaignCurrency;
     }
 
     /**
