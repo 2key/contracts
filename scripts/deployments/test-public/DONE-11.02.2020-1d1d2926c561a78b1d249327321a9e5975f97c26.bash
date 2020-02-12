@@ -11,11 +11,11 @@ spinner() {
     done
 }
 
+
 spinner 2
 echo "Generating bytecodes for changes on public network"
 echo "Destination for execution: 0xf4797416e6b6835114390591d3ac6a531a061396"
 cd ../..
-
 
 python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.21
 
