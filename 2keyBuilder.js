@@ -90,8 +90,9 @@ const getDiffBetweenLatestTags = async () => {
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
+        if(!checkIfFileExistsInDir(singletonsChanged[i]) || singletonsChanged[i] == "TwoKeyPlasmaFactory") {
             singletonsChanged.splice(i,1);
+            i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
     return [singletonsChanged, campaignsChanged, cpcChanged];
@@ -377,6 +378,7 @@ async function deployUpgrade(networks, args) {
 
 
         if(process.argv.includes('merge-deploy')) {
+            console.log("Deploying new contracts: \n (1) TwoKeyFeeManager \n (2) TwoKeyPlasmaEventSource");
             await runDeployFeeManagerMigration(networks[i]);
             await runDeployPlasmaEventSourceMigration(networks[i]);
         }
@@ -403,9 +405,9 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        if(cpcChanged.length > 0) {
-            await runDeployCPCCampaignMigration(networks[i]);
-        }
+        // if(cpcChanged.length > 0) {
+        //     await runDeployCPCCampaignMigration(networks[i]);
+        // }
 
 
         // await runDeployFeeManagerMigration(networks[i]);
