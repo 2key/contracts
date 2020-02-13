@@ -212,7 +212,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         //Get the conversion id
         uint conversionId = converterToConversionId[converter];
         // Get the conversion object
-        Conversion c = conversions[conversionId];
+        Conversion storage c = conversions[conversionId];
         // Update state of conversion to EXECUTED
         c.state = ConversionState.EXECUTED;
 
@@ -248,8 +248,11 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
         require(isApprovedConverter[converter] == false);
 
+        // Get the conversion ID
         uint conversionId = converterToConversionId[converter];
-        Conversion c = conversions[conversionId];
+
+        // Get the conversion object
+        Conversion storage c = conversions[conversionId];
 
         require(c.state == ConversionState.PENDING_APPROVAL);
         c.state = ConversionState.REJECTED;
