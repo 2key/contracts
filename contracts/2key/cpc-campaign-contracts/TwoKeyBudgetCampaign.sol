@@ -155,8 +155,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 	/**
- * @notice validate a merkle proof.
- */
+	 * @notice validate a merkle proof.
+	 */
 	function checkMerkleProof(
 		address influencer,
 		bytes32[] proof,

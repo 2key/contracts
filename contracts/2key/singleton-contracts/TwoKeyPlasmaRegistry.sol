@@ -41,12 +41,22 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     }
 
     // Internal function to fetch address from TwoKeyRegTwoistry
-    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+    function getAddressFromTwoKeySingletonRegistry(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
 
-    function onlyMaintainer() internal view returns (bool) {
+    function onlyMaintainer()
+    internal
+    view
+    returns (bool)
+    {
         address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
         return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender);
     }
@@ -54,7 +64,13 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     /**
      * @notice Function to link username and address once signature is validated
      */
-    function linkUsernameAndAddress(bytes signature, address plasma_address, string username) public {
+    function linkUsernameAndAddress(
+        bytes signature,
+        address plasma_address,
+        string username
+    )
+    public
+    {
         require(msg.sender == plasma_address || onlyMaintainer());
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
         require (signature.length == 65);
@@ -68,7 +84,12 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         emitPlasma2Handle(plasma_address, username);
     }
 
-    function add_plasma2ethereum(address plasma_address, bytes sig) public {
+    function add_plasma2ethereum(
+        address plasma_address,
+        bytes sig
+    )
+    public
+    {
         require(msg.sender == plasma_address || onlyMaintainer());
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
         require (sig.length == 65);
@@ -81,12 +102,22 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         emitPlasma2Ethereum(plasma_address, eth_address);
     }
 
-    function emitPlasma2Ethereum(address plasma, address ethereum) internal {
+    function emitPlasma2Ethereum(
+        address plasma,
+        address ethereum
+    )
+    internal
+    {
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2EthereumEvent(plasma, ethereum);
     }
 
-    function emitPlasma2Handle(address plasma, string handle) internal {
+    function emitPlasma2Handle(
+        address plasma,
+        string handle
+    )
+    internal
+    {
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2HandleEvent(plasma, handle);
     }
