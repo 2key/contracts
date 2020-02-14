@@ -19,10 +19,9 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     string constant _usernameToAddress = "usernameToAddress";
     string constant _plasma2ethereum = "plasma2ethereum";
     string constant _ethereum2plasma = "ethereum2plasma";
-
+    string constant _moderatorFeePercentage = "moderatorFeePercentage";
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _twoKeyPlasmaEventSource = "TwoKeyPlasmaEventSource";
-
 
     ITwoKeyPlasmaRegistryStorage public PROXY_STORAGE_CONTRACT;
 
@@ -36,7 +35,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
 
         TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaRegistryStorage(_proxyStorage);
-
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), 2);
         initialized = true;
     }
 
@@ -50,6 +49,12 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
+    }
+
+    modifier onlyTwoKeyPlasmaCongress {
+        address twoKeyCongress = getCongressAddress();
+        require(msg.sender == address(twoKeyCongress));
+        _;
     }
 
     function onlyMaintainer()
@@ -101,6 +106,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
 
         emitPlasma2Ethereum(plasma_address, eth_address);
     }
+
 
     function emitPlasma2Ethereum(
         address plasma,
@@ -175,6 +181,40 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
             keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
         address recoveredAddress = Call.recoverHash(hash, signature, 0);
         return recoveredAddress;
+    }
+
+    /**
+     * @notice Function where Congress on plasma can set moderator fee
+     * @param feePercentage is the feePercentage in uint (ether units)
+     * example if you want to set 1%  then feePercentage = 1
+     */
+    function setModeratorFee(
+        uint feePercentage
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), feePercentage);
+    }
+
+    /**
+     * @notice Function to return moderator fee
+     */
+    function getModeratorFee()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorFeePercentage));
+    }
+
+    function getCongressAddress()
+    public
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getNonUpgradableContractAddress("TwoKeyPlasmaCongress");
     }
 
 }

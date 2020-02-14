@@ -63,6 +63,7 @@ let campaignObject = {
     bountyPerConversionWei: 3
 };
 
+let percentageLeft = 0.98;
 let campaignAddress;
 let campaignPublicAddress;
 let converterPlasma;
@@ -187,7 +188,7 @@ describe('CPC campaign', () => {
     it('should get max number of conversions', async() => {
         printTestNumber();
         let maxNumberOfConversions = await twoKeyProtocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
-        console.log('Max number of conversions: ' + maxNumberOfConversions);
+        expect(maxNumberOfConversions).to.be.equal(1666);
     }).timeout(TIMEOUT_LENGTH);
 
 
@@ -312,7 +313,7 @@ describe('CPC campaign', () => {
         printTestNumber();
         converterPlasma = twoKeyProtocol.plasmaAddress;
         let txHash = await twoKeyProtocol.CPCCampaign.joinAndConvert(campaignAddress, links.gmail.link, twoKeyProtocol.plasmaAddress, {fSecret: links.gmail.fSecret});
-        console.log('Converter plasma: ' + converterPlasma)
+
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get active influencers before conversion is approved', async() => {
@@ -349,14 +350,14 @@ describe('CPC campaign', () => {
         printTestNumber();
         let bounty = await twoKeyProtocol.CPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
         let bountyAvailable = await twoKeyProtocol.CPCCampaign.getAvailableBountyOnCampaign(campaignAddress);
-        expect(bountyAvailable).to.be.equal(bounty.totalBounty - bounty.bountyPerConversion);
+        expect(bountyAvailable).to.be.equal(bounty.totalBounty - (bounty.bountyPerConversion * percentageLeft));
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get number of influencers behind converter', async() => {
         printTestNumber();
 
         let numberOfReferrers = await twoKeyProtocol.CPCCampaign.getNumberOfInfluencersForConverter(campaignAddress, converterPlasma);
-        console.log('Referrers: ' + numberOfReferrers);
+        expect(numberOfReferrers).to.be.equal(2);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get both influencers involved in conversion from plasma contract and their balances', async() => {
@@ -372,8 +373,8 @@ describe('CPC campaign', () => {
         let balanceA = await twoKeyProtocol.CPCCampaign.getReferrerBalanceInFloat(campaignAddress,influencers[0]);
         let balanceB = await twoKeyProtocol.CPCCampaign.getReferrerBalanceInFloat(campaignAddress,influencers[1]);
 
-        expect(balanceA).to.be.equal(1.5);
-        expect(balanceB).to.be.equal(1.5);
+        expect(balanceA).to.be.equal(1.5 * percentageLeft);
+        expect(balanceB).to.be.equal(1.5 * percentageLeft);
     }).timeout(TIMEOUT_LENGTH);
 
 
@@ -383,7 +384,7 @@ describe('CPC campaign', () => {
         let conversion = await twoKeyProtocol.CPCCampaign.getConversion(campaignAddress, 0);
         expect(conversion.converterPlasma).to.be.equal(converterPlasma);
         expect(conversion.conversionState).to.be.equal("EXECUTED");
-        expect(conversion.bountyPaid).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString()));
+        expect(conversion.bountyPaid).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei, 'ether').toString())*percentageLeft);
     }).timeout(TIMEOUT_LENGTH);
 
 
@@ -461,18 +462,12 @@ describe('CPC campaign', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should check the amount of the tokens withdrawn', async() => {
-        printTestNumber();
-        let addressBalance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, from);
-
-        expect(addressBalance).to.be.equal(addressBalanceBeforeConversion+1.5);
-    }).timeout(TIMEOUT_LENGTH);
 
     it('should get counters from the campaign', async() => {
         printTestNumber();
 
         let counters = await twoKeyProtocol.CPCCampaign.getCampaignSummary(campaignAddress);
-        expect(counters.totalBounty).to.be.equal(3);
+        expect(counters.totalBounty).to.be.equal(3*percentageLeft);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get number of forwarders for the campaign', async() => {
@@ -494,12 +489,15 @@ describe('CPC campaign', () => {
     it('should print number of active influencers and get referrers and earnings', async() => {
         printTestNumber();
         let numberOfActiveInfluencers = await twoKeyProtocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
-        console.log(numberOfActiveInfluencers);
-
         let obj = await twoKeyProtocol.CPCCampaign.getInfluencersAndBalances(campaignAddress, 0, numberOfActiveInfluencers);
-        console.log(obj);
+        expect(obj.influencers.length).to.be.equal(numberOfActiveInfluencers);
 
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should get moderator earnings per campaign', async() => {
+        printTestNumber();
+        let moderatorEarnings = await twoKeyProtocol.CPCCampaign.getModeratorEarningsPerCampaign(campaignAddress);
+        expect(moderatorEarnings).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString())* 0.02);
+    })
 
 });

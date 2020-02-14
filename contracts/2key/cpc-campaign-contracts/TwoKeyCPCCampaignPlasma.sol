@@ -42,7 +42,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     // Address of campaign deployed to public eth network
     address public mirrorCampaignOnPublic;
 
-
     //Active influencer means that he has at least on participation in successful conversion
     address[] activeInfluencers;
 
@@ -181,87 +180,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return influencers;
     }
 
-    /**
-     * @notice Internal function to make converter approved if it's his 1st conversion
-     * @param _converter is the plasma address of the converter
-     */
-    function oneTimeApproveConverter(
-        address _converter
-    )
-    internal
-    {
-        require(isApprovedConverter[_converter] == false);
-        isApprovedConverter[_converter] = true;
-    }
 
-
-    /**
-     * @notice Function to approve converter and execute conversion, can be called once per converter
-     * @param converter is the plasma address of the converter
-     */
-    function approveConverterAndExecuteConversion(
-        address converter
-    )
-    public
-    contractNotLocked
-    onlyMaintainer
-    isCampaignValidated
-    {
-        //Check if converter don't have any executed conversions before and approve him
-        oneTimeApproveConverter(converter);
-        //Get the conversion id
-        uint conversionId = converterToConversionId[converter];
-        // Get the conversion object
-        Conversion storage c = conversions[conversionId];
-        // Update state of conversion to EXECUTED
-        c.state = ConversionState.EXECUTED;
-
-        // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
-        if(converterToNumberOfInfluencers[converter] > 0 && counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign) {
-            //Distribute rewards between referrers
-            updateRewardsBetweenInfluencers(converter, conversionId);
-            //Update paid bounty
-            c.bountyPaid = bountyPerConversionWei;
-            //Increment how much bounty is paid
-            counters[6] = counters[6] + c.bountyPaid; // Total bounty paid
-        }
-
-        counters[0]--; //Decrement number of pending conversions
-        //Increment number of executed conversions
-        counters[1]++; //increment number approved converters
-        counters[5]++; //increment number of executed conversions
-
-        //Emit event through TwoKeyEventSource that conversion is approved and executed
-        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionExecutedEvent(
-            conversionId
-        );
-    }
-
-
-    function rejectConverterAndConversion(
-        address converter
-    )
-    public
-    contractNotLocked
-    onlyMaintainer
-    isCampaignValidated
-    {
-        require(isApprovedConverter[converter] == false);
-
-        // Get the conversion ID
-        uint conversionId = converterToConversionId[converter];
-
-        // Get the conversion object
-        Conversion storage c = conversions[conversionId];
-
-        require(c.state == ConversionState.PENDING_APPROVAL);
-        c.state = ConversionState.REJECTED;
-
-        counters[0]--; //reduce number of pending converters
-        counters[2]++; //increase number of rejected converters
-        counters[3]--; //reduce number of pending conversions
-        counters[4]++; //increase number of rejected conversions
-    }
 
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
         address _referrerAddress,
@@ -358,6 +277,97 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     }
 
     /**
+     * @notice Internal function to make converter approved if it's his 1st conversion
+     * @param _converter is the plasma address of the converter
+     */
+    function oneTimeApproveConverter(
+        address _converter
+    )
+    internal
+    {
+        require(isApprovedConverter[_converter] == false);
+        isApprovedConverter[_converter] = true;
+    }
+
+
+    /**
+     * @notice Function to approve converter and execute conversion, can be called once per converter
+     * @param converter is the plasma address of the converter
+     */
+    function approveConverterAndExecuteConversion(
+        address converter
+    )
+    public
+    contractNotLocked
+    onlyMaintainer
+    isCampaignValidated
+    {
+        //Check if converter don't have any executed conversions before and approve him
+        oneTimeApproveConverter(converter);
+        //Get the conversion id
+        uint conversionId = converterToConversionId[converter];
+        // Get the conversion object
+        Conversion storage c = conversions[conversionId];
+        // Update state of conversion to EXECUTED
+        c.state = ConversionState.EXECUTED;
+
+        // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
+        if(converterToNumberOfInfluencers[converter] > 0 && counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign) {
+            //Get moderator fee percentage
+            uint moderatorFeePercent = getModeratorFeePercent();
+            //Calculate moderator fee to be taken from bounty
+            uint moderatorFee = bountyPerConversionWei.mul(moderatorFeePercent).div(100);
+            //Add earnings to moderator total earnings
+            moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFee);
+            //Left to be distributed between influencers
+            uint bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFee);
+
+            //Distribute rewards between referrers
+            updateRewardsBetweenInfluencers(converter, conversionId, bountyToBeDistributed);
+            //Update paid bounty
+            c.bountyPaid = bountyToBeDistributed;
+            //Increment how much bounty is paid
+            counters[6] = counters[6] + bountyToBeDistributed; // Total bounty paid
+        }
+
+        counters[0]--; //Decrement number of pending conversions
+        //Increment number of executed conversions
+        counters[1]++; //increment number approved converters
+        counters[5]++; //increment number of executed conversions
+
+        //Emit event through TwoKeyEventSource that conversion is approved and executed
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionExecutedEvent(
+            conversionId
+        );
+    }
+
+
+    function rejectConverterAndConversion(
+        address converter
+    )
+    public
+    contractNotLocked
+    onlyMaintainer
+    isCampaignValidated
+    {
+        require(isApprovedConverter[converter] == false);
+
+        // Get the conversion ID
+        uint conversionId = converterToConversionId[converter];
+
+        // Get the conversion object
+        Conversion storage c = conversions[conversionId];
+
+        require(c.state == ConversionState.PENDING_APPROVAL);
+        c.state = ConversionState.REJECTED;
+
+        counters[0]--; //reduce number of pending converters
+        counters[2]++; //increase number of rejected converters
+        counters[3]--; //reduce number of pending conversions
+        counters[4]++; //increase number of rejected conversions
+    }
+
+    /**
      * @param _referrer we want to check earnings for
      */
     function getReferrerBalance(address _referrer) public view returns (uint) {
@@ -439,7 +449,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     function updateRewardsBetweenInfluencers(
         address _converter,
-        uint _conversionId
+        uint _conversionId,
+        uint _bountyForDistribution
     )
     internal
     returns (uint)
@@ -454,14 +465,14 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         uint i;
         uint reward;
         if(incentiveModel == IncentiveModel.VANILLA_AVERAGE) {
-            reward = IncentiveModels.averageModelRewards(bountyPerConversionWei, numberOfInfluencers);
+            reward = IncentiveModels.averageModelRewards(_bountyForDistribution, numberOfInfluencers);
             for(i=0; i<numberOfInfluencers; i++) {
                 updateReferrerMappings(influencers[i], reward, _conversionId);
             }
         } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
             uint rewardForLast;
             // Calculate reward for regular ones and for the last
-            (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(bountyPerConversionWei, numberOfInfluencers);
+            (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(_bountyForDistribution, numberOfInfluencers);
             if(numberOfInfluencers > 0) {
                 //Update equal rewards to all influencers but last
                 for(i=0; i<numberOfInfluencers - 1; i++) {
@@ -472,7 +483,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             }
         } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
             // Get rewards per referrer
-            uint [] memory rewards = IncentiveModels.powerLawRewards(bountyPerConversionWei, numberOfInfluencers, 2);
+            uint [] memory rewards = IncentiveModels.powerLawRewards(_bountyForDistribution, numberOfInfluencers, 2);
             //Iterate through all referrers and distribute rewards
             for(i=0; i<numberOfInfluencers; i++) {
                 updateReferrerMappings(influencers[i], rewards[i], _conversionId);
@@ -603,8 +614,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     view
     returns (address)
     {
-        address twoKeyPlasmaEventsRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
-        return ITwoKeyPlasmaRegistry(twoKeyPlasmaEventsRegistry).plasma2ethereum(_address);
+        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        return ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).plasma2ethereum(_address);
     }
 
     function getCounters()
@@ -672,6 +683,15 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         }
 
         return (influencers, balances);
+    }
+
+    function getModeratorFeePercent()
+    internal
+    view
+    returns (uint)
+    {
+        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        return ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).getModeratorFee();
     }
 
 

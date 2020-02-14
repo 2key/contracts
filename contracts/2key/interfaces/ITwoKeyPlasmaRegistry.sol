@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 contract ITwoKeyPlasmaRegistry {
+
     function plasma2ethereum(
         address _plasma
     )
@@ -15,4 +16,9 @@ contract ITwoKeyPlasmaRegistry {
     public
     view
     returns (address);
+
+    function getModeratorFee()
+    public
+    view
+    returns (uint);
 }

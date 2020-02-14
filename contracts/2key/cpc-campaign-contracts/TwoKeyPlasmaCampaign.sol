@@ -16,17 +16,26 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     address public contractorPublicAddress;
 
+
+    uint public moderatorTotalEarnings; // total rewards which are going to moderator
+
+
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
 
+    // Representing number of influencers between contractor and converter
     mapping(address => uint) public converterToNumberOfInfluencers;
+
+    // Validator if campaign is validated from maintainer side
     bool public isValidated;
 
+    // Modifier restricting calls only to maintainers
     modifier onlyMaintainer {
         require(isMaintainer(msg.sender));
         _;
     }
 
+    // Checking if the campaign is created through TwoKeyPlasmaFactory
     modifier isCampaignValidated {
         require(isValidated == true);
         _;

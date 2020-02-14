@@ -18,6 +18,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 	bytes32 public merkleRoot;
+
 	address public mirrorCampaignOnPlasma; // Address of campaign deployed to plasma network
 
 	// Flag to determine if campaign is validated
@@ -35,7 +36,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	//Selector if inventory is added
 	bool isInventoryAdded;
 
+	// Mapping representing if rewards are withdrawn
 	mapping(address => bool) areRewardsWithdrawn;
+
+	// Mapping representing amount influencer earned
 	mapping(address => uint) amountInfluencerEarned;
 
 	// Dollar to 2key rate in WEI at the moment of adding inventory
@@ -50,6 +54,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	//Amount for rewards inventory
 	uint public rewardsInventoryAmount;
 
+	// Amount representing how much moderator has earned
+	uint public moderatorEarnings;
 
 	/**
      * @notice Function to validate that contracts plasma and public are well mirrored
@@ -73,7 +79,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return IERC20(twoKeyEconomy).balanceOf(address(this));
 	}
 
-	function transferERC20(
+	function transfer2KEY(
 		address receiver,
 		uint amount
 	)
@@ -113,7 +119,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		//TODO: add fee manager for claiming fee debt
 		for(uint i=0; i<influencers.length; i++) {
-			transferERC20(twoKeyEventSource.ethereumOf(influencers[i]), referrerPlasma2Balances2key[influencers[i]]);
+			transfer2KEY(twoKeyEventSource.ethereumOf(influencers[i]), referrerPlasma2Balances2key[influencers[i]]);
 			referrerPlasma2Balances2key[influencers[i]] = 0;
 		}
 	}
@@ -208,6 +214,26 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		}
 	}
 
+	/**
+	 * @notice Function where maintainer can push earnings of moderator for the campaign
+	 * @param _moderatorEarnings is the amount of 2key tokens earned by moderator
+	 */
+	function pushModeratorEarnings(
+		uint _moderatorEarnings
+	)
+	public
+	onlyMaintainer
+	{
+		moderatorEarnings = _moderatorEarnings;
+
+		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+		//Send 2key tokens to moderator
+		transfer2KEY(twoKeyAdmin, _moderatorEarnings);
+
+		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorEarnings);
+	}
 
 	function getInfluencersWithPendingRewards(
 		uint start,
@@ -256,7 +282,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(areRewardsWithdrawn[msg.sender] == false); //He can't take reward twice
 
 		//Sending him his rewards
-		transferERC20(msg.sender, amount);
+		transfer2KEY(msg.sender, amount);
 
 		//Incrementing amount he has earned
 		amountInfluencerEarned[msg.sender] = amount;
