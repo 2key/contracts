@@ -382,6 +382,8 @@ async function deployUpgrade(networks, args) {
             await runDeployFeeManagerMigration(networks[i]);
             await runDeployPlasmaEventSourceMigration(networks[i]);
         }
+
+
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */
@@ -405,7 +407,8 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        if(cpcChanged.length > 0) {
+        if(cpcChanged.length > 0 && contractsStatus.current === 'develop') {
+            console.log("CPC Campaigns are only patched on develop (test) env. ");
             await runDeployCPCCampaignMigration(networks[i]);
         }
 
