@@ -410,7 +410,6 @@ async function deployUpgrade(networks, args) {
         }
 
 
-        // await runDeployFeeManagerMigration(networks[i]);
         /* eslint-enable no-await-in-loop */
     }
     await archiveBuild();
