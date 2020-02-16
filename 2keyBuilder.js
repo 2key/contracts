@@ -65,7 +65,7 @@ const getDiffBetweenLatestTags = async () => {
 
 
     const tagsMaster = (await contractsGit.tags()).all.filter(item => item.endsWith('-master')).sort(sortMechanism);
-    let latestTagMaster = tagsMaster[tagsMaster.length-1];
+    let latestTagMaster = tagsMaster[tagsMaster.length-2];
 
     let status = await contractsGit.status();
     let diffParams;
