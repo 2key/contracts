@@ -407,10 +407,10 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        if(cpcChanged.length > 0 && contractsStatus.current === 'develop') {
-            console.log("CPC Campaigns are only patched on develop (test) env. ");
-            await runDeployCPCCampaignMigration(networks[i]);
-        }
+        // if(cpcChanged.length > 0 && contractsStatus.current === 'develop') {
+        //     console.log("CPC Campaigns are only patched on develop (test) env. ");
+        //     await runDeployCPCCampaignMigration(networks[i]);
+        // }
 
 
         // await runDeployFeeManagerMigration(networks[i]);
