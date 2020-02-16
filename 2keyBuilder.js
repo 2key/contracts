@@ -90,7 +90,13 @@ const getDiffBetweenLatestTags = async () => {
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i]) || singletonsChanged[i] == "TwoKeyPlasmaFactory") {
+        if(!checkIfFileExistsInDir(singletonsChanged[i]) ||
+            singletonsChanged[i] == "TwoKeyPlasmaFactory" ||
+            singletonsChanged[i] == "TwoKeyFeeManager" ||
+            singletonsChanged[i] == "TwoKeyAdmin" ||
+            singletonsChanged[i] == "TwoKeyEventSource" ||
+            singletonsChanged[i] == "TwoKeyFactory"
+        ) {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
@@ -395,10 +401,7 @@ async function deployUpgrade(networks, args) {
                     }
                 } else {
                     if(networks[i].includes('public')) {
-                        if(singletonsToBeUpgraded[j] != 'TwoKeyFeeManager') {
-                            await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-                        }
-
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 }
             }
