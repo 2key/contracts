@@ -65,7 +65,7 @@ const getDiffBetweenLatestTags = async () => {
 
 
     const tagsMaster = (await contractsGit.tags()).all.filter(item => item.endsWith('-master')).sort(sortMechanism);
-    let latestTagMaster = tagsMaster[tagsMaster.length-2];
+    let latestTagMaster = tagsMaster[tagsMaster.length-1];
 
     let status = await contractsGit.status();
     let diffParams;
@@ -90,14 +90,7 @@ const getDiffBetweenLatestTags = async () => {
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i]) ||
-            singletonsChanged[i] == "TwoKeyPlasmaFactory" ||
-            singletonsChanged[i] == "TwoKeyFeeManager" ||
-            singletonsChanged[i] == "TwoKeyAdmin" ||
-            singletonsChanged[i] == "TwoKeyEventSource" ||
-            singletonsChanged[i] == "TwoKeyFactory" ||
-            singletonsChanged[i] == "TwoKeyUpgradableExchange"
-        ) {
+        if(!checkIfFileExistsInDir(singletonsChanged[i]) || singletonsChanged[i] == "TwoKeyPlasmaFactory") {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
@@ -389,24 +382,22 @@ async function deployUpgrade(networks, args) {
             await runDeployFeeManagerMigration(networks[i]);
             await runDeployPlasmaEventSourceMigration(networks[i]);
         }
-
-        //
-        // if(singletonsToBeUpgraded.length > 0) {
-        //     for(let j=0; j<singletonsToBeUpgraded.length; j++) {
-        //         /* eslint-disable no-await-in-loop */
-        //         console.log(networks[i], singletonsToBeUpgraded[j]);
-        //         if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
-        //             console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
-        //             if(networks[i].includes('private') || networks[i].includes('plasma')) {
-        //                 await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-        //             }
-        //         } else {
-        //             if(networks[i].includes('public')) {
-        //                 await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-        //             }
-        //         }
-        //     }
-        // }
+        if(singletonsToBeUpgraded.length > 0) {
+            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+                /* eslint-disable no-await-in-loop */
+                console.log(networks[i], singletonsToBeUpgraded[j]);
+                if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
+                    console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
+                    if(networks[i].includes('private') || networks[i].includes('plasma')) {
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                    }
+                } else {
+                    if(networks[i].includes('public')) {
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                    }
+                }
+            }
+        }
 
         if(campaignsToBeUpgraded.length > 0) {
             if(networks[i].includes('public')) {
@@ -414,10 +405,9 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        // if(cpcChanged.length > 0 && contractsStatus.current === 'develop') {
-        //     console.log("CPC Campaigns are only patched on develop (test) env. ");
-        //     await runDeployCPCCampaignMigration(networks[i]);
-        // }
+        if(cpcChanged.length > 0) {
+            await runDeployCPCCampaignMigration(networks[i]);
+        }
 
 
         // await runDeployFeeManagerMigration(networks[i]);
