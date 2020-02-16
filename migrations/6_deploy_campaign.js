@@ -26,9 +26,9 @@ module.exports = function deploy(deployer) {
     let version;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        deployer.deploy(TwoKeyConversionHandler)
-            .then(() => TwoKeyConversionHandler.deployed())
-            .then(() => deployer.deploy(TwoKeyPurchasesHandler))
+        deployer.deploy(TwoKeyPurchasesHandler)
+            // .then(() => TwoKeyConversionHandler.deployed())
+            // .then(() => deployer.deploy(TwoKeyPurchasesHandler))
             .then(() => TwoKeyPurchasesHandler.deployed())
             .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
             .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
