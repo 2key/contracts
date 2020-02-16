@@ -95,7 +95,8 @@ const getDiffBetweenLatestTags = async () => {
             singletonsChanged[i] == "TwoKeyFeeManager" ||
             singletonsChanged[i] == "TwoKeyAdmin" ||
             singletonsChanged[i] == "TwoKeyEventSource" ||
-            singletonsChanged[i] == "TwoKeyFactory"
+            singletonsChanged[i] == "TwoKeyFactory" ||
+            singletonsChanged[i] == "TwoKeyUpgradableExchange"
         ) {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
