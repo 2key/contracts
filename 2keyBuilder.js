@@ -395,7 +395,10 @@ async function deployUpgrade(networks, args) {
                     }
                 } else {
                     if(networks[i].includes('public')) {
-                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                        if(singletonsToBeUpgraded[j] != 'TwoKeyFeeManager') {
+                            await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                        }
+
                     }
                 }
             }
