@@ -316,7 +316,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             //Calculate moderator fee to be taken from bounty
             uint moderatorFee = bountyPerConversionWei.mul(moderatorFeePercent).div(100);
             //Add earnings to moderator total earnings
-            moderatorTotalEarniLngs = moderatorTotalEarnings.add(moderatorFee);
+            moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFee);
             //Left to be distributed between influencers
             uint bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFee);
 
