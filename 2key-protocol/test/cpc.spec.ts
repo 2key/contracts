@@ -1,13 +1,9 @@
 import {TwoKeyProtocol} from "../src";
-import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {expect} from "chai";
+import web3Switcher from "./helpers/web3Switcher";
+import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "./helpers/twoKeyProtocol";
 const { env } = process;
 
-const networkId = parseInt(env.MAIN_NET_ID, 10);
-const privateNetworkId = parseInt(env.SYNC_NET_ID, 10);
-
-const rpcUrls = [env.RPC_URL];
-const eventsNetUrls = [env.PLASMA_RPC_URL];
 
 const TIMEOUT_LENGTH = 60000;
 let i = 1;
@@ -17,20 +13,6 @@ let addressBalanceBeforeConversion;
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
-
-const web3switcher = {
-    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
-    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
-    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrls),
-    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrls),
-    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrls),
-    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrls),
-    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrls),
-    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrls),
-    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
-    guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrls),
-    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrls)
-};
 
 const links: any = {
     deployer: {},
@@ -73,18 +55,11 @@ let influencers;
 const etherForRewards = 3;
 
 describe('CPC campaign', () => {
-
     it('should create a CPC campaign', async() => {
         printTestNumber();
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
 
         //Convert bounty per conversion to be in WEI
         campaignObject.bountyPerConversionWei = parseFloat(twoKeyProtocol.Utils.toWei(campaignObject.bountyPerConversionWei,'ether').toString());
@@ -160,15 +135,9 @@ describe('CPC campaign', () => {
     it('should set that plasma contract is valid from maintainer', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.buyer();
+        const {web3, address} = web3Switcher.buyer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
         let txHash = await twoKeyProtocol.CPCCampaign.validatePlasmaContract(campaignAddress, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -195,15 +164,9 @@ describe('CPC campaign', () => {
     it('should set that public contract is valid from maintainer', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
 
         let txHash = await twoKeyProtocol.CPCCampaign.validatePublicContract(campaignAddress, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -231,15 +194,9 @@ describe('CPC campaign', () => {
     it('should get public link key of contractor', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
 
         const pkl = await twoKeyProtocol.CPCCampaign.getPublicLinkKey(campaignAddress, twoKeyProtocol.plasmaAddress);
         expect(pkl.length).to.be.greaterThan(0);
@@ -248,15 +205,9 @@ describe('CPC campaign', () => {
     it('should visit and join campaign from test user', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.test();
+        const {web3, address} = web3Switcher.test();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
         let txHash = await twoKeyProtocol.CPCCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
 
         const hash = await twoKeyProtocol.CPCCampaign.join(campaignAddress, twoKeyProtocol.plasmaAddress, {
@@ -272,15 +223,9 @@ describe('CPC campaign', () => {
 
     it('should create a join link by gmail', async () => {
         printTestNumber();
-        const {web3, address} = web3switcher.gmail();
+        const {web3, address} = web3Switcher.gmail();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL));
 
         let txHash = await twoKeyProtocol.CPCCampaign.visit(campaignAddress, links.test.link, links.test.fSecret);
         const hash = await twoKeyProtocol.CPCCampaign.join(campaignAddress, twoKeyProtocol.plasmaAddress, {
@@ -296,15 +241,9 @@ describe('CPC campaign', () => {
     it('should visit campaign', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.test4();
+        const {web3, address} = web3Switcher.test4();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST4));
 
         let txHash = await twoKeyProtocol.CPCCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
     }).timeout(TIMEOUT_LENGTH);
@@ -334,15 +273,9 @@ describe('CPC campaign', () => {
     it('should approve converter from maintainer and distribute rewards', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.buyer();
+        const {web3, address} = web3Switcher.buyer();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_BUYER));
         let txHash = await twoKeyProtocol.CPCCampaign.approveConverterAndExecuteConversion(campaignAddress, converterPlasma, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
@@ -420,15 +353,9 @@ describe('CPC campaign', () => {
     it('should get merklee proof from roots as an influencer', async() => {
         printTestNumber();
 
-        const {web3, address} = web3switcher.test();
+        const {web3, address} = web3Switcher.test();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
 
         let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
         expect(proofs.length).to.be.greaterThan(0);
@@ -499,5 +426,4 @@ describe('CPC campaign', () => {
         let moderatorEarnings = await twoKeyProtocol.CPCCampaign.getModeratorEarningsPerCampaign(campaignAddress);
         expect(moderatorEarnings).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString())* 0.02);
     })
-
 });

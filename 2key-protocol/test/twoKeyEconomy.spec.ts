@@ -1,46 +1,24 @@
 import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
+import getTwoKeyProtocol from "./helpers/twoKeyProtocol";
+import web3Switcher from "./helpers/web3Switcher";
 const { env } = process;
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
-const rpcUrls = [env.RPC_URL];
-const networkId = parseInt(env.MAIN_NET_ID, 10);
-const privateNetworkId = parseInt(env.SYNC_NET_ID, 10);
-const eventsNetUrls = [env.PLASMA_RPC_URL];
 
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
-
-const web3switcher = {
-    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
-    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
-    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrls),
-    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrls),
-    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrls),
-    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrls),
-    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrls),
-    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrls),
-    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
-    guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrls),
-};
-
 
 /**
  * Tests for TwoKeyEconomy contract
  */
 describe('Tests for TwoKeyEconomy ERC20 contract' , () => {
     it('should check token name', async() => {
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
 
         let tokenName = await twoKeyProtocol.ERC20.getTokenName(twoKeyProtocol.twoKeyEconomy.address);
         expect(tokenName).to.be.equal("TwoKeyEconomy");
@@ -105,8 +83,4 @@ describe('Tests for TwoKeyEconomy ERC20 contract' , () => {
         let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
         expect(balance).to.be.equal(totalSupply*(0.47));
     }).timeout(60000);
-
-
-
 });
-

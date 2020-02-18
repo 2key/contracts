@@ -1,31 +1,15 @@
-import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
+import web3Switcher from "./helpers/web3Switcher";
+import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "./helpers/twoKeyProtocol";
 const { env } = process;
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
-const rpcUrls = [env.RPC_URL];
-const eventsNetUrls = [env.PLASMA_RPC_URL];
-const networkId = parseInt(env.MAIN_NET_ID, 10);
-const privateNetworkId = parseInt(env.SYNC_NET_ID, 10);
 
 
 let twoKeyProtocol: TwoKeyProtocol;
 let from: string;
-
-const web3switcher = {
-    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
-    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
-    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrls),
-    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrls),
-    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrls),
-    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrls),
-    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrls),
-    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrls),
-    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
-    guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrls),
-};
 
 const buildBytecode = (receiverAddress: string) => {
     let firstPart = '0x9ffe94d9000000000000000000000000'
@@ -42,15 +26,9 @@ let transactionBytecodeUpgradeContract =
 
 describe('Start and execute voting' , () => {
     it('should check if bytecode is well created', async() => {
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
         let contractor = '0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7';
         let bytecode = buildBytecode(contractor);
         expect(bytecode).to.be.equal(transactionBytecodeTransferTokens);
@@ -68,16 +46,9 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('1. member vote to support proposal', async() => {
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
-
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
 
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
@@ -88,15 +59,9 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('2. member vote to support proposal', async() => {
-        const {web3, address} = web3switcher.aydnep();
+        const {web3, address} = web3Switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP));
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I also support sending tokens", from);
@@ -106,15 +71,9 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('3. member vote to support proposal', async() => {
-        const {web3, address} = web3switcher.gmail();
+        const {web3, address} = web3Switcher.gmail();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL));
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I also support sending tokens", from);
@@ -132,15 +91,9 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('should upgrade contract', async() => {
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
 
         let txHash = await twoKeyProtocol.SingletonRegistry.setContractImplementationByContractNameAndVersion("TwoKeyUpgradableExchange", "1.1", twoKeyProtocol.twoKeyUpgradableExchange.address, from);
     }).timeout(60000);
@@ -157,15 +110,9 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('1. member vote to support proposal', async() => {
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
 
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
@@ -176,15 +123,9 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('2. member vote to support proposal', async() => {
-        const {web3, address} = web3switcher.aydnep();
+        const {web3, address} = web3Switcher.aydnep();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support upgrading contracts", from);
@@ -194,15 +135,9 @@ describe('Start and execute voting' , () => {
     }).timeout(60000);
 
     it('3. member vote to support proposal', async() => {
-        const {web3, address} = web3switcher.gmail();
+        const {web3, address} = web3Switcher.gmail();
         from = address;
-        twoKeyProtocol.setWeb3({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support upgrading contracts", from);
