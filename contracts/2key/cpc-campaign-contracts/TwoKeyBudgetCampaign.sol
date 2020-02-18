@@ -3,6 +3,8 @@ pragma solidity ^0.4.24;
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../interfaces/ITwoKeyCampaignLogicHandler.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITwoKeyFeeManager.sol";
+
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
 import "../libraries/MerkleProof.sol";
 
@@ -38,9 +40,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	// Mapping representing if rewards are withdrawn
 	mapping(address => bool) areRewardsWithdrawn;
-
-	// Mapping representing amount influencer earned
-	mapping(address => uint) amountInfluencerEarned;
 
 	// Dollar to 2key rate in WEI at the moment of adding inventory
 	uint public usd2KEYrateWei;
@@ -111,17 +110,52 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isInventoryAdded = true;
 	}
 
+	/**
+	 * @notice Function to distribute rewards between all the influencers
+	 * which have earned the reward once campaign is done
+	 * @param influencers is the array of influencers
+	 */
 	function distributeRewardsBetweenInfluencers(
 		address [] influencers
 	)
 	public
 	onlyMaintainer
 	{
-		//TODO: add fee manager for claiming fee debt
 		for(uint i=0; i<influencers.length; i++) {
-			transfer2KEY(twoKeyEventSource.ethereumOf(influencers[i]), referrerPlasma2Balances2key[influencers[i]]);
-			referrerPlasma2Balances2key[influencers[i]] = 0;
+			if(areRewardsWithdrawn[influencers[i]]) {
+				// Get the influencer balance
+				uint balance = referrerPlasma2Balances2key[influencers[i]];
+				// Set balance to be 0
+				referrerPlasma2Balances2key[influencers[i]] = 0;
+				// Pay fee
+				payFeeForRegistration(influencers[i], balance);
+			}
 		}
+	}
+
+
+	/**
+	 * @notice Wrapper function to pay the registration fee
+	 * @param influencerPlasma is the plasma address of the influencer
+	 * @param balance is the balance influencer earned
+	 */
+	function payFeeForRegistration(
+		address influencerPlasma,
+		uint balance
+	)
+	internal
+	{
+		// Get the address of TwoKeyFeeManager contract
+		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+		// Approve twoKeyFeeManager to take 2key tokens in amount of balance from this contract
+		IERC20(twoKeyEconomy).approve(twoKeyFeeManager, balance);
+		// Pay debt, Fee manager will keep the debt and forward leftover to the influencer
+		ITwoKeyFeeManager(twoKeyFeeManager).payDebtWith2Key(
+			twoKeyEventSource.ethereumOf(influencerPlasma),
+			influencerPlasma,
+			balance
+		);
+
 	}
 
 	/**
@@ -281,13 +315,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		//Assuming that msg.sender is influencer
 		require(areRewardsWithdrawn[msg.sender] == false); //He can't take reward twice
 
-		//Sending him his rewards
-		transfer2KEY(msg.sender, amount);
-
-		//Incrementing amount he has earned
-		amountInfluencerEarned[msg.sender] = amount;
-
-		//TODO: Add event withdrawn msg.sender + amount
+		payFeeForRegistration(influencerPlasma, amount);
 	}
 
 
