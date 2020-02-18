@@ -13,7 +13,8 @@ const web3Switcher = {
   gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrls),
   aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrls),
   test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
-  guest: () => createWeb3('mnemonic words should be here bu   t for some reason they are missing', rpcUrls),
+  buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrls),
+  guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrls),
 };
 
 export default web3Switcher;

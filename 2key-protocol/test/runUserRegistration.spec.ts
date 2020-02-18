@@ -1,15 +1,11 @@
 import registerUserFromBackend, {IRegistryData} from "./_registerUserFromBackend";
 import {TwoKeyProtocol} from '../src';
-import {generatePlasmaFromMnemonic} from "./_web3";
-import createWeb3 from "./_web3";
+import web3Switcher from "./helpers/web3Switcher";
+import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "./helpers/twoKeyProtocol";
 let twoKeyProtocol: TwoKeyProtocol;
 const TIMEOUT_LENGTH = 60000;
 const {env} = process;
 
-const rpcUrls = [env.RPC_URL];
-const eventsNetUrls = [env.PLASMA_RPC_URL];
-const networkId = parseInt(env.MAIN_NET_ID, 10);
-const privateNetworkId = parseInt(env.SYNC_NET_ID, 10);
 let from: string;
 
 const users = {
@@ -136,179 +132,100 @@ const tryToRegisterUser = async (username, from) => {
     return registerReceipts;
 };
 
-const web3switcher = {
-    deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
-    aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
-    gmail: () => createWeb3(env.MNEMONIC_GMAIL, rpcUrls),
-    test4: () => createWeb3(env.MNEMONIC_TEST4, rpcUrls),
-    renata: () => createWeb3(env.MNEMONIC_RENATA, rpcUrls),
-    uport: () => createWeb3(env.MNEMONIC_UPORT, rpcUrls),
-    gmail2: () => createWeb3(env.MNEMONIC_GMAIL2, rpcUrls),
-    aydnep2: () => createWeb3(env.MNEMONIC_AYDNEP2, rpcUrls),
-    test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
-    guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrls),
-    buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrls)
-};
 
 describe('Should register all users on contract', () => {
     it('should register deployer', async() => {
-        const {web3, address} = web3switcher.deployer();
+        const {web3, address} = web3Switcher.deployer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_DEPLOYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
 
         await tryToRegisterUser('Deployer', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register aydnep', async() => {
-        const {web3, address} = web3switcher.aydnep();
+        const {web3, address} = web3Switcher.aydnep();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP));
 
         await tryToRegisterUser('Aydnep', from);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should register gmail', async() => {
-        const {web3, address} = web3switcher.gmail();
+        const {web3, address} = web3Switcher.gmail();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL));
 
         await tryToRegisterUser('gmail', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register test4', async() => {
-        const {web3, address} = web3switcher.test4();
+        const {web3, address} = web3Switcher.test4();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST4));
 
         await tryToRegisterUser('test4', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register renata', async() => {
-        const {web3, address} = web3switcher.renata();
+        const {web3, address} = web3Switcher.renata();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_RENATA).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_RENATA));
 
         await tryToRegisterUser('renata', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register renata', async() => {
-        const {web3, address} = web3switcher.uport();
+        const {web3, address} = web3Switcher.uport();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_UPORT));
 
         await tryToRegisterUser('uport', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register gmail2', async() => {
-        const {web3, address} = web3switcher.gmail2();
+        const {web3, address} = web3Switcher.gmail2();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL2));
 
         await tryToRegisterUser('gmail2', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register aydnep2', async() => {
-        const {web3, address} = web3switcher.aydnep2();
+        const {web3, address} = web3Switcher.aydnep2();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_AYDNEP2).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP2));
 
         await tryToRegisterUser('aydnep2', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register test', async() => {
-        const {web3, address} = web3switcher.aydnep2();
+        const {web3, address} = web3Switcher.aydnep2();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_TEST).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
 
         await tryToRegisterUser('test', from);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should register guest', async() => {
-        const {web3, address} = web3switcher.guest();
+        const {web3, address} = web3Switcher.guest();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_GUEST).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, 'mnemonic words should be here but for some reason they are missing'));
 
         await tryToRegisterUser('guest', from);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should register buyer', async() => {
-        const {web3, address} = web3switcher.buyer();
+        const {web3, address} = web3Switcher.buyer();
         from = address;
-        twoKeyProtocol = new TwoKeyProtocol({
-            web3,
-            eventsNetUrls,
-            plasmaPK: generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).privateKey,
-            networkId,
-            privateNetworkId,
-        });
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_BUYER));
 
         await tryToRegisterUser('buyer', from);
     }).timeout(TIMEOUT_LENGTH);
