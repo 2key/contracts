@@ -52,6 +52,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     mapping(address => bool) public isConverter;
     mapping(address => bool) isApprovedConverter;
 
+    mapping(address => bytes) converterToSignature;
+
     bytes32 public merkleRoot;
     bytes32[] merkle_roots;
 
@@ -226,20 +228,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     }
 
 
-    /**
-     * @notice Function where converter can convert
-     */
-    function convertInternal(
-        bytes signature,
-        address converter
-    )
-    private
-    {
-        require(isConverter[converter] == false); // Requiring that user can convert only 1 time
-        isConverter[converter] = true;
-
-        distributeArcsIfNecessary(converter, signature);
-    }
 
 
     function convert(
@@ -250,7 +238,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     public
     {
         require(merkleRoot == 0);
-        convertInternal(signature, msg.sender);
+
+        require(isConverter[msg.sender] == false); // Requiring that user can convert only 1 time
+        isConverter[msg.sendercoc] = true;
+
+        // Save converter signature on the blockchain
+        converterToSignature[msg.sender] = signature;
 
         // Create conversion
         Conversion memory c = Conversion (
@@ -304,6 +297,11 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
         //Check if converter don't have any executed conversions before and approve him
         oneTimeApproveConverter(converter);
+
+        // Get the converter signature
+        bytes memory signature = converterToSignature[converter];
+        // Distribute arcs if necessary
+        distributeArcsIfNecessary(converter, signature);
         //Get the conversion id
         uint conversionId = converterToConversionId[converter];
         // Get the conversion object
