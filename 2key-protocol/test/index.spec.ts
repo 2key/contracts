@@ -6,8 +6,7 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
-import createWeb3, { generatePlasmaFromMnemonic } from './_web3';
-import registerUserFromBackend, { IRegistryData } from './_registerUserFromBackend';
+import { generatePlasmaFromMnemonic } from './_web3';
 import {promisify} from '../src/utils/promisify';
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 import web3Switcher from "./helpers/web3Switcher";
@@ -47,88 +46,6 @@ const progressCallback = (name: string, mined: boolean, transactionResult: strin
 };
 
 const links: any = {};
-
-const users = {
-        'deployer': {
-            name: 'DEPLOYER',
-            email: 'support@2key.network',
-            fullname:  'deployer account',
-            walletname: 'DEPLOYER-wallet',
-        },
-        'aydnep': {
-            name: 'Aydnep',
-            email: 'aydnep@gmail.com',
-            fullname:  'aydnep account',
-            walletname: 'Aydnep-wallet',
-        },
-        'nikola': {
-            name: 'Nikola',
-            email: 'nikola@2key.co',
-            fullname: 'Nikola Madjarevic',
-            walletname: 'Nikola-wallet',
-        },
-        'andrii': {
-            name: 'Andrii',
-            email: 'andrii@2key.co',
-            fullname: 'Andrii Pindiura',
-            walletname: 'Andrii-wallet',
-
-        },
-        'Kiki': {
-            name: 'Kiki',
-            email: 'kiki@2key.co',
-            fullname: 'Erez Ben Kiki',
-            walletname: 'Kiki-wallet',
-        },
-        'gmail': {
-            name: 'gmail',
-            email: 'aydnep@gmail.com',
-            fullname: 'gmail account',
-            walletname: 'gmail-wallet',
-        },
-        'test4': {
-            name: 'test4',
-            email: 'test4@mailinator.com',
-            fullname: 'test4 account',
-            walletname: 'test4-wallet',
-        },
-        'renata': {
-            name: 'renata',
-            email: 'renata.pindiura@gmail.com',
-            fullname: 'renata account',
-            walletname: 'renata-wallet',
-        },
-        'uport': {
-            name: 'uport',
-            email: 'aydnep_uport@gmail.com',
-            fullname: 'uport account',
-            walletname: 'uport-wallet',
-        },
-        'gmail2': {
-            name: 'gmail2',
-            email: 'aydnep+2@gmail.com',
-            fullname: 'gmail2 account',
-            walletname: 'gmail2-wallet',
-        },
-        'aydnep2': {
-            name: 'aydnep2',
-            email: 'aydnep+2@aydnep.com.ua',
-            fullname: 'aydnep2 account',
-            walletname: 'aydnep2-wallet',
-        },
-        'test': {
-            name: 'test',
-            email: 'test@gmail.com',
-            fullname: 'test account',
-            walletname: 'test-wallet',
-        },
-        'buyer': {
-            name: 'buyer',
-            email: 'buyer@gmail.com',
-            fullname: 'buyer account',
-            walletname: 'buyer-wallet',
-        }
-};
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
 let twoKeyProtocol: TwoKeyProtocol;
@@ -185,53 +102,6 @@ const printBalances = (done) => {
     });
 };
 
-const tryToRegisterUser = async (username, from) => {
-    console.log('REGISTERING', username);
-    let isRegistered = await twoKeyProtocol.Registry.checkIfAddressIsRegistered(from);
-    if(isRegistered) {
-        return;
-    }
-
-    const user = users[username.toLowerCase()];
-    const registerData: IRegistryData = {};
-    try  {
-        registerData.signedUser = await twoKeyProtocol.Registry.signUserData2Registry(from, user.name, user.fullname, user.email)
-    } catch {
-        console.log('Error in Registry.signUserData');
-    }
-    try {
-        registerData.signedWallet = await twoKeyProtocol.Registry.signWalletData2Registry(from, user.name, user.walletname);
-    } catch {
-        console.log('Error in Registry.singWalletData');
-    }
-    try {
-        registerData.signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
-    } catch {
-        console.log('Error Registry.signPlasma');
-    }
-    try {
-        registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
-    } catch (e) {
-        console.log('Error Plasma.signEthereum');
-        console.log(e);
-    }
-    try {
-        registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
-    } catch (e) {
-        console.log('Error Plasma.signedUsername');
-        console.log(e);
-    }
-    let registerReceipts;
-    try {
-        registerReceipts = await registerUserFromBackend(registerData);
-    } catch (e) {
-        console.log(e);
-    }
-
-    return registerReceipts;
-    // console.log('REGISTER RESULT', register);
-};
-
 describe('TwoKeyProtocol', () => {
     let from: string;
     before(function () {
@@ -242,7 +112,6 @@ describe('TwoKeyProtocol', () => {
                 from = address;
                 twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
 
-                await tryToRegisterUser('Deployer', from);
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
                 const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(singletons.TwoKeyAdmin.networks[networkId].address), {inWei: true});
                 console.log(adminBalance);
@@ -395,7 +264,6 @@ describe('TwoKeyProtocol', () => {
         const {web3, address} = web3Switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP));
-        await tryToRegisterUser('Aydnep', from);
         const balance = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(from), {inWei: true});
         console.log('SWITCH USER', balance.balance);
         return expect(balance).to.exist
@@ -543,7 +411,6 @@ describe('TwoKeyProtocol', () => {
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL));
         console.log('Gmail plasma', await promisify(twoKeyProtocol.plasmaWeb3.eth.getAccounts, []));
-        await tryToRegisterUser('Gmail', from);
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
@@ -561,7 +428,6 @@ describe('TwoKeyProtocol', () => {
         const {web3, address} = web3Switcher.test4();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST4));
-        await tryToRegisterUser('Test4', from);
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.gmail.link, links.gmail.fSecret);
         // console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         let maxReward = await twoKeyProtocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(campaignAddress, from, links.gmail.link, links.gmail.fSecret);
@@ -626,7 +492,6 @@ describe('TwoKeyProtocol', () => {
         const {web3, address} = web3Switcher.renata();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_RENATA));
-        await tryToRegisterUser('Renata', from);
         console.log('isUserJoined', await twoKeyProtocol.AcquisitionCampaign.isAddressJoined(campaignAddress, from));
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.test4.link, links.test4.fSecret);
         console.log('VISIT', txHash);
@@ -653,27 +518,10 @@ describe('TwoKeyProtocol', () => {
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
     }).timeout(60000);
 
-    it('should register buyer', async() => {
-        const {web3, address} = web3Switcher.buyer();
-        from = address;
-        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_BUYER));
-        await tryToRegisterUser('Buyer', from);
-    }).timeout(60000);
-
-
-    it('should register gmail', async() => {
-        const {web3, address} = web3Switcher.gmail2();
-        from = address;
-        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL2));
-        await tryToRegisterUser('Gmail2', from);
-    }).timeout(60000);
-
-
     it('should buy some tokens from uport', async () => {
         const {web3, address} = web3Switcher.uport();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_UPORT));
-        await tryToRegisterUser('Uport', from);
         await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.renata.link, links.renata.fSecret);
 
         console.log('6) uport buy from REFLINK', links.renata);
@@ -692,7 +540,6 @@ describe('TwoKeyProtocol', () => {
         const {web3, address} = web3Switcher.gmail2();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL2));
-        await tryToRegisterUser('Gmail2', from);
 
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('GMAIL2 ARCS', arcs);
@@ -722,20 +569,10 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
-
-    it('should register test', async() => {
-        const {web3, address} = web3Switcher.test();
-        from = address;
-        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
-        await tryToRegisterUser('Test', from);
-    }).timeout(60000);
-
-
     it('should buy some tokens from test', async () => {
         const {web3, address} = web3Switcher.test();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
-        await tryToRegisterUser('Test', from);
 
         // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), links.renata.link, from, { fSecret: links.renata.fSecret });
