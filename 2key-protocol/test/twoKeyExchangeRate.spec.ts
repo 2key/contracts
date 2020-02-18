@@ -36,7 +36,7 @@ describe(
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
         usdSymbol,
-        twoKeyProtocol.Utils.toWei(usdRate, 'ether'),
+        usdRate,
         from
       );
       await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -50,7 +50,7 @@ describe(
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
         usdDaiSymbol,
-        twoKeyProtocol.Utils.toWei(usdDaiRate, 'ether'),
+        usdDaiRate,
         from);
       await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
       const value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdDaiSymbol);
@@ -64,10 +64,7 @@ describe(
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValues(
         [usdSymbol, usdDaiSymbol],
-        [
-          twoKeyProtocol.Utils.toWei(usdRate, 'ether'),
-          twoKeyProtocol.Utils.toWei(usdDaiRate, 'ether'),
-        ],
+        [usdRate, usdDaiRate],
         from);
       await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
       let usdValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdSymbol);
@@ -83,7 +80,7 @@ describe(
 
       const setRateTxHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
         usdSymbol,
-        twoKeyProtocol.Utils.toWei(usdRate, 'ether'),
+        usdRate,
         from
       );
       await twoKeyProtocol.Utils.getTransactionReceiptMined(setRateTxHash);
