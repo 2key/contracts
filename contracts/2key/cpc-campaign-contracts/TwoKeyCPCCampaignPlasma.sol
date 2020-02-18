@@ -240,7 +240,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         require(merkleRoot == 0);
 
         require(isConverter[msg.sender] == false); // Requiring that user can convert only 1 time
-        isConverter[msg.sendercoc] = true;
+        isConverter[msg.sender] = true;
 
         // Save converter signature on the blockchain
         converterToSignature[msg.sender] = signature;
@@ -316,7 +316,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             //Calculate moderator fee to be taken from bounty
             uint moderatorFee = bountyPerConversionWei.mul(moderatorFeePercent).div(100);
             //Add earnings to moderator total earnings
-            moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFee);
+            moderatorTotalEarniLngs = moderatorTotalEarnings.add(moderatorFee);
             //Left to be distributed between influencers
             uint bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFee);
 
