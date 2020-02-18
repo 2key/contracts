@@ -36,7 +36,7 @@ let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
 let campaignInventory = 1234000;
 let registrationDebt = 0.0001; //0.001 ETH is the debt for the registration
-
+const acquisitionCurrency = 'USD';
 console.log(rpcUrls);
 console.log(networkId);
 console.log(singletons.TwoKeyEventSource.networks[networkId].address);
@@ -145,7 +145,6 @@ const users = {
 };
 
 const addresses = [env.AYDNEP_ADDRESS, env.GMAIL_ADDRESS, env.TEST4_ADDRESS, env.RENATA_ADDRESS, env.UPORT_ADDRESS, env.GMAIL2_ADDRESS, env.AYDNEP2_ADDRESS, env.TEST_ADDRESS];
-const acquisitionCurrency = 'USD';
 let twoKeyProtocol: TwoKeyProtocol;
 
 const printBalances = (done) => {
@@ -299,8 +298,6 @@ describe('TwoKeyProtocol', () => {
             parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString())
         ];
 
-        console.log(debts);
-        console.log(plasmaAddresses);
         let txHash = await twoKeyProtocol.TwoKeyFeeManager.setDebtsForAddresses(plasmaAddresses, debts, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);

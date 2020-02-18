@@ -33,7 +33,6 @@ describe(
 
     it('should set dollar rate', async () => {
       const usdRate = 100;
-
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
         usdSymbol,
         usdRate,
@@ -60,7 +59,7 @@ describe(
 
     it('should set dollar and dollar/dai rates with one request', async () => {
       const usdRate = 100;
-      const usdDaiRate = 0.09;
+      const usdDaiRate = 0.099;
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValues(
         [usdSymbol, usdDaiSymbol],
@@ -75,8 +74,8 @@ describe(
     }).timeout(timeout);
 
     it('should correctly exchange eth to dollar', async () => {
-      const usdRate = 10;
-      const weiAmount = 10;
+      const usdRate = 100;
+      const weiAmount = 100;
 
       const setRateTxHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
         usdSymbol,
