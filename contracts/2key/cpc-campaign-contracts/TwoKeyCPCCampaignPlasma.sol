@@ -33,9 +33,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     uint constant public N = 2048; //constant number
 
-    // Incentive model selected for campaign
-    IncentiveModel model;
-
     // Url being tracked
     string public targetUrl;
 
@@ -49,7 +46,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     mapping(address => bool) isActiveInfluencer;
     mapping(address => uint) activeInfluencer2idx;
 
-    mapping(address => bool) public isConverter;
     mapping(address => bool) isApprovedConverter;
 
     mapping(address => bytes) converterToSignature;
@@ -228,7 +224,15 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     }
 
 
-
+    function isConverter(
+        address converter
+    )
+    public
+    view
+    returns (bool)
+    {
+        return converterToSignature[converter].length != 0 ? true : false;
+    }
 
     function convert(
         bytes signature
@@ -239,14 +243,13 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     {
         require(merkleRoot == 0);
 
-        require(isConverter[msg.sender] == false); // Requiring that user can convert only 1 time
-        isConverter[msg.sender] = true;
-
+        // Require that this is his first conversion
+        require(isConverter(msg.sender) == false);
         // Save converter signature on the blockchain
         converterToSignature[msg.sender] = signature;
 
         // Create conversion
-        Conversion memory c = Conversion (
+        Conversion memory c = Conversion(
             msg.sender,
             0,
             block.timestamp,

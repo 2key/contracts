@@ -14,11 +14,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
-    address public contractorPublicAddress;
-
+    address public contractorPublicAddress; // Contractor address on public chain
 
     uint public moderatorTotalEarnings; // total rewards which are going to moderator
-
 
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
@@ -41,6 +39,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         _;
     }
 
+
     /**
      * @dev Transfer tokens from one address to another
      * @param _from address The address which you want to send tokens from ALREADY converted to plasma
@@ -53,10 +52,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint256 _value
     )
     internal
-    returns (bool)
     {
-        // _from and _to are assumed to be already converted to plasma address (e.g. using plasmaOf)
-        require(_value == 1);
         require(balances[_from] > 0);
 
         balances[_from] = balances[_from].sub(1);
@@ -64,9 +60,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
 
         received_from[_to] = _from;
-        return true;
     }
-
 
     /**
      * @notice Private function to set public link key to plasma address
@@ -137,9 +131,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         address[] memory influencers;
         address[] memory keys;
-        uint8[] memory weights;
         address old_address;
-        (influencers, keys, weights, old_address) = getInfluencersKeysAndWeightsFromSignature(sig, _converter);
+        (influencers, keys,, old_address) = getInfluencersKeysAndWeightsFromSignature(sig, _converter);
         uint i;
         address new_address;
         uint numberOfInfluencers = influencers.length;

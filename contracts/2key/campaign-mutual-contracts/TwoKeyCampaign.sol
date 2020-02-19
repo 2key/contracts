@@ -21,6 +21,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	address ownerPlasma; //contractor plasma address
 
 
+
 	bool isKYCRequired;
     bool mustConvertToReferr;
 
@@ -29,6 +30,8 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	uint256 contractorTotalProceeds; // Contractor total earnings
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 
+	//Referral accounting stuff
+	mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
 	mapping(address => uint) public converterToNumberOfInfluencers;
 
 	/**
