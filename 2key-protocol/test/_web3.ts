@@ -18,6 +18,7 @@ import createLedgerSubprovider from '@ledgerhq/web3-subprovider';
 interface EthereumWeb3 {
     web3: any;
     address: string;
+    mnemonic?: string;
     privateKey?: string;
 }
 
@@ -108,5 +109,5 @@ export default function (mnemonic: string, rpcUrls: string[], pk?: string): Ethe
     const address = `0x${wallet.getAddress().toString('hex')}`;
     const privateKey = wallet.getPrivateKey().toString('hex');
     // console.log('new Web3', address, privateKey);
-    return {web3, address, privateKey};
+    return {web3, address, privateKey, mnemonic};
 }
