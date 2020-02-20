@@ -1,8 +1,8 @@
-import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
-import {TwoKeyProtocol} from "../src";
+import {generatePlasmaFromMnemonic} from "../../helpers/_web3";
+import {TwoKeyProtocol} from "../../../src";
 import {expect} from "chai";
-import web3Switcher from "./helpers/web3Switcher";
-import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "./helpers/twoKeyProtocol";
+import web3Switcher from "../../helpers/web3Switcher";
+import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "../../helpers/twoKeyProtocol";
 const { env } = process;
 require('es6-promise').polyfill();
 require('isomorphic-fetch');

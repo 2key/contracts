@@ -4,9 +4,9 @@ require('isomorphic-form-data');
 
 import {expect} from 'chai';
 import 'mocha';
-import web3Switcher from "./helpers/web3Switcher";
-import {TwoKeyProtocol} from "../src";
-import getTwoKeyProtocol from "./helpers/twoKeyProtocol";
+import web3Switcher from "../../helpers/web3Switcher";
+import {TwoKeyProtocol} from "../../../src";
+import getTwoKeyProtocol from "../../helpers/twoKeyProtocol";
 
 const {env} = process;
 

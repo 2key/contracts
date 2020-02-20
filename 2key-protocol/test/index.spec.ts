@@ -6,7 +6,7 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
-import { generatePlasmaFromMnemonic } from './_web3';
+import {generatePlasmaFromMnemonic} from "./helpers/_web3";
 import {promisify} from '../src/utils/promisify';
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 import web3Switcher from "./helpers/web3Switcher";

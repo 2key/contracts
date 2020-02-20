@@ -1,4 +1,4 @@
-import {generatePlasmaFromMnemonic} from "./_web3";
+import {generatePlasmaFromMnemonic} from "./helpers/_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
 import {IConversion, ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";

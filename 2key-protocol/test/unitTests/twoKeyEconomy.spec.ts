@@ -1,28 +1,24 @@
-import createWeb3, {generatePlasmaFromMnemonic} from "./_web3";
-import {TwoKeyProtocol} from "../src";
-import {expect} from "chai";
-import getTwoKeyProtocol from "./helpers/twoKeyProtocol";
-import web3Switcher from "./helpers/web3Switcher";
-const { env } = process;
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
-require('isomorphic-form-data');
+import '../constants/polifils';
 
-let twoKeyProtocol: TwoKeyProtocol;
-let from: string;
+import {expect} from "chai";
+import {describe, it} from "mocha";
+import availableUsers from "../constants/availableUsers";
+
+const {protocol: twoKeyProtocol} = availableUsers.deployer;
 
 /**
  * Tests for TwoKeyEconomy contract
  */
 describe('Tests for TwoKeyEconomy ERC20 contract' , () => {
     it('should check token name', async() => {
-        const {web3, address} = web3Switcher.deployer();
-        from = address;
-        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
-
         let tokenName = await twoKeyProtocol.ERC20.getTokenName(twoKeyProtocol.twoKeyEconomy.address);
         expect(tokenName).to.be.equal("TwoKeyEconomy");
     }).timeout(60000);
+
+    it('check for correct symbol', async () => {
+        const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyProtocol.twoKeyEconomy.address);
+        expect(tokenSymbol).to.be.equal('2KEY');
+    }).timeout(10000);
 
     it('should check total supply of tokens', async() => {
         let totalSupply = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);

@@ -6,9 +6,9 @@ import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
 import Web3 from 'web3';
-import { TwoKeyProtocol } from '../src';
-import { ISignedPlasma, ISignedWalletData } from '../src/registry/interfaces';
-import { ISignedEthereum, ISignedUsername } from '../src/plasma/interfaces';
+import { TwoKeyProtocol } from '../../src';
+import { ISignedPlasma, ISignedWalletData } from '../../src/registry/interfaces';
+import { ISignedEthereum, ISignedUsername } from '../../src/plasma/interfaces';
 
 
 interface IUser {
@@ -127,7 +127,7 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     return receipts;
 }
 
-console.log(process.argv[2].startsWith('{'));
+
 if (process.argv[2] && process.argv[2].startsWith('{')) {
     console.log(process.argv[2]);
     const data = JSON.parse(process.argv[2]);
