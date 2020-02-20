@@ -18,6 +18,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * be implemented by all budget campaigns in future
 	 */
 
+	uint public rate2KeyBoughtAt;
 
 	bytes32 public merkleRoot;
 
@@ -105,7 +106,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 		uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
-		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(rewardsInventoryAmount); //0.1 DOLLAR
+		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(rewardsInventoryAmount);
 
 		isInventoryAdded = true;
 	}
@@ -224,6 +225,14 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		require(merkleRoot == 0, 'merkle root already defined');
 		merkleRoot = _merkleRoot;
+	}
+
+	function rebalanceRates()
+	public
+	onlyMaintainer
+	{
+		// Function which will be used to rebalance rates
+
 	}
 
 
