@@ -442,5 +442,15 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         }
     }
 
+
+    function referrerWithdraw(
+        address _address,
+        bool _withdrawAsStable
+    )
+    public
+    {
+        referrerWithdrawInternal(_address, _withdrawAsStable);
+    }
+
 }
 

@@ -492,11 +492,11 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
  	 * @param _address is the address we're withdrawing funds to
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
-	function referrerWithdraw(
+	function referrerWithdrawInternal(
 		address _address,
 		bool _withdrawAsStable
 	)
-	public
+	internal
 	{
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		address twoKeyAdminAddress;

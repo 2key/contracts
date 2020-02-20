@@ -218,4 +218,14 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
         return reservedAmount2keyForRewards;
     }
 
+    function referrerWithdraw(
+        address _address,
+        bool _withdrawAsStable
+    )
+    public
+    {
+        referrerWithdrawInternal(_address, _withdrawAsStable);
+    }
+
+
 }
