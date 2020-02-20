@@ -65,7 +65,6 @@ describe('Setup of users data', async () => {
   await it('should correct set registration depts', async () => {
     const {protocol, web3: {address}} = availableUsers.deployer;
 
-    // TODO: Relates to user registration
     const plasmaAddresses = [
       generatePlasmaFromMnemonic(availableUsers.test.web3.mnemonic).address,
       generatePlasmaFromMnemonic(availableUsers.test4.web3.mnemonic).address,
@@ -89,6 +88,7 @@ describe('Setup of users data', async () => {
       console.log('\x1b[31m', 'Probably test has been already run after latest deploy');
     }
     let stats = await protocol.TwoKeyFeeManager.getDebtsSummary();
+    // TODO: add assert
     console.log({stats});
   }).timeout(TIMEOUT_LENGTH);
 });
