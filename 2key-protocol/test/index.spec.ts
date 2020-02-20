@@ -1,3 +1,5 @@
+import {registrationDebt} from "./constants/smallConstants";
+
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
@@ -6,7 +8,6 @@ import {expect} from 'chai';
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
 import singletons from '../src/contracts/singletons';
-import { generatePlasmaFromMnemonic } from './_web3';
 import {promisify} from '../src/utils/promisify';
 import {IPrivateMetaInformation} from "../src/acquisition/interfaces";
 import web3Switcher from "./helpers/web3Switcher";
@@ -33,8 +34,8 @@ let isFiatOnly = false;
 let incentiveModel = "MANUAL";
 let amount = 0; //1000 tokens fiat inventory
 let vestingAmount = 'BONUS';
+//TODO: recheck formula hardcap * token price
 let campaignInventory = 1234000;
-let registrationDebt = 0.0001; //0.001 ETH is the debt for the registration
 const acquisitionCurrency = 'USD';
 console.log(rpcUrls);
 console.log(networkId);
@@ -113,7 +114,10 @@ describe('TwoKeyProtocol', () => {
                 twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
 
                 const {balance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(env.AYDNEP_ADDRESS), {inWei: true});
-                const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(singletons.TwoKeyAdmin.networks[networkId].address), {inWei: true});
+                const {balance: adminBalance} = twoKeyProtocol.Utils.balanceFromWeiString(
+                  await twoKeyProtocol.getBalance(singletons.TwoKeyAdmin.networks[networkId].address),
+                  {inWei: true},
+                  );
                 console.log(adminBalance);
                 let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
                 console.log('Number of proposals is: ' + numberOfProposals);
@@ -130,48 +134,9 @@ describe('TwoKeyProtocol', () => {
 
     let txHash;
 
-    it('should get few plasma addresses and add debts for them', async() => {
-        let plasmaAddresses = [
-            generatePlasmaFromMnemonic(env.MNEMONIC_TEST).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_TEST4).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_UPORT).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL2).address,
-            generatePlasmaFromMnemonic(env.MNEMONIC_BUYER).address
-        ];
-
-        let debts = [
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString()),
-            parseFloat(twoKeyProtocol.Utils.toWei(registrationDebt,'ether').toString())
-        ];
-
-        try{
-            let txHash = await twoKeyProtocol.TwoKeyFeeManager.setDebtsForAddresses(plasmaAddresses, debts, from);
-            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        } catch (error) {
-            if (error.message === 'gas required exceeds allowance or always failing transaction') {
-                console.log('\x1b[31m', 'Probably test has been already run after latest deploy');
-                return;
-            }
-
-            throw error;
-        }
-    }).timeout(60000);
-
-    it('should get stats for the debts', async() => {
-        let stats = await twoKeyProtocol.TwoKeyFeeManager.getDebtsSummary();
-        console.log(stats);
-    }).timeout(60000);
 
 
-    it('should get total supply of economy contract' ,async() => {
-        console.log("Check total supply on 2key-economy contract");
-        let totalSup = await twoKeyProtocol.ERC20.getTotalSupply(twoKeyProtocol.twoKeyEconomy.address);
-        console.log(totalSup);
-    }).timeout(60000);
-
+    // TODO: Recheck
     it('should return a balance for address', async () => {
         const business = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(twoKeyAdmin), {
             inWei: true,
@@ -221,91 +186,99 @@ describe('TwoKeyProtocol', () => {
         expect(aydnepBalance).to.exist.to.haveOwnProperty('gasPrice')
     }).timeout(60000);
 
-    it('should save balance to ipfs', () => {
-        return twoKeyProtocol.ipfs.add(aydnepBalance).then((hash) => {
-            console.log('IPFS hash', hash);
-            expect(hash).to.be.a('string');
-        });
-    }).timeout(60000);
-
-    it('should read from ipfs', () => {
-        return twoKeyProtocol.ipfs.get('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
-            console.log('IPFS data', data);
-        });
-    }).timeout(60000);
-
-    const rnd = Math.floor(Math.random() * 8);
-    console.log('Random', rnd, addresses[rnd]);
-    const ethDstAddress = addresses[rnd];
-
-    it(`should return estimated gas for transfer ether ${ethDstAddress}`, async () => {
-        if (networkId > 4) {
-            const gas = await twoKeyProtocol.getETHTransferGas(ethDstAddress, twoKeyProtocol.Utils.toWei(10, 'ether'), from);
-            console.log('Gas required for ETH transfer', gas);
-            expect(gas).to.exist.to.be.greaterThan(0);
-        } else {
-            expect(true);
-        }
-    }).timeout(60000);
-
-    it(`should transfer ether to ${ethDstAddress}`, async () => {
-        if (networkId > 4) {
-            txHash = await twoKeyProtocol.transferEther(ethDstAddress, twoKeyProtocol.Utils.toWei(10, 'ether'), from, 6000000000);
-            console.log('Transfer Ether', txHash, typeof txHash);
-            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-            const status = receipt && receipt.status;
-            expect(status).to.be.equal('0x1');
-        } else {
-            expect(true);
-        }
-    }).timeout(60000);
-
-    it('should return a balance for address', async () => {
-        const {web3, address} = web3Switcher.aydnep();
-        from = address;
-        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP));
-        const balance = twoKeyProtocol.Utils.balanceFromWeiString(await twoKeyProtocol.getBalance(from), {inWei: true});
-        console.log('SWITCH USER', balance.balance);
-        return expect(balance).to.exist
-            .to.haveOwnProperty('gasPrice')
-        // .to.be.equal(twoKeyProtocol.getGasPrice());
-    }).timeout(60000);
-
-    it('should show token symbol of economy', async () => {
-        const tokenSymbol = await twoKeyProtocol.ERC20.getERC20Symbol(twoKeyEconomy);
-        console.log(tokenSymbol);
-        expect(tokenSymbol).to.be.equal('2KEY');
-    }).timeout(10000);
-
     let campaignData;
 
+    // TODO: move to before as pre-setup action
     it('should create a new campaign Acquisition Contract', async () => {
+        const {web3, address} = web3Switcher.aydnep();
+        from = address;
+        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_AYDNEP);
+
         campaignData = {
+            // Probably deploer address
             moderator: from,
+            expiryConversion: 0, // For conversion cancellation from converter side
+            // twoKeyEconomy or custom erc
+            assetContractERC20: twoKeyEconomy,
+            pricePerUnitInETHWei: twoKeyProtocol.Utils.toWei(pricePerUnitInETHOrUSD, 'ether'),
+            currency: acquisitionCurrency, // ETH or USD (exchange contract working)
+            // Start campaign details step
+
+            // Campaign Goals
+            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
+            campaignSoftCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
+
+            // End the contract once it reaches it's goal
+            endCampaignWhenHardCapReached: true,
+
+            // Campaign Bonus
+            maxConverterBonusPercentWei: maxConverterBonusPercent, // 0 or > 0
+
+            //
+            /**
+             * Currencies select
+             *
+             * true - if selected fiat
+             * true || false
+             */
+            isFiatOnly,
+            /**
+             * true - no need bank details
+             *
+             * true || false
+             */
+            isFiatConversionAutomaticallyApproved,
+
+            // Campaign Dates
             campaignStartTime,
             campaignEndTime,
-            expiryConversion: 0,
-            maxConverterBonusPercentWei: maxConverterBonusPercent,
-            pricePerUnitInETHWei: twoKeyProtocol.Utils.toWei(pricePerUnitInETHOrUSD, 'ether'),
-            maxReferralRewardPercentWei: maxReferralRewardPercent,
-            assetContractERC20: twoKeyEconomy,
-            minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'),
-            maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
-            currency: acquisitionCurrency,
+
+            // Tokens Lockup
+
             tokenDistributionDate: 1,
             maxDistributionDateShiftInDays: 180,
             numberOfVestingPortions: 6,
             numberOfDaysBetweenPortions: 1,
             bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
-            isKYCRequired,
-            isFiatConversionAutomaticallyApproved,
-            incentiveModel,
-            isFiatOnly,
+
+            // with bonus or without
             vestingAmount,
+
+            // Advanced options - Participant details
+
+            // Participation Limits
+            minContributionETHWei: twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), // min === max or min < max
+            maxContributionETHWei: twoKeyProtocol.Utils.toWei(maxContributionETHorUSD, 'ether'),
+            /**
+             * Ask for Identity Verification?
+             * true - required contractor approve for each conversion
+             *
+             * true || false
+             */
+            isKYCRequired,
+            // End campaign details step
+
+            //Referral Reward
+            maxReferralRewardPercentWei: maxReferralRewardPercent, // 0 or > 0
+
+            // Only Participants can join the Referral program
             mustConvertToReferr: false,
-            campaignHardCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
-            campaignSoftCapWEI: twoKeyProtocol.Utils.toWei((campaignInventory * pricePerUnitInETHOrUSD), 'ether'),
-            endCampaignWhenHardCapReached: true,
+            /**
+             *
+             * NOBONUS - maxReferralRewardPercentWei === 0
+             * MANUAL - manual checked
+             * vanilla types:
+             * EQUAL -
+             * EQUAL3X -
+             * GROWING -
+             */
+            incentiveModel,
+            // Limit the number of invites per referrer
+            // number or inlimited
+            referrerQuota: undefined,
+            // Limit the number of users to start a referral chain
+            // number or inlimited
+            totalSupplyArcs: undefined,
         };
 
         const campaign = await twoKeyProtocol.AcquisitionCampaign.create(campaignData, campaignData, {} , from, {
@@ -314,7 +287,7 @@ describe('TwoKeyProtocol', () => {
             interval: 500,
             timeout: 600000
         });
-
+        // TODO: check for privacy data: private meta and public meta
         console.log('Campaign address', campaign);
         campaignAddress = campaign.campaignAddress;
         nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
@@ -327,6 +300,10 @@ describe('TwoKeyProtocol', () => {
     //     expect(src.length).to.be.gte(0);
     // }).timeout(60000);
 
+    // campaignData.isFiatOnly === true
+    // TODO: Recheck with Nicola, probably should be for two different test cases
+    // when value > 0
+    // when amount > 0
     it('should reserve amount for fiat conversion rewards', async() => {
         if(amount) {
             let value = parseFloat(twoKeyProtocol.Utils.toWei(1, 'ether').toString());
@@ -335,17 +312,20 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(60000);
 
+    // TODO move to create campaign test
     it('should proff that campaign is validated and registered properly', async() => {
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
         expect(isValidated).to.be.equal(true);
         console.log('Campaign is validated');
     }).timeout(60000);
     //
+    // TODO move to create campaign test, probably can be removed
     it('should proof that non singleton hash is set for the campaign', async() => {
         let nonSingletonHash = await twoKeyProtocol.CampaignValidator.getCampaignNonSingletonsHash(campaignAddress);
         expect(nonSingletonHash).to.be.equal(twoKeyProtocol.AcquisitionCampaign.getNonSingletonsHash());
     }).timeout(60000);
 
+    // TODO move to create campaign test, probably can be removed
     it('should get campaign from IPFS', async () => {
         // const hash = await twoKeyProtocol.Utils.ipfsAdd(campaignData);
         // console.log('HASH', hash);
@@ -357,14 +337,17 @@ describe('TwoKeyProtocol', () => {
         console.log(campaignMeta);
         expect(campaignMeta.meta.assetContractERC20).to.be.equal(campaignData.assetContractERC20);
     }).timeout(120000);
+
+    // TODO: remove
     it('should print balance after campaign created', printBalances).timeout(15000);
 
+    // TODO assert recheck
     it('should transfer assets to campaign', async () => {
         txHash = await twoKeyProtocol.transfer2KEYTokens(campaignAddress, twoKeyProtocol.Utils.toWei(campaignInventory, 'ether'), from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const balance = twoKeyProtocol.Utils.fromWei(await twoKeyProtocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)).toString();
         console.log('Campaign Balance', balance);
-        expect(parseFloat(balance)).to.be.equal(1234000 - amount);
+        expect(parseFloat(balance)).to.be.equal(campaignInventory - amount);
     }).timeout(600000);
 
 
@@ -375,6 +358,7 @@ describe('TwoKeyProtocol', () => {
         expect(isActivated).to.be.equal(true);
     }).timeout(600000);
 
+    // TODO move to campaign creation
     it('should get user public link', async () => {
         try {
             const publicLink = await twoKeyProtocol.AcquisitionCampaign.getPublicLinkKey(campaignAddress, from);
@@ -385,13 +369,19 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(10000);
 
+    // TODO move to campaign creation
     it('should get and decrypt ipfs hash', async() => {
         let data: IPrivateMetaInformation = await twoKeyProtocol.AcquisitionCampaign.getPrivateMetaHash(campaignAddress, from);
         console.log(data);
         expect(data.campaignPublicLinkKey).to.be.equal(links.deployer.link);
     }).timeout(120000);
 
+    // ---------- Campaign creation end ----------
 
+    // For guest user
+    // TODO check from link owner
+    // TODO assert: check for visited from guest plasma.getVisitedFrom
+    // TODO assert: check for visited address plasma.getVisitList
     it('should visit campaign as guest', async () => {
         const {web3, address} = web3Switcher.guest();
         from = address;
@@ -401,10 +391,13 @@ describe('TwoKeyProtocol', () => {
             'mnemonic words should be here but for some reason they are missing',
           ),
         );
+        // twoKeyProtocol.plasmaAddress
         txHash = await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.deployer.link, links.deployer.fSecret);
         console.log(txHash);
         expect(txHash.length).to.be.gt(0);
     }).timeout(60000);
+
+    // ------- for authorized uses -------
 
     it('should create a join link', async () => {
         const {web3, address} = web3Switcher.gmail();
@@ -420,10 +413,14 @@ describe('TwoKeyProtocol', () => {
         });
         console.log('2) gmail offchain REFLINK', hash);
         links.gmail = hash;
+        // TODO: console and add assert for regexp
         expect(hash.link).to.be.a('string');
     }).timeout(60000);
 
-
+    /**
+     * Separate test due to different user usage
+     */
+    // TODO: add assert for max reward change (maxReferralRewardPercent * (50(cut)/100))
     it('should show maximum referral reward after ONE referrer', async() => {
         const {web3, address} = web3Switcher.test4();
         from = address;
@@ -435,31 +432,48 @@ describe('TwoKeyProtocol', () => {
         // expect(maxReward).to.be.gte(7.5);
     }).timeout(60000);
 
+    // TODO move to campaign creation tests
+    // TODO: clarify what should we check here
+    // TODO assert: campaignInvertory -
     it('==> should print available amount of tokens before conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
-        expect(availableAmountOfTokens).to.be.equal(1234000 - amount);
+        expect(availableAmountOfTokens).to.be.equal(campaignInventory - amount);
     }).timeout(60000);
 
+    // TODO assert: check for conversion amount in this case it is first conversion in array
     it('should buy some tokens', async () => {
         console.log('4) buy from test4 REFLINK', links.gmail);
 
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'), links.gmail.link, from, { fSecret: links.gmail.fSecret });
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(
+          campaignAddress,
+          twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'),
+          links.gmail.link,
+          from,
+          {fSecret: links.gmail.fSecret},
+        );
         console.log(txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         expect(txHash).to.be.a('string');
     }).timeout(60000);
 
+    // TODO: remove as deprecated
     it('should get number of influencers to converter', async() => {
         let numberOfInfluencers = await twoKeyProtocol.AcquisitionCampaign.getNumberOfInfluencersForConverter(campaignAddress, from);
         expect(numberOfInfluencers).to.be.equal(1);
     }).timeout(60000);
 
+    // TODO: Recheck
+    // TODO: Third params should be calculated inside contract - task for Nicola
     it('==> should print available amount of tokens after conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
-        const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei((minContributionETHorUSD-registrationDebt), 'ether'));
+        const { totalTokens } = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(
+          campaignAddress,
+          campaignData.isFiatOnly,
+          twoKeyProtocol.Utils.toWei((minContributionETHorUSD-registrationDebt), 'ether')
+        );
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens, totalTokens);
-        expect(availableAmountOfTokens).to.be.lte(1234000 - amount - totalTokens);
+        expect(availableAmountOfTokens).to.be.lte(campaignInventory - amount - totalTokens);
     }).timeout(60000);
 
     it('should join as test4', async () => {
@@ -476,18 +490,24 @@ describe('TwoKeyProtocol', () => {
         expect(hash.link).to.be.a('string');
     }).timeout(600000);
 
+    // TODO: probably redundant for this case and we should trust contracts calculations
+    // TODO: recheck and move before conversion for test4 user
+    // (amountOfTX + bonus) * price
     it('should print amount of tokens that user want to buy', async () => {
-        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether'));
+        const tokens = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(
+          campaignAddress, false, twoKeyProtocol.Utils.toWei(minContributionETHorUSD, 'ether')
+        );
         console.log(tokens);
         expect(tokens.totalTokens).to.gte(0);
     });
 
+    // TODO assert: check relation between test4 and gmail users
     it('should print joined_from', async () => {
         const { contractor } = await twoKeyProtocol.ipfs.get(links.gmail.link, { json: true });
         console.log('joined_from test4', await twoKeyProtocol.PlasmaEvents.getJoinedFrom(campaignAddress, contractor, twoKeyProtocol.plasmaAddress));
     }).timeout(60000);
 
-
+    // TODO assert: after two cuts initial*0.5*0.33
     it('should show maximum referral reward after TWO referrer', async() => {
         const {web3, address} = web3Switcher.renata();
         from = address;
@@ -501,6 +521,7 @@ describe('TwoKeyProtocol', () => {
         // expect(maxReward).to.be.gte(5.025);
     }).timeout(60000);
 
+    // TODO: add assert or maybe move such simple operations to another test and simple check final result here
     it('should joinOffchain as Renata', async () => {
         const hash = await twoKeyProtocol.AcquisitionCampaign.join(campaignAddress, from, {
             cut: 20,
@@ -513,11 +534,13 @@ describe('TwoKeyProtocol', () => {
         expect(hash.link).to.be.a('string');
     }).timeout(600000);
 
+    // TODO: add assert
     it('==> should print available amount of tokens before conversion', async() => {
         const availableAmountOfTokens = await twoKeyProtocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress,from);
         console.log('Available amount of tokens before conversion is: ' + availableAmountOfTokens);
     }).timeout(60000);
 
+    // TODO add assert check for balances
     it('should buy some tokens from uport', async () => {
         const {web3, address} = web3Switcher.uport();
         from = address;
@@ -525,7 +548,13 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.AcquisitionCampaign.visit(campaignAddress, links.renata.link, links.renata.fSecret);
 
         console.log('6) uport buy from REFLINK', links.renata);
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'), links.renata.link, from, { fSecret: links.renata.fSecret });
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(
+          campaignAddress,
+          twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.5, 'ether'),
+          links.renata.link,
+          from,
+          {fSecret: links.renata.fSecret},
+        );
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
         expect(txHash).to.be.a('string');
@@ -536,6 +565,8 @@ describe('TwoKeyProtocol', () => {
         console.log('Available amount of tokens after conversion is: ' + availableAmountOfTokens);
     }).timeout(60000);
 
+
+    // TODO do we really need arks
     it('should buy some tokens from gmail2', async () => {
         const {web3, address} = web3Switcher.gmail2();
         from = address;

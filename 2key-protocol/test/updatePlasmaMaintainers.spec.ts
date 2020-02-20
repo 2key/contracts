@@ -4,7 +4,7 @@ require('isomorphic-fetch');
 require('isomorphic-form-data');
 
 import {TwoKeyProtocol} from '../src';
-import web3switcher from './_web3';
+import web3switcher from './helpers/_web3';
 import {promisify} from '../src/utils/promisify';
 
 const { env } = process;

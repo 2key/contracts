@@ -1,5 +1,5 @@
 import {TwoKeyProtocol} from "../../src";
-import {generatePlasmaFromMnemonic} from "../_web3";
+import {generatePlasmaFromMnemonic} from "./_web3";
 import {ITwoKeyInit} from "../../src/interfaces";
 
 const { env } = process;
