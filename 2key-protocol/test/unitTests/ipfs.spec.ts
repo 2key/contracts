@@ -4,15 +4,15 @@ require('isomorphic-form-data');
 import chai from 'chai';
 import promisedChai from 'chai-as-promised';
 
-import TwoKeyIPFS from '../src/utils/ipfs';
-import {ETwoKeyIPFSMode} from '../src/utils/interfaces';
-const {env} = process;
+import TwoKeyIPFS from '../../src/utils/ipfs';
+import {ETwoKeyIPFSMode} from '../../src/utils/interfaces';
 
+const {env} = process;
 const expect = chai.expect;
 chai.use(promisedChai);
 
 const ipfsRegex = /Qm[a-zA-Z0-9]{44}/;
-const campaign = require('./campaign.json');
+const campaign = require('../campaign.json');
 const apiUrl = env.IPFS_URL;
 
 // describe('IPFS: Basic scenario. Read  from Gateway QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', () => {

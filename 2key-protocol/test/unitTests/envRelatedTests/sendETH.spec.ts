@@ -6,11 +6,8 @@ require('isomorphic-form-data');
 
 import {expect} from 'chai';
 import 'mocha';
-import {TwoKeyProtocol} from '../src';
-import createWeb3 from './_web3';
-import Sign from '../src/sign';
-import {promisify} from "../src/utils/promisify";
-import {ITxReceiptOpts} from "../src/utils/interfaces";
+import createWeb3 from '../../helpers/_web3';
+import {promisify} from "../../../src/utils/promisify";
 
 const { env } = process;
 
@@ -18,7 +15,7 @@ const rpcUrls = [env.RPC_URL];
 
 let web3: any;
 let from: string;
-let config = require('../../configurationFiles/accountsConfig.json');
+let config = require('../../../../configurationFiles/accountsConfig.json');
 
 const getReceipt = (txHash: string, { web3, timeout = 60000, interval = 500}) => new Promise(async (resolve, reject) => {
     let txInterval;

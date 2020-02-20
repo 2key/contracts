@@ -1,4 +1,4 @@
-import createWeb3 from "../_web3";
+import createWeb3 from "./_web3";
 const { env } = process;
 const rpcUrls = [env.RPC_URL];
 
