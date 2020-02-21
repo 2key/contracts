@@ -478,6 +478,40 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return amountOfDAIs;
     }
 
+    function getMore2KeyTokensForRebalancing(
+        uint amountOf2KeyRequested
+    )
+    public
+    onlyValidatedContracts
+    returns (uint)
+    {
+        uint campaignID = getContractId(msg.sender);
+
+        // Calculate how much DAIs we need for this amount of 2key (including spread) //TODO: Ask Eitan
+        uint amountOfDAIWeNeedToTake = getUSDStableCoinAmountFrom2keyUnits(amountOf2KeyRequested, campaignID);
+
+        // Get key for how much DAI is available for this contract to withdraw
+        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", campaignID);
+        // Get key for total available to fill reserve
+        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+
+        // Get DAI available
+        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(campaignID);
+
+
+        uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
+
+
+        //TODO: Check with Eitan
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable.sub(amountOfDAIWeNeedToTake)));
+
+        // Set DAI available for this campaign to 0 since we will release everything to reserve
+        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
+
+        // Send the tokens to the campaign
+        _processPurchase(msg.sender, amountOf2KeyRequested);
+    }
+
     /**
      * @notice Function to buyTokens
      * @param _beneficiary to get
@@ -564,10 +598,37 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-
-
         setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiToReduce));
         setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailable.sub(_daiWeiToReduce));
+    }
+
+    /**
+     * @notice After the rebalancing on budget campaigns is done, we're releasing all the DAI tokens
+     * @param amountOf2key is the amount of 2key which we're receiving back to liquidity pool
+     */
+    function returnLeftoverAfterRebalancing(
+        uint amountOf2key
+    )
+    public
+    onlyValidatedContracts
+    {
+        uint contractID = getContractId(msg.sender);
+
+        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractID);
+        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+
+        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(contractID);
+        uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
+
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable));
+        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
+
+        //Take 2key tokens to the liquidity pool
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transferFrom(
+            msg.sender,
+            address(this),
+            amountOf2key
+        );
     }
 
     /**
@@ -752,6 +813,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         payFeesToManagerAndTransferTokens(_beneficiary, contractId, stableCoinUnits, dai);
     }
 
+
+    /**
+     * @notice Function to pay Fees to amnager and transfer the tokens forward to the referrers
+     * @param _beneficiary is the address who's receiving tokens
+     * @param _contractId is the id of the contract
+     * @param _totalStableCoins is the total amount of DAIs
+     */
     function payFeesToManagerAndTransferTokens(
         address _beneficiary,
         uint _contractId,
@@ -787,6 +855,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         dai.transfer(_beneficiary, _totalStableCoins.sub(amountToPay)); // Transfer the rest of the DAI to users
     }
+
 
     /**
      * @notice Function to buy 2key tokens from Bancor

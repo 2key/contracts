@@ -45,4 +45,16 @@ contract IUpgradableExchange {
     view
     returns (uint);
 
+    function returnLeftoverAfterRebalancing(
+        uint amountOf2key
+    )
+    public;
+
+    function getMore2KeyTokensForRebalancing(
+        uint amountOf2KeyRequested
+    )
+    public
+    view
+    returns (uint);
+
 }

@@ -25,6 +25,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
 	string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
+	string constant _daiWithdrawnFromUpgradableExchange = "daiWithdrawnFromUpgradableExchange";
 
 	/**
 	 * Keys for the addresses we're accessing

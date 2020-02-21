@@ -18,8 +18,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * be implemented by all budget campaigns in future
 	 */
 
-	uint public rate2KeyBoughtAt;
-
 	bytes32 public merkleRoot;
 
 	address public mirrorCampaignOnPlasma; // Address of campaign deployed to plasma network
@@ -55,7 +53,11 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	uint public rewardsInventoryAmount;
 
 	// Amount representing how much moderator has earned
-	uint public moderatorEarnings;
+	uint public moderatorTotalEarnings;
+
+	// Amount representing how much moderator has now
+	uint public moderatorEarningsBalance;
+
 
 	/**
      * @notice Function to validate that contracts plasma and public are well mirrored
@@ -111,11 +113,101 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isInventoryAdded = true;
 	}
 
-	/**
-	 * @notice Function to distribute rewards between all the influencers
-	 * which have earned the reward once campaign is done
-	 * @param influencers is the array of influencers
-	 */
+
+    function rebalanceRatesInfluencers()
+    public
+    onlyMaintainer
+    {
+		//TODO: Add moderator rebalancing to this funnel
+		//TODO: Add condition that this can be called only once per influencers and once per moderator
+        address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        // Function which will be used to rebalance rates
+        uint usd2KEYRateWeiNow = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
+
+		/**
+		 * Explanation of algorithm:
+		 *	________________________
+		 *   25 2key |  1.5$  | 0.06$
+		 *    X 2key |  1.5$  | 0.12$
+	 	 *
+		 *	25 2KEY * 0.06$ = X 2KEY * 0.12$
+		 *
+		 *   ==> X 2KEY = (25 2KEY * 0.06$) / (0.12$)
+		 *   ==> X 2KEY = 1.5 2KEY $ / (0.12$)
+		 *   ==> X 2KEY = 12.5 2KEY
+		 */
+        //Now check if rate went up
+        if(usd2KEYRateWeiNow > usd2KEYrateWei) {
+            uint tokensToBeGivenBackToExchange = reduceBalance(usd2KEYRateWeiNow);
+			// Approve upgradable exchange to take leftover back
+            IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchange, tokensToBeGivenBackToExchange);
+			// Call the function to release all DAI for this contract to reserve and to take approved amount of 2key back to liquidity pool
+			IUpgradableExchange(twoKeyUpgradableExchange).returnLeftoverAfterRebalancing(tokensToBeGivenBackToExchange);
+            // Reduce the reserved amount for the amount we're returning back
+            reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(tokensToBeGivenBackToExchange);
+        }
+        // Check if rate went down
+        else if(usd2KEYRateWeiNow < usd2KEYrateWei) {
+            uint tokensToBeTakenFromExchange = increaseBalance(usd2KEYRateWeiNow);
+            // Get more tokens we need
+            IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancing(tokensToBeTakenFromExchange);
+            // Increase reserved amount of tokens for the rewards
+            reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(tokensToBeTakenFromExchange);
+        }
+    }
+
+
+    function reduceBalance(
+        uint newRate
+    )
+    internal
+    returns (uint)
+    {
+        uint amountToReturnToExchange;
+
+        for(uint i=0; i<activeInfluencers.length; i++) {
+			//Taking current influencer balance in 2key
+            uint balance = referrerPlasma2Balances2key[activeInfluencers[i]];
+
+			// Computing the new balance for the influencer
+            uint newBalance = balance.mul(usd2KEYrateWei).div(newRate);
+
+			// Assigning new balance to the influencer
+            referrerPlasma2Balances2key[activeInfluencers[i]] = newBalance;
+
+			// Amount to return
+            amountToReturnToExchange = amountToReturnToExchange.add(balance.sub(newBalance));
+        }
+
+        return amountToReturnToExchange;
+    }
+
+    function increaseBalance(
+        uint newRate
+    )
+    internal
+    returns (uint)
+    {
+        uint amountToGetFromExchange;
+
+        for(uint i=0; i<activeInfluencers.length; i++) {
+            uint balance = referrerPlasma2Balances2key[activeInfluencers[i]];
+
+            uint newBalance = balance.mul(usd2KEYrateWei).div(newRate);
+            referrerPlasma2Balances2key[activeInfluencers[i]] = newBalance;
+
+            amountToGetFromExchange = amountToGetFromExchange.add(newBalance.sub(balance));
+        }
+
+        return amountToGetFromExchange;
+    }
+
+
+    /**
+     * @notice Function to distribute rewards between all the influencers
+     * which have earned the reward once campaign is done
+     * @param influencers is the array of influencers
+     */
 	function distributeRewardsBetweenInfluencers(
 		address [] influencers
 	)
@@ -128,6 +220,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 				uint balance = referrerPlasma2Balances2key[influencers[i]];
 				// Set balance to be 0
 				referrerPlasma2Balances2key[influencers[i]] = 0;
+                // Reduce reserved amount for rewards
+                reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
 				// Pay fee
 				payFeeForRegistration(influencers[i], balance);
 			}
@@ -227,14 +321,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		merkleRoot = _merkleRoot;
 	}
 
-	function rebalanceRates()
-	public
-	onlyMaintainer
-	{
-		// Function which will be used to rebalance rates
-
-	}
-
 
 	/**
      * @notice Allow maintainers to push balances table
@@ -254,28 +340,44 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 				isActiveInfluencer[influencers[i]] = true;
 			}
 			referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(balances[i]);
+            reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(balances[i]);
 		}
 	}
 
 	/**
-	 * @notice Function where maintainer can push earnings of moderator for the campaign
-	 * @param _moderatorEarnings is the amount of 2key tokens earned by moderator
+	 * @notice Function to set moderator earnings for the campaign
+	 * @param totalEarnings is the total amount of 2KEY tokens moderator earned
+	 * This function can be called only once.
 	 */
-	function pushModeratorEarnings(
-		uint _moderatorEarnings
+	function setModeratorEarnings(
+		uint totalEarnings
 	)
 	public
 	onlyMaintainer
 	{
-		moderatorEarnings = _moderatorEarnings;
+		require(moderatorTotalEarnings == 0);
+		moderatorTotalEarnings = totalEarnings;
+		moderatorEarningsBalance = totalEarnings;
 
+        reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalEarnings);
+	}
+
+	/**
+	 * @notice Function where maintainer can push earnings of moderator for the campaign
+	 */
+	function pushModeratorEarnings()
+	public
+	onlyMaintainer
+	{
 		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-
 		//Send 2key tokens to moderator
-		transfer2KEY(twoKeyAdmin, _moderatorEarnings);
-
+		transfer2KEY(twoKeyAdmin, moderatorEarningsBalance);
 		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorEarnings);
+		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorEarningsBalance);
+        // Update reserved amount of tokens
+        reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(moderatorEarningsBalance);
+        // Set moderator balance to 0
+		moderatorEarningsBalance = 0;
 	}
 
 	function getInfluencersWithPendingRewards(
@@ -310,22 +412,22 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 
-	function submitProofAndWithdrawRewards(
-		bytes32 [] proof,
-		uint amount
-	)
-	public
-	{
-		address influencerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-
-		//Validating that this is the amount he earned
-		require(checkMerkleProof(influencerPlasma,proof,amount), 'proof is invalid');
-
-		//Assuming that msg.sender is influencer
-		require(areRewardsWithdrawn[msg.sender] == false); //He can't take reward twice
-
-		payFeeForRegistration(influencerPlasma, amount);
-	}
+//	function submitProofAndWithdrawRewards(
+//		bytes32 [] proof,
+//		uint amount
+//	)
+//	public
+//	{
+//		address influencerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
+//
+//		//Validating that this is the amount he earned
+//		require(checkMerkleProof(influencerPlasma,proof,amount), 'proof is invalid');
+//
+//		//Assuming that msg.sender is influencer
+//		require(areRewardsWithdrawn[msg.sender] == false); //He can't take reward twice
+//
+//		payFeeForRegistration(influencerPlasma, amount);
+//	}
 
 
 }
