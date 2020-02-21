@@ -367,27 +367,27 @@ describe('CPC campaign', () => {
         expect(isProofValid).to.be.equal(true);
     }).timeout(TIMEOUT_LENGTH);
 
-    it('should withdraw more than he earned tokens as an influencer with his proof', async() => {
-        printTestNumber();
-        let influencerEarnings = await twoKeyProtocol.CPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
-        let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
-        influencerEarnings = influencerEarnings + "0";
-        try {
-            let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
-        } catch (e) {
-            expect(1).to.be.equal(1);
-        }
-    }).timeout(TIMEOUT_LENGTH);
-
-    it('should try to withdraw valid amount of tokens', async() => {
-        printTestNumber();
-        let influencerEarnings = await twoKeyProtocol.CPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
-        let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
-        addressBalanceBeforeConversion = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, from);
-        addressBalanceBeforeConversion = parseInt(addressBalanceBeforeConversion,10);
-        let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(TIMEOUT_LENGTH);
+    // it('should withdraw more than he earned tokens as an influencer with his proof', async() => {
+    //     printTestNumber();
+    //     let influencerEarnings = await twoKeyProtocol.CPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
+    //     let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
+    //     influencerEarnings = influencerEarnings + "0";
+    //     try {
+    //         let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
+    //     } catch (e) {
+    //         expect(1).to.be.equal(1);
+    //     }
+    // }).timeout(TIMEOUT_LENGTH);
+    //
+    // it('should try to withdraw valid amount of tokens', async() => {
+    //     printTestNumber();
+    //     let influencerEarnings = await twoKeyProtocol.CPCCampaign.getReferrerBalance(campaignAddress, twoKeyProtocol.plasmaAddress);
+    //     let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
+    //     addressBalanceBeforeConversion = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, from);
+    //     addressBalanceBeforeConversion = parseInt(addressBalanceBeforeConversion,10);
+    //     let txHash = await twoKeyProtocol.CPCCampaign.submitProofAndWithdrawRewards(campaignAddress, proofs, influencerEarnings, from);
+    //     await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(TIMEOUT_LENGTH);
 
 
     it('should get counters from the campaign', async() => {
@@ -426,4 +426,6 @@ describe('CPC campaign', () => {
         let moderatorEarnings = await twoKeyProtocol.CPCCampaign.getModeratorEarningsPerCampaign(campaignAddress);
         expect(moderatorEarnings).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString())* 0.02);
     })
+
+
 });
