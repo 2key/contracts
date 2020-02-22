@@ -390,6 +390,29 @@ describe('CPC campaign', () => {
     // }).timeout(TIMEOUT_LENGTH);
 
 
+    it('should push balances for influencers to the mainchain', async() => {
+        printTestNumber();
+
+        // Deployer is the maintainer address
+        const {web3, address} = web3Switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
+
+        let numberOfInfluencers = await twoKeyProtocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
+        let resp = await twoKeyProtocol.CPCCampaign.getInfluencersAndBalances(campaignAddress, 0, numberOfInfluencers);
+        let txHash = await twoKeyProtocol.CPCCampaign.pushBalancesForInfluencers(campaignPublicAddress,resp.influencers, resp.balances, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(TIMEOUT_LENGTH);
+
+
+    it('should distribute rewards between influencers on the mainchain', async() => {
+        printTestNumber();
+        let numberOfInfluencers = await twoKeyProtocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
+        let resp = await twoKeyProtocol.CPCCampaign.getInfluencersAndBalances(campaignAddress, 0, numberOfInfluencers);
+        let txHash = await twoKeyProtocol.CPCCampaign.distributeRewardsBetweenInfluencers(campaignPublicAddress, resp.influencers, from);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(TIMEOUT_LENGTH);
+
     it('should get counters from the campaign', async() => {
         printTestNumber();
 
@@ -407,6 +430,10 @@ describe('CPC campaign', () => {
 
     it('should get address stats', async() => {
         printTestNumber();
+
+        const {web3, address} = web3Switcher.test();
+        from = address;
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
 
         let stats = await twoKeyProtocol.CPCCampaign.getAddressStatistic(campaignAddress, twoKeyProtocol.plasmaAddress);
         expect(stats.ethereum).to.be.equal(from);

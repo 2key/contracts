@@ -340,7 +340,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 				isActiveInfluencer[influencers[i]] = true;
 			}
 			referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(balances[i]);
-            reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(balances[i]);
+			reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(balances[i]);
 		}
 	}
 
