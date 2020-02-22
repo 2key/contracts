@@ -9,6 +9,7 @@ import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
+import "../interfaces/IUpgradableExchange.sol";
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../libraries/SafeMath.sol";
@@ -212,6 +213,17 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
         ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
     }
+
+	function withdrawERC20FromUpgradableExchange(
+		address _tokenAddress,
+		uint _amountOfTokens
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+		IUpgradableExchange(twoKeyUpgradableExchange).withdrawERC20(_tokenAddress, _amountOfTokens);
+	}
 
 
 	function updateReceivedTokensAsModerator(

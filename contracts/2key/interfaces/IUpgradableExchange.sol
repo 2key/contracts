@@ -57,4 +57,10 @@ contract IUpgradableExchange {
     view
     returns (uint);
 
+    function withdrawERC20(
+        address _erc20TokenAddress,
+        uint _tokenAmount
+    )
+    public;
+
 }
