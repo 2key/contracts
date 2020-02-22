@@ -18,43 +18,32 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * be implemented by all budget campaigns in future
 	 */
 
+    // Merkle root
 	bytes32 public merkleRoot;
-
-	address public mirrorCampaignOnPlasma; // Address of campaign deployed to plasma network
-
+    // Address of campaign deployed to plasma network
+	address public mirrorCampaignOnPlasma;
 	// Flag to determine if campaign is validated
 	bool public isValidated;
-
 	//Active influencer means that he has at least on participation in successful conversion
 	address[] activeInfluencers;
-
 	// Mapping active influencers
 	mapping(address => bool) isActiveInfluencer;
-
 	// His index position in the array
 	mapping(address => uint) activeInfluencer2idx;
-
 	//Selector if inventory is added
 	bool isInventoryAdded;
-
 	// Mapping representing if rewards are withdrawn
 	mapping(address => bool) areRewardsWithdrawn;
-
 	// Dollar to 2key rate in WEI at the moment of adding inventory
 	uint public usd2KEYrateWei;
-
 	// Variable to let us know if rewards have been bought with Ether
 	bool public boughtRewardsWithEther;
-
 	// Bounty how contractor wants referrers to split per conversion
 	uint public bountyPerConversion;
-
 	//Amount for rewards inventory
 	uint public rewardsInventoryAmount;
-
 	// Amount representing how much moderator has earned
 	uint public moderatorTotalEarnings;
-
 	// Amount representing how much moderator has now
 	uint public moderatorEarningsBalance;
 
@@ -157,6 +146,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     }
 
 
+    /**
+     * @notice Function which will reduce influencers balance in case 2key rate went up
+     * @param newRate is the new rate of 2key token
+     */
     function reduceBalance(
         uint newRate
     )
@@ -182,6 +175,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
         return amountToReturnToExchange;
     }
 
+    /**
+     * @notice Function which will increase influencers balance in case 2key rate went down
+     * @param newRate is the new rate of 2key token
+     */
     function increaseBalance(
         uint newRate
     )
@@ -365,7 +362,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	/**
 	 * @notice Function where maintainer can push earnings of moderator for the campaign
 	 */
-	function pushModeratorEarnings()
+	function distributeModeratorEarnings()
 	public
 	onlyMaintainer
 	{
