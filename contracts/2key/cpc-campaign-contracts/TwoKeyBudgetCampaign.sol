@@ -102,13 +102,17 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isInventoryAdded = true;
 	}
 
+    function rebalanceRatesModerator()
+    public
+    onlyMaintainer
+    {
+
+    }
 
     function rebalanceRatesInfluencers()
     public
     onlyMaintainer
     {
-		//TODO: Add moderator rebalancing to this funnel
-		//TODO: Add condition that this can be called only once per influencers and once per moderator
         address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
         // Function which will be used to rebalance rates
         uint usd2KEYRateWeiNow = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
@@ -372,7 +376,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
 		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorEarningsBalance);
         // Update reserved amount of tokens
-        reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(moderatorEarningsBalance);
+        reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(moderatorEarningsBalance);
         // Set moderator balance to 0
 		moderatorEarningsBalance = 0;
 	}
