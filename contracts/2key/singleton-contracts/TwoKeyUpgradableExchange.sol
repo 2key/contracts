@@ -478,6 +478,27 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return amountOfDAIs;
     }
 
+//    /**
+//     * @notice Function to calculate how many stable coins we can get for specific amount of 2keys
+//     * @dev This is happening in case we're receiving (buying) 2key
+//     * @param _2keyAmount is the amount of 2keys sent to the contract
+//     */
+//    function getUSDStableCoinAmountFrom2keyUnitsBasedOnSellRate(
+//        uint256 _2keyAmount
+//    )
+//    public
+//    view
+//    returns (uint256)
+//    {
+//        uint sellRate = sellRate2key();
+//
+//        uint hundredPercent = 10**18;
+//        uint rateWithSpread = sellRate.mul(hundredPercent.sub(spreadWei())).div(10**18);
+//        uint amountOfDAIs = _2keyAmount.mul(rateWithSpread).div(10**18);
+//
+//        return amountOfDAIs;
+//    }
+
     function getMore2KeyTokensForRebalancing(
         uint amountOf2KeyRequested
     )
@@ -491,7 +512,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         //TODO: Nikola: the rate that should be used it the current rate. if we have a current sell rate
         //TODO: of 2KEY in USD, we can translate that to current rate in DAI, and compute how much to take
         //TODO: this is not related to the hedge rate of the campaign, but to current rate.
-        uint amountOfDAIWeNeedToTake = getUSDStableCoinAmountFrom2keyUnits(amountOf2KeyRequested, campaignID);
+//        uint amountOfDAIWeNeedToTake = getUSDStableCoinAmountFrom2keyUnitsBasedOnSellRate(amountOf2KeyRequested);
 
         // Get key for how much DAI is available for this contract to withdraw
         bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", campaignID);
@@ -509,7 +530,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         //TODO: only difference is that in one scenario the campaign sends 2KEY back to exchange, and in another scenario
         //TODO: the exchange sends back 2KEY to the campaign. but in both cases all DAI can be transferred to the balance of the exchange after
         //TODO: Check with Eitan
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable.sub(amountOfDAIWeNeedToTake)));
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable));
 
         // Set DAI available for this campaign to 0 since we will release everything to reserve
         setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
