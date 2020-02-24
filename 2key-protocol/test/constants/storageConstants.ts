@@ -1,4 +1,4 @@
-export const availableTestCounters = {
+export const availableStorageCounters = {
   approvedConversions: 'approvedConversions',
   approvedConverters: 'approvedConverters',
   campaignRaisedByNow: 'campaignRaisedByNow',
@@ -13,4 +13,15 @@ export const availableTestCounters = {
   tokensSold: 'tokensSold',
   totalBounty: 'totalBounty',
   uniqueConverters: 'uniqueConverters',
+};
+
+export const availableStorageUserFields = {
+  link: 'link',
+};
+
+export const availableStorageArrays = {
+  pendingConverters: 'pendingConverters',
+  approvedConverters: 'approvedConverters',
+  rejectedConverters: 'rejectedConverters',
+  cancelledConversions: 'cancelledConversions',
 };

@@ -2,9 +2,11 @@ import '../../constants/polifils';
 import {expect} from 'chai';
 import availableUsers from "../../constants/availableUsers";
 import {IPrivateMetaInformation} from "../../../src/acquisition/interfaces";
+import TestStorage from "../../helperClasses/TestStorage";
+import {availableStorageUserFields} from "../../constants/storageConstants";
 
 
-export default function checkCampaign(campaignParams, storage, userKey) {
+export default function checkCampaign(campaignParams, storage: TestStorage, userKey) {
   it('validate non singleton hash', async () => {
     const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
@@ -95,12 +97,13 @@ export default function checkCampaign(campaignParams, storage, userKey) {
 
   it('should get and decrypt ipfs hash', async () => {
     const {protocol, web3: {address: from}} = availableUsers[userKey];
-    const {campaignAddress, links: {[userKey]: {link}}} = storage;
+    const {campaignAddress} = storage;
+    const link = storage.getUserData([userKey], availableStorageUserFields.link);
 
     let data: IPrivateMetaInformation = await protocol.AcquisitionCampaign.getPrivateMetaHash(
       campaignAddress, from);
 
-    expect(data.campaignPublicLinkKey).to.be.equal(link);
+    expect(data.campaignPublicLinkKey).to.be.equal(link.link);
   }).timeout(120000);
 
   it('check available tokens', async () => {
