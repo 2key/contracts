@@ -141,7 +141,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
             reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(tokensToBeTakenFromExchange);
         } else {
             // In this case we just need to release all the DAI but neither send or take 2KEY tokens
-            IUpgradableExchange(twoKeyUpgradableExchange).releaseAll2KEYFromContractToReserve();
+            IUpgradableExchange(twoKeyUpgradableExchange).releaseAllDAIFromContractToReserve();
         }
     }
 

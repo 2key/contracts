@@ -507,13 +507,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         uint campaignID = getContractId(msg.sender);
-
-        // Calculate how much DAIs we need for this amount of 2key (including spread) //TODO: Ask Eitan
-        //TODO: Nikola: the rate that should be used it the current rate. if we have a current sell rate
-        //TODO: of 2KEY in USD, we can translate that to current rate in DAI, and compute how much to take
-        //TODO: this is not related to the hedge rate of the campaign, but to current rate.
-//        uint amountOfDAIWeNeedToTake = getUSDStableCoinAmountFrom2keyUnitsBasedOnSellRate(amountOf2KeyRequested);
-
+        //TODO: Check there's enough 2key and DAI to complete tx
         // Get key for how much DAI is available for this contract to withdraw
         bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", campaignID);
         // Get key for total available to fill reserve
@@ -522,14 +516,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Get DAI available
         uint _daiWeiAvailable = daiWeiAvailableToWithdraw(campaignID);
 
-
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-        //TODO: Nikola, actually, in both cases (2KEY goes up/down, you still pass all the DAI for that campaign, after
-        //TODO rebalacing, to the _daiWeiAvailableToFill2keyReserveCurrently
-        //TODO: only difference is that in one scenario the campaign sends 2KEY back to exchange, and in another scenario
-        //TODO: the exchange sends back 2KEY to the campaign. but in both cases all DAI can be transferred to the balance of the exchange after
-        //TODO: Check with Eitan
         setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable));
 
         // Set DAI available for this campaign to 0 since we will release everything to reserve
@@ -591,7 +579,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return tokens;
     }
 
-    function releaseAll2KEYFromContractToReserve()
+    function releaseAllDAIFromContractToReserve()
     public
     onlyValidatedContracts
     {

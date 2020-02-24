@@ -63,6 +63,6 @@ contract IUpgradableExchange {
     )
     public;
 
-    function releaseAll2KEYFromContractToReserve()
+    function releaseAllDAIFromContractToReserve()
     public;
 }

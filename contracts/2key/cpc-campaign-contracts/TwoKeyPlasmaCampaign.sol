@@ -22,7 +22,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint campaignEndTime; // Time when campaign ends
 
     // Representing number of influencers between contractor and converter
-    mapping(address => uint) public converterToNumberOfInfluencers;
+    mapping(address => uint) converterToNumberOfInfluencers;
 
     // Validator if campaign is validated from maintainer side
     bool public isValidated;

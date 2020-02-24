@@ -129,28 +129,22 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
      * and how many tokens are paid per conversion for the influencers
      */
     function setTotalBounty(
-        uint _totalBounty
+        uint _totalBounty,
+        uint _maxNumberOfConversions
     )
     public
     onlyMaintainer
     {
         // So if contractor adds more bounty we can increase it
         totalBountyForCampaign = totalBountyForCampaign.add(_totalBounty);
-        maxNumberOfConversions = totalBountyForCampaign.div(bountyPerConversionWei);
+        if(_totalBounty == 0 && bountyPerConversionWei == 0) {
+            maxNumberOfConversions = _maxNumberOfConversions;
+        } else {
+            maxNumberOfConversions = totalBountyForCampaign.div(bountyPerConversionWei);
+            require(maxNumberOfConversions == _maxNumberOfConversions);
+        }
     }
 
-
-    /**
-     * @notice Function to get total bounty available and bounty per conversion
-     * @return tuple
-     */
-    function getTotalBountyAndBountyPerConversion()
-    public
-    view
-    returns (uint,uint)
-    {
-        return (totalBountyForCampaign, bountyPerConversionWei);
-    }
 
     /**
      * @notice Function to return referrers participated in the referral chain
@@ -241,8 +235,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     isCampaignValidated
     public
     {
-        require(merkleRoot == 0);
-
         // Require that this is his first conversion
         require(isConverter(msg.sender) == false);
         // Save converter signature on the blockchain
@@ -312,6 +304,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         // Update state of conversion to EXECUTED
         c.state = ConversionState.EXECUTED;
 
+        //TODO: Dissallow maintainer to approve more than maxNumberOfConversions
         // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
         if(converterToNumberOfInfluencers[converter] > 0 && counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign) {
             //Get moderator fee percentage
@@ -332,7 +325,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         }
 
         counters[0]--; //Decrement number of pending conversions
-        //Increment number of executed conversions
         counters[1]++; //increment number approved converters
         counters[5]++; //increment number of executed conversions
 
