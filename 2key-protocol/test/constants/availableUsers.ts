@@ -15,8 +15,22 @@ const test = web3Switcher.test();
 const buyer = web3Switcher.buyer();
 const guest = web3Switcher.guest();
 
+export const userIds = {
+  deployer: 'deployer',
+  aydnep: 'aydnep',
+  gmail: 'gmail',
+  test4: 'test4',
+  renata: 'renata',
+  uport: 'uport',
+  gmail2: 'gmail2',
+  aydnep2: 'aydnep2',
+  test: 'test',
+  buyer: 'buyer',
+  guest: 'guest',
+};
+
 const availableUsers = {
-  deployer: {
+  [userIds.deployer]: {
     name: 'DEPLOYER',
     email: 'support@2key.network',
     fullname: 'deployer account',
@@ -25,7 +39,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(deployer.web3, deployer.mnemonic),
     address: env.DEPLOYER_ADDRESS,
   },
-  aydnep: {
+  [userIds.aydnep]: {
     name: 'Aydnep',
     email: 'aydnep@gmail.com',
     fullname: 'aydnep account',
@@ -34,7 +48,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(aydnep.web3, aydnep.mnemonic),
     address: env.DEPLOYER_ADDRESS,
   },
-  gmail: {
+  [userIds.gmail]: {
     name: 'gmail',
     email: 'aydnep@gmail.com',
     fullname: 'gmail account',
@@ -43,7 +57,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(gmail.web3, gmail.mnemonic),
     address: env.GMAIL_ADDRESS,
   },
-  test4: {
+  [userIds.test4]: {
     name: 'test4',
     email: 'test4@mailinator.com',
     fullname: 'test4 account',
@@ -52,7 +66,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(test4.web3, test4.mnemonic),
     address: env.TEST4_ADDRESS,
   },
-  renata: {
+  [userIds.renata]: {
     name: 'renata',
     email: 'renata.pindiura@gmail.com',
     fullname: 'renata account',
@@ -61,7 +75,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(renata.web3, renata.mnemonic),
     address: env.RENATA_ADDRESS,
   },
-  uport: {
+  [userIds.uport]: {
     name: 'uport',
     email: 'aydnep_uport@gmail.com',
     fullname: 'uport account',
@@ -70,7 +84,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(uport.web3, uport.mnemonic),
     address: env.UPORT_ADDRESS,
   },
-  gmail2: {
+  [userIds.gmail2]: {
     name: 'gmail2',
     email: 'aydnep+2@gmail.com',
     fullname: 'gmail2 account',
@@ -79,7 +93,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(gmail2.web3, gmail2.mnemonic),
     address: env.GMAIL2_ADDRESS,
   },
-  aydnep2: {
+  [userIds.aydnep2]: {
     name: 'aydnep2',
     email: 'aydnep+2@aydnep.com.ua',
     fullname: 'aydnep2 account',
@@ -88,7 +102,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(aydnep2.web3, aydnep2.mnemonic),
     address: env.AYDNEP2_ADDRESS,
   },
-  test: {
+  [userIds.test]: {
     name: 'test',
     email: 'test@gmail.com',
     fullname: 'test account',
@@ -97,7 +111,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(test.web3, test.mnemonic),
     address: env.TEST_ADDRESS,
   },
-  buyer: {
+  [userIds.buyer]: {
     name: 'buyer',
     email: 'buyer@gmail.com',
     fullname: 'buyer account',
@@ -106,7 +120,7 @@ const availableUsers = {
     protocol: getTwoKeyProtocol(buyer.web3, buyer.mnemonic),
     address: env.BUYER_ADDRESS,
   },
-  guest: {
+  [userIds.guest]: {
     name: 'guest',
     email: 'guest@example.com',
     fullname: 'guest account',

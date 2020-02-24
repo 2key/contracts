@@ -4,9 +4,9 @@ import availableUsers from "../../constants/availableUsers";
 import {IPrivateMetaInformation} from "../../../src/acquisition/interfaces";
 
 
-export default function checkCampaign(campaignParams, storage, user) {
+export default function checkCampaign(campaignParams, storage, userKey) {
   it('validate non singleton hash', async () => {
-    const {protocol} = user;
+    const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const nonSingletonHash = await protocol.CampaignValidator.getCampaignNonSingletonsHash(
       campaignAddress
@@ -21,18 +21,22 @@ export default function checkCampaign(campaignParams, storage, user) {
   // when amount > 0
   if (campaignParams.isFiatOnly) {
     it('should reserve amount for fiat conversion rewards', async () => {
-      const {protocol, web3: {address: from}} = user;
-      const amount = 100; // probably should be retrieved from the data
+      const {protocol, web3: {address: from}} = availableUsers[userKey];
       const {campaignAddress} = storage;
 
       let value = parseFloat(protocol.Utils.toWei(1, 'ether').toString());
-      let txHash = await protocol.AcquisitionCampaign.specifyFiatConversionRewards(campaignAddress, value, amount, from);
+      let txHash = await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
+        campaignAddress,
+        value,
+        campaignParams.amount,
+        from,
+      );
       await protocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
   }
 
   it('check is campaign validated', async () => {
-    const {protocol} = user;
+    const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
     const isValidated = await protocol.CampaignValidator.isCampaignValidated(campaignAddress);
@@ -41,7 +45,7 @@ export default function checkCampaign(campaignParams, storage, user) {
   }).timeout(60000);
 
   it('should get campaign public meta from IPFS', async () => {
-    const {protocol, web3: {address: from}} = user;
+    const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
     const campaignMeta = await protocol.AcquisitionCampaign.getPublicMeta(campaignAddress, from);
@@ -50,7 +54,7 @@ export default function checkCampaign(campaignParams, storage, user) {
   }).timeout(120000);
 
   it('should transfer assets to campaign', async () => {
-    const {protocol, web3: {address: from}} = user;
+    const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
     const txHash = await protocol.transfer2KEYTokens(
@@ -68,7 +72,7 @@ export default function checkCampaign(campaignParams, storage, user) {
 
 
   it('should make campaign active', async () => {
-    const {protocol, web3: {address: from}} = user;
+    const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
     const txHash = await protocol.AcquisitionCampaign.activateCampaign(campaignAddress, from);
@@ -80,8 +84,8 @@ export default function checkCampaign(campaignParams, storage, user) {
     expect(isActivated).to.be.equal(true);
   }).timeout(600000);
 
-  it('should get user public link', async () => {
-    const {protocol, web3: {address: from}} = user;
+  it('should get campaign public link', async () => {
+    const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
     const publicLink = await protocol.AcquisitionCampaign.getPublicLinkKey(campaignAddress, from);
@@ -90,8 +94,8 @@ export default function checkCampaign(campaignParams, storage, user) {
   }).timeout(10000);
 
   it('should get and decrypt ipfs hash', async () => {
-    const {protocol, web3: {address: from}} = user;
-    const {campaignAddress, links: {deployer: {link}}} = storage;
+    const {protocol, web3: {address: from}} = availableUsers[userKey];
+    const {campaignAddress, links: {[userKey]: {link}}} = storage;
 
     let data: IPrivateMetaInformation = await protocol.AcquisitionCampaign.getPrivateMetaHash(
       campaignAddress, from);
@@ -100,7 +104,7 @@ export default function checkCampaign(campaignParams, storage, user) {
   }).timeout(120000);
 
   it('check available tokens', async () => {
-    const {protocol, web3: {address: from}} = user;
+    const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
     const availableAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress, from);
