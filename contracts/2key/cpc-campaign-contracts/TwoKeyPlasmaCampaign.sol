@@ -10,8 +10,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     IncentiveModel incentiveModel; //Incentive model for rewards
 
-    mapping(address => uint256) public referrerPlasma2TotalEarnings2key; // Total earnings for referrers
-    mapping(address => uint256) public referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
+    mapping(address => uint256) internal referrerPlasma2TotalEarnings2key; // Total earnings for referrers
+    mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions; // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;
 
     address public contractorPublicAddress; // Contractor address on public chain
@@ -22,7 +22,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint campaignEndTime; // Time when campaign ends
 
     // Representing number of influencers between contractor and converter
-    mapping(address => uint) converterToNumberOfInfluencers;
+    mapping(address => uint) public converterToNumberOfInfluencers;
 
     // Validator if campaign is validated from maintainer side
     bool public isValidated;
