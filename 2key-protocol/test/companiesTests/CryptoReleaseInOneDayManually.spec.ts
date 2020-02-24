@@ -7,6 +7,8 @@ import createCampaign from "./helpers/createCampaign";
 import checkCampaign from "./reusable/checkCampaign.spec";
 import usersActions from "./reusable/usersActions.spec";
 import {campaignUserActions} from "./constants/constants";
+import TestStorage from "../helperClasses/TestStorage";
+import {availableStorageArrays, availableStorageUserFields} from "../constants/storageConstants";
 
 const {env} = process;
 const networkId = parseInt(env.MAIN_NET_ID, 10);
@@ -138,10 +140,8 @@ const campaignUsers = {
   },
 };
 
-describe(
-  'CryptoReleaseInOneDayManually',
-  () => {
-    const storage = {
+/*
+{
       campaign: undefined,
       campaignAddress: undefined,
       links: {
@@ -171,7 +171,12 @@ describe(
         totalBounty: 0,
         uniqueConverters: 0,
       }
-    };
+    }
+ */
+describe(
+  'CryptoReleaseInOneDayManually',
+  () => {
+    const storage = new TestStorage();
 
     before(function () {
       this.timeout(60000);
@@ -179,11 +184,14 @@ describe(
       return new Promise(async (resolve) => {
         const campaign = await createCampaign(campaignData, availableUsers[userIds.aydnep]);
         const {
-          campaignAddress, campaignPublicLinkKey, fSecret,
+          campaignPublicLinkKey, fSecret,
         } = campaign;
         storage.campaign = campaign;
-        storage.campaignAddress = campaignAddress;
-        storage.links[userIds.aydnep] = {link: campaignPublicLinkKey, fSecret: fSecret};
+        storage.setUserData(
+          userIds.aydnep,
+          availableStorageUserFields.link,
+          {link: campaignPublicLinkKey, fSecret: fSecret},
+          );
         resolve();
       })
     });
@@ -324,7 +332,7 @@ describe(
 
         const addresses = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
 
-        expect(addresses).to.deep.equal(storage.envData.pendingConverters);
+        expect(addresses).to.deep.equal(storage.getArray(availableStorageArrays.pendingConverters));
       }).timeout(60000);
 
       it('should approve converter', async () => {
@@ -336,29 +344,26 @@ describe(
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.AcquisitionCampaign.approveConverter(campaignAddress, test4Address, address),
         );
-        storage.envData.pendingConverters = storage.envData.pendingConverters.filter(
-          (val) => (val !== test4Web3Address)
-        );
-        storage.envData.approvedConverters.push(test4Web3Address);
+
+        storage.arrayRemove(availableStorageArrays.pendingConverters, test4Web3Address);
+        storage.arrayPush(availableStorageArrays.approvedConverters, test4Web3Address);
 
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.AcquisitionCampaign.approveConverter(campaignAddress, gmail2Address, address)
         );
 
-        storage.envData.pendingConverters = storage.envData.pendingConverters.filter(
-          (val) => (val !== gmail2Web3Address)
-        );
-        storage.envData.approvedConverters.push(gmail2Web3Address);
+        storage.arrayRemove(availableStorageArrays.pendingConverters, gmail2Web3Address);
+        storage.arrayPush(availableStorageArrays.approvedConverters, gmail2Web3Address);
 
         const approved = await protocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, address);
         const pending = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
 
         expect(approved)
-          .to.have.deep.members(storage.envData.approvedConverters)
-          .to.not.have.members(storage.envData.pendingConverters);
+          .to.have.deep.members(storage.getArray(availableStorageArrays.approvedConverters))
+          .to.not.have.members(storage.getArray(availableStorageArrays.pendingConverters));
         expect(pending)
-          .to.have.deep.members(storage.envData.pendingConverters)
-          .to.not.have.members(storage.envData.approvedConverters);
+          .to.have.deep.members(storage.getArray(availableStorageArrays.pendingConverters))
+          .to.not.have.members(storage.getArray(availableStorageArrays.approvedConverters));
       }).timeout(60000);
 
       // TODO: maybe assert for conversion array should be empty
@@ -372,20 +377,18 @@ describe(
           await protocol.AcquisitionCampaign.rejectConverter(campaignAddress, testAddress, address)
         );
 
-        storage.envData.pendingConverters = storage.envData.pendingConverters.filter(
-          (val) => (val !== testWeb3Address)
-        );
-        storage.envData.rejectedConverters.push(testWeb3Address);
+        storage.arrayRemove(availableStorageArrays.pendingConverters, testWeb3Address);
+        storage.arrayPush(availableStorageArrays.rejectedConverters, testWeb3Address);
 
         const rejected = await protocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, address);
         const pending = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
 
         expect(rejected)
-          .to.have.deep.members(storage.envData.rejectedConverters)
-          .to.not.have.members(storage.envData.pendingConverters);
+          .to.have.deep.members(storage.getArray(availableStorageArrays.rejectedConverters))
+          .to.not.have.members(storage.getArray(availableStorageArrays.pendingConverters));
         expect(pending)
-          .to.have.deep.members(storage.envData.pendingConverters)
-          .to.not.have.members(storage.envData.rejectedConverters);
+          .to.have.deep.members(storage.getArray(availableStorageArrays.pendingConverters))
+          .to.not.have.members(storage.getArray(availableStorageArrays.rejectedConverters));
       }).timeout(60000);
     }
   },

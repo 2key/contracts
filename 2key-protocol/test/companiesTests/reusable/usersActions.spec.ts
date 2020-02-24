@@ -3,6 +3,12 @@ import {expect} from "chai";
 import {ipfsRegex} from "../../helpers/regExp";
 import {campaignUserActions} from "../constants/constants";
 import {prepareNumberForCompare, rewardCalc} from "../helpers/numberHelpers";
+import TestStorage from "../../helperClasses/TestStorage";
+import {
+  availableStorageArrays,
+  availableStorageCounters,
+  availableStorageUserFields
+} from "../../constants/storageConstants";
 
 export default function userTests(
   {
@@ -15,7 +21,7 @@ export default function userTests(
     refererKey: string,
     actions: Array<string>,
     campaignData,
-    storage: any,
+    storage: TestStorage,
     contribution?: number,
     cut?: number,
     cutChain?: Array<number>,
@@ -26,7 +32,8 @@ export default function userTests(
     it(`should visit campaign as ${userKey}`, async () => {
       const {web3: {address: refAddress}} = availableUsers[refererKey];
       const {protocol} = availableUsers[userKey];
-      const {campaignAddress, links: {[refererKey]: refLink}, campaign: {contractor}} = storage;
+      const {campaignAddress, campaign: {contractor}} = storage;
+      const refLink = storage.getUserData(refererKey, availableStorageUserFields.link);
 
       await protocol.AcquisitionCampaign
         .visit(campaignAddress, refLink.link, refLink.fSecret);
@@ -39,7 +46,8 @@ export default function userTests(
     if (cutChain) {
       it(`should check correct referral value after visit by ${userKey}`, async () => {
         const {protocol, web3: {address}} = availableUsers[userKey];
-        const {campaignAddress, links: {[refererKey]: refLink}} = storage;
+        const {campaignAddress} = storage;
+        const refLink = storage.getUserData(refererKey, availableStorageUserFields.link);
 
         let maxReward = await protocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(
           campaignAddress,
@@ -65,7 +73,8 @@ export default function userTests(
 
     it(`should create a join link for ${userKey}`, async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
-      const {campaignAddress, links: {[refererKey]: refLink}} = storage;
+      const {campaignAddress} = storage;
+      const refLink = storage.getUserData(refererKey, availableStorageUserFields.link);
 
       const hash = await protocol.AcquisitionCampaign.join(
         campaignAddress,
@@ -75,7 +84,7 @@ export default function userTests(
           fSecret: refLink.fSecret,
         });
 
-      storage.links[userKey] = hash;
+      storage.setUserData(userKey, availableStorageUserFields.link, hash);
 
       expect(ipfsRegex.test(hash.link)).to.be.eq(true);
     }).timeout(60000);
@@ -104,7 +113,8 @@ export default function userTests(
 
     it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
-      const {campaignAddress, links: {[refererKey]: refLink}} = storage;
+      const {campaignAddress} = storage;
+      const refLink = storage.getUserData(refererKey, availableStorageUserFields.link);
 
       const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
@@ -138,10 +148,11 @@ export default function userTests(
         .eq(
           prepareNumberForCompare(initialAmountOfTokens - amountOfTokensForPurchase)
         );
+
       if (campaignData.isKYCRequired) {
-        storage.envData.pendingConverters.push(address);
-        storage.counters.pendingConverters += 1;
-        storage.counters.pendingConversions += 1;
+        storage.arrayPush(availableStorageArrays.pendingConverters, address);
+        storage.incrementCounter(availableStorageCounters.pendingConversions);
+        storage.incrementCounter(availableStorageCounters.pendingConverters);
       }
     }).timeout(60000);
   }
@@ -178,8 +189,9 @@ export default function userTests(
         campaignAddress, conversionIndex, web3Address,
       );
 
-      storage.counters.cancelledConversions += 1;
-      storage.counters.pendingConversions -= 1;
+
+      storage.incrementCounter(availableStorageCounters.cancelledConversions);
+      storage.decrementCounter(availableStorageCounters.pendingConversions);
 
       // todo: assert
       // expect()
