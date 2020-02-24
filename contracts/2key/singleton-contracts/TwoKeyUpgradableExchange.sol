@@ -591,6 +591,22 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return tokens;
     }
 
+    function releaseAll2KEYFromContractToReserve()
+    public
+    onlyValidatedContracts
+    {
+        uint _contractID = getContractId(msg.sender);
+        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
+        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+
+        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
+
+        uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
+
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable));
+        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
+    }
+
     /**
      * @notice Function which will be called every time by campaign when referrer select to withdraw directly 2key token
      * @param amountOfTokensWithdrawn is the amount of tokens he wants to withdraw

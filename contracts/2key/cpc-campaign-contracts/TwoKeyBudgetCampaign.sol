@@ -102,14 +102,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isInventoryAdded = true;
 	}
 
-    function rebalanceRatesModerator()
-    public
-    onlyMaintainer
-    {
-
-    }
-
-    function rebalanceRatesInfluencers()
+    function rebalanceRates()
     public
     onlyMaintainer
     {
@@ -146,6 +139,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
             IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancing(tokensToBeTakenFromExchange);
             // Increase reserved amount of tokens for the rewards
             reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(tokensToBeTakenFromExchange);
+        } else {
+            // In this case we just need to release all the DAI but neither send or take 2KEY tokens
+            IUpgradableExchange(twoKeyUpgradableExchange).releaseAll2KEYFromContractToReserve();
         }
     }
 
@@ -176,6 +172,16 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
             amountToReturnToExchange = amountToReturnToExchange.add(balance.sub(newBalance));
         }
 
+        // Rebalancing for the moderator
+        uint newModeratorBalance = moderatorEarningsBalance.mul(usd2KEYrateWei).div(newRate);
+
+        // Adding how much we have to return to exchange
+        amountToReturnToExchange = amountToReturnToExchange.add(moderatorEarningsBalance.sub(newModeratorBalance));
+
+        // Updating state vars
+        moderatorEarningsBalance = newModeratorBalance;
+        moderatorTotalEarnings = newModeratorBalance;
+
         return amountToReturnToExchange;
     }
 
@@ -199,6 +205,17 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
             amountToGetFromExchange = amountToGetFromExchange.add(newBalance.sub(balance));
         }
+
+        // Rebalancing for the moderator
+        uint newModeratorBalance = moderatorEarningsBalance.mul(usd2KEYrateWei).div(newRate);
+
+        // Adding how much we have to return to exchange
+        amountToGetFromExchange = amountToGetFromExchange.add(newModeratorBalance.sub(moderatorEarningsBalance));
+
+        // Updating state vars
+        moderatorEarningsBalance = newModeratorBalance;
+        moderatorTotalEarnings = newModeratorBalance;
+
 
         return amountToGetFromExchange;
     }
