@@ -1,0 +1,16 @@
+export const availableTestCounters = {
+  approvedConversions: 'approvedConversions',
+  approvedConverters: 'approvedConverters',
+  campaignRaisedByNow: 'campaignRaisedByNow',
+  cancelledConversions: 'cancelledConversions',
+  executedConversions: 'executedConversions',
+  pendingConversions: 'pendingConversions',
+  pendingConverters: 'pendingConverters',
+  raisedFundsEthWei: 'raisedFundsEthWei',
+  raisedFundsFiatWei: 'raisedFundsFiatWei',
+  rejectedConversions: 'rejectedConversions',
+  rejectedConverters: 'rejectedConverters',
+  tokensSold: 'tokensSold',
+  totalBounty: 'totalBounty',
+  uniqueConverters: 'uniqueConverters',
+};

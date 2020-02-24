@@ -574,7 +574,13 @@ describe('TwoKeyProtocol', () => {
 
         const arcs = await twoKeyProtocol.AcquisitionCampaign.getBalanceOfArcs(campaignAddress, from);
         console.log('GMAIL2 ARCS', arcs);
-        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), links.renata.link, from, { fSecret: links.renata.fSecret });
+        txHash = await twoKeyProtocol.AcquisitionCampaign.joinAndConvert(
+          campaignAddress,
+          twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'),
+          links.renata.link,
+          from,
+          { fSecret: links.renata.fSecret }
+          );
         // txHash = await twoKeyProtocol.transferEther(campaignAddress, twoKeyProtocol.Utils.toWei(minContributionETHorUSD * 1.1, 'ether'), from);
         console.log('HASH', txHash);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
@@ -600,6 +606,8 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
+
+
     it('should buy some tokens from test', async () => {
         const {web3, address} = web3Switcher.test();
         from = address;
@@ -616,6 +624,8 @@ describe('TwoKeyProtocol', () => {
         console.log(addresses);
     }).timeout(60000);
 
+    // TODO: recheck is data different with previous
+    // TODO: probably can be as assert for cancelConvert
     it('should return all pending converters from contractor', async () => {
         const {web3, address} = web3Switcher.aydnep();
         from = address;
@@ -625,6 +635,8 @@ describe('TwoKeyProtocol', () => {
         console.log("Addresses: " + addresses);
     }).timeout(60000);
 
+
+    // TODO: assert for moved to approved array
     it('should approve converter', async () => {
         console.log('Test where contractor can approve converter to execute lockup');
         const {web3, address} = web3Switcher.aydnep();
@@ -650,12 +662,19 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(60000);
 
+
+    // TODO: recheck and remove
     it('should get converter conversion ids', async() => {
         console.log('Test where we have to print conversion ids for the converter');
         let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.TEST4_ADDRESS, from);
         console.log('For the converter: ' + env.TEST4_ADDRESS + 'conversion ids are:' + conversionIds);
     }).timeout(60000);
 
+    /**
+     * ----------------------------------- all tests above moved and corrected -----------------------------------
+     */
+    // TODO: maybe assert for conversion array should be empty
+    // TODO: recheck for error on next Convert
     it('should reject converter', async () => {
         console.log("Test where contractor / moderator can reject converter to execute lockup");
         if(isKYCRequired) {
@@ -687,6 +706,7 @@ describe('TwoKeyProtocol', () => {
     //     expect(upgradableExchangeFiatReserve).to.be.equal(0);
     // }).timeout(60000);
 
+    // TODO: assert for removed from pending conversions
     it('should be executed conversion by contractor' ,async() => {
         if(isKYCRequired) {
             let conversionIdsForGmail2 = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
@@ -702,6 +722,7 @@ describe('TwoKeyProtocol', () => {
     //     expect(upgradableExchangeFiatReserve).not.to.be.equal(0);
     // }).timeout(60000);
 
+    // todo: Remove
     it('should print campaigns where user converter', async() => {
         const {web3, address} = web3Switcher.test4();
         from = address;
@@ -709,7 +730,7 @@ describe('TwoKeyProtocol', () => {
         // const campaigns = await twoKeyProtocol.Lockup.getCampaignsWhereConverter(from);
         // console.log(campaigns);
     });
-
+    // todo: maybe remove or check for user able to execute conversion after approve
     it('should execute conversion and create purchase', async () => {
         const {web3, address} = web3Switcher.test4();
         from = address;
@@ -719,24 +740,81 @@ describe('TwoKeyProtocol', () => {
             await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         }
     }).timeout(60000);
-
-
+    /**
+     * todo: asserts
+     * BASE_AND_BONUS // bonus can be zero
+     * - check for portions number (numberOfVestingPortions),
+     * - check for dates (numberOfDaysBetweenPortions),
+     * - amount (sum all conversions (in tokens) / numberOfVestingPortions)
+     * BONUS
+     * - check for portions number (numberOfVestingPortions + 1)
+     * - check for dates (numberOfDaysBetweenPortions),1),
+     * -- [0] - tokenDistributionDate - tokenDistributionDate
+     * -- [1] - tokenDistributionDate + bonusTokensVestingStartShiftInDaysFromDistributionDate
+     * -- [2] - [1] + numberOfDaysBetweenPortions
+     * -- etc
+     * - amount (sum all conversions (in tokens) / numberOfVestingPortions)
+     * -- [0] - base tokens amount
+     * -- [1] and other - bonus tokens amount / numberOfVestingPortions
+     * todo: assert correct bonus model
+     */
     it('should get purchase information', async() => {
         console.log('Getting purchase information');
         let purchase = await twoKeyProtocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress,0,from);
         console.log(purchase);
     }).timeout(60000);
 
+    // todo: contractor action, user
+    // todo: assert for check for corrected purchaced amount
     it('should start hedging some ether', async() => {
         const {web3, address} = web3Switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP));
-        let approvedMinConversionRate = 1000;
+        let approvedMinConversionRate = 1000; // todo: check with Nicola
         let upgradableExchangeBalance = await twoKeyProtocol.getBalance(twoKeyProtocol.twoKeyUpgradableExchange.address);
-        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(parseFloat(upgradableExchangeBalance.balance.ETH.toString()), approvedMinConversionRate, from);
+        const hash = await twoKeyProtocol.UpgradableExchange.startHedgingEth(
+          parseFloat(upgradableExchangeBalance.balance.ETH.toString()), approvedMinConversionRate, from
+        );
         console.log(hash);
     }).timeout(50000);
 
+    /**
+     * todo: assert for all values
+    AcquisitionCampaign:
+    {
+     approvedConversions: 0
+     approvedConverters: 1
+     campaignRaisedByNow: 101.1534
+     cancelledConversions: 0
+     executedConversions: 1
+     pendingConversions: 0
+     pendingConverters: 0
+     raisedFundsEthWei: 0.47
+     raisedFundsFiatWei: 0
+     rejectedConversions: 0
+     rejectedConverters: 0
+     tokensSold: 11228.0274
+     totalBounty: 0
+     uniqueConverters: 1
+     }
+
+     DonationCampaign:
+     {
+     approvedConversions: 0
+     approvedConverters: 1
+     campaignRaisedByNow: 81.7836
+     cancelledConversions: 0
+     executedConversions: 1
+     pendingConversions: 0
+     pendingConverters: 0
+     raisedFundsEthWei: 0.38
+     rejectedConversions: 0
+     rejectedConverters: 0
+     tokensSold: 81.7836
+     totalBounty: 0
+     uniqueConverters: 1
+     }
+     */
     it('should show campaign summary', async() => {
         const {web3, address} = web3Switcher.test4();
         from = address;
@@ -745,34 +823,48 @@ describe('TwoKeyProtocol', () => {
         console.log(summary);
     }).timeout(60000);
 
+    // moderator from campaign data, check from campaign creator should get 2% from conversion sum
+    // todo: assert for eq
     it('should show moderator earnings', async() => {
         let moderatorTotalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress, from);
         console.log('Moderator total earnings in 2key-tokens are: ' + moderatorTotalEarnings);
     }).timeout(60000);
 
+    // todo: check balance of conversion owner
+    // todo maybe add check for withdraw repeat with same indexes
+    // todo: maybe error check on withdraw for locked portion
     it('should pull down base tokens amount from purchases handler contract', async() => {
         const {web3, address} = web3Switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP));
-        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(campaignAddress, 0, 0, from);
+        let txHash = await twoKeyProtocol.AcquisitionCampaign.withdrawTokens(
+          campaignAddress,
+          0, // first conversion per campaign
+          0, // first part
+          from,
+          );
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
 
+    // todo: check amount of available for withdraw
+    // todo: calc???? probably we should user numbers from TwoKeyExchangeRateContract test
     it('==> should print referrer balance after hedging is done so hedge-rate exists', async() => {
         const referrerBalance = await twoKeyProtocol.AcquisitionCampaign.getAmountReferrerCanWithdraw(campaignAddress, env.GMAIL_ADDRESS, from);
         console.log(referrerBalance);
     }).timeout(60000);
 
+    // todo: remove
     it('should print balances', printBalances).timeout(15000);
 
+    // todo: check for balance before and after withdraw
     it('==> should contractor withdraw his earnings', async() => {
         const {web3, address} = web3Switcher.aydnep();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_AYDNEP));
-
+        // todo: maybe move to campaign creation as separate test
         const isContractor:boolean = await twoKeyProtocol.AcquisitionCampaign.isAddressContractor(campaignAddress,from);
         console.log('Aydnep is contractor: ' + isContractor);
-        const balanceOfContract = await twoKeyProtocol.getBalance(campaignAddress);
+        const balanceOfContract = await twoKeyProtocol.getBalance(campaignAddress); // sum(conversions) - 2%
         console.log('contract balance', twoKeyProtocol.Utils.balanceFromWeiString(balanceOfContract, {
             inWei: true,
             toNum: true
@@ -785,6 +877,7 @@ describe('TwoKeyProtocol', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(hash);
     }).timeout(60000);
 
+    // todo: recheck
     it('==> should get address statistics', async() => {
         const {web3, address} = web3Switcher.aydnep();
         from = address;
@@ -793,22 +886,28 @@ describe('TwoKeyProtocol', () => {
         console.log(hexedValues);
     }).timeout(60000);
 
+    // todo: recheck and remove or move to rcreate campaign tests
     it('==> should print moderator address', async() => {
         const moderatorAddress: string = await twoKeyProtocol.AcquisitionCampaign.getModeratorAddress(campaignAddress,from);
         console.log("Moderator address is: " + moderatorAddress);
         expect(moderatorAddress).to.be.equal('0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7');
     }).timeout(60000);
 
+    // todo: check user referrer balance
     it('==> should referrer withdraw his balances in 2key-tokens', async() => {
         const {web3, address} = web3Switcher.renata();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_RENATA));
-        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(campaignAddress, false ,from);
+        const txHash = await twoKeyProtocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(
+          campaignAddress,
+          false,
+          from,
+          );
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log(txHash);
     }).timeout(60000);
 
-
+    // todo: remove as debug
     it('should print balances before cancelation', async() => {
         for (let i = 0; i < addresses.length; i++) {
             let addressCurrent = addresses[i].toString();
@@ -817,12 +916,14 @@ describe('TwoKeyProtocol', () => {
         }
     }).timeout(60000);
 
+    // todo: remove as debug
     it('should get all whitelisted addresses', async() => {
         const addresses = await twoKeyProtocol.CongressMembersRegistry.getAllMembersForCongress(from);
         // console.log(addresses);
         expect(addresses.length).to.be.equal(4);
     }).timeout(60000);
 
+    // todo: remove as debug
     it('should get rate from upgradable exchange', async() => {
         const rate = await twoKeyProtocol.UpgradableExchange.get2keySellRate(from);
 
@@ -830,12 +931,14 @@ describe('TwoKeyProtocol', () => {
         expect(rate.toString()).to.be.equal("0.06");
     }).timeout(60000);
 
+    // todo: Move to create campaign tests
     it('should print currency', async() => {
         const currency = await twoKeyProtocol.AcquisitionCampaign.getAcquisitionCampaignCurrency(campaignAddress, from);
         expect(currency).to.be.equal(acquisitionCurrency);
         console.log('Currency is: '+ currency);
     }).timeout(60000);
 
+    // recheck
     it('should get moderator total earnings in campaign', async() => {
         const totalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress,from);
         console.log('Moderator total earnings: '+ totalEarnings);
@@ -858,27 +961,40 @@ describe('TwoKeyProtocol', () => {
         console.log(stats);
     }).timeout(60000);
 
-
+    /**
+     * todo: check
+     totalBought(pin):66048.639
+     totalAvailable(pin):66048.639
+     totalLocked(pin):0
+     totalWithdrawn(pin):0
+     */
     it('should get converter metrics per campaign', async() => {
         let metrics = await twoKeyProtocol.AcquisitionCampaign.getConverterMetricsPerCampaign(campaignAddress, env.GMAIL2_ADDRESS);
         console.log(metrics);
     }).timeout(60000);
 
+    // todo: recheck, check campaignInventory - sum(conversions)
     it('should print balance of left ERC20 on the Acquisition contract', async() => {
         let balance = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyEconomy, campaignAddress);
         console.log(balance);
     }).timeout(60000);
 
+
+    // todo: only for fiat, debug info
     it('should check the amount of tokens for the offline conversion', async() => {
         console.log('Trying to resolve base and bonus amount of tokens for this kind of conversion');
-        let obj = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(campaignAddress,true,twoKeyProtocol.Utils.toWei(50, 'ether'));
+        let obj = await twoKeyProtocol.AcquisitionCampaign.getEstimatedTokenAmount(
+          campaignAddress,
+          true,
+          twoKeyProtocol.Utils.toWei(50, 'ether'),
+          );
         console.log(obj);
     }).timeout(60000);
 
     if(
         isFiatOnly == true
     ) {
-
+// todo: same as joinAndConvert
         it('should create an offline(fiat) conversion', async () => {
             const {web3, address} = web3Switcher.gmail2();
             from = address;
@@ -890,20 +1006,20 @@ describe('TwoKeyProtocol', () => {
             let txHash = await twoKeyProtocol.AcquisitionCampaign.convertOffline(campaignAddress, signature, from, from, 50);
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         }).timeout(60000);
-
+// todo: recheck - remove
         it('should check conversion ids conversion handler after conversion is created', async () => {
             let conversionIds = await twoKeyProtocol.AcquisitionCampaign.getConverterConversionIds(campaignAddress, env.GMAIL2_ADDRESS, from);
             console.log('Conversion ids for the Gmail 2 are: ' + conversionIds);
         }).timeout(60000);
 
-
+// todo: recheck - remove
         it('should check conversion object for the created fiat conversion', async () => {
             console.log("Fiat conversion is this: ");
             let conversion = await twoKeyProtocol.AcquisitionCampaign.getConversion(campaignAddress, 4, from);
             console.log(conversion);
         }).timeout(60000);
     }
-
+   // todo: recheck - remove
     it('should check conversion object', async() => {
         const {web3, address} = web3Switcher.test4();
         from = address;
@@ -914,6 +1030,7 @@ describe('TwoKeyProtocol', () => {
     }).timeout(60000);
 
     if(isFiatOnly == true) {
+        // todo: check for is offline fiat conversion available for withdraw
         it('should execute conversion from contractor', async() => {
             const {web3, address} = web3Switcher.aydnep();
             from = address;
@@ -927,12 +1044,12 @@ describe('TwoKeyProtocol', () => {
         }).timeout(60000);
     }
 
-
+    // todo: recheck - remove
     it('should return number of forwarders for the campaign', async() => {
         let numberOfForwarders = await twoKeyProtocol.PlasmaEvents.getForwardersPerCampaign(campaignAddress);
         console.log('Number of forwarders stored on plasma: ' + numberOfForwarders);
     }).timeout(60000);
-
+    // todo - remove, not working
     it('should check reputation points for a couple of addresses', async() => {
         console.log('Checking stats for Renata');
         let renataStats = await twoKeyProtocol.BaseReputation.getReputationPointsForAllRolesPerAddress(env.RENATA_ADDRESS);
@@ -971,23 +1088,26 @@ describe('TwoKeyProtocol', () => {
         console.log('Rewards inventory required' , obj);
     }).timeout(60000);
 
-
+ // todo - move to campaign creation tests
     it('should get campaign type by address', async() => {
         let campaignType = await twoKeyProtocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
         expect(campaignType).to.be.equal("TOKEN_SELL");
     }).timeout(60000);
 
+    // todo - env unit
     it('should get all maintainers', async() => {
         let maintainers = await twoKeyProtocol.TwoKeyMaintainersRegistry.getAllMaintainers();
         expect(maintainers.length).to.be.greaterThan(35);
     }).timeout(60000);
 
-
+    // todo - move to exchnage rate unit
     it('should get stats for the contract from upgradable exchange', async() => {
         let stats = await twoKeyProtocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
         console.log(stats);
     }).timeout(60000);
 
+
+    // todo - remove moved to `set registration depts
     it('should get stats for the debts', async() => {
         let stats = await twoKeyProtocol.TwoKeyFeeManager.getDebtsSummary();
         console.log(stats);

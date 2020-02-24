@@ -57,14 +57,13 @@ const getReceipt = (txHash: string, { web3, timeout = 60000, interval = 500}) =>
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         if (!web3) {
-            console.log('Creating TwoKeyProtocol instance');
             const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls);
             from = address;
             web3 = web3Instance;
         }
         // console.log(twoKeyProtocol);
         const txHash = await promisify(web3.eth.sendTransaction, [{ to: recipient, value: web3.toWei(100, 'ether'), from }]);
-        console.log(`${recipient}: ${txHash}`);
+
         const receipt = await getReceipt(txHash, { web3 });
         resolve(receipt);
     } catch (err) {
@@ -76,7 +75,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
 describe('TwoKeyProtocol LOCAL', () => {
 
 
-    it('LOCAL: should transfer ether', async () => {
+    it('LOCAL: should transfer ether without errors', async () => {
         let error = false;
         const addresses = Object.keys(env).filter(key => key.endsWith('_ADDRESS') && env[key].includes('0x') && env[key].length == 42).map(key => env[key]);
         addresses.push(config.address);

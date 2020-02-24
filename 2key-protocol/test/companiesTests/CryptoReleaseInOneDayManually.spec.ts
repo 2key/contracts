@@ -1,11 +1,12 @@
+import {expect} from "chai";
+
 import '../constants/polifils';
-import availableUsers from "../constants/availableUsers";
+import availableUsers, {userIds} from "../constants/availableUsers";
 import singletons from "../../src/contracts/singletons";
 import createCampaign from "./helpers/createCampaign";
 import checkCampaign from "./reusable/checkCampaign.spec";
-import {expect} from "chai";
-import {prepareNumberForCompare, rewardCalc} from "./helpers/numberHelpers";
-import {ipfsRegex} from "../helpers/regExp";
+import usersActions from "./reusable/usersActions.spec";
+import {campaignUserActions} from "./constants/constants";
 
 const {env} = process;
 const networkId = parseInt(env.MAIN_NET_ID, 10);
@@ -72,14 +73,17 @@ const campaignData = {
   campaignEndTime,
 
   // Tokens Lockup
-
+  // should be date
   tokenDistributionDate: 1,
   maxDistributionDateShiftInDays: 180,
+  // total amount divider, how payments will be
   numberOfVestingPortions: 6,
+  // Interval between payments in days
   numberOfDaysBetweenPortions: 1,
+  // only BONUS, when bonus payments payouts start in days
   bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
 
-  // with bonus or without
+  // with bonus or without, BASE_AND_BONUS or BONUS
   vestingAmount,
 
   // Advanced options - Participant details
@@ -119,27 +123,18 @@ const campaignData = {
   totalSupplyArcs: undefined,
 };
 
-const actions = {
-  join: 'join',
-  visit: 'visit',
-  joinAndConvert: 'joinAndConvert',
-};
-
 const campaignUsers = {
   gmail: {
     cut: 50,
     percentCut: 0.5,
-    action: actions.join
   },
   test4: {
     cut: 20,
     percentCut: 0.20,
-    action: actions.join
   },
   renata: {
     cut: 20,
     percentCut: 0.2,
-    action: actions.join
   },
 };
 
@@ -150,282 +145,248 @@ describe(
       campaign: undefined,
       campaignAddress: undefined,
       links: {
-        deployer: undefined,
-        gmail: undefined,
-        test4: undefined,
-        renata: undefined,
+        [userIds.aydnep]: undefined,
+        [userIds.gmail]: undefined,
+        [userIds.test4]: undefined,
+        [userIds.renata]: undefined,
       },
+      envData: {
+        pendingConverters: [],
+        approvedConverters: [],
+        rejectedConverters: [],
+      },
+      counters: {
+        approvedConversions: 0,
+        approvedConverters: 0,
+        campaignRaisedByNow: 0,
+        cancelledConversions: 0,
+        executedConversions: 0,
+        pendingConversions: 0,
+        pendingConverters: 0,
+        raisedFundsEthWei: 0,
+        raisedFundsFiatWei: 0,
+        rejectedConversions: 0,
+        rejectedConverters: 0,
+        tokensSold: 0,
+        totalBounty: 0,
+        uniqueConverters: 0,
+      }
     };
 
     before(function () {
       this.timeout(60000);
 
       return new Promise(async (resolve) => {
-        const campaign = await createCampaign(campaignData, availableUsers.aydnep);
+        const campaign = await createCampaign(campaignData, availableUsers[userIds.aydnep]);
         const {
           campaignAddress, campaignPublicLinkKey, fSecret,
         } = campaign;
         storage.campaign = campaign;
         storage.campaignAddress = campaignAddress;
-        storage.links.deployer = {link: campaignPublicLinkKey, fSecret: fSecret};
+        storage.links[userIds.aydnep] = {link: campaignPublicLinkKey, fSecret: fSecret};
         resolve();
       })
     });
 
-    checkCampaign(campaignData, storage, availableUsers.aydnep);
+    checkCampaign(campaignData, storage, userIds.aydnep);
 
-    it('should visit campaign as guest', async () => {
-      const {web3: {address: aydnepAddress}} = availableUsers.aydnep;
-      const {protocol} = availableUsers.guest;
-      const {campaignAddress, links: {deployer}, campaign: {contractor}} = storage;
+    usersActions(
+      {
+        userKey: userIds.guest,
+        refererKey: userIds.aydnep,
+        actions: [campaignUserActions.visit],
+        campaignData,
+        storage,
+      }
+    );
 
-      const txHash = await protocol.AcquisitionCampaign
-        .visit(campaignAddress, deployer.link, deployer.fSecret);
-      const linkOwnerAddress = await protocol.PlasmaEvents.getVisitedFrom(
-        campaignAddress, contractor, protocol.plasmaAddress,
-      );
-      expect(linkOwnerAddress).to.be.eq(aydnepAddress);
-    }).timeout(60000);
+    usersActions(
+      {
+        userKey: userIds.gmail,
+        refererKey: userIds.aydnep,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.join,
+        ],
+        campaignData,
+        storage,
+        cut: campaignUsers.gmail.cut,
+      }
+    );
 
-    it('should create a join link for gmail user and aydnep as parent', async () => {
-      const {web3: {address: aydnepAddress}} = availableUsers.aydnep;
-      const {protocol, web3: {address}} = availableUsers.gmail;
-      const {campaignAddress, links: {deployer}, campaign: {contractor}} = storage;
+    usersActions(
+      {
+        userKey: userIds.test4,
+        refererKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.join,
+          campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
+        cut: campaignUsers.test4.cut,
+        contribution: minContributionETHorUSD,
+        cutChain: [
+          campaignUsers.gmail.percentCut,
+        ],
+      }
+    );
 
-      await protocol.AcquisitionCampaign.visit(
-        campaignAddress,
-        deployer.link,
-        deployer.fSecret,
-      );
-
-      const hash = await protocol.AcquisitionCampaign.join(
-        campaignAddress,
-        address, {
-          cut: campaignUsers.gmail.cut,
-          referralLink: deployer.link,
-          fSecret: deployer.fSecret,
-        });
-
-      storage.links.gmail = hash;
-
-      expect(ipfsRegex.test(hash.link)).to.be.eq(true);
-
-      const linkOwnerAddress = await protocol.PlasmaEvents.getVisitedFrom(
-        campaignAddress, contractor, protocol.plasmaAddress,
-      );
-      expect(linkOwnerAddress).to.be.eq(aydnepAddress);
-    }).timeout(60000);
-
-
-    /**
-     * Separate test due to different user usage
-     */
-    it(`should decrease max referral reward to ${campaignUsers.gmail.cut}%`, async () => {
-      const {protocol, web3: {address}} = availableUsers.test4;
-      const {campaignAddress, links: {gmail}} = storage;
-
-      await protocol.AcquisitionCampaign.visit(campaignAddress, gmail.link, gmail.fSecret);
-
-      let maxReward = await protocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(
-        campaignAddress,
-        address, gmail.link, gmail.fSecret,
-      );
-
-      expect(maxReward).to.be.eq(
-        rewardCalc(
-          maxReferralRewardPercent,
-          [
-            campaignUsers.gmail.percentCut,
-          ],
-        ),
-      );
-    }).timeout(60000);
-
-    it('should decrease available tokens amount to purchased amount by test4', async () => {
-      const {protocol, web3: {address}} = availableUsers.test4;
-      const {campaignAddress, links: {gmail}} = storage;
-
-      const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
-
-      const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
-        campaignAddress,
-        campaignData.isFiatOnly,
-        protocol.Utils.toWei((minContributionETHorUSD), 'ether')
-      );
-
-      const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
-        campaignAddress,
-        protocol.Utils.toWei(minContributionETHorUSD, 'ether'),
-        gmail.link,
-        address,
-        {fSecret: gmail.fSecret},
-      );
-
-      await protocol.Utils.getTransactionReceiptMined(txHash);
-
-      const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
-
-      expect(amountOfTokensAfterConvert).to.be.eq(initialAmountOfTokens - amountOfTokensForPurchase);
-    }).timeout(60000);
-
-    it('should generate link for test4', async () => {
-      const {protocol, web3: {address}} = availableUsers.test4;
-      const {campaignAddress, links: {gmail}} = storage;
-
-      const hash = await protocol.AcquisitionCampaign.join(
-        campaignAddress,
-        address, {
-          cut: campaignUsers.test4.cut,
-          referralLink: gmail.link,
-          fSecret: gmail.fSecret
-        },
-      );
-      const isJoined = await protocol.AcquisitionCampaign.isAddressJoined(campaignAddress, address);
-      storage.links.test4 = hash;
-
-      expect(ipfsRegex.test(hash.link)).to.be.eq(true);
-      expect(isJoined).to.be.eq(true);
-    }).timeout(600000);
-
-    it('should check is test4 joined by gmail link', async () => {
-      const {protocol} = availableUsers.test4;
-      const {protocol: gmailProtocol} = availableUsers.gmail;
-      const {campaignAddress, campaign: {contractor}} = storage;
-
-      const joinedFrom = await protocol.PlasmaEvents.getJoinedFrom(
-        campaignAddress,
-        contractor,
-        protocol.plasmaAddress,
-      );
-
-      expect(joinedFrom).to.eq(gmailProtocol.plasmaAddress)
-    }).timeout(60000);
-
-    it('should check maximum referral reward after visit test4 link', async () => {
-      const {protocol, web3: {address}} = availableUsers.renata;
-      const {campaignAddress, links: {test4}} = storage;
-
-      await protocol.AcquisitionCampaign.visit(campaignAddress, test4.link, test4.fSecret);
-
-      const maxReward = await protocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(
-        campaignAddress, address, test4.link, test4.fSecret,
-      );
-
-      expect(maxReward).to.be.eq(
-        Number.parseFloat(
-          (
-            rewardCalc(
-              maxReferralRewardPercent,
-              [
-                campaignUsers.gmail.percentCut,
-                campaignUsers.test4.percentCut
-              ],
-            )
-          ).toFixed(2)
-        )
-      );
-    }).timeout(60000);
-
-    it('should joinOffchain as Renata', async () => {
-      const {protocol, web3: {address}} = availableUsers.renata;
-      const {campaignAddress, links: {test4}} = storage;
-
-      const hash = await protocol.AcquisitionCampaign.join(campaignAddress, address, {
+    usersActions(
+      {
+        userKey: userIds.renata,
+        refererKey: userIds.test4,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.join,
+          campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
         cut: campaignUsers.renata.cut,
-        referralLink: test4.link,
-        fSecret: test4.fSecret,
-      });
+        contribution: minContributionETHorUSD,
+        cutChain: [
+          campaignUsers.gmail.percentCut,
+          campaignUsers.test4.percentCut,
+        ],
+      }
+    );
 
-      storage.links.renata = hash;
+    usersActions(
+      {
+        userKey: userIds.uport,
+        refererKey: userIds.renata,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: minContributionETHorUSD,
+        cutChain: [
+          campaignUsers.gmail.percentCut,
+          campaignUsers.test4.percentCut,
+          campaignUsers.renata.percentCut,
+        ],
+      }
+    );
 
-      expect(ipfsRegex.test(hash.link)).to.be.eq(true);
-    }).timeout(600000);
+    usersActions(
+      {
+        userKey: userIds.gmail2,
+        refererKey: userIds.renata,
+        actions: [
+          campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: minContributionETHorUSD,
+        cutChain: [
+          campaignUsers.gmail.percentCut,
+          campaignUsers.test4.percentCut,
+          campaignUsers.renata.percentCut,
+        ],
+      }
+    );
 
-    it('should decrease available tokens amount to purchased amount by renata', async () => {
-      const {protocol, web3: {address}} = availableUsers.renata;
-      const {campaignAddress, links: {test4}} = storage;
-      const contributionAmount = protocol.Utils.toWei((minContributionETHorUSD), 'ether');
+    usersActions(
+      {
+        userKey: userIds.buyer,
+        refererKey: userIds.renata,
+        actions: [
+          campaignUserActions.joinAndConvert,
+          campaignUserActions.cancelConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: minContributionETHorUSD,
+      }
+    );
 
-      const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
+    usersActions(
+      {
+        userKey: userIds.test,
+        refererKey: userIds.renata,
+        actions: [
+          campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: minContributionETHorUSD,
+      }
+    );
 
-      const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
-        campaignAddress,
-        campaignData.isFiatOnly,
-        contributionAmount
-      );
+    if (campaignData.isKYCRequired) {
+      it('should check pendinf converters', async () => {
+        const {protocol, web3: {address}} = availableUsers[userIds.aydnep];
+        const {campaignAddress} = storage;
 
-      const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
-        campaignAddress,
-        contributionAmount,
-        test4.link,
-        address,
-        {fSecret: test4.fSecret},
-      );
+        const addresses = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
 
-      await protocol.Utils.getTransactionReceiptMined(txHash);
+        expect(addresses).to.deep.equal(storage.envData.pendingConverters);
+      }).timeout(60000);
 
-      const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
+      it('should approve converter', async () => {
+        const {protocol, web3: {address}} = availableUsers[userIds.aydnep];
+        const {address: test4Address, web3: {address: test4Web3Address}} = availableUsers[userIds.test4];
+        const {address: gmail2Address, web3: {address: gmail2Web3Address}} = availableUsers[userIds.gmail2];
+        const {campaignAddress} = storage;
 
-      expect(amountOfTokensAfterConvert).to.be.eq(initialAmountOfTokens - amountOfTokensForPurchase);
-    }).timeout(60000);
+        await protocol.Utils.getTransactionReceiptMined(
+          await protocol.AcquisitionCampaign.approveConverter(campaignAddress, test4Address, address),
+        );
+        storage.envData.pendingConverters = storage.envData.pendingConverters.filter(
+          (val) => (val !== test4Web3Address)
+        );
+        storage.envData.approvedConverters.push(test4Web3Address);
 
-    it('should buy some tokens from uport', async () => {
-      const {protocol, web3: {address}} = availableUsers.uport;
-      const {campaignAddress, links: {renata}} = storage;
-      const contributionAmount = protocol.Utils.toWei((minContributionETHorUSD), 'ether');
+        await protocol.Utils.getTransactionReceiptMined(
+          await protocol.AcquisitionCampaign.approveConverter(campaignAddress, gmail2Address, address)
+        );
 
-      await protocol.AcquisitionCampaign.visit(campaignAddress, renata.link, renata.fSecret);
+        storage.envData.pendingConverters = storage.envData.pendingConverters.filter(
+          (val) => (val !== gmail2Web3Address)
+        );
+        storage.envData.approvedConverters.push(gmail2Web3Address);
 
-      const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
+        const approved = await protocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, address);
+        const pending = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
 
-      const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
-        campaignAddress,
-        campaignData.isFiatOnly,
-        contributionAmount
-      );
+        expect(approved)
+          .to.have.deep.members(storage.envData.approvedConverters)
+          .to.not.have.members(storage.envData.pendingConverters);
+        expect(pending)
+          .to.have.deep.members(storage.envData.pendingConverters)
+          .to.not.have.members(storage.envData.approvedConverters);
+      }).timeout(60000);
 
-      const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
-        campaignAddress,
-        contributionAmount,
-        renata.link,
-        address,
-        {fSecret: renata.fSecret},
-      );
+      // TODO: maybe assert for conversion array should be empty
+      // TODO: recheck for error on next Convert
+      it('should reject converter', async () => {
+        const {protocol, web3: {address}} = availableUsers[userIds.aydnep];
+        const {address: testAddress, web3: {address: testWeb3Address}} = availableUsers[userIds.test];
+        const {campaignAddress} = storage;
 
-      await protocol.Utils.getTransactionReceiptMined(txHash);
+        await protocol.Utils.getTransactionReceiptMined(
+          await protocol.AcquisitionCampaign.rejectConverter(campaignAddress, testAddress, address)
+        );
 
-      const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
+        storage.envData.pendingConverters = storage.envData.pendingConverters.filter(
+          (val) => (val !== testWeb3Address)
+        );
+        storage.envData.rejectedConverters.push(testWeb3Address);
 
-      expect(prepareNumberForCompare(amountOfTokensAfterConvert)).to.be
-        .eq(prepareNumberForCompare(initialAmountOfTokens - amountOfTokensForPurchase));
-    }).timeout(60000);
-    return;
-    it('==> should print available amount of tokens after conversion', async () => {
-      const {protocol, web3: {address}} = availableUsers.uport;
-      const {campaignAddress} = storage;
-      const availableAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
-      console.log('Available amount of tokens after conversion is: ' + availableAmountOfTokens);
-    }).timeout(60000);
+        const rejected = await protocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, address);
+        const pending = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
+
+        expect(rejected)
+          .to.have.deep.members(storage.envData.rejectedConverters)
+          .to.not.have.members(storage.envData.pendingConverters);
+        expect(pending)
+          .to.have.deep.members(storage.envData.pendingConverters)
+          .to.not.have.members(storage.envData.rejectedConverters);
+      }).timeout(60000);
+    }
   },
 );

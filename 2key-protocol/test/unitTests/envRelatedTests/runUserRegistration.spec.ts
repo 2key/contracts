@@ -1,12 +1,12 @@
 import '../../constants/polifils';
 import registerUserFromBackend, {IRegistryData} from "../../helpers/_registerUserFromBackend";
-import availableUsersInitial from "../../constants/availableUsers";
+import availableUsersInitial, {userIds} from "../../constants/availableUsers";
 import {generatePlasmaFromMnemonic} from "../../helpers/_web3";
 import {registrationDebt} from "../../constants/smallConstants";
 
 const TIMEOUT_LENGTH = 60000;
 
-const {guest, ...availableUsers} = availableUsersInitial;
+const {[userIds.guest]: guest, ...availableUsers} = availableUsersInitial;
 
 const tryToRegisterUser = async ({protocol: twoKeyProtocol, ...user}, from) => {
 
@@ -35,7 +35,7 @@ const tryToRegisterUser = async ({protocol: twoKeyProtocol, ...user}, from) => {
   }
   try {
     registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
-  } catch {
+  } catch (e) {
     error = true;
   }
 
@@ -55,7 +55,7 @@ describe('Should register all users on contract', async () => {
   for (let i = 0; i < usersKeys.length; i += 1) {
     const key = usersKeys[i];
     await it(`should register ${key}`, async () => {
-      const {web3: {address, mnemonic}, ...user} = availableUsers[key];
+      const {web3: {address}, ...user} = availableUsers[key];
       await tryToRegisterUser(user, address);
     }).timeout(TIMEOUT_LENGTH);
   }
@@ -63,7 +63,7 @@ describe('Should register all users on contract', async () => {
 
 describe('Setup of users data', async () => {
   await it('should correct set registration depts', async () => {
-    const {protocol, web3: {address}} = availableUsers.deployer;
+    const {protocol, web3: {address}} = availableUsers[userIds.deployer];
 
     const plasmaAddresses = [
       generatePlasmaFromMnemonic(availableUsers.test.web3.mnemonic).address,
