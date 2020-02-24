@@ -323,8 +323,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             counters[6] = counters[6] + bountyToBeDistributed; // Total bounty paid
         }
 
-        counters[0]--; //Decrement number of pending conversions
+        counters[0]--; //Decrement number of pending converters
         counters[1]++; //increment number approved converters
+        counters[3]--; // Decrement number of pending conversions
         counters[5]++; //increment number of executed conversions
 
         //Emit event through TwoKeyEventSource that conversion is approved and executed
