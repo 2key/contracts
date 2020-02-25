@@ -619,6 +619,18 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         return counters;
     }
 
+    /**
+     * @notice Function to get total bounty available and bounty per conversion
+     * @return tuple
+     */
+    function getTotalBountyAndBountyPerConversion()
+    public
+    view
+    returns (uint,uint)
+    {
+        return (totalBountyForCampaign, bountyPerConversionWei);
+    }
+
     function getAddressJoinedStatus(
         address _plasmaAddress
     )
