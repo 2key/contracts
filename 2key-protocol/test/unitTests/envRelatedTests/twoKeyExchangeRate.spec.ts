@@ -1,3 +1,5 @@
+import {exchangeRates} from "../../constants/smallConstants";
+
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
@@ -32,7 +34,7 @@ describe(
     );
 
     it('should set dollar rate', async () => {
-      const usdRate = 100;
+      const usdRate = 30;
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
         usdSymbol,
         usdRate,
@@ -45,7 +47,7 @@ describe(
     }).timeout(timeout);
 
     it('should set dollar/dai rate', async () => {
-      const usdDaiRate = 0.099;
+      const usdDaiRate = 50;
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
         usdDaiSymbol,
@@ -58,8 +60,8 @@ describe(
     }).timeout(timeout);
 
     it('should set dollar and dollar/dai rates with one request', async () => {
-      const usdRate = 100;
-      const usdDaiRate = 0.099;
+      const usdRate = exchangeRates.usd;
+      const usdDaiRate = exchangeRates.usdDai;
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValues(
         [usdSymbol, usdDaiSymbol],
@@ -74,7 +76,7 @@ describe(
     }).timeout(timeout);
 
     it('should correctly exchange eth to dollar', async () => {
-      const usdRate = 100;
+      const usdRate = exchangeRates.usd;
       const weiAmount = 100;
 
       const setRateTxHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(

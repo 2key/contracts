@@ -6,7 +6,8 @@ import TestStorage from "../../helperClasses/TestStorage";
 import {availableStorageUserFields} from "../../constants/storageConstants";
 
 
-export default function checkCampaign(campaignParams, storage: TestStorage, userKey) {
+export default function checkCampaign(campaignParams, storage: TestStorage) {
+  const userKey = storage.contractorKey;
   it('validate non singleton hash', async () => {
     const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
@@ -15,6 +16,31 @@ export default function checkCampaign(campaignParams, storage: TestStorage, user
     );
     expect(nonSingletonHash).to.be.equal(protocol.AcquisitionCampaign.getNonSingletonsHash());
   });
+
+  it('check contractor user', async () => {
+    const {protocol, web3: {address}} = availableUsers[userKey];
+    const {campaignAddress} = storage;
+    const isContractor: boolean = await protocol.AcquisitionCampaign.isAddressContractor(campaignAddress, address);
+
+    expect(isContractor).to.be.equal(true);
+  });
+
+  it('should check moderator address', async () => {
+    const {protocol, web3: {address}} = availableUsers[userKey];
+    const {campaignAddress} = storage;
+
+    const moderatorAddress: string = await protocol.AcquisitionCampaign.getModeratorAddress(campaignAddress, address);
+
+    expect(moderatorAddress).to.be.equal(campaignParams.moderator);
+  }).timeout(60000);
+
+  it('should check currency', async () => {
+    const {protocol, web3: {address}} = availableUsers[userKey];
+    const {campaignAddress} = storage;
+
+    const currency = await protocol.AcquisitionCampaign.getAcquisitionCampaignCurrency(campaignAddress, address);
+    expect(currency).to.be.equal(campaignParams.currency);
+  }).timeout(60000);
 
   // campaignData.isFiatOnly === true
   // TODO: Recheck with Nicola, probably should be for two different test cases
@@ -115,5 +141,30 @@ export default function checkCampaign(campaignParams, storage: TestStorage, user
     // TODO: when isFiatOnly=true return `1235666.6666666667` instead of 1234000. WHY?
     expect(availableAmountOfTokens).to.be
       .equal(campaignParams.campaignInventory - campaignParams.amount);
+  }).timeout(60000);
+
+  // todo: assert
+  /*
+  { ethWeiAvailableToHedge: 0,
+  daiWeiAvailableToWithdraw: 0,
+  daiWeiReceivedFromHedgingPerContract: 0,
+  ethWeiHedgedPerContract: 0,
+  sent2keyToContract: 0,
+  ethReceivedFromContract: 0 }
+   */
+  // todo: add assert
+  it('should check stats for the contract from upgradable exchange', async () => {
+    const {protocol, web3: {address: from}} = availableUsers[userKey];
+    const {campaignAddress} = storage;
+    let stats = await protocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
+    // console.log(stats);
+  }).timeout(60000);
+
+  // todo: why `TOKEN_SELL`???
+  it('should get campaign type by address', async () => {
+    const {protocol} = availableUsers[userKey];
+    const {campaignAddress} = storage;
+    const campaignType = await protocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
+    expect(campaignType).to.be.equal("TOKEN_SELL");
   }).timeout(60000);
 }

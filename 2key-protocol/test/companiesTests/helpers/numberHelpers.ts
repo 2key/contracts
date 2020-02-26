@@ -1,4 +1,4 @@
-// TODO: need to decide how we should round numbers for compare
+import {expect} from 'chai';
 
 export function prepareNumberForCompare(number: number) {
   return Number.parseFloat(
@@ -16,3 +16,10 @@ export function rewardCalc(reward: number, cutChain: Array<number>) {
   return resultReward;
 }
 
+const tolerance = 0.01;
+
+export function expectEqualNumbers(value: number, compareWith: number){
+  expect(value)
+    .to.be.lte(compareWith + tolerance)
+    .to.be.gte(compareWith - tolerance)
+}
