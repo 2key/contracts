@@ -32,8 +32,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	mapping(address => uint) activeInfluencer2idx;
 	//Selector if inventory is added
 	bool isInventoryAdded;
-	// Mapping representing if rewards are withdrawn
-	mapping(address => bool) areRewardsWithdrawn;
 	// Dollar to 2key rate in WEI at the moment of adding inventory
 	uint public usd2KEYrateWei;
 	// Variable to let us know if rewards have been bought with Ether
@@ -233,13 +231,14 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyMaintainer
 	{
 		for(uint i=0; i<influencers.length; i++) {
-			if(areRewardsWithdrawn[influencers[i]]) {
-				// Get the influencer balance
-				uint balance = referrerPlasma2Balances2key[influencers[i]];
+			// Get the influencer balance
+			uint balance = referrerPlasma2Balances2key[influencers[i]];
+			// If there's some balance then proceed
+			if(balance > 0) {
 				// Set balance to be 0
 				referrerPlasma2Balances2key[influencers[i]] = 0;
-                // Reduce reserved amount for rewards
-                reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
+				// Reduce reserved amount for rewards
+				reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
 				// Pay fee
 				payFeeForRegistration(influencers[i], balance);
 			}
