@@ -5,20 +5,26 @@ import {IAcquisitionCampaignMeta} from "../../src/acquisition/interfaces";
 class TestStorage {
 
   // todo: maybe counters can be totally replaced by arrays check getCounter usage after cleanup
-  private counters = {};
+  counters = {};
 
-  private arrays = {};
+  arrays = {};
 
-  private campaignObj: IAcquisitionCampaignMeta;
+  campaignObj: IAcquisitionCampaignMeta;
 
-  private userData = {};
+  userData = {};
 
-  incrementCounter(key) {
-    this.counters[key] = (this[key] || 0) + 1;
+  contractorKey: string = undefined;
+
+  constructor(contractorKey) {
+    this.contractorKey = contractorKey;
   }
 
-  decrementCounter(key) {
-    this.counters[key] = (this[key] || 0) - 1;
+  counterIncrease(key, amount = 1) {
+    this.counters[key] = (this[key] || 0) + amount;
+  }
+
+  counterDecrease(key, amount = 1) {
+    this.counters[key] = (this[key] || 0) - amount;
   }
 
   getCounter(key) {
@@ -43,8 +49,8 @@ class TestStorage {
     );
   }
 
-  getArray(key) {
-    return this.arrays[key];
+  getArray(key): [] {
+    return this.arrays[key] || [];
   }
 
   set campaign(value: IAcquisitionCampaignMeta) {
