@@ -474,19 +474,17 @@ export default function userTests(
     }).timeout(60000);
   }
 
-  /**
-   * todo: Probably getStatusForTheContract result should be changed before and after
-   */
-
   if (actions.includes(campaignUserActions.hedgingEth)) {
     it(`should hedging all available ether (${userKey})`, async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
+      const {campaignAddress} = storage;
 
-      const upgradableExchangeBalance = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
+      const {balance:{ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
+      const amountForHedge =  parseFloat(ETH.toString());
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.UpgradableExchange.startHedgingEth(
-          parseFloat(upgradableExchangeBalance.balance.ETH.toString()), hedgeRate, address
+          amountForHedge, hedgeRate, address
         ),
       );
 
@@ -586,8 +584,8 @@ export default function userTests(
        unlockTimestamp: 1,
        lockupsAddress: '0xb44457f7964e55ef2a4bd292c2f6973832589d4d'
      }
-     protocol.getBalance results
-     ETH                 2KEY
+     protocol.getBalance
+     results       ETH                     2KEY
      before: 1.70991167452e+21, 5.7894736842105263157893e+22
      after:          0          1.7968833333333333333333356e+25
      */
@@ -688,7 +686,21 @@ export default function userTests(
     }).timeout(60000);
   }
 
-  // probably useful for referrer
+  /**
+  {
+    amountConverterSpentETH: 0,
+    referrerRewards: 1666.6666666666667,
+    tokensBought: 0,
+    isConverter: false,
+    isReferrer: true,
+    isJoined: true,
+    username: 'gmail',
+    fullName: '7YwD8IUQcly0KwM5Jc+IZw==',
+    email: 'RY6B9WJVMQK0tajTtW3jWw==',
+    ethereumOf: '0xf3c7641096bc9dc50d94c572bb455e56efc85412',
+    converterState: 'NOT_CONVERTER'
+  }
+   */
   // todo: add assertion
   if (actions.includes(campaignUserActions.checkStatistic)) {
     it(`should get statistics for ${userKey}`, async () => {
@@ -707,17 +719,11 @@ export default function userTests(
 
   if (actions.includes(campaignUserActions.checkCampaignMetric)) {
     /**
-     * todo: assertion
-     totalBought(pin):66048.639
-     totalAvailable(pin):66048.639
-     totalLocked(pin):0
-     totalWithdrawn(pin):0
-     */
-    /**
-     { totalBought: 0,
-  totalAvailable: 0,
+     * todo: implement assertion after new storage implementation
+     { totalBought: 6052.631578947368,
+  totalAvailable: 789.4736842105264,
   totalLocked: 0,
-  totalWithdrawn: 0 }
+  totalWithdrawn: 5263.1578947368425 }
      */
     it(`should get converter metrics per campaign`, async () => {
       const {protocol, address} = availableUsers[userKey];
