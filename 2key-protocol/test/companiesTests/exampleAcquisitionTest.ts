@@ -325,7 +325,7 @@ describe(
     );
     usersActions(
       {
-        userKey: storage.contractorKey,
+        userKey: userIds.test4,
         actions: [
           campaignUserActions.checkCampaignMetric,
         ],
