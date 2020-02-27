@@ -1,18 +1,18 @@
 import '../../constants/polifils';
-import getCampaignData from "../helpers/getCampaignData";
+import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
 import singletons from "../../../src/contracts/singletons";
 import {incentiveModels, vestingSchemas} from "../../constants/smallConstants";
 import TestStorage from "../../helperClasses/TestStorage";
-import createCampaign from "../helpers/createCampaign";
+import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
-import checkCampaign from "../reusable/checkCampaign";
+import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
 import usersActions from "../reusable/usersActions";
 import {campaignUserActions} from "../constants/constants";
 
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
 
-const campaignData = getCampaignData(
+const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
@@ -60,10 +60,10 @@ describe(
 
     before(function () {
       this.timeout(60000);
-      return createCampaign(campaignData, storage);
+      return createAcquisitionCampaign(campaignData, storage);
     });
 
-    checkCampaign(campaignData, storage);
+    checkAcquisitionCampaign(campaignData, storage);
 
     usersActions(
       {

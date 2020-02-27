@@ -1,20 +1,20 @@
 import '../constants/polifils';
 import availableUsers, {userIds} from "../constants/availableUsers";
 import singletons from "../../src/contracts/singletons";
-import createCampaign from "./helpers/createCampaign";
-import checkCampaign from "./reusable/checkCampaign";
+import createAcquisitionCampaign from "./helpers/createAcquisitionCampaign";
+import checkAcquisitionCampaign from "./reusable/checkAcquisitionCampaign";
 import usersActions from "./reusable/usersActions";
 import {campaignUserActions} from "./constants/constants";
 import TestStorage from "../helperClasses/TestStorage";
 import {availableStorageUserFields} from "../constants/storageConstants";
 import {incentiveModels, vestingSchemas} from "../constants/smallConstants";
-import getCampaignData from "./helpers/getCampaignData";
+import getAcquisitionCampaignData from "./helpers/getAcquisitionCampaignData";
 
 const {env} = process;
 const networkId = parseInt(env.MAIN_NET_ID, 10);
 const contributionSize = 5;
 
-const campaignData = getCampaignData(
+const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
@@ -56,16 +56,16 @@ const campaignUsers = {
 };
 
 describe(
-  'CryptoReleaseInOneDayManually',
+  'exampleAcquisitionTest.ts',
   () => {
     const storage = new TestStorage(userIds.aydnep);
 
     before(function () {
       this.timeout(60000);
-      return createCampaign(campaignData, storage);
+      return createAcquisitionCampaign(campaignData, storage);
     });
 
-    checkCampaign(campaignData, storage);
+    checkAcquisitionCampaign(campaignData, storage);
 
     usersActions(
       {
