@@ -28,11 +28,11 @@ const campaignData = getCampaignData(
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
     vestingAmount: vestingSchemas.baseAndBonus,
-    isKYCRequired: true,
+    isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 1,
-    numberOfDaysBetweenPortions: 0,
+    numberOfVestingPortions: 5,
+    numberOfDaysBetweenPortions: 90,
     bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
     maxDistributionDateShiftInDays: 0,
   }
@@ -54,7 +54,7 @@ const campaignUsers = {
 };
 
 describe(
-  'ETH, with bonus, with KYC, all tokens released in DD, manual incentive [Tokensale]',
+  'Token Lockup [WITH Campaign Bonus] ETH- All Tokens Released in 5 Equal Parts every 90 Days',
   () => {
     const storage = new TestStorage(userIds.aydnep);
 
@@ -87,42 +87,11 @@ describe(
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
         ],
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
         campaignData,
         storage,
         contribution: conversionSize,
       }
     );
-
-    usersActions(
-      {
-        userKey: userIds.renata,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-          campaignUserActions.cancelConvert,
-        ],
-        campaignData,
-        storage,
-        contribution: conversionSize,
-      }
-    );
-
-      usersActions(
-        {
-            userKey: storage.contractorKey,
-            secondaryUserKey: userIds.test4,
-            actions: [
-                campaignUserActions.checkPendingConverters,
-                campaignUserActions.approveConverter,
-            ],
-            campaignData,
-            storage,
-        }
-      );
 
     usersActions(
       {

@@ -9,7 +9,7 @@ import {
   availableStorageCounters,
   availableStorageUserFields
 } from "../../constants/storageConstants";
-import {conversionStatuses, hedgeRate, vestingSchemas} from "../../constants/smallConstants";
+import {conversionStatuses, hedgeRate, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
 import {daysToSeconds} from "../helpers/dates";
 import {calcUnlockingDates, calcWithdrawAmounts} from "../helpers/calcHelpers";
 import web3Switcher from "../../helpers/web3Switcher";
@@ -48,7 +48,7 @@ export default function userTests(
       expect(linkOwnerAddress).to.be.eq(refAddress);
     }).timeout(60000);
 
-    if (cutChain) {
+    if (cutChain && campaignData.incentiveModel === incentiveModels.manual) {
       it(`should check correct referral value after visit by ${userKey}`, async () => {
         const {protocol, web3: {address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
@@ -58,14 +58,13 @@ export default function userTests(
           campaignAddress,
           address, refLink.link, refLink.fSecret,
         );
-        console.log({maxReward, userKey, secondaryUserKey});
-        // TODO: uncomment after test7 completed
-        // expect(maxReward).to.be.eq(
-        //   rewardCalc(
-        //     campaignData.maxReferralRewardPercentWei,
-        //     cutChain,
-        //   ),
-        // );
+
+        expect(maxReward).to.be.eq(
+          rewardCalc(
+            campaignData.maxReferralRewardPercentWei,
+            cutChain,
+          ),
+        );
       }).timeout(60000);
     }
   }
@@ -118,6 +117,7 @@ export default function userTests(
         `${campaignUserActions.joinAndConvert} action required parameter missing for user ${userKey}`
       );
     }
+    // todo: isFiatOnly = true, error appears: "gas required exceeds allowance or always failing transaction"
 
     it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
@@ -342,10 +342,16 @@ export default function userTests(
         campaignData.numberOfDaysBetweenPortions,
       );
       const withBase = campaignData.vestingAmount === vestingSchemas.baseAndBonus;
+      let portionsQty =  campaignData.numberOfVestingPortions;
+
+      if(campaignData.maxConverterBonusPercentWei === 0 && !withBase){
+        // in this case base tokens release in DD, and we don't have any bonus for create portion withdraws
+        portionsQty = 0;
+      }
 
       const unlockingDates = calcUnlockingDates(
         campaignData.tokenDistributionDate,
-        campaignData.numberOfVestingPortions,
+        portionsQty,
         portionIntervalInSeconds,
         distributionShiftInSeconds,
         withBase,
@@ -361,12 +367,12 @@ export default function userTests(
       const withdrawAmounts = calcWithdrawAmounts(
         conversionObj.baseTokenUnits,
         conversionObj.bonusTokenUnits,
-        campaignData.numberOfVestingPortions,
+        portionsQty,
         withBase,
       );
       const withdrawContractsQuantity = withBase
-        ? campaignData.numberOfVestingPortions
-        : campaignData.numberOfVestingPortions + 1; // added first
+        ? portionsQty
+        : portionsQty + 1; // added first
 
       const purchase = await protocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress, conversionId, web3Address);
 
