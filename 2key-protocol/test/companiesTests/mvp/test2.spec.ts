@@ -5,13 +5,11 @@ import {incentiveModels, vestingSchemas} from "../../constants/smallConstants";
 import TestStorage from "../../helperClasses/TestStorage";
 import createCampaign from "../helpers/createCampaign";
 import {userIds} from "../../constants/availableUsers";
-import checkCampaign from "../reusable/checkCampaign.spec";
-import usersActions from "../reusable/usersActions.spec";
+import checkCampaign from "../reusable/checkCampaign";
+import usersActions from "../reusable/usersActions";
 import {campaignUserActions} from "../constants/constants";
 
-/**
- * ETH, with bonus, with KYC, all tokens released in 10 equal parts every 30 days, starting 90 days after DD, manual incentive [Tokensale]
- */
+
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
 
@@ -30,7 +28,7 @@ const campaignData = getCampaignData(
     twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
-    vestingAmount: vestingSchemas.bonus,
+    vestingAmount: vestingSchemas.baseAndBonus,
     isKYCRequired: true,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,

@@ -28,7 +28,7 @@ const campaignData = getCampaignData(
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
     vestingAmount: vestingSchemas.baseAndBonus,
-    isKYCRequired: true,
+    isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
     numberOfVestingPortions: 1,
@@ -87,42 +87,11 @@ describe(
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
         ],
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
         campaignData,
         storage,
         contribution: conversionSize,
       }
     );
-
-    usersActions(
-      {
-        userKey: userIds.renata,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-          campaignUserActions.cancelConvert,
-        ],
-        campaignData,
-        storage,
-        contribution: conversionSize,
-      }
-    );
-
-      usersActions(
-        {
-            userKey: storage.contractorKey,
-            secondaryUserKey: userIds.test4,
-            actions: [
-                campaignUserActions.checkPendingConverters,
-                campaignUserActions.approveConverter,
-            ],
-            campaignData,
-            storage,
-        }
-      );
 
     usersActions(
       {

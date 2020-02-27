@@ -16,7 +16,7 @@ const campaignData = getCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
-    maxConverterBonusPercent: 100,
+    maxConverterBonusPercent: 0,
     pricePerUnitInETHOrUSD: 0.095,
     maxReferralRewardPercent: 20,
     minContributionETHorUSD: 5,
@@ -28,11 +28,11 @@ const campaignData = getCampaignData(
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
     vestingAmount: vestingSchemas.baseAndBonus,
-    isKYCRequired: true,
+    isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 1,
-    numberOfDaysBetweenPortions: 0,
+    numberOfVestingPortions: 10,
+    numberOfDaysBetweenPortions: 40,
     bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
     maxDistributionDateShiftInDays: 0,
   }
@@ -54,7 +54,7 @@ const campaignUsers = {
 };
 
 describe(
-  'ETH, with bonus, with KYC, all tokens released in DD, manual incentive [Tokensale]',
+  'Token Lockup  ETH - All Tokens Released in 10 Equal Parts every 40 Days',
   () => {
     const storage = new TestStorage(userIds.aydnep);
 
@@ -87,42 +87,11 @@ describe(
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
         ],
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
         campaignData,
         storage,
         contribution: conversionSize,
       }
     );
-
-    usersActions(
-      {
-        userKey: userIds.renata,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-          campaignUserActions.cancelConvert,
-        ],
-        campaignData,
-        storage,
-        contribution: conversionSize,
-      }
-    );
-
-      usersActions(
-        {
-            userKey: storage.contractorKey,
-            secondaryUserKey: userIds.test4,
-            actions: [
-                campaignUserActions.checkPendingConverters,
-                campaignUserActions.approveConverter,
-            ],
-            campaignData,
-            storage,
-        }
-      );
 
     usersActions(
       {
