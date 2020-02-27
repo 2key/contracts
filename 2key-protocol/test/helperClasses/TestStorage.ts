@@ -1,5 +1,7 @@
-import {availableStorageArrays, availableStorageCounters} from "../constants/storageConstants";
+
 import {IAcquisitionCampaignMeta} from "../../src/acquisition/interfaces";
+import {campaignTypes} from "../constants/smallConstants";
+import {IDonationMeta} from "../../src/donation/interfaces";
 
 
 class TestStorage {
@@ -9,14 +11,17 @@ class TestStorage {
 
   arrays = {};
 
-  campaignObj: IAcquisitionCampaignMeta;
+  campaignObj: IAcquisitionCampaignMeta | IDonationMeta;
 
   userData = {};
 
   contractorKey: string = undefined;
 
-  constructor(contractorKey) {
+  campaignType: string = undefined;
+
+  constructor(contractorKey, campaignType = campaignTypes.acquisition) {
     this.contractorKey = contractorKey;
+    this.campaignType = campaignType;
   }
 
   counterIncrease(key, amount = 1) {
@@ -53,7 +58,7 @@ class TestStorage {
     return this.arrays[key] || [];
   }
 
-  set campaign(value: IAcquisitionCampaignMeta) {
+  set campaign(value: IAcquisitionCampaignMeta | IDonationMeta) {
     this.campaignObj = value;
   }
 

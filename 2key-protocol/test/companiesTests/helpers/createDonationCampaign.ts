@@ -1,11 +1,12 @@
 import availableUsers, {userIds} from "../../constants/availableUsers";
 import {availableStorageUserFields} from "../../constants/storageConstants";
+import {ICreateCampaign} from "../../../src/donation/interfaces";
 import {campaignTypes} from "../../constants/smallConstants";
 
-export default async function createAcquisitionCampaign(campaignData, storage) {
+export default async function createDonationCampaign(campaignData: ICreateCampaign, storage) {
   const {web3: {address}, protocol} = availableUsers[storage.contractorKey];
 
-  const campaign = await protocol.AcquisitionCampaign.create(
+  const campaign = await protocol.DonationCampaign.create(
     campaignData,
     campaignData,
     {},
@@ -26,6 +27,4 @@ export default async function createAcquisitionCampaign(campaignData, storage) {
     availableStorageUserFields.link,
     {link: campaignPublicLinkKey, fSecret: fSecret},
   );
-
-  storage.campaignType = campaignTypes.acquisition;
 }

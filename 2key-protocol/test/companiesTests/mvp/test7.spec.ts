@@ -32,7 +32,7 @@ const campaignData = getAcquisitionCampaignData(
     isFiatConversionAutomaticallyApproved: true,
     vestingAmount: vestingSchemas.bonus,
     isKYCRequired: true,
-    incentiveModel: incentiveModels.noReferalReward,
+    incentiveModel: incentiveModels.vanillaAverageLast3x,
     tokenDistributionDate: 1,
     numberOfVestingPortions: 1,
     numberOfDaysBetweenPortions: 0,
