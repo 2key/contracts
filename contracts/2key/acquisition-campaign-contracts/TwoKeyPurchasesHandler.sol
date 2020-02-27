@@ -201,7 +201,7 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         require(_newDate.sub(maxDistributionDateShiftInDays.mul(1 days)) <= tokenDistributionDate);
         require(now < tokenDistributionDate);
 
-        uint shift = tokenDistributionDate.sub(_newDate);
+        uint shift = _newDate.sub(tokenDistributionDate);
 
         // If the date is changed shifting all tokens unlocking dates for the difference
         for(uint i=0; i<numberOfVestingPortions;i++) {
