@@ -5,7 +5,7 @@ import {TestIAcquisitionCampaign} from "../../typings/TestIAcquisitionCampaign";
 
 const {protocol: deployerProtocol} = availableUsers.deployer;
 
-export default function getCampaignData(
+export default function getAcquisitionCampaignData(
   {
     amount,
     campaignInventory,

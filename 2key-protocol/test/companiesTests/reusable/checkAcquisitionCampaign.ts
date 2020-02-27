@@ -6,7 +6,7 @@ import TestStorage from "../../helperClasses/TestStorage";
 import {availableStorageUserFields} from "../../constants/storageConstants";
 
 
-export default function checkCampaign(campaignParams, storage: TestStorage) {
+export default function checkAcquisitionCampaign(campaignParams, storage: TestStorage) {
   const userKey = storage.contractorKey;
   it('validate non singleton hash', async () => {
     const {protocol} = availableUsers[userKey];
