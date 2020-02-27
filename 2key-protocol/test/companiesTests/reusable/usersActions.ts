@@ -9,7 +9,14 @@ import {
   availableStorageCounters,
   availableStorageUserFields
 } from "../../constants/storageConstants";
-import {conversionStatuses, hedgeRate, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
+import {
+  campaignTypes,
+  campaignTypeToInstance,
+  conversionStatuses, exchangeRates,
+  hedgeRate,
+  incentiveModels,
+  vestingSchemas
+} from "../../constants/smallConstants";
 import {daysToSeconds} from "../helpers/dates";
 import {calcUnlockingDates, calcWithdrawAmounts} from "../helpers/calcHelpers";
 import web3Switcher from "../../helpers/web3Switcher";
@@ -32,6 +39,7 @@ export default function userTests(
     cutChain?: Array<number>,
   }
 ): void {
+  const campaignContract = campaignTypeToInstance[storage.campaignType];
 
   if (actions.includes(campaignUserActions.visit)) {
     it(`should visit campaign as ${userKey}`, async () => {
@@ -39,9 +47,11 @@ export default function userTests(
       const {protocol} = availableUsers[userKey];
       const {campaignAddress, campaign: {contractor}} = storage;
       const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+      const campaignContract = campaignTypeToInstance[storage.campaignType];
 
-      await protocol.AcquisitionCampaign
+      await protocol[campaignContract]
         .visit(campaignAddress, refLink.link, refLink.fSecret);
+
       const linkOwnerAddress = await protocol.PlasmaEvents.getVisitedFrom(
         campaignAddress, contractor, protocol.plasmaAddress,
       );
@@ -54,21 +64,24 @@ export default function userTests(
         const {campaignAddress} = storage;
         const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
 
-        let maxReward = await protocol.AcquisitionCampaign.getEstimatedMaximumReferralReward(
+        let maxReward = await protocol[campaignContract].getEstimatedMaximumReferralReward(
           campaignAddress,
           address, refLink.link, refLink.fSecret,
         );
 
+        const initialPercent = storage.campaignType === campaignTypes.donation
+          ? campaignData.maxReferralRewardPercent
+          : campaignData.maxReferralRewardPercentWei;
+
         expect(maxReward).to.be.eq(
           rewardCalc(
-            campaignData.maxReferralRewardPercentWei,
+            initialPercent,
             cutChain,
           ),
         );
       }).timeout(60000);
     }
   }
-
 
 
   if (actions.includes(campaignUserActions.join)) {
@@ -83,7 +96,7 @@ export default function userTests(
       const {campaignAddress} = storage;
       const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
 
-      const hash = await protocol.AcquisitionCampaign.join(
+      const hash = await protocol[campaignContract].join(
         campaignAddress,
         address, {
           cut,
@@ -118,46 +131,101 @@ export default function userTests(
       );
     }
     // todo: isFiatOnly = true, error appears: "gas required exceeds allowance or always failing transaction"
+    if (storage.campaignType === campaignTypes.acquisition) {
+      it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
+        const {protocol, web3: {address}} = availableUsers[userKey];
+        const {campaignAddress} = storage;
+        const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
 
-    it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
-      const {protocol, web3: {address}} = availableUsers[userKey];
-      const {campaignAddress} = storage;
-      const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+        const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
+          campaignAddress,
+          address
+        );
 
-      const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
+        const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
+          campaignAddress,
+          campaignData.isFiatOnly,
+          protocol.Utils.toWei((contribution), 'ether')
+        );
 
-      const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
-        campaignAddress,
-        campaignData.isFiatOnly,
-        protocol.Utils.toWei((contribution), 'ether')
-      );
+        const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
+          campaignAddress,
+          protocol.Utils.toWei(contribution, 'ether'),
+          refLink.link,
+          address,
+          {fSecret: refLink.fSecret},
+        );
 
-      const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
-        campaignAddress,
-        protocol.Utils.toWei(contribution, 'ether'),
-        refLink.link,
-        address,
-        {fSecret: refLink.fSecret},
-      );
+        await protocol.Utils.getTransactionReceiptMined(txHash);
 
-      await protocol.Utils.getTransactionReceiptMined(txHash);
+        const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
+          campaignAddress,
+          address
+        );
 
-      const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
-        campaignAddress,
-        address
-      );
+        expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
 
-      expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
+        if (campaignData.isKYCRequired) {
+          storage.arrayPush(availableStorageArrays.pendingConverters, address);
+          storage.counterIncrease(availableStorageCounters.pendingConversions);
+        }
+      }).timeout(60000);
+    }
 
-      if (campaignData.isKYCRequired) {
-        storage.arrayPush(availableStorageArrays.pendingConverters, address);
-        storage.counterIncrease(availableStorageCounters.pendingConversions);
-      }
-    }).timeout(60000);
+    if (storage.campaignType === campaignTypes.donation) {
+      it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
+        const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+        const {campaignAddress} = storage;
+        const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+
+        const initialAmountOfTokens = await protocol.DonationCampaign.getAmountConverterSpent(
+          campaignAddress,
+          address
+        );
+
+        await protocol.Utils.getTransactionReceiptMined(
+          await protocol.DonationCampaign.joinAndConvert(
+            campaignAddress,
+            protocol.Utils.toWei(contribution, 'ether'),
+            refLink.link,
+            web3Address,
+            {fSecret: refLink.fSecret},
+          )
+        );
+
+        const amountOfTokensAfterConvert = await protocol.DonationCampaign.getAmountConverterSpent(
+          campaignAddress,
+          address
+        );
+
+// todo: correct only for first conversion, should be moved to storage
+        expectEqualNumbers(amountOfTokensAfterConvert, contribution);
+        //
+        if (campaignData.isKYCRequired) {
+          storage.arrayPush(availableStorageArrays.pendingConverters, web3Address);
+          storage.counterIncrease(availableStorageCounters.pendingConversions);
+        }
+      }).timeout(60000);
+    }
   }
+
+  // todo: possible to user correctly only after correct storage implementation
+  // if (actions.includes(campaignUserActions.checkConverterSpent)) {
+  //   if (storage.campaignType !== campaignTypes.donation) {
+  //     throw new Error(`${campaignUserActions.checkConverterSpent} action available only for donation`)
+  //   }
+  //
+  //   it('should get how much user have spent', async () => {
+  //     const {protocol, address} = availableUsers[userKey];
+  //     const {campaignAddress} = storage;
+  //
+  //     const userSpent = 0;
+  //
+  //     let amountSpent = await protocol.DonationCampaign.getAmountConverterSpent(campaignAddress, address);
+  //     expect(amountSpent).to.be.equal(userSpent);
+  //   }).timeout(60000);
+  // }
+
   /**
    * TODO: conversion id or index should be provided as param
    * TODO: check for current user balance (maybe deps issue)
@@ -172,7 +240,7 @@ export default function userTests(
         const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
 
-        const conversionIds = await protocol.AcquisitionCampaign.getConverterConversionIds(
+        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
           campaignAddress, address, web3Address,
         );
 
@@ -181,14 +249,14 @@ export default function userTests(
         const conversionId = conversionIds[0];
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol.AcquisitionCampaign.converterCancelConversion(
+          await protocol[campaignContract].converterCancelConversion(
             campaignAddress,
             conversionId,
             web3Address,
           )
         );
 
-        const conversionObj = await protocol.AcquisitionCampaign.getConversion(
+        const conversionObj = await protocol[campaignContract].getConversion(
           campaignAddress, conversionId, web3Address,
         );
 
@@ -204,7 +272,7 @@ export default function userTests(
         const {protocol, web3: {address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
 
-        const addresses = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
+        const addresses = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);
 
         expect(addresses).to.deep.equal(storage.getArray(availableStorageArrays.pendingConverters));
       }).timeout(60000);
@@ -218,14 +286,14 @@ export default function userTests(
         const {address: warAddress, web3: {address: secondaryWeb3Address}} = availableUsers[secondaryUserKey];
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol.AcquisitionCampaign.approveConverter(campaignAddress, warAddress, address),
+          await protocol[campaignContract].approveConverter(campaignAddress, warAddress, address),
         );
 
         storage.arrayRemove(availableStorageArrays.pendingConverters, secondaryWeb3Address);
         storage.arrayPush(availableStorageArrays.approvedConverters, secondaryWeb3Address);
 
-        const approved = await protocol.AcquisitionCampaign.getApprovedConverters(campaignAddress, address);
-        const pending = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
+        const approved = await protocol[campaignContract].getApprovedConverters(campaignAddress, address);
+        const pending = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);
 
         expect(approved)
           .to.have.deep.members(storage.getArray(availableStorageArrays.approvedConverters))
@@ -243,14 +311,14 @@ export default function userTests(
         const {campaignAddress} = storage;
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol.AcquisitionCampaign.rejectConverter(campaignAddress, warAddress, address)
+          await protocol[campaignContract].rejectConverter(campaignAddress, warAddress, address)
         );
 
         storage.arrayRemove(availableStorageArrays.pendingConverters, secondaryWeb3Address);
         storage.arrayPush(availableStorageArrays.rejectedConverters, secondaryWeb3Address);
 
-        const rejected = await protocol.AcquisitionCampaign.getAllRejectedConverters(campaignAddress, address);
-        const pending = await protocol.AcquisitionCampaign.getAllPendingConverters(campaignAddress, address);
+        const rejected = await protocol[campaignContract].getAllRejectedConverters(campaignAddress, address);
+        const pending = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);
 
         expect(rejected)
           .to.have.deep.members(storage.getArray(availableStorageArrays.rejectedConverters))
@@ -269,7 +337,7 @@ export default function userTests(
         let error = false;
         try {
           await protocol.Utils.getTransactionReceiptMined(
-            await protocol.AcquisitionCampaign.joinAndConvert(
+            await protocol[campaignContract].joinAndConvert(
               campaignAddress,
               protocol.Utils.toWei(contribution, 'ether'),
               refLink.link,
@@ -291,17 +359,17 @@ export default function userTests(
         const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
 
-        const conversionIds = await protocol.AcquisitionCampaign.getConverterConversionIds(
+        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
           campaignAddress, address, web3Address,
         );
 
         const conversionId = conversionIds[0];
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol.AcquisitionCampaign.executeConversion(campaignAddress, conversionId, web3Address)
+          await protocol[campaignContract].executeConversion(campaignAddress, conversionId, web3Address)
         );
 
-        const conversionObj = await protocol.AcquisitionCampaign.getConversion(
+        const conversionObj = await protocol[campaignContract].getConversion(
           campaignAddress, conversionId, web3Address,
         );
 
@@ -342,9 +410,9 @@ export default function userTests(
         campaignData.numberOfDaysBetweenPortions,
       );
       const withBase = campaignData.vestingAmount === vestingSchemas.baseAndBonus;
-      let portionsQty =  campaignData.numberOfVestingPortions;
+      let portionsQty = campaignData.numberOfVestingPortions;
 
-      if(campaignData.maxConverterBonusPercentWei === 0 && !withBase){
+      if (campaignData.maxConverterBonusPercentWei === 0 && !withBase) {
         // in this case base tokens release in DD, and we don't have any bonus for create portion withdraws
         portionsQty = 0;
       }
@@ -356,12 +424,12 @@ export default function userTests(
         distributionShiftInSeconds,
         withBase,
       );
-      const conversionIds = await protocol.AcquisitionCampaign.getConverterConversionIds(
+      const conversionIds = await protocol[campaignContract].getConverterConversionIds(
         campaignAddress, address, web3Address,
       );
       const conversionId = conversionIds[0];
 
-      const conversionObj = await protocol.AcquisitionCampaign.getConversion(
+      const conversionObj = await protocol[campaignContract].getConversion(
         campaignAddress, conversionId, web3Address,
       );
       const withdrawAmounts = calcWithdrawAmounts(
@@ -374,7 +442,7 @@ export default function userTests(
         ? portionsQty
         : portionsQty + 1; // added first
 
-      const purchase = await protocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress, conversionId, web3Address);
+      const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversionId, web3Address);
 
       /**
        * todo: looks like bug
@@ -405,6 +473,10 @@ export default function userTests(
       storage.counterIncrease(availableStorageCounters.raisedFundsEthWei, conversionObj.conversionAmount);
     }).timeout(60000);
   }
+
+  /**
+   * todo: Probably getStatusForTheContract result should be changed before and after
+   */
 
   if (actions.includes(campaignUserActions.hedgingEth)) {
     it(`should hedging all available ether (${userKey})`, async () => {
@@ -467,7 +539,7 @@ export default function userTests(
       const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
 
-      const summary = await protocol.AcquisitionCampaign.getCampaignSummary(campaignAddress, address);
+      const summary = await protocol[campaignContract].getCampaignSummary(campaignAddress, address);
 
       expectEqualNumbers(
         summary.pendingConverters,
@@ -498,7 +570,7 @@ export default function userTests(
       const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
 
-      let moderatorTotalEarnings = await protocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress, address);
+      let moderatorTotalEarnings = await protocol[campaignContract].getModeratorTotalEarnings(campaignAddress, address);
       console.log('Moderator total earnings in 2key-tokens are: ' + moderatorTotalEarnings);
       // Moderator total earnings in 2key-tokens are: 163.33333333333334
     }).timeout(60000);
@@ -525,13 +597,13 @@ export default function userTests(
       const conversionIndex = 0;
       const portionIndex = 0;
 
-      const conversionIds = await protocol.AcquisitionCampaign.getConverterConversionIds(
+      const conversionIds = await protocol[campaignContract].getConverterConversionIds(
         campaignAddress, address, web3Address,
       );
       const conversionId = conversionIds[conversionIndex];
 
       await protocol.Utils.getTransactionReceiptMined(
-        await protocol.AcquisitionCampaign.withdrawTokens(
+        await protocol[campaignContract].withdrawTokens(
           campaignAddress,
           conversionId,
           portionIndex,
@@ -539,7 +611,7 @@ export default function userTests(
         )
       );
 
-      const purchase = await protocol.AcquisitionCampaign.getPurchaseInformation(campaignAddress, conversionId, web3Address);
+      const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversionId, web3Address);
 
       expect(purchase.isPortionWithdrawn[portionIndex]).to.be.eq(true);
     }).timeout(60000);
@@ -555,7 +627,7 @@ export default function userTests(
       const {address: secondaryAddress} = availableUsers[secondaryUserKey];
       const {campaignAddress} = storage;
 
-      const withdrawable = await protocol.AcquisitionCampaign.getAmountReferrerCanWithdraw(
+      const withdrawable = await protocol[campaignContract].getAmountReferrerCanWithdraw(
         campaignAddress, secondaryAddress, address,
       );
       /*
@@ -576,10 +648,10 @@ export default function userTests(
       const {campaignAddress} = storage;
 
       await protocol.Utils.getTransactionReceiptMined(
-        await protocol.AcquisitionCampaign.contractorWithdraw(campaignAddress, address)
+        await protocol[campaignContract].contractorWithdraw(campaignAddress, address)
       );
 
-      const contractorBalance = await protocol.AcquisitionCampaign.getContractorBalance(campaignAddress, address);
+      const contractorBalance = await protocol[campaignContract].getContractorBalance(campaignAddress, address);
 
       expect(contractorBalance.available).to.be.eq(0);
     }).timeout(60000);
@@ -593,15 +665,15 @@ export default function userTests(
 
       const {balance: before} = await protocol.getBalance(address, campaignData.assetContractERC20);
       await protocol.Utils.getTransactionReceiptMined(
-        await protocol.AcquisitionCampaign.moderatorAndReferrerWithdraw(
+        await protocol[campaignContract].moderatorAndReferrerWithdraw(
           campaignAddress,
           false,
           address,
         )
       );
       const {balance: after} = await protocol.getBalance(address, campaignData.assetContractERC20);
-console.log(before.ETH.toString(), before['2KEY'].toString());
-console.log(after.ETH.toString(), after['2KEY'].toString());
+      console.log(before.ETH.toString(), before['2KEY'].toString());
+      console.log(after.ETH.toString(), after['2KEY'].toString());
 
     }).timeout(60000);
   }
@@ -611,7 +683,7 @@ console.log(after.ETH.toString(), after['2KEY'].toString());
       const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
 
-      const totalEarnings = await protocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress, address);
+      const totalEarnings = await protocol[campaignContract].getModeratorTotalEarnings(campaignAddress, address);
       console.log('Moderator total earnings: ' + totalEarnings);
     }).timeout(60000);
   }
@@ -623,7 +695,7 @@ console.log(after.ETH.toString(), after['2KEY'].toString());
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
 
-      let stats = await protocol.AcquisitionCampaign.getAddressStatistic(
+      let stats = await protocol[campaignContract].getAddressStatistic(
         campaignAddress,
         address,
         '0x0000000000000000000000000000000000000000',
@@ -651,7 +723,7 @@ console.log(after.ETH.toString(), after['2KEY'].toString());
       const {protocol, address} = availableUsers[userKey];
       const {campaignAddress} = storage;
 
-      let metrics = await protocol.AcquisitionCampaign.getConverterMetricsPerCampaign(
+      let metrics = await protocol[campaignContract].getConverterMetricsPerCampaign(
         campaignAddress, address);
       console.log(metrics);
     }).timeout(60000);
@@ -659,15 +731,34 @@ console.log(after.ETH.toString(), after['2KEY'].toString());
 
   if (actions.includes(campaignUserActions.checkERC20Balance)) {
     // todo: add assert
-    it(`should print balance of left ERC20 on the Acquisition contract`, async () => {
-      const {protocol} = availableUsers[userKey];
-      const {campaignAddress} = storage;
+    if (storage.campaignType === campaignTypes.acquisition) {
+      it(`should print balance of left ERC20 on the Acquisition contract`, async () => {
+        const {protocol} = availableUsers[userKey];
+        const {campaignAddress} = storage;
 
-      let balance = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, campaignAddress);
-      console.log(balance);
-      // 1229614.0350877193 ()
-      // 1234000 - 1229614.0350877193 = 4385.96491228
-    }).timeout(60000);
+        let balance = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, campaignAddress);
+        console.log(balance);
+        // 1229614.0350877193 ()
+        // 1234000 - 1229614.0350877193 = 4385.96491228
+      }).timeout(60000);
+    }
+
+    if (storage.campaignType === campaignTypes.donation) {
+      it('should proof that the invoice has been issued for executed conversion (Invoice tokens transfered)', async () => {
+        const {protocol} = availableUsers[userKey];
+        const {address: secondaryUserAddress} = availableUsers[secondaryUserKey];
+        // @ts-ignore
+        const {campaignAddress, campaign: {invoiceToken}} = storage;
+
+        let balance = await protocol.ERC20.getERC20Balance(invoiceToken, secondaryUserAddress);
+        // todo: value should be from storage or params
+        let expectedValue = 1;
+        if (campaignData.currency == 'USD') {
+          expectedValue *= exchangeRates.usd;
+        }
+        expect(balance).to.be.equal(expectedValue);
+      }).timeout(60000);
+    }
   }
 
   if (campaignData.isFiatOnly) {
@@ -683,19 +774,19 @@ console.log(after.ETH.toString(), after['2KEY'].toString());
         const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
         const {campaignAddress} = storage;
 
-        const signature = await protocol.AcquisitionCampaign.getSignatureFromLink(
+        const signature = await protocol[campaignContract].getSignatureFromLink(
           refLink.link, protocol.plasmaAddress, refLink.fSecret);
 
-        const conversionIdsBefore = await protocol.AcquisitionCampaign.getConverterConversionIds(
+        const conversionIdsBefore = await protocol[campaignContract].getConverterConversionIds(
           campaignAddress, address, web3Address);
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol.AcquisitionCampaign.convertOffline(
+          await protocol[campaignContract].convertOffline(
             campaignAddress, signature, web3Address, web3Address,
             contribution,
           )
         );
-        const conversionIdsAfter = await protocol.AcquisitionCampaign.getConverterConversionIds(
+        const conversionIdsAfter = await protocol[campaignContract].getConverterConversionIds(
           campaignAddress, address, web3Address);
 
         console.log({conversionIdsBefore, conversionIdsAfter});
@@ -712,13 +803,13 @@ console.log(after.ETH.toString(), after['2KEY'].toString());
         const {campaignAddress} = storage;
 
         // Return empty array for contractor
-        const conversionIds = await protocol.AcquisitionCampaign.getConverterConversionIds(
+        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
           campaignAddress, address, web3Address,
         );
         const conversionId = conversionIds[0];
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol.AcquisitionCampaign.executeConversion(campaignAddress, 4, web3Address)
+          await protocol[campaignContract].executeConversion(campaignAddress, 4, web3Address)
         );
       }).timeout(60000);
     }

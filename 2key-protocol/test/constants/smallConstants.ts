@@ -31,3 +31,14 @@ export const exchangeRates = {
 };
 
 export const hedgeRate = 1000;
+
+export const campaignTypes = {
+  acquisition: 'TOKEN_SELL',
+  donation: 'DONATION',
+};
+
+
+export const campaignTypeToInstance = {
+  [campaignTypes.acquisition]: 'AcquisitionCampaign',
+  [campaignTypes.donation]: 'DonationCampaign',
+};

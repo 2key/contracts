@@ -4,10 +4,19 @@ import availableUsers from "../../constants/availableUsers";
 import {IPrivateMetaInformation} from "../../../src/acquisition/interfaces";
 import TestStorage from "../../helperClasses/TestStorage";
 import {availableStorageUserFields} from "../../constants/storageConstants";
+import {campaignTypes} from "../../constants/smallConstants";
 
 
 export default function checkAcquisitionCampaign(campaignParams, storage: TestStorage) {
   const userKey = storage.contractorKey;
+
+  it('should check campaign type by address', async () => {
+    const {protocol} = availableUsers[userKey];
+    const {campaignAddress} = storage;
+    const campaignType = await protocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
+    expect(campaignType).to.be.equal(campaignTypes.acquisition);
+  }).timeout(60000);
+
   it('validate non singleton hash', async () => {
     const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
@@ -144,7 +153,9 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
   }).timeout(60000);
 
   // todo: assert
-  /*
+  /**
+   * related to  hedgingEth
+   *
   { ethWeiAvailableToHedge: 0,
   daiWeiAvailableToWithdraw: 0,
   daiWeiReceivedFromHedgingPerContract: 0,
@@ -158,13 +169,5 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
     const {campaignAddress} = storage;
     let stats = await protocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
     // console.log(stats);
-  }).timeout(60000);
-
-  // todo: why `TOKEN_SELL`???
-  it('should get campaign type by address', async () => {
-    const {protocol} = availableUsers[userKey];
-    const {campaignAddress} = storage;
-    const campaignType = await protocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
-    expect(campaignType).to.be.equal("TOKEN_SELL");
   }).timeout(60000);
 }
