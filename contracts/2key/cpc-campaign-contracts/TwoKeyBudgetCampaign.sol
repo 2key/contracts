@@ -44,7 +44,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	uint public moderatorTotalEarnings;
 	// Amount representing how much moderator has now
 	uint public moderatorEarningsBalance;
-
+	// Total earnings per referrer
+	mapping(address => uint256) public referrerPlasma2TotalEarnings2key;
 
 	/**
      * @notice Function to validate that contracts plasma and public are well mirrored
@@ -166,6 +167,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			// Assigning new balance to the influencer
             referrerPlasma2Balances2key[activeInfluencers[i]] = newBalance;
 
+			// Assign new total earned
+			referrerPlasma2TotalEarnings2key[activeInfluencers[i]] = newBalance;
+
 			// Amount to return
             amountToReturnToExchange = amountToReturnToExchange.add(balance.sub(newBalance));
         }
@@ -199,7 +203,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
             uint balance = referrerPlasma2Balances2key[activeInfluencers[i]];
 
             uint newBalance = balance.mul(usd2KEYrateWei).div(newRate);
+			// Update balance
             referrerPlasma2Balances2key[activeInfluencers[i]] = newBalance;
+			// Update total earnings
+			referrerPlasma2TotalEarnings2key[activeInfluencers[i]] = newBalance;
 
             amountToGetFromExchange = amountToGetFromExchange.add(newBalance.sub(balance));
         }
@@ -357,7 +364,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 				isActiveInfluencer[influencers[i]] = true;
 			}
 			referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(balances[i]);
+			// Update balance
 			reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(balances[i]);
+			// Update total earned
+			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(balances[i]);
 		}
 	}
 
@@ -427,6 +437,16 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return twoKeyEventSource.plasmaOf(_a);
 	}
 
+
+	function getReferrerTotalRewardsAndCurrentBalance(
+		address _referrerPlasma
+	)
+	public
+	view
+	returns (uint,uint)
+	{
+		return (referrerPlasma2TotalEarnings2key[_referrerPlasma], referrerPlasma2Balances2key[_referrerPlasma]);
+	}
 
 
 //	function submitProofAndWithdrawRewards(
