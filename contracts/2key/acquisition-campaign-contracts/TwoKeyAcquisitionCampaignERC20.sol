@@ -79,8 +79,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
 
     /**
-     * @notice Internal function to check the balance of the specific ERC20 on this contract
-     * @param tokenAddress is the ERC20 contract address
+     * @notice      Internal function to check the balance of the specific ERC20 on this contract
+     *
+     * @param       tokenAddress is the ERC20 contract address
      */
     function getTokenBalance(
         address tokenAddress
@@ -93,22 +94,20 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     }
 
     /**
-     * @notice Function to add fiat inventory for rewards
-     * @dev only contractor can add this inventory
+     * @notice      Function to add fiat inventory for rewards
+     * @dev         Only contractor can add this inventory
+     *              This method can be called only once per the campaign.
      */
     function specifyFiatConversionRewards()
     public
     onlyContractor
     payable
     {
-        //It can be called only ONCE per campaign
         require(usd2KEYrateWei == 0);
 
         boughtRewardsWithEther = true;
         uint amountOfTwoKeys = buyTokensFromUpgradableExchange(msg.value, address(this));
-        uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
-
-        usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(amountOfTwoKeys); //0.1 DOLLAR
+        usd2KEYrateWei = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
     }
 
 
@@ -332,6 +331,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     view
     returns (uint,uint,uint,uint)
     {
+        //TODO: Here we might have a bug actually
         uint inventoryBalance = getTokenBalance(assetContractERC20);
         if(assetContractERC20 == twoKeyEconomy) {
             return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards, inventoryBalance);
