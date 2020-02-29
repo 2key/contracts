@@ -45,7 +45,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	// Amount representing how much moderator has now
 	uint public moderatorEarningsBalance;
 	// Total earnings per referrer
-	mapping(address => uint256) public referrerPlasma2TotalEarnings2key;
+	mapping(address => uint256) referrerPlasma2TotalEarnings2key;
 
 	/**
      * @notice Function to validate that contracts plasma and public are well mirrored
