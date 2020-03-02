@@ -38,20 +38,6 @@ const campaignData = getAcquisitionCampaignData(
   }
 );
 
-const campaignUsers = {
-  gmail: {
-    cut: 50,
-    percentCut: 0.5,
-  },
-  test4: {
-    cut: 20,
-    percentCut: 0.20,
-  },
-  renata: {
-    cut: 20,
-    percentCut: 0.2,
-  },
-};
 
 describe(
   'ETH, no bonus, no KYC, all tokens released in 5 equal parts every 7 days [Tokensale]',
@@ -75,7 +61,7 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.gmail.cut,
+        cut: 50,
       }
     );
 

@@ -74,7 +74,7 @@ export default function checkDonationCampaign(campaignParams: ICreateCampaign, s
   it('should get and decrypt ipfs hash', async () => {
     const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
-    const link = storage.getUserData([userKey], availableStorageUserFields.link);
+    const {link} = storage.getUser(userKey);
 
     let data: IPrivateMetaInformation = await protocol.DonationCampaign.getPrivateMetaHash(
       campaignAddress, from);

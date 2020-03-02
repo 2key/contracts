@@ -133,12 +133,12 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
   it('should get and decrypt ipfs hash', async () => {
     const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
-    const link = storage.getUserData([userKey], availableStorageUserFields.link);
+    const user = storage.getUser(userKey);
 
     let data: IPrivateMetaInformation = await protocol.AcquisitionCampaign.getPrivateMetaHash(
       campaignAddress, from);
 
-    expect(data.campaignPublicLinkKey).to.be.equal(link.link);
+    expect(data.campaignPublicLinkKey).to.be.equal(user.link.link);
   }).timeout(120000);
 
   it('check available tokens', async () => {

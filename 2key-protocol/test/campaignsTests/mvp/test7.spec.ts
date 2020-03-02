@@ -7,7 +7,7 @@ import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
 import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
 import usersActions from "../reusable/usersActions";
-import {campaignUserActions} from "../constants/constants";
+import {campaignUserActions, maxRefReward} from "../constants/constants";
 
 /**
  * ETH, no bonus, with KYC, all tokens released in DD, equal+3x incentive [Tokensale]
@@ -41,21 +41,6 @@ const campaignData = getAcquisitionCampaignData(
   }
 );
 
-const campaignUsers = {
-  gmail: {
-    cut: 50,
-    percentCut: 0.5,
-  },
-  test4: {
-    cut: 20,
-    percentCut: 0.20,
-  },
-  renata: {
-    cut: 20,
-    percentCut: 0.2,
-  },
-};
-
 describe(
   'ETH, no bonus, with KYC, all tokens released in DD, equal+3x incentive [Tokensale]',
   () => {
@@ -79,7 +64,7 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.gmail.cut,
+        cut: 50,
       }
     );
 
@@ -91,7 +76,7 @@ describe(
           campaignUserActions.visit,
           campaignUserActions.join,
         ],
-        cut: campaignUsers.gmail.cut,
+        cut: 50,
         campaignData,
         storage,
         contribution: conversionSize,
@@ -104,6 +89,21 @@ describe(
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: conversionSize,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.renata,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.joinAndConvert,
+          campaignUserActions.cancelConvert,
         ],
         campaignData,
         storage,
