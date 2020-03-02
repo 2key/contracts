@@ -47,7 +47,7 @@ export default function userTests(
       const {protocol} = availableUsers[userKey];
       const {campaignAddress, campaign: {contractor}} = storage;
       const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
-      const campaignContract = campaignTypeToInstance[storage.campaignType];
+
 
       await protocol[campaignContract]
         .visit(campaignAddress, refLink.link, refLink.fSecret);
@@ -136,7 +136,7 @@ export default function userTests(
         const {protocol, web3: {address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
         const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
-
+        const conversionAmount = protocol.Utils.toWei((contribution), 'ether');
         const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
           campaignAddress,
           address
@@ -145,12 +145,12 @@ export default function userTests(
         const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
           campaignAddress,
           campaignData.isFiatOnly,
-          protocol.Utils.toWei((contribution), 'ether')
+          conversionAmount,
         );
 
         const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
           campaignAddress,
-          protocol.Utils.toWei(contribution, 'ether'),
+          conversionAmount,
           refLink.link,
           address,
           {fSecret: refLink.fSecret},
@@ -228,7 +228,6 @@ export default function userTests(
 
   /**
    * TODO: conversion id or index should be provided as param
-   * TODO: check for current user balance (maybe deps issue)
    * We had a plan to compare balance before and after but it will be too complex
    * protocol.getBalance returns one of type number | string | BigNumber
    */
@@ -240,6 +239,11 @@ export default function userTests(
         const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
 
+        const initialCampaignInventory = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
+          campaignAddress,
+          address
+        );
+        const balanceBefore = await protocol.getBalance(web3Address, campaignData.assetContractERC20);
         const conversionIds = await protocol[campaignContract].getConverterConversionIds(
           campaignAddress, address, web3Address,
         );
@@ -259,10 +263,33 @@ export default function userTests(
         const conversionObj = await protocol[campaignContract].getConversion(
           campaignAddress, conversionId, web3Address,
         );
+        const resultCampaignInventory = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
+          campaignAddress,
+          address
+        );
+        const balanceAfter = await protocol.getBalance(web3Address, campaignData.assetContractERC20);
 
         storage.counterIncrease(availableStorageCounters.cancelledConversions);
         storage.counterDecrease(availableStorageCounters.pendingConversions);
 
+        /**
+         * For conversion amount `5`
+         * diff is `4.999842805999206` - it is BigNumber calc
+         */
+        expectEqualNumbers(
+          conversionObj.conversionAmount,
+          parseFloat(
+            protocol.Utils.fromWei(
+              parseFloat(balanceAfter.balance.ETH.toString())
+              - parseFloat(balanceBefore.balance.ETH.toString())
+            )
+              .toString()
+          ),
+        );
+        expectEqualNumbers(
+          resultCampaignInventory - initialCampaignInventory,
+          conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits
+        );
         expect(conversionObj.state).to.be.eq(conversionStatuses.cancelledByConverter);
       }).timeout(60000);
     }
@@ -479,8 +506,8 @@ export default function userTests(
       const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
 
-      const {balance:{ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
-      const amountForHedge =  parseFloat(ETH.toString());
+      const {balance: {ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
+      const amountForHedge = parseFloat(ETH.toString());
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.UpgradableExchange.startHedgingEth(
@@ -575,20 +602,6 @@ export default function userTests(
   }
 
   if (actions.includes(campaignUserActions.withdrawTokens)) {
-    // todo: add balance assertion
-    /**
-     {
-       withdrawn: true,
-       amount: 5263.1578947368425,
-       unlockDate: 1970-01-01T00:00:01.000Z,
-       unlockTimestamp: 1,
-       lockupsAddress: '0xb44457f7964e55ef2a4bd292c2f6973832589d4d'
-     }
-     protocol.getBalance
-     results       ETH                     2KEY
-     before: 1.70991167452e+21, 5.7894736842105263157893e+22
-     after:          0          1.7968833333333333333333356e+25
-     */
     it('should withdraw tokens', async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
@@ -599,6 +612,7 @@ export default function userTests(
         campaignAddress, address, web3Address,
       );
       const conversionId = conversionIds[conversionIndex];
+      const balanceBefore = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, address);
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol[campaignContract].withdrawTokens(
@@ -609,9 +623,12 @@ export default function userTests(
         )
       );
 
+      const balanceAfter = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, address);
       const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversionId, web3Address);
+      const withdrawnContract = purchase.contracts[portionIndex];
 
-      expect(purchase.isPortionWithdrawn[portionIndex]).to.be.eq(true);
+      expectEqualNumbers(withdrawnContract.amount, balanceAfter - balanceBefore);
+      expect(withdrawnContract.withdrawn).to.be.eq(true);
     }).timeout(60000);
   }
 
@@ -676,6 +693,34 @@ export default function userTests(
     }).timeout(60000);
   }
 
+  if (actions.includes(campaignUserActions.checkReferrerReward)) {
+    it(`should check is referrers reward calculated correctly for ${userKey} conversion`, async () => {
+      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {campaignAddress} = storage;
+
+      const referrers = await protocol.AcquisitionCampaign.getReferrersForConverter(campaignAddress, web3Address);
+      console.log({referrers});
+
+      const conversionIds = await protocol[campaignContract].getConverterConversionIds(
+        campaignAddress, address, web3Address,
+      );
+
+      const conversionId = conversionIds[0];
+
+      const conversionObj = await protocol[campaignContract].getConversion(
+        campaignAddress, conversionId, web3Address,
+      );
+      console.log(conversionObj);
+      for(let i = 0; i < referrers.length; i +=1){
+        const referrerAddress = referrers[i];
+        console.log(
+          await protocol.AcquisitionCampaign.getReferrerPlasmaBalance(campaignAddress, referrerAddress)
+        );
+      }
+    }).timeout(60000);
+  }
+
+
   if (actions.includes(campaignUserActions.checkTotalEarnings)) {
     it('should get moderator total earnings in campaign', async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
@@ -687,7 +732,7 @@ export default function userTests(
   }
 
   /**
-  {
+   {
     amountConverterSpentETH: 0,
     referrerRewards: 1666.6666666666667,
     tokensBought: 0,

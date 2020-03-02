@@ -1,7 +1,7 @@
 import '../../constants/polifils';
 import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
 import singletons from "../../../src/contracts/singletons";
-import {incentiveModels, vestingSchemas} from "../../constants/smallConstants";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
 import TestStorage from "../../helperClasses/TestStorage";
 import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
@@ -16,7 +16,7 @@ const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
-    maxConverterBonusPercent: 100,
+    maxConverterBonusPercent: 0,
     pricePerUnitInETHOrUSD: 0.095,
     maxReferralRewardPercent: 20,
     minContributionETHorUSD: 5,
@@ -32,7 +32,7 @@ const campaignData = getAcquisitionCampaignData(
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
     numberOfVestingPortions: 5,
-    numberOfDaysBetweenPortions: 90,
+    numberOfDaysBetweenPortions: 7,
     bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
     maxDistributionDateShiftInDays: 0,
   }
@@ -54,9 +54,9 @@ const campaignUsers = {
 };
 
 describe(
-  'Token Lockup [WITH Campaign Bonus] ETH- All Tokens Released in 5 Equal Parts every 90 Days',
+  'ETH, no bonus, no KYC, all tokens released in 5 equal parts every 7 days [Tokensale]',
   () => {
-    const storage = new TestStorage(userIds.aydnep);
+    const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
     before(function () {
       this.timeout(60000);

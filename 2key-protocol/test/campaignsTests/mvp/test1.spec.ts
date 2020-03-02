@@ -1,7 +1,7 @@
 import '../../constants/polifils';
 import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
 import singletons from "../../../src/contracts/singletons";
-import {incentiveModels, vestingSchemas} from "../../constants/smallConstants";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
 import TestStorage from "../../helperClasses/TestStorage";
 import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
@@ -27,14 +27,14 @@ const campaignData = getAcquisitionCampaignData(
     twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
-    vestingAmount: vestingSchemas.bonus,
-    isKYCRequired: false,
+    vestingAmount: vestingSchemas.baseAndBonus,
+    isKYCRequired: true,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 4,
-    numberOfDaysBetweenPortions: 90,
-    bonusTokensVestingStartShiftInDaysFromDistributionDate: 90,
-    maxDistributionDateShiftInDays: 180,
+    numberOfVestingPortions: 1,
+    numberOfDaysBetweenPortions: 0,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
+    maxDistributionDateShiftInDays: 0,
   }
 );
 
@@ -54,9 +54,9 @@ const campaignUsers = {
 };
 
 describe(
-  'Token Lockup [WITH Campaign Bonus] ETH- Bonus Released in 4 Equal Parts every 90 days. Starting after 90 days',
+  'ETH, with bonus, with KYC, all tokens released in DD, manual incentive [Tokensale]',
   () => {
-    const storage = new TestStorage(userIds.aydnep);
+    const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
     before(function () {
       this.timeout(60000);
@@ -87,11 +87,42 @@ describe(
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
         ],
+        cutChain: [
+          campaignUsers.gmail.percentCut,
+        ],
         campaignData,
         storage,
         contribution: conversionSize,
       }
     );
+
+    usersActions(
+      {
+        userKey: userIds.renata,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.joinAndConvert,
+          campaignUserActions.cancelConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: conversionSize,
+      }
+    );
+
+      usersActions(
+        {
+            userKey: storage.contractorKey,
+            secondaryUserKey: userIds.test4,
+            actions: [
+                campaignUserActions.checkPendingConverters,
+                campaignUserActions.approveConverter,
+            ],
+            campaignData,
+            storage,
+        }
+      );
 
     usersActions(
       {

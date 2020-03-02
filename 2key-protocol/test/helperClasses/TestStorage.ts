@@ -1,10 +1,12 @@
-
-import {IAcquisitionCampaignMeta} from "../../src/acquisition/interfaces";
-import {campaignTypes} from "../constants/smallConstants";
+import {IAcquisitionCampaignMeta, IConversionObject} from "../../src/acquisition/interfaces";
+import {campaignTypes, userStatuses} from "../constants/smallConstants";
 import {IDonationMeta} from "../../src/donation/interfaces";
+import TestUser from "./TestUser";
+import {userIds} from "../constants/availableUsers";
 
 
 class TestStorage {
+  private users: { [key: string]: TestUser } = {};
 
   // todo: maybe counters can be totally replaced by arrays check getCounter usage after cleanup
   counters = {};
@@ -19,9 +21,83 @@ class TestStorage {
 
   campaignType: string = undefined;
 
-  constructor(contractorKey, campaignType = campaignTypes.acquisition) {
+  constructor(contractorKey, campaignType: string = campaignTypes.acquisition, withKyc: boolean = false) {
     this.contractorKey = contractorKey;
+
+    const {
+      [userIds.deployer]: deployer,
+      [userIds.guest]: guest,
+      ...usersForTest
+    } = userIds;
+
     this.campaignType = campaignType;
+
+    this.users = Object.values(usersForTest).reduce(
+      (accum, userId: string) => {
+        return {
+          ...accum,
+          [userId]: new TestUser(
+            userId,
+            withKyc ? userStatuses.pending : userStatuses.approved,
+          ),
+        };
+      },
+      {},
+    );
+  }
+
+  getUser(userKey: string): TestUser {
+    return this.users[userKey];
+  }
+
+  get pendingConversions(): Array<IConversionObject> {
+    return Object.values(this.users)
+      .reduce(
+        (accum: Array<IConversionObject>, user: TestUser) => {
+          return [...accum, ...user.pendingConversions];
+        },
+        [],
+      )
+  }
+
+  get approvedConversions(): Array<IConversionObject> {
+    return Object.values(this.users)
+      .reduce(
+        (accum: Array<IConversionObject>, user: TestUser) => {
+          return [...accum, ...user.approvedConversions];
+        },
+        [],
+      )
+  }
+
+  get executedConversions(): Array<IConversionObject> {
+    return Object.values(this.users)
+      .reduce(
+        (accum: Array<IConversionObject>, user: TestUser) => {
+          return [...accum, ...user.executedConversions];
+        },
+        [],
+      )
+  }
+
+  get rejectedConversions(): Array<IConversionObject> {
+    return Object.values(this.users)
+      .reduce(
+        (accum: Array<IConversionObject>, user: TestUser) => {
+          return [...accum, ...user.rejectedConversions];
+        },
+        [],
+      )
+  }
+
+  get canceledConversions(): Array<IConversionObject> {
+    return Object.values(this.users)
+      .reduce(
+        (accum: Array<IConversionObject>, user: TestUser) => {
+          return [...accum, ...user.canceledConversions];
+        },
+        [],
+      )
   }
 
   counterIncrease(key, amount = 1) {

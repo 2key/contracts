@@ -1,7 +1,7 @@
 import '../../constants/polifils';
 import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
 import singletons from "../../../src/contracts/singletons";
-import {incentiveModels, vestingSchemas} from "../../constants/smallConstants";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
 import TestStorage from "../../helperClasses/TestStorage";
 import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
@@ -16,7 +16,7 @@ const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
-    maxConverterBonusPercent: 100,
+    maxConverterBonusPercent: 0,
     pricePerUnitInETHOrUSD: 0.095,
     maxReferralRewardPercent: 20,
     minContributionETHorUSD: 5,
@@ -31,9 +31,9 @@ const campaignData = getAcquisitionCampaignData(
     isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 6,
-    numberOfDaysBetweenPortions: 30,
-    bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
+    numberOfVestingPortions: 4,
+    numberOfDaysBetweenPortions: 90,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: 90,
     maxDistributionDateShiftInDays: 180,
   }
 );
@@ -54,9 +54,9 @@ const campaignUsers = {
 };
 
 describe(
-  'Token Lockup [WITH Campaign Bonus] ETH- Purchases Tokens Unlocked. Bonus Released in 6 Equal Parts every 30 days. Starting after 180 Days',
+  'Token Lockup  ETH- Bonus Released in 4 Equal Parts every 90 days. Starting after 90 days',
   () => {
-    const storage = new TestStorage(userIds.aydnep);
+    const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
     before(function () {
       this.timeout(60000);

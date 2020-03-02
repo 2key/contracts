@@ -9,6 +9,12 @@ export const conversionStatuses = {
   rejected: 'REJECTED',
 };
 
+export const userStatuses = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+};
+
 export const vestingSchemas = {
   bonus: 'BONUS',
   baseAndBonus: 'BASE_AND_BONUS',
