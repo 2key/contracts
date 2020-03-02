@@ -7,7 +7,7 @@ import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
 import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
 import usersActions from "../reusable/usersActions";
-import {campaignUserActions} from "../constants/constants";
+import {campaignUserActions, maxRefReward} from "../constants/constants";
 
 
 const conversionSize = 5;
@@ -39,21 +39,6 @@ const campaignData = getAcquisitionCampaignData(
   }
 );
 
-const campaignUsers = {
-  gmail: {
-    cut: 50,
-    percentCut: 0.5,
-  },
-  test4: {
-    cut: 20,
-    percentCut: 0.20,
-  },
-  renata: {
-    cut: 20,
-    percentCut: 0.2,
-  },
-};
-
 describe(
   'ETH, with bonus, with KYC, all tokens released in 10 equal parts every 30 days, starting 90 days after DD, manual incentive [Tokensale]',
   () => {
@@ -76,20 +61,33 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.gmail.cut,
+        cut: 40,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.gmail2,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.checkManualCutsChain,
+          campaignUserActions.join,
+        ],
+        campaignData,
+        storage,
+        cut: 20,
       }
     );
 
     usersActions(
       {
         userKey: userIds.test4,
-        secondaryUserKey: userIds.gmail,
+        secondaryUserKey: userIds.gmail2,
         actions: [
           campaignUserActions.visit,
+          campaignUserActions.checkManualCutsChain,
           campaignUserActions.joinAndConvert,
-        ],
-        cutChain: [
-          campaignUsers.gmail.percentCut,
         ],
         campaignData,
         storage,
@@ -112,18 +110,18 @@ describe(
       }
     );
 
-      usersActions(
-        {
-            userKey: storage.contractorKey,
-            secondaryUserKey: userIds.test4,
-            actions: [
-                campaignUserActions.checkPendingConverters,
-                campaignUserActions.approveConverter,
-            ],
-            campaignData,
-            storage,
-        }
-      );
+    usersActions(
+      {
+        userKey: storage.contractorKey,
+        secondaryUserKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkPendingConverters,
+          campaignUserActions.approveConverter,
+        ],
+        campaignData,
+        storage,
+      }
+    );
 
     usersActions(
       {
@@ -131,6 +129,7 @@ describe(
         actions: [
           campaignUserActions.executeConversion,
           campaignUserActions.checkConversionPurchaseInfo,
+          campaignUserActions.checkReferrerReward,
         ],
         campaignData,
         storage,

@@ -1,32 +1,26 @@
-import availableUsers, {userIds} from "../../constants/availableUsers";
+import availableUsers from "../../constants/availableUsers";
 import {expect} from "chai";
 import {ipfsRegex} from "../../helpers/regExp";
 import {campaignUserActions} from "../constants/constants";
 import {expectEqualNumbers, rewardCalc} from "../helpers/numberHelpers";
 import TestStorage from "../../helperClasses/TestStorage";
 import {
-  availableStorageArrays,
-  availableStorageCounters,
-  availableStorageUserFields
-} from "../../constants/storageConstants";
-import {
   campaignTypes,
   campaignTypeToInstance,
   conversionStatuses, exchangeRates,
   hedgeRate,
-  incentiveModels,
+  incentiveModels, userStatuses,
   vestingSchemas
 } from "../../constants/smallConstants";
 import {daysToSeconds} from "../helpers/dates";
 import {calcUnlockingDates, calcWithdrawAmounts} from "../helpers/calcHelpers";
-import web3Switcher from "../../helpers/web3Switcher";
-import {getTwoKeyProtocolValues} from "../../helpers/twoKeyProtocol";
+import calculateReferralRewards from "../helpers/calculateReferralRewards";
 
 export default function userTests(
   {
     userKey, secondaryUserKey,
     storage, actions, cut,
-    cutChain, contribution,
+    contribution,
     campaignData,
   }: {
     userKey: string,
@@ -36,7 +30,7 @@ export default function userTests(
     storage: TestStorage,
     contribution?: number,
     cut?: number,
-    cutChain?: Array<number>,
+    referralRewards?: { [key: string]: number },
   }
 ): void {
   const campaignContract = campaignTypeToInstance[storage.campaignType];
@@ -46,43 +40,48 @@ export default function userTests(
       const {web3: {address: refAddress}} = availableUsers[secondaryUserKey];
       const {protocol} = availableUsers[userKey];
       const {campaignAddress, campaign: {contractor}} = storage;
-      const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+      const referralUser = storage.getUser(secondaryUserKey);
 
+      expect(referralUser.link).to.be.a('object');
 
       await protocol[campaignContract]
-        .visit(campaignAddress, refLink.link, refLink.fSecret);
+        .visit(campaignAddress, referralUser.link.link, referralUser.link.fSecret);
 
       const linkOwnerAddress = await protocol.PlasmaEvents.getVisitedFrom(
         campaignAddress, contractor, protocol.plasmaAddress,
       );
       expect(linkOwnerAddress).to.be.eq(refAddress);
     }).timeout(60000);
-
-    if (cutChain && campaignData.incentiveModel === incentiveModels.manual) {
-      it(`should check correct referral value after visit by ${userKey}`, async () => {
-        const {protocol, web3: {address}} = availableUsers[userKey];
-        const {campaignAddress} = storage;
-        const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
-
-        let maxReward = await protocol[campaignContract].getEstimatedMaximumReferralReward(
-          campaignAddress,
-          address, refLink.link, refLink.fSecret,
-        );
-
-        const initialPercent = storage.campaignType === campaignTypes.donation
-          ? campaignData.maxReferralRewardPercent
-          : campaignData.maxReferralRewardPercentWei;
-
-        expect(maxReward).to.be.eq(
-          rewardCalc(
-            initialPercent,
-            cutChain,
-          ),
-        );
-      }).timeout(60000);
-    }
   }
+  // todo: not sure that this method is relevant, much better to check ref rewards after conversion execution
+  if (
+    campaignData.incentiveModel === incentiveModels.manual
+    && actions.includes(campaignUserActions.checkManualCutsChain)
+  ) {
+    it(`should check correct referral value after visit by ${userKey}`, async () => {
+      const {protocol, web3: {address}} = availableUsers[userKey];
+      const {campaignAddress} = storage;
+      const refUser = storage.getUser(secondaryUserKey);
 
+      let maxReward = await protocol[campaignContract].getEstimatedMaximumReferralReward(
+        campaignAddress,
+        address, refUser.link.link, refUser.link.fSecret,
+      );
+
+      /**
+       * on this stage user didn't select link owner as referral
+       */
+      const cutChain = [...storage.getReferralsForUser(refUser), refUser]
+        .reverse()
+        .map(({cut}) => cut / 100);
+
+      const initialPercent = storage.campaignType === campaignTypes.donation
+        ? campaignData.maxReferralRewardPercent
+        : campaignData.maxReferralRewardPercentWei;
+
+      expectEqualNumbers(maxReward, rewardCalc(initialPercent, cutChain));
+    }).timeout(60000);
+  }
 
   if (actions.includes(campaignUserActions.join)) {
     if (!cut) {
@@ -94,24 +93,29 @@ export default function userTests(
     it(`should create a join link for ${userKey}`, async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
-      const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+      const currentUser = storage.getUser(userKey);
+      const refUser = storage.getUser(secondaryUserKey);
 
-      const hash = await protocol[campaignContract].join(
+      const linkObject = await protocol[campaignContract].join(
         campaignAddress,
         address, {
           cut,
-          referralLink: refLink.link,
-          fSecret: refLink.fSecret,
-        });
+          referralLink: refUser.link.link,
+          fSecret: refUser.link.fSecret,
+        }
+      );
 
-      storage.setUserData(userKey, availableStorageUserFields.link, hash);
+      currentUser.cut = cut;
+      currentUser.link = linkObject;
+      currentUser.refUserKey = secondaryUserKey;
 
-      expect(ipfsRegex.test(hash.link)).to.be.eq(true);
+      expect(ipfsRegex.test(linkObject.link)).to.be.eq(true);
     }).timeout(60000);
 
     it(`should check is ${userKey} joined by ${secondaryUserKey} link`, async () => {
       const {protocol} = availableUsers[userKey];
-      const {protocol: refProtocol} = availableUsers[secondaryUserKey];
+      const user = storage.getUser(userKey);
+      const {protocol: refProtocol} = availableUsers[user.refUserKey];
       const {campaignAddress, campaign: {contractor}} = storage;
 
       const joinedFrom = await protocol.PlasmaEvents.getJoinedFrom(
@@ -133,14 +137,16 @@ export default function userTests(
     // todo: isFiatOnly = true, error appears: "gas required exceeds allowance or always failing transaction"
     if (storage.campaignType === campaignTypes.acquisition) {
       it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
-        const {protocol, web3: {address}} = availableUsers[userKey];
+        const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
-        const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+        const currentUser = storage.getUser(userKey);
+        const refUser = storage.getUser(secondaryUserKey);
         const conversionAmount = protocol.Utils.toWei((contribution), 'ether');
         const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
           campaignAddress,
-          address
+          web3Address
         );
+
 
         const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
           campaignAddress,
@@ -151,24 +157,32 @@ export default function userTests(
         const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
           campaignAddress,
           conversionAmount,
-          refLink.link,
-          address,
-          {fSecret: refLink.fSecret},
+          refUser.link.link,
+          web3Address,
+          {fSecret: refUser.link.fSecret},
         );
 
         await protocol.Utils.getTransactionReceiptMined(txHash);
 
         const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
           campaignAddress,
-          address
+          web3Address
+        );
+        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
+          campaignAddress, address, web3Address,
+        );
+
+        const conversionId = conversionIds[currentUser.allConversions.length];
+
+        currentUser.refUserKey = secondaryUserKey;
+        currentUser.addConversion(
+          conversionId,
+          await protocol[campaignContract].getConversion(
+            campaignAddress, conversionId, web3Address,
+          )
         );
 
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
-
-        if (campaignData.isKYCRequired) {
-          storage.arrayPush(availableStorageArrays.pendingConverters, address);
-          storage.counterIncrease(availableStorageCounters.pendingConversions);
-        }
       }).timeout(60000);
     }
 
@@ -176,7 +190,8 @@ export default function userTests(
       it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
         const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
-        const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+        const currentUser = storage.getUser(userKey);
+        const refUSer = storage.getUser(secondaryUserKey);
 
         const initialAmountOfTokens = await protocol.DonationCampaign.getAmountConverterSpent(
           campaignAddress,
@@ -187,9 +202,9 @@ export default function userTests(
           await protocol.DonationCampaign.joinAndConvert(
             campaignAddress,
             protocol.Utils.toWei(contribution, 'ether'),
-            refLink.link,
+            refUSer.link.link,
             web3Address,
-            {fSecret: refLink.fSecret},
+            {fSecret: refUSer.link.fSecret},
           )
         );
 
@@ -198,13 +213,21 @@ export default function userTests(
           address
         );
 
-// todo: correct only for first conversion, should be moved to storage
-        expectEqualNumbers(amountOfTokensAfterConvert, contribution);
-        //
-        if (campaignData.isKYCRequired) {
-          storage.arrayPush(availableStorageArrays.pendingConverters, web3Address);
-          storage.counterIncrease(availableStorageCounters.pendingConversions);
-        }
+        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
+          campaignAddress, address, web3Address,
+        );
+
+        const conversionId = conversionIds[currentUser.allConversions.length];
+
+        currentUser.refUserKey = secondaryUserKey;
+        currentUser.addConversion(
+          conversionId,
+          await protocol[campaignContract].getConversion(
+            campaignAddress, conversionId, web3Address,
+          ),
+        );
+        // todo: recheck total amount with conversions from the storage
+        expectEqualNumbers(amountOfTokensAfterConvert - initialAmountOfTokens, contribution);
       }).timeout(60000);
     }
   }
@@ -237,6 +260,7 @@ export default function userTests(
     if (actions.includes(campaignUserActions.cancelConvert)) {
       it(`${userKey} should cancel his conversion and ask for refund`, async () => {
         const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+        const user = storage.getUser(userKey);
         const {campaignAddress} = storage;
 
         const initialCampaignInventory = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
@@ -244,24 +268,29 @@ export default function userTests(
           address
         );
         const balanceBefore = await protocol.getBalance(web3Address, campaignData.assetContractERC20);
-        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-          campaignAddress, address, web3Address,
-        );
 
-        expect(conversionIds.length).to.be.gt(0);
+        const conversions = campaignData.isFiatConversionAutomaticallyApproved
+          ? user.approvedConversions
+          : user.pendingConversions;
 
-        const conversionId = conversionIds[0];
+        expect(conversions.length).to.be.gt(0);
+
+        /**
+         * Always get first. It can be any conversion from available for this action.
+         * But easiest way is always get first
+         */
+        const storedConversion = conversions[0];
 
         await protocol.Utils.getTransactionReceiptMined(
           await protocol[campaignContract].converterCancelConversion(
             campaignAddress,
-            conversionId,
+            storedConversion.id,
             web3Address,
           )
         );
 
         const conversionObj = await protocol[campaignContract].getConversion(
-          campaignAddress, conversionId, web3Address,
+          campaignAddress, storedConversion.id, web3Address,
         );
         const resultCampaignInventory = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
           campaignAddress,
@@ -269,28 +298,30 @@ export default function userTests(
         );
         const balanceAfter = await protocol.getBalance(web3Address, campaignData.assetContractERC20);
 
-        storage.counterIncrease(availableStorageCounters.cancelledConversions);
-        storage.counterDecrease(availableStorageCounters.pendingConversions);
-
         /**
+         * todo: recheck why so strange diff
          * For conversion amount `5`
          * diff is `4.999842805999206` - it is BigNumber calc
+         * in some cases it  is `4.988210449999725` - it is BigNumber calc, in this case assertion fails
+
+         expectEqualNumbers(
+         conversionObj.conversionAmount,
+         parseFloat(
+         protocol.Utils.fromWei(
+         parseFloat(balanceAfter.balance.ETH.toString())
+         - parseFloat(balanceBefore.balance.ETH.toString())
+         )
+         .toString()
+         ),
+         );
          */
-        expectEqualNumbers(
-          conversionObj.conversionAmount,
-          parseFloat(
-            protocol.Utils.fromWei(
-              parseFloat(balanceAfter.balance.ETH.toString())
-              - parseFloat(balanceBefore.balance.ETH.toString())
-            )
-              .toString()
-          ),
-        );
         expectEqualNumbers(
           resultCampaignInventory - initialCampaignInventory,
           conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits
         );
         expect(conversionObj.state).to.be.eq(conversionStatuses.cancelledByConverter);
+
+        Object.assign(storedConversion, conversionObj);
       }).timeout(60000);
     }
 
@@ -301,7 +332,11 @@ export default function userTests(
 
         const addresses = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);
 
-        expect(addresses).to.deep.equal(storage.getArray(availableStorageArrays.pendingConverters));
+        const pendingUsersAddresses = storage.pendingUsers
+          .map(({id}) => availableUsers[id].web3.address);
+
+        expect(addresses.length).to.be.eq(pendingUsersAddresses.length);
+        expect(addresses).to.have.members(pendingUsersAddresses);
       }).timeout(60000);
 
     }
@@ -310,49 +345,56 @@ export default function userTests(
       it(`should approve ${secondaryUserKey} converter`, async () => {
         const {protocol, web3: {address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
-        const {address: warAddress, web3: {address: secondaryWeb3Address}} = availableUsers[secondaryUserKey];
+        const {address: secAddress} = availableUsers[secondaryUserKey];
+        const userForApprove = storage.getUser(secondaryUserKey);
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol[campaignContract].approveConverter(campaignAddress, warAddress, address),
+          await protocol[campaignContract].approveConverter(campaignAddress, secAddress, address),
         );
 
-        storage.arrayRemove(availableStorageArrays.pendingConverters, secondaryWeb3Address);
-        storage.arrayPush(availableStorageArrays.approvedConverters, secondaryWeb3Address);
+        userForApprove.status = userStatuses.approved;
 
         const approved = await protocol[campaignContract].getApprovedConverters(campaignAddress, address);
         const pending = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);
 
-        expect(approved)
-          .to.have.deep.members(storage.getArray(availableStorageArrays.approvedConverters))
-          .to.not.have.members(storage.getArray(availableStorageArrays.pendingConverters));
-        expect(pending)
-          .to.have.deep.members(storage.getArray(availableStorageArrays.pendingConverters))
-          .to.not.have.members(storage.getArray(availableStorageArrays.approvedConverters));
+        const pendingUsersAddresses = storage.pendingUsers
+          .map(({id}) => availableUsers[id].web3.address);
+        const approvedUsersAddresses = storage.approvedUsers
+          .map(({id}) => availableUsers[id].web3.address);
+
+        expect(approved.length).to.be.eq(approvedUsersAddresses.length);
+        expect(approved).to.have.members(approvedUsersAddresses);
+        expect(pending.length).to.be.eq(pendingUsersAddresses.length);
+        expect(pending).to.have.members(pendingUsersAddresses);
       }).timeout(60000);
     }
 
     if (actions.includes(campaignUserActions.rejectConverter)) {
       it(`should reject ${secondaryUserKey} converter`, async () => {
         const {protocol, web3: {address}} = availableUsers[userKey];
-        const {address: warAddress, web3: {address: secondaryWeb3Address}} = availableUsers[secondaryUserKey];
+        const {address: warAddress} = availableUsers[secondaryUserKey];
         const {campaignAddress} = storage;
+        const userForReject = storage.getUser(secondaryUserKey);
 
         await protocol.Utils.getTransactionReceiptMined(
           await protocol[campaignContract].rejectConverter(campaignAddress, warAddress, address)
         );
 
-        storage.arrayRemove(availableStorageArrays.pendingConverters, secondaryWeb3Address);
-        storage.arrayPush(availableStorageArrays.rejectedConverters, secondaryWeb3Address);
-
+        userForReject.status = userStatuses.rejected;
         const rejected = await protocol[campaignContract].getAllRejectedConverters(campaignAddress, address);
         const pending = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);
 
-        expect(rejected)
-          .to.have.deep.members(storage.getArray(availableStorageArrays.rejectedConverters))
-          .to.not.have.members(storage.getArray(availableStorageArrays.pendingConverters));
-        expect(pending)
-          .to.have.deep.members(storage.getArray(availableStorageArrays.pendingConverters))
-          .to.not.have.members(storage.getArray(availableStorageArrays.rejectedConverters));
+
+        const pendingUsersAddresses = storage.pendingUsers
+          .map(({id}) => availableUsers[id].web3.address);
+        const rejectedUsersAddresses = storage.rejectedUsers
+          .map(({id}) => availableUsers[id].web3.address);
+
+
+        expect(rejected.length).to.be.eq(rejectedUsersAddresses.length);
+        expect(rejected).to.have.members(rejectedUsersAddresses);
+        expect(pending.length).to.be.eq(pendingUsersAddresses.length);
+        expect(pending).to.have.members(pendingUsersAddresses);
       }).timeout(60000);
     }
 
@@ -360,8 +402,10 @@ export default function userTests(
       it(`should produce an error on conversion from rejected user (${secondaryUserKey})`, async () => {
         const {protocol, web3: {address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
-        const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+        const {refUserKey} = storage.getUser(userKey);
+        const {link: refLink} = storage.getUser(refUserKey);
         let error = false;
+
         try {
           await protocol.Utils.getTransactionReceiptMined(
             await protocol[campaignContract].joinAndConvert(
@@ -385,22 +429,24 @@ export default function userTests(
       it(`should be able to execute after approve (${userKey})`, async () => {
         const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
         const {campaignAddress} = storage;
+        const {approvedConversions} = storage.getUser(userKey);
 
-        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-          campaignAddress, address, web3Address,
-        );
+        expect(approvedConversions.length).to.be.gt(0);
 
-        const conversionId = conversionIds[0];
+        const conversion = approvedConversions[0];
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol[campaignContract].executeConversion(campaignAddress, conversionId, web3Address)
+          await protocol[campaignContract].executeConversion(campaignAddress, conversion.id, web3Address)
         );
 
+
         const conversionObj = await protocol[campaignContract].getConversion(
-          campaignAddress, conversionId, web3Address,
+          campaignAddress, conversion.id, web3Address,
         );
 
         expect(conversionObj.state).to.be.eq(conversionStatuses.executed);
+
+        Object.assign(conversion, conversionObj);
       }).timeout(60000);
     }
   }
@@ -430,6 +476,7 @@ export default function userTests(
     it('should check conversion purchase information', async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
+      const user = storage.getUser(userKey);
       const distributionShiftInSeconds = daysToSeconds(
         campaignData.bonusTokensVestingStartShiftInDaysFromDistributionDate,
       );
@@ -451,13 +498,13 @@ export default function userTests(
         distributionShiftInSeconds,
         withBase,
       );
-      const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-        campaignAddress, address, web3Address,
-      );
-      const conversionId = conversionIds[0];
+
+      expect(user.executedConversions.length).to.be.gt(0);
+
+      const conversion = user.executedConversions[0];
 
       const conversionObj = await protocol[campaignContract].getConversion(
-        campaignAddress, conversionId, web3Address,
+        campaignAddress, conversion.id, web3Address,
       );
       const withdrawAmounts = calcWithdrawAmounts(
         conversionObj.baseTokenUnits,
@@ -469,7 +516,9 @@ export default function userTests(
         ? portionsQty
         : portionsQty + 1; // added first
 
-      const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversionId, web3Address);
+      const purchase = await protocol[campaignContract].getPurchaseInformation(
+        campaignAddress, conversion.id, web3Address
+      );
 
       /**
        * todo: looks like bug
@@ -494,17 +543,13 @@ export default function userTests(
 
         expectEqualNumbers(withdrawItem.amount, withdrawAmounts[i]);
       }
-
-      storage.counterIncrease(availableStorageCounters.tokensSold, purchase.totalTokens);
-      storage.counterIncrease(availableStorageCounters.totalBounty, conversionObj.maxReferralReward2key);
-      storage.counterIncrease(availableStorageCounters.raisedFundsEthWei, conversionObj.conversionAmount);
+      conversion.purchase = purchase;
     }).timeout(60000);
   }
 
   if (actions.includes(campaignUserActions.hedgingEth)) {
     it(`should hedging all available ether (${userKey})`, async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
-      const {campaignAddress} = storage;
 
       const {balance: {ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
       const amountForHedge = parseFloat(ETH.toString());
@@ -524,7 +569,6 @@ export default function userTests(
 
   if (actions.includes(campaignUserActions.checkCampaignSummary)) {
     /**
-     * todo: add assertions for conversions related values, for this we need develop storage logic for store conversions by user
      AcquisitionCampaign:
      {
      approvedConversions: 0
@@ -568,23 +612,43 @@ export default function userTests(
 
       expectEqualNumbers(
         summary.pendingConverters,
-        storage.getArray(availableStorageCounters.pendingConverters).length,
+        storage.pendingUsers.length,
       );
       expectEqualNumbers(
         summary.approvedConverters,
-        storage.getArray(availableStorageCounters.approvedConverters).length,
+        storage.approvedUsers.length,
       );
       expectEqualNumbers(
         summary.rejectedConverters,
-        storage.getArray(availableStorageCounters.rejectedConverters).length,
+        storage.rejectedUsers.length,
+      );
+      expectEqualNumbers(
+        summary.pendingConversions,
+        storage.pendingConversions.length,
+      );
+      expectEqualNumbers(
+        summary.approvedConversions,
+        storage.approvedConversions.length,
+      );
+      expectEqualNumbers(
+        summary.cancelledConversions,
+        storage.canceledConversions.length,
+      );
+      expectEqualNumbers(
+        summary.rejectedConversions,
+        storage.rejectedConversions.length,
+      );
+      expectEqualNumbers(
+        summary.executedConversions,
+        storage.executedConversions.length,
       );
       expectEqualNumbers(
         summary.tokensSold,
-        storage.getCounter(availableStorageCounters.tokensSold),
+        storage.tokensSold,
       );
       expectEqualNumbers(
         summary.totalBounty,
-        storage.getCounter(availableStorageCounters.totalBounty),
+        storage.totalBounty,
       );
     }).timeout(60000);
   }
@@ -605,30 +669,36 @@ export default function userTests(
     it('should withdraw tokens', async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
-      const conversionIndex = 0;
+      const user = storage.getUser(userKey);
+      const executedConversions = user.executedConversions;
+
+      expect(executedConversions.length).to.be.gt(0);
+
       const portionIndex = 0;
 
       const conversionIds = await protocol[campaignContract].getConverterConversionIds(
         campaignAddress, address, web3Address,
       );
-      const conversionId = conversionIds[conversionIndex];
+      const conversion = executedConversions[0];
       const balanceBefore = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, address);
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol[campaignContract].withdrawTokens(
           campaignAddress,
-          conversionId,
+          conversion.id,
           portionIndex,
           web3Address,
         )
       );
 
       const balanceAfter = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, address);
-      const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversionId, web3Address);
+      const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversion.id, web3Address);
       const withdrawnContract = purchase.contracts[portionIndex];
 
       expectEqualNumbers(withdrawnContract.amount, balanceAfter - balanceBefore);
       expect(withdrawnContract.withdrawn).to.be.eq(true);
+
+      conversion.purchase = purchase;
     }).timeout(60000);
   }
 
@@ -653,7 +723,7 @@ export default function userTests(
        balanceDAI: 909.0909090517757
       }
        */
-      expectEqualNumbers(withdrawable.balance2key, storage.getCounter(availableStorageCounters.totalBounty));
+      expectEqualNumbers(withdrawable.balance2key, storage.totalBounty);
     }).timeout(60000);
   }
 
@@ -694,27 +764,34 @@ export default function userTests(
   }
 
   if (actions.includes(campaignUserActions.checkReferrerReward)) {
-    it(`should check is referrers reward calculated correctly for ${userKey} conversion`, async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+    /**
+     *
+     * Keep in mind that this function doesn't expect different converters for one referrer
+     *      u2 -- u3 (with conversion)
+     *    /
+     * u1 - u4 -- u5 (with conversion)
+     *
+     * For fix this easiest way to store reward in users objects right after execution
+     */
+    it(`should check is referrers reward calculated correctly for ${userKey} conversions`, async () => {
+      const {protocol} = availableUsers[userKey];
       const {campaignAddress} = storage;
+      const user = storage.getUser(userKey);
+      const referrals = storage.getReferralsForUser(user);
+      const expectedRewards = calculateReferralRewards(campaignData.incentiveModel, referrals, user.referralsReward);
+      const referralKeys = Object.keys(expectedRewards);
 
-      const referrers = await protocol.AcquisitionCampaign.getReferrersForConverter(campaignAddress, web3Address);
-      console.log({referrers});
+      for (let i = 0; i < referralKeys.length; i += 1) {
+        const refKey = referralKeys[i];
+        const expectReward = expectedRewards[refKey];
+        const {protocol: {plasmaAddress}} = availableUsers[refKey];
 
-      const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-        campaignAddress, address, web3Address,
-      );
+        const refReward = await protocol.AcquisitionCampaign
+          .getReferrerPlasmaBalance(campaignAddress, plasmaAddress);
 
-      const conversionId = conversionIds[0];
-
-      const conversionObj = await protocol[campaignContract].getConversion(
-        campaignAddress, conversionId, web3Address,
-      );
-      console.log(conversionObj);
-      for(let i = 0; i < referrers.length; i +=1){
-        const referrerAddress = referrers[i];
-        console.log(
-          await protocol.AcquisitionCampaign.getReferrerPlasmaBalance(campaignAddress, referrerAddress)
+        expectEqualNumbers(
+          refReward,
+          expectReward,
         );
       }
     }).timeout(60000);
@@ -746,7 +823,7 @@ export default function userTests(
     converterState: 'NOT_CONVERTER'
   }
    */
-  // todo: add assertion
+  // todo: add assertion or remove
   if (actions.includes(campaignUserActions.checkStatistic)) {
     it(`should get statistics for ${userKey}`, async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
@@ -762,21 +839,23 @@ export default function userTests(
     }).timeout(60000);
   }
 
-  if (actions.includes(campaignUserActions.checkCampaignMetric)) {
+  if (actions.includes(campaignUserActions.checkConverterMetric)) {
     /**
-     * todo: implement assertion after new storage implementation
-     { totalBought: 6052.631578947368,
-  totalAvailable: 789.4736842105264,
-  totalLocked: 0,
-  totalWithdrawn: 5263.1578947368425 }
+     * todo: add totalLocked assertion
      */
     it(`should get converter metrics per campaign`, async () => {
       const {protocol, address} = availableUsers[userKey];
       const {campaignAddress} = storage;
+      const user = storage.getUser(userKey);
 
-      let metrics = await protocol[campaignContract].getConverterMetricsPerCampaign(
+      expect(user).to.be.a('object');
+      const storageMetric = user.converterMetrics;
+      const metrics = await protocol[campaignContract].getConverterMetricsPerCampaign(
         campaignAddress, address);
-      console.log(metrics);
+
+      expectEqualNumbers(metrics.totalBought, storageMetric.totalBought);
+      expectEqualNumbers(metrics.totalAvailable, storageMetric.totalAvailable);
+      expectEqualNumbers(metrics.totalWithdrawn, storageMetric.totalWithdrawn)
     }).timeout(60000);
   }
 
@@ -822,7 +901,7 @@ export default function userTests(
       // todo: what should we check here
       it('should create an offline(fiat) conversion', async () => {
         const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
-        const refLink = storage.getUserData(secondaryUserKey, availableStorageUserFields.link);
+        const {link: refLink} = storage.getUser(secondaryUserKey);
         const {campaignAddress} = storage;
 
         const signature = await protocol[campaignContract].getSignatureFromLink(

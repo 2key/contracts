@@ -38,21 +38,6 @@ const campaignData = getAcquisitionCampaignData(
   }
 );
 
-const campaignUsers = {
-  gmail: {
-    cut: 50,
-    percentCut: 0.5,
-  },
-  test4: {
-    cut: 20,
-    percentCut: 0.20,
-  },
-  renata: {
-    cut: 20,
-    percentCut: 0.2,
-  },
-};
-
 describe(
   'Token Lockup [WITH Campaign Bonus] ETH- Bonus Released in 4 Equal Parts every 90 days. Starting after 90 days',
   () => {
@@ -75,7 +60,7 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.gmail.cut,
+        cut: 50,
       }
     );
 

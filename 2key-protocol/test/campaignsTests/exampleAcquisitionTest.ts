@@ -97,6 +97,7 @@ describe(
         secondaryUserKey: userIds.gmail,
         actions: [
           campaignUserActions.visit,
+          campaignUserActions.checkManualCutsChain,
           campaignUserActions.join,
           campaignUserActions.joinAndConvert,
         ],
@@ -104,9 +105,6 @@ describe(
         storage,
         cut: campaignUsers.test4.cut,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
       }
     );
 
@@ -116,6 +114,7 @@ describe(
         secondaryUserKey: userIds.test4,
         actions: [
           campaignUserActions.visit,
+          campaignUserActions.checkManualCutsChain,
           campaignUserActions.join,
           campaignUserActions.joinAndConvert,
         ],
@@ -123,10 +122,6 @@ describe(
         storage,
         cut: campaignUsers.renata.cut,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-          campaignUsers.test4.percentCut,
-        ],
       }
     );
 
@@ -136,16 +131,12 @@ describe(
         secondaryUserKey: userIds.renata,
         actions: [
           campaignUserActions.visit,
+          campaignUserActions.checkManualCutsChain,
           campaignUserActions.joinAndConvert,
         ],
         campaignData,
         storage,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-          campaignUsers.test4.percentCut,
-          campaignUsers.renata.percentCut,
-        ],
       }
     );
 
@@ -159,11 +150,6 @@ describe(
         campaignData,
         storage,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-          campaignUsers.test4.percentCut,
-          campaignUsers.renata.percentCut,
-        ],
       }
     );
 
@@ -234,7 +220,6 @@ describe(
     usersActions(
       {
         userKey: userIds.test,
-        secondaryUserKey: userIds.renata,
         actions: [
           campaignUserActions.checkRestrictedConvert,
           campaignUserActions.checkStatistic,
@@ -244,7 +229,6 @@ describe(
         storage,
       }
     );
-
     usersActions(
       {
         userKey: userIds.test4,
@@ -328,7 +312,7 @@ describe(
       {
         userKey: userIds.test4,
         actions: [
-          campaignUserActions.checkCampaignMetric,
+          campaignUserActions.checkConverterMetric,
         ],
         campaignData,
         storage,

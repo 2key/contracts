@@ -8,7 +8,6 @@ import {ICreateCampaign} from "../../src/donation/interfaces";
 import createDonationCampaign from "./helpers/createDonationCampaign";
 import checkDonationCampaign from "./reusable/checkDonationCampaign";
 
-const {env} = process;
 const contributionSize = 1;
 
 const  campaignData: ICreateCampaign = {
@@ -98,9 +97,6 @@ describe(
         storage,
         cut: campaignUsers.test4.cut,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
       }
     );
 
@@ -117,9 +113,6 @@ describe(
         storage,
         cut: campaignUsers.test4.cut,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
       }
     );
 
@@ -135,9 +128,6 @@ describe(
         campaignData,
         storage,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
       }
     );
 
@@ -164,9 +154,6 @@ describe(
         storage,
         cut: campaignUsers.test4.cut,
         contribution: contributionSize,
-        cutChain: [
-          campaignUsers.gmail.percentCut,
-        ],
       }
     );
 
@@ -405,7 +392,7 @@ describe(
           {
             userKey: storage.contractorKey,
             actions: [
-              campaignUserActions.checkCampaignMetric,
+              campaignUserActions.checkConverterMetric,
             ],
             campaignData,
             storage,

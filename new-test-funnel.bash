@@ -26,7 +26,8 @@ yarn run test:one 2key-protocol/test/unitTests/envRelatedTests/congressVote.spec
 spinner 2
 echo "Running acquisition test"
 #node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/exampleAcquisitionTest.ts
-node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/mvp/test7.spec.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/withCampaignBonus/*.spec.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/withoutCampaignBonus/*.spec.ts
+#node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/mvp/test7.spec.ts
+node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/mvp/*.spec.ts
+node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/withCampaignBonus/*.spec.ts
+node -r dotenv/config ./node_modules/.bin/mocha --exit --bail -r ts-node/register 2key-protocol/test/campaignsTests/withoutCampaignBonus/*.spec.ts
 

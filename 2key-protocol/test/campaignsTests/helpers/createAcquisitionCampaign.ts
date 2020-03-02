@@ -4,7 +4,8 @@ import {campaignTypes} from "../../constants/smallConstants";
 
 export default async function createAcquisitionCampaign(campaignData, storage) {
   const {web3: {address}, protocol} = availableUsers[storage.contractorKey];
-
+  const storageUser = storage.getUser(storage.contractorKey);
+  
   const campaign = await protocol.AcquisitionCampaign.create(
     campaignData,
     campaignData,
@@ -20,10 +21,5 @@ export default async function createAcquisitionCampaign(campaignData, storage) {
   } = campaign;
 
   storage.campaign = campaign;
-
-  storage.setUserData(
-    storage.contractorKey,
-    availableStorageUserFields.link,
-    {link: campaignPublicLinkKey, fSecret: fSecret},
-  );
+  storageUser.link =  {link: campaignPublicLinkKey, fSecret: fSecret};
 }

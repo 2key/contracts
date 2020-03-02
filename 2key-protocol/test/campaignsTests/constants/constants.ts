@@ -1,5 +1,6 @@
 export const campaignUserActions = {
   visit: 'visit',
+  checkManualCutsChain: 'checkManualCutsChain',
   join: 'join',
   joinAndConvert: 'joinAndConvert',
   checkConverterSpent: 'checkConverterSpent',
@@ -19,9 +20,11 @@ export const campaignUserActions = {
   moderatorAndReferrerWithdraw: 'moderatorAndReferrerWithdraw',
   checkTotalEarnings: 'checkTotalEarnings',
   checkStatistic: 'checkStatistic',
-  checkCampaignMetric: 'checkCampaignMetric',
+  checkConverterMetric: 'checkConverterMetric',
   checkERC20Balance: 'checkERC20Balance',
   createOffline: 'createOffline',
   contractorExecuteConversion: 'contractorExecuteConversion',
   checkReferrerReward: 'checkReferrerReward',
 };
+
+export const maxRefReward = 1666.6666666666667;

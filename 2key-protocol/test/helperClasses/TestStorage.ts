@@ -8,14 +8,7 @@ import {userIds} from "../constants/availableUsers";
 class TestStorage {
   private users: { [key: string]: TestUser } = {};
 
-  // todo: maybe counters can be totally replaced by arrays check getCounter usage after cleanup
-  counters = {};
-
-  arrays = {};
-
-  campaignObj: IAcquisitionCampaignMeta | IDonationMeta;
-
-  userData = {};
+  private campaignObj: IAcquisitionCampaignMeta | IDonationMeta;
 
   contractorKey: string = undefined;
 
@@ -100,40 +93,6 @@ class TestStorage {
       )
   }
 
-  counterIncrease(key, amount = 1) {
-    this.counters[key] = (this[key] || 0) + amount;
-  }
-
-  counterDecrease(key, amount = 1) {
-    this.counters[key] = (this[key] || 0) - amount;
-  }
-
-  getCounter(key) {
-    return this.counters[key];
-  }
-
-  arrayPush(key, value) {
-    if (!Array.isArray(this.arrays[key])) {
-      this.arrays[key] = [];
-    }
-
-    this.arrays[key].push(value);
-  }
-
-  arrayRemove(key, value) {
-    if (!Array.isArray(this.arrays[key])) {
-      return
-    }
-
-    this.arrays[key] = this.arrays[key].filter(
-      (val) => (val !== value)
-    );
-  }
-
-  getArray(key): [] {
-    return this.arrays[key] || [];
-  }
-
   set campaign(value: IAcquisitionCampaignMeta | IDonationMeta) {
     this.campaignObj = value;
   }
@@ -146,16 +105,76 @@ class TestStorage {
     return this.campaignObj.campaignAddress;
   }
 
-  setUserData(userKey, fieldKey, value) {
-    if (typeof this.userData[userKey] !== 'object') {
-      this.userData[userKey] = {};
-    }
-
-    return this.userData[userKey][fieldKey] = value;
+  get allUsers() {
+    return this.users
   }
 
-  getUserData(userKey, fieldKey) {
-    return this.userData[userKey][fieldKey];
+  get converters() {
+    return Object.values(this.users).filter(
+      (user) => (user.refUserKey && user.allConversions.length)
+    );
+  }
+
+  get pendingUsers() {
+    return this.converters.filter(({status}) => status === userStatuses.pending);
+  }
+
+  get approvedUsers() {
+    return this.converters.filter(({status}) => status === userStatuses.approved);
+  }
+
+  get rejectedUsers() {
+    return this.converters.filter(({status}) => status === userStatuses.rejected);
+  }
+
+  get tokensSold(): number {
+    return this.executedConversions
+      .reduce(
+        (accum: number, conversion: IConversionObject): number => {
+          accum += (conversion.bonusTokenUnits + conversion.baseTokenUnits);
+
+          return accum;
+        },
+        0,
+      )
+  }
+
+  get totalBounty(): number {
+    return this.executedConversions
+      .reduce(
+        (accum: number, conversion: IConversionObject): number => {
+          accum += conversion.maxReferralReward2key;
+
+          return accum;
+        },
+        0,
+      )
+  }
+
+  get raisedFundsEthWei(): number {
+    return this.executedConversions
+      .reduce(
+        (accum: number, conversion: IConversionObject): number => {
+          accum += conversion.conversionAmount;
+
+          return accum;
+        },
+        0,
+      );
+  }
+
+  getReferralsForUser(user: TestUser): Array<TestUser> {
+    const referrals = [];
+
+    for (
+      let referral = this.getUser(user.refUserKey);
+      referral.refUserKey;
+      referral = this.getUser(referral.refUserKey)
+    ) {
+      referrals.push(referral);
+    }
+
+    return referrals;
   }
 }
 
