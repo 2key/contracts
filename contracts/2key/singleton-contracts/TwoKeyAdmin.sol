@@ -233,7 +233,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	onlyAllowedContracts
 	{
 
-		uint networkFee = getDefaultIntegratorFeePercent();
+		// Network fee which will be taken from moderator
+		uint networkFee = getDefaultNetworkTaxPercent();
+
 		uint moderatorTokens = amountOfTokens.mul(100 - networkFee).div(100);
 
 		bytes32 keyHashTotalRewards = keccak256(_rewardsReceivedAsModeratorTotal);
