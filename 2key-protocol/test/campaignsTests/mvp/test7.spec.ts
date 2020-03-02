@@ -1,7 +1,7 @@
 import '../../constants/polifils';
 import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
 import singletons from "../../../src/contracts/singletons";
-import {incentiveModels, vestingSchemas} from "../../constants/smallConstants";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
 import TestStorage from "../../helperClasses/TestStorage";
 import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
@@ -9,6 +9,9 @@ import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
 import usersActions from "../reusable/usersActions";
 import {campaignUserActions} from "../constants/constants";
 
+/**
+ * ETH, no bonus, with KYC, all tokens released in DD, equal+3x incentive [Tokensale]
+ */
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
 
@@ -16,7 +19,7 @@ const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
-    maxConverterBonusPercent: 100,
+    maxConverterBonusPercent: 0,
     pricePerUnitInETHOrUSD: 0.095,
     maxReferralRewardPercent: 20,
     minContributionETHorUSD: 5,
@@ -27,12 +30,12 @@ const campaignData = getAcquisitionCampaignData(
     twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
-    vestingAmount: vestingSchemas.baseAndBonus,
-    isKYCRequired: false,
-    incentiveModel: incentiveModels.manual,
+    vestingAmount: vestingSchemas.bonus,
+    isKYCRequired: true,
+    incentiveModel: incentiveModels.vanillaAverageLast3x,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 10,
-    numberOfDaysBetweenPortions: 40,
+    numberOfVestingPortions: 1,
+    numberOfDaysBetweenPortions: 0,
     bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
     maxDistributionDateShiftInDays: 0,
   }
@@ -54,9 +57,9 @@ const campaignUsers = {
 };
 
 describe(
-  'Token Lockup [WITH Campaign Bonus] ETH - All Tokens Released in 10 Equal Parts every 40 Days',
+  'ETH, no bonus, with KYC, all tokens released in DD, equal+3x incentive [Tokensale]',
   () => {
-    const storage = new TestStorage(userIds.aydnep);
+    const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
     before(function () {
       this.timeout(60000);
@@ -64,6 +67,7 @@ describe(
     });
 
     checkAcquisitionCampaign(campaignData, storage);
+
 
     usersActions(
       {
@@ -81,8 +85,22 @@ describe(
 
     usersActions(
       {
-        userKey: userIds.test4,
+        userKey: userIds.gmail2,
         secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.join,
+        ],
+        cut: campaignUsers.gmail.cut,
+        campaignData,
+        storage,
+        contribution: conversionSize,
+      }
+    );
+    usersActions(
+      {
+        userKey: userIds.test4,
+        secondaryUserKey: userIds.gmail2,
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
@@ -95,10 +113,24 @@ describe(
 
     usersActions(
       {
+        userKey: storage.contractorKey,
+        secondaryUserKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkPendingConverters,
+          campaignUserActions.approveConverter,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
         userKey: userIds.test4,
         actions: [
           campaignUserActions.executeConversion,
           campaignUserActions.checkConversionPurchaseInfo,
+          campaignUserActions.checkReferrerReward,
         ],
         campaignData,
         storage,

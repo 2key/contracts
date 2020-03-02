@@ -26,6 +26,4 @@ export default async function createAcquisitionCampaign(campaignData, storage) {
     availableStorageUserFields.link,
     {link: campaignPublicLinkKey, fSecret: fSecret},
   );
-
-  storage.campaignType = campaignTypes.acquisition;
 }

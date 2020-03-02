@@ -7,7 +7,7 @@ import usersActions from "./reusable/usersActions";
 import {campaignUserActions} from "./constants/constants";
 import TestStorage from "../helperClasses/TestStorage";
 import {availableStorageUserFields} from "../constants/storageConstants";
-import {incentiveModels, vestingSchemas} from "../constants/smallConstants";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../constants/smallConstants";
 import getAcquisitionCampaignData from "./helpers/getAcquisitionCampaignData";
 
 const {env} = process;
@@ -58,7 +58,7 @@ const campaignUsers = {
 describe(
   'exampleAcquisitionTest.ts',
   () => {
-    const storage = new TestStorage(userIds.aydnep);
+    const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
     before(function () {
       this.timeout(60000);
@@ -237,6 +237,7 @@ describe(
         secondaryUserKey: userIds.renata,
         actions: [
           campaignUserActions.checkRestrictedConvert,
+          campaignUserActions.checkStatistic,
         ],
         contribution: contributionSize,
         campaignData,

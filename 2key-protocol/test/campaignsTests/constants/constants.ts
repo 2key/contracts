@@ -23,4 +23,5 @@ export const campaignUserActions = {
   checkERC20Balance: 'checkERC20Balance',
   createOffline: 'createOffline',
   contractorExecuteConversion: 'contractorExecuteConversion',
+  checkReferrerReward: 'checkReferrerReward',
 };

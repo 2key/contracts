@@ -51,7 +51,7 @@ const campaignUsers = {
 describe(
   'exampleDonationTest',
   () => {
-    const storage = new TestStorage(userIds.aydnep, campaignTypes.donation);
+    const storage = new TestStorage(userIds.aydnep, campaignTypes.donation, campaignData.isKYCRequired);
 
     before(function () {
       this.timeout(60000);

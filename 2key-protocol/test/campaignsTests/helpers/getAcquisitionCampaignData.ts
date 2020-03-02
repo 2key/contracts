@@ -1,7 +1,6 @@
 import availableUsers from "../../constants/availableUsers";
 import singletons from "../../../src/contracts/singletons";
 import {vestingSchemas} from "../../constants/smallConstants";
-import {TestIAcquisitionCampaign} from "../../typings/TestIAcquisitionCampaign";
 
 const {protocol: deployerProtocol} = availableUsers.deployer;
 
@@ -29,7 +28,7 @@ export default function getAcquisitionCampaignData(
     bonusTokensVestingStartShiftInDaysFromDistributionDate,
     maxDistributionDateShiftInDays,
   }
-): TestIAcquisitionCampaign {
+) {
 
 
   return {
