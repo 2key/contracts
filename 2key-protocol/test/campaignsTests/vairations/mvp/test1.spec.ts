@@ -1,14 +1,13 @@
-import '../../constants/polifils';
-import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
-import singletons from "../../../src/contracts/singletons";
-import {campaignTypes, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
-import TestStorage from "../../helperClasses/TestStorage";
-import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
-import {userIds} from "../../constants/availableUsers";
-import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
-import usersActions from "../reusable/userActions/usersActions";
-import {campaignUserActions, maxRefReward} from "../constants/constants";
-
+import '../../../constants/polifils';
+import getAcquisitionCampaignData from "../../helpers/getAcquisitionCampaignData";
+import singletons from "../../../../src/contracts/singletons";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../../constants/smallConstants";
+import TestStorage from "../../../helperClasses/TestStorage";
+import createAcquisitionCampaign from "../../helpers/createAcquisitionCampaign";
+import {userIds} from "../../../constants/availableUsers";
+import checkAcquisitionCampaign from "../../reusable/checkAcquisitionCampaign";
+import usersActions from "../../reusable/userActions/usersActions";
+import {campaignUserActions} from "../../constants/constants";
 
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
@@ -32,15 +31,15 @@ const campaignData = getAcquisitionCampaignData(
     isKYCRequired: true,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 10,
-    numberOfDaysBetweenPortions: 30,
-    bonusTokensVestingStartShiftInDaysFromDistributionDate: 90,
+    numberOfVestingPortions: 1,
+    numberOfDaysBetweenPortions: 0,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
     maxDistributionDateShiftInDays: 0,
   }
 );
 
 describe(
-  'ETH, with bonus, with KYC, all tokens released in 10 equal parts every 30 days, starting 90 days after DD, manual incentive [Tokensale]',
+  'ETH, with bonus, with KYC, all tokens released in DD, manual incentive [Tokensale]',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
@@ -61,29 +60,14 @@ describe(
         ],
         campaignData,
         storage,
-        cut: 40,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.gmail2,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.checkManualCutsChain,
-          campaignUserActions.join,
-        ],
-        campaignData,
-        storage,
-        cut: 20,
+        cut: 50,
       }
     );
 
     usersActions(
       {
         userKey: userIds.test4,
-        secondaryUserKey: userIds.gmail2,
+        secondaryUserKey: userIds.gmail,
         actions: [
           campaignUserActions.visit,
           campaignUserActions.checkManualCutsChain,
@@ -129,7 +113,6 @@ describe(
         actions: [
           campaignUserActions.executeConversion,
           campaignUserActions.checkConversionPurchaseInfo,
-          campaignUserActions.checkReferrerReward,
         ],
         campaignData,
         storage,

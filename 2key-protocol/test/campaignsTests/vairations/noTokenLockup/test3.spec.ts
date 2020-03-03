@@ -1,13 +1,13 @@
-import '../../constants/polifils';
-import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
-import singletons from "../../../src/contracts/singletons";
-import {campaignTypes, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
-import TestStorage from "../../helperClasses/TestStorage";
-import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
-import {userIds} from "../../constants/availableUsers";
-import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
-import usersActions from "../reusable/userActions/usersActions";
-import {campaignUserActions} from "../constants/constants";
+import '../../../constants/polifils';
+import getAcquisitionCampaignData from "../../helpers/getAcquisitionCampaignData";
+import singletons from "../../../../src/contracts/singletons";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../../constants/smallConstants";
+import TestStorage from "../../../helperClasses/TestStorage";
+import createAcquisitionCampaign from "../../helpers/createAcquisitionCampaign";
+import {userIds} from "../../../constants/availableUsers";
+import checkAcquisitionCampaign from "../../reusable/checkAcquisitionCampaign";
+import usersActions from "../../reusable/userActions/usersActions";
+import {campaignUserActions} from "../../constants/constants";
 
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
@@ -27,19 +27,19 @@ const campaignData = getAcquisitionCampaignData(
     twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
-    vestingAmount: vestingSchemas.bonus,
+    vestingAmount: vestingSchemas.baseAndBonus,
     isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 6,
-    numberOfDaysBetweenPortions: 30,
-    bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
-    maxDistributionDateShiftInDays: 180,
+    numberOfVestingPortions: 0,
+    numberOfDaysBetweenPortions: 0,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
+    maxDistributionDateShiftInDays: 0,
   }
 );
 
 describe(
-  'Token Lockup [WITH Campaign Bonus] ETH- Purchases Tokens Unlocked. Bonus Released in 6 Equal Parts every 30 days. Starting after 180 Days',
+  'with Campaign Bonus & no Token Lockup  (ETH)',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 

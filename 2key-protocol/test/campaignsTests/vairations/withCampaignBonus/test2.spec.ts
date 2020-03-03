@@ -1,13 +1,13 @@
-import '../../constants/polifils';
-import getAcquisitionCampaignData from "../helpers/getAcquisitionCampaignData";
-import singletons from "../../../src/contracts/singletons";
-import {campaignTypes, incentiveModels, vestingSchemas} from "../../constants/smallConstants";
-import TestStorage from "../../helperClasses/TestStorage";
-import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
-import {userIds} from "../../constants/availableUsers";
-import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
-import usersActions from "../reusable/userActions/usersActions";
-import {campaignUserActions} from "../constants/constants";
+import '../../../constants/polifils';
+import getAcquisitionCampaignData from "../../helpers/getAcquisitionCampaignData";
+import singletons from "../../../../src/contracts/singletons";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../../constants/smallConstants";
+import TestStorage from "../../../helperClasses/TestStorage";
+import createAcquisitionCampaign from "../../helpers/createAcquisitionCampaign";
+import {userIds} from "../../../constants/availableUsers";
+import checkAcquisitionCampaign from "../../reusable/checkAcquisitionCampaign";
+import usersActions from "../../reusable/userActions/usersActions";
+import {campaignUserActions} from "../../constants/constants";
 
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
@@ -16,7 +16,7 @@ const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
-    maxConverterBonusPercent: 0,
+    maxConverterBonusPercent: 100,
     pricePerUnitInETHOrUSD: 0.095,
     maxReferralRewardPercent: 20,
     minContributionETHorUSD: 5,
@@ -31,16 +31,15 @@ const campaignData = getAcquisitionCampaignData(
     isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 5,
-    numberOfDaysBetweenPortions: 7,
+    numberOfVestingPortions: 1,
+    numberOfDaysBetweenPortions: 0,
     bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
     maxDistributionDateShiftInDays: 0,
   }
 );
 
-
 describe(
-  'ETH, no bonus, no KYC, all tokens released in 5 equal parts every 7 days [Tokensale]',
+  'ETH, with bonus, with KYC, all tokens released in DD, manual incentive [Tokensale]',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
