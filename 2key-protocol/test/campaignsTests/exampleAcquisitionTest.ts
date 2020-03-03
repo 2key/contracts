@@ -1,12 +1,11 @@
 import '../constants/polifils';
-import availableUsers, {userIds} from "../constants/availableUsers";
+import {userIds} from "../constants/availableUsers";
 import singletons from "../../src/contracts/singletons";
 import createAcquisitionCampaign from "./helpers/createAcquisitionCampaign";
 import checkAcquisitionCampaign from "./reusable/checkAcquisitionCampaign";
-import usersActions from "./reusable/usersActions";
+import usersActions from "./reusable/userActions/usersActions";
 import {campaignUserActions} from "./constants/constants";
 import TestStorage from "../helperClasses/TestStorage";
-import {availableStorageUserFields} from "../constants/storageConstants";
 import {campaignTypes, incentiveModels, vestingSchemas} from "../constants/smallConstants";
 import getAcquisitionCampaignData from "./helpers/getAcquisitionCampaignData";
 
@@ -40,20 +39,6 @@ const campaignData = getAcquisitionCampaignData(
   }
 );
 
-const campaignUsers = {
-  gmail: {
-    cut: 50,
-    percentCut: 0.5,
-  },
-  test4: {
-    cut: 20,
-    percentCut: 0.20,
-  },
-  renata: {
-    cut: 20,
-    percentCut: 0.2,
-  },
-};
 
 describe(
   'exampleAcquisitionTest.ts',
@@ -87,7 +72,7 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.gmail.cut,
+        cut: 50,
       }
     );
 
@@ -103,7 +88,7 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.test4.cut,
+        cut: 50,
         contribution: contributionSize,
       }
     );
@@ -120,7 +105,7 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.renata.cut,
+        cut: 50,
         contribution: contributionSize,
       }
     );
@@ -313,27 +298,6 @@ describe(
         userKey: userIds.test4,
         actions: [
           campaignUserActions.checkConverterMetric,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-    usersActions(
-      {
-        userKey: userIds.gmail2,
-        actions: [
-          campaignUserActions.createOffline,
-        ],
-        campaignData,
-        storage,
-        contribution: 50,
-      }
-    );
-    usersActions(
-      {
-        userKey: storage.contractorKey,
-        actions: [
-          campaignUserActions.contractorExecuteConversion,
         ],
         campaignData,
         storage,
