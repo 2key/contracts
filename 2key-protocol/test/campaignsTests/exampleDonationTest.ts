@@ -1,6 +1,6 @@
 import '../constants/polifils';
 import availableUsers, {userIds} from "../constants/availableUsers";
-import usersActions from "./reusable/usersActions";
+import usersActions from "./reusable/userActions/usersActions";
 import {campaignUserActions} from "./constants/constants";
 import TestStorage from "../helperClasses/TestStorage";
 import {campaignTypes, incentiveModels} from "../constants/smallConstants";

@@ -6,7 +6,7 @@ import TestStorage from "../../helperClasses/TestStorage";
 import createAcquisitionCampaign from "../helpers/createAcquisitionCampaign";
 import {userIds} from "../../constants/availableUsers";
 import checkAcquisitionCampaign from "../reusable/checkAcquisitionCampaign";
-import usersActions from "../reusable/usersActions";
+import usersActions from "../reusable/userActions/usersActions";
 import {campaignUserActions} from "../constants/constants";
 
 const conversionSize = 5;
@@ -83,7 +83,6 @@ describe(
       {
         userKey: userIds.test4,
         actions: [
-          campaignUserActions.executeConversion,
           campaignUserActions.checkConversionPurchaseInfo,
         ],
         campaignData,
