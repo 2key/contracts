@@ -20,7 +20,7 @@ export default function checkReferrerRewardTest(
    * For fix this easiest way to store reward in users objects right after execution
    */
   it(`should check is referrers reward calculated correctly for ${userKey} conversions`, async () => {
-    const {protocol} = availableUsers[userKey];
+    const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
     const referrals = storage.getReferralsForUser(user);
@@ -32,8 +32,11 @@ export default function checkReferrerRewardTest(
       const expectReward = expectedRewards[refKey];
       const {protocol: {plasmaAddress}} = availableUsers[refKey];
 
-      const refReward = await protocol.AcquisitionCampaign
-        .getReferrerPlasmaBalance(campaignAddress, plasmaAddress);
+      const refReward = storage.campaignType
+        ? await protocol.AcquisitionCampaign
+          .getReferrerPlasmaBalance(campaignAddress, plasmaAddress)
+        : await protocol.DonationCampaign
+          .getReferrerBalance(campaignAddress, plasmaAddress, web3Address);
 
       expectEqualNumbers(
         refReward,

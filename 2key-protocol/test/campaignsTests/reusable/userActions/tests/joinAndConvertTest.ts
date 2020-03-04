@@ -3,6 +3,8 @@ import {campaignTypes} from "../../../../constants/smallConstants";
 import availableUsers from "../../../../constants/availableUsers";
 import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 import functionParamsInterface from "../typings/functionParamsInterface";
+import TestDonationConversion from "../../../../helperClasses/TestDonationConversion";
+import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 
 export default function joinAndConvertTest(
   {
@@ -61,10 +63,12 @@ export default function joinAndConvertTest(
 
       currentUser.refUserKey = secondaryUserKey;
       currentUser.addConversion(
-        conversionId,
-        await protocol[campaignContract].getConversion(
-          campaignAddress, conversionId, web3Address,
-        )
+        new TestAcquisitionConversion(
+          conversionId,
+          await protocol[campaignContract].getConversion(
+            campaignAddress, conversionId, web3Address,
+          ),
+        ),
       );
 
       expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
@@ -106,12 +110,14 @@ export default function joinAndConvertTest(
 
       currentUser.refUserKey = secondaryUserKey;
       currentUser.addConversion(
-        conversionId,
-        await protocol[campaignContract].getConversion(
-          campaignAddress, conversionId, web3Address,
+        new TestDonationConversion(
+          conversionId,
+          await protocol.DonationCampaign.getConversion(
+            campaignAddress, conversionId, web3Address,
+          ),
         ),
       );
-      // todo: recheck total amount with conversions from the storage
+      // // todo: recheck total amount with conversions from the storage
       expectEqualNumbers(amountOfTokensAfterConvert - initialAmountOfTokens, contribution);
     }).timeout(60000);
   }

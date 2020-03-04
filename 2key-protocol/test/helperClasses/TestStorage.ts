@@ -1,8 +1,12 @@
-import {IAcquisitionCampaignMeta, IConversionObject} from "../../src/acquisition/interfaces";
+import {IAcquisitionCampaignMeta} from "../../src/acquisition/interfaces";
 import {campaignTypes, userStatuses} from "../constants/smallConstants";
 import {IDonationMeta} from "../../src/donation/interfaces";
 import TestUser from "./TestUser";
 import {userIds} from "../constants/availableUsers";
+import ITestConversion from "../typings/ITestConversion";
+import TestAcquisitionConversion from "./TestAcquisitionConversion";
+import TestDonationConversion from "./TestDonationConversion";
+import TestCPCConversion from "./TestCPCConversion";
 
 
 class TestStorage {
@@ -43,50 +47,50 @@ class TestStorage {
     return this.users[userKey];
   }
 
-  get pendingConversions(): Array<IConversionObject> {
+  get pendingConversions(): Array<ITestConversion> {
     return Object.values(this.users)
       .reduce(
-        (accum: Array<IConversionObject>, user: TestUser) => {
+        (accum: Array<ITestConversion>, user: TestUser) => {
           return [...accum, ...user.pendingConversions];
         },
         [],
       )
   }
 
-  get approvedConversions(): Array<IConversionObject> {
+  get approvedConversions(): Array<ITestConversion> {
     return Object.values(this.users)
       .reduce(
-        (accum: Array<IConversionObject>, user: TestUser) => {
+        (accum: Array<ITestConversion>, user: TestUser) => {
           return [...accum, ...user.approvedConversions];
         },
         [],
       )
   }
 
-  get executedConversions(): Array<IConversionObject> {
+  get executedConversions(): Array<ITestConversion> {
     return Object.values(this.users)
       .reduce(
-        (accum: Array<IConversionObject>, user: TestUser) => {
+        (accum: Array<ITestConversion>, user: TestUser) => {
           return [...accum, ...user.executedConversions];
         },
         [],
       )
   }
 
-  get rejectedConversions(): Array<IConversionObject> {
+  get rejectedConversions(): Array<ITestConversion> {
     return Object.values(this.users)
       .reduce(
-        (accum: Array<IConversionObject>, user: TestUser) => {
+        (accum: Array<ITestConversion>, user: TestUser) => {
           return [...accum, ...user.rejectedConversions];
         },
         [],
       )
   }
 
-  get canceledConversions(): Array<IConversionObject> {
+  get canceledConversions(): Array<ITestConversion> {
     return Object.values(this.users)
       .reduce(
-        (accum: Array<IConversionObject>, user: TestUser) => {
+        (accum: Array<ITestConversion>, user: TestUser) => {
           return [...accum, ...user.canceledConversions];
         },
         [],
@@ -130,8 +134,12 @@ class TestStorage {
   get tokensSold(): number {
     return this.executedConversions
       .reduce(
-        (accum: number, conversion: IConversionObject): number => {
-          accum += (conversion.bonusTokenUnits + conversion.baseTokenUnits);
+        (accum: number, conversion: ITestConversion): number => {
+          if (conversion instanceof TestAcquisitionConversion) {
+            accum += (conversion.data.bonusTokenUnits + conversion.data.baseTokenUnits);
+          } else if (conversion instanceof TestDonationConversion) {
+            accum += conversion.data.tokensBought;
+          }
 
           return accum;
         },
@@ -142,8 +150,15 @@ class TestStorage {
   get totalBounty(): number {
     return this.executedConversions
       .reduce(
-        (accum: number, conversion: IConversionObject): number => {
-          accum += conversion.maxReferralReward2key;
+        (accum: number, conversion: ITestConversion): number => {
+          if (
+            conversion instanceof TestAcquisitionConversion
+            || conversion instanceof TestDonationConversion
+          ) {
+            accum += conversion.data.maxReferralReward2key;
+          } else if (conversion instanceof TestCPCConversion) {
+            accum += conversion.data.bountyPaid;
+          }
 
           return accum;
         },
@@ -151,17 +166,17 @@ class TestStorage {
       )
   }
 
-  get raisedFundsEthWei(): number {
-    return this.executedConversions
-      .reduce(
-        (accum: number, conversion: IConversionObject): number => {
-          accum += conversion.conversionAmount;
-
-          return accum;
-        },
-        0,
-      );
-  }
+  // get raisedFundsEthWei(): number {
+  //   return this.executedConversions
+  //     .reduce(
+  //       (accum: number, conversion: ITestConversion): number => {
+  //         accum += conversion.conversionAmount;
+  //
+  //         return accum;
+  //       },
+  //       0,
+  //     );
+  // }
 
   getReferralsForUser(user: TestUser): Array<TestUser> {
     const referrals = [];

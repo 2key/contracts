@@ -3,6 +3,7 @@ import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
 import {conversionStatuses} from "../../../../constants/smallConstants";
 import kycRequired from "../checks/kycRequired";
+import ITestConversion from "../../../../typings/ITestConversion";
 
 export default function executeConversionTest(
   {
@@ -21,7 +22,7 @@ export default function executeConversionTest(
 
     expect(approvedConversions.length).to.be.gt(0);
 
-    const conversion = approvedConversions[0];
+    const conversion: ITestConversion = approvedConversions[0];
 
     await protocol.Utils.getTransactionReceiptMined(
       await protocol[campaignContract].executeConversion(campaignAddress, conversion.id, web3Address)
@@ -32,7 +33,6 @@ export default function executeConversionTest(
     );
 
     expect(conversionObj.state).to.be.eq(conversionStatuses.executed);
-
-    Object.assign(conversion, conversionObj);
+    conversion.data = conversionObj;
   }).timeout(60000);
 }

@@ -4,6 +4,7 @@ import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 import {conversionStatuses} from "../../../../constants/smallConstants";
 import functionParamsInterface from "../typings/functionParamsInterface";
 import kycRequired from "../checks/kycRequired";
+import ITestConversion from "../../../../typings/ITestConversion";
 
 export default function cancelConversionTest(
   {
@@ -36,7 +37,7 @@ export default function cancelConversionTest(
      * Always get first. It can be any conversion from available for this action.
      * But easiest way is always get first
      */
-    const storedConversion = conversions[0];
+    const storedConversion: ITestConversion = conversions[0];
 
     await protocol.Utils.getTransactionReceiptMined(
       await protocol[campaignContract].converterCancelConversion(
@@ -77,7 +78,6 @@ export default function cancelConversionTest(
       conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits
     );
     expect(conversionObj.state).to.be.eq(conversionStatuses.cancelledByConverter);
-
-    Object.assign(storedConversion, conversionObj);
+    storedConversion.data = conversionObj;
   }).timeout(60000);
 }

@@ -130,6 +130,7 @@ describe(
         actions: [
           campaignUserActions.executeConversion,
           campaignUserActions.checkConversionPurchaseInfo,
+          campaignUserActions.checkReferrersList,
           campaignUserActions.checkReferrerReward,
         ],
         campaignData,

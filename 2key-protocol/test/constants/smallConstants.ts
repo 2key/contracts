@@ -41,6 +41,7 @@ export const hedgeRate = 1000;
 export const campaignTypes = {
   acquisition: 'TOKEN_SELL',
   donation: 'DONATION',
+  cpc: 'CPC',
 };
 
 

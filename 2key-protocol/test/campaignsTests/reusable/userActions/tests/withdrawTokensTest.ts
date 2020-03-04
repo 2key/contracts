@@ -2,6 +2,7 @@ import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
 import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 
 export default function withdrawTokensTest(
   {
@@ -21,9 +22,6 @@ export default function withdrawTokensTest(
 
     const portionIndex = 0;
 
-    const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-      campaignAddress, address, web3Address,
-    );
     const conversion = executedConversions[0];
     const balanceBefore = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, address);
 
@@ -43,7 +41,9 @@ export default function withdrawTokensTest(
     expectEqualNumbers(withdrawnContract.amount, balanceAfter - balanceBefore);
     expect(withdrawnContract.withdrawn).to.be.eq(true);
 
-    conversion.purchase = purchase;
+    if (conversion instanceof TestAcquisitionConversion) {
+      conversion.purchase = purchase;
+    }
   }).timeout(60000);
 
 }
