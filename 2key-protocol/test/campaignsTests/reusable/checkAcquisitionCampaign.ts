@@ -57,19 +57,19 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
   // when value > 0
   // when amount > 0
   if (campaignParams.isFiatOnly) {
-    it('should reserve amount for fiat conversion rewards', async () => {
-      const {protocol, web3: {address: from}} = availableUsers[userKey];
-      const {campaignAddress} = storage;
-
-      let value = parseFloat(protocol.Utils.toWei(1, 'ether').toString());
-      let txHash = await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
-        campaignAddress,
-        value,
-        campaignParams.amount,
-        from,
-      );
-      await protocol.Utils.getTransactionReceiptMined(txHash);
-    }).timeout(60000);
+    // it('should reserve amount for fiat conversion rewards', async () => {
+    //   const {protocol, web3: {address: from}} = availableUsers[userKey];
+    //   const {campaignAddress} = storage;
+    //
+    //   let value = parseFloat(protocol.Utils.toWei(1, 'ether').toString());
+    //   let txHash = await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
+    //     campaignAddress,
+    //     value,
+    //     campaignParams.amount,
+    //     from,
+    //   );
+    //   await protocol.Utils.getTransactionReceiptMined(txHash);
+    // }).timeout(60000);
   }
 
   it('check is campaign validated', async () => {
@@ -147,7 +147,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
 
     const availableAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress, from);
 
-    // TODO: when isFiatOnly=true return `1235666.6666666667` instead of 1234000. WHY?
+    // TODO: for fiat we wil use campaignParams.campaignInventory + specifyFiatConversionRewards.value
     // expect(availableAmountOfTokens).to.be
     //   .equal(campaignParams.campaignInventory - campaignParams.amount);
   }).timeout(60000);

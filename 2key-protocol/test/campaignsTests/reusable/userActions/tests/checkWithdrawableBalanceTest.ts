@@ -10,10 +10,6 @@ export default function checkWithdrawableBalanceTest(
     campaignContract,
   }: functionParamsInterface,
 ) {
-  // todo: check amount of available for withdraw
-  // todo: calc???? probably we should user numbers from TwoKeyExchangeRateContract test
-  // if single in chain  - sum(conversion.base)* maxReferralRewardPercent
-  // if chain length > 1  - sum(conversion.base)* cut (from maxReferralRewardPercent)
   it('should check referrer balance after hedging is done so hedge-rate exists', async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {address: secondaryAddress} = availableUsers[secondaryUserKey];
@@ -30,6 +26,7 @@ export default function checkWithdrawableBalanceTest(
      balanceDAI: 909.0909090517757
     }
      */
+    // todo: incorrect should use sum of all referrer rewards for this user
     expectEqualNumbers(withdrawable.balance2key, storage.totalBounty);
   }).timeout(60000);
 }
