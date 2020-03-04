@@ -31,7 +31,7 @@ const campaignData = getAcquisitionCampaignData(
     isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 0,
+    numberOfVestingPortions: 1,
     numberOfDaysBetweenPortions: 0,
     bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
     maxDistributionDateShiftInDays: 0,

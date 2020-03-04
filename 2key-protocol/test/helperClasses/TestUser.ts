@@ -1,19 +1,16 @@
-import {IConversionObject, IPurchaseInformation, IReferralLink} from "../../src/acquisition/interfaces";
+import {IReferralLink} from "../../src/acquisition/interfaces";
 import {conversionStatuses, userStatuses} from "../constants/smallConstants";
-import BigNumber from "bignumber.js";
-
-interface IConversionTests extends IConversionObject {
-  id: number;
-  purchase?: IPurchaseInformation
-}
+import ITestConversion from "../typings/ITestConversion";
+import TestDonationConversion from "./TestDonationConversion";
+import TestAcquisitionConversion from "./TestAcquisitionConversion";
 
 class TestUser {
 
-  private _id: string;
+  readonly _id: string;
 
   private refLink?: IReferralLink;
 
-  private conversions: Array<IConversionTests> = [];
+  private conversions: Array<ITestConversion> = [];
 
   private statusVal: string;
 
@@ -31,8 +28,7 @@ class TestUser {
     this.statusVal = status;
   }
 
-  addConversion(id: number, conversion: IConversionTests) {
-    conversion.id = id;
+  addConversion(conversion: ITestConversion) {
     this.conversions.push(conversion);
   }
 
@@ -42,7 +38,7 @@ class TestUser {
 
   set status(val: string) {
     if (val === userStatuses.rejected) {
-      this.conversions = this.conversions.map((conversion: IConversionTests) => {
+      this.conversions = this.conversions.map((conversion: ITestConversion) => {
         conversion.state = conversionStatuses.rejected;
         return conversion;
       })
@@ -67,39 +63,45 @@ class TestUser {
     return this.refLink;
   }
 
-  get allConversions(): Array<IConversionTests> {
+  get allConversions(): Array<ITestConversion> {
     return this.conversions;
   }
 
-  get pendingConversions(): Array<IConversionTests> {
+  get pendingConversions(): Array<ITestConversion> {
     return this.conversions
-      .filter((conversion: IConversionTests) => (conversion.state === conversionStatuses.pendingApproval));
+      .filter((conversion: ITestConversion) => (conversion.state === conversionStatuses.pendingApproval));
   }
 
-  get approvedConversions(): Array<IConversionTests> {
+  get approvedConversions(): Array<ITestConversion> {
     return this.conversions
-      .filter((conversion: IConversionTests) => (conversion.state === conversionStatuses.approved));
+      .filter((conversion: ITestConversion) => (conversion.state === conversionStatuses.approved));
   }
 
-  get executedConversions(): Array<IConversionTests> {
+  get executedConversions(): Array<ITestConversion> {
     return this.conversions
-      .filter((conversion: IConversionTests) => (conversion.state === conversionStatuses.executed));
+      .filter((conversion: ITestConversion) => (conversion.state === conversionStatuses.executed));
   }
 
-  get rejectedConversions(): Array<IConversionTests> {
+  get rejectedConversions(): Array<ITestConversion> {
     return this.conversions
-      .filter((conversion: IConversionTests) => (conversion.state === conversionStatuses.rejected));
+      .filter((conversion: ITestConversion) => (conversion.state === conversionStatuses.rejected));
   }
 
-  get canceledConversions(): Array<IConversionTests> {
-    return this.conversions.filter((conversion: IConversionTests) => (conversion.state === conversionStatuses.cancelledByConverter))
+  get canceledConversions(): Array<ITestConversion> {
+    return this.conversions.filter((conversion: ITestConversion) => (conversion.state === conversionStatuses.cancelledByConverter))
   }
 
   get referralsReward(): number {
     return this.executedConversions
       .reduce(
-        (accum: number, {maxReferralReward2key}) => {
-          accum += maxReferralReward2key;
+        (accum: number, conversion) => {
+          if (
+            conversion instanceof TestAcquisitionConversion
+            || conversion instanceof TestDonationConversion
+          ) {
+            accum += conversion.data.maxReferralReward2key;
+          }
+
           return accum
         },
         0,
@@ -117,18 +119,20 @@ class TestUser {
     this.executedConversions
       .forEach(
         (conversion) => {
-          metric.totalBought += conversion.purchase.totalTokens;
+          if (conversion instanceof TestAcquisitionConversion) {
+            metric.totalBought += conversion.purchase.totalTokens;
 
-          conversion.purchase.contracts
-            .forEach(
-              (contract) => {
-                if (contract.withdrawn) {
-                  metric.totalWithdrawn += contract.amount;
-                } else {
-                  metric.totalAvailable += contract.amount;
-                }
-              },
-            );
+            conversion.purchase.contracts
+              .forEach(
+                (contract) => {
+                  if (contract.withdrawn) {
+                    metric.totalWithdrawn += contract.amount;
+                  } else {
+                    metric.totalAvailable += contract.amount;
+                  }
+                },
+              );
+          }
         },
       );
 

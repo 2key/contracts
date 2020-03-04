@@ -2,6 +2,7 @@ import functionParamsInterface from "../typings/functionParamsInterface";
 import {campaignTypes, exchangeRates} from "../../../../constants/smallConstants";
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
+import TestDonationConversion from "../../../../helperClasses/TestDonationConversion";
 
 export default function checkERC20BalanceTest(
   {
@@ -29,15 +30,27 @@ export default function checkERC20BalanceTest(
       const {protocol} = availableUsers[userKey];
       const {address: secondaryUserAddress} = availableUsers[secondaryUserKey];
       // @ts-ignore
-      const {campaignAddress, campaign: {invoiceToken}} = storage;
+      const {campaign: {invoiceToken}} = storage;
+      const user = storage.getUser(secondaryUserKey);
+      const conversions = user.executedConversions;
+      let userSpent = conversions
+        .reduce(
+          (accum, conversion) => {
+            if(conversion instanceof TestDonationConversion){
+              accum += conversion.data.tokensBought;
+            }
+
+            return accum;
+          },
+          0,
+        );
 
       let balance = await protocol.ERC20.getERC20Balance(invoiceToken, secondaryUserAddress);
-      // todo: value should be from storage or params
-      let expectedValue = 1;
+
       if (campaignData.currency == 'USD') {
-        expectedValue *= exchangeRates.usd;
+        userSpent *= exchangeRates.usd;
       }
-      expect(balance).to.be.equal(expectedValue);
+      expect(balance).to.be.equal(userSpent);
     }).timeout(60000);
   }
 }

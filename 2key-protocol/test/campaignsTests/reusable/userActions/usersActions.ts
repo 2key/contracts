@@ -29,6 +29,7 @@ import checkERC20BalanceTest from "./tests/checkERC20BalanceTest";
 import createOfflineConversionTest from "./tests/createOfflineConversionTest";
 import functionParamsInterface from "./typings/functionParamsInterface";
 import converterSpentTest from "./tests/converterSpentTest";
+import referrersListTest from "./tests/referrersListTest";
 
 
 const actionToTest: {[key: string]: (params: functionParamsInterface) => void} = {
@@ -44,6 +45,7 @@ const actionToTest: {[key: string]: (params: functionParamsInterface) => void} =
   [campaignUserActions.checkWithdrawableBalance]: checkWithdrawableBalanceTest,
   [campaignUserActions.contractorWithdraw]: contractorWithdrawTest,
   [campaignUserActions.moderatorAndReferrerWithdraw]: moderatorAndReferrerWithdrawTest,
+  [campaignUserActions.checkReferrersList]: referrersListTest,
   [campaignUserActions.checkReferrerReward]: checkReferrerRewardTest,
   [campaignUserActions.checkTotalEarnings]: checkTotalEarningsTest,
   [campaignUserActions.contractorWithdraw]: contractorWithdrawTest,

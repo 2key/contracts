@@ -1,5 +1,5 @@
 import '../constants/polifils';
-import availableUsers, {userIds} from "../constants/availableUsers";
+import {userIds} from "../constants/availableUsers";
 import usersActions from "./reusable/userActions/usersActions";
 import {campaignUserActions} from "./constants/constants";
 import TestStorage from "../helperClasses/TestStorage";
@@ -30,21 +30,6 @@ const  campaignData: ICreateCampaign = {
   currency: 'ETH',
   endCampaignOnceGoalReached: false,
   expiryConversionInHours: 0,
-};
-
-const campaignUsers = {
-  gmail: {
-    cut: 50,
-    percentCut: 0.5,
-  },
-  test4: {
-    cut: 20,
-    percentCut: 0.20,
-  },
-  renata: {
-    cut: 20,
-    percentCut: 0.2,
-  },
 };
 
 describe(
@@ -80,7 +65,7 @@ describe(
         ],
         campaignData,
         storage,
-        cut: campaignUsers.gmail.cut,
+        cut: 50,
       }
     );
 
@@ -90,95 +75,12 @@ describe(
         secondaryUserKey: userIds.gmail,
         actions: [
           campaignUserActions.visit,
-          campaignUserActions.join,
           campaignUserActions.joinAndConvert,
-        ],
-        campaignData,
-        storage,
-        cut: campaignUsers.test4.cut,
-        contribution: contributionSize,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.renata,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
           campaignUserActions.checkConverterSpent,
-          campaignUserActions.joinAndConvert,
-        ],
-        campaignData,
-        storage,
-        cut: campaignUsers.test4.cut,
-        contribution: contributionSize,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.uport,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-          campaignUserActions.cancelConvert,
         ],
         campaignData,
         storage,
         contribution: contributionSize,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: storage.contractorKey,
-        secondaryUserKey: userIds.test4,
-        actions: [
-          campaignUserActions.checkPendingConverters,
-          campaignUserActions.approveConverter,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.test4,
-        actions: [
-          campaignUserActions.executeConversion,
-        ],
-        campaignData,
-        storage,
-        cut: campaignUsers.test4.cut,
-        contribution: contributionSize,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: storage.contractorKey,
-        secondaryUserKey: userIds.renata,
-        actions: [
-          campaignUserActions.rejectConverter,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.renata,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.checkRestrictedConvert,
-        ],
-        contribution: contributionSize,
-        campaignData,
-        storage,
       }
     );
 
@@ -192,6 +94,7 @@ describe(
         storage,
       }
     );
+
     usersActions(
       {
         userKey: storage.contractorKey,
@@ -204,31 +107,19 @@ describe(
       }
     );
 
+    usersActions(
+      {
+        userKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkReferrersList,
+          campaignUserActions.checkReferrerReward,
+        ],
+        campaignData,
+        storage,
+      }
+    );
 /*
 
-
-        it('should get conversion object', async() => {
-            printTestNumber();
-
-            let conversionId = 0;
-            let conversion: IConversion = await twoKeyProtocol.DonationCampaign.getConversion(campaignAddress, conversionId, from);
-            console.log(conversion);
-            expect(conversion.conversionState).to.be.equal("EXECUTED");
-        }).timeout(60000);
-
-        it('should print referrers', async() => {
-            printTestNumber();
-            let influencers = await twoKeyProtocol.DonationCampaign.getRefferrersToConverter(campaignAddress,  env.TEST4_ADDRESS, from);
-            console.log(influencers);
-        }).timeout(60000);
-
-        it('should get referrer earnings', async() => {
-            printTestNumber();
-            let refPlasma = generatePlasmaFromMnemonic(env.MNEMONIC_GMAIL).address;
-            console.log('Referrer plasma address: ' + refPlasma);
-            let referrerBalance = await twoKeyProtocol.DonationCampaign.getReferrerBalance(campaignAddress, refPlasma, from);
-            expect(referrerBalance).to.be.equal(250);
-        }).timeout(60000);
 
         it('should get reserved amount for referrers', async() => {
             printTestNumber();

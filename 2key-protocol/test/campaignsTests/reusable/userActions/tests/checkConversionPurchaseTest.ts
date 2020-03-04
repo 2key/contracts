@@ -5,6 +5,7 @@ import {vestingSchemas} from "../../../../constants/smallConstants";
 import {calcUnlockingDates, calcWithdrawAmounts} from "../../../helpers/calcHelpers";
 import {expect} from "chai";
 import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 
 export default function checkConversionPurchaseTest(
   {
@@ -105,7 +106,9 @@ export default function checkConversionPurchaseTest(
 
       expectEqualNumbers(withdrawItem.amount, withdrawAmounts[i]);
     }
-    conversion.purchase = purchase;
+    if (conversion instanceof TestAcquisitionConversion) {
+      conversion.purchase = purchase;
+    }
   }).timeout(60000);
 
 }
