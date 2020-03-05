@@ -2,7 +2,12 @@ pragma solidity ^0.4.24;
 
 contract ITwoKeyCampaign {
 
-    mapping(address => uint) public converterToNumberOfInfluencers;
+    function getNumberOfUsersToContractor(
+        address _user
+    )
+    public
+    view
+    returns (uint);
 
     function getReceivedFrom(
         address _receiver

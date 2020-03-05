@@ -714,10 +714,10 @@ describe('TwoKeyProtocol', () => {
         console.log(summary);
     }).timeout(60000);
 
-    it('should show moderator earnings', async() => {
-        let moderatorTotalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress, from);
-        console.log('Moderator total earnings in 2key-tokens are: ' + moderatorTotalEarnings);
-    }).timeout(60000);
+    // it('should show moderator earnings', async() => {
+    //     let moderatorTotalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress, from);
+    //     console.log('Moderator total earnings in 2key-tokens are: ' + moderatorTotalEarnings);
+    // }).timeout(60000);
 
     it('should pull down base tokens amount from purchases handler contract', async() => {
         const {web3, address} = web3Switcher.aydnep();
@@ -805,10 +805,10 @@ describe('TwoKeyProtocol', () => {
         console.log('Currency is: '+ currency);
     }).timeout(60000);
 
-    it('should get moderator total earnings in campaign', async() => {
-        const totalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress,from);
-        console.log('Moderator total earnings: '+ totalEarnings);
-    }).timeout(60000);
+    // it('should get moderator total earnings in campaign', async() => {
+    //     const totalEarnings = await twoKeyProtocol.AcquisitionCampaign.getModeratorTotalEarnings(campaignAddress,from);
+    //     console.log('Moderator total earnings: '+ totalEarnings);
+    // }).timeout(60000);
 
     it('should get statistics for the address from the contract', async() => {
         const {web3, address} = web3Switcher.renata();
