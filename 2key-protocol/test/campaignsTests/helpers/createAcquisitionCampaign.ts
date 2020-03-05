@@ -1,11 +1,9 @@
 import availableUsers, {userIds} from "../../constants/availableUsers";
-import {availableStorageUserFields} from "../../constants/storageConstants";
-import {campaignTypes} from "../../constants/smallConstants";
 
 export default async function createAcquisitionCampaign(campaignData, storage) {
   const {web3: {address}, protocol} = availableUsers[storage.contractorKey];
   const storageUser = storage.getUser(storage.contractorKey);
-  
+
   const campaign = await protocol.AcquisitionCampaign.create(
     campaignData,
     campaignData,

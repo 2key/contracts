@@ -62,21 +62,21 @@ export default function joinAndConvertTest(
       const conversionId = conversionIds[currentUser.allConversions.length];
 
       currentUser.refUserKey = secondaryUserKey;
-      currentUser.addConversion(
-        new TestAcquisitionConversion(
-          conversionId,
-          await protocol[campaignContract].getConversion(
-            campaignAddress, conversionId, web3Address,
-          ),
+      const conversion = new TestAcquisitionConversion(
+        conversionId,
+        await protocol[campaignContract].getConversion(
+          campaignAddress, conversionId, web3Address,
         ),
       );
+      currentUser.addConversion(conversion);
+      storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
 
       expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
     }).timeout(60000);
   }
 
   if (storage.campaignType === campaignTypes.donation) {
-    it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
+    it(`should create new conversion for ${userKey}`, async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
@@ -85,6 +85,10 @@ export default function joinAndConvertTest(
       const initialAmountOfTokens = await protocol.DonationCampaign.getAmountConverterSpent(
         campaignAddress,
         address
+      );
+
+      const conversionIds = await protocol.DonationCampaign.getConverterConversionIds(
+        campaignAddress, address, web3Address,
       );
 
       await protocol.Utils.getTransactionReceiptMined(
@@ -102,23 +106,28 @@ export default function joinAndConvertTest(
         address
       );
 
-      const conversionIds = await protocol[campaignContract].getConverterConversionIds(
+      const conversionIdsAfter = await protocol.DonationCampaign.getConverterConversionIds(
         campaignAddress, address, web3Address,
       );
 
-      const conversionId = conversionIds[currentUser.allConversions.length];
+      const conversionId = conversionIdsAfter[currentUser.allConversions.length];
 
       currentUser.refUserKey = secondaryUserKey;
-      currentUser.addConversion(
-        new TestDonationConversion(
-          conversionId,
-          await protocol.DonationCampaign.getConversion(
-            campaignAddress, conversionId, web3Address,
-          ),
+      const conversion = new TestDonationConversion(
+        conversionId,
+        await protocol.DonationCampaign.getConversion(
+          campaignAddress, conversionId, web3Address,
         ),
       );
-      // // todo: recheck total amount with conversions from the storage
-      expectEqualNumbers(amountOfTokensAfterConvert - initialAmountOfTokens, contribution);
+      currentUser.addConversion(conversion);
+      storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
+
+      expectEqualNumbers(conversionIds.length, conversionIdsAfter.length - 1);
+
+      if (!campaignData.isKYCRequired) {
+        expectEqualNumbers(amountOfTokensAfterConvert, currentUser.executedConversionsTotal);
+        expectEqualNumbers(amountOfTokensAfterConvert - initialAmountOfTokens, contribution);
+      }
     }).timeout(60000);
   }
 }

@@ -30,6 +30,10 @@ import createOfflineConversionTest from "./tests/createOfflineConversionTest";
 import functionParamsInterface from "./typings/functionParamsInterface";
 import converterSpentTest from "./tests/converterSpentTest";
 import referrersListTest from "./tests/referrersListTest";
+import checkAvailableDonationTest from "./tests/checkAvailableDonationTest";
+import checkTotalReferrerRewardTest from "./tests/checkTotalReferrerRewardTest";
+import checkContractorBalanceAndProceedsTest from "./tests/checkContractorBalanceAndProceedsTest";
+import referrerRewardStatsTest from "./tests/referrerRewardStatsTest";
 
 
 const actionToTest: {[key: string]: (params: functionParamsInterface) => void} = {
@@ -52,6 +56,9 @@ const actionToTest: {[key: string]: (params: functionParamsInterface) => void} =
   [campaignUserActions.checkStatistic]: checkStatisticTest,
   [campaignUserActions.checkConverterMetric]: checkConverterMetricTest,
   [campaignUserActions.checkERC20Balance]: checkERC20BalanceTest,
+  [campaignUserActions.checkContractorBalanceAndProceeds]: checkContractorBalanceAndProceedsTest,
+  [campaignUserActions.checkReferrerRewardStats]: referrerRewardStatsTest,
+
   /**
    * KYC only tests
    */
@@ -69,6 +76,8 @@ const actionToTest: {[key: string]: (params: functionParamsInterface) => void} =
    * Donation only tests
    */
   [campaignUserActions.checkConverterSpent]: converterSpentTest,
+  [campaignUserActions.checkTotalReferrerReward]: checkTotalReferrerRewardTest,
+  [campaignUserActions.checkAvailableDonation]: checkAvailableDonationTest,
 };
 
 export default function userTests(

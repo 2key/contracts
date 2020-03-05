@@ -29,7 +29,6 @@ export default function rejectConverterTest(
     const rejected = await protocol[campaignContract].getAllRejectedConverters(campaignAddress, address);
     const pending = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);
 
-
     const pendingUsersAddresses = storage.pendingUsers
       .map(({id}) => availableUsers[id].web3.address);
     const rejectedUsersAddresses = storage.rejectedUsers

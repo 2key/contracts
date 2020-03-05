@@ -4,8 +4,6 @@ import donationOnly from "../checks/donationOnly";
 import availableUsers from "../../../../constants/availableUsers";
 import TestDonationConversion from "../../../../helperClasses/TestDonationConversion";
 
-// todo: possible to user correctly only after correct storage implementation
-
 export default function converterSpentTest(
   {
     storage,
@@ -18,21 +16,8 @@ export default function converterSpentTest(
     const {protocol, address} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
-    const conversions = user.executedConversions;
-
-    const userSpent = conversions
-      .reduce(
-        (accum, conversion) => {
-          if(conversion instanceof TestDonationConversion){
-            accum += conversion.data.tokensBought;
-          }
-
-          return accum;
-        },
-        0,
-      );
 
     let amountSpent = await protocol.DonationCampaign.getAmountConverterSpent(campaignAddress, address);
-    expect(amountSpent).to.be.equal(userSpent);
+    expect(amountSpent).to.be.equal(user.executedConversionsTotal);
   }).timeout(60000);
 }

@@ -23,7 +23,7 @@ export default function checkCampaignSummaryTest(
      raisedFundsFiatWei: 0
      rejectedConversions: 0
      rejectedConverters: 0
-     tokensSold: 11228.0274
+     executedConversionsTotal: 11228.0274
      totalBounty: 0
      uniqueConverters: 1
      }
@@ -40,7 +40,7 @@ export default function checkCampaignSummaryTest(
      raisedFundsEthWei: 0.38
      rejectedConversions: 0
      rejectedConverters: 0
-     tokensSold: 81.7836
+     executedConversionsTotal: 81.7836
      totalBounty: 0
      uniqueConverters: 1
      }
@@ -85,7 +85,7 @@ export default function checkCampaignSummaryTest(
     );
     expectEqualNumbers(
       summary.tokensSold,
-      storage.tokensSold,
+      storage.executedConversionsTotal,
     );
     expectEqualNumbers(
       summary.totalBounty,

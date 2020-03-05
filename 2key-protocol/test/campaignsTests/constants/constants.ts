@@ -26,6 +26,10 @@ export const campaignUserActions = {
   contractorExecuteConversion: 'contractorExecuteConversion',
   checkReferrersList: 'checkReferrersList',
   checkReferrerReward: 'checkReferrerReward',
+  checkTotalReferrerReward: 'checkTotalReferrerReward',
+  checkAvailableDonation: 'checkAvailableDonation',
+  checkContractorBalanceAndProceeds: 'checkContractorBalanceAndProceeds',
+  checkReferrerRewardStats: 'checkReferrerRewardStats',
 };
 
 export const maxRefReward = 1666.6666666666667;

@@ -6,7 +6,7 @@ class TestDonationConversion implements ITestConversion{
 
   readonly _data:  IConversion;
 
-  constructor(id: number, conversion: IConversion , ) {
+  constructor(id: number, conversion: IConversion ) {
     this._id = id;
     this._data = conversion;
   }
