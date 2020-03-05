@@ -20,6 +20,9 @@ cd ../..
 python3 generate_bytecode.py approveNewCampaign DONATION 1.0.33
 python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.33
 
+python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.28
+
+
 
 
 
