@@ -170,8 +170,9 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	{
 		uint counter = 0;
 		_user = twoKeyEventSource.plasmaOf(_user);
-		while(received_from[_user] != ownerPlasma || received_from[_user] == address(0)) {
+		while(received_from[_user] != ownerPlasma) {
 			_user = received_from[_user];
+			require(_user != address(0));
 			counter ++;
 		}
 		return counter;
