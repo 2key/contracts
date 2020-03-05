@@ -115,6 +115,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	view
 	returns (address[],address[],uint8[],address)
 	{
+		// Recheck
 //		require(sig != bytes(0)); // signature can't be empty
 		// move ARCs and set public_link keys and weights/cuts based on signature information
 		// returns the last address in the sig
