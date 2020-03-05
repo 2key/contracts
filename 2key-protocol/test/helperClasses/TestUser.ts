@@ -14,6 +14,8 @@ class TestUser {
 
   private statusVal: string;
 
+  private refRewardsPerConversion: { [key: number]: number } = {};
+
   /**
    * Has affect only for manual incentiveModel
    */
@@ -32,8 +34,22 @@ class TestUser {
     this.conversions.push(conversion);
   }
 
+  addRefReward(conversionId: number, amount: number): void {
+    this.refRewardsPerConversion[conversionId] = amount;
+  }
+
   get id() {
     return this._id;
+  }
+
+  get referrerReward(): number {
+    return Object.values(this.refRewardsPerConversion)
+      .reduce(
+        (accum: number, refReward: number): number => {
+          return accum + refReward;
+        },
+        0
+      );
   }
 
   set status(val: string) {
@@ -91,23 +107,6 @@ class TestUser {
     return this.conversions.filter((conversion: ITestConversion) => (conversion.state === conversionStatuses.cancelledByConverter))
   }
 
-  get referralsReward(): number {
-    return this.executedConversions
-      .reduce(
-        (accum: number, conversion) => {
-          if (
-            conversion instanceof TestAcquisitionConversion
-            || conversion instanceof TestDonationConversion
-          ) {
-            accum += conversion.data.maxReferralReward2key;
-          }
-
-          return accum
-        },
-        0,
-      );
-  }
-
   get converterMetrics() {
     const metric = {
       totalBought: 0,
@@ -137,6 +136,21 @@ class TestUser {
       );
 
     return metric;
+  }
+
+  get executedConversionsTotal(): number {
+    return this.executedConversions.reduce(
+      (accum: number, conversion: ITestConversion): number => {
+        if (conversion instanceof TestAcquisitionConversion) {
+          accum += (conversion.data.bonusTokenUnits + conversion.data.baseTokenUnits);
+        } else if (conversion instanceof TestDonationConversion) {
+          accum += conversion.data.tokensBought;
+        }
+
+        return accum;
+      },
+      0,
+    )
   }
 }
 

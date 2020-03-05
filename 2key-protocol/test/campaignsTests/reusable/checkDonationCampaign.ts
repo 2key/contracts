@@ -3,7 +3,6 @@ import {expect} from 'chai';
 import availableUsers from "../../constants/availableUsers";
 import {IPrivateMetaInformation} from "../../../src/acquisition/interfaces";
 import TestStorage from "../../helperClasses/TestStorage";
-import {availableStorageUserFields} from "../../constants/storageConstants";
 import {ICreateCampaign} from "../../../src/donation/interfaces";
 import {campaignTypes} from "../../constants/smallConstants";
 
