@@ -1,12 +1,12 @@
-import '../constants/polifils';
-import availableUsers, {userIds} from "../constants/availableUsers";
-import usersActions from "./reusable/userActions/usersActions";
-import {campaignUserActions} from "./constants/constants";
-import TestStorage from "../helperClasses/TestStorage";
-import {campaignTypes, incentiveModels} from "../constants/smallConstants";
-import {ICreateCampaign} from "../../src/donation/interfaces";
-import createDonationCampaign from "./helpers/createDonationCampaign";
-import checkDonationCampaign from "./reusable/checkDonationCampaign";
+import '../../../constants/polifils';
+import {campaignTypes, incentiveModels} from "../../../constants/smallConstants";
+import TestStorage from "../../../helperClasses/TestStorage";
+import {userIds} from "../../../constants/availableUsers";
+import usersActions from "../../reusable/userActions/usersActions";
+import {campaignUserActions} from "../../constants/constants";
+import {ICreateCampaign} from "../../../../src/donation/interfaces";
+import createDonationCampaign from "../../helpers/createDonationCampaign";
+import checkDonationCampaign from "../../reusable/checkDonationCampaign";
 
 const conversionSize = 1;
 
@@ -26,14 +26,14 @@ const campaignData: ICreateCampaign = {
   isKYCRequired: true,
   shouldConvertToRefer: false,
   acceptsFiat: false,
-  incentiveModel: incentiveModels.manual,
+  incentiveModel: incentiveModels.vanillaPowerLaw,
   currency: 'ETH',
   endCampaignOnceGoalReached: false,
   expiryConversionInHours: 0,
 };
 
 describe(
-  'exampleDonationTest',
+  'ETH, with KYC, growing incentive [Donation]',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.donation, campaignData.isKYCRequired);
 
@@ -43,7 +43,6 @@ describe(
     });
 
     checkDonationCampaign(campaignData, storage);
-
 
     usersActions(
       {
@@ -114,67 +113,65 @@ describe(
       }
     );
 
-    if(campaignData.isKYCRequired){
-      usersActions(
-        {
-          userKey: userIds.uport,
-          secondaryUserKey: userIds.gmail,
-          actions: [
-            campaignUserActions.cancelConvert,
-          ],
-          campaignData,
-          storage,
-        }
-      );
+    usersActions(
+      {
+        userKey: userIds.uport,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.cancelConvert,
+        ],
+        campaignData,
+        storage,
+      }
+    );
 
-      usersActions(
-        {
-          userKey: storage.contractorKey,
-          secondaryUserKey: userIds.test4,
-          actions: [
-            campaignUserActions.checkPendingConverters,
-            campaignUserActions.approveConverter,
-          ],
-          campaignData,
-          storage,
-        }
-      );
+    usersActions(
+      {
+        userKey: storage.contractorKey,
+        secondaryUserKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkPendingConverters,
+          campaignUserActions.approveConverter,
+        ],
+        campaignData,
+        storage,
+      }
+    );
 
-      usersActions(
-        {
-          userKey: userIds.test4,
-          actions: [
-            campaignUserActions.executeConversion,
-            campaignUserActions.checkConverterSpent,
-          ],
-          campaignData,
-          storage,
-        }
-      );
-      usersActions(
-        {
-          userKey: storage.contractorKey,
-          secondaryUserKey: userIds.renata,
-          actions: [
-            campaignUserActions.checkPendingConverters,
-            campaignUserActions.rejectConverter,
-          ],
-          campaignData,
-          storage,
-        }
-      );
-      usersActions(
-        {
-          userKey: userIds.renata,
-          actions: [
-            campaignUserActions.checkRestrictedConvert,
-          ],
-          campaignData,
-          storage,
-          contribution: conversionSize,
-        }
-      );
-    }
+    usersActions(
+      {
+        userKey: userIds.test4,
+        actions: [
+          campaignUserActions.executeConversion,
+          campaignUserActions.checkConverterSpent,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+    usersActions(
+      {
+        userKey: storage.contractorKey,
+        secondaryUserKey: userIds.renata,
+        actions: [
+          campaignUserActions.checkPendingConverters,
+          campaignUserActions.rejectConverter,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+    usersActions(
+      {
+        userKey: userIds.renata,
+        actions: [
+          campaignUserActions.checkRestrictedConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: conversionSize,
+      }
+    );
 
     usersActions(
       {
@@ -225,13 +222,5 @@ describe(
         storage,
       }
     );
-
-    // todo: what should we check here???
-    it('should get stats for the contract from upgradable exchange', async() => {
-      const {protocol, web3: {address}} = availableUsers[userIds.aydnep];
-      const {campaignAddress} = storage;
-      let stats = await protocol.UpgradableExchange.getStatusForTheContract(campaignAddress, address);
-      console.log(stats);
-    }).timeout(60000);
   },
 );
