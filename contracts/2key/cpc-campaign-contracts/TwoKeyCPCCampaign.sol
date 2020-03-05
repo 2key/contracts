@@ -14,6 +14,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     string public targetUrl;
 
 
+
     //Replacement for constructor
     function setInitialParamsCPCCampaign(
         address _contractor,
