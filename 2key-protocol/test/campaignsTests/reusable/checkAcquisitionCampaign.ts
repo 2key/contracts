@@ -4,6 +4,8 @@ import availableUsers from "../../constants/availableUsers";
 import {IPrivateMetaInformation} from "../../../src/acquisition/interfaces";
 import TestStorage from "../../helperClasses/TestStorage";
 import {campaignTypes} from "../../constants/smallConstants";
+import singletons from "../../../src/contracts/singletons";
+import {expectEqualNumbers} from "../helpers/numberHelpers";
 
 
 export default function checkAcquisitionCampaign(campaignParams, storage: TestStorage) {
@@ -56,19 +58,31 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
   // when value > 0
   // when amount > 0
   if (campaignParams.isFiatOnly) {
-    // it('should reserve amount for fiat conversion rewards', async () => {
-    //   const {protocol, web3: {address: from}} = availableUsers[userKey];
-    //   const {campaignAddress} = storage;
-    //
-    //   let value = parseFloat(protocol.Utils.toWei(1, 'ether').toString());
-    //   let txHash = await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
-    //     campaignAddress,
-    //     value,
-    //     campaignParams.amount,
-    //     from,
-    //   );
-    //   await protocol.Utils.getTransactionReceiptMined(txHash);
-    // }).timeout(60000);
+    it('should reserve amount for fiat conversion rewards', async () => {
+      const {protocol, web3: {address: from}} = availableUsers[userKey];
+      const {campaignAddress} = storage;
+      const rate = await protocol.UpgradableExchange.get2keySellRate(from);
+
+      const {ethWorth2keys} = await protocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(
+        campaignParams.isFiatOnly,
+        !campaignParams.isFiatOnly,
+
+        parseFloat(
+          protocol.Utils.fromWei(
+            campaignParams.campaignHardCapWEI
+          ).toString()
+        ),
+        campaignParams.maxReferralRewardPercentWei,
+      );
+
+      let txHash = await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
+        campaignAddress,
+        parseFloat(protocol.Utils.toWei(ethWorth2keys, 'ether').toString()),
+        campaignParams.amount,
+        from,
+      );
+      await protocol.Utils.getTransactionReceiptMined(txHash);
+    }).timeout(60000);
   }
 
   it('check is campaign validated', async () => {
@@ -146,8 +160,28 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
 
     const availableAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress, from);
 
-    // TODO: for fiat we wil use campaignParams.campaignInventory + specifyFiatConversionRewards.value
-    // expect(availableAmountOfTokens).to.be
-    //   .equal(campaignParams.campaignInventory - campaignParams.amount);
+    const networkId = parseInt(process.env.MAIN_NET_ID, 10);
+
+    if (
+      campaignParams.isFiatOnly
+      && campaignParams.assetContractERC20 === singletons.TwoKeyEconomy.networks[networkId].address
+    ) {
+      const {amount2key} = await protocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(
+        campaignParams.isFiatOnly,
+        !campaignParams.isFiatOnly,
+        campaignParams.campaignHardCapWEI,
+        campaignParams.maxReferralRewardPercentWei,
+      );
+
+      expectEqualNumbers(
+        availableAmountOfTokens,
+        campaignParams.campaignInventory
+        + parseFloat(protocol.Utils.fromWei(amount2key).toString()),
+        );
+    } else {
+      expect(availableAmountOfTokens).to.be
+        .equal(campaignParams.campaignInventory);
+
+    }
   }).timeout(60000);
 }

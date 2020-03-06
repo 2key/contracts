@@ -39,7 +39,7 @@ const campaignData = getAcquisitionCampaignData(
 );
 
 describe(
-  'Token Lockup [WITH Campaign Bonus] ETH- Modified Token Lockup: Base & Bonus',
+  'ETH- Modified Token Lockup: Base & Bonus',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 

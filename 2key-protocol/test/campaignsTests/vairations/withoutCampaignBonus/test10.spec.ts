@@ -39,7 +39,7 @@ const campaignData = getAcquisitionCampaignData(
 );
 
 describe(
-  'Token Lockup  ETH- Bonus Released in 4 Equal Parts every 90 days. Starting after 90 days',
+  'ETH- Bonus Released in 4 Equal Parts every 90 days. Starting after 90 days',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 

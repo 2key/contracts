@@ -23,23 +23,23 @@ const campaignData = getAcquisitionCampaignData(
     maxContributionETHorUSD: 1000000,
     campaignStartTime: 0,
     campaignEndTime: 9884748832,
-    acquisitionCurrency: 'ETH',
+    acquisitionCurrency: 'USD',
     twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
-    isFiatOnly: false,
+    isFiatOnly: true,
     isFiatConversionAutomaticallyApproved: true,
-    vestingAmount: vestingSchemas.bonus,
+    vestingAmount: vestingSchemas.baseAndBonus,
     isKYCRequired: false,
     incentiveModel: incentiveModels.manual,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 7,
-    numberOfDaysBetweenPortions: 15,
-    bonusTokensVestingStartShiftInDaysFromDistributionDate: 80,
-    maxDistributionDateShiftInDays: 80,
+    numberOfVestingPortions: 1,
+    numberOfDaysBetweenPortions: 0,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: 0,
+    maxDistributionDateShiftInDays: 0,
   }
 );
 
 describe(
-  'ETH - Modified Token Lockup: Bonus',
+  'FIAT - All Tokens Released on Distribution Date',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 

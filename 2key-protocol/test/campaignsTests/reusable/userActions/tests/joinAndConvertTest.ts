@@ -43,15 +43,27 @@ export default function joinAndConvertTest(
         conversionAmount,
       );
 
-      const txHash = await protocol.AcquisitionCampaign.joinAndConvert(
-        campaignAddress,
-        conversionAmount,
-        refUser.link.link,
-        web3Address,
-        {fSecret: refUser.link.fSecret},
-      );
+      if (campaignData.isFiatOnly) {
+        const signature = await protocol[campaignContract].getSignatureFromLink(
+          refUser.link.link, protocol.plasmaAddress, refUser.link.fSecret);
 
-      await protocol.Utils.getTransactionReceiptMined(txHash);
+        await protocol.Utils.getTransactionReceiptMined(
+          await protocol[campaignContract].convertOffline(
+            campaignAddress, signature, web3Address, web3Address,
+            contribution,
+          )
+        );
+      } else {
+        await protocol.Utils.getTransactionReceiptMined(
+          await protocol.AcquisitionCampaign.joinAndConvert(
+            campaignAddress,
+            conversionAmount,
+            refUser.link.link,
+            web3Address,
+            {fSecret: refUser.link.fSecret},
+          )
+        );
+      }
 
       const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
@@ -73,7 +85,16 @@ export default function joinAndConvertTest(
       currentUser.addConversion(conversion);
       storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
 
-      expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
+      if (campaignData.isFiatOnly && !campaignData.isKYCRequired) {
+        const rate = await protocol.UpgradableExchange.get2keySellRate(web3Address);
+        const reward = contribution * campaignData.maxReferralRewardPercentWei / 100 / rate;
+
+        expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase - reward);
+      } else {
+        expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
+
+      }
+      // todo: for case when twoKeyEconomy is foreign and KYC isn't required: add check for rewards inventory subtract
     }).timeout(60000);
   }
 
@@ -141,16 +162,16 @@ export default function joinAndConvertTest(
 
       const conversions = currentUser.allConversions;
       const nextID = conversions.length;
-        await protocol.CPCCampaign.joinAndConvert(
-          campaignAddress,
-          refUser.link.link,
-          protocol.plasmaAddress,
-          {fSecret:refUser.link.fSecret});
+      await protocol.CPCCampaign.joinAndConvert(
+        campaignAddress,
+        refUser.link.link,
+        protocol.plasmaAddress,
+        {fSecret: refUser.link.fSecret});
 
       currentUser.refUserKey = secondaryUserKey;
 
       const conversion = await protocol.CPCCampaign.getConversion(campaignAddress, nextID);
-console.log({nextID, conversion});
+      console.log({nextID, conversion});
 
       expect(conversion).to.be.a('object');
 

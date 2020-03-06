@@ -25,7 +25,7 @@ export const incentiveModels = {
   vanillaAverage: 'VANILLA_AVERAGE',
   vanillaAverageLast3x: 'VANILLA_AVERAGE_LAST_3X',
   vanillaPowerLaw: 'VANILLA_POWER_LAW',
-  noReferalReward: 'NO_REFERRAL_REWARD',
+  noReferralReward: 'NO_REFERRAL_REWARD',
 };
 
 /**

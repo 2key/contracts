@@ -48,11 +48,17 @@ export default function calculateReferralRewards(
     case incentiveModels.vanillaPowerLaw:
       const powerLawFactor = 2;
       const x = calculateX(totalReward, referrals.length, powerLawFactor);
+
       for (let i = 0; i < referrals.length; i++) {
         const user = reversedReferrals[referrals.length - (i + 1)];
 
         rewards[user.id] = x / (powerLawFactor ** i);
       }
+      break;
+    case incentiveModels.noReferralReward:
+      referrals.forEach((user) => {
+        rewards[user.id] = 0;
+      });
       break;
     default:
       throw new Error('Unknown incentive model');

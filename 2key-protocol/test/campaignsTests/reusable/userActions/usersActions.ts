@@ -26,7 +26,6 @@ import checkTotalEarningsTest from "./tests/checkTotalEarningsTest";
 import checkStatisticTest from "./tests/checkStatisticTest";
 import checkConverterMetricTest from "./tests/checkConverterMetricTest";
 import checkERC20BalanceTest from "./tests/checkERC20BalanceTest";
-import createOfflineConversionTest from "./tests/createOfflineConversionTest";
 import functionParamsInterface from "./typings/functionParamsInterface";
 import converterSpentTest from "./tests/converterSpentTest";
 import referrersListTest from "./tests/referrersListTest";
@@ -68,10 +67,6 @@ const actionToTest: {[key: string]: (params: functionParamsInterface) => void} =
   [campaignUserActions.rejectConverter]: rejectConverterTest,
   [campaignUserActions.checkRestrictedConvert]: checkRestrictedConversionTest,
   [campaignUserActions.executeConversion]: executeConversionTest,
-  /**
-   * Fiat only tests
-   */
-  [campaignUserActions.createOffline]: createOfflineConversionTest,
   /**
    * Donation only tests
    */
