@@ -8,12 +8,13 @@ import TestAcquisitionConversion from "./TestAcquisitionConversion";
 import TestDonationConversion from "./TestDonationConversion";
 import TestCPCConversion from "./TestCPCConversion";
 import calculateReferralRewards from "../campaignsTests/helpers/calculateReferralRewards";
+import {ICPCMeta} from "../../src/cpc/interfaces";
 
 
 class TestStorage {
   readonly users: { [key: string]: TestUser } = {};
 
-  private campaignObj: IAcquisitionCampaignMeta | IDonationMeta;
+  private campaignObj: IAcquisitionCampaignMeta | IDonationMeta| ICPCMeta;
 
   contractorKey: string = undefined;
 
@@ -23,7 +24,6 @@ class TestStorage {
     this.contractorKey = contractorKey;
 
     const {
-      [userIds.deployer]: deployer,
       [userIds.guest]: guest,
       ...usersForTest
     } = userIds;
@@ -146,7 +146,7 @@ class TestStorage {
       )
   }
 
-  set campaign(value: IAcquisitionCampaignMeta | IDonationMeta) {
+  set campaign(value: IAcquisitionCampaignMeta | IDonationMeta| ICPCMeta) {
     this.campaignObj = value;
   }
 

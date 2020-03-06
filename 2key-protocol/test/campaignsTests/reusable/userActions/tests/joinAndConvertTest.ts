@@ -1,3 +1,4 @@
+import {expect} from "chai";
 import {campaignUserActions} from "../../../constants/constants";
 import {campaignTypes} from "../../../../constants/smallConstants";
 import availableUsers from "../../../../constants/availableUsers";
@@ -5,6 +6,7 @@ import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 import functionParamsInterface from "../typings/functionParamsInterface";
 import TestDonationConversion from "../../../../helperClasses/TestDonationConversion";
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
+import TestCPCConversion from "../../../../helperClasses/TestCPCConversion";
 
 export default function joinAndConvertTest(
   {
@@ -16,7 +18,7 @@ export default function joinAndConvertTest(
     campaignContract,
   }: functionParamsInterface,
 ) {
-  if (!contribution) {
+  if (!contribution && [campaignTypes.acquisition, campaignTypes.donation].includes(storage.campaignType)) {
     throw new Error(
       `${campaignUserActions.joinAndConvert} action required parameter missing for user ${userKey}`
     );
@@ -80,8 +82,7 @@ export default function joinAndConvertTest(
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
-      const refUSer = storage.getUser(secondaryUserKey);
-
+      const refUser = storage.getUser(secondaryUserKey);
       const initialAmountOfTokens = await protocol.DonationCampaign.getAmountConverterSpent(
         campaignAddress,
         address
@@ -95,9 +96,9 @@ export default function joinAndConvertTest(
         await protocol.DonationCampaign.joinAndConvert(
           campaignAddress,
           protocol.Utils.toWei(contribution, 'ether'),
-          refUSer.link.link,
+          refUser.link.link,
           web3Address,
-          {fSecret: refUSer.link.fSecret},
+          {fSecret: refUser.link.fSecret},
         )
       );
 
@@ -128,6 +129,37 @@ export default function joinAndConvertTest(
         expectEqualNumbers(amountOfTokensAfterConvert, currentUser.executedConversionsTotal);
         expectEqualNumbers(amountOfTokensAfterConvert - initialAmountOfTokens, contribution);
       }
+    }).timeout(60000);
+  }
+
+  if (storage.campaignType === campaignTypes.cpc) {
+    it(`should create new conversion for ${userKey}`, async () => {
+      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {campaignAddress} = storage;
+      const currentUser = storage.getUser(userKey);
+      const refUser = storage.getUser(secondaryUserKey);
+
+      const conversions = currentUser.allConversions;
+      const nextID = conversions.length;
+        await protocol.CPCCampaign.joinAndConvert(
+          campaignAddress,
+          refUser.link.link,
+          protocol.plasmaAddress,
+          {fSecret:refUser.link.fSecret});
+
+      currentUser.refUserKey = secondaryUserKey;
+
+      const conversion = await protocol.CPCCampaign.getConversion(campaignAddress, nextID);
+console.log({nextID, conversion});
+
+      expect(conversion).to.be.a('object');
+
+      const conversionObj = new TestCPCConversion(
+        nextID,
+        conversion,
+      );
+      currentUser.addConversion(conversionObj);
+      storage.processConversion(currentUser, conversionObj, campaignData.incentiveModel);
     }).timeout(60000);
   }
 }

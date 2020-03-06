@@ -25,11 +25,12 @@ yarn run test:one 2key-protocol/test/unitTests/envRelatedTests/congressVote.spec
 #yarn run test:one 2key-protocol/test/unitTests/envRelatedTests/twoKeyExchangeRate.spec.ts
 #spinner 2
 echo "Running acquisition test"
-
+#yarn run test:cpc
 #node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleAcquisitionTest.ts
 #node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleDonationTest.ts
-node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/*.spec.ts
-node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/withCampaignBonus/*.spec.ts
-node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/withoutCampaignBonus/*.spec.ts
-node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/noTokenLockup/*.spec.ts
+node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleCpcTest.ts
+#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/*.spec.ts
+#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/withCampaignBonus/*.spec.ts
+#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/withoutCampaignBonus/*.spec.ts
+#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/noTokenLockup/*.spec.ts
 
