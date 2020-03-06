@@ -48,4 +48,5 @@ export const campaignTypes = {
 export const campaignTypeToInstance = {
   [campaignTypes.acquisition]: 'AcquisitionCampaign',
   [campaignTypes.donation]: 'DonationCampaign',
+  [campaignTypes.cpc]: 'CPCCampaign',
 };
