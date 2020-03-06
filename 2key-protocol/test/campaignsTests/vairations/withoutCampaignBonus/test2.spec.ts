@@ -39,7 +39,7 @@ const campaignData = getAcquisitionCampaignData(
 );
 
 describe(
-  'Token Lockup ETH - All Tokens Released on Distribution Date',
+  'ETH - All Tokens Released on Distribution Date',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 

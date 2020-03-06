@@ -40,7 +40,7 @@ const campaignData = getAcquisitionCampaignData(
 
 
 describe(
-  'Token Lockup [WITH Campaign Bonus] ETH - All Tokens Released in 10 Equal Parts every 40 Days',
+  'ETH - All Tokens Released in 10 Equal Parts every 40 Days',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 

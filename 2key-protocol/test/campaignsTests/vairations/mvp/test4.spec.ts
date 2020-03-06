@@ -9,6 +9,7 @@ import checkAcquisitionCampaign from "../../reusable/checkAcquisitionCampaign";
 import usersActions from "../../reusable/userActions/usersActions";
 import {campaignUserActions} from "../../constants/constants";
 
+
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
 
@@ -16,30 +17,30 @@ const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
     campaignInventory: 1234000,
-    maxConverterBonusPercent: 0,
+    maxConverterBonusPercent: 100,
     pricePerUnitInETHOrUSD: 0.095,
     maxReferralRewardPercent: 20,
     minContributionETHorUSD: 5,
     maxContributionETHorUSD: 1000000,
     campaignStartTime: 0,
     campaignEndTime: 9884748832,
-    acquisitionCurrency: 'ETH',
+    acquisitionCurrency: 'USD',
     twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
-    isFiatOnly: false,
+    isFiatOnly: true,
     isFiatConversionAutomaticallyApproved: true,
-    vestingAmount: vestingSchemas.bonus,
-    isKYCRequired: false,
-    incentiveModel: incentiveModels.manual,
+    vestingAmount: vestingSchemas.baseAndBonus,
+    isKYCRequired: true,
+    incentiveModel: incentiveModels.noReferralReward,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 7,
-    numberOfDaysBetweenPortions: 15,
-    bonusTokensVestingStartShiftInDaysFromDistributionDate: 80,
-    maxDistributionDateShiftInDays: 80,
+    numberOfVestingPortions: 10,
+    numberOfDaysBetweenPortions: 30,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: 90,
+    maxDistributionDateShiftInDays: 90,
   }
 );
 
 describe(
-  'ETH - Modified Token Lockup: Bonus',
+  'FIAT, with bonus, with KYC, all tokens released in 10 equal parts every 30 days, starting 90 days after DD, no incentive [Tokensale]',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
@@ -60,14 +61,28 @@ describe(
         ],
         campaignData,
         storage,
-        cut: 50,
+        cut: 40,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.gmail2,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.join,
+        ],
+        campaignData,
+        storage,
+        cut: 20,
       }
     );
 
     usersActions(
       {
         userKey: userIds.test4,
-        secondaryUserKey: userIds.gmail,
+        secondaryUserKey: userIds.gmail2,
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
@@ -80,9 +95,63 @@ describe(
 
     usersActions(
       {
+        userKey: userIds.renata,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.joinAndConvert,
+          // campaignUserActions.cancelConvert,
+        ],
+        campaignData,
+        storage,
+        contribution: conversionSize,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: storage.contractorKey,
+        secondaryUserKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkPendingConverters,
+          campaignUserActions.approveConverter,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: storage.contractorKey,
+        secondaryUserKey: userIds.renata,
+        actions: [
+          campaignUserActions.checkPendingConverters,
+          campaignUserActions.rejectConverter,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.renata,
+        actions: [
+          campaignUserActions.checkRestrictedConvert,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
         userKey: userIds.test4,
         actions: [
+          campaignUserActions.executeConversion,
           campaignUserActions.checkConversionPurchaseInfo,
+          campaignUserActions.checkReferrerReward,
         ],
         campaignData,
         storage,

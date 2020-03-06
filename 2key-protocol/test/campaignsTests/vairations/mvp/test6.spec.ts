@@ -9,6 +9,7 @@ import checkAcquisitionCampaign from "../../reusable/checkAcquisitionCampaign";
 import usersActions from "../../reusable/userActions/usersActions";
 import {campaignUserActions} from "../../constants/constants";
 
+
 const conversionSize = 5;
 const networkId = parseInt(process.env.MAIN_NET_ID, 10);
 
@@ -23,23 +24,23 @@ const campaignData = getAcquisitionCampaignData(
     maxContributionETHorUSD: 1000000,
     campaignStartTime: 0,
     campaignEndTime: 9884748832,
-    acquisitionCurrency: 'ETH',
+    acquisitionCurrency: 'USD',
     twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
-    isFiatOnly: false,
+    isFiatOnly: true,
     isFiatConversionAutomaticallyApproved: true,
-    vestingAmount: vestingSchemas.bonus,
+    vestingAmount: vestingSchemas.baseAndBonus,
     isKYCRequired: false,
-    incentiveModel: incentiveModels.manual,
+    incentiveModel: incentiveModels.vanillaPowerLaw,
     tokenDistributionDate: 1,
-    numberOfVestingPortions: 7,
-    numberOfDaysBetweenPortions: 15,
-    bonusTokensVestingStartShiftInDaysFromDistributionDate: 80,
-    maxDistributionDateShiftInDays: 80,
+    numberOfVestingPortions: 10,
+    numberOfDaysBetweenPortions: 30,
+    bonusTokensVestingStartShiftInDaysFromDistributionDate: 180,
+    maxDistributionDateShiftInDays: 180,
   }
 );
 
 describe(
-  'ETH - Modified Token Lockup: Bonus',
+  'FIAT, no bonus, no KYC, no bank, all tokens released in 10 equal parts every 30 days, starting 180 days after DD, growing incentive [Tokensale]',
   () => {
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
@@ -60,14 +61,28 @@ describe(
         ],
         campaignData,
         storage,
-        cut: 50,
+        cut: 40,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.gmail2,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.join,
+        ],
+        campaignData,
+        storage,
+        cut: 20,
       }
     );
 
     usersActions(
       {
         userKey: userIds.test4,
-        secondaryUserKey: userIds.gmail,
+        secondaryUserKey: userIds.gmail2,
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
@@ -83,6 +98,7 @@ describe(
         userKey: userIds.test4,
         actions: [
           campaignUserActions.checkConversionPurchaseInfo,
+          campaignUserActions.checkReferrerReward,
         ],
         campaignData,
         storage,
