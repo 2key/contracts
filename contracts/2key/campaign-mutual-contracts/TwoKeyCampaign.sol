@@ -162,6 +162,14 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		return (influencers, keys, weights, old_address);
 	}
 
+	/**
+	 * @notice 		Function to get number of influencers between submimtted user and contractor
+	 * @param 		_user is the address of the user we're checking information
+	 *
+	 * 				Example: contractor -> user1 -> user2 -> user3
+	 *				Result for input(user3) = 2
+	 * @return		Difference between user -> contractor
+	 */
 	function getNumberOfUsersToContractor(
 		address _user
 	)
@@ -291,7 +299,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	 * @param 		_converter is the address of the converter
 	 * @param		signature is the signature user is converting with
 	 *
-	 * @return 	Distance between user and contractor
+	 * @return 		Distance between user and contractor
 	 */
 	function distributeArcsIfNecessary(
 		address _converter,
