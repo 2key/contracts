@@ -148,16 +148,9 @@ describe('CPC campaign', () => {
         console.log(amountOfTokensAdded);
         let maxNumberOfConversions = Math.floor(amountOfTokensAdded / parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString()));
         console.log(maxNumberOfConversions);
-        await twoKeyProtocol.CPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), maxNumberOfConversions, twoKeyProtocol.plasmaAddress);
+        let txHash = await twoKeyProtocol.CPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), maxNumberOfConversions, twoKeyProtocol.plasmaAddress);
+
     }).timeout(TIMEOUT_LENGTH);
-
-
-    it('should get max number of conversions', async() => {
-        printTestNumber();
-        let maxNumberOfConversions = await twoKeyProtocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
-        expect(maxNumberOfConversions).to.be.equal(1666);
-    }).timeout(TIMEOUT_LENGTH);
-
 
     it('should set that public contract is valid from maintainer', async() => {
         printTestNumber();
@@ -169,6 +162,15 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.CPCCampaign.validatePublicContract(campaignAddress, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
+
+    it('should get max number of conversions', async() => {
+        printTestNumber();
+        let maxNumberOfConversions = await twoKeyProtocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
+        console.log(maxNumberOfConversions);
+        expect(maxNumberOfConversions).to.be.equal(1666);
+    }).timeout(TIMEOUT_LENGTH);
+
+
 
     it('should proof that plasma contract is validated well from maintainer side', async() => {
         printTestNumber();
@@ -250,7 +252,7 @@ describe('CPC campaign', () => {
         printTestNumber();
         converterPlasma = twoKeyProtocol.plasmaAddress;
         let txHash = await twoKeyProtocol.CPCCampaign.joinAndConvert(campaignAddress, links.gmail.link, twoKeyProtocol.plasmaAddress, {fSecret: links.gmail.fSecret});
-
+        console.log(txHash);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get active influencers before conversion is approved', async() => {
@@ -263,17 +265,20 @@ describe('CPC campaign', () => {
 
     it('should approve converter from maintainer and distribute rewards', async() => {
         printTestNumber();
-
+        // Long functions take time set timeout to make sure previous one is mined
+        await new Promise(resolve => setTimeout(resolve, 1000));
         const {web3, address} = web3Switcher.buyer();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_BUYER));
+
         let txHash = await twoKeyProtocol.CPCCampaign.approveConverterAndExecuteConversion(campaignAddress, converterPlasma, twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
 
     it('should get number of influencers behind converter', async() => {
         printTestNumber();
-
+        // Long functions take time set timeout to make sure previous one is mined
+        await new Promise(resolve => setTimeout(resolve, 1000));
         let numberOfReferrers = await twoKeyProtocol.CPCCampaign.getNumberOfInfluencersForConverter(campaignAddress, converterPlasma);
         expect(numberOfReferrers).to.be.equal(2);
     }).timeout(TIMEOUT_LENGTH);

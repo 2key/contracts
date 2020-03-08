@@ -6,30 +6,26 @@ import promisedChai from 'chai-as-promised';
 
 import TwoKeyIPFS from '../src/utils/ipfs';
 import {ETwoKeyIPFSMode} from '../src/utils/interfaces';
+const {env} = process;
 
 const expect = chai.expect;
 chai.use(promisedChai);
 
 const ipfsRegex = /Qm[a-zA-Z0-9]{44}/;
 const campaign = require('./campaign.json');
+const apiUrl = env.IPFS_URL;
 
-describe('IPFS: Basic scenario. Read  from Gateway QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', () => {
-    const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
-        readUrl: 'https://ipfs.2key.net/ipfs/',
-        readMode: ETwoKeyIPFSMode.GATEWAY,
-    });
-
-    it('get object from ipfs/QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', async () => {
-        const hash = await ipfs.get('QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', { json: true });
-        console.log(hash);
-    }).timeout(30000);
-});
+// describe('IPFS: Basic scenario. Read  from Gateway QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', () => {
+//     const ipfs = new TwoKeyIPFS(apiUrl);
+//
+//     it('get object from ipfs/QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', async () => {
+//         const hash = await ipfs.get('QmWjWdzwaoTpju9KBT1XrNzHYQhhXwzkExfQPrtwwhocXA', { json: true });
+//         console.log(hash);
+//     }).timeout(30000);
+// });
 
 describe('IPFS: Basic scenario. Read from Gateway', () => {
-    const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
-        readUrl: 'https://ipfs.2key.net/ipfs/',
-        readMode: ETwoKeyIPFSMode.GATEWAY,
-    });
+    const ipfs = new TwoKeyIPFS(apiUrl);
     let hash;
     const now = new Date().toLocaleTimeString();
 
@@ -55,10 +51,7 @@ describe('IPFS: Basic scenario. Read from Gateway', () => {
 });
 
 describe('IPFS: Basic scenario. Read from API', () => {
-    const ipfs = new TwoKeyIPFS('https://ipfs.2key.net/api/v0', {
-        readUrl: 'https://ipfs.2key.net/api/v0',
-        readMode: ETwoKeyIPFSMode.API,
-    });
+    const ipfs = new TwoKeyIPFS(apiUrl);
     let hash;
     const now = new Date().toLocaleTimeString();
 

@@ -228,12 +228,6 @@ describe('TwoKeyProtocol', () => {
         });
     }).timeout(60000);
 
-    it('should read from ipfs', () => {
-        return twoKeyProtocol.ipfs.get('QmTiZzUGHaQz6np6WpFwMv5zKqLLgW3uM6a4ow2tht642j').then((data) => {
-            console.log('IPFS data', data);
-        });
-    }).timeout(60000);
-
     const rnd = Math.floor(Math.random() * 8);
     console.log('Random', rnd, addresses[rnd]);
     const ethDstAddress = addresses[rnd];
