@@ -29,6 +29,9 @@ echo "Running acquisition test"
 yarn run test
 spinner 2
 echo "Running donation test"
-yarn run test:one 2key-protocol/test/donation.spec.ts
+yarn run test:donation
+spinner 2
+echo "Running CPC test"
+yarn run test:cpc
 spinner 2
 echo "Bash script finished execution!"
