@@ -73,6 +73,13 @@ module.exports = {
           gasPrice: 15500000000
       },
 
+      'plasma-test-local': {
+          provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
+          network_id: 8087, // Match any network id
+          gas: 8000000,
+          gasPrice: 0
+      },
+
       'public.test-ledger': {
           provider: createLedgerProvider(rpcs["test-public"], ids["test-public"]),
           skipDryRun: true,
@@ -169,13 +176,13 @@ module.exports = {
           gasPrice: 0,
       },
 
-      'plasma-test-local': {
-          provider: () => new HDWalletProvider(mnemonic, 'https://rpc-staging.private.test.k8s.2key.net'),
-          network_id: 182,
-          gas: 7900000,
-          gasPrice: '0x0',
-          skipDryRun: true
-      },
+      // 'plasma-test-local': {
+      //     provider: () => new HDWalletProvider(mnemonic, 'https://rpc-staging.private.test.k8s.2key.net'),
+      //     network_id: 182,
+      //     gas: 7900000,
+      //     gasPrice: '0x0',
+      //     skipDryRun: true
+      // },
 
       'public.prod-ropsten-hdwallet': {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
