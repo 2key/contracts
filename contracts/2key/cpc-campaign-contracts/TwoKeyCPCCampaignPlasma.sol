@@ -94,8 +94,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
 
     /**
-     * @notice Function to approve converter and execute conversion, can be called once per converter
-     * @param converter is the plasma address of the converter
+     * @notice          Function to approve converter and execute conversion, can be called once per converter
+     * @param           converter is the plasma address of the converter
      */
     function approveConverterAndExecuteConversion(
         address converter
