@@ -23,7 +23,7 @@ export default function joinAndConvertTest(
       `${campaignUserActions.joinAndConvert} action required parameter missing for user ${userKey}`
     );
   }
-  // todo: isFiatOnly = true, error appears: "gas required exceeds allowance or always failing transaction"
+
   if (storage.campaignType === campaignTypes.acquisition) {
     it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
@@ -92,9 +92,8 @@ export default function joinAndConvertTest(
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase - reward);
       } else {
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
-
       }
-      // todo: for case when twoKeyEconomy is foreign and KYC isn't required: add check for rewards inventory subtract
+      // todo: for case when twoKeyEconomy is custom and KYC isn't required: add check for rewards inventory subtract
     }).timeout(60000);
   }
 

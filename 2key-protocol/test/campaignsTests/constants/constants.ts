@@ -30,6 +30,10 @@ export const campaignUserActions = {
   checkAvailableDonation: 'checkAvailableDonation',
   checkContractorBalanceAndProceeds: 'checkContractorBalanceAndProceeds',
   checkReferrerRewardStats: 'checkReferrerRewardStats',
+  lockContract: 'lockContract',
+  merkleCopyTest: 'merkleCopyTest',
+  checkMerkleProof: 'checkMerkleProof',
+  checkMainChainBalancesSync: 'checkMainChainBalancesSync',
 };
 
 export const maxRefReward = 1666.6666666666667;

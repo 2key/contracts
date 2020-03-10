@@ -5,6 +5,7 @@ import {campaignTypes, conversionStatuses} from "../../../../constants/smallCons
 import functionParamsInterface from "../typings/functionParamsInterface";
 import kycRequired from "../checks/kycRequired";
 import ITestConversion from "../../../../typings/ITestConversion";
+import ethOnly from "../checks/ethOnly";
 
 export default function cancelConversionTest(
   {
@@ -15,6 +16,7 @@ export default function cancelConversionTest(
   }: functionParamsInterface,
 ) {
   kycRequired(campaignData.isKYCRequired);
+  ethOnly(campaignData.isFiatOnly);
 
   if(storage.campaignType === campaignTypes.acquisition) {
     it(`${userKey} should cancel his conversion and ask for refund`, async () => {
@@ -28,12 +30,9 @@ export default function cancelConversionTest(
       );
       const balanceBefore = await protocol.getBalance(web3Address, campaignData.assetContractERC20);
 
-      const conversions = campaignData.isFiatConversionAutomaticallyApproved
-        ? user.approvedConversions
-        : user.pendingConversions;
+      const conversions = user.approvedConversions;
 
       expect(conversions.length).to.be.gt(0);
-
       /**
        * Always get first. It can be any conversion from available for this action.
        * But easiest way is always get first

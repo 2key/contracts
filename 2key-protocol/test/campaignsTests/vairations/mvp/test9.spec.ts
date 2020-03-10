@@ -106,22 +106,11 @@ describe(
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
           campaignUserActions.checkConverterSpent,
-        ],
-        campaignData,
-        storage,
-        contribution: conversionSize,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.uport,
-        secondaryUserKey: userIds.gmail,
-        actions: [
           campaignUserActions.cancelConvert,
         ],
         campaignData,
         storage,
+        contribution: conversionSize,
       }
     );
 

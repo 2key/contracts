@@ -22,7 +22,6 @@ import checkWithdrawableBalanceTest from "./tests/checkWithdrawableBalanceTest";
 import contractorWithdrawTest from "./tests/contractorWithdrawTest";
 import moderatorAndReferrerWithdrawTest from "./tests/moderatorAndReferrerWithdrawTest";
 import checkReferrerRewardTest from "./tests/checkReferrerRewardTest";
-import checkTotalEarningsTest from "./tests/checkTotalEarningsTest";
 import checkStatisticTest from "./tests/checkStatisticTest";
 import checkConverterMetricTest from "./tests/checkConverterMetricTest";
 import checkERC20BalanceTest from "./tests/checkERC20BalanceTest";
@@ -33,6 +32,10 @@ import checkAvailableDonationTest from "./tests/checkAvailableDonationTest";
 import checkTotalReferrerRewardTest from "./tests/checkTotalReferrerRewardTest";
 import checkContractorBalanceAndProceedsTest from "./tests/checkContractorBalanceAndProceedsTest";
 import referrerRewardStatsTest from "./tests/referrerRewardStatsTest";
+import lockContractTest from "./tests/lockContractTest";
+import merkleCopyTest from "./tests/merkleCopyTest";
+import checkMerkleProofTest from "./tests/checkMerkleProofTest";
+import mainChainBalancesSyncTest from "./tests/mainChainBalancesSyncTest";
 
 
 const actionToTest: {[key: string]: (params: functionParamsInterface) => void} = {
@@ -50,7 +53,6 @@ const actionToTest: {[key: string]: (params: functionParamsInterface) => void} =
   [campaignUserActions.moderatorAndReferrerWithdraw]: moderatorAndReferrerWithdrawTest,
   [campaignUserActions.checkReferrersList]: referrersListTest,
   [campaignUserActions.checkReferrerReward]: checkReferrerRewardTest,
-  [campaignUserActions.checkTotalEarnings]: checkTotalEarningsTest,
   [campaignUserActions.contractorWithdraw]: contractorWithdrawTest,
   [campaignUserActions.checkStatistic]: checkStatisticTest,
   [campaignUserActions.checkConverterMetric]: checkConverterMetricTest,
@@ -73,6 +75,13 @@ const actionToTest: {[key: string]: (params: functionParamsInterface) => void} =
   [campaignUserActions.checkConverterSpent]: converterSpentTest,
   [campaignUserActions.checkTotalReferrerReward]: checkTotalReferrerRewardTest,
   [campaignUserActions.checkAvailableDonation]: checkAvailableDonationTest,
+  /**
+   * cpc only tests
+   */
+  [campaignUserActions.lockContract]: lockContractTest,
+  [campaignUserActions.merkleCopyTest]: merkleCopyTest,
+  [campaignUserActions.checkMerkleProof]: checkMerkleProofTest,
+  [campaignUserActions.checkMainChainBalancesSync]: mainChainBalancesSyncTest,
 };
 
 export default function userTests(
@@ -110,30 +119,4 @@ export default function userTests(
 
     method(functionParams)
   });
-
-  if (campaignData.isFiatOnly) {
-// todo: recheck probably the same as execute conversion from owner
-    /*
-    if (
-      actions.includes(campaignUserActions.contractorExecuteConversion)
-      && campaignData.isFiatConversionAutomaticallyApproved
-      && !campaignData.isKYCRequired
-    ) {
-      it('should execute conversion from contractor', async () => {
-        const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
-        const {campaignAddress} = storage;
-
-        // Return empty array for contractor
-        const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-          campaignAddress, address, web3Address,
-        );
-        const conversionId = conversionIds[0];
-
-        await protocol.Utils.getTransactionReceiptMined(
-          await protocol[campaignContract].executeConversion(campaignAddress, 4, web3Address)
-        );
-      }).timeout(60000);
-    }
-     */
-  }
 }

@@ -1,12 +1,14 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {campaignTypes, feePercent} from "../../../../constants/smallConstants";
 
 export default function checkCampaignSummaryTest(
   {
     storage,
     userKey,
     campaignContract,
+    campaignData,
   }: functionParamsInterface,
 ) {
   /**
@@ -44,6 +46,18 @@ export default function checkCampaignSummaryTest(
      totalBounty: 0
      uniqueConverters: 1
      }
+
+   CPC
+
+   {
+      pendingConverters: 0,
+      approvedConverters: 1,
+      rejectedConverters: 0,
+      pendingConversions: 0,
+      rejectedConversions: 0,
+      executedConversions: 1,
+      totalBounty: 2.94
+   }
    */
   it('should compare campaign summary with storage', async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
@@ -68,14 +82,6 @@ export default function checkCampaignSummaryTest(
       storage.pendingConversions.length,
     );
     expectEqualNumbers(
-      summary.approvedConversions,
-      storage.approvedConversions.length,
-    );
-    expectEqualNumbers(
-      summary.cancelledConversions,
-      storage.canceledConversions.length,
-    );
-    expectEqualNumbers(
       summary.rejectedConversions,
       storage.rejectedConversions.length,
     );
@@ -84,13 +90,31 @@ export default function checkCampaignSummaryTest(
       storage.executedConversions.length,
     );
     expectEqualNumbers(
-      summary.tokensSold,
-      storage.executedConversionsTotal,
-    );
-    expectEqualNumbers(
       summary.totalBounty,
       storage.totalBounty,
     );
+
+    if (storage.campaignType === campaignTypes.cpc) {
+      expectEqualNumbers(
+        summary.totalBounty,
+
+        summary.executedConversions * campaignData.bountyPerConversionWei * (1 - feePercent),
+      );
+    } else {
+      expectEqualNumbers(
+        summary.approvedConversions,
+        storage.approvedConversions.length,
+      );
+      expectEqualNumbers(
+        summary.cancelledConversions,
+        storage.canceledConversions.length,
+      );
+      expectEqualNumbers(
+        summary.tokensSold,
+        storage.executedConversionsTotal,
+      );
+
+    }
   }).timeout(60000);
 
 }

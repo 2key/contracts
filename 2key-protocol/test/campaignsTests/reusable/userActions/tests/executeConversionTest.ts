@@ -19,11 +19,6 @@ export default function executeConversionTest(
   }
 
   if (storage.campaignType === campaignTypes.cpc) {
-    /**
-     * todo: add assertions for some balances
-     *
-     * AS I understand all conversions approved with on single call
-     */
     it('should approve converter from maintainer and distribute rewards', async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {protocol: converterProtocol} = availableUsers[secondaryUserKey];

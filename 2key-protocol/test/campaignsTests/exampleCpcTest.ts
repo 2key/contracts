@@ -37,7 +37,6 @@ describe(
 
     checkCpcCampaign(campaignData, storage, userIds.buyer);
 
-
     usersActions(
       {
         userKey: userIds.test,
@@ -95,10 +94,55 @@ describe(
     usersActions(
       {
         userKey: userIds.test4,
-        // secondaryUserKey: userIds.test4,
         actions: [
           campaignUserActions.checkReferrersList,
           campaignUserActions.checkReferrerReward,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.buyer,
+        actions: [
+          campaignUserActions.lockContract,
+          campaignUserActions.merkleCopyTest,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.test,
+        actions: [
+          campaignUserActions.checkMerkleProof,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.deployer,
+        actions: [
+          campaignUserActions.checkMainChainBalancesSync,
+          campaignUserActions.checkCampaignSummary,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.test,
+        actions: [
+          campaignUserActions.checkModeratorEarnings,
         ],
         campaignData,
         storage,
