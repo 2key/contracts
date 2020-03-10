@@ -422,6 +422,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         // So if contractor adds more bounty we can increase it
         totalBountyForCampaign = totalBountyForCampaign.add(_totalBounty);
         if(_totalBounty == 0 && bountyPerConversionWei == 0) {
+            if(_maxNumberOfConversions == 0) {
+                maxNumberOfConversions = uint256(-1);
+            }
             maxNumberOfConversions = _maxNumberOfConversions;
         } else {
             maxNumberOfConversions = totalBountyForCampaign.div(bountyPerConversionWei);
