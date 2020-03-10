@@ -12,7 +12,7 @@ import "../campaign-mutual-contracts/TwoKeyCampaignLogicHandler.sol";
 
 contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicHandler {
 
-    uint powerLawFactor;
+    uint public powerLawFactor; // Factor
 
     uint campaignGoal; // Goal of the campaign, how many funds to raise
 
