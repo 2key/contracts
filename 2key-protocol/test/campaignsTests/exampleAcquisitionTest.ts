@@ -8,9 +8,9 @@ import {campaignUserActions} from "./constants/constants";
 import TestStorage from "../helperClasses/TestStorage";
 import {campaignTypes, incentiveModels, vestingSchemas} from "../constants/smallConstants";
 import getAcquisitionCampaignData from "./helpers/getAcquisitionCampaignData";
+import getTwoKeyEconomyAddress from "./helpers/getTwoKeyEconomyAddress";
 
 const {env} = process;
-const networkId = parseInt(env.MAIN_NET_ID, 10);
 const contributionSize = 5;
 
 const campaignData = getAcquisitionCampaignData(
@@ -25,7 +25,7 @@ const campaignData = getAcquisitionCampaignData(
     campaignStartTime: 0,
     campaignEndTime: 9884748832,
     acquisitionCurrency: 'USD',
-    twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
+    twoKeyEconomy: getTwoKeyEconomyAddress(),
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
     vestingAmount: vestingSchemas.bonus,
@@ -130,6 +130,7 @@ describe(
         userKey: userIds.gmail2,
         secondaryUserKey: userIds.renata,
         actions: [
+          campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
         ],
         campaignData,
@@ -143,6 +144,7 @@ describe(
         userKey: userIds.buyer,
         secondaryUserKey: userIds.renata,
         actions: [
+          campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
           campaignUserActions.cancelConvert,
         ],
@@ -286,7 +288,7 @@ describe(
         userKey: userIds.renata,
         actions: [
           campaignUserActions.moderatorAndReferrerWithdraw,
-          campaignUserActions.checkTotalEarnings,
+          campaignUserActions.checkModeratorEarnings,
           campaignUserActions.checkERC20Balance,
         ],
         campaignData,

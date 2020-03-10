@@ -4,8 +4,8 @@ import availableUsers from "../../constants/availableUsers";
 import {IPrivateMetaInformation} from "../../../src/acquisition/interfaces";
 import TestStorage from "../../helperClasses/TestStorage";
 import {campaignTypes} from "../../constants/smallConstants";
-import singletons from "../../../src/contracts/singletons";
 import {expectEqualNumbers} from "../helpers/numberHelpers";
+import getTwoKeyEconomyAddress from "../helpers/getTwoKeyEconomyAddress";
 
 
 export default function checkAcquisitionCampaign(campaignParams, storage: TestStorage) {
@@ -52,21 +52,14 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
     expect(currency).to.be.equal(campaignParams.currency);
   }).timeout(60000);
 
-  // campaignData.isFiatOnly === true
-  // TODO: Recheck with Nicola, probably should be for two different test cases
-  // why `1` ether?
-  // when value > 0
-  // when amount > 0
   if (campaignParams.isFiatOnly) {
     it('should reserve amount for fiat conversion rewards', async () => {
       const {protocol, web3: {address: from}} = availableUsers[userKey];
       const {campaignAddress} = storage;
-      const rate = await protocol.UpgradableExchange.get2keySellRate(from);
 
       const {ethWorth2keys} = await protocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(
         campaignParams.isFiatOnly,
         !campaignParams.isFiatOnly,
-
         parseFloat(
           protocol.Utils.fromWei(
             campaignParams.campaignHardCapWEI
@@ -75,13 +68,14 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
         campaignParams.maxReferralRewardPercentWei,
       );
 
-      let txHash = await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
-        campaignAddress,
-        parseFloat(protocol.Utils.toWei(ethWorth2keys, 'ether').toString()),
-        campaignParams.amount,
-        from,
+      await protocol.Utils.getTransactionReceiptMined(
+        await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
+          campaignAddress,
+          parseFloat(protocol.Utils.toWei(ethWorth2keys, 'ether').toString()),
+          campaignParams.amount,
+          from,
+        )
       );
-      await protocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(60000);
   }
 
@@ -106,18 +100,27 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
   it('should transfer assets to campaign', async () => {
     const {protocol, web3: {address: from}} = availableUsers[userKey];
     const {campaignAddress} = storage;
-
+    const balanceBefore = Number.parseFloat(
+      protocol.Utils.fromWei(
+        await protocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)
+      ).toString()
+    );
     const txHash = await protocol.transfer2KEYTokens(
       campaignAddress,
       protocol.Utils.toWei(campaignParams.campaignInventory, 'ether'),
       from,
     );
     await protocol.Utils.getTransactionReceiptMined(txHash);
-    const balance = protocol.Utils.fromWei(
-      await protocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)
-    ).toString();
+    const balance = Number.parseFloat(
+      protocol.Utils.fromWei(
+        await protocol.AcquisitionCampaign.checkInventoryBalance(campaignAddress, from)
+      ).toString()
+    );
 
-    // expect(parseFloat(balance)).to.be.equal(campaignParams.campaignInventory);
+    expectEqualNumbers(
+      balance,
+      campaignParams.campaignInventory + balanceBefore
+    );
   }).timeout(600000);
 
 
@@ -160,13 +163,11 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
 
     const availableAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(campaignAddress, from);
 
-    const networkId = parseInt(process.env.MAIN_NET_ID, 10);
-
     if (
       campaignParams.isFiatOnly
-      && campaignParams.assetContractERC20 === singletons.TwoKeyEconomy.networks[networkId].address
+      && campaignParams.assetContractERC20 === getTwoKeyEconomyAddress()
     ) {
-      const {amount2key} = await protocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(
+      const {amount2key, ...rest} = await protocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(
         campaignParams.isFiatOnly,
         !campaignParams.isFiatOnly,
         campaignParams.campaignHardCapWEI,
@@ -177,11 +178,10 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
         availableAmountOfTokens,
         campaignParams.campaignInventory
         + parseFloat(protocol.Utils.fromWei(amount2key).toString()),
-        );
+      );
     } else {
       expect(availableAmountOfTokens).to.be
         .equal(campaignParams.campaignInventory);
-
     }
   }).timeout(60000);
 }
