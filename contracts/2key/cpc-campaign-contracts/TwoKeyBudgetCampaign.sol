@@ -18,34 +18,25 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * be implemented by all budget campaigns in future
 	 */
 
-    // Merkle root
-	bytes32 public merkleRoot;
-    // Address of campaign deployed to plasma network
-	address public mirrorCampaignOnPlasma;
-	// Flag to determine if campaign is validated
-	bool public isValidated;
-	//Active influencer means that he has at least on participation in successful conversion
-	address[] activeInfluencers;
-	// Mapping active influencers
-	mapping(address => bool) isActiveInfluencer;
-	// His index position in the array
-	mapping(address => uint) activeInfluencer2idx;
-	//Selector if inventory is added
-	bool isInventoryAdded;
-	// Dollar to 2key rate in WEI at the moment of adding inventory
-	uint public usd2KEYrateWei;
-	// Variable to let us know if rewards have been bought with Ether
-	bool public boughtRewardsWithEther;
-	// Bounty how contractor wants referrers to split per conversion
-	uint public bountyPerConversion;
-	//Amount for rewards inventory
-	uint public rewardsInventoryAmount;
-	// Amount representing how much moderator has earned
-	uint public moderatorTotalEarnings;
-	// Amount representing how much moderator has now
-	uint public moderatorEarningsBalance;
-	// Total earnings per referrer
-	mapping(address => uint256) referrerPlasma2TotalEarnings2key;
+
+	bytes32 public merkleRoot;						// Merkle root
+	address public mirrorCampaignOnPlasma;			// Address of campaign deployed to plasma network
+	bool public isValidated;						// Flag to determine if campaign is validated
+	address[] activeInfluencers;					// Active influencer means that he has at least on participation in successful conversion
+
+	mapping(address => bool) isActiveInfluencer;	// Mapping active influencers
+	mapping(address => uint) activeInfluencer2idx;	// His index position in the array
+
+	bool public isInventoryAdded;					// Selector if inventory is added
+	bool public boughtRewardsWithEther;				// Variable to let us know if rewards have been bought with Ether
+	uint public usd2KEYrateWei;						// Dollar to 2key rate in WEI at the moment of adding inventory
+	uint public bountyPerConversion;				// Bounty how contractor wants referrers to split per conversion
+	uint public rewardsInventoryAmount;				// Amount for rewards inventory
+	uint public moderatorTotalEarnings;				// Amount representing how much moderator has earned
+	uint public moderatorEarningsBalance;			// Amount representing how much moderator has now
+
+	mapping(address => uint256) referrerPlasma2TotalEarnings2key;	// Total earnings per referrer
+
 
 	/**
      * @notice Function to validate that contracts plasma and public are well mirrored
@@ -279,18 +270,13 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	/**
 	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
-	 * @param _amount is the amount he called previously approve with
 	 */
-	function addDirectly2KEYAsInventory(
-		uint _amount
-	)
+	function addDirectly2KEYAsInventory()
 	public
 	onlyContractor
 	{
 		require(isInventoryAdded == false);
-		require(getTokenBalance() == _amount);
-
-		rewardsInventoryAmount = _amount;
+		rewardsInventoryAmount = getTokenBalance();
 		isInventoryAdded = true;
 	}
 
