@@ -403,11 +403,11 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        if(campaignsToBeUpgraded.length > 0) {
-            if(networks[i].includes('public')) {
-                await runDeployCampaignMigration(networks[i]);
-            }
-        }
+        // if(campaignsToBeUpgraded.length > 0) {
+        //     if(networks[i].includes('public')) {
+        //         await runDeployCampaignMigration(networks[i]);
+        //     }
+        // }
 
         if(cpcChanged.length > 0) {
             await runDeployCPCCampaignMigration(networks[i]);
