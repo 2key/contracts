@@ -12,12 +12,12 @@ case $i in
     ;;
 esac
 done
-echo BRANCH = ${BRANCH}
+echo BRANCH_TO_CHECKOUT = ${BRANCH}
 
-git checkout staging
+git checkout BRANCH
 cd 2key-protocol/src
-git checkout staging
+git checkout BRANCH
 cd ..
 cd dist
-git checkout staging
+git checkout BRANCH
 cd ../..
