@@ -1,6 +1,5 @@
 import '../../../constants/polifils';
 import getAcquisitionCampaignData from "../../helpers/getAcquisitionCampaignData";
-import singletons from "../../../../src/contracts/singletons";
 import {campaignTypes, incentiveModels, vestingSchemas} from "../../../constants/smallConstants";
 import TestStorage from "../../../helperClasses/TestStorage";
 import createAcquisitionCampaign from "../../helpers/createAcquisitionCampaign";
@@ -8,10 +7,10 @@ import {userIds} from "../../../constants/availableUsers";
 import checkAcquisitionCampaign from "../../reusable/checkAcquisitionCampaign";
 import usersActions from "../../reusable/userActions/usersActions";
 import {campaignUserActions, maxRefReward} from "../../constants/constants";
+import getTwoKeyEconomyAddress from "../../helpers/getTwoKeyEconomyAddress";
 
 
 const conversionSize = 5;
-const networkId = parseInt(process.env.MAIN_NET_ID, 10);
 
 const campaignData = getAcquisitionCampaignData(
   {
@@ -25,7 +24,7 @@ const campaignData = getAcquisitionCampaignData(
     campaignStartTime: 0,
     campaignEndTime: 9884748832,
     acquisitionCurrency: 'ETH',
-    twoKeyEconomy: singletons.TwoKeyEconomy.networks[networkId].address,
+    twoKeyEconomy: getTwoKeyEconomyAddress(),
     isFiatOnly: false,
     isFiatConversionAutomaticallyApproved: true,
     vestingAmount: vestingSchemas.baseAndBonus,
