@@ -1,7 +1,7 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
-import {campaignTypes, conversionStatuses} from "../../../../constants/smallConstants";
+import {campaignTypes, conversionStatuses, feePercent} from "../../../../constants/smallConstants";
 import kycRequired from "../checks/kycRequired";
 import ITestConversion from "../../../../typings/ITestConversion";
 
@@ -37,6 +37,7 @@ export default function executeConversionTest(
       await protocol.CPCCampaign.approveConverterAndExecuteConversion(
         campaignAddress, converterProtocol.plasmaAddress, protocol.plasmaAddress
       );
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const lastConversion = await converterProtocol.CPCCampaign.getConversion(
         campaignAddress,
@@ -44,6 +45,7 @@ export default function executeConversionTest(
       );
 
       expect(lastConversion.conversionState).to.be.eq(conversionStatuses.executed);
+      expect(lastConversion.bountyPaid).to.be.eq(campaignData.bountyPerConversionWei * (1 - feePercent));
 
       conversionForCheck.data = lastConversion;
       storage.processConversion(user, conversionForCheck, campaignData.incentiveModel);

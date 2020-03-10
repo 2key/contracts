@@ -50,3 +50,5 @@ export const campaignTypeToInstance = {
   [campaignTypes.donation]: 'DonationCampaign',
   [campaignTypes.cpc]: 'CPCCampaign',
 };
+
+export const feePercent = 0.02;

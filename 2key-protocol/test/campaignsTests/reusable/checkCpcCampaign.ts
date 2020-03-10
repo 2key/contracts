@@ -83,7 +83,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, ma
     const isValidatedBefore = await protocol.CPCCampaign.checkIsPlasmaContractValid(campaignAddress);
 
     await protocol.CPCCampaign.validatePlasmaContract(campaignAddress, protocol.plasmaAddress);
-
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const isValidatedAfter = await protocol.CPCCampaign.checkIsPlasmaContractValid(campaignAddress);
 
     expect(isValidatedBefore).to.be.eq(false);
@@ -107,7 +107,8 @@ export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, ma
       maxNumberOfConversionsCalculated,
       protocol.plasmaAddress
     );
-    const  maxNumberOfConversions = await protocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const maxNumberOfConversions = await protocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
 
     expect(maxNumberOfConversions).to.be.equal(maxNumberOfConversionsCalculated);
   }).timeout(TIMEOUT_LENGTH);
@@ -125,11 +126,11 @@ export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, ma
     const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
-    const campaignMeta = await protocol.CPCCampaign.getPublicMeta(campaignAddress,protocol.plasmaAddress);
+    const campaignMeta = await protocol.CPCCampaign.getPublicMeta(campaignAddress, protocol.plasmaAddress);
     expect(campaignMeta.meta.url).to.be.equal(campaignParams.url);
   }).timeout(TIMEOUT_LENGTH);
 
-  it('should get public link key of contractor', async() => {
+  it('should get public link key of contractor', async () => {
     const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
 

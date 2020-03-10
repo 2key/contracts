@@ -19,6 +19,7 @@ const  campaignData: ICreateCPC = {
   incentiveModel: incentiveModels.vanillaAverage,
   campaignStartTime : 0,
   campaignEndTime : 9884748832,
+  // will be reduced to fee amount, for now it is 2%, so it will be 3*0.98 = 2.94 per conversion
   bountyPerConversionWei: 3,
 // @ts-ignore
   etherForRewards: 3,
@@ -88,7 +89,19 @@ describe(
         ],
         campaignData,
         storage,
-        cut: 10,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.test4,
+        // secondaryUserKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkReferrersList,
+          campaignUserActions.checkReferrerReward,
+        ],
+        campaignData,
+        storage,
       }
     );
   },
