@@ -38,7 +38,8 @@ const {
     runDeployPlasmaEventSourceMigration,
     runDeployCPCCampaignMigration,
     runDeployFeeManagerMigration,
-    runDeployCPCFirstTime
+    runDeployCPCFirstTime,
+    runTruffleCompile
 } = require('./helpers');
 
 
@@ -369,6 +370,7 @@ async function deployUpgrade(networks, args) {
     console.log(networks);
     const l = networks.length;
 
+    await runTruffleCompile();
     let [singletonsToBeUpgraded, campaignsToBeUpgraded, cpcChanged] = await getDiffBetweenLatestTags();
 
     for (let i = 0; i < l; i += 1) {
