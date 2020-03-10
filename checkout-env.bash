@@ -14,10 +14,10 @@ esac
 done
 echo BRANCH_TO_CHECKOUT = ${BRANCH}
 
-git checkout BRANCH
+git checkout ${BRANCH}
 cd 2key-protocol/src
-git checkout BRANCH
+git checkout ${BRANCH}
 cd ..
 cd dist
-git checkout BRANCH
+git checkout ${BRANCH}
 cd ../..
