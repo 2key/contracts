@@ -168,10 +168,11 @@ export default function joinAndConvertTest(
         protocol.plasmaAddress,
         {fSecret: refUser.link.fSecret});
 
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
       currentUser.refUserKey = secondaryUserKey;
 
       const conversion = await protocol.CPCCampaign.getConversion(campaignAddress, nextID);
-      console.log({nextID, conversion});
 
       expect(conversion).to.be.a('object');
 

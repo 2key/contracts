@@ -77,6 +77,8 @@ class TestStorage {
       || conversion instanceof TestDonationConversion
     ) {
       conversionReward = conversion.data.maxReferralReward2key;
+    } else if (conversion instanceof TestCPCConversion){
+      conversionReward = conversion.data.bountyPaid;
     }
 
     if (!conversionReward) {

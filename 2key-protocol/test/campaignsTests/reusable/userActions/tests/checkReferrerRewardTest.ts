@@ -1,6 +1,7 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {campaignTypes} from "../../../../constants/smallConstants";
 
 /**
  * We have two similar tests this one and referrerRewardStatsTest. Probably one can be removed
@@ -24,11 +25,23 @@ export default function checkReferrerRewardTest(
       const refUser = referrals[i];
       const {protocol: {plasmaAddress}} = availableUsers[refUser.id];
 
-      const refReward = storage.campaignType
-        ? await protocol.AcquisitionCampaign
-          .getReferrerPlasmaBalance(campaignAddress, plasmaAddress)
-        : await protocol.DonationCampaign
-          .getReferrerBalance(campaignAddress, plasmaAddress, web3Address);
+      let refReward;
+
+      switch (storage.campaignType) {
+        case campaignTypes.acquisition:
+          refReward = await protocol.AcquisitionCampaign
+            .getReferrerPlasmaBalance(campaignAddress, plasmaAddress);
+          break;
+        case campaignTypes.donation:
+          refReward = await protocol.DonationCampaign
+            .getReferrerBalance(campaignAddress, plasmaAddress, web3Address);
+          break;
+        case campaignTypes.cpc:
+          refReward = await protocol.CPCCampaign.getReferrerBalanceInFloat(campaignAddress, plasmaAddress);
+          break;
+        default:
+          throw new Error('Unknown campaign type');
+      }
 
       expectEqualNumbers(
         refReward,
