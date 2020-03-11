@@ -8,7 +8,10 @@ import "./SafeMath.sol";
  */
 library PriceDiscovery {
 
+
     using SafeMath for uint;
+
+
 
     /**
      * @notice          Function to calculate token price based on amount of tokens in the pool
@@ -31,24 +34,121 @@ library PriceDiscovery {
     }
 
 
+
+    /**
+     * @notice          Function to calculate how many iterations to recompute price we need
+     *
+     * @param           amountOfUSDSpendingForBuyingTokens is the dollar amount user is spending
+     *                  to buy the tokens
+     * @param           tokenPriceBeforeBuying is the price of the token when user expressed
+     *                  a will to buy the tokens
+     * @param           totalAmountOfTokensInThePool is the amount of the tokens that are currently present in the pool
+     * @return          tuple containing number of iterations and how many dollars will be spent per iteration
+     */
     function calculateNumberOfIterationsNecessary(
-        uint amountOfUSDSpendingForBuyingTokens
+        uint amountOfUSDSpendingForBuyingTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool
     )
     public
     pure
-    returns (uint)
+    returns (uint, uint)
     {
-        //TBD
+        uint HUNDRED_WEI = 100*(10**18);
+        uint ONE_WEI = 10**18;
+
+        uint numberOfIterations = 1;
+
+        if(amountOfUSDSpendingForBuyingTokens > HUNDRED_WEI) {
+            // Amount of tokens that user would receive in case he bought for the whole money at initial price
+            uint amountOfTokensToBeBought = amountOfUSDSpendingForBuyingTokens.mul(tokenPriceBeforeBuying).div(10**18);
+            // Percentage of the current amount in the pool in tokens user is buying
+            uint percentageOfThePoolWei = amountOfTokensToBeBought.mul(HUNDRED_WEI).div(totalAmountOfTokensInThePool);
+
+            if(percentageOfThePoolWei < ONE_WEI) {
+                // Case less than 1%
+                numberOfIterations = 5;
+
+            } else if(percentageOfThePoolWei < ONE_WEI.mul(10)) {
+                // Case between 1% and 10%
+                numberOfIterations = 10;
+            } else if(percentageOfThePoolWei < ONE_WEI.mul(30)) {
+                // Case between 10% and 30%
+                numberOfIterations = 30;
+            } else {
+                // Cases where 30% or above
+                numberOfIterations = 100;
+            }
+        }
+
+        return (numberOfIterations, amountOfUSDSpendingForBuyingTokens.div(numberOfIterations));
     }
 
-    function calculateAmountOfTokensPerIteration(
+
+
+    function calculateTotalTokensUserIsGetting(
+        uint amountOfUSDSpendingForBuyingTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool
+    )
+    public
+    pure
+    returns (uint,uint)
+    {
+        uint totalTokensBought;
+
+        uint numberOfIterations;
+        uint amountBuyingPerIteration;
+
+        (numberOfIterations, amountBuyingPerIteration) = calculateNumberOfIterationsNecessary(
+            amountOfUSDSpendingForBuyingTokens,
+            tokenPriceBeforeBuying,
+            totalAmountOfTokensInThePool
+        );
+
+        uint index;
+        uint amountOfTokensReceived;
+        uint newPrice = tokenPriceBeforeBuying;
+
+        for(index = 0; index < numberOfIterations; index ++) {
+            // Function which will calculate the amount of tokens we got for specific iteration
+            // and also besides that what will be the new token price
+            (amountOfTokensReceived, newPrice, totalAmountOfTokensInThePool) = calculateAmountOfTokensPerIterationAndNewPrice(
+                totalAmountOfTokensInThePool,
+                newPrice,
+                amountBuyingPerIteration
+            );
+            // Update total tokens which user have bought
+            totalTokensBought = totalTokensBought.add(amountOfTokensReceived);
+        }
+
+        return (totalTokensBought, newPrice);
+    }
+
+
+
+    /**
+     * @notice          Function to calculate amount of tokens per iteration and what will be the new price
+     * @param           totalAmountOfTokensInThePool is the total amount of tokens in the pool at the moment
+     * @param           tokenPrice is the price of the token at the moment
+     * @param           iterationAmount is the amount user is spending in this iteration
+     */
+    function calculateAmountOfTokensPerIterationAndNewPrice(
+        uint totalAmountOfTokensInThePool,
         uint tokenPrice,
         uint iterationAmount
     )
     public
     pure
-    returns (uint)
+    returns (uint,uint)
     {
-        return tokenPrice.mul(iterationAmount);
+        // Calculate amount of tokens user is getting
+        uint amountOfTokens = tokenPrice.mul(iterationAmount);
+        // Calculate the new price for the pool
+        uint tokensLeftInThePool = totalAmountOfTokensInThePool.sub(amountOfTokens);
+        // The new price after the tokens are being bought
+        uint newPrice = recalculatePrice(poolInitialAmountOfUSD, tokensLeftInThePool);
+
+        return (amountOfTokens, tokensLeftInThePool, newPrice);
     }
 }
