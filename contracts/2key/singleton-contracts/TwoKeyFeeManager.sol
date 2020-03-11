@@ -248,6 +248,9 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
             // 2KEY / ETH
             uint debtIn2Key = (usersDebtInEth.mul(ethTo2key)).div(10**18); // ETH * (2KEY / ETH) = 2KEY
 
+            // This is the initial amount he has to pay
+            amountToPay = debtIn2Key;
+
             if (_amountOf2keyForRewards > debtIn2Key){
                 if(_amountOf2keyForRewards < 3 * debtIn2Key) {
                     amountToPay = debtIn2Key / 2;
