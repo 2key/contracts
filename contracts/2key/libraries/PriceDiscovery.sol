@@ -86,6 +86,9 @@ library PriceDiscovery {
 
 
 
+    /**
+     *
+     */
     function calculateTotalTokensUserIsGetting(
         uint amountOfUSDSpendingForBuyingTokens,
         uint tokenPriceBeforeBuying,
