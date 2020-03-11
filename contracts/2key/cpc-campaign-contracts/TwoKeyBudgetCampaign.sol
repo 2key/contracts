@@ -303,7 +303,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     onlyContractor
 	returns (uint)
 	{
-		require(ITwoKeyCampaignLogicHandler(logicHandler).canContractorWithdrawRemainingRewardsInventory() == true);
+		//TODO: Add here some requirement that campaign is not ended or something like that
 		uint campaignRewardsBalance = getTokenBalance();
 
 		uint rewardsNotSpent = campaignRewardsBalance.sub(reservedAmount2keyForRewards);
