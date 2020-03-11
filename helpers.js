@@ -79,6 +79,36 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
     }
 });
 
+
+/**
+ * This is function to run when we want to update our campaigns
+ * @param network
+ * @returns {Promise<any>}
+ */
+const runDeployCPCFirstTime = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '8', '--to', '8', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+/**
+ * This is function to run when we want to update our campaigns
+ * @param network
+ * @returns {Promise<any>}
+ */
+const runTruffleCompile = () => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['compile']);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
 /**
  * This is function to run when we want to update our cpc campaigns
  * @param network
@@ -386,5 +416,7 @@ module.exports = {
     ipfsGet,
     runDeployPlasmaEventSourceMigration,
     runDeployCPCCampaignMigration,
-    runDeployFeeManagerMigration
+    runDeployFeeManagerMigration,
+    runDeployCPCFirstTime,
+    runTruffleCompile
 };

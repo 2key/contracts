@@ -291,7 +291,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
         ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource))
         .cpcCampaignCreated(
             proxyCPC,
-            msg.sender
+            plasmaOf(msg.sender)
         );
     }
 

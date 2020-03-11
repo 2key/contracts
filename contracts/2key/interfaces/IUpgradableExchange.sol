@@ -45,4 +45,24 @@ contract IUpgradableExchange {
     view
     returns (uint);
 
+    function returnLeftoverAfterRebalancing(
+        uint amountOf2key
+    )
+    public;
+
+    function getMore2KeyTokensForRebalancing(
+        uint amountOf2KeyRequested
+    )
+    public
+    view
+    returns (uint);
+
+    function withdrawERC20(
+        address _erc20TokenAddress,
+        uint _tokenAmount
+    )
+    public;
+
+    function releaseAllDAIFromContractToReserve()
+    public;
 }

@@ -21,7 +21,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	address ownerPlasma; //contractor plasma address
 
 
-	bool isKYCRequired;
+	bool isKYCRequired; // Flag if KYC is required or not on this campaign
     bool mustConvertToReferr;
 
 
@@ -29,7 +29,9 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	uint256 contractorTotalProceeds; // Contractor total earnings
 	uint256 moderatorTotalEarnings2key; //Total earnings of the moderator all time
 
-	mapping(address => uint) public converterToNumberOfInfluencers;
+	//Referral accounting stuff
+	mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
+
 
 	/**
 	 * @notice Modifier which will enable only twoKeyConversionHandlerContract to execute some functions
@@ -113,6 +115,8 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	view
 	returns (address[],address[],uint8[],address)
 	{
+		// Recheck
+//		require(sig != bytes(0)); // signature can't be empty
 		// move ARCs and set public_link keys and weights/cuts based on signature information
 		// returns the last address in the sig
 
@@ -158,6 +162,30 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		return (influencers, keys, weights, old_address);
 	}
 
+	/**
+	 * @notice 		Function to get number of influencers between submimtted user and contractor
+	 * @param 		_user is the address of the user we're checking information
+	 *
+	 * 				Example: contractor -> user1 -> user2 -> user3
+	 *				Result for input(user3) = 2
+	 * @return		Difference between user -> contractor
+	 */
+	function getNumberOfUsersToContractor(
+		address _user
+	)
+	public
+	view
+	returns (uint)
+	{
+		uint counter = 0;
+		_user = twoKeyEventSource.plasmaOf(_user);
+		while(received_from[_user] != ownerPlasma) {
+			_user = received_from[_user];
+			require(_user != address(0));
+			counter ++;
+		}
+		return counter;
+	}
 
 	/**
 	 * @notice Function to set cut of
@@ -187,7 +215,6 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		address _converter
 	)
 	internal
-	returns (uint)
 	{
 		address[] memory influencers;
 		address[] memory keys;
@@ -206,6 +233,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 			} else {
 				require(received_from[new_address] == old_address);
 			}
+
 			old_address = new_address;
 
 			if (i < keys.length) {
@@ -216,10 +244,6 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 				setCutOf(new_address, uint256(weights[i]));
 			}
 		}
-        if(numberOfInfluencers > 0) {
-            return numberOfInfluencers - 1;
-        }
-		return numberOfInfluencers;
 	}
 
 	function calculateInfluencersFee(
@@ -269,6 +293,14 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 
 
 
+	/**
+	 * @notice 		Function which will distribute arcs if that is necessary
+	 *
+	 * @param 		_converter is the address of the converter
+	 * @param		signature is the signature user is converting with
+	 *
+	 * @return 		Distance between user and contractor
+	 */
 	function distributeArcsIfNecessary(
 		address _converter,
 		bytes signature
@@ -277,9 +309,9 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	returns (uint)
 	{
 		if(received_from[twoKeyEventSource.plasmaOf(_converter)] == address(0)) {
-			converterToNumberOfInfluencers[_converter] = distributeArcsBasedOnSignature(signature, _converter);
+			distributeArcsBasedOnSignature(signature, _converter);
 		}
-		return converterToNumberOfInfluencers[_converter];
+		return getNumberOfUsersToContractor(_converter);
 	}
 
 
@@ -407,18 +439,13 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
         return (conversionQuota, maxReferralRewardPercent, isKYCRequired);
     }
 
-    /**
-     * @notice Function to fetch moderator balance in ETH and his total earnings
-     * @dev only contractor or moderator are eligible to call this function
-     * @return value of his balance in ETH
-     */
-    function getModeratorTotalEarnings()
-	public
-	view
-	returns (uint)
-	{
-        return (moderatorTotalEarnings2key);
-    }
+//    function getModeratorTotalEarnings()
+//	public
+//	view
+//	returns (uint)
+//	{
+//        return (moderatorTotalEarnings2key);
+//    }
 
     /**
      * @notice Function to fetch contractor balance in ETH
@@ -489,11 +516,11 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
  	 * @param _address is the address we're withdrawing funds to
  	 * @dev It can be called by the address specified in the param or by the one of two key maintainers
  	 */
-	function referrerWithdraw(
+	function referrerWithdrawInternal(
 		address _address,
 		bool _withdrawAsStable
 	)
-	public
+	internal
 	{
 		require(msg.sender == _address || twoKeyEventSource.isAddressMaintainer(msg.sender));
 		address twoKeyAdminAddress;

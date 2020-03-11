@@ -19,6 +19,12 @@ spinner 2
 echo "Testing congress voting and sending ether"
 yarn run test:one 2key-protocol/test/congressVote.spec.ts
 spinner 2
+echo "Testing user creation, all errors will be skipped and displayed in console"
+yarn run test:one 2key-protocol/test/runUserRegistration.spec.ts
+spinner 2
+echo "Testing setting the rates for the contracts"
+yarn run test:one 2key-protocol/test/twoKeyExchangeRate.spec.ts
+spinner 2
 echo "Running acquisition test"
 yarn run test
 spinner 2

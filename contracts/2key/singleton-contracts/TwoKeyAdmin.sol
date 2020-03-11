@@ -9,6 +9,7 @@ import "../interfaces/storage-contracts/ITwoKeyAdminStorage.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
+import "../interfaces/IUpgradableExchange.sol";
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../libraries/SafeMath.sol";
@@ -25,6 +26,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
 	string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
+	string constant _daiWithdrawnFromUpgradableExchange = "daiWithdrawnFromUpgradableExchange";
 
 	/**
 	 * Keys for the addresses we're accessing
@@ -212,6 +214,17 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
     }
 
+	function withdrawERC20FromUpgradableExchange(
+		address _tokenAddress,
+		uint _amountOfTokens
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+		IUpgradableExchange(twoKeyUpgradableExchange).withdrawERC20(_tokenAddress, _amountOfTokens);
+	}
+
 
 	function updateReceivedTokensAsModerator(
 		uint amountOfTokens
@@ -220,7 +233,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	onlyAllowedContracts
 	{
 
-		uint networkFee = getDefaultIntegratorFeePercent();
+		// Network fee which will be taken from moderator
+		uint networkFee = getDefaultNetworkTaxPercent();
+
 		uint moderatorTokens = amountOfTokens.mul(100 - networkFee).div(100);
 
 		bytes32 keyHashTotalRewards = keccak256(_rewardsReceivedAsModeratorTotal);

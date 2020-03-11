@@ -95,6 +95,12 @@ def generate_bytecode_for_taking_fees_from_manager():
     values = []
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_changing_moderator_fee_on_plasma(moderator_fee):
+    moderator_fee = int(moderator_fee)
+    method_name_and_params = "setModeratorFee(uint256)"
+    types = ["uint256"]
+    values = [moderator_fee]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name
@@ -125,4 +131,6 @@ if __name__ == "__main__":
         generate_bytecode_for_adding_core_devs_plasma(sys.argv[2])
     if(arg1 == "withdrawRewardsFromFeeManager"):
         generate_bytecode_for_taking_fees_from_manager()
+    if(arg1 == "setModeratorFeePlasma"):
+        generate_bytecode_for_changing_moderator_fee_on_plasma(sys.argv[2])
     print_line()

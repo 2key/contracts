@@ -25,8 +25,6 @@ contract TwoKeyCampaignAbstract is ArcToken {
     string public publicMetaHash; // Ipfs hash of json campaign object
     string public privateMetaHash; // Ipfs hash of json sensitive (contractor) information
 
-    //Referral accounting stuff
-    mapping(address => uint256) internal referrerPlasma2cut; // Mapping representing how much are cuts in percent(0-100) for referrer address
     mapping(address => uint256) internal referrerPlasma2Balances2key; // balance of EthWei for each influencer that he can withdraw
 
     mapping(address => address) internal public_link_key;

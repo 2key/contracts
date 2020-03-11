@@ -37,7 +37,9 @@ const {
     ipfsGet,
     runDeployPlasmaEventSourceMigration,
     runDeployCPCCampaignMigration,
-    runDeployFeeManagerMigration
+    runDeployFeeManagerMigration,
+    runDeployCPCFirstTime,
+    runTruffleCompile
 } = require('./helpers');
 
 
@@ -90,7 +92,7 @@ const getDiffBetweenLatestTags = async () => {
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i]) || singletonsChanged[i] == "TwoKeyPlasmaFactory") {
+        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
@@ -368,6 +370,7 @@ async function deployUpgrade(networks, args) {
     console.log(networks);
     const l = networks.length;
 
+    await runTruffleCompile();
     let [singletonsToBeUpgraded, campaignsToBeUpgraded, cpcChanged] = await getDiffBetweenLatestTags();
 
     for (let i = 0; i < l; i += 1) {
@@ -377,11 +380,12 @@ async function deployUpgrade(networks, args) {
         console.log('CPC contracts changed: ', cpcChanged);
 
 
-        if(process.argv.includes('merge-deploy')) {
-            console.log("Deploying new contracts: \n (1) TwoKeyFeeManager \n (2) TwoKeyPlasmaEventSource");
-            await runDeployFeeManagerMigration(networks[i]);
-            await runDeployPlasmaEventSourceMigration(networks[i]);
+        // Deploy the CPC contracts
+        if(process.argv.includes('cpc-deploy')) {
+            console.log("Deploying CPC campaign for the first time to the network");
+            await runDeployCPCFirstTime(networks[i]);
         }
+
         if(singletonsToBeUpgraded.length > 0) {
             for(let j=0; j<singletonsToBeUpgraded.length; j++) {
                 /* eslint-disable no-await-in-loop */

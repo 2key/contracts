@@ -207,7 +207,9 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasma_address);
         bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", eth_address);
 
+
         require(PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == eth_address, "cant change eth=>plasma");
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == plasma_address);
 
         PROXY_STORAGE_CONTRACT.setAddress(keyHashPlasmaToEthereum, eth_address);
         PROXY_STORAGE_CONTRACT.setAddress(keyHashEthereumToPlasma, plasma_address);
