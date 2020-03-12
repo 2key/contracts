@@ -25,7 +25,7 @@ export const userIds = {
   gmail2: 'gmail2',
   aydnep2: 'aydnep2',
   test: 'test',
-  buyer: 'buyer',
+  buyer: 'buyer', // maintainer
   guest: 'guest',
 };
 

@@ -1,7 +1,7 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
-import {campaignTypes, conversionStatuses, feePercent} from "../../../../constants/smallConstants";
+import {campaignTypes, conversionStatuses, feePercent, userStatuses} from "../../../../constants/smallConstants";
 import kycRequired from "../checks/kycRequired";
 import ITestConversion from "../../../../typings/ITestConversion";
 
@@ -12,6 +12,7 @@ export default function executeConversionTest(
     secondaryUserKey,
     campaignData,
     campaignContract,
+    expectError,
   }: functionParamsInterface,
 ) {
   if (storage.campaignType !== campaignTypes.cpc) {
@@ -19,20 +20,33 @@ export default function executeConversionTest(
   }
 
   if (storage.campaignType === campaignTypes.cpc) {
-    it('should approve converter from maintainer and distribute rewards', async () => {
+    it(
+      `should approve ${secondaryUserKey} from maintainer and distribute rewards ${expectError ? ' with error' : ''}`,
+      async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {protocol: converterProtocol} = availableUsers[secondaryUserKey];
       const {campaignAddress} = storage;
       const user = storage.getUser(secondaryUserKey);
       const {pendingConversions} = user;
+      let error = false;
 
       expect(pendingConversions.length, 'any pending conversions for execute').to.be.gt(0);
       const conversionForCheck = pendingConversions[0];
+      try {
+        await protocol.CPCCampaign.approveConverterAndExecuteConversion(
+          campaignAddress, converterProtocol.plasmaAddress, protocol.plasmaAddress
+        );
 
-      await protocol.CPCCampaign.approveConverterAndExecuteConversion(
-        campaignAddress, converterProtocol.plasmaAddress, protocol.plasmaAddress
-      );
-      await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 4000));
+      } catch (e) {
+        console.log(e);
+        error = true;
+      }
+
+      if (expectError) {
+        expect(error).to.be.eq(true);
+        return;
+      }
 
       const lastConversion = await converterProtocol.CPCCampaign.getConversion(
         campaignAddress,
@@ -42,6 +56,7 @@ export default function executeConversionTest(
       expect(lastConversion.conversionState).to.be.eq(conversionStatuses.executed);
       expect(lastConversion.bountyPaid).to.be.eq(campaignData.bountyPerConversionWei * (1 - feePercent));
 
+      user.status = userStatuses.approved;
       conversionForCheck.data = lastConversion;
       storage.processConversion(user, conversionForCheck, campaignData.incentiveModel);
     }).timeout(60000);

@@ -1,11 +1,16 @@
-import {ICreateCPC} from "../../../src/cpc/interfaces";
-import availableUsers from "../../constants/availableUsers";
+import availableUsers, {userIds} from "../../constants/availableUsers";
 import {expect} from "chai";
+import ICreateCPCTest from "../../typings/ICreateCPCTest";
+import {expectEqualNumbers} from "../helpers/numberHelpers";
 
 const TIMEOUT_LENGTH = 60000;
 
-export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, maintainerKey: string) {
+export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage, maintainerKey: string) {
   const userKey = storage.contractorKey;
+
+  if(!campaignParams.etherForRewards && !campaignParams.targetClicks){
+    throw new Error('Required CPC campaign params missing');
+  }
 
   it('should get contractor plasma and public address', async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
@@ -50,44 +55,88 @@ export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, ma
     expect(privateMeta.campaignPublicLinkKey).to.be.equal(user.link.link);
   }).timeout(TIMEOUT_LENGTH);
 
-  it('should buy referral rewards on public contract by sending ether', async () => {
-    const {protocol, web3: {address}} = availableUsers[userKey];
-    const {campaignAddress} = storage;
-    const inventoryBefore = await protocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
+  if(Math.round(Math.random())) {
+    it('should directly transfer tokens to campaign', async () => {
+      const {protocol, web3: {address}} = availableUsers[userKey];
+      const {protocol: withBalanceProtocol, web3: {address: addressWithBalance}} = availableUsers[userIds.aydnep]; //user with 2keys
+      const {campaignAddress} = storage;
+      const inventoryBefore = await protocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
+      let reward;
 
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign
-        .buyTokensForReferralRewards(
-          campaignAddress,
-          // @ts-ignore
-          protocol.Utils.toWei(campaignParams.etherForRewards, 'ether'),
-          address
+      if (campaignParams.etherForRewards) {
+        const eth2usd = await withBalanceProtocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
+        const boughtRate = await withBalanceProtocol.UpgradableExchange.get2keySellRate(address);
+
+        reward = campaignParams.etherForRewards * eth2usd / boughtRate;
+      } else if (campaignParams.targetClicks) {
+        reward = campaignParams.bountyPerConversionWei * campaignParams.targetClicks;
+      }
+
+      const campaignPublicAddress = await protocol.CPCCampaign.getMirrorContractPlasma(campaignAddress);
+      await protocol.Utils.getTransactionReceiptMined(
+        await withBalanceProtocol.transfer2KEYTokens(
+          campaignPublicAddress,
+          withBalanceProtocol.Utils.toWei(reward, 'ether'),
+          addressWithBalance,
         )
-    );
+      );
+      await protocol.Utils.getTransactionReceiptMined(
+        await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, address)
+      );
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const inventoryAfter = await protocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
-    const boughtRate = await protocol.CPCCampaign.getBought2keyRate(campaignAddress);
-    const eth2usd = await protocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
+      const inventoryAfter = await protocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
 
-    expect((inventoryAfter - inventoryBefore) * boughtRate)
-      // @ts-ignore
-      .to.be.equal(campaignParams.etherForRewards * eth2usd);
+      expectEqualNumbers(
+        (inventoryAfter - inventoryBefore),
+        reward,
+      );
+    });
+  }else{
+    it('should buy referral rewards on public contract by sending ether', async () => {
+      const {protocol, web3: {address}} = availableUsers[userKey];
+      const {campaignAddress} = storage;
+      const inventoryBefore = await protocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
+      const eth2usd = await protocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
+      const boughtRate = await protocol.UpgradableExchange.get2keySellRate(address);
 
-  }).timeout(TIMEOUT_LENGTH);
+      let reward;
+      if (campaignParams.etherForRewards) {
+        reward = campaignParams.etherForRewards;
+      } else if (campaignParams.targetClicks) {
+        reward = campaignParams.bountyPerConversionWei * campaignParams.targetClicks
+          / eth2usd * boughtRate;
+      }
 
+      await protocol.Utils.getTransactionReceiptMined(
+        await protocol.CPCCampaign
+          .buyTokensForReferralRewards(
+            campaignAddress,
+            // @ts-ignore
+            protocol.Utils.toWei(reward, 'ether'),
+            address
+          )
+      );
+      const inventoryAfter = await protocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
+
+      expectEqualNumbers(
+        (inventoryAfter - inventoryBefore),
+        reward * eth2usd / boughtRate,
+      );
+    }).timeout(TIMEOUT_LENGTH);
+  }
 
   it('should set that plasma contract is valid from maintainer', async () => {
     const {protocol} = availableUsers[maintainerKey];
     const {campaignAddress} = storage;
 
-    const isValidatedBefore = await protocol.CPCCampaign.checkIsPlasmaContractValid(campaignAddress);
-
     await protocol.CPCCampaign.validatePlasmaContract(campaignAddress, protocol.plasmaAddress);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const isValidatedAfter = await protocol.CPCCampaign.checkIsPlasmaContractValid(campaignAddress);
 
-    expect(isValidatedBefore).to.be.eq(false);
-    expect(isValidatedAfter).to.be.eq(true);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    const isPlasmaValid = await protocol.CPCCampaign.checkIsPlasmaContractValid(campaignAddress);
+
+    expect(isPlasmaValid).to.be.eq(true);
   }).timeout(TIMEOUT_LENGTH);
 
   it('should set on plasma contract inventory amount from maintainer', async () => {
@@ -96,10 +145,11 @@ export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, ma
 
     const amountOfTokensAvailable = await protocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
 
-    const maxNumberOfConversionsCalculated = Math.floor(
-      amountOfTokensAvailable /
-      campaignParams.bountyPerConversionWei
-    );
+    const maxNumberOfConversionsCalculated = campaignParams.targetClicks
+      || Math.floor(
+        amountOfTokensAvailable /
+        campaignParams.bountyPerConversionWei
+      );
 
     await protocol.CPCCampaign.setTotalBountyPlasma(
       campaignAddress,
@@ -107,7 +157,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, ma
       maxNumberOfConversionsCalculated,
       protocol.plasmaAddress
     );
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     const maxNumberOfConversions = await protocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
 
     expect(maxNumberOfConversions).to.be.equal(maxNumberOfConversionsCalculated);
@@ -120,6 +170,9 @@ export default function checkCpcCampaign(campaignParams: ICreateCPC, storage, ma
     await protocol.Utils.getTransactionReceiptMined(
       await protocol.CPCCampaign.validatePublicContract(campaignAddress, address)
     );
+    const isPublicValid = await protocol.CPCCampaign.checkIsPublicContractValid(campaignAddress);
+
+    expect(isPublicValid).to.be.eq(true);
   }).timeout(TIMEOUT_LENGTH);
 
   it('should get campaign from IPFS', async () => {

@@ -89,7 +89,7 @@ export default function userTests(
     userKey, secondaryUserKey,
     storage, actions, cut,
     contribution,
-    campaignData,
+    campaignData, expectError
   }: {
     userKey: string,
     secondaryUserKey?: string,
@@ -98,6 +98,7 @@ export default function userTests(
     storage: TestStorage,
     contribution?: number,
     cut?: number,
+    expectError?: boolean,
   }
 ): void {
   const campaignContract = campaignTypeToInstance[storage.campaignType];
@@ -109,6 +110,7 @@ export default function userTests(
     contribution,
     campaignContract,
     cut,
+    expectError,
   };
 
   actions.forEach((action) => {
