@@ -92,7 +92,8 @@ library PriceDiscovery {
     function calculateTotalTokensUserIsGetting(
         uint amountOfUSDSpendingForBuyingTokens,
         uint tokenPriceBeforeBuying,
-        uint totalAmountOfTokensInThePool
+        uint totalAmountOfTokensInThePool,
+        uint poolInitialWorthUSD
     )
     public
     pure
@@ -119,7 +120,8 @@ library PriceDiscovery {
             (amountOfTokensReceived, newPrice, totalAmountOfTokensInThePool) = calculateAmountOfTokensPerIterationAndNewPrice(
                 totalAmountOfTokensInThePool,
                 newPrice,
-                amountBuyingPerIteration
+                amountBuyingPerIteration,
+                poolInitialWorthUSD
             );
             // Update total tokens which user have bought
             totalTokensBought = totalTokensBought.add(amountOfTokensReceived);
@@ -139,19 +141,20 @@ library PriceDiscovery {
     function calculateAmountOfTokensPerIterationAndNewPrice(
         uint totalAmountOfTokensInThePool,
         uint tokenPrice,
-        uint iterationAmount
+        uint iterationAmount,
+        uint poolInitialWorthUSD
     )
     public
     pure
-    returns (uint,uint)
+    returns (uint,uint,uint)
     {
         // Calculate amount of tokens user is getting
         uint amountOfTokens = tokenPrice.mul(iterationAmount);
         // Calculate the new price for the pool
         uint tokensLeftInThePool = totalAmountOfTokensInThePool.sub(amountOfTokens);
         // The new price after the tokens are being bought
-        uint newPrice = recalculatePrice(poolInitialAmountOfUSD, tokensLeftInThePool);
+        uint newPrice = recalculatePrice(poolInitialWorthUSD, tokensLeftInThePool);
 
-        return (amountOfTokens, tokensLeftInThePool, newPrice);
+        return (amountOfTokens,newPrice,tokensLeftInThePool);
     }
 }
