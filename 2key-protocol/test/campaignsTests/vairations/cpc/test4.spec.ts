@@ -147,6 +147,21 @@ describe(
         ],
         campaignData,
         storage,
+
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.aydnep,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
+        expectError: true,
       }
     );
 

@@ -16,6 +16,7 @@ export default function joinAndConvertTest(
     campaignData,
     contribution,
     campaignContract,
+    expectError,
   }: functionParamsInterface,
 ) {
   if (!contribution && [campaignTypes.acquisition, campaignTypes.donation].includes(storage.campaignType)) {
@@ -153,18 +154,27 @@ export default function joinAndConvertTest(
   }
 
   if (storage.campaignType === campaignTypes.cpc) {
-    it(`should create new conversion for ${userKey}`, async () => {
+    it(`should create new conversion for ${userKey} ${expectError ? ' with error' : ''}`, async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
+      let error = false;
 
+      try {
+        await protocol.CPCCampaign.joinAndConvert(
+          campaignAddress,
+          refUser.link.link,
+          protocol.plasmaAddress,
+          {fSecret: refUser.link.fSecret});
+      } catch (e) {
+        error = true;
+      }
 
-      await protocol.CPCCampaign.joinAndConvert(
-        campaignAddress,
-        refUser.link.link,
-        protocol.plasmaAddress,
-        {fSecret: refUser.link.fSecret});
+      if (expectError) {
+        expect(error).to.be.eq(true);
+        return;
+      }
 
       await new Promise(resolve => setTimeout(resolve, 4000));
 
