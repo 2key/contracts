@@ -21,7 +21,10 @@ export default function merkleCopyTest(
     await protocol.Utils.getTransactionReceiptMined(
       await protocol.CPCCampaign.setMerkleRootOnMainchain(campaignAddress,root, address)
     );
-    let rootOnPublic = await protocol.CPCCampaign.getMerkleRootFromPublic(campaignAddress);
+
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    const rootOnPublic = await protocol.CPCCampaign.getMerkleRootFromPublic(campaignAddress);
     expect(root).to.be.equal(rootOnPublic);
   }).timeout(60000);
 }

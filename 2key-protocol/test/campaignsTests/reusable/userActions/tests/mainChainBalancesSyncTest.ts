@@ -1,6 +1,5 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
-import {expect} from "chai";
 import cpcOnly from "../checks/cpcOnly";
 
 export default function mainChainBalancesSyncTest(
@@ -22,7 +21,7 @@ export default function mainChainBalancesSyncTest(
 
     await protocol.Utils.getTransactionReceiptMined(
       await protocol.CPCCampaign.pushBalancesForInfluencers(
-    // @ts-ignore
+        // @ts-ignore
         campaign.campaignAddressPublic,
         resp.influencers,
         resp.balances,
