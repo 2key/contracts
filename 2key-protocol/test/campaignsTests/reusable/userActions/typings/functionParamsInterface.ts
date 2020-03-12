@@ -6,6 +6,7 @@ export default interface functionParamsInterface {
   campaignData: any,
   campaignContract: string,
 
+  expectError?: boolean,
   secondaryUserKey?: string,
   cut?: number,
   contribution?: number,

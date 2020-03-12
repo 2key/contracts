@@ -3,6 +3,7 @@ import {campaignUserActions} from "../../../constants/constants";
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
 import {ipfsRegex} from "../../../../helpers/regExp";
+import {incentiveModels} from "../../../../constants/smallConstants";
 
 export default function joinTest(
   {
@@ -10,10 +11,11 @@ export default function joinTest(
     userKey,
     secondaryUserKey,
     cut,
+    campaignData,
     campaignContract,
   }: functionParamsInterface,
 ) {
-  if (!cut) {
+  if (!cut && campaignData.incentiveModel === incentiveModels.manual) {
     throw new Error(
       `${campaignUserActions.join} action required parameter missing for user ${userKey}`
     );

@@ -20,7 +20,7 @@ class TestStorage {
 
   campaignType: string = undefined;
 
-  constructor(contractorKey, campaignType: string = campaignTypes.acquisition, withKyc: boolean = false) {
+  constructor(contractorKey, campaignType: string = campaignTypes.acquisition, requireApprove: boolean = false) {
     this.contractorKey = contractorKey;
 
     const {
@@ -36,7 +36,7 @@ class TestStorage {
           ...accum,
           [userId]: new TestUser(
             userId,
-            withKyc ? userStatuses.pending : userStatuses.approved,
+            requireApprove ? userStatuses.pending : userStatuses.approved,
           ),
         };
       },

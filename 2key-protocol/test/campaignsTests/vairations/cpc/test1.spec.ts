@@ -1,12 +1,12 @@
-import '../constants/polifils';
-import {userIds} from "../constants/availableUsers";
-import usersActions from "./reusable/userActions/usersActions";
-import {campaignUserActions} from "./constants/constants";
-import TestStorage from "../helperClasses/TestStorage";
-import {campaignTypes, incentiveModels} from "../constants/smallConstants";
-import createCpcCampaign from "./helpers/createCpcCampaign";
-import checkCpcCampaign from "./reusable/checkCpcCampaign";
-import ICreateCPCTest from "../typings/ICreateCPCTest";
+import '../../../constants/polifils';
+import {userIds} from "../../../constants/availableUsers";
+import usersActions from "../../reusable/userActions/usersActions";
+import {campaignUserActions} from "../../constants/constants";
+import TestStorage from "../../../helperClasses/TestStorage";
+import {campaignTypes, incentiveModels} from "../../../constants/smallConstants";
+import createCpcCampaign from "../../helpers/createCpcCampaign";
+import checkCpcCampaign from "../../reusable/checkCpcCampaign";
+import ICreateCPCTest from "../../../typings/ICreateCPCTest";
 
 const  campaignData: ICreateCPCTest = {
   url: "https://2key.network",
@@ -15,7 +15,7 @@ const  campaignData: ICreateCPCTest = {
   campaignStartTime : 0,
   campaignEndTime : 9884748832,
   // will be reduced to fee amount, for now it is 2%, so it will be 3*0.98 = 2.94 per conversion
-  bountyPerConversionWei: 3,
+  bountyPerConversionWei: 4,
   // Should fail on conversion stage
   // referrerQuota: 1,
   // etherForRewards: 3,
@@ -23,10 +23,10 @@ const  campaignData: ICreateCPCTest = {
 };
 
 describe(
-  'exampleCpcTest',
+  '2 clicks target, growing incentive model, end campaign when goal reached, 4 tokens pay per click',
   function() {
     const storage = new TestStorage(userIds.deployer, campaignTypes.cpc, true);
-      this.timeout(60000);
+    this.timeout(60000);
 
     before(function () {
       return createCpcCampaign(campaignData, storage);
@@ -113,6 +113,18 @@ describe(
     usersActions(
       {
         userKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkReferrersList,
+          campaignUserActions.checkReferrerReward,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.renata,
         actions: [
           campaignUserActions.checkReferrersList,
           campaignUserActions.checkReferrerReward,

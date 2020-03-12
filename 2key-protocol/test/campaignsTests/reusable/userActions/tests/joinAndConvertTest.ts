@@ -159,24 +159,23 @@ export default function joinAndConvertTest(
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
 
-      const conversions = currentUser.allConversions;
-      const nextID = conversions.length;
+
       await protocol.CPCCampaign.joinAndConvert(
         campaignAddress,
         refUser.link.link,
         protocol.plasmaAddress,
         {fSecret: refUser.link.fSecret});
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 4000));
 
-      currentUser.refUserKey = secondaryUserKey;
-
-      const conversion = await protocol.CPCCampaign.getConversion(campaignAddress, nextID);
+      const conversionId = await protocol.CPCCampaign.getConversionId(campaignAddress, protocol.plasmaAddress);
+      const conversion = await protocol.CPCCampaign.getConversion(campaignAddress, conversionId);
 
       expect(conversion).to.be.a('object');
 
+      currentUser.refUserKey = secondaryUserKey;
       const conversionObj = new TestCPCConversion(
-        nextID,
+        conversionId,
         conversion,
       );
       currentUser.addConversion(conversionObj);

@@ -11,7 +11,7 @@ export default function mainChainBalancesSyncTest(
 ) {
   cpcOnly(storage.campaignType);
 
-  it(`should push and distribute balances for influencers to the mainchain`, async () => {
+  it(`should push and distribute balances for influencers to the mainchain from deployer`, async () => {
     const {protocol, web3:{address}} = availableUsers[userKey];
     const {campaignAddress, campaign} = storage;
 
