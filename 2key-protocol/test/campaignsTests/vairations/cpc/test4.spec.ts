@@ -11,19 +11,19 @@ import ICreateCPCTest from "../../../typings/ICreateCPCTest";
 const  campaignData: ICreateCPCTest = {
   url: "https://2key.network",
   moderator: "",
-  incentiveModel: incentiveModels.vanillaPowerLaw,
+  incentiveModel: incentiveModels.vanillaAverage,
   campaignStartTime : 0,
   campaignEndTime : 9884748832,
   // will be reduced to fee amount, for now it is 2%, so it will be 3*0.98 = 2.94 per conversion
-  bountyPerConversionWei: 4,
+  bountyPerConversionWei: 5,
   // Should fail on conversion stage
   // referrerQuota: 1,
   // etherForRewards: 3,
-  targetClicks: 2,
+  targetClicks: 3,
 };
 
 describe(
-  '2 clicks target, growing incentive model, end campaign when goal reached, 4 tokens pay per click',
+  '3 clicks target, average incentive model, end campaign when goal not reached, 5 tokens pay per click',
   function() {
     const storage = new TestStorage(userIds.deployer, campaignTypes.cpc, true);
     this.timeout(60000);
@@ -60,6 +60,8 @@ describe(
       }
     );
 
+    /* test4 conversion */
+
     usersActions(
       {
         userKey: userIds.test4,
@@ -87,6 +89,20 @@ describe(
 
     usersActions(
       {
+        userKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkReferrersList,
+          campaignUserActions.checkReferrerReward,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    /* renata conversion */
+
+    usersActions(
+      {
         userKey: userIds.renata,
         secondaryUserKey: userIds.gmail,
         actions: [
@@ -104,18 +120,6 @@ describe(
         secondaryUserKey: userIds.renata,
         actions: [
           campaignUserActions.executeConversion,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.test4,
-        actions: [
-          campaignUserActions.checkReferrersList,
-          campaignUserActions.checkReferrerReward,
         ],
         campaignData,
         storage,

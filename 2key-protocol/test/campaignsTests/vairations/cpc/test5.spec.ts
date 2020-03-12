@@ -11,19 +11,19 @@ import ICreateCPCTest from "../../../typings/ICreateCPCTest";
 const  campaignData: ICreateCPCTest = {
   url: "https://2key.network",
   moderator: "",
-  incentiveModel: incentiveModels.vanillaPowerLaw,
+  incentiveModel: incentiveModels.vanillaAverage,
   campaignStartTime : 0,
   campaignEndTime : 9884748832,
   // will be reduced to fee amount, for now it is 2%, so it will be 3*0.98 = 2.94 per conversion
-  bountyPerConversionWei: 4,
+  bountyPerConversionWei: 0,
   // Should fail on conversion stage
   // referrerQuota: 1,
   // etherForRewards: 3,
-  targetClicks: 2,
+  targetClicks: 99999999,
 };
 
 describe(
-  '2 clicks target, growing incentive model, end campaign when goal reached, 4 tokens pay per click',
+  'no reward, with huge clicks target, end date must be enforced, check all metrics updating correctly',
   function() {
     const storage = new TestStorage(userIds.deployer, campaignTypes.cpc, true);
     this.timeout(60000);
@@ -60,6 +60,8 @@ describe(
       }
     );
 
+    /* test4 conversion */
+
     usersActions(
       {
         userKey: userIds.test4,
@@ -84,6 +86,20 @@ describe(
         storage,
       }
     );
+
+    usersActions(
+      {
+        userKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkReferrersList,
+          campaignUserActions.checkReferrerReward,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    /* renata conversion */
 
     usersActions(
       {
@@ -112,7 +128,7 @@ describe(
 
     usersActions(
       {
-        userKey: userIds.test4,
+        userKey: userIds.renata,
         actions: [
           campaignUserActions.checkReferrersList,
           campaignUserActions.checkReferrerReward,
@@ -122,9 +138,36 @@ describe(
       }
     );
 
+    /* gmail2 conversion */
+
     usersActions(
       {
-        userKey: userIds.renata,
+        userKey: userIds.gmail2,
+        secondaryUserKey: userIds.gmail,
+        actions: [
+          campaignUserActions.visit,
+          campaignUserActions.joinAndConvert,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.buyer,
+        secondaryUserKey: userIds.gmail2,
+        actions: [
+          campaignUserActions.executeConversion,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: userIds.gmail2,
         actions: [
           campaignUserActions.checkReferrersList,
           campaignUserActions.checkReferrerReward,

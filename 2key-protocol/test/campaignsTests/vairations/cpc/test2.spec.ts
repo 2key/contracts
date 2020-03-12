@@ -23,7 +23,7 @@ const  campaignData: ICreateCPCTest = {
 };
 
 describe(
-  '2 clicks target, growing incentive model, end campaign when goal reached, 4 tokens pay per click',
+  '2 clicks target, growing incentive model, end campaign when goal not reached, 4 tokens pay per click',
   function() {
     const storage = new TestStorage(userIds.deployer, campaignTypes.cpc, true);
     this.timeout(60000);
@@ -87,44 +87,7 @@ describe(
 
     usersActions(
       {
-        userKey: userIds.renata,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.buyer,
-        secondaryUserKey: userIds.renata,
-        actions: [
-          campaignUserActions.executeConversion,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
         userKey: userIds.test4,
-        actions: [
-          campaignUserActions.checkReferrersList,
-          campaignUserActions.checkReferrerReward,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.renata,
         actions: [
           campaignUserActions.checkReferrersList,
           campaignUserActions.checkReferrerReward,
