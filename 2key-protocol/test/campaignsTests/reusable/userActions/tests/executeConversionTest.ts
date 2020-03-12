@@ -39,7 +39,6 @@ export default function executeConversionTest(
 
         await new Promise(resolve => setTimeout(resolve, 4000));
       } catch (e) {
-        console.log(e);
         error = true;
       }
 
