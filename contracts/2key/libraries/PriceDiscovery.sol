@@ -31,6 +31,7 @@ library PriceDiscovery {
     returns (uint)
     {
         return (poolInitialAmountInUSD.mul(10**18)).div(amountOfTokensLeftInPool);
+        
     }
 
 
@@ -61,7 +62,7 @@ library PriceDiscovery {
 
         if(amountOfUSDSpendingForBuyingTokens > HUNDRED_WEI) {
             // Amount of tokens that user would receive in case he bought for the whole money at initial price
-            uint amountOfTokensToBeBought = amountOfUSDSpendingForBuyingTokens.mul(tokenPriceBeforeBuying).div(10**18);
+            uint amountOfTokensToBeBought = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(tokenPriceBeforeBuying);
             // Percentage of the current amount in the pool in tokens user is buying
             uint percentageOfThePoolWei = amountOfTokensToBeBought.mul(HUNDRED_WEI).div(totalAmountOfTokensInThePool);
 
@@ -82,6 +83,25 @@ library PriceDiscovery {
         }
 
         return (numberOfIterations, amountOfUSDSpendingForBuyingTokens.div(numberOfIterations));
+    }
+
+
+    function calculatePercentageOfThePoolWei(
+        uint amountSpendingToBuyTokens,
+        uint totalAmountOfTokensInThePool,
+        uint tokenPriceBeforeBuying
+    )
+    public
+    pure
+    returns (uint,uint)
+    {
+        uint HUNDRED_WEI = 100*(10**18);
+
+        uint amountOfTokensToBeBought = amountSpendingToBuyTokens.mul(10**18).div(tokenPriceBeforeBuying);
+        // Percentage of the current amount in the pool in tokens user is buying
+        uint percentageOfThePoolWei = amountOfTokensToBeBought.mul(HUNDRED_WEI).div(totalAmountOfTokensInThePool);
+
+        return (amountOfTokensToBeBought, percentageOfThePoolWei);
     }
 
 
@@ -149,7 +169,7 @@ library PriceDiscovery {
     returns (uint,uint,uint)
     {
         // Calculate amount of tokens user is getting
-        uint amountOfTokens = tokenPrice.mul(iterationAmount);
+        uint amountOfTokens = iterationAmount.mul(10**18).div(tokenPrice);
         // Calculate the new price for the pool
         uint tokensLeftInThePool = totalAmountOfTokensInThePool.sub(amountOfTokens);
         // The new price after the tokens are being bought
