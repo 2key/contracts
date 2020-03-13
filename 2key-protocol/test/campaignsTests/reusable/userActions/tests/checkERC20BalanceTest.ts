@@ -28,7 +28,7 @@ export default function checkERC20BalanceTest(
   if (storage.campaignType === campaignTypes.donation) {
     it('should proof that the invoice has been issued for executed conversion (Invoice tokens transfered)', async () => {
       const {protocol} = availableUsers[userKey];
-      const {address: secondaryUserAddress} = availableUsers[secondaryUserKey];
+      const {web3: {address: secondaryUserAddress}} = availableUsers[secondaryUserKey];
       // @ts-ignore
       const {campaign: {invoiceToken}} = storage;
       const user = storage.getUser(secondaryUserKey);

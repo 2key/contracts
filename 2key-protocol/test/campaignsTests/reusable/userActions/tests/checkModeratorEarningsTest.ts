@@ -3,7 +3,6 @@ import availableUsers from "../../../../constants/availableUsers";
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 import {campaignTypes, feePercent} from "../../../../constants/smallConstants";
 import {expect} from "chai";
-import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 
 export default function checkModeratorEarningsTest(
   {
@@ -15,7 +14,7 @@ export default function checkModeratorEarningsTest(
 ) {
   if(storage.campaignType === campaignTypes.cpc){
     it('should get moderator earnings per campaign', async() => {
-      const {protocol, web3: {address}} = availableUsers[userKey];
+      const {protocol} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const earnings = await protocol.CPCCampaign.getModeratorEarningsPerCampaign(campaignAddress);
       const calculatedEarnings = (storage.executedConversions.length)

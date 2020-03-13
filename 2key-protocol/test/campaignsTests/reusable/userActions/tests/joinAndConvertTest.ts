@@ -27,14 +27,14 @@ export default function joinAndConvertTest(
 
   if (storage.campaignType === campaignTypes.acquisition) {
     it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
-      const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
       const conversionAmount = protocol.Utils.toWei((contribution), 'ether');
       const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
-        web3Address
+        address
       );
 
       const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
@@ -49,7 +49,7 @@ export default function joinAndConvertTest(
 
         await protocol.Utils.getTransactionReceiptMined(
           await protocol[campaignContract].convertOffline(
-            campaignAddress, signature, web3Address, web3Address,
+            campaignAddress, signature, address, address,
             contribution,
           )
         );
@@ -59,7 +59,7 @@ export default function joinAndConvertTest(
             campaignAddress,
             conversionAmount,
             refUser.link.link,
-            web3Address,
+            address,
             {fSecret: refUser.link.fSecret},
           )
         );
@@ -67,10 +67,10 @@ export default function joinAndConvertTest(
 
       const amountOfTokensAfterConvert = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
-        web3Address
+        address
       );
       const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-        campaignAddress, web3Address, web3Address,
+        campaignAddress, address, address,
       );
 
       const conversionId = conversionIds[currentUser.allConversions.length];
@@ -79,14 +79,14 @@ export default function joinAndConvertTest(
       const conversion = new TestAcquisitionConversion(
         conversionId,
         await protocol[campaignContract].getConversion(
-          campaignAddress, conversionId, web3Address,
+          campaignAddress, conversionId, address,
         ),
       );
       currentUser.addConversion(conversion);
       storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
 
       if (campaignData.isFiatOnly && !campaignData.isKYCRequired) {
-        const rate = await protocol.UpgradableExchange.get2keySellRate(web3Address);
+        const rate = await protocol.UpgradableExchange.get2keySellRate(address);
         const reward = contribution * campaignData.maxReferralRewardPercentWei / 100 / rate;
 
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase - reward);
@@ -99,17 +99,17 @@ export default function joinAndConvertTest(
 
   if (storage.campaignType === campaignTypes.donation) {
     it(`should create new conversion for ${userKey}`, async () => {
-      const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
       const initialAmountOfTokens = await protocol.DonationCampaign.getAmountConverterSpent(
         campaignAddress,
-        web3Address
+        address
       );
 
       const conversionIds = await protocol.DonationCampaign.getConverterConversionIds(
-        campaignAddress, web3Address, web3Address,
+        campaignAddress, address, address,
       );
 
       await protocol.Utils.getTransactionReceiptMined(
@@ -117,18 +117,18 @@ export default function joinAndConvertTest(
           campaignAddress,
           protocol.Utils.toWei(contribution, 'ether'),
           refUser.link.link,
-          web3Address,
+          address,
           {fSecret: refUser.link.fSecret},
         )
       );
 
       const amountOfTokensAfterConvert = await protocol.DonationCampaign.getAmountConverterSpent(
         campaignAddress,
-        web3Address
+        address
       );
 
       const conversionIdsAfter = await protocol.DonationCampaign.getConverterConversionIds(
-        campaignAddress, web3Address, web3Address,
+        campaignAddress, address, address,
       );
 
       const conversionId = conversionIdsAfter[currentUser.allConversions.length];
@@ -137,7 +137,7 @@ export default function joinAndConvertTest(
       const conversion = new TestDonationConversion(
         conversionId,
         await protocol.DonationCampaign.getConversion(
-          campaignAddress, conversionId, web3Address,
+          campaignAddress, conversionId, address,
         ),
       );
       currentUser.addConversion(conversion);

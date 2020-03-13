@@ -42,7 +42,6 @@ const campaignData = getAcquisitionCampaignData(
 describe(
   'ETH, no bonus, no KYC, all tokens released in 5 equal parts every 7 days [Tokensale with new users]',
   () => {
-    const {protocol, web3} = availableUsers[userIds.aydnep];
     const randomUserIds = {
       contractor: getUniqueId(),
       referrer: getUniqueId(),

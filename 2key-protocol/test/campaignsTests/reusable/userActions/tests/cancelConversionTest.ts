@@ -20,7 +20,7 @@ export default function cancelConversionTest(
 
   if (storage.campaignType === campaignTypes.acquisition) {
     it(`${userKey} should cancel his conversion and ask for refund`, async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address}} = availableUsers[userKey];
       const user = storage.getUser(userKey);
       const {campaignAddress} = storage;
 
@@ -28,7 +28,7 @@ export default function cancelConversionTest(
         campaignAddress,
         address
       );
-      const balanceBefore = await protocol.getBalance(web3Address, campaignData.assetContractERC20);
+      const balanceBefore = await protocol.getBalance(address, campaignData.assetContractERC20);
 
       const conversions = user.approvedConversions;
 
@@ -43,18 +43,18 @@ export default function cancelConversionTest(
         await protocol.AcquisitionCampaign.converterCancelConversion(
           campaignAddress,
           storedConversion.id,
-          web3Address,
+          address,
         )
       );
 
       const conversionObj = await protocol[campaignContract].getConversion(
-        campaignAddress, storedConversion.id, web3Address,
+        campaignAddress, storedConversion.id, address,
       );
       const resultCampaignInventory = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
         address
       );
-      const balanceAfter = await protocol.getBalance(web3Address, campaignData.assetContractERC20);
+      const balanceAfter = await protocol.getBalance(address, campaignData.assetContractERC20);
 
       /**
        * todo: recheck why so strange diff
@@ -86,7 +86,7 @@ export default function cancelConversionTest(
 
   if (storage.campaignType === campaignTypes.donation) {
     it(`${userKey} should cancel his conversion and ask for refund`, async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
       const user = storage.getUser(userKey);
       const {campaignAddress} = storage;
 

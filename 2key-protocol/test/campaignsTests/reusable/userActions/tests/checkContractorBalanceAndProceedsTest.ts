@@ -13,7 +13,7 @@ export default function checkContractorBalanceAndProceedsTest(
 ) {
 
   it(`should check contractor balance and total earnings for ${userKey}`, async () => {
-    const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const totalProceedsStorage = storage.executedConversions
       .reduce(
@@ -29,7 +29,7 @@ export default function checkContractorBalanceAndProceedsTest(
       );
 
     const {contractorBalance, contractorTotalProceeds} = await protocol[campaignContract]
-      .getContractorBalanceAndTotalProceeds(campaignAddress, web3Address);
+      .getContractorBalanceAndTotalProceeds(campaignAddress, address);
 
     expectEqualNumbers(contractorTotalProceeds, totalProceedsStorage);
     expectEqualNumbers(contractorBalance, totalProceedsStorage);

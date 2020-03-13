@@ -12,7 +12,7 @@ export default function referrersListTest(
 ) {
   it(`should check referrers chain from user ${userKey}`,
     async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const user = storage.getUser(userKey);
       const storageReferrers = storage.getReferralsForUser(user)
@@ -28,7 +28,7 @@ export default function referrersListTest(
           break;
         case campaignTypes.donation:
           referrers = (await protocol.DonationCampaign
-            .getRefferrersToConverter(campaignAddress, address, web3Address));
+            .getRefferrersToConverter(campaignAddress, address, address));
           break;
         case campaignTypes.cpc:
           referrers = await protocol.CPCCampaign.getReferrers(campaignAddress, protocol.plasmaAddress);

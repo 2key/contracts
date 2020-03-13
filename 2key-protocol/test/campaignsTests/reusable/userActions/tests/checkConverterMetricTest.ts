@@ -14,7 +14,7 @@ export default function checkConverterMetricTest(
    * todo: add totalLocked assertion
    */
   it(`should get converter metrics per campaign`, async () => {
-    const {protocol, address} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
 

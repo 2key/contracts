@@ -13,7 +13,7 @@ export default function converterSpentTest(
   donationOnly(storage.campaignType);
 
   it('should get how much user have spent', async () => {
-    const {protocol, address} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
 

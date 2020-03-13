@@ -23,7 +23,7 @@ export default function executeConversionTest(
     it(
       `should approve ${secondaryUserKey} from maintainer and distribute rewards ${expectError ? ' with error' : ''}`,
       async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol} = availableUsers[userKey];
       const {protocol: converterProtocol} = availableUsers[secondaryUserKey];
       const {campaignAddress} = storage;
       const user = storage.getUser(secondaryUserKey);
@@ -61,7 +61,7 @@ export default function executeConversionTest(
     }).timeout(60000);
   } else {
     it(`should be able to execute after approve (${userKey})`, async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const user = storage.getUser(userKey);
       const {approvedConversions} = user;
@@ -71,11 +71,11 @@ export default function executeConversionTest(
       const conversion: ITestConversion = approvedConversions[0];
 
       await protocol.Utils.getTransactionReceiptMined(
-        await protocol[campaignContract].executeConversion(campaignAddress, conversion.id, web3Address)
+        await protocol[campaignContract].executeConversion(campaignAddress, conversion.id, address)
       );
 
       const conversionObj = await protocol[campaignContract].getConversion(
-        campaignAddress, conversion.id, web3Address,
+        campaignAddress, conversion.id, address,
       );
       if (storage.campaignType === campaignTypes.acquisition) {
         expect(conversionObj.state).to.be.eq(conversionStatuses.executed);

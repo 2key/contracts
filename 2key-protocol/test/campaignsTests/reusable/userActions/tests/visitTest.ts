@@ -11,7 +11,7 @@ export default function visitTest(
   }: functionParamsInterface,
 ) {
   it(`should visit campaign as ${userKey}`, async () => {
-    const {web3: {address: refAddress}} = availableUsers[secondaryUserKey];
+    const {web3: {address}} = availableUsers[secondaryUserKey];
     const {protocol} = availableUsers[userKey];
     const {campaignAddress, campaign: {contractor}} = storage;
     const referralUser = storage.getUser(secondaryUserKey);
@@ -24,6 +24,6 @@ export default function visitTest(
     const linkOwnerAddress = await protocol.PlasmaEvents.getVisitedFrom(
       campaignAddress, contractor, protocol.plasmaAddress,
     );
-    expect(linkOwnerAddress).to.be.eq(refAddress);
+    expect(linkOwnerAddress).to.be.eq(address);
   }).timeout(60000);
 }

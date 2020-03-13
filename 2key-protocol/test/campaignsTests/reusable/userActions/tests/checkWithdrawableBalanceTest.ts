@@ -12,7 +12,7 @@ export default function checkWithdrawableBalanceTest(
 ) {
   it('should check referrer balance after hedging is done so hedge-rate exists', async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
-    const {address: secondaryAddress} = availableUsers[secondaryUserKey];
+    const {web3: {address: secondaryAddress}} = availableUsers[secondaryUserKey];
     const {campaignAddress} = storage;
 
     const withdrawable = await protocol[campaignContract].getAmountReferrerCanWithdraw(

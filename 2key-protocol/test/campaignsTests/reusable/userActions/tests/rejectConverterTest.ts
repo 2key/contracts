@@ -17,12 +17,12 @@ export default function rejectConverterTest(
 
   it(`should reject ${secondaryUserKey} converter`, async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
-    const {address: warAddress} = availableUsers[secondaryUserKey];
+    const {web3: {address: secAddress}} = availableUsers[secondaryUserKey];
     const {campaignAddress} = storage;
     const userForReject = storage.getUser(secondaryUserKey);
 
     await protocol.Utils.getTransactionReceiptMined(
-      await protocol[campaignContract].rejectConverter(campaignAddress, warAddress, address)
+      await protocol[campaignContract].rejectConverter(campaignAddress, secAddress, address)
     );
 
     // smart contracts doesn't change user status on reject
