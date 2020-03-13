@@ -27,7 +27,7 @@ export default function joinAndConvertTest(
 
   if (storage.campaignType === campaignTypes.acquisition) {
     it(`should decrease available tokens amount to purchased amount by ${userKey}`, async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
@@ -36,7 +36,6 @@ export default function joinAndConvertTest(
         campaignAddress,
         web3Address
       );
-
 
       const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
         campaignAddress,
@@ -71,7 +70,7 @@ export default function joinAndConvertTest(
         web3Address
       );
       const conversionIds = await protocol[campaignContract].getConverterConversionIds(
-        campaignAddress, address, web3Address,
+        campaignAddress, web3Address, web3Address,
       );
 
       const conversionId = conversionIds[currentUser.allConversions.length];
@@ -100,17 +99,17 @@ export default function joinAndConvertTest(
 
   if (storage.campaignType === campaignTypes.donation) {
     it(`should create new conversion for ${userKey}`, async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
       const initialAmountOfTokens = await protocol.DonationCampaign.getAmountConverterSpent(
         campaignAddress,
-        address
+        web3Address
       );
 
       const conversionIds = await protocol.DonationCampaign.getConverterConversionIds(
-        campaignAddress, address, web3Address,
+        campaignAddress, web3Address, web3Address,
       );
 
       await protocol.Utils.getTransactionReceiptMined(
@@ -125,11 +124,11 @@ export default function joinAndConvertTest(
 
       const amountOfTokensAfterConvert = await protocol.DonationCampaign.getAmountConverterSpent(
         campaignAddress,
-        address
+        web3Address
       );
 
       const conversionIdsAfter = await protocol.DonationCampaign.getConverterConversionIds(
-        campaignAddress, address, web3Address,
+        campaignAddress, web3Address, web3Address,
       );
 
       const conversionId = conversionIdsAfter[currentUser.allConversions.length];
@@ -155,7 +154,7 @@ export default function joinAndConvertTest(
 
   if (storage.campaignType === campaignTypes.cpc) {
     it(`should create new conversion for ${userKey} ${expectError ? ' with error' : ''}`, async () => {
-      const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+      const {protocol} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);

@@ -3,6 +3,7 @@ import availableUsers from "../../../../constants/availableUsers";
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 import {campaignTypes, feePercent} from "../../../../constants/smallConstants";
 import {expect} from "chai";
+import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 
 export default function checkModeratorEarningsTest(
   {
@@ -41,10 +42,10 @@ export default function checkModeratorEarningsTest(
           },
           0,
         );
-      console.log({rate, sum});
-      // todo: uncommit when we will know ethTo2KeyRate
+      // console.log({rate, sum, moderatorTotalEarnings, sum1: storage.executedConversionsTotal});
+
       // todo: getModeratorTotalEarnings is deprecated and should be replaced in future
-// expectEqualNumbers(moderatorTotalEarnings, sum * 0.02* ethTo2KeyRate)
+// expectEqualNumbers(moderatorTotalEarnings, sum * feePercent / rate)
     }).timeout(60000);
   }
 }

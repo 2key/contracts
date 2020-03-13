@@ -68,46 +68,55 @@ export default function checkCampaignSummaryTest(
     expectEqualNumbers(
       summary.pendingConverters,
       storage.pendingUsers.length,
+      'pendingConverters',
     );
     expectEqualNumbers(
       summary.approvedConverters,
       storage.approvedUsers.length,
+      'approvedConverters'
     );
     expectEqualNumbers(
       summary.rejectedConverters,
       storage.rejectedUsers.length,
+      'rejectedConverters',
     );
     expectEqualNumbers(
       summary.pendingConversions,
       storage.pendingConversions.length,
+      'pendingConversions',
     );
     expectEqualNumbers(
       summary.rejectedConversions,
       storage.rejectedConversions.length,
+      'rejectedConversions',
     );
     expectEqualNumbers(
       summary.executedConversions,
       storage.executedConversions.length,
+      'executedConversions',
     );
     expectEqualNumbers(
       summary.totalBounty,
       storage.totalBounty,
+      'totalBounty',
     );
 
     if (storage.campaignType === campaignTypes.cpc) {
       expectEqualNumbers(
         summary.totalBounty,
-
         summary.executedConversions * campaignData.bountyPerConversionWei * (1 - feePercent),
+        'totalBounty'
       );
     } else {
       expectEqualNumbers(
         summary.approvedConversions,
         storage.approvedConversions.length,
+        'approvedConversions',
       );
       expectEqualNumbers(
         summary.cancelledConversions,
         storage.canceledConversions.length,
+        'cancelledConversions',
       );
       expectEqualNumbers(
         summary.tokensSold,

@@ -1,6 +1,6 @@
 import createWeb3 from "./_web3";
+import {rpcUrls} from "../constants/smallConstants";
 const { env } = process;
-const rpcUrls = [env.RPC_URL];
 
 //TODO: maybe, should be memoized in future
 const web3Switcher = {

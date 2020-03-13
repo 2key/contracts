@@ -85,12 +85,14 @@ export const generateWalletFromMnemonic = (mnemonic) => {
     };
 };
 
-export default function (mnemonic: string, rpcUrls: string[], pk?: string): EthereumWeb3 {
+export default function createWeb3(mnemonicInput: string, rpcUrls: string[], pk?: string): EthereumWeb3 {
     let wallet;
+    const mnemonic = mnemonicInput || bip39.generateMnemonic();
+
     if (pk) {
         const private_key = Buffer.from(pk, 'hex');
         wallet = eth_wallet.fromPrivateKey(private_key);
-    } else {
+    } else{
         const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
         wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
     }

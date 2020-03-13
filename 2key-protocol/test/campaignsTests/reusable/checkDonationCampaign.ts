@@ -81,7 +81,6 @@ export default function checkDonationCampaign(campaignParams: ICreateCampaign, s
     expect(data.campaignPublicLinkKey).to.be.equal(link.link);
   }).timeout(120000);
 
-  // todo: assert
   /*
   { ethWeiAvailableToHedge: 0,
   daiWeiAvailableToWithdraw: 0,
