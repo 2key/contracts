@@ -27,7 +27,7 @@ export default function checkStatisticTest(
   }: functionParamsInterface,
 ) {
   it(`should get statistics for ${userKey}`, async () => {
-    const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
 
@@ -35,10 +35,9 @@ export default function checkStatisticTest(
       campaignAddress,
       address,
       '0x0000000000000000000000000000000000000000',
-      {from: web3Address},
+      {from: address},
     );
-    const {isReferrer, isJoined, converterState, tokensBought} = stats;
-    console.log({stats, user, bought: user.executedConversionsTotal});
+    const {isJoined, converterState, tokensBought} = stats;
 
     expect(converterState).to.be
       .eq(
@@ -47,5 +46,6 @@ export default function checkStatisticTest(
           : userStatuses.pending
       );
     expect(isJoined).to.be.eq(Boolean(user.link || user.allConversions.length));
+    expect(tokensBought).to.be.eq(user.executedConversionsTotal);
   }).timeout(60000);
 }

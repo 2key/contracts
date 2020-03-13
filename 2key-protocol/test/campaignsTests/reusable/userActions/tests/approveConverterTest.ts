@@ -18,7 +18,7 @@ export default function approveConverterTest(
   it(`should approve ${secondaryUserKey} converter`, async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
-    const {address: secAddress} = availableUsers[secondaryUserKey];
+    const {web3: {address: secAddress}} = availableUsers[secondaryUserKey];
     const userForApprove = storage.getUser(secondaryUserKey);
 
     await protocol.Utils.getTransactionReceiptMined(

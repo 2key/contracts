@@ -16,7 +16,7 @@ export default function checkReferrerRewardTest(
   }: functionParamsInterface,
 ) {
   it(`should check is referrers reward calculated correctly for ${userKey} conversions`, async () => {
-    const {protocol, web3: {address: web3Address}} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
     const referrals = storage.getReferralsForUser(user);
@@ -34,7 +34,7 @@ export default function checkReferrerRewardTest(
           break;
         case campaignTypes.donation:
           refReward = await protocol.DonationCampaign
-            .getReferrerBalance(campaignAddress, plasmaAddress, web3Address);
+            .getReferrerBalance(campaignAddress, plasmaAddress, address);
           break;
         case campaignTypes.cpc:
           refReward = await protocol.CPCCampaign.getReferrerBalanceInFloat(campaignAddress, plasmaAddress);

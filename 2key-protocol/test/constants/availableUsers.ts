@@ -37,7 +37,6 @@ const availableUsers = {
     walletname: 'DEPLOYER-wallet',
     web3: deployer,
     protocol: getTwoKeyProtocol(deployer.web3, deployer.mnemonic),
-    address: env.DEPLOYER_ADDRESS,
   },
   [userIds.aydnep]: {
     name: 'Aydnep',
@@ -46,7 +45,6 @@ const availableUsers = {
     walletname: 'Aydnep-wallet',
     web3: aydnep,
     protocol: getTwoKeyProtocol(aydnep.web3, aydnep.mnemonic),
-    address: env.DEPLOYER_ADDRESS,
   },
   [userIds.gmail]: {
     name: 'gmail',
@@ -55,7 +53,6 @@ const availableUsers = {
     walletname: 'gmail-wallet',
     web3: gmail,
     protocol: getTwoKeyProtocol(gmail.web3, gmail.mnemonic),
-    address: env.GMAIL_ADDRESS,
   },
   [userIds.test4]: {
     name: 'test4',
@@ -64,7 +61,6 @@ const availableUsers = {
     walletname: 'test4-wallet',
     web3: test4,
     protocol: getTwoKeyProtocol(test4.web3, test4.mnemonic),
-    address: env.TEST4_ADDRESS,
   },
   [userIds.renata]: {
     name: 'renata',
@@ -73,7 +69,6 @@ const availableUsers = {
     walletname: 'renata-wallet',
     web3: renata,
     protocol: getTwoKeyProtocol(renata.web3, renata.mnemonic),
-    address: env.RENATA_ADDRESS,
   },
   [userIds.uport]: {
     name: 'uport',
@@ -82,7 +77,6 @@ const availableUsers = {
     walletname: 'uport-wallet',
     web3: uport,
     protocol: getTwoKeyProtocol(uport.web3, uport.mnemonic),
-    address: env.UPORT_ADDRESS,
   },
   [userIds.gmail2]: {
     name: 'gmail2',
@@ -91,7 +85,6 @@ const availableUsers = {
     walletname: 'gmail2-wallet',
     web3: gmail2,
     protocol: getTwoKeyProtocol(gmail2.web3, gmail2.mnemonic),
-    address: env.GMAIL2_ADDRESS,
   },
   [userIds.aydnep2]: {
     name: 'aydnep2',
@@ -100,7 +93,6 @@ const availableUsers = {
     walletname: 'aydnep2-wallet',
     web3: aydnep2,
     protocol: getTwoKeyProtocol(aydnep2.web3, aydnep2.mnemonic),
-    address: env.AYDNEP2_ADDRESS,
   },
   [userIds.test]: {
     name: 'test',
@@ -109,7 +101,6 @@ const availableUsers = {
     walletname: 'test-wallet',
     web3: test,
     protocol: getTwoKeyProtocol(test.web3, test.mnemonic),
-    address: env.TEST_ADDRESS,
   },
   [userIds.buyer]: {
     name: 'buyer',
@@ -118,7 +109,6 @@ const availableUsers = {
     walletname: 'buyer-wallet',
     web3: buyer,
     protocol: getTwoKeyProtocol(buyer.web3, buyer.mnemonic),
-    address: env.BUYER_ADDRESS,
   },
   [userIds.guest]: {
     name: 'guest',
@@ -127,7 +117,6 @@ const availableUsers = {
     walletname: 'guest-wallet',
     web3: guest,
     protocol: getTwoKeyProtocol(guest.web3, guest.mnemonic),
-    address: undefined,
   }
 };
 

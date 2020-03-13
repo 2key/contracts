@@ -19,7 +19,7 @@ export default function referrerRewardStatsTest(
   donationOnly(storage.campaignType);
 
   it(`should check referrer stats for user ${userKey}`, async () => {
-    const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+    const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
 

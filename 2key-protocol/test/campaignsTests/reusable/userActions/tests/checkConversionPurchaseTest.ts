@@ -37,7 +37,7 @@ export default function checkConversionPurchaseTest(
    * -- [1] and other = bonus tokens amount / numberOfVestingPortions
    */
   it('should check conversion purchase information', async () => {
-    const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
     const distributionShiftInSeconds = daysToSeconds(
@@ -67,7 +67,7 @@ export default function checkConversionPurchaseTest(
     const conversion = user.executedConversions[0];
 
     const conversionObj = await protocol[campaignContract].getConversion(
-      campaignAddress, conversion.id, web3Address,
+      campaignAddress, conversion.id, address,
     );
     const withdrawAmounts = calcWithdrawAmounts(
       conversionObj.baseTokenUnits,
@@ -80,7 +80,7 @@ export default function checkConversionPurchaseTest(
       : portionsQty + 1; // added first
 
     const purchase = await protocol[campaignContract].getPurchaseInformation(
-      campaignAddress, conversion.id, web3Address
+      campaignAddress, conversion.id, address
     );
 
     /**

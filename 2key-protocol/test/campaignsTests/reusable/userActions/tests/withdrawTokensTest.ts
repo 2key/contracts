@@ -13,7 +13,7 @@ export default function withdrawTokensTest(
   }: functionParamsInterface,
 ) {
   it('should withdraw tokens', async () => {
-    const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
     const executedConversions = user.executedConversions;
@@ -30,12 +30,12 @@ export default function withdrawTokensTest(
         campaignAddress,
         conversion.id,
         portionIndex,
-        web3Address,
+        address,
       )
     );
 
     const balanceAfter = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, address);
-    const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversion.id, web3Address);
+    const purchase = await protocol[campaignContract].getPurchaseInformation(campaignAddress, conversion.id, address);
     const withdrawnContract = purchase.contracts[portionIndex];
 
     expectEqualNumbers(withdrawnContract.amount, balanceAfter - balanceBefore);

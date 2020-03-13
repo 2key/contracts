@@ -14,12 +14,11 @@ export default function checkAvailableDonationTest(
   donationOnly(storage.campaignType);
 
   it(`should check how much ${userKey} can donate`, async () => {
-    const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
+    const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
     const user = storage.getUser(userKey);
 
-
-    let leftToDonate = await protocol.DonationCampaign.howMuchUserCanContribute(campaignAddress, address, web3Address);
+    let leftToDonate = await protocol.DonationCampaign.howMuchUserCanContribute(campaignAddress, address, address);
 
     let expectedValue = user.executedConversionsTotal;
 
