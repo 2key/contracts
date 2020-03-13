@@ -25,6 +25,7 @@ export default function rejectConverterTest(
       await protocol[campaignContract].rejectConverter(campaignAddress, warAddress, address)
     );
 
+    // smart contracts doesn't change user status on reject
     userForReject.status = userStatuses.rejected;
     const rejected = await protocol[campaignContract].getAllRejectedConverters(campaignAddress, address);
     const pending = await protocol[campaignContract].getAllPendingConverters(campaignAddress, address);

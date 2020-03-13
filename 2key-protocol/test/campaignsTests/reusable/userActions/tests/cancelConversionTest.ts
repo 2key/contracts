@@ -18,7 +18,7 @@ export default function cancelConversionTest(
   kycRequired(campaignData.isKYCRequired);
   ethOnly(campaignData.isFiatOnly);
 
-  if(storage.campaignType === campaignTypes.acquisition) {
+  if (storage.campaignType === campaignTypes.acquisition) {
     it(`${userKey} should cancel his conversion and ask for refund`, async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const user = storage.getUser(userKey);
@@ -62,16 +62,16 @@ export default function cancelConversionTest(
        * diff is `4.999842805999206` - it is BigNumber calc
        * in some cases it  is `4.988210449999725` - it is BigNumber calc, in this case assertion fails
 
-       expectEqualNumbers(
-       conversionObj.conversionAmount,
-       parseFloat(
-       protocol.Utils.fromWei(
-       parseFloat(balanceAfter.balance.ETH.toString())
-       - parseFloat(balanceBefore.balance.ETH.toString())
-       )
-       .toString()
-       ),
-       );
+      expectEqualNumbers(
+        conversionObj.conversionAmount,
+        parseFloat(
+          protocol.Utils.fromWei(
+            parseFloat(balanceAfter.balance.ETH.toString())
+            - parseFloat(balanceBefore.balance.ETH.toString())
+          )
+            .toString()
+        ),
+      );
        */
       expectEqualNumbers(
         resultCampaignInventory - initialCampaignInventory,
@@ -84,7 +84,7 @@ export default function cancelConversionTest(
     }).timeout(60000);
   }
 
-  if(storage.campaignType === campaignTypes.donation) {
+  if (storage.campaignType === campaignTypes.donation) {
     it(`${userKey} should cancel his conversion and ask for refund`, async () => {
       const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
       const user = storage.getUser(userKey);

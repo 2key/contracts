@@ -1,5 +1,7 @@
+import {expect} from "chai";
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
+import {userStatuses} from "../../../../constants/smallConstants";
 
 /**
  {
@@ -16,7 +18,7 @@ import availableUsers from "../../../../constants/availableUsers";
     converterState: 'NOT_CONVERTER'
   }
  */
-// todo: add assertion or remove
+
 export default function checkStatisticTest(
   {
     storage,
@@ -27,13 +29,23 @@ export default function checkStatisticTest(
   it(`should get statistics for ${userKey}`, async () => {
     const {protocol, address, web3: {address: web3Address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
+    const user = storage.getUser(userKey);
 
-    let stats = await protocol[campaignContract].getAddressStatistic(
+    const stats = await protocol[campaignContract].getAddressStatistic(
       campaignAddress,
       address,
       '0x0000000000000000000000000000000000000000',
       {from: web3Address},
     );
-    console.log(stats);
+    const {isReferrer, isJoined, converterState, tokensBought} = stats;
+    console.log({stats, user, bought: user.executedConversionsTotal});
+
+    expect(converterState).to.be
+      .eq(
+        user.status !== userStatuses.rejected // TODO: looks like bug
+          ? user.status
+          : userStatuses.pending
+      );
+    expect(isJoined).to.be.eq(Boolean(user.link || user.allConversions.length));
   }).timeout(60000);
 }

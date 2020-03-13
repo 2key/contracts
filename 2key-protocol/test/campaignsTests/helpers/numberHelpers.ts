@@ -18,8 +18,8 @@ export function rewardCalc(reward: number, cutChain: Array<number>) {
 
 const tolerance = 0.01;
 
-export function expectEqualNumbers(value: number, compareWith: number){
-  expect(value)
+export function expectEqualNumbers(value: number, compareWith: number, message?: string){
+  expect(value, message)
     .to.be.lte(compareWith + tolerance)
     .to.be.gte(compareWith - tolerance)
 }

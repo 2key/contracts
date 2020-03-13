@@ -12,7 +12,9 @@ import {ICPCMeta} from "../../src/cpc/interfaces";
 
 
 class TestStorage {
-  readonly users: { [key: string]: TestUser } = {};
+  readonly requireApprove: Boolean;
+
+  private users: { [key: string]: TestUser } = {};
 
   private campaignObj: IAcquisitionCampaignMeta | IDonationMeta| ICPCMeta;
 
@@ -27,6 +29,8 @@ class TestStorage {
       [userIds.guest]: guest,
       ...usersForTest
     } = userIds;
+
+    this.requireApprove = requireApprove;
 
     this.campaignType = campaignType;
 
@@ -92,6 +96,13 @@ class TestStorage {
 
       user.addRefReward(conversion.id, rewardsPerUser[userKey]);
     })
+  }
+
+  addUser(userId){
+    this.users[userId] = new TestUser(
+      userId,
+      this.requireApprove ? userStatuses.pending : userStatuses.approved,
+    );
   }
 
   getUser(userKey: string): TestUser {

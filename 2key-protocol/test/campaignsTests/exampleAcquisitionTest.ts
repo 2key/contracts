@@ -285,6 +285,36 @@ describe(
     );
     usersActions(
       {
+        userKey: userIds.test,
+        actions: [
+          campaignUserActions.checkStatistic,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+    usersActions(
+      {
+        userKey: userIds.renata,
+        actions: [
+          campaignUserActions.checkStatistic,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+    usersActions(
+      {
+        userKey: userIds.test4,
+        actions: [
+          campaignUserActions.checkStatistic,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+    usersActions(
+      {
         userKey: userIds.renata,
         actions: [
           campaignUserActions.moderatorAndReferrerWithdraw,

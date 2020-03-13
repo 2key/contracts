@@ -1,3 +1,5 @@
+const {env} = process;
+
 // 0.001 ETH is the debt for the registration
 export const registrationDebt = 0.0001;
 
@@ -10,9 +12,9 @@ export const conversionStatuses = {
 };
 
 export const userStatuses = {
-  pending: 'pending',
-  approved: 'approved',
-  rejected: 'rejected',
+  pending: 'NOT_CONVERTER',
+  approved: 'APPROVED',
+  rejected: 'REJECTED',
 };
 
 export const vestingSchemas = {
@@ -52,3 +54,5 @@ export const campaignTypeToInstance = {
 };
 
 export const feePercent = 0.02;
+
+export const rpcUrls = [env.RPC_URL];

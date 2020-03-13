@@ -63,14 +63,14 @@ describe('Should register all users on contract', async () => {
 
 describe('Setup of users data', async () => {
   await it('should correct set registration depts', async () => {
-    const {protocol, web3: {address}} = availableUsers[userIds.deployer];
+    const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.deployer];
 
     const plasmaAddresses = [
-      generatePlasmaFromMnemonic(availableUsers.test.web3.mnemonic).address,
-      generatePlasmaFromMnemonic(availableUsers.test4.web3.mnemonic).address,
-      generatePlasmaFromMnemonic(availableUsers.uport.web3.mnemonic).address,
-      generatePlasmaFromMnemonic(availableUsers.gmail2.web3.mnemonic).address,
-      generatePlasmaFromMnemonic(availableUsers.buyer.web3.mnemonic).address,
+      availableUsers.test.protocol.plasmaAddress,
+      availableUsers.test4.protocol.plasmaAddress,
+      availableUsers.uport.protocol.plasmaAddress,
+      availableUsers.gmail2.protocol.plasmaAddress,
+      availableUsers.buyer.protocol.plasmaAddress,
     ];
 
     const debts = (new Array(plasmaAddresses.length)).fill(
