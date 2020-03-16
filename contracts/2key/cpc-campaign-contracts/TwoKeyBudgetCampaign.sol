@@ -287,16 +287,14 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	function withdrawRemainingRewardsInventory()
     public
     onlyContractor
-	returns (uint)
 	{
-		require(ITwoKeyCampaignLogicHandler(logicHandler).canContractorWithdrawRemainingRewardsInventory() == true);
+		require(merkleRoot != 0, 'Campaign not ended yet - merkle root is not set.');
 		uint campaignRewardsBalance = getTokenBalance();
 
 		uint rewardsNotSpent = campaignRewardsBalance.sub(reservedAmount2keyForRewards);
 		if(rewardsNotSpent > 0) {
 			IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
 		}
-		return rewardsNotSpent;
 	}
 
 	/**

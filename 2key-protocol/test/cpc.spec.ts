@@ -2,6 +2,7 @@ import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
 import web3Switcher from "./helpers/web3Switcher";
 import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "./helpers/twoKeyProtocol";
+import {TIMEOUT} from "dns";
 const { env } = process;
 
 
@@ -266,7 +267,7 @@ describe('CPC campaign', () => {
     it('should approve converter from maintainer and distribute rewards', async() => {
         printTestNumber();
         // Long functions take time set timeout to make sure previous one is mined
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
         const {web3, address} = web3Switcher.buyer();
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_BUYER));
@@ -278,7 +279,7 @@ describe('CPC campaign', () => {
     it('should get number of influencers behind converter', async() => {
         printTestNumber();
         // Long functions take time set timeout to make sure previous one is mined
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 5000));
         let numberOfReferrers = await twoKeyProtocol.CPCCampaign.getNumberOfInfluencersForConverter(campaignAddress, converterPlasma);
         expect(numberOfReferrers).to.be.equal(2);
     }).timeout(TIMEOUT_LENGTH);
@@ -399,6 +400,7 @@ describe('CPC campaign', () => {
         printTestNumber();
         let numberOfInfluencers = await twoKeyProtocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
         let resp = await twoKeyProtocol.CPCCampaign.getInfluencersAndBalances(campaignAddress, 0, numberOfInfluencers);
+        console.log(resp);
         let txHash = await twoKeyProtocol.CPCCampaign.distributeRewardsBetweenInfluencers(campaignPublicAddress, resp.influencers, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
@@ -442,7 +444,23 @@ describe('CPC campaign', () => {
         printTestNumber();
         let moderatorEarnings = await twoKeyProtocol.CPCCampaign.getModeratorEarningsPerCampaign(campaignAddress);
         expect(moderatorEarnings).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString())* 0.02);
-    })
+    }).timeout(TIMEOUT_LENGTH);
+
+    it('should contractor withdraw unspent budget', async() => {
+        const {web3, address} = web3Switcher.deployer();
+        from = address;
+        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
+
+        printTestNumber();
+        let campaignBalanceBefore = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, campaignPublicAddress);
+        console.log(campaignBalanceBefore);
+
+        let txHash = await twoKeyProtocol.CPCCampaign.contractorWithdraw(campaignPublicAddress, from);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        let campaignBalanceAfter = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, campaignPublicAddress);
+        console.log(campaignBalanceAfter);
+    }).timeout(TIMEOUT_LENGTH)
 
 
 });
