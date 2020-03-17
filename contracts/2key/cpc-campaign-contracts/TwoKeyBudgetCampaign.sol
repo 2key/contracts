@@ -432,6 +432,13 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return (referrerPlasma2TotalEarnings2key[_referrerPlasma], referrerPlasma2Balances2key[_referrerPlasma]);
 	}
 
+	function getReservedAmountForRewards()
+	public
+	view
+	returns (uint)
+	{
+		return reservedAmount2keyForRewards;
+	}
 
 //	function submitProofAndWithdrawRewards(
 //		bytes32 [] proof,

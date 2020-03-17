@@ -395,6 +395,14 @@ describe('CPC campaign', () => {
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
 
+    it('should get reserved amount of rewards', async() => {
+        printTestNumber();
+
+        let rewards = await twoKeyProtocol.CPCCampaign.getReservedAmountForRewards(campaignPublicAddress);
+        console.log(rewards);
+
+    }).timeout(TIMEOUT_LENGTH);
+
 
     it('should distribute rewards between influencers on the mainchain', async() => {
         printTestNumber();
@@ -436,8 +444,8 @@ describe('CPC campaign', () => {
         printTestNumber();
         let numberOfActiveInfluencers = await twoKeyProtocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
         let obj = await twoKeyProtocol.CPCCampaign.getInfluencersAndBalances(campaignAddress, 0, numberOfActiveInfluencers);
+        console.log(obj);
         expect(obj.influencers.length).to.be.equal(numberOfActiveInfluencers);
-
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get moderator earnings per campaign', async() => {
