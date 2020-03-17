@@ -43,7 +43,7 @@ let campaignObject = {
     incentiveModel: "VANILLA_AVERAGE",
     campaignStartTime : 0,
     campaignEndTime : 9884748832,
-    bountyPerConversionWei: 3
+    bountyPerConversionWei: 50
 };
 
 let percentageLeft = 0.98;
@@ -147,6 +147,7 @@ describe('CPC campaign', () => {
         printTestNumber();
         let amountOfTokensAdded = await twoKeyProtocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
         console.log(amountOfTokensAdded);
+        console.log(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString()))
         let maxNumberOfConversions = Math.floor(amountOfTokensAdded / parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString()));
         console.log(maxNumberOfConversions);
         let txHash = await twoKeyProtocol.CPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), maxNumberOfConversions, twoKeyProtocol.plasmaAddress);
@@ -168,7 +169,7 @@ describe('CPC campaign', () => {
         printTestNumber();
         let maxNumberOfConversions = await twoKeyProtocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
         console.log(maxNumberOfConversions);
-        expect(maxNumberOfConversions).to.be.equal(1666);
+        expect(maxNumberOfConversions).to.be.equal(100);
     }).timeout(TIMEOUT_LENGTH);
 
 
@@ -297,8 +298,7 @@ describe('CPC campaign', () => {
         let balanceA = await twoKeyProtocol.CPCCampaign.getReferrerBalanceInFloat(campaignAddress,influencers[0]);
         let balanceB = await twoKeyProtocol.CPCCampaign.getReferrerBalanceInFloat(campaignAddress,influencers[1]);
 
-        expect(balanceA).to.be.equal(1.5 * percentageLeft);
-        expect(balanceB).to.be.equal(1.5 * percentageLeft);
+        expect(balanceA).to.be.equal(25 * percentageLeft);
     }).timeout(TIMEOUT_LENGTH);
 
 
@@ -391,16 +391,15 @@ describe('CPC campaign', () => {
 
         let numberOfInfluencers = await twoKeyProtocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
         let resp = await twoKeyProtocol.CPCCampaign.getInfluencersAndBalances(campaignAddress, 0, numberOfInfluencers);
+        resp.balances = resp.balances.map(balance => twoKeyProtocol.Utils.toWei(balance,'ether'));
         let txHash = await twoKeyProtocol.CPCCampaign.pushBalancesForInfluencers(campaignPublicAddress,resp.influencers, resp.balances, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get reserved amount of rewards', async() => {
         printTestNumber();
-
         let rewards = await twoKeyProtocol.CPCCampaign.getReservedAmountForRewards(campaignPublicAddress);
         console.log(rewards);
-
     }).timeout(TIMEOUT_LENGTH);
 
 
@@ -417,7 +416,7 @@ describe('CPC campaign', () => {
         printTestNumber();
 
         let counters = await twoKeyProtocol.CPCCampaign.getCampaignSummary(campaignAddress);
-        expect(counters.totalBounty).to.be.equal(3*percentageLeft);
+        expect(counters.totalBounty).to.be.equal(50*percentageLeft);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should get number of forwarders for the campaign', async() => {
