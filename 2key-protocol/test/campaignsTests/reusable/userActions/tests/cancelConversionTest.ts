@@ -72,6 +72,18 @@ export default function cancelConversionTest(
         ),
       );
        */
+      console.log({
+        conversionObj,
+        diff: resultCampaignInventory - initialCampaignInventory,
+        sum: conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits,
+        balanceDiff: parseFloat(
+          protocol.Utils.fromWei(
+            parseFloat(balanceAfter.balance.ETH.toString())
+            - parseFloat(balanceBefore.balance.ETH.toString())
+          )
+            .toString()
+        ),
+      });
       expectEqualNumbers(
         resultCampaignInventory - initialCampaignInventory,
         conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits
