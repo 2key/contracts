@@ -84,7 +84,7 @@ export default function checkConversionPurchaseTest(
     );
 
     /**
-     * todo: looks like bug
+     * TODO: looks like bug
      * vestingAmount: BASE_AND_BONUS
      * numberOfVestingPortions = 6
      * purchase.vestingPortions = 5

@@ -20,7 +20,7 @@ export default function lockContractTest(
 
     await protocol.CPCCampaign.lockContractFromMaintainer(campaignAddress, protocol.plasmaAddress);
     await new Promise(resolve => setTimeout(resolve, 2000));
-    // todo: replace with protocol getter
+    // TODO: replace with protocol getter
     const merkleRoot = Number(await promisify(s.merkleRoot, []));
 
     expect(merkleRoot).to.be.gt(0);

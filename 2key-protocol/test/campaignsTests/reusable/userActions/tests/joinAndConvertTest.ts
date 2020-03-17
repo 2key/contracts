@@ -8,6 +8,11 @@ import TestDonationConversion from "../../../../helperClasses/TestDonationConver
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 import TestCPCConversion from "../../../../helperClasses/TestCPCConversion";
 
+/**
+ * Donation and Acquisition campaigns conversions expect ether on converter balance
+ * Amount should be `conversion amount` + `gasPrice of TX`
+ */
+
 export default function joinAndConvertTest(
   {
     storage,
@@ -31,7 +36,8 @@ export default function joinAndConvertTest(
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
-      const conversionAmount = protocol.Utils.toWei((contribution), 'ether');
+      const userDepts = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
+
       const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
         address
@@ -40,7 +46,7 @@ export default function joinAndConvertTest(
       const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
         campaignAddress,
         campaignData.isFiatOnly,
-        conversionAmount,
+        protocol.Utils.toWei((contribution - userDepts), 'ether'),
       );
 
       if (campaignData.isFiatOnly) {
@@ -57,7 +63,7 @@ export default function joinAndConvertTest(
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.AcquisitionCampaign.joinAndConvert(
             campaignAddress,
-            conversionAmount,
+            protocol.Utils.toWei(contribution, 'ether'),
             refUser.link.link,
             address,
             {fSecret: refUser.link.fSecret},
@@ -93,7 +99,7 @@ export default function joinAndConvertTest(
       } else {
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
       }
-      // todo: for case when twoKeyEconomy is custom and KYC isn't required: add check for rewards inventory subtract
+      // TODO: for case when twoKeyEconomy is custom and KYC isn't required: add check for rewards inventory subtract
     }).timeout(60000);
   }
 

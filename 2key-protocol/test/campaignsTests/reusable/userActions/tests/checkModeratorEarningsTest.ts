@@ -41,9 +41,9 @@ export default function checkModeratorEarningsTest(
           },
           0,
         );
-      // console.log({rate, sum, moderatorTotalEarnings, sum1: storage.executedConversionsTotal});
 
-      // todo: getModeratorTotalEarnings is deprecated and should be replaced in future
+
+      // TODO: getModeratorTotalEarnings is deprecated and should be replaced in future
 // expectEqualNumbers(moderatorTotalEarnings, sum * feePercent / rate)
     }).timeout(60000);
   }

@@ -58,11 +58,11 @@ describe(
       this.timeout(600000);
 
       // @ts-ignore
-      availableUsers[randomUserIds.contractor] = await registerRandomUser(randomUserIds.contractor, campaignData.campaignInventory);
+      availableUsers[randomUserIds.contractor] = await registerRandomUser(randomUserIds.contractor, campaignData.campaignInventory* 2, conversionSize * 2);
       // @ts-ignore
-      availableUsers[randomUserIds.referrer] = await registerRandomUser(randomUserIds.referrer);
+      availableUsers[randomUserIds.referrer] = await registerRandomUser(randomUserIds.referrer, undefined, conversionSize * 2);
       // @ts-ignore
-      availableUsers[randomUserIds.converter] = await registerRandomUser(randomUserIds.converter, 10000);
+      availableUsers[randomUserIds.converter] = await registerRandomUser(randomUserIds.converter, undefined, conversionSize * 2);
 
       await createAcquisitionCampaign(campaignData, storage);
     });
@@ -89,6 +89,7 @@ describe(
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
+          campaignUserActions.checkConversionPurchaseInfo,
         ],
         campaignData,
         storage,
@@ -96,12 +97,35 @@ describe(
       }
     );
 
-    return;
     usersActions(
       {
-        userKey: userIds.test4,
+        userKey: storage.contractorKey,
         actions: [
-          campaignUserActions.checkConversionPurchaseInfo,
+          campaignUserActions.hedgingEth,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: randomUserIds.referrer,
+        actions: [
+          campaignUserActions.moderatorAndReferrerWithdraw,
+          campaignUserActions.checkModeratorEarnings,
+          campaignUserActions.checkERC20Balance,
+        ],
+        campaignData,
+        storage,
+      }
+    );
+
+    usersActions(
+      {
+        userKey: storage.contractorKey,
+        actions: [
+          campaignUserActions.contractorWithdraw,
         ],
         campaignData,
         storage,
