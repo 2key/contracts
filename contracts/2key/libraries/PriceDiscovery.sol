@@ -117,7 +117,7 @@ library PriceDiscovery {
     )
     public
     pure
-    returns (uint,uint, uint)
+    returns (uint,uint)
     {
         uint totalTokensBought;
 
@@ -147,8 +147,8 @@ library PriceDiscovery {
             totalTokensBought = totalTokensBought.add(amountOfTokensReceived);
         }
 
-        uint averagePricePaidPerToken = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(totalTokensBought);
-        return (totalTokensBought, newPrice, averagePricePaidPerToken);
+//        uint averagePricePaidPerToken = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(totalTokensBought);
+        return (totalTokensBought, newPrice);
     }
 
 
