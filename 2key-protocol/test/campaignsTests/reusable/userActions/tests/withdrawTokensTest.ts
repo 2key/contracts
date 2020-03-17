@@ -19,7 +19,7 @@ export default function withdrawTokensTest(
     const executedConversions = user.executedConversions;
 
     expect(executedConversions.length).to.be.gt(0);
-    // todo: probably we should search for first contract with `withdrawn` = false
+    // TODO: probably we should search for first contract with `withdrawn` = false
     const portionIndex = 0;
 
     const conversion = executedConversions[0];

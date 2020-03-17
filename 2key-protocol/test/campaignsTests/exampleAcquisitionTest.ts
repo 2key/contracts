@@ -315,7 +315,7 @@ describe(
     );
     usersActions(
       {
-        userKey: userIds.renata,
+        userKey: userIds.gmail,
         actions: [
           campaignUserActions.moderatorAndReferrerWithdraw,
           campaignUserActions.checkModeratorEarnings,

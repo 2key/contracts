@@ -14,7 +14,7 @@ export function getUniqueId() {
 export default async function registerRandomUser(
   id: string,
   tokensAmount: number = 0,
-  etherAmount: number = 5,
+  etherAmount: number = 10,
 ) {
   const {protocol: protocolAydnep, web3: web3Aydnep} = availableUsers[userIds.aydnep];
   const {protocol: protocolDeployer, web3: web3Deployer} = availableUsers[userIds.deployer];
@@ -42,8 +42,11 @@ export default async function registerRandomUser(
 
   await registerUserFromBackend(registerData);
 
-  await protocolDeployer.TwoKeyFeeManager.setDebtsForAddresses(
-    [protocol.plasmaAddress], [deptWei], web3Deployer.address);
+  await protocol.Utils.getTransactionReceiptMined(
+    await protocolDeployer.TwoKeyFeeManager.setDebtsForAddresses(
+      [protocol.plasmaAddress], [deptWei], web3Deployer.address
+    )
+  );
 
   if (tokensAmount > 0) {
     await protocolAydnep.Utils.getTransactionReceiptMined(

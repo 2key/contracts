@@ -61,7 +61,7 @@ const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
             from = address;
             web3 = web3Instance;
         }
-        // console.log(twoKeyProtocol);
+
         const txHash = await promisify(web3.eth.sendTransaction, [{ to: recipient, value: web3.toWei(100, 'ether'), from }]);
 
         const receipt = await getReceipt(txHash, { web3 });

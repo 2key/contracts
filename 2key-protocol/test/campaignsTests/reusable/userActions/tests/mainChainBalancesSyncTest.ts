@@ -37,6 +37,6 @@ export default function mainChainBalancesSyncTest(
         address,
       )
     );
-    // todo: add assertion
+    // TODO: add assertion
   }).timeout(60000);
 }

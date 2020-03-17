@@ -18,7 +18,7 @@ export default function checkWithdrawableBalanceTest(
     const withdrawable = await protocol[campaignContract].getAmountReferrerCanWithdraw(
       campaignAddress, secondaryAddress, address,
     );
-    // todo: incorrect should use sum of all referrer rewards for this user
+    // TODO: incorrect should use sum of all referrer rewards for this user
     expectEqualNumbers(withdrawable.balance2key, storage.totalBounty);
   }).timeout(60000);
 }
