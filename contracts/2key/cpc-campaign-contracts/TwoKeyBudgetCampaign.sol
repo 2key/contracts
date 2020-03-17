@@ -440,22 +440,15 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return reservedAmount2keyForRewards;
 	}
 
-//	function submitProofAndWithdrawRewards(
-//		bytes32 [] proof,
-//		uint amount
-//	)
-//	public
-//	{
-//		address influencerPlasma = twoKeyEventSource.plasmaOf(msg.sender);
-//
-//		//Validating that this is the amount he earned
-//		require(checkMerkleProof(influencerPlasma,proof,amount), 'proof is invalid');
-//
-//		//Assuming that msg.sender is influencer
-//		require(areRewardsWithdrawn[msg.sender] == false); //He can't take reward twice
-//
-//		payFeeForRegistration(influencerPlasma, amount);
-//	}
+    function getAvailableInventory()
+    public
+    view
+    returns (uint)
+    {
+        uint currentERC20Balance = getTokenBalance();
+        return currentERC20Balance.sub(reservedAmount2keyForRewards);
+    }
+
 
 
 }
