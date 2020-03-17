@@ -31,7 +31,7 @@ library PriceDiscovery {
     returns (uint)
     {
         return (poolInitialAmountInUSD.mul(10**18)).div(amountOfTokensLeftInPool);
-        
+
     }
 
 
@@ -117,7 +117,7 @@ library PriceDiscovery {
     )
     public
     pure
-    returns (uint,uint)
+    returns (uint,uint, uint)
     {
         uint totalTokensBought;
 
@@ -147,7 +147,8 @@ library PriceDiscovery {
             totalTokensBought = totalTokensBought.add(amountOfTokensReceived);
         }
 
-        return (totalTokensBought, newPrice);
+        uint averagePricePaidPerToken = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(totalTokensBought);
+        return (totalTokensBought, newPrice, averagePricePaidPerToken);
     }
 
 
