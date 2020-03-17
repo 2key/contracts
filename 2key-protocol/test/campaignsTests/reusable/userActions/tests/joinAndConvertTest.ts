@@ -36,7 +36,11 @@ export default function joinAndConvertTest(
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
-      const userDepts = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
+      /**
+       * Return total amount of depts, but should be for specific conversion
+       * Potential error
+       */
+      const userDeptsBefore = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
 
       const initialAmountOfTokens = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
@@ -46,7 +50,7 @@ export default function joinAndConvertTest(
       const {totalTokens: amountOfTokensForPurchase} = await protocol.AcquisitionCampaign.getEstimatedTokenAmount(
         campaignAddress,
         campaignData.isFiatOnly,
-        protocol.Utils.toWei((contribution - userDepts), 'ether'),
+        protocol.Utils.toWei((contribution - userDeptsBefore), 'ether'),
       );
 
       if (campaignData.isFiatOnly) {
@@ -90,6 +94,11 @@ export default function joinAndConvertTest(
       );
       currentUser.addConversion(conversion);
       storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
+      const userDeptsAfter = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
+
+      if (userDeptsBefore > 0) {
+        expect(userDeptsAfter).to.be.lt(userDeptsBefore)
+      }
 
       if (campaignData.isFiatOnly && !campaignData.isKYCRequired) {
         const rate = await protocol.UpgradableExchange.get2keySellRate(address);
@@ -109,6 +118,7 @@ export default function joinAndConvertTest(
       const {campaignAddress} = storage;
       const currentUser = storage.getUser(userKey);
       const refUser = storage.getUser(secondaryUserKey);
+      const userDeptsBefore = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
       const initialAmountOfTokens = await protocol.DonationCampaign.getAmountConverterSpent(
         campaignAddress,
         address
@@ -150,10 +160,19 @@ export default function joinAndConvertTest(
       storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
 
       expectEqualNumbers(conversionIds.length, conversionIdsAfter.length - 1);
+      expectEqualNumbers(conversion.data.conversionAmount, contribution - userDeptsBefore);
+
+      if (userDeptsBefore > 0) {
+        const userDeptsAfter = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
+        expect(userDeptsAfter).to.be.lt(userDeptsBefore);
+      }
 
       if (!campaignData.isKYCRequired) {
         expectEqualNumbers(amountOfTokensAfterConvert, currentUser.executedConversionsTotal);
-        expectEqualNumbers(amountOfTokensAfterConvert - initialAmountOfTokens, contribution);
+        expectEqualNumbers(
+          amountOfTokensAfterConvert - initialAmountOfTokens,
+          contribution,
+        );
       }
     }).timeout(60000);
   }
