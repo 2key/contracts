@@ -460,11 +460,15 @@ describe('CPC campaign', () => {
 
         printTestNumber();
         let campaignBalanceBefore = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, campaignPublicAddress);
+        let contractorBalanceBefore = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, address);
         console.log(campaignBalanceBefore);
 
         let txHash = await twoKeyProtocol.CPCCampaign.contractorWithdraw(campaignPublicAddress, from);
         await new Promise(resolve => setTimeout(resolve, 5000));
 
+        let contractorBalanceAfter = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, address);
+
+        console.log(contractorBalanceBefore,contractorBalanceAfter);
         let campaignBalanceAfter = await twoKeyProtocol.ERC20.getERC20Balance(twoKeyProtocol.twoKeyEconomy.address, campaignPublicAddress);
         console.log(campaignBalanceAfter);
     }).timeout(TIMEOUT_LENGTH)
