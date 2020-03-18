@@ -29,7 +29,7 @@ echo "Running campaign tests"
 
 #node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/**/*.spec.ts
 
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleAcquisitionTest.ts
+node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleAcquisitionTest.ts
 #node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleDonationTest.ts
 #node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleCpcTest.ts
 
@@ -40,4 +40,4 @@ echo "Running campaign tests"
 #node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/noTokenLockup/*.spec.ts
 
 #node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/test11.spec-draft.ts
-node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/test9.spec.ts
+#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/test9.spec.ts

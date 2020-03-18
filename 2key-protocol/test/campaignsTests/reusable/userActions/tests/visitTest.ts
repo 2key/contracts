@@ -21,6 +21,8 @@ export default function visitTest(
     await protocol[campaignContract]
       .visit(campaignAddress, referralUser.link.link, referralUser.link.fSecret);
 
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
     const linkOwnerAddress = await protocol.PlasmaEvents.getVisitedFrom(
       campaignAddress, contractor, protocol.plasmaAddress,
     );

@@ -66,6 +66,7 @@ describe('Setup of users data', async () => {
     const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.deployer];
 
     const plasmaAddresses = [
+      availableUsers.aydnep.protocol.plasmaAddress,
       availableUsers.test.protocol.plasmaAddress,
       availableUsers.test4.protocol.plasmaAddress,
       availableUsers.uport.protocol.plasmaAddress,
@@ -87,8 +88,10 @@ describe('Setup of users data', async () => {
 
       console.log('\x1b[31m', 'Probably test has been already run after latest deploy');
     }
-    let stats = await protocol.TwoKeyFeeManager.getDebtsSummary();
-    // TODO: add assert
-    console.log({stats});
+
+    /**
+     * Leave it as test without assertion due to complex logic
+     * Can be checked only for clear network
+     */
   }).timeout(TIMEOUT_LENGTH);
 });

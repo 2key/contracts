@@ -10,9 +10,7 @@ export default function checkConverterMetricTest(
     campaignContract,
   }: functionParamsInterface,
 ) {
-  /**
-   * TODO: add totalLocked assertion
-   */
+
   it(`should get converter metrics per campaign`, async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
@@ -23,6 +21,11 @@ export default function checkConverterMetricTest(
     const metrics = await protocol[campaignContract].getConverterMetricsPerCampaign(
       campaignAddress, address);
 
+    /**
+     * totalLocked - conversions portions which not unlocked till now.
+     * In tests is always zero because unlock dates are behind current date
+     */
+    expectEqualNumbers(metrics.totalLocked, 0);
     expectEqualNumbers(metrics.totalBought, storageMetric.totalBought);
     expectEqualNumbers(metrics.totalAvailable, storageMetric.totalAvailable);
     expectEqualNumbers(metrics.totalWithdrawn, storageMetric.totalWithdrawn)

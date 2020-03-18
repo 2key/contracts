@@ -4,6 +4,7 @@ import {expect} from "chai";
 import {campaignTypes, conversionStatuses, feePercent, userStatuses} from "../../../../constants/smallConstants";
 import kycRequired from "../checks/kycRequired";
 import ITestConversion from "../../../../typings/ITestConversion";
+import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 
 export default function executeConversionTest(
   {
@@ -83,6 +84,13 @@ export default function executeConversionTest(
         expect(conversionObj.conversionState).to.be.eq(conversionStatuses.executed);
       }
       conversion.data = conversionObj;
+
+      if(conversion instanceof TestAcquisitionConversion){
+        conversion.purchase = await protocol.AcquisitionCampaign.getPurchaseInformation(
+          campaignAddress, conversion.id, address
+        );
+      }
+
       storage.processConversion(user, conversion, campaignData.incentiveModel);
     }).timeout(60000);
   }
