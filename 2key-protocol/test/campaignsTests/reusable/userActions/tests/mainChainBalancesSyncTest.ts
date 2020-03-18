@@ -41,6 +41,7 @@ export default function mainChainBalancesSyncTest(
         address,
       )
     );
+
     const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), address);
 
 console.log({balanceBefore, balanceAfter,

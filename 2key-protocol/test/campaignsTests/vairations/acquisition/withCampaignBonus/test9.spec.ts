@@ -1,13 +1,13 @@
 import '../../../../constants/polifils';
-import getAcquisitionCampaignData from "../../helpers/getAcquisitionCampaignData";
-import {campaignTypes, incentiveModels, vestingSchemas} from "../../../constants/smallConstants";
-import TestStorage from "../../../helperClasses/TestStorage";
-import createAcquisitionCampaign from "../../helpers/createAcquisitionCampaign";
-import {userIds} from "../../../constants/availableUsers";
-import checkAcquisitionCampaign from "../../reusable/checkAcquisitionCampaign";
-import usersActions from "../../reusable/userActions/usersActions";
-import {campaignUserActions} from "../../constants/constants";
-import getTwoKeyEconomyAddress from "../../helpers/getTwoKeyEconomyAddress";
+import getAcquisitionCampaignData from "../../../helpers/getAcquisitionCampaignData";
+import {campaignTypes, incentiveModels, vestingSchemas} from "../../../../constants/smallConstants";
+import TestStorage from "../../../../helperClasses/TestStorage";
+import createAcquisitionCampaign from "../../../helpers/createAcquisitionCampaign";
+import {userIds} from "../../../../constants/availableUsers";
+import checkAcquisitionCampaign from "../../../reusable/checkAcquisitionCampaign";
+import usersActions from "../../../reusable/userActions/usersActions";
+import {campaignUserActions} from "../../../constants/constants";
+import getTwoKeyEconomyAddress from "../../../helpers/getTwoKeyEconomyAddress";
 
 const conversionSize = 5;
 

@@ -15,15 +15,6 @@ export default function hedgingEthTest(
     const {balance: {ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
     const amountForHedge = parseFloat(ETH.toString());
 
-    try {
-      console.log((await promisify(
-        protocol.twoKeyUpgradableExchange.getKyberExpectedRate, [amountForHedge, {from: address}]
-        )).toString(),
-      );
-    } catch{
-
-    }
-
     await protocol.Utils.getTransactionReceiptMined(
       await protocol.UpgradableExchange.startHedgingEth(
         amountForHedge, hedgeRate, address
