@@ -1,43 +1,42 @@
 #!/bin/bash
 
-spinner() {
-    chars="/-\|"
+test
+testsPath='2key-protocol/test/campaignsTests/vairations/**/*.spec.ts'
 
-    for (( j=0; j< $1; j++ )); do
-      for (( i=0; i<${#chars}; i++ )); do
-        sleep 0.5
-        echo -en "${chars:$i:1}" "\r"
-      done
-    done
-}
+while test $# -gt 0; do
+  case "$1" in
+  --cpc)
+    shift
+    testsPath='2key-protocol/test/campaignsTests/vairations/cpc/*.spec.ts'
+    shift
+    ;;
+  --mvp)
+    shift
+    testsPath='2key-protocol/test/campaignsTests/vairations/mvp/*.spec.ts'
+    shift
+    ;;
+  --donation)
+    shift
+    echo "Donation tests aren't implmented yet"
+    exit 1;
+    shift
+    ;;
+  --acquisition)
+    shift
+    testsPath='2key-protocol/test/campaignsTests/vairations/acquisition/**/*.spec.ts'
+    shift
+    ;;
+  --example)
+    shift
+    testsPath='2key-protocol/test/campaignsTests/*.ts'
+    shift
+    ;;
+  *)
+    break
+    ;;
+  esac
+done
 
+yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/*.spec.ts
 
-echo "Sending some eth to addresses"
-yarn run test:one 2key-protocol/test/unitTests/envRelatedTests/sendETH.spec.ts
-spinner 2
-echo "Testing congress voting and sending ether"
-yarn run test:one 2key-protocol/test/unitTests/envRelatedTests/congressVote.spec.ts
-spinner 2
-echo "Testing user creation, all errors will be skipped and displayed in console"
-yarn run test:one 2key-protocol/test/unitTests/envRelatedTests/runUserRegistration.spec.ts
-spinner 2
-echo "Testing setting the rates for the contracts"
-yarn run test:one 2key-protocol/test/unitTests/envRelatedTests/twoKeyExchangeRate.spec.ts
-spinner 2
-echo "Running campaign tests"
-
-
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/**/*.spec.ts
-
-node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleAcquisitionTest.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleDonationTest.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/exampleCpcTest.ts
-
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/cpc/*.spec.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/*.spec.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/withCampaignBonus/*.spec.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/withoutCampaignBonus/*.spec.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/noTokenLockup/*.spec.ts
-
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/test11.spec-draft.ts
-#node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register 2key-protocol/test/campaignsTests/vairations/mvp/test9.spec.ts
+yarn run test:command "$testsPath"
