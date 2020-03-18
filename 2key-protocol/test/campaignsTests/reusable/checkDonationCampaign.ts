@@ -80,20 +80,4 @@ export default function checkDonationCampaign(campaignParams: ICreateCampaign, s
 
     expect(data.campaignPublicLinkKey).to.be.equal(link.link);
   }).timeout(120000);
-
-  /*
-  { ethWeiAvailableToHedge: 0,
-  daiWeiAvailableToWithdraw: 0,
-  daiWeiReceivedFromHedgingPerContract: 0,
-  ethWeiHedgedPerContract: 0,
-  sent2keyToContract: 0,
-  ethReceivedFromContract: 0 }
-   */
-  // todo: add assert
-  it('should check stats for the contract from upgradable exchange', async () => {
-    const {protocol, web3: {address: from}} = availableUsers[userKey];
-    const {campaignAddress} = storage;
-    let stats = await protocol.UpgradableExchange.getStatusForTheContract(campaignAddress, from);
-    // console.log(stats);
-  }).timeout(60000);
 }

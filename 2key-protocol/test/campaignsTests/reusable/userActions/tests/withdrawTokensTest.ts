@@ -3,6 +3,8 @@ import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
 import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
+import ITestConversion from "../../../../typings/ITestConversion";
+import acquisitionOnly from "../checks/acquisitionOnly";
 
 export default function withdrawTokensTest(
   {
@@ -12,6 +14,8 @@ export default function withdrawTokensTest(
     campaignData
   }: functionParamsInterface,
 ) {
+  acquisitionOnly(storage.campaignType);
+
   it('should withdraw tokens', async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
@@ -19,10 +23,35 @@ export default function withdrawTokensTest(
     const executedConversions = user.executedConversions;
 
     expect(executedConversions.length).to.be.gt(0);
-    // TODO: probably we should search for first contract with `withdrawn` = false
-    const portionIndex = 0;
 
-    const conversion = executedConversions[0];
+    let portionIndex = 0;
+
+    const conversion = executedConversions
+      .find(
+        (conversion: ITestConversion) => {
+          if (!(conversion instanceof TestAcquisitionConversion)) {
+            return true;
+          }
+
+          if (conversion instanceof TestAcquisitionConversion) {
+            return Boolean(
+              conversion.purchase.contracts
+                .find(
+                  (contract, contractIndex) => {
+                    if (!contract.withdrawn) {
+                      portionIndex = contractIndex;
+                      return true;
+                    }
+                    return false;
+                  },
+                )
+            );
+          }
+        }
+      );
+
+    expect(conversion).to.be.a('object');
+
     const balanceBefore = await protocol.ERC20.getERC20Balance(campaignData.assetContractERC20, address);
 
     await protocol.Utils.getTransactionReceiptMined(

@@ -109,6 +109,7 @@ export default function joinAndConvertTest(
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
       }
       // TODO: for case when twoKeyEconomy is custom and KYC isn't required: add check for rewards inventory subtract
+      // @Nikola
     }).timeout(60000);
   }
 

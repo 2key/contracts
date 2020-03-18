@@ -14,11 +14,12 @@ export default function checkWithdrawableBalanceTest(
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {web3: {address: secondaryAddress}} = availableUsers[secondaryUserKey];
     const {campaignAddress} = storage;
+    const user = storage.getUser(secondaryUserKey);
 
     const withdrawable = await protocol[campaignContract].getAmountReferrerCanWithdraw(
       campaignAddress, secondaryAddress, address,
     );
-    // TODO: incorrect should use sum of all referrer rewards for this user
-    expectEqualNumbers(withdrawable.balance2key, storage.totalBounty);
+
+    expectEqualNumbers(withdrawable.balance2key, user.referrerReward);
   }).timeout(60000);
 }

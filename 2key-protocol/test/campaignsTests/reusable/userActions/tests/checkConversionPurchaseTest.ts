@@ -6,15 +6,16 @@ import {calcUnlockingDates, calcWithdrawAmounts} from "../../../helpers/calcHelp
 import {expect} from "chai";
 import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
+import acquisitionOnly from "../checks/acquisitionOnly";
 
 export default function checkConversionPurchaseTest(
   {
     storage,
     userKey,
     campaignData,
-    campaignContract,
   }: functionParamsInterface,
 ) {
+  acquisitionOnly(storage.campaignType);
   /**
    * BASE_AND_BONUS
    *
@@ -66,7 +67,7 @@ export default function checkConversionPurchaseTest(
 
     const conversion = user.executedConversions[0];
 
-    const conversionObj = await protocol[campaignContract].getConversion(
+    const conversionObj = await protocol.AcquisitionCampaign.getConversion(
       campaignAddress, conversion.id, address,
     );
     const withdrawAmounts = calcWithdrawAmounts(
@@ -77,19 +78,13 @@ export default function checkConversionPurchaseTest(
     );
     const withdrawContractsQuantity = withBase
       ? portionsQty
-      : portionsQty + 1; // added first
+      : portionsQty + 1; // added first portions with separate base amount
 
-    const purchase = await protocol[campaignContract].getPurchaseInformation(
+    const purchase = await protocol.AcquisitionCampaign.getPurchaseInformation(
       campaignAddress, conversion.id, address
     );
 
-    /**
-     * TODO: looks like bug
-     * vestingAmount: BASE_AND_BONUS
-     * numberOfVestingPortions = 6
-     * purchase.vestingPortions = 5
-     */
-    // expect(purchase.vestingPortions).to.be.eq(campaignData.numberOfVestingPortions);
+    expect(purchase.vestingPortions).to.be.eq(withdrawContractsQuantity);
     expect(purchase.unlockingDays.length).to.be.eq(withdrawContractsQuantity);
     expect(purchase.unlockingDays).to.deep.equal(unlockingDates);
     expectEqualNumbers(

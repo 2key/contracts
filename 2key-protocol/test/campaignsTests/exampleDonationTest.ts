@@ -225,13 +225,5 @@ describe(
         storage,
       }
     );
-
-    // todo: what should we check here???
-    it('should get stats for the contract from upgradable exchange', async() => {
-      const {protocol, web3: {address}} = availableUsers[userIds.aydnep];
-      const {campaignAddress} = storage;
-      let stats = await protocol.UpgradableExchange.getStatusForTheContract(campaignAddress, address);
-      console.log(stats);
-    }).timeout(60000);
   },
 );

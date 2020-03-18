@@ -57,7 +57,7 @@ export default function cancelConversionTest(
       const balanceAfter = await protocol.getBalance(address, campaignData.assetContractERC20);
 
       /**
-       * TODO: recheck why so strange diff
+       * TODO: recheck why so strange diff sometimes
        * For conversion amount `5`
        * diff is `4.999842805999206` - it is BigNumber calc
        * in some cases it  is `4.988210449999725` - it is BigNumber calc, in this case assertion fails
