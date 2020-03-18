@@ -147,8 +147,34 @@ library PriceDiscovery {
             totalTokensBought = totalTokensBought.add(amountOfTokensReceived);
         }
 
-//        uint averagePricePaidPerToken = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(totalTokensBought);
         return (totalTokensBought, newPrice);
+    }
+
+
+
+    function buyTokens(
+        uint amountOfUSDSpendingForBuyingTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool,
+        uint poolInitialWorthUSD
+    )
+    public
+    pure
+    returns (uint,uint,uint)
+    {
+        uint totalTokensBought;
+        uint newTokenPrice;
+
+        (totalTokensBought, newTokenPrice) = calculateTotalTokensUserIsGetting(
+            amountOfUSDSpendingForBuyingTokens,
+            tokenPriceBeforeBuying,
+            totalAmountOfTokensInThePool,
+            poolInitialWorthUSD
+        );
+
+        uint averageTokenPriceForPurchase = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(totalTokensBought);
+
+        return (averageTokenPriceForPurchase, newTokenPrice, totalTokensBought);
     }
 
 
