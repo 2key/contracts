@@ -1,10 +1,5 @@
 import {expect} from 'chai';
 
-export function prepareNumberForCompare(number: number) {
-  return Number.parseFloat(
-    number.toFixed(9)
-  )
-}
 
 export function rewardCalc(reward: number, cutChain: Array<number>) {
   let resultReward = reward;

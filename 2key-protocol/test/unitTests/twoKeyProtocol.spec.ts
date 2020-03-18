@@ -2,11 +2,9 @@ import '../constants/polifils';
 import {describe, it} from 'mocha';
 import {expect} from "chai";
 import availableUsers from "../constants/availableUsers";
-import web3Switcher from "../helpers/web3Switcher";
-import {getTwoKeyProtocolValues} from "../helpers/twoKeyProtocol";
 
 const {web3: {address: from}, protocol: deployerProtocol} = availableUsers.deployer;
-const {address: aydnepAddress, protocol: aydnepProtocol} = availableUsers.aydnep;
+const {web3: {address: aydnepAddress}, protocol: aydnepProtocol} = availableUsers.aydnep;
 
 
 describe('TwoKeyProtocol root methods test', () => {
@@ -20,7 +18,7 @@ describe('TwoKeyProtocol root methods test', () => {
     const balance = aydnepProtocol.Utils.balanceFromWeiString(
       await aydnepProtocol.getBalance(aydnepAddress),
       {inWei: true},
-      );
+    );
 
     return expect(balance).to.exist
       .to.haveOwnProperty('gasPrice')
