@@ -167,5 +167,16 @@ describe(
         storage,
       }
     );
+
+    usersActions(
+      {
+        userKey: storage.contractorKey,
+        actions: [
+          campaignUserActions.contractorWithdraw,
+        ],
+        campaignData,
+        storage,
+      }
+    );
   },
 );
