@@ -2,6 +2,7 @@ import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {hedgeRate} from "../../../../constants/smallConstants";
 import {expect} from "chai";
+import {promisify} from "../../../../../src/utils/promisify";
 
 export default function hedgingEthTest(
   {
@@ -14,6 +15,15 @@ export default function hedgingEthTest(
     const {balance: {ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
     const amountForHedge = parseFloat(ETH.toString());
 
+    try {
+      console.log((await promisify(
+        protocol.twoKeyUpgradableExchange.getKyberExpectedRate, [amountForHedge, {from: address}]
+        )).toString(),
+      );
+    } catch{
+
+    }
+
     await protocol.Utils.getTransactionReceiptMined(
       await protocol.UpgradableExchange.startHedgingEth(
         amountForHedge, hedgeRate, address
@@ -22,7 +32,6 @@ export default function hedgingEthTest(
 
     const upgradableExchangeBalanceAfter = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
 
-    // send to hedging all available ether
     expect(upgradableExchangeBalanceAfter.balance.ETH.toString()).to.be.eq('0');
   }).timeout(50000);
 }
