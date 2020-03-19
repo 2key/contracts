@@ -125,7 +125,7 @@ describe('CPC campaign', () => {
 
     it('should show the rate of 2key at the moment bought and the amount of tokens in the inventory received', async() => {
         printTestNumber();
-        let amountOfTokensReceived = await twoKeyProtocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
+        let amountOfTokensReceived = await twoKeyProtocol.CPCCampaign.getInitialBountyAmount(campaignPublicAddress);
 
         let boughtRate = await twoKeyProtocol.CPCCampaign.getBought2keyRate(campaignAddress);
         let eth2usd = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
@@ -145,13 +145,9 @@ describe('CPC campaign', () => {
 
     it('should set on plasma contract inventory amount from maintainer', async() => {
         printTestNumber();
-        let amountOfTokensAdded = await twoKeyProtocol.CPCCampaign.getTokensAvailableInInventory(campaignAddress);
-        console.log(amountOfTokensAdded);
-        console.log(parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString()))
+        let amountOfTokensAdded = await twoKeyProtocol.CPCCampaign.getInitialBountyAmount(campaignPublicAddress);
         let maxNumberOfConversions = Math.floor(amountOfTokensAdded / parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString()));
-        console.log(maxNumberOfConversions);
         let txHash = await twoKeyProtocol.CPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), maxNumberOfConversions, twoKeyProtocol.plasmaAddress);
-
     }).timeout(TIMEOUT_LENGTH);
 
     it('should set that public contract is valid from maintainer', async() => {
@@ -341,22 +337,22 @@ describe('CPC campaign', () => {
     }).timeout(TIMEOUT_LENGTH);
 
 
-    it('should get merklee proof from roots as an influencer', async() => {
-        printTestNumber();
-
-        const {web3, address} = web3Switcher.test();
-        from = address;
-        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
-
-        let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
-        expect(proofs.length).to.be.greaterThan(0);
-    }).timeout(TIMEOUT_LENGTH);
-
-    it('should check merkle proof on the main chain from influencer address', async() => {
-        printTestNumber();
-        let isProofValid = await twoKeyProtocol.CPCCampaign.checkMerkleProofAsInfluencer(campaignAddress, twoKeyProtocol.plasmaAddress);
-        expect(isProofValid).to.be.equal(true);
-    }).timeout(TIMEOUT_LENGTH);
+    // it('should get merklee proof from roots as an influencer', async() => {
+    //     printTestNumber();
+    //
+    //     const {web3, address} = web3Switcher.test();
+    //     from = address;
+    //     twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_TEST));
+    //
+    //     let proofs = await twoKeyProtocol.CPCCampaign.getMerkleProofFromRoots(campaignAddress, twoKeyProtocol.plasmaAddress);
+    //     expect(proofs.length).to.be.greaterThan(0);
+    // }).timeout(TIMEOUT_LENGTH);
+    //
+    // it('should check merkle proof on the main chain from influencer address', async() => {
+    //     printTestNumber();
+    //     let isProofValid = await twoKeyProtocol.CPCCampaign.checkMerkleProofAsInfluencer(campaignAddress, twoKeyProtocol.plasmaAddress);
+    //     expect(isProofValid).to.be.equal(true);
+    // }).timeout(TIMEOUT_LENGTH);
 
     // it('should withdraw more than he earned tokens as an influencer with his proof', async() => {
     //     printTestNumber();
