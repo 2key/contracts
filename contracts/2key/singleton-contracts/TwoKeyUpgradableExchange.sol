@@ -1117,9 +1117,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @notice Function to get amount of 2KEY receiving, new token price, and average price per token
      * @param purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
      */
-    function get2KEYTokenPriceAndAmountOfTokensReceiving(
+   function get2KEYTokenPriceAndAmountOfTokensReceiving(
         uint purchaseAmountUSDWei
-    )
+   )
     public
     view
     returns (uint,uint,uint)
