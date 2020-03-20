@@ -28,6 +28,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     address constant ETH_TOKEN_ADDRESS = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee;
 
 
+    uint constant POOL_WORTH_USD = 1080000*(10**18);            // Pool tokens are always worth in total this value
+
     string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
     string constant _twoKeyEconomy = "TwoKeyEconomy";
     string constant _twoKeyExchangeRateContract = "TwoKeyExchangeRateContract";
@@ -1110,6 +1112,49 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
         return ERC20(tokenAddress).balanceOf(address(this));
     }
+
+    /**
+     * @notice Function to get amount of 2KEY receiving, new token price, and average price per token
+     * @param purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
+     */
+    function get2KEYTokenPriceAndAmountOfTokensReceiving(
+        uint purchaseAmountUSDWei
+    )
+    public
+    view
+    returns (uint,uint,uint)
+    {
+        uint currentPrice = sellRate2key();
+
+        uint averageTokenPriceForPurchase;
+        uint newTokenPrice;
+        uint totalTokensBought;
+
+        (averageTokenPriceForPurchase, newTokenPrice, totalTokensBought) = PriceDiscovery.buyTokens(
+            purchaseAmountUSDWei,
+            currentPrice,
+            getPoolBalanceOf2KeyTokens(),
+            POOL_WORTH_USD
+        );
+
+        return (averageTokenPriceForPurchase, newTokenPrice, totalTokensBought);
+    }
+
+    /**
+     * @notice Function to get token price from the Bancor exchange
+     */
+    function getBancorPriceFor2KeyToken(
+        uint purchaseAmountUSDWei
+    )
+    public
+    view
+    returns (uint)
+    {
+        //TODO: For now return 0, once Bancor integrated we will update this function
+        return 0;
+    }
+
+
 
 
     /**
