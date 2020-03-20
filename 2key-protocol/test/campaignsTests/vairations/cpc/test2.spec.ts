@@ -127,7 +127,7 @@ describe(
       {
         userKey: userIds.test,
         actions: [
-          campaignUserActions.checkMerkleProof,
+          // campaignUserActions.checkMerkleProof,
         ],
         campaignData,
         storage,
