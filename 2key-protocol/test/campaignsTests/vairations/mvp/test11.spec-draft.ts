@@ -15,7 +15,7 @@ const conversionSize = 5;
 const campaignData = getAcquisitionCampaignData(
   {
     amount: 0,
-    campaignInventory: 1234000,
+    campaignInventory: 40000,
     maxConverterBonusPercent: 0,
     pricePerUnitInETHOrUSD: 0.095,
     maxReferralRewardPercent: 20,
