@@ -23,6 +23,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     using SafeMath for uint256;
+
     bool initialized;
     address constant ETH_TOKEN_ADDRESS = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee;
 
@@ -36,17 +37,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     ITwoKeyUpgradableExchangeStorage public PROXY_STORAGE_CONTRACT;
-
-    /**
-     * @notice Event will be fired every time someone buys tokens
-     */
-    event TokenSell(
-        address indexed purchaser,
-        address indexed beneficiary,
-        uint256 value,
-        uint256 amount
-    );
-
 
     /**
      * Event for token purchase logging
@@ -480,26 +470,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return amountOfDAIs;
     }
 
-//    /**
-//     * @notice Function to calculate how many stable coins we can get for specific amount of 2keys
-//     * @dev This is happening in case we're receiving (buying) 2key
-//     * @param _2keyAmount is the amount of 2keys sent to the contract
-//     */
-//    function getUSDStableCoinAmountFrom2keyUnitsBasedOnSellRate(
-//        uint256 _2keyAmount
-//    )
-//    public
-//    view
-//    returns (uint256)
-//    {
-//        uint sellRate = sellRate2key();
-//
-//        uint hundredPercent = 10**18;
-//        uint rateWithSpread = sellRate.mul(hundredPercent.sub(spreadWei())).div(10**18);
-//        uint amountOfDAIs = _2keyAmount.mul(rateWithSpread).div(10**18);
-//
-//        return amountOfDAIs;
-//    }
 
     function getMore2KeyTokensForRebalancing(
         uint amountOf2KeyRequested
@@ -1127,7 +1097,18 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(msg.sender == twoKeyAdmin);
         ERC20(_erc20TokenAddress).transfer(twoKeyAdmin, _tokenAmount);
+    }
 
+    /**
+     * @notice Function to get current pool supply of 2KEY tokens
+     */
+    function getPoolBalanceOf2KeyTokens()
+    public
+    view
+    returns (uint)
+    {
+        address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
+        return ERC20(tokenAddress).balanceOf(address(this));
     }
 
 
