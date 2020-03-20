@@ -15,6 +15,8 @@ import "../upgradability/Upgradeable.sol";
 
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
+import "../libraries/PriceDiscovery.sol";
+
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
@@ -922,6 +924,17 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 daiWeiAvailablbeToFill2keyReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
         setUint(daiWeiAvailablbeToFill2keyReserveKeyHash, daiWeiAvailableToFill2KEYReserve().sub(amountDAI));
     }
+
+    function getPriceForBuyingToken(
+        uint dollarAmountWei
+    )
+    public
+    view
+    returns (uint)
+    {
+
+    }
+
 
     /**
      * @notice Function to return number of campaign contracts (different) interacted with this contract
