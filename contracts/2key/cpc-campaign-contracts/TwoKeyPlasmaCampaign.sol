@@ -14,7 +14,7 @@ import "../libraries/MerkleProof.sol";
 
 contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAbstract {
 
-    uint constant public N = 2048;  //constant number
+    uint constant N = 2048;  //constant number
     IncentiveModel incentiveModel;  //Incentive model for rewards
 
     /**
@@ -532,7 +532,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint)
     {
-
         return totalBountyForCampaign.sub(counters[6]);             // Total bounty - bounty PAID for executed conversions
     }
 
@@ -704,6 +703,18 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return referrerPlasma2Balances2key[_referrer];
     }
 
+    /**
+     * @notice Function to update state of the contract that the bounty is withdrawn
+     * @dev Only contractor can update this function
+     */
+    function updateContractorWithdrawnBounty()
+    public
+    onlyContractor
+    {
+        // Make total bounty to be only what is for influencers, so another getter will return 0
+        totalBountyForCampaign = counters[6];
+    }
+
 
 
     /**
@@ -719,41 +730,41 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *                  of the work to get a full proof
      *                  See https://github.com/2key/web3-alpha/commit/105b0b17ab3d20662b1e2171d84be25089962b68
      */
-    function getMerkleProofBaseFromRoots(
-        address _influencer
-    )
-    internal
-    view
-    returns (uint, bytes32[])
-    {
-
-        if (isActiveInfluencer[_influencer] == false) {
-            return (0, new bytes32[](0));
-        }
-
-        uint influencer_idx = activeInfluencer2idx[_influencer];
-
-        uint start = N * (influencer_idx / N);
-
-        influencer_idx = influencer_idx.sub(start);
-
-        uint n = activeInfluencers.length.sub(start);
-
-        if (n > N) {
-            n = N;
-        }
-
-        bytes32[] memory hashes = new bytes32[](n);
-        uint i;
-
-        for (i = 0; i < n; i++) {
-            address influencer = activeInfluencers[i+start];
-            uint amount = referrerPlasma2Balances2key[influencer];
-            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-        }
-
-        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
-    }
+//    function getMerkleProofBaseFromRoots(
+//        address _influencer
+//    )
+//    internal
+//    view
+//    returns (uint, bytes32[])
+//    {
+//
+//        if (isActiveInfluencer[_influencer] == false) {
+//            return (0, new bytes32[](0));
+//        }
+//
+//        uint influencer_idx = activeInfluencer2idx[_influencer];
+//
+//        uint start = N * (influencer_idx / N);
+//
+//        influencer_idx = influencer_idx.sub(start);
+//
+//        uint n = activeInfluencers.length.sub(start);
+//
+//        if (n > N) {
+//            n = N;
+//        }
+//
+//        bytes32[] memory hashes = new bytes32[](n);
+//        uint i;
+//
+//        for (i = 0; i < n; i++) {
+//            address influencer = activeInfluencers[i+start];
+//            uint amount = referrerPlasma2Balances2key[influencer];
+//            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+//        }
+//
+//        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
+//    }
 
     /**
      * @notice          compute a merkle proof that influencer and amount are in the the merkle_root.
@@ -762,30 +773,30 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_root,
      *                  which prove that (_influencer,amount) are inside the root.
      */
-    function getMerkleProofFromRoots()
-    public
-    view
-    returns (bytes32[])
-    {
-        address _influencer = msg.sender;
-        bytes32[] memory proof0;
-        uint start;
-        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
-        if (proof0.length == 0) {
-            return proof0; // return failury
-        }
-        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
-        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
-        uint i;
-        for (i = 0; i < proof0.length; i++) {
-            proof[i] = proof0[i];
-        }
-        for (i = 0; i < proof1.length; i++) {
-            proof[i+proof0.length] = proof1[i];
-        }
-
-        return proof;
-    }
+//    function getMerkleProofFromRoots()
+//    public
+//    view
+//    returns (bytes32[])
+//    {
+//        address _influencer = msg.sender;
+//        bytes32[] memory proof0;
+//        uint start;
+//        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
+//        if (proof0.length == 0) {
+//            return proof0; // return failury
+//        }
+//        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
+//        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
+//        uint i;
+//        for (i = 0; i < proof0.length; i++) {
+//            proof[i] = proof0[i];
+//        }
+//        for (i = 0; i < proof1.length; i++) {
+//            proof[i+proof0.length] = proof1[i];
+//        }
+//
+//        return proof;
+//    }
 
     /**
      * @notice          compute a merkle root of the active influencers and the amount they received.

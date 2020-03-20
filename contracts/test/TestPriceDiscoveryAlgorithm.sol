@@ -58,7 +58,7 @@ contract TestPriceDiscoveryAlgorithm {
             TOKEN_PRICE
         );
     }
-    
+
     function testCalculateTotalTokensUserIsGetting(
         uint amountOfUSDSpending
     )
@@ -73,7 +73,7 @@ contract TestPriceDiscoveryAlgorithm {
             POOL_VALUE
         );
     }
-    
+
     function testCalculateAmountOfTokensPerIterationAndNewPrice(
         uint iterationAomunt
     )
