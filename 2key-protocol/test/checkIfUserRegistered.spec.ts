@@ -1,6 +1,6 @@
 import 'mocha';
 import {TwoKeyProtocol} from '../src';
-import createWeb3 from './_web3';
+import createWeb3 from './helpers/_web3';
 import Sign from '../src/sign';
 require('es6-promise').polyfill();
 require('isomorphic-fetch');

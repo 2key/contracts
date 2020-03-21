@@ -1,4 +1,4 @@
-import {generatePlasmaFromMnemonic} from "./_web3";
+import {generatePlasmaFromMnemonic} from "./helpers/_web3";
 import {TwoKeyProtocol} from "../src";
 import {expect} from "chai";
 import {IConversion, ICreateCampaign, InvoiceERC20} from "../src/donation/interfaces";
@@ -119,7 +119,9 @@ describe('TwoKeyDonationCampaign', () => {
         invoiceTokenAddress = result.invoiceToken;
    }).timeout(60000);
 
-
+  /**
+   * Start campaign check tests
+   */
     it('should proff that campaign is validated and registered properly', async() => {
         printTestNumber();
         let isValidated = await twoKeyProtocol.CampaignValidator.isCampaignValidated(campaignAddress);
@@ -167,7 +169,9 @@ describe('TwoKeyDonationCampaign', () => {
         let data: IPrivateMetaInformation = await twoKeyProtocol.DonationCampaign.getPrivateMetaHash(campaignAddress, from);
         expect(data.campaignPublicLinkKey).to.be.equal(links.deployer.link);
     }).timeout(120000);
-
+    /**
+     * end campaign check tests
+     */
     it('should visit campaign as guest', async () => {
         printTestNumber();
         const {web3, address} = web3Switcher.guest();
@@ -198,6 +202,9 @@ describe('TwoKeyDonationCampaign', () => {
         expect(links.gmail.link).to.be.a('string');
     }).timeout(60000);
 
+  /**
+   * For manual schema only
+   */
     it('should show maximum referral reward after ONE referrer', async() => {
         printTestNumber();
         const {web3, address} = web3Switcher.test4();
