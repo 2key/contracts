@@ -1154,6 +1154,17 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return 0;
     }
 
+    function comparePrices(
+        uint priceFromExchange,
+        uint priceFromBancor
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return priceFromExchange > priceFromBancor ? priceFromExchange : priceFromBancor;
+    }
+
 
 
 
