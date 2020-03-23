@@ -29,6 +29,7 @@ const TwoKeyPlasmaCongressMembersRegistry = artifacts.require('TwoKeyPlasmaCongr
 
 const Call = artifacts.require('Call');
 const IncentiveModels = artifacts.require('IncentiveModels');
+const PriceDiscovery = artifacts.require('PriceDiscovery');
 
 const fs = require('fs');
 const path = require('path');
@@ -78,6 +79,7 @@ module.exports = function deploy(deployer) {
 
     deployer.deploy(Call);
     deployer.deploy(IncentiveModels);
+    deployer.deploy(PriceDiscovery);
 
     if (deployer.network.startsWith('dev') || deployer.network.startsWith('public.') || deployer.network.startsWith('ropsten')) {
 
@@ -120,6 +122,7 @@ module.exports = function deploy(deployer) {
             .then(() => KyberNetworkTestMockContract.deployed())
             .then(() => deployer.deploy(TwoKeyBaseReputationRegistry))
             .then(() => TwoKeyBaseReputationRegistry.deployed())
+            .then(() => deployer.link(PriceDiscovery, TwoKeyUpgradableExchange))
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
             .then(() => deployer.deploy(TwoKeyParticipationMiningPool))
