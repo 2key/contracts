@@ -1,7 +1,7 @@
 import availableUsers, {userIds} from "../../constants/availableUsers";
 import {expect} from "chai";
 import ICreateCPCTest from "../../typings/ICreateCPCTest";
-import {expectEqualNumbers} from "../helpers/numberHelpers";
+import {expectEqualNumbers} from "../../helpers/numberHelpers";
 
 const TIMEOUT_LENGTH = 60000;
 

@@ -2,7 +2,7 @@ import {expect} from "chai";
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {campaignTypes} from "../../../../constants/smallConstants";
-import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
 
 export default function contractorWithdrawTest(
   {

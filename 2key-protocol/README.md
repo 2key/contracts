@@ -3,11 +3,18 @@
 ### How to prepare environment
 
 * ```yarn run geth``` - to start local devnet
-* deploy contracts with ```yarn run deploy --migrate dev-local,plasma-ap --reset``` this will deploy new contracts to your local node and remote syncEventsNode (http://astring.aydnep.com.ua:18545)
+* deploy contracts with ```yarn run deploy --migrate dev-local,plasma-test-local --reset``` this will deploy new contracts to your local node and remote syncEventsNode (http://astring.aydnep.com.ua:18545)
 * setup ```.env``` file and specify mnemonics and addresses of accounts
-* run ```yarn run test:one 2key-protocol/test/sendETH.spec.ts``` - this test will send ETH to all accounts used in test
-* run ```yarn run test``` to start tests
+* run ```yarn run test:all``` to start all tests
+
 * after all steps passed you can continue with development
+
+How to run specific part of the tests:
+* run ```yarn run test:examples``` to start example tests, these tests include almost all available user actions 
+* run ```yarn run test:cpc``` to start cpc tests
+* run ```yarn run test:acquisition``` to start acquisition tests
+* run ```yarn run test:mvp``` to start mvp tests, includes acquisition and donation tests
+* run ```yarn run test:donation``` to start donation tests, for now we have only two donation variations and they includes to mvp
 
 ### How run Metamask debugger app
 
@@ -33,11 +40,16 @@
 |    |----interfaces.ts - definitions of all functions and datastructures
 |----dist - submodule that synced with github.com/2key/2key-protocol repo here webpack will build our library
 |----test - tests folder
-|    |----_web3.ts - test helpers to create web3 instance with wallet provider
-|    |----index.html - debugger app with metamask support
-|    |----index.spec.ts - the main test scenario, in feature we need to split this to different cases
-|    |----proxy.spec.ts - proxy for listening plasama event
-|    |----sendETH.spec.ts - test for fullfilling all needed accounts (look at .env file) with 10ETH
-|    |----sendTokens.spec.ts - test for sending truffle2Key tokens to aydnep accounts in staging network
+|    |----campaignsTests - all related tests to campaigns includes
+|           |----reusable - reusable campaign checks and user actions
+|           |----variations - directory with described cmapaigns variations
+|    |----constants - all constants related to tests
+|    |----examples - example with almost all available user actions for specific campaign, don't run with all other tests
+|    |----helperClasses - classes which used for organise information for further compare with test results
+|    |----helpers - helper functions
+|    |----oldTestsBackup - tests from previous version, should be removed in future  
+|    |----typings - some typescript types 
+|    |----unitTests - isolated contracts tests also includes required tests which affect environment prepare
+|    |----index.html - debugger app with metamask support\
 |    |----webapp.ts - script for debugger app
 ```

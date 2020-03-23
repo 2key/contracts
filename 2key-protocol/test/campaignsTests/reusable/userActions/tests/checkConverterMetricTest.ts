@@ -1,7 +1,7 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
-import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
 
 export default function checkConverterMetricTest(
   {
