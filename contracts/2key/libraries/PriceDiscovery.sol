@@ -174,7 +174,7 @@ library PriceDiscovery {
 
         uint averageTokenPriceForPurchase = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(totalTokensBought);
 
-        return (averageTokenPriceForPurchase, newTokenPrice, totalTokensBought);
+        return (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice);
     }
 
 
