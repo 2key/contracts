@@ -27,7 +27,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     bool initialized;
     address constant ETH_TOKEN_ADDRESS = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee;
 
-
+    //TODO: Remove const, add getters and setters
     uint constant POOL_WORTH_USD = 1080000*(10**18);            // Pool tokens are always worth in total this value
 
     string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
@@ -291,17 +291,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param _weiAmount Value in wei to be converted into tokens
      * @return Number of tokens that can be purchased with the specified _weiAmount
      */
-    function _getTokenAmountToBeSold(
+    function getTokenAmountToBeSold(
         uint256 _weiAmount
     )
-    internal
+    public
     view
-    returns (uint256)
+    returns (uint256,uint256,uint256)
     {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
         uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
-        return (_weiAmount*rate).div(sellRate2key());
+        uint dollarAmountWei = _weiAmount.mul(rate).div(10**18);
+
+        return get2KEYTokenPriceAndAmountOfTokensReceiving(dollarAmountWei);
+
     }
 
     /**
@@ -512,14 +515,23 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     payable
     onlyValidatedContracts
-    returns (uint)
+    returns (uint,uint)
     {
         _preValidatePurchase(_beneficiary, msg.value);
 
-        // calculate token amount to be created
-        uint256 tokens = _getTokenAmountToBeSold(msg.value);
+        uint totalTokensBought;
+        uint averageTokenPriceForPurchase;
+        uint newTokenPrice;
 
-        // update state
+        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = getTokenAmountToBeSold(msg.value);
+
+        // update sellRate2KEY of the token
+        bytes32 sellRateKeyHash = keccak256("sellRate2key");
+
+        // Set the new token price after this purchase
+        setUint(sellRateKeyHash, newTokenPrice);
+
+        // update weiRaised by this contract
         bytes32 weiRaisedKeyHash = keccak256("weiRaised");
         uint weiRaised = getUint(weiRaisedKeyHash).add(msg.value);
         setUint(weiRaisedKeyHash,weiRaised);
@@ -527,31 +539,35 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // check if contract is first time interacting with this one
         uint contractId = getContractId(msg.sender);
 
+        // Check if the contract exists
         if(contractId == 0) {
             contractId = addNewContract(msg.sender);
         }
 
+        // Update how much ether we received from msg.sender contract
         bytes32 ethReceivedFromContractKeyHash = keccak256("ethReceivedFromContract", contractId);
         setUint(ethReceivedFromContractKeyHash, ethReceivedFromContract(contractId).add(msg.value));
 
+        // Update how much 2KEY tokens we sent to msg.sender contract
         bytes32 sent2keyToContractKeyHash = keccak256("sent2keyToContract", contractId);
-        setUint(sent2keyToContractKeyHash, sent2keyToContract(contractId).add(tokens));
+        setUint(sent2keyToContractKeyHash, sent2keyToContract(contractId).add(totalTokensBought));
 
         updateEthWeiAvailableToHedge(contractId, msg.value);
 
-        _processPurchase(_beneficiary, tokens);
+        _processPurchase(_beneficiary, totalTokensBought);
 
 
         emit TokenPurchase(
             msg.sender,
             _beneficiary,
             msg.value,
-            tokens,
-            sellRate2key()
+            totalTokensBought,
+            averageTokenPriceForPurchase
         );
 
-        return tokens;
+        return (totalTokensBought, averageTokenPriceForPurchase);
     }
+
 
     function releaseAllDAIFromContractToReserve()
     public

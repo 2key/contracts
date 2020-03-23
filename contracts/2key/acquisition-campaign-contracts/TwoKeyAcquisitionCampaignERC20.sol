@@ -106,8 +106,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         require(usd2KEYrateWei == 0);
 
         boughtRewardsWithEther = true;
-        uint amountOfTwoKeys = buyTokensFromUpgradableExchange(msg.value, address(this));
-        usd2KEYrateWei = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
+
+        // Second returned argument is rate on which token is bought
+        (,usd2KEYrateWei)= buyTokensFromUpgradableExchange(msg.value, address(this));
     }
 
 
@@ -262,7 +263,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
             } else {
                 //Buy tokens from upgradable exchange
-                totalBounty2keys = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+                (totalBounty2keys,) = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
             }
             // Update reserved amount

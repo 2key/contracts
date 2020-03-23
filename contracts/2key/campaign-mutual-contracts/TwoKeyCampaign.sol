@@ -272,7 +272,8 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	{
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 		// Get the total tokens bought
-		uint totalTokens = buyTokensFromUpgradableExchange(moderatorFee, twoKeyAdmin); // Buy tokens for moderator and twoKeyDeepFreezeTokenPool
+		uint totalTokens;
+		(totalTokens,) = buyTokensFromUpgradableExchange(moderatorFee, twoKeyAdmin); // Buy tokens for moderator and twoKeyDeepFreezeTokenPool
 
 		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
 		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(totalTokens);
@@ -359,11 +360,10 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 		address receiver
 	)
 	internal
-	returns (uint)
+	returns (uint,uint)
 	{
 		address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
-		uint amountBought = IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
-		return amountBought;
+		return IUpgradableExchange(upgradableExchange).buyTokens.value(amountOfMoney)(receiver);
 	}
 
 

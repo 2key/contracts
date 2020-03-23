@@ -10,7 +10,7 @@ contract IUpgradableExchange {
     )
     public
     payable
-    returns (uint);
+    returns (uint,uint);
 
     function buyStableCoinWith2key(
         uint _twoKeyUnits,

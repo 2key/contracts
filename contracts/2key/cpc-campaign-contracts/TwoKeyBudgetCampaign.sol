@@ -83,11 +83,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(isInventoryAdded == false);
 
 		boughtRewardsWithEther = true;
-		rewardsInventoryAmount = buyTokensFromUpgradableExchange(msg.value, address(this));
-
-
-		uint rateUsdToEth = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).getBaseToTargetRate("USD");
-		usd2KEYrateWei = (msg.value).mul(rateUsdToEth).div(rewardsInventoryAmount);
+		(rewardsInventoryAmount,usd2KEYrateWei) = buyTokensFromUpgradableExchange(msg.value, address(this));
 
 		isInventoryAdded = true;
 	}
