@@ -27,9 +27,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     bool initialized;
     address constant ETH_TOKEN_ADDRESS = 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee;
 
-    //TODO: Remove const, add getters and setters
-    uint constant POOL_WORTH_USD = 1080000*(10**18);            // Pool tokens are always worth in total this value
-
     string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
     string constant _twoKeyEconomy = "TwoKeyEconomy";
     string constant _twoKeyExchangeRateContract = "TwoKeyExchangeRateContract";
@@ -1057,6 +1054,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return ethReceivedFromContract(_contractID) > 0 ? true : false;
     }
 
+    function poolWorthUSD()
+    public
+    view
+    returns (uint)
+    {
+        // 1.08 M Dollars in WEI
+        return 1080000*(10**18);
+    }
+
 
     /**
      * @notice Getter to get spreadWei value
@@ -1146,7 +1152,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             purchaseAmountUSDWei,
             currentPrice,
             getPoolBalanceOf2KeyTokens(),
-            POOL_WORTH_USD
+            poolWorthUSD()
         );
 
     }
