@@ -1126,18 +1126,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint currentPrice = sellRate2key();
 
-        uint averageTokenPriceForPurchase;
-        uint newTokenPrice;
-        uint totalTokensBought;
-
-        (averageTokenPriceForPurchase, newTokenPrice, totalTokensBought) = PriceDiscovery.buyTokens(
+        return PriceDiscovery.buyTokens(
             purchaseAmountUSDWei,
             currentPrice,
             getPoolBalanceOf2KeyTokens(),
             POOL_WORTH_USD
         );
 
-        return (averageTokenPriceForPurchase, newTokenPrice, totalTokensBought);
     }
 
     /**
