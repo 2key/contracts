@@ -1,7 +1,7 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import donationOnly from "../checks/donationOnly";
-import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
 import {exchangeRates} from "../../../../constants/smallConstants";
 
 export default function checkAvailableDonationTest(

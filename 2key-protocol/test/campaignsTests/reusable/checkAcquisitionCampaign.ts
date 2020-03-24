@@ -4,8 +4,8 @@ import availableUsers from "../../constants/availableUsers";
 import {IPrivateMetaInformation} from "../../../src/acquisition/interfaces";
 import TestStorage from "../../helperClasses/TestStorage";
 import {campaignTypes} from "../../constants/smallConstants";
-import {expectEqualNumbers} from "../helpers/numberHelpers";
-import getTwoKeyEconomyAddress from "../helpers/getTwoKeyEconomyAddress";
+import {expectEqualNumbers} from "../../helpers/numberHelpers";
+import getTwoKeyEconomyAddress from "../../helpers/getTwoKeyEconomyAddress";
 
 
 export default function checkAcquisitionCampaign(campaignParams, storage: TestStorage) {
