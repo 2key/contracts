@@ -1154,7 +1154,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             getPoolBalanceOf2KeyTokens(),
             poolWorthUSD()
         );
-
     }
 
     /**

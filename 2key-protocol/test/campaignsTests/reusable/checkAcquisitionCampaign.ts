@@ -167,17 +167,16 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
       campaignParams.isFiatOnly
       && campaignParams.assetContractERC20 === getTwoKeyEconomyAddress()
     ) {
-      const {amount2key, ...rest} = await protocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(
-        campaignParams.isFiatOnly,
-        !campaignParams.isFiatOnly,
-        campaignParams.campaignHardCapWEI,
-        campaignParams.maxReferralRewardPercentWei,
-      );
+      const rateAtWhich2KeyIsBought = await protocol.AcquisitionCampaign.getRateAtWhich2KEYWasBoughtFIAT(campaignAddress);
+      const campaignHardCap = parseFloat(protocol.Utils.fromWei(campaignParams.campaignHardCapWEI).toString());
+      const usdAmount = campaignHardCap * (campaignParams.maxReferralRewardPercentWei /100);
+
+      const amount2key = usdAmount/rateAtWhich2KeyIsBought;
 
       expectEqualNumbers(
         availableAmountOfTokens,
         campaignParams.campaignInventory
-        + parseFloat(protocol.Utils.fromWei(amount2key).toString()),
+        + amount2key,
       );
     } else {
       expect(availableAmountOfTokens).to.be
