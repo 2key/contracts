@@ -1,5 +1,5 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
-import {campaignUserActions} from "../../../constants/constants";
+import {campaignUserActions} from "../../../../constants/campaignUserActions";
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
 import {ipfsRegex} from "../../../../helpers/regExp";

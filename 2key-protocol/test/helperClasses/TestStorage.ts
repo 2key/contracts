@@ -7,7 +7,7 @@ import ITestConversion from "../typings/ITestConversion";
 import TestAcquisitionConversion from "./TestAcquisitionConversion";
 import TestDonationConversion from "./TestDonationConversion";
 import TestCPCConversion from "./TestCPCConversion";
-import calculateReferralRewards from "../campaignsTests/helpers/calculateReferralRewards";
+import calculateReferralRewards from "../helpers/calculateReferralRewards";
 import {ICPCMeta} from "../../src/cpc/interfaces";
 
 

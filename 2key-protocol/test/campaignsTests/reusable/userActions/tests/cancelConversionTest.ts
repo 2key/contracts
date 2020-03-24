@@ -1,6 +1,6 @@
 import availableUsers from "../../../../constants/availableUsers";
 import {expect} from "chai";
-import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
 import {campaignTypes, conversionStatuses} from "../../../../constants/smallConstants";
 import functionParamsInterface from "../typings/functionParamsInterface";
 import kycRequired from "../checks/kycRequired";

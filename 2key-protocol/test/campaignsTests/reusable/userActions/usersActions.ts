@@ -1,4 +1,4 @@
-import {campaignUserActions} from "../../constants/constants";
+import {campaignUserActions} from "../../../constants/campaignUserActions";
 import TestStorage from "../../../helperClasses/TestStorage";
 import {
   campaignTypeToInstance,

@@ -1,10 +1,10 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
-import {daysToSeconds} from "../../../helpers/dates";
+import {daysToSeconds} from "../../../../helpers/dates";
 import {vestingSchemas} from "../../../../constants/smallConstants";
-import {calcUnlockingDates, calcWithdrawAmounts} from "../../../helpers/calcHelpers";
+import {calcUnlockingDates, calcWithdrawAmounts} from "../../../../helpers/calcHelpers";
 import {expect} from "chai";
-import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 import acquisitionOnly from "../checks/acquisitionOnly";
 

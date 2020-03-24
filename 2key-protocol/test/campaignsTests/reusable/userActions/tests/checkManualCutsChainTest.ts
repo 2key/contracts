@@ -1,7 +1,7 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import {campaignTypes, incentiveModels} from "../../../../constants/smallConstants";
-import {expectEqualNumbers, rewardCalc} from "../../../helpers/numberHelpers";
+import {expectEqualNumbers, rewardCalc} from "../../../../helpers/numberHelpers";
 
 export default function checkManualCutsChainTest(
   {

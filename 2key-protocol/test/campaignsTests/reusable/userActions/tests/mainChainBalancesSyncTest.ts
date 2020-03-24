@@ -1,7 +1,7 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import cpcOnly from "../checks/cpcOnly";
-import getTwoKeyEconomyAddress from "../../../helpers/getTwoKeyEconomyAddress";
+import getTwoKeyEconomyAddress from "../../../../helpers/getTwoKeyEconomyAddress";
 
 export default function mainChainBalancesSyncTest(
   {

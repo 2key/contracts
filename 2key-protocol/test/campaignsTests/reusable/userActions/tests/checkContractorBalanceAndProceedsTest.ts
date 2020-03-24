@@ -1,6 +1,6 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
-import {expectEqualNumbers} from "../../../helpers/numberHelpers";
+import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
 import TestDonationConversion from "../../../../helperClasses/TestDonationConversion";
 import TestAcquisitionConversion from "../../../../helperClasses/TestAcquisitionConversion";
 
