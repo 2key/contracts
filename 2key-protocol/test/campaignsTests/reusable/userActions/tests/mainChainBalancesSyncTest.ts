@@ -2,6 +2,7 @@ import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import cpcOnly from "../checks/cpcOnly";
 import getTwoKeyEconomyAddress from "../../../helpers/getTwoKeyEconomyAddress";
+import {expectEqualNumbers} from "../../../helpers/numberHelpers";
 
 export default function mainChainBalancesSyncTest(
   {
@@ -19,12 +20,14 @@ export default function mainChainBalancesSyncTest(
     const resp = await protocol.CPCCampaign.getInfluencersAndBalances(
       campaignAddress, 0, numberOfInfluencers
     );
-    const balanceBefore =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), address);
+    // @ts-ignore
+    const campaignPublicAddress = campaign.campaignAddressPublic;
+
+    const balanceBefore =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
 
     await protocol.Utils.getTransactionReceiptMined(
       await protocol.CPCCampaign.pushBalancesForInfluencers(
-        // @ts-ignore
-        campaign.campaignAddressPublic,
+        campaignPublicAddress,
         resp.influencers,
         resp.balances.map(balance => protocol.Utils.toWei(balance,'ether')),
         address
@@ -33,20 +36,18 @@ export default function mainChainBalancesSyncTest(
 
     await protocol.Utils.getTransactionReceiptMined(
       await protocol.CPCCampaign.distributeRewardsBetweenInfluencers(
-        // @ts-ignore
-        campaign.campaignAddressPublic,
+        campaignPublicAddress,
         resp.influencers,
         address,
       )
     );
 
-    const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), address);
+      const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
 
-console.log({balanceBefore, balanceAfter,
-  diff: balanceBefore - balanceAfter,
-  sum: resp.balances.reduce((accum, num) => {accum += num; return accum;}, 0)
-});
-    // TODO: add assertion sum(resp.balances) === balances diff
-    // use protocol.ERC20.getERC20Balance(invoiceToken, secondaryUserAddress)
+      expectEqualNumbers(
+          balanceBefore,
+          balanceAfter + resp.balances.reduce((accum, num) => {accum += num; return accum;}, 0)
+      );
+
   }).timeout(60000);
 }

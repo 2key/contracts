@@ -165,7 +165,7 @@ describe('CPC campaign', () => {
         printTestNumber();
         let maxNumberOfConversions = await twoKeyProtocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
         console.log(maxNumberOfConversions);
-        expect(maxNumberOfConversions).to.be.equal(100);
+        expect(maxNumberOfConversions).to.be.equal(98);
     }).timeout(TIMEOUT_LENGTH);
 
 

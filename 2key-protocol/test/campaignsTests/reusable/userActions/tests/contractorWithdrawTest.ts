@@ -38,6 +38,8 @@ export default function contractorWithdrawTest(
       const userDeptsBefore = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
 
       const balanceBefore = (await protocol.getBalance(address)).balance;
+
+
       const contractorBalanceBefore = await protocol[campaignContract].getContractorBalance(campaignAddress, address);
 
       await protocol.Utils.getTransactionReceiptMined(
