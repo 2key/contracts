@@ -196,7 +196,7 @@ library PriceDiscovery {
      *
      * @dev             All input values are in WEI units
      */
-    function buyTokens(
+    function buyTokensFromExchangeRealignPrice(
         uint amountOfUSDSpendingForBuyingTokens,
         uint tokenPriceBeforeBuying,
         uint totalAmountOfTokensInThePool,
