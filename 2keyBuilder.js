@@ -27,7 +27,8 @@ let deployment = process.env.FORCE_DEPLOYMENT || false;
 
 const {
     runProcess,
-    runDeployCampaignMigration,
+    runDeployTokenSellCampaignMigration,
+    runDeployDonationCampaignMigration,
     runUpdateMigration,
     rmDir,
     getGitBranch,
@@ -35,9 +36,7 @@ const {
     sortMechanism,
     ipfsAdd,
     ipfsGet,
-    runDeployPlasmaEventSourceMigration,
     runDeployCPCCampaignMigration,
-    runDeployFeeManagerMigration,
     runDeployCPCFirstTime,
     runTruffleCompile
 } = require('./helpers');
@@ -84,7 +83,8 @@ const getDiffBetweenLatestTags = async () => {
     let diffAllContracts = (await contractsGit.diffSummary(diffParams)).files.filter(item => item.file.endsWith('.sol')).map(item => item.file);
 
     let singletonsChanged = diffAllContracts.filter(item => item.includes('/singleton-contracts/') || item.includes('/token-pools')).map(item => item.split('/').pop().replace(".sol",""));
-    let campaignsChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/')|| item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+    let tokenSellCampaignChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/')|| item.includes('/campaign-mutual-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+    let donationCampaignChanged = diffAllContracts.filter(item => item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let cpcChanged = diffAllContracts.filter(item => item.includes('/cpc-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
 
     //Restore from archive the latest build so we can check which contracts are new
@@ -97,7 +97,7 @@ const getDiffBetweenLatestTags = async () => {
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
-    return [singletonsChanged, campaignsChanged, cpcChanged];
+    return [singletonsChanged, tokenSellCampaignChanged, donationCampaignChanged, cpcChanged];
 };
 
 const checkIfFileExistsInDir = (contractName) => {
@@ -371,7 +371,7 @@ async function deployUpgrade(networks, args) {
     const l = networks.length;
 
     await runTruffleCompile();
-    let [singletonsToBeUpgraded, campaignsToBeUpgraded, cpcChanged] = await getDiffBetweenLatestTags();
+    let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged] = await getDiffBetweenLatestTags();
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
@@ -403,11 +403,17 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        // if(campaignsToBeUpgraded.length > 0) {
-        //     if(networks[i].includes('public')) {
-        //         await runDeployCampaignMigration(networks[i]);
-        //     }
-        // }
+        if(tokenSellToBePatched.length > 0) {
+            if(networks[i].includes('public')) {
+                await runDeployTokenSellCampaignMigration(networks[i]);
+            }
+        }
+
+        if(donationToBePatched.length > 0) {
+            if(networks[i].includes('public')) {
+                await runDeployDonationCampaignMigration(networks[i]);
+            }
+        }
 
         if(cpcChanged.length > 0) {
             await runDeployCPCCampaignMigration(networks[i]);

@@ -70,7 +70,7 @@ const runProcess = (app, args) => new Promise((resolve, reject) => {
  * @param network
  * @returns {Promise<any>}
  */
-const runDeployCampaignMigration = (network) => new Promise(async(resolve, reject) => {
+const runDeployTokenSellCampaignMigration = (network) => new Promise(async(resolve, reject) => {
     try {
         await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '6', '--to', '6', '--network', network]);
         resolve(true);
@@ -80,6 +80,29 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
 });
 
 
+const runDeployDonationCampaignMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '7', '--to', '7', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+/**
+ * This is function to run when we want to update our cpc campaigns
+ * @param network
+ * @returns {Promise<any>}
+ */
+const runDeployCPCCampaignMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '8', '--to', '8', '--network', network, 'update_cpc']);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
 /**
  * This is function to run when we want to update our campaigns
  * @param network
@@ -87,7 +110,52 @@ const runDeployCampaignMigration = (network) => new Promise(async(resolve, rejec
  */
 const runDeployCPCFirstTime = (network) => new Promise(async(resolve, reject) => {
     try {
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '8', '--to', '8', '--network', network]);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '9', '--to', '9', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+/**
+ * If there's a need to update, we'll run this function
+ * @param network
+ * @param contractName
+ * @returns {Promise<any>}
+ */
+const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
+    try {
+        console.log("Running update migration");
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '10', '--to', '10', '--network', network, 'update', contractName]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+/**
+ *
+ * @param network
+ * @param contractName
+ * @returns {Promise<any>}
+ */
+const runDeployPlasmaEventSourceMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        console.log("Running update migration");
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '11', '--to', '11', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+
+const runDeployFeeManagerMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '12', '--to', '12', '--network', network]);
         resolve(true);
     } catch (e) {
         reject(e);
@@ -109,61 +177,7 @@ const runTruffleCompile = () => new Promise(async(resolve, reject) => {
     }
 });
 
-/**
- * This is function to run when we want to update our cpc campaigns
- * @param network
- * @returns {Promise<any>}
- */
-const runDeployCPCCampaignMigration = (network) => new Promise(async(resolve, reject) => {
-    try {
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '9', '--to', '9', '--network', network, 'update_cpc']);
-        resolve(true);
-    } catch (e) {
-        reject(e);
-    }
-});
 
-const runDeployFeeManagerMigration = (network) => new Promise(async(resolve, reject) => {
-    try {
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '11', '--to', '11', '--network', network]);
-        resolve(true);
-    } catch (e) {
-        reject(e);
-    }
-});
-
-/**
- * If there's a need to update, we'll run this function
- * @param network
- * @param contractName
- * @returns {Promise<any>}
- */
-const runUpdateMigration = (network, contractName) => new Promise(async(resolve,reject) => {
-    try {
-        console.log("Running update migration");
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '7', '--to', '7', '--network', network, 'update', contractName]);
-        resolve(true);
-    } catch (e) {
-        reject(e);
-    }
-});
-
-
-/**
- *
- * @param network
- * @param contractName
- * @returns {Promise<any>}
- */
-const runDeployPlasmaEventSourceMigration = (network) => new Promise(async(resolve, reject) => {
-    try {
-        console.log("Running update migration");
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '10', '--to', '10', '--network', network]);
-        resolve(true);
-    } catch (e) {
-        reject(e);
-    }
-});
 
 const checkArgumentsForUpdate = ((argumentsPassed) => {
     argumentsPassed.forEach((argument) => {
@@ -402,7 +416,8 @@ const ipfsAdd = (data, deployment) => new Promise((resolve, reject) => {
 module.exports = {
     incrementVersion,
     runProcess,
-    runDeployCampaignMigration: runDeployCampaignMigration,
+    runDeployTokenSellCampaignMigration,
+    runDeployDonationCampaignMigration,
     runUpdateMigration,
     rmDir,
     getGitBranch,
