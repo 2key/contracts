@@ -35,7 +35,6 @@ library PriceDiscovery {
     }
 
 
-
     /**
      * @notice          Function to calculate how many iterations to recompute price we need
      *
@@ -44,6 +43,9 @@ library PriceDiscovery {
      * @param           tokenPriceBeforeBuying is the price of the token when user expressed
      *                  a will to buy the tokens
      * @param           totalAmountOfTokensInThePool is the amount of the tokens that are currently present in the pool
+     *
+     * @dev             All input values are in WEI units
+     *
      * @return          tuple containing number of iterations and how many dollars will be spent per iteration
      */
     function calculateNumberOfIterationsNecessary(
@@ -55,16 +57,25 @@ library PriceDiscovery {
     pure
     returns (uint, uint)
     {
-        uint HUNDRED_WEI = 100*(10**18);
         uint ONE_WEI = 10**18;
+        uint HUNDRED_WEI = 100*(10**18);
 
         uint numberOfIterations = 1;
 
         if(amountOfUSDSpendingForBuyingTokens > HUNDRED_WEI) {
-            // Amount of tokens that user would receive in case he bought for the whole money at initial price
-            uint amountOfTokensToBeBought = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(tokenPriceBeforeBuying);
-            // Percentage of the current amount in the pool in tokens user is buying
-            uint percentageOfThePoolWei = amountOfTokensToBeBought.mul(HUNDRED_WEI).div(totalAmountOfTokensInThePool);
+            uint amountOfTokensToBeBought;
+            uint percentageOfThePoolWei;
+
+            /**
+             Function to calculate how many tokens will be bought and how much percentage is that
+             out of the current pool supply
+             */
+            (amountOfTokensToBeBought, percentageOfThePoolWei) = calculatePercentageOfThePoolWei(
+                amountOfUSDSpendingForBuyingTokens,
+                tokenPriceBeforeBuying,
+                totalAmountOfTokensInThePool
+            );
+
 
             if(percentageOfThePoolWei < ONE_WEI) {
                 // Case less than 1%
@@ -86,10 +97,23 @@ library PriceDiscovery {
     }
 
 
+    /**
+     * @notice          Function to calculate how many tokens would be bought in case the token price
+     *                  is static, and how many in percentage is that out of the pool amount
+     *
+     * @param           usdAmountSpendingToBuyTokens is the amount of dollars user is spending for
+     *                  buying tokens
+     * @param           tokenPriceBeforeBuying is the price of the token at the moment of
+     *                  purchase initialization
+     * @param           totalAmountOfTokensInThePool is the total amount of the tokens in the pool at
+     *                  the moment
+     *
+     * @dev             All input values are in WEI units
+     */
     function calculatePercentageOfThePoolWei(
-        uint amountSpendingToBuyTokens,
-        uint totalAmountOfTokensInThePool,
-        uint tokenPriceBeforeBuying
+        uint usdAmountSpendingToBuyTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool
     )
     public
     pure
@@ -97,7 +121,8 @@ library PriceDiscovery {
     {
         uint HUNDRED_WEI = 100*(10**18);
 
-        uint amountOfTokensToBeBought = amountSpendingToBuyTokens.mul(10**18).div(tokenPriceBeforeBuying);
+        // Amount of tokens that user would receive in case he bought for the whole money at initial price
+        uint amountOfTokensToBeBought = usdAmountSpendingToBuyTokens.mul(10**18).div(tokenPriceBeforeBuying);
         // Percentage of the current amount in the pool in tokens user is buying
         uint percentageOfThePoolWei = amountOfTokensToBeBought.mul(HUNDRED_WEI).div(totalAmountOfTokensInThePool);
 
@@ -105,9 +130,16 @@ library PriceDiscovery {
     }
 
 
-
     /**
+     * @notice          Function to calculate total tokens user will get and what will be the new
+     *                  price after his purchase of tokens is done
      *
+     * @param           amountOfUSDSpendingForBuyingTokens is the dollar amount user is spending
+     * @param           tokenPriceBeforeBuying is the price of the token before purchase
+     * @param           totalAmountOfTokensInThePool is the total amount of the tokens in the pool atm
+     * @param           poolInitialWorthUSD is how much all 2KEY tokens in the pool should be worth together
+     *
+     * @dev             All input values are in WEI units
      */
     function calculateTotalTokensUserIsGetting(
         uint amountOfUSDSpendingForBuyingTokens,
@@ -134,6 +166,7 @@ library PriceDiscovery {
         uint amountOfTokensReceived;
         uint newPrice = tokenPriceBeforeBuying;
 
+        // We're looping here without any issues because number of iterations is limited to maximal 100
         for(index = 0; index < numberOfIterations; index ++) {
             // Function which will calculate the amount of tokens we got for specific iteration
             // and also besides that what will be the new token price
@@ -151,7 +184,18 @@ library PriceDiscovery {
     }
 
 
-
+    /**
+     * @notice          Function which will be used always when we're buying tokens from upgradable exchange
+     *                  and will take care of calculations of tokens to be bought, average token price paid
+     *                  in this purchase, and what will be the new token price after purchase
+     *
+     * @param           amountOfUSDSpendingForBuyingTokens is the dollar amount user is spending
+     * @param           tokenPriceBeforeBuying is the price of the token before purchase
+     * @param           totalAmountOfTokensInThePool is the total amount of the tokens in the pool atm
+     * @param           poolInitialWorthUSD is how much all 2KEY tokens in the pool should be worth together
+     *
+     * @dev             All input values are in WEI units
+     */
     function buyTokens(
         uint amountOfUSDSpendingForBuyingTokens,
         uint tokenPriceBeforeBuying,
@@ -176,7 +220,6 @@ library PriceDiscovery {
 
         return (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice);
     }
-
 
 
     /**
