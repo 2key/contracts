@@ -74,6 +74,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         _;
     }
 
+    modifier onlyIfContractActiveInTermsOfTime {
+        require(campaignStartTime <= block.timestamp && block.timestamp <= campaignEndTime);
+        _;
+    }
 
     /**
      * @dev             Transfer tokens from one address to another
