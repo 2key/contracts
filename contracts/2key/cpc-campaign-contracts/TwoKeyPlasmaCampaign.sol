@@ -74,7 +74,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         _;
     }
 
-    modifier onlyIfContractActiveInTermsOfTime {
+    modifier onlyIfContractActiveInTermsOfTime {    // Modifier which requires that contract is active in terms of time
         require(campaignStartTime <= block.timestamp && block.timestamp <= campaignEndTime);
         _;
     }
@@ -292,6 +292,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(_address);
     }
 
+
     /**
      * @notice          Function to validate that contracts plasma and public are well mirrored
      * @dev             This function can be called only by maintainer
@@ -302,6 +303,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         isValidated = true;
     }
+
 
     function getReferrersBalancesAndTotalEarnings(
         address[] _referrerPlasmaList
@@ -321,6 +323,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
     }
+
 
     function updateRewardsBetweenInfluencers(
         address _converter,
@@ -367,6 +370,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return numberOfInfluencers;
     }
 
+
     function updateReferrerMappings(
         address referrerPlasma,
         uint reward,
@@ -381,6 +385,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
     }
 
+
     function checkIsActiveInfluencerAndAddToQueue(
         address _influencer
     )
@@ -392,6 +397,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             isActiveInfluencer[_influencer] = true;
         }
     }
+
 
     /**
      * @notice          Will be called only once in a lifetime, immediately after campaign on public network is deployed
@@ -434,7 +440,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-
     /**
      * @notice          Function to return referrers participated in the referral chain
      * @param           customer is the one who converted
@@ -459,7 +464,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         }
         return influencers;
     }
-
 
 
     /**
@@ -498,6 +502,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
 
+
     /**
      * @notice          Internal helper function to recover the signature
      */
@@ -527,6 +532,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).getModeratorFee();
     }
 
+
     /**
      * @notice          Function to get available bounty at the moment
      *                  Practically it just substracts bountyPaid from totalBounty pool
@@ -538,6 +544,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         return totalBountyForCampaign.sub(counters[6]);             // Total bounty - bounty PAID for executed conversions
     }
+
 
     /**
      * @notice          Function to get influencers addresses and balances
@@ -564,6 +571,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         return (influencers, balances);
     }
+
 
     /**
      * @notice          Function to get total bounty available and bounty per conversion
@@ -596,6 +604,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return false;
     }
 
+
     /**
      * @notice           Function to get ethereum address for passed plasma address
      * @param            _address is the address we're getting ETH address for
@@ -623,6 +632,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return counters;
     }
 
+
     /**
      * @notice          Function to get all active influencers
      */
@@ -633,6 +643,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         return activeInfluencers;
     }
+
 
     /**
      * @notice          Function to get number of active influencers
@@ -669,6 +680,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return (isReferrer, isAddressConverter, isJoined, ethereumOf(_address));
     }
 
+
     /**
      * @notice          Function to check if the address is the converter or not
      * @dev             If he has on-chain signature, that means he already converted
@@ -699,6 +711,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         isApprovedConverter[_converter] = true;
     }
 
+
     /**
      * @notice          Function to check the balance of the referrer
      * @param           _referrer we want to check earnings for
@@ -707,9 +720,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return referrerPlasma2Balances2key[_referrer];
     }
 
+
     /**
-     * @notice Function to update state of the contract that the bounty is withdrawn
-     * @dev Only contractor can update this function
+     * @notice          Function to update state of the contract that the bounty is withdrawn
+     * @dev             Only contractor can update this function
      */
     function updateContractorWithdrawnBounty()
     public
@@ -801,6 +815,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 //
 //        return proof;
 //    }
+
 
     /**
      * @notice          compute a merkle root of the active influencers and the amount they received.

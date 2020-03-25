@@ -13,7 +13,7 @@ const  campaignData: ICreateCPCTest = {
   moderator: "",
   incentiveModel: incentiveModels.vanillaAverage,
   campaignStartTime : 0,
-  campaignEndTime : 9884748832,
+  campaignEndTime : 1234567891011,
   // will be reduced to fee amount, for now it is 2%, so it will be 3*0.98 = 2.94 per conversion
   bountyPerConversionWei: 3,
   // Should fail on conversion stage

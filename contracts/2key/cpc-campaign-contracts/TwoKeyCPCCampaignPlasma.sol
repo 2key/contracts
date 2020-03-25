@@ -25,6 +25,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     Conversion [] conversions;          // Array of all conversions
 
+
     function setInitialParamsCPCCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
@@ -56,11 +57,18 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     }
 
 
+    /**
+     * @notice          Function to convert on the campaign, passing the signature
+     *
+     * @param           signature is the signature containing information about the link path
+     *                  across the web
+     */
     function convert(
         bytes signature
     )
     contractNotLocked
     isCampaignValidated
+    onlyIfContractActiveInTermsOfTime
     public
     {
         // Require that this is his first conversion
@@ -150,6 +158,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     }
 
 
+    /**
+     * @notice          Function to reject converter and his conversion
+     * @param           converter is the address of the converter
+     */
     function rejectConverterAndConversion(
         address converter
     )
@@ -175,6 +187,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         counters[4]++; //increase number of rejected conversions
     }
 
+    /**
+     * @notice          Function which will serve as a getter for conversion object
+     * @param           _conversionId is the id of the conversion
+     */
     function getConversion(
         uint _conversionId
     )
@@ -183,6 +199,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     returns (address, uint, uint, ConversionState)
     {
         Conversion memory c = conversions[_conversionId];
+
         return (
             c.converterPlasma,
             c.bountyPaid,
