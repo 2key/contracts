@@ -18,6 +18,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 	using SafeMath for *;
 
+
 	/**
 	 * Storage keys are stored on the top. Here they are in order to avoid any typos
 	 */
@@ -27,6 +28,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
 	string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
 	string constant _daiWithdrawnFromUpgradableExchange = "daiWithdrawnFromUpgradableExchange";
+	string constant _moderatorEarningsPerCampaign = "moderatorEarningsPerCampaign";
+
 
 	/**
 	 * Keys for the addresses we're accessing
@@ -40,15 +43,24 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 	bool initialized = false;
-	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; //Pointer to storage contract
 
 
-    /// @notice Modifier which throws if caller is not TwoKeyCongress
+	ITwoKeyAdminStorage public PROXY_STORAGE_CONTRACT; 			//Pointer to storage contract
+
+
+	/**
+	 * @notice 			Modifier which throws if caller is not TwoKeyCongress
+	 */
 	modifier onlyTwoKeyCongress {
 		require(msg.sender == getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyCongress));
 	    _;
 	}
 
+
+	/**
+	 * @notice 			Modifier which throws if the campaign contract sending request is not validated
+	 * 					by TwoKeyCampaignValidator contract
+	 */
 	modifier onlyAllowedContracts {
 		address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator);
 		require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
@@ -57,16 +69,20 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Function to set initial parameters in the contract including singletones
-     * @param _twoKeySingletonRegistry is the singletons registry contract address
-     * @param _proxyStorageContract is the address of proxy for storage for this contract
-     * @dev This function can be called only once, which will be done immediately after deployment.
+     * @notice 			Function to set initial parameters in the contract including singletones
+     *
+     * @param 			_twoKeySingletonRegistry is the singletons registry contract address
+     * @param 			_proxyStorageContract is the address of proxy for storage for this contract
+     *
+     * @dev 			This function can be called only once, which will be done immediately after deployment.
      */
     function setInitialParams(
 		address _twoKeySingletonRegistry,
 		address _proxyStorageContract,
 		uint _twoKeyTokenReleaseDate
-    ) external {
+    )
+	public
+	{
         require(initialized == false);
 
 		TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
@@ -74,18 +90,21 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 		setUint(_twoKeyIntegratorDefaultFeePercent,2);
 		setUint(_twoKeyNetworkTaxPercent,25);
-		setUint(_twoKeyTokenRate, 95);
 		setUint(_rewardReleaseAfter, _twoKeyTokenReleaseDate);
 
         initialized = true;
     }
 
 
+    /**
+     * @notice 			Function where only TwoKeyCongress can transfer ether to an address
+     *
+     * @dev 			We're recurring to address different from address 0 and value is in WEI
+     *
+     * @param 			to is representing receiver's address
+     * @param 			amount of ether to be transferred
 
-    /// @notice Function where only TwoKeyCongress can transfer ether to an address
-    /// @dev We're recurring to address different from address 0
-    /// @param to receiver's address
-    /// @param amount of ether to be transferred
+     */
 	function transferEtherByAdmins(
 		address to,
 		uint256 amount
@@ -98,10 +117,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
 	/**
-	 * @notice Function to forward call from congress to the Maintainers Registry and add core devs
-	 * @param _coreDevs is the array of core devs to be added to the system
+	 * @notice 			Function to forward call from congress to the Maintainers Registry and add core devs
+	 *
+	 * @param 			_coreDevs is the array of core devs to be added to the system
 	 */
 	function addCoreDevsToMaintainerRegistry(
 		address [] _coreDevs
@@ -114,10 +133,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
 	/**
-	 * @notice Function to forward call from congress to the Maintainers Registry and add maintainers
-	 * @param _maintainers is the array of core devs to be added to the system
+	 * @notice 			Function to forward call from congress to the Maintainers Registry and add maintainers
+	 *
+	 * @param 			_maintainers is the array of core devs to be added to the system
 	 */
 	function addMaintainersToMaintainersRegistry(
 		address [] _maintainers
@@ -130,10 +149,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
 	/**
-	 * @notice Function to forward call from congress to the Maintainers Registry and remove core devs
-	 * @param _coreDevs is the array of core devs to be removed from the system
+	 * @notice 			Function to forward call from congress to the Maintainers Registry and remove core devs
+	 *
+	 * @param 			_coreDevs is the array of core devs to be removed from the system
 	 */
 	function removeCoreDevsFromMaintainersRegistry(
 		address [] _coreDevs
@@ -146,10 +165,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
 	/**
-	 * @notice Function to forward call from congress to the Maintainers Registry and remove maintainers
-	 * @param _maintainers is the array of maintainers to be removed from the system
+	 * @notice 			Function to forward call from congress to the Maintainers Registry and remove maintainers
+	 *
+	 * @param 			_maintainers is the array of maintainers to be removed from the system
 	 */
 	function removeMaintainersFromMaintainersRegistry(
 		address [] _maintainers
@@ -163,7 +182,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 
-	/// @notice Function to freeze all transfers for 2KEY token
+	/**
+	 * @notice 			Function to freeze all transfers for 2KEY token
+	 *					Which means that no one transfer of ERC20 2KEY can be performed
+	 * @dev 			Restricted only to TwoKeyCongress contract
+	 */
 	function freezeTransfersInEconomy()
 	external
 	onlyTwoKeyCongress
@@ -173,8 +196,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
-	/// @notice Function to unfreeze all transfers for 2KEY token
+	/**
+	 * @notice 			Function to unfreeze all transfers for 2KEY token
+	 *
+	 * @dev 			Restricted only to TwoKeyCongress contract
+	 */
 	function unfreezeTransfersInEconomy()
 	external
 	onlyTwoKeyCongress
@@ -184,11 +210,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
-	/// @notice Function to transfer 2key tokens
-	/// @dev only TwoKeyCongress can call this function
-	/// @param _to is tokens receiver
-	/// @param _amount is the amount of tokens to be transferred
+	/**
+	 * @notice 			Function to transfer 2key tokens from the admin contract
+	 * @dev 			only TwoKeyCongress can call this function
+	 * @param 			_to is address representing tokens receiver
+	 * @param 			_amount is the amount of tokens to be transferred
+ 	 */
     function transfer2KeyTokens(
 		address _to,
 		uint256 _amount
@@ -202,9 +229,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return completed;
 	}
 
+
     /**
-     * @notice Function to withdraw collected ether from TwoKeyFeeManager contract
-     * and it can be done only when TwoKeyCongress does voting on that
+     * @notice 			Function to withdraw collected ether from TwoKeyFeeManager contract
+     * 					and it can be done only when TwoKeyCongress does voting on that
+     * @dev				Restricted only to TwoKeyCongress contract
      */
     function withdrawEtherCollectedFromFeeManager()
     public
@@ -214,6 +243,15 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
     }
 
+
+	/**
+	 * @notice 			Function to withdraw any ERC20 we have on TwoKeyUpgradableExchange contract
+	 *
+	 * @param 			_tokenAddress is the address of the ERC20 token we're willing to take
+	 * @param			_amountOfTokens is the amount of the tokens we're willing to withdraw
+	 *
+	 * @dev 			Restricted only to TwoKeyCongress contract
+	 */
 	function withdrawERC20FromUpgradableExchange(
 		address _tokenAddress,
 		uint _amountOfTokens
@@ -226,18 +264,22 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+	/**
+	 * @notice 			Function which will be used take the tokens from the campaign and distribute
+	 * 					them between itself and TwoKeyDeepFreezeTokenPool
+	 *
+	 * @param			amountOfTokens is the amount of the tokens which are for moderator rewards
+ 	 */
 	function updateReceivedTokensAsModerator(
 		uint amountOfTokens
 	)
 	public
 	onlyAllowedContracts
 	{
-
 		// Network fee which will be taken from moderator
 		uint networkFee = getDefaultNetworkTaxPercent();
 
 		uint moderatorTokens = amountOfTokens.mul(100 - networkFee).div(100);
-
 		bytes32 keyHashTotalRewards = keccak256(_rewardsReceivedAsModeratorTotal);
 		PROXY_STORAGE_CONTRACT.setUint(keyHashTotalRewards, moderatorTokens.add((PROXY_STORAGE_CONTRACT.getUint(keyHashTotalRewards))));
 
@@ -255,13 +297,23 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		//Transfer tokens to deep freeze token pool
 		IERC20(twoKeyEconomy).transfer(deepFreezeTokenPool, tokensForDeepFreezeTokenPool);
 
-//		//Update contract on receiving tokens
+		//Update contract on receiving tokens
 		ITwoKeyDeepFreezeTokenPool(deepFreezeTokenPool).updateReceivedTokensForSuccessfulConversions(tokensForDeepFreezeTokenPool, msg.sender);
+
+		// Compute the hash for the storage for moderator earnings per campaign
+		bytes32 keyHashEarningsPerCampaign = keccak256(_moderatorEarningsPerCampaign, msg.sender);
+		// Take the current earnings
+		uint currentEarningsForThisCampaign = PROXY_STORAGE_CONTRACT.getUint(keyHashEarningsPerCampaign);
+		// Increase them by earnings added now and store
+		PROXY_STORAGE_CONTRACT.setUint(keyHashEarningsPerCampaign, currentEarningsForThisCampaign.add(moderatorTokens));
 	}
 
 
-	/// @notice Getter for all integers we'd like to store
-	/// @param key is the key (var name)
+	/**
+	 * @notice 			Function to get uint from the storage
+	 *
+	 * @param 			key is the name of the key in the storages
+	 */
 	function getUint(
 		string key
 	)
@@ -274,9 +326,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 
-	/// @notice Setter for all integers we'd like to store
-	/// @param key is the key (var name)
-	/// @param value is the value of integer we'd like to store
+	/**
+	 * @notice 			Setter for all integers we'd like to store
+	 *
+	 * @param 			key is the key (var name)
+	 * @param 			value is the value of integer we'd like to store
+	 */
 	function setUint(
 		string key,
 		uint value
@@ -287,8 +342,26 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+	/**
+	 * @notice 			Getter for moderator earnings per campaign
+	 *
+	 * @param 			_campaignAddress is the address of the campaign we're searching for moderator earnings
+ 	 */
+	function getModeratorEarningsPerCampaign(
+		address _campaignAddress
+	)
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorEarningsPerCampaign, _campaignAddress));
+	}
 
-	/// @notice Getter function for TwoKeyRewardsReleaseDate
+
+	/**
+	 * @notice 			Function to return the release date when 2KEY token can be withdrawn from the
+	 * 					network
+	 */
 	function getTwoKeyRewardsReleaseDate()
 	external
 	view
@@ -299,7 +372,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 
-	/// @notice Getter function for TwoKeyIntegratorDefaultFeePercent
+	/**
+	 * @notice			Getter for default moderator percent he takes
+ 	 */
 	function getDefaultIntegratorFeePercent()
 	public
 	view
@@ -310,7 +385,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 
-	/// @notice Getter function for TwoKeyNetworkTaxPercent
+	/**
+	 * @notice 			Getter for network tax percent which is taken from moderator
+	 */
 	function getDefaultNetworkTaxPercent()
 	public
 	view
@@ -320,18 +397,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
-	/// @notice Getter function for TwoKeyTokenRate
-	function getTwoKeyTokenRate()
-	public
-	view
-	returns (uint)
-	{
-		return getUint(_twoKeyTokenRate);
-	}
-
-
-
+	/**
+	 * @notice			Setter in case TwoKeyCongress decides to change the release date
+	 */
 	function setNewTwoKeyRewardsReleaseDate(
 		uint256 newDate
 	)
@@ -342,7 +410,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-
+	/**
+	 * @notice			Setter in case TwoKeyCongress decides to change integrator fee percent
+	 */
 	function setDefaultIntegratorFeePercent(
 		uint newFeePercent
 	)
@@ -352,6 +422,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_twoKeyIntegratorDefaultFeePercent),newFeePercent);
 	}
 
+
+	/**
+	 * @notice 			Getter to check how many total tokens TwoKeyAdmin received as a moderator from
+	 *					various campaign contracts running on 2key.network
+	 */
 	function getAmountOfTokensReceivedAsModerator()
 	public
 	view
@@ -360,7 +435,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
 	}
 
-	/// Fallback function
+
+	/**
+	 * @notice Free ether is always accepted :)
+ 	 */
 	function()
 	external
 	payable
