@@ -59,6 +59,12 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     );
 
 
+    event ConversionRejected(
+        address campaignAddressPlasma,
+        uint conversionID,
+        uint statusCode
+    );
+
 
     event CPCCampaignCreated(
         address proxyCPCCampaignPlasma,
@@ -124,6 +130,20 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         emit ConversionExecuted(
             msg.sender,
             conversionID
+        );
+    }
+
+    function emitConversionRejectedEvent(
+        uint conversionID,
+        uint statusCode
+    )
+    public
+    onlyWhitelistedCampaigns
+    {
+        emit ConversionRejected(
+            msg.sender,
+            conversionID,
+            statusCode
         );
     }
 

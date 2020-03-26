@@ -163,7 +163,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
      * @param           converter is the address of the converter
      */
     function rejectConverterAndConversion(
-        address converter
+        address converter,
+        uint rejectionStatusCode
     )
     public
     contractNotLocked
@@ -185,6 +186,11 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         counters[2]++; //increase number of rejected converters
         counters[3]--; //reduce number of pending conversions
         counters[4]++; //increase number of rejected conversions
+
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionRejectedEvent(
+            conversionId,
+            rejectionStatusCode
+        );
     }
 
     /**
