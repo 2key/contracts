@@ -332,7 +332,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     view
     returns (uint,uint,uint,uint)
     {
-        //TODO: Here we might have a bug actually
         uint inventoryBalance = getTokenBalance(assetContractERC20);
         if(assetContractERC20 == twoKeyEconomy) {
             return (inventoryBalance, reservedAmountOfTokens, reservedAmount2keyForRewards, inventoryBalance);
