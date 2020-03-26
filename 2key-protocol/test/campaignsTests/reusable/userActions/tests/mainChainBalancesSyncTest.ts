@@ -42,7 +42,7 @@ export default function mainChainBalancesSyncTest(
       )
     );
 
-    const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), address);
+    const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
 
       expectEqualNumbers(
           balanceBefore,
