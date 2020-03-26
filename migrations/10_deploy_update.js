@@ -42,6 +42,7 @@ const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStora
 const TwoKeyPlasmaEventSourceStorage = artifacts.require('TwoKeyPlasmaEventSourceStorage');
 
 const Call = artifacts.require('Call');
+const PriceDiscovery = artifacts.require('PriceDiscovery');
 
 const { incrementVersion, getConfigForTheBranch, slack_message_proposal_created, } = require('../helpers');
 const { generateBytecodeForUpgrading } = require('../generateBytecode');
@@ -171,6 +172,11 @@ module.exports = async function deploy(deployer) {
 
 
     console.log(contractName);
+
+    if(contractName == "TwoKeyUpgradableExchange") {
+        await deployer.deploy(PriceDiscovery)
+            .then(deployer.link(PriceDiscovery, TwoKeyUpgradableExchange));
+    }
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
