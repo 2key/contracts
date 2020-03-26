@@ -208,7 +208,7 @@ module.exports = async function deploy(deployer) {
                     })
                 })
             )
-            .then(() => true);
+            .then(() => true));
     } else {
         deployer.deploy(contract)
             .then(() => contract.deployed()
