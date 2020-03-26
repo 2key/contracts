@@ -175,7 +175,8 @@ module.exports = async function deploy(deployer) {
 
     if(contractName == "TwoKeyUpgradableExchange") {
         await deployer.deploy(PriceDiscovery)
-            .then(deployer.link(PriceDiscovery, TwoKeyUpgradableExchange));
+            .then(() => deployer.link(PriceDiscovery, TwoKeyUpgradableExchange))
+            .then(() => true);
     }
     deployer.deploy(contract)
         .then(() => contract.deployed()
