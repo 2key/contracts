@@ -103,6 +103,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     /**
      * @notice          Function to approve converter and execute conversion, can be called once per converter
+     *
      * @param           converter is the plasma address of the converter
      */
     function approveConverterAndExecuteConversion(
@@ -160,7 +161,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
     /**
      * @notice          Function to reject converter and his conversion
+     *
      * @param           converter is the address of the converter
+     * @param           rejectionStatusCode is the status code why is converter rejected
      */
     function rejectConverterAndConversion(
         address converter,
