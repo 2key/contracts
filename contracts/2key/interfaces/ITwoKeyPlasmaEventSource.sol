@@ -7,4 +7,5 @@ contract ITwoKeyPlasmaEventSource {
     function emitConversionCreatedEvent(address campaignAddressPublic, uint conversionID, address contractor, address converter) public;
     function emitConversionExecutedEvent(uint conversionID) public;
     function emitConversionRejectedEvent(uint conversionID, uint statusCode) public;
+    function emitCPCCampaignMirrored(address proxyAddressPlasma, address proxyAddressPublic) public;
 }

@@ -112,6 +112,15 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
 
 
     /**
+     * @notice          Event emitted when CPC campaign is validated
+     */
+    event PlasmaMirrorCampaigns(
+        address proxyPlasmaAddress,
+        address proxyPublicAddress
+    );
+
+
+    /**
      * @notice          Modifier restricting calls only to TwoKeyPlasmaFactory contract
      */
     modifier onlyTwoKeyPlasmaFactory {
@@ -235,6 +244,26 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         emit CPCCampaignCreated(
             proxyCPCCampaignPlasma,
             contractorPlasma
+        );
+    }
+
+
+    /**
+     * @notice          Function to emit an event when CPC campaign is validated
+     *
+     * @param           proxyAddressPlasma is the plasma address of the campaign
+     * @param           proxyAddressPublic is the public address of the campaign
+     */
+    function emitCPCCampaignMirrored(
+        address proxyAddressPlasma,
+        address proxyAddressPublic
+    )
+    public
+    onlyWhitelistedCampaigns
+    {
+        emit PlasmaMirrorCampaigns(
+            proxyAddressPlasma,
+            proxyAddressPublic
         );
     }
 
