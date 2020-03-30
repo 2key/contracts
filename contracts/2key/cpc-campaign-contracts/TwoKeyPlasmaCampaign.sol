@@ -302,6 +302,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     onlyMaintainer
     {
         isValidated = true;
+        // Emit the event to link plasma and public for TheGraph
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitCPCCampaignMirrored(
+                address(this),
+                mirrorCampaignOnPublic
+            );
     }
 
 
