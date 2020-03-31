@@ -19,26 +19,25 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
 
-    /// @notice Event is emitted when a user's name is changed
-    event UserNameChanged(address owner, string name);
 
-
-    // Internal function to check if address is maintainer
-    function isMaintainer(address _caller) internal view returns (bool) {
-        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
-        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_caller);
-    }
+    event UserNameChanged(
+        address owner,
+        string name
+    );
 
 
     /**
-     * @notice Function which can be called only once
-     * used as a constructor
+     * @notice          Function which can be called only once
+     *                  used as a constructor
+     *
+     * @param           _twoKeySingletonesRegistry is the address of TwoKeySingletonsRegistry contract
+     * @param           _proxyStorage is the address of the proxy contract used as a storage
      */
     function setInitialParams(
         address _twoKeySingletonesRegistry,
         address _proxyStorage
     )
-    external
+    public
     {
         require(initialized == false);
 
@@ -49,134 +48,107 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     }
 
 
-
-    /// @notice Function where new name/address pair is added or an old address is updated with new name
-    /// @dev private function
-    /// @param _name is name of user
-    /// @param _sender is address of user
-    function addNameInternal(
-        string _name,
-        address _sender
+    /**
+     * @notice          Function which is called either during the registration or when user
+     *                  decides to change his username
+     *
+     * @param           _username is the new username user want's to set. Must be unique.
+     * @param           _userAddress is the address of the user who is this action being
+     *                  performed for.
+     *
+     */
+    function addOrChangeUsernameInternal(
+        string _username,
+        address _userAddress
     )
     internal
     {
-        bytes32 name = stringToBytes32(_name);
+        // Generate the name in the bytes
+        bytes32 usernameBytes32 = stringToBytes32(_username);
 
-        bytes32 keyHashUserNameToAddress = keccak256("username2currentAddress", name);
-        bytes32 keyHashAddressToUserName = keccak256("address2username", _sender);
+        bytes32 keyHashUserNameToAddress = keccak256("username2currentAddress", usernameBytes32);
+        bytes32 keyHashAddressToUserName = keccak256("address2username", _userAddress);
 
         // check if name is taken
         if (PROXY_STORAGE_CONTRACT.getAddress(keyHashUserNameToAddress) != address(0)) {
             revert();
         }
 
-        PROXY_STORAGE_CONTRACT.setString(keyHashAddressToUserName, _name);
-        PROXY_STORAGE_CONTRACT.setAddress(keyHashUserNameToAddress, _sender);
+        // Set mapping address => username
+        PROXY_STORAGE_CONTRACT.setString(keyHashAddressToUserName, _username);
 
-        emit UserNameChanged(_sender, _name);
+        // Set mapping username => address
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashUserNameToAddress, _userAddress);
+
+        // Emit event that username is added or changed
+        emit UserNameChanged(_userAddress, _username);
     }
+
 
     /**
-     * @notice Function to concat this 2 functions at once
+     * @notice          Function where maintainer can register user
+     *
+     * @param           _username is the username of the user
+     * @param           _userAddress is the address of the user
+     * @param           _fullName is the full name of the user
+     * @param           _email is the email address of the user
+     * @param           signature is the message user signed with his wallet
      */
-    function addNameAndSetWalletName(
-        string _name,
-        address _sender,
-        string _fullName,
-        string _email,
-        string _username_walletName,
-        bytes _signatureName,
-        bytes _signatureWalletName
-    )
-    public
-    onlyMaintainer
-    {
-        addName(_name, _sender, _fullName, _email, _signatureName);
-        setWalletName(_name, _sender, _username_walletName, _signatureWalletName);
-    }
-
-    /// @notice Function where only admin can add a name - address pair
-    /// @param _name is name of user
-    /// @param _sender is address of user
     function addName(
-        string _name,
-        address _sender,
+        string _username,
+        address _userAddress,
         string _fullName,
         string _email,
         bytes signature
     )
-    public
+    internal
     {
-        require(isMaintainer(msg.sender)== true || msg.sender == address(this));
-
-        string memory concatenatedValues = strConcat(_name,_fullName,_email);
+        // Concat the arguments
+        string memory concatenatedValues = strConcat(_username, _fullName, _email);
+        // Generate hash
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
             keccak256(abi.encodePacked(concatenatedValues))));
-        address message_signer = Call.recoverHash(hash, signature, 0);
-        require(message_signer == _sender);
-        bytes32 keyHashUsername = keccak256("addressToUserData", "username", _sender);
-        bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _sender);
-        bytes32 keyHashEmail = keccak256("addressToUserData", "email", _sender);
 
-        PROXY_STORAGE_CONTRACT.setString(keyHashUsername, _name);
+        // Take the signer of the message
+        address message_signer = Call.recoverHash(hash, signature, 0);
+
+        // Assert that the message signer is the _sender in the arguments
+        require(message_signer == _userAddress);
+
+        // Generate the keys for the storage contract
+        bytes32 keyHashUsername = keccak256("addressToUserData", "username", _userAddress);
+        bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _userAddress);
+        bytes32 keyHashEmail = keccak256("addressToUserData", "email", _userAddress);
+
+        // Set the values
+        PROXY_STORAGE_CONTRACT.setString(keyHashUsername, _username);
         PROXY_STORAGE_CONTRACT.setString(keyHashFullName, _fullName);
         PROXY_STORAGE_CONTRACT.setString(keyHashEmail, _email);
 
-        addNameInternal(_name, _sender);
+
+        addOrChangeUsernameInternal(_username, _userAddress);
     }
 
-    /// @notice Add signed name
-    /// @param _name is the name
-    /// @param external_sig is the external signature
-    function addNameSigned(
-        string _name,
-        bytes external_sig
-    )
-    public
-    {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
-            keccak256(abi.encodePacked(_name))));
-        address eth_address = Call.recoverHash(hash,external_sig,0);
-        require (msg.sender == eth_address || isMaintainer(msg.sender) == true, "only maintainer or user can change name");
-        addNameInternal(_name, eth_address);
-    }
-
-    function setNoteInternal(
-        bytes note,
-        address me
-    )
-    private
-    {
-        bytes32 keyHashNotes = keccak256("notes", me);
-        PROXY_STORAGE_CONTRACT.setBytes(keyHashNotes, note);
-    }
-
-    function setNoteByUser(
-        bytes note
-    )
-    public
-    {
-        // note is a message you can store with sig. For example it could be the secret you used encrypted by you
-        setNoteInternal(note, msg.sender);
-    }
-
-
-    /// @notice Function where TwoKeyMaintainer can add walletname to address
-    /// @param username is the username of the user we want to update map for
-    /// @param _address is the address of the user we want to update map for
-    /// @param _username_walletName is the concatenated username + '_' + walletName, since sending from trusted provider no need to validate
+    /**
+     * @notice          Function where maintainer can add walletName to address
+     *
+     * @param           username is the username of the user we want to update wallet name for
+     * @param           _address is the address of the user we want to update wallet name for
+     * @param           _username_walletName is the concatenated username + '_' + walletName,
+     *                  since sending from trusted provider no need to validate
+     * @param           signature is the sig where user ad
+     */
     function setWalletName(
         string memory username,
         address _address,
         string memory _username_walletName,
         bytes signature
     )
-    public
+    internal
     {
-        require(isMaintainer(msg.sender) == true || msg.sender == address(this));
-        require(_address != address(0));
         bytes32 usernameHex = stringToBytes32(username);
         address usersAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", usernameHex));
+
         require(usersAddress == _address); // validating that username exists
 
         string memory concatenatedValues = strConcat(username,_username_walletName,"");
@@ -194,77 +166,173 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setAddress(keyHashWalletTag2Address, _address);
     }
 
-    function addPlasma2EthereumInternal(
-        bytes sig,
-        address eth_address
-    )
-    private
-    {
-        // add an entry connecting msg.sender to the ethereum address that was used to sign sig.
-        // see setup_demo.js on how to generate sig
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(eth_address))));
-        address plasma_address = Call.recoverHash(hash,sig,0);
-        bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasma_address);
-        bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", eth_address);
 
-
-        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == eth_address, "cant change eth=>plasma");
-        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == plasma_address);
-
-        PROXY_STORAGE_CONTRACT.setAddress(keyHashPlasmaToEthereum, eth_address);
-        PROXY_STORAGE_CONTRACT.setAddress(keyHashEthereumToPlasma, plasma_address);
-    }
-
-    function addPlasma2EthereumByUser(
-        bytes sig
-    )
-    public
-    {
-        addPlasma2EthereumInternal(sig, msg.sender);
-    }
-
-    function setPlasma2EthereumAndNoteSigned(
-        bytes sig,
+    /**
+     * @notice          Internal function for setting note
+     *
+     * @param           note is the note user wants to set
+     * @param           userAddress is the address of the user
+     */
+    function setNoteInternal(
         bytes note,
-        bytes external_sig
+        address userAddress
+    )
+    internal
+    {
+        bytes32 keyHashNotes = keccak256("notes", userAddress);
+        PROXY_STORAGE_CONTRACT.setBytes(keyHashNotes, note);
+    }
+
+
+    /**
+     * @notice          Function to map plasma and ethereum addresses for the user
+     *
+     * @param           signature is the message user signed so we can take his plasma_address
+     * @param           ethereumAddress is the ethereum address of the user who signed the message
+     *
+     */
+    function addPlasma2EthereumInternal(
+        bytes signature,
+        address ethereumAddress
+    )
+    internal
+    {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(ethereumAddress))));
+        address plasmaAddress = Call.recoverHash(hash,signature,0);
+
+        bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasmaAddress);
+        bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", ethereumAddress);
+
+
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == ethereumAddress, "cant change eth=>plasma");
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == plasmaAddress);
+
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashPlasmaToEthereum, ethereumAddress);
+        PROXY_STORAGE_CONTRACT.setAddress(keyHashEthereumToPlasma, plasmaAddress);
+    }
+
+    /**
+     * @notice          Function concatenating calls for both addName and setWalletName
+     *
+     * @param           _username is the username user want's to set
+     * @param           _userAddress is the address of the user
+     * @param           _fullName is users full name
+     * @param           _email is the email address of the user
+     * @param           _username_walletName is the concatenated username and wallet name
+     * @param           _signatureUsername is the signature for name
+     * @param           _signatureWalletName is the signature for wallet name
+     *
+     */
+    function addNameAndSetWalletName(
+        string _username,
+        address _userAddress,
+        string _fullName,
+        string _email,
+        string _username_walletName,
+        bytes _signatureUsername,
+        bytes _signatureWalletName
     )
     public
+    onlyMaintainer
+    {
+        addName(_username, _userAddress, _fullName, _email, _signatureUsername);
+        setWalletName(_username, _userAddress, _username_walletName, _signatureWalletName);
+    }
+
+
+    /**
+     * @notice          Function where username can be changed
+     *
+     * @param           newUsername is the new username user wants to add
+     * @param           userAddress is the ethereum address of the user
+     * @param           signature is the signature of the user
+     */
+    function changeUsername(
+        string newUsername,
+        address userAddress,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        // Generate hash
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+            keccak256(abi.encodePacked(newUsername))));
+
+        // Take the signer of the message
+        address messageSigner = Call.recoverHash(hash, signature, 0);
+
+        // Assert that the message signer is the _sender in the arguments
+        require(messageSigner == userAddress);
+
+        // Get the storage key for username in structure address => userData
+        bytes32 keyHashUsername = keccak256("addressToUserData", "username", userAddress);
+
+        // Set new username
+        PROXY_STORAGE_CONTRACT.setString(keyHashUsername, newUsername);
+
+        addOrChangeUsernameInternal(newUsername, userAddress);
+    }
+
+
+    /**
+     * @notice          Function to link plasma and ethereum addresses, and set the note for the user
+     *
+     * @param           signature is the signature containing various information
+     * @param           note is the note user wants to set
+     * @param           externalSignature is the external signature user created
+     */
+    function setPlasma2EthereumAndNoteSigned(
+        bytes signature,
+        bytes note,
+        bytes externalSignature
+    )
+    public
+    onlyMaintainer
     {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
-            keccak256(abi.encodePacked(sig,note))));
-        address eth_address = Call.recoverHash(hash,external_sig,0);
-        require (msg.sender == eth_address || isMaintainer(msg.sender), "only maintainer or user can change ethereum-plasma");
-        addPlasma2EthereumInternal(sig, eth_address);
-        setNoteInternal(note, eth_address);
+            keccak256(abi.encodePacked(signature,note))));
+
+        address ethereumAddress = Call.recoverHash(hash,externalSignature,0);
+
+        require(ethereumAddress != address(0));
+
+        // Link plasma 2 ethereum
+        addPlasma2EthereumInternal(externalSignature, ethereumAddress);
+        // Set note
+        setNoteInternal(note, ethereumAddress);
     }
 
-    /// View function - doesn't cost any gas to be executed
-    /// @notice Function to fetch address of the user that corresponds to given name
-    /// @param _name is name of user
-    /// @return address of the user as type address
+
+    /**
+     * @notice          Function to read from mapping username => address
+     *
+     * @param           _username is the username of the user
+     */
     function getUserName2UserAddress(
-        string _name
+        string _username
     )
-    external
+    public
     view
     returns (address)
     {
-        bytes32 name = stringToBytes32(_name);
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", name));
+        bytes32 usernameBytes = stringToBytes32(_username);
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", usernameBytes));
     }
 
-    /// View function - doesn't cost any gas to be executed
-    /// @notice Function to fetch name that corresponds to the address
-    /// @param _sender is address of user
-    /// @return name of the user as type string
+    /**
+     * @notice          Function to read mapping address => username
+     *
+     * @param           _userAddress is the address of the user
+     */
     function getUserAddress2UserName(
-        address _sender
+        address _userAddress
     )
-    external
+    public
     view
     returns (string)
     {
-        return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _sender));
+        return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _userAddress));
     }
 
 //    /**
@@ -301,82 +369,88 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Reading from mapping ethereum 2 plasma
-     * @param plasma is the plasma address we're searching eth address for
-     * @return ethereum address if exist otherwise 0x0 (address(0))
+     * @notice          Function to read from the mapping plasma=>ethereum
+     *
+     * @param           plasmaAddress is the plasma address we're searching eth address for
      */
     function getPlasmaToEthereum(
-        address plasma
+        address plasmaAddress
     )
     public
     view
     returns (address)
     {
-        bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasma);
-        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum);
-        if(ethereum!= address(0)) {
-            return ethereum;
-        }
-        return plasma;
+        bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasmaAddress);
+        address ethereumAddress = PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum);
+
+        return ethereumAddress != address(0) ? ethereumAddress : plasmaAddress;
     }
 
     /**
-     * @notice Reading from mapping plasma 2 ethereum
-     * @param ethereum is the ethereum address we're searching plasma address for
-     * @return plasma address if exist otherwise 0x0 (address(0))
+     * @notice          Function to read from the mapping ethereum => plasma
+     *
+     * @param           ethereumAddress is the ethereum address we're searching plasma address for
+     *
+     * @return          plasma address if exist otherwise 0x0 (address(0))
      */
     function getEthereumToPlasma(
-        address ethereum
+        address ethereumAddress
     )
     public
     view
     returns (address)
     {
-        bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", ethereum);
-        address plasma = PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma);
-        if(plasma != address(0)) {
-            return plasma;
-        }
-        return ethereum;
+        bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", ethereumAddress);
+        address plasmaAddress = PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma);
+
+        return plasmaAddress != address(0) ? plasmaAddress : ethereumAddress;
     }
 
 
     /**
-     * @notice Function to check if the user exists
-     * @param _userAddress is the address of the user
-     * @return true if exists otherwise false
+     * @notice          Function to check if the user exists
+     *
+     * @param           _userAddress is the address of the user
+     *
+     * @return          true if exists otherwise false
      */
     function checkIfUserExists(
         address _userAddress
     )
-    external
+    public
     view
     returns (bool)
     {
         string memory username = PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", _userAddress));
-        bytes memory tempEmptyStringTest = bytes(username);
+        bytes memory usernameInBytes = bytes(username);
         bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", _userAddress);
         address plasma = PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma);
-        //notes[_userAddress].length == 0
         bytes memory savedNotes = PROXY_STORAGE_CONTRACT.getBytes(keccak256("notes", _userAddress));
         bytes32 walletTag = PROXY_STORAGE_CONTRACT.getBytes32(keccak256("address2walletTag", _userAddress));
-        if(tempEmptyStringTest.length == 0 || walletTag == 0 || plasma == address(0) || savedNotes.length == 0) {
+        if(usernameInBytes.length == 0 || walletTag == 0 || plasma == address(0) || savedNotes.length == 0) {
             return false;
         }
         return true;
     }
 
 
+    /**
+     * @notice          Function to get user data
+     *
+     * @param           _userAddress is the ethereum address of the user
+     */
     function getUserData(
-        address _user
+        address _userAddress
     )
-    external
+    public
     view
     returns (bytes)
     {
-        bytes32 keyHashUsername = keccak256("addressToUserData", "username", _user);
-        bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _user);
-        bytes32 keyHashEmail = keccak256("addressToUserData", "email", _user);
+        //Generate the keys for the storage
+
+        bytes32 keyHashUsername = keccak256("addressToUserData", "username", _userAddress);
+        bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _userAddress);
+        bytes32 keyHashEmail = keccak256("addressToUserData", "email", _userAddress);
 
 
         bytes32 username = stringToBytes32(PROXY_STORAGE_CONTRACT.getString(keyHashUsername));
@@ -386,6 +460,12 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return (abi.encodePacked(username, fullName, email));
     }
 
+
+    /**
+     * @notice          Function to get the notes
+     *
+     * @param           keyAddress is the address of the key for the storage
+     */
     function notes(
         address keyAddress
     )
@@ -396,6 +476,12 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return PROXY_STORAGE_CONTRACT.getBytes(keccak256("notes", keyAddress));
     }
 
+
+    /**
+     * @notice          Function to read from the mapping userAddress => walletTag
+     *
+     * @param           keyAddress is the address user is searching wallet tag for
+     */
     function address2walletTag(
         address keyAddress
     )
@@ -406,6 +492,12 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return PROXY_STORAGE_CONTRACT.getBytes32(keccak256("address2walletTag", keyAddress));
     }
 
+
+    /**
+     * @notice          Function to read from the mapping walletTag => userAddress
+     *
+     * @param           walletTag is the tag we wan't to get mapped address for
+     */
     function walletTag2address(
         bytes32 walletTag
     )
@@ -416,6 +508,12 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256("walletTag2address", walletTag));
     }
 
+
+    /**
+     * @notice          Function to read from the mapping userAddress => username
+     *
+     * @param           keyAddress is the address we use as the key
+     */
     function address2username(
         address keyAddress
     )
@@ -426,6 +524,12 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", keyAddress));
     }
 
+
+    /**
+     * @notice          Function to read from the mapping username => currentAddress
+     *
+     * @param           _username is the hex username we want to get address for
+     */
     function username2currentAddress(
         bytes32 _username
     )
@@ -435,7 +539,5 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", _username));
     }
-
-
 
 }

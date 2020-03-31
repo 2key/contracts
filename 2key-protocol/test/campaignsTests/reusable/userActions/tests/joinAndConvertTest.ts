@@ -79,6 +79,7 @@ export default function joinAndConvertTest(
         campaignAddress,
         address
       );
+      
       const conversionIds = await protocol[campaignContract].getConverterConversionIds(
         campaignAddress, address, address,
       );
