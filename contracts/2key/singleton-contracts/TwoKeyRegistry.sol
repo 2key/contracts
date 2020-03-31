@@ -298,7 +298,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         require(ethereumAddress != address(0));
 
         // Link plasma 2 ethereum
-        addPlasma2EthereumInternal(externalSignature, ethereumAddress);
+        addPlasma2EthereumInternal(signature, ethereumAddress);
         // Set note
         setNoteInternal(note, ethereumAddress);
     }
