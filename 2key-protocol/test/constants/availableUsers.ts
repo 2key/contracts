@@ -14,6 +14,7 @@ const aydnep2 = web3Switcher.aydnep2();
 const test = web3Switcher.test();
 const buyer = web3Switcher.buyer();
 const guest = web3Switcher.guest();
+const nikola = web3Switcher.nikola();
 
 export const userIds = {
   deployer: 'deployer',
@@ -27,6 +28,7 @@ export const userIds = {
   test: 'test',
   buyer: 'buyer', // maintainer
   guest: 'guest',
+  nikola: 'nikola'
 };
 
 const availableUsers = {
@@ -117,7 +119,15 @@ const availableUsers = {
     walletname: 'guest-wallet',
     web3: guest,
     protocol: getTwoKeyProtocol(guest.web3, guest.mnemonic),
-  }
+  },
+  [userIds.nikola]: {
+    name: 'nikola',
+    email: 'nikola@example.com',
+    fullname: 'nikola madjarevic',
+    walletname: 'nikola-wallet',
+    web3: nikola,
+    protocol: getTwoKeyProtocol(nikola.web3, nikola.mnemonic)
+  },
 };
 
 export default availableUsers;

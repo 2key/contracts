@@ -1,8 +1,8 @@
 import '../../constants/polifils';
 import registerUserFromBackend, {IRegistryData} from "../../helpers/_registerUserFromBackend";
 import availableUsersInitial, {userIds} from "../../constants/availableUsers";
-import {generatePlasmaFromMnemonic} from "../../helpers/_web3";
 import {registrationDebt} from "../../constants/smallConstants";
+import {expectEqualStrings} from "../../helpers/stringHelpers";
 
 const TIMEOUT_LENGTH = 60000;
 
@@ -95,3 +95,70 @@ describe('Setup of users data', async () => {
      */
   }).timeout(TIMEOUT_LENGTH);
 });
+
+let signature;
+let userAddress;
+let newUsername;
+describe('Should generate signature to change username', async() => {
+  await it('should generate signature to change username for Nikola user', async() => {
+      let {protocol, web3: {address, mnemonic}} = availableUsers[userIds.nikola];
+      try {
+        newUsername = Math.random().toString(36).substr(2, 5);
+        userAddress = address;
+        signature = await protocol.Registry.signNewUsername2Registry(address, newUsername);
+      } catch (error) {
+          if (error.message !== 'gas required exceeds allowance or always failing transaction') {
+              throw error;
+          }
+          console.log('\x1b[31m', 'Probably test has been already run after latest deploy');
+      }
+  }).timeout(TIMEOUT_LENGTH);
+});
+
+describe('Should change username from maintainer on public', async() => {
+  await it('should change username from the maintainer address for Nikola user on PUBLIC network', async() => {
+      const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.deployer];
+      try {
+
+          let oldUsername = await protocol.Registry.getRegisteredNameForAddress(userAddress);
+
+          let txHash = await protocol.Registry.changeUsername(newUsername, userAddress, signature, address)
+          console.log(txHash);
+          await protocol.Utils.getTransactionReceiptMined(txHash);
+
+          let mappingForOldUsername = await protocol.Registry.getRegisteredAddressForName(oldUsername);
+
+          let username = await protocol.Registry.getRegisteredNameForAddress(userAddress);
+          let addressTakenFromMapping = await protocol.Registry.getRegisteredAddressForName(newUsername);
+
+          expectEqualStrings(mappingForOldUsername,"");
+          expectEqualStrings(username, newUsername);
+          expectEqualStrings(userAddress, addressTakenFromMapping);
+      } catch (error) {
+          console.log(error);
+      }
+  }).timeout(TIMEOUT_LENGTH);
+});
+
+describe('Should change username from maintainer on private', async() => {
+  await it('should change username from the maintainer address for Nikola user on PRIVATE network', async() => {
+      const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.buyer];
+      try {
+            await protocol.PlasmaEvents.changeUsername(newUsername, userAddress, signature, protocol.plasmaAddress);
+      } catch (error) {
+          console.log('Error: ',error);
+      }
+  }).timeout(TIMEOUT_LENGTH);
+})
+
+
+
+
+
+
+
+
+
+
+
+

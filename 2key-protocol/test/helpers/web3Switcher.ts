@@ -15,6 +15,7 @@ const web3Switcher = {
   test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
   buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrls),
   guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrls),
+  nikola: () => createWeb3(env.MNEMONIC_NIKOLA,rpcUrls)
 };
 
 export default web3Switcher;

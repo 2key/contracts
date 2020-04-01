@@ -104,6 +104,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
         require (signature.length == 65);
+
         address plasma = Call.recoverHash(hash,signature,0);
         require(plasma == plasmaAddress);
 
@@ -165,6 +166,12 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         require(messageSigner == userPublicAddress);
 
         address plasmaAddress = ethereum2plasma(userPublicAddress);
+
+        // Get current username for this user
+        string memory currentUsername = getAddressToUsername(plasmaAddress);
+
+        // Delete previous username mapping
+        PROXY_STORAGE_CONTRACT.deleteAddress(keccak256(_usernameToAddress, currentUsername));
 
         require(getUsernameToAddress(newUsername) == address(0));
 

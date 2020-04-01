@@ -67,6 +67,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         // Generate the name in the bytes
         bytes32 usernameBytes32 = stringToBytes32(_username);
 
+        // Create key hashes for mappings for username2currentAddress and address2username
         bytes32 keyHashUserNameToAddress = keccak256("username2currentAddress", usernameBytes32);
         bytes32 keyHashAddressToUserName = keccak256("address2username", _userAddress);
 
@@ -263,6 +264,12 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         // Assert that the message signer is the _sender in the arguments
         require(messageSigner == userPublicAddress);
 
+        // Get current username which is allocated to this address
+        string memory currentUsernameHex = address2username(userPublicAddress);
+
+        // Delete current username=>address mapping
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256("username2currentAddress", currentUsernameHex),address(0));
+
         // Get the storage key for username in structure address => userData
         bytes32 keyHashUsername = keccak256("addressToUserData", "username", userPublicAddress);
 
@@ -324,6 +331,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         bytes32 usernameBytes = stringToBytes32(_username);
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", usernameBytes));
     }
+
 
     /**
      * @notice          Function to read mapping address => username
