@@ -24,8 +24,6 @@ export default function checkStatisticTest(
     );
     const {isJoined, converterState, tokensBought} = stats;
 
-    console.log('Converter state is: ' + converterState);
-
     expect(converterState).to.be
       .eq(
         user.status

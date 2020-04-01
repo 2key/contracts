@@ -37,10 +37,11 @@ export default function contractorWithdrawTest(
       const {campaignAddress} = storage;
       const userDeptsBefore = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
 
+
       const balanceBefore = (await protocol.getBalance(address)).balance;
 
-
       const contractorBalanceBefore = await protocol[campaignContract].getContractorBalance(campaignAddress, address);
+
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol[campaignContract].contractorWithdraw(campaignAddress, address)
@@ -48,7 +49,9 @@ export default function contractorWithdrawTest(
 
       const contractorBalance = await protocol[campaignContract].getContractorBalance(campaignAddress, address);
 
+
       const balanceAfter = (await protocol.getBalance(address)).balance;
+
 
       if (userDeptsBefore > 0) {
         const userDeptsAfter = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
