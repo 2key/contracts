@@ -119,12 +119,9 @@ describe('Should change username from maintainer on public', async() => {
   await it('should change username from the maintainer address for Nikola user on PUBLIC network', async() => {
       const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.deployer];
       try {
-
           let oldUsername = await protocol.Registry.getRegisteredNameForAddress(userAddress);
-          console.log('oldUsername',oldUsername);
 
           let txHash = await protocol.Registry.changeUsername(newUsername, userAddress, signature, address)
-          console.log(txHash);
           await protocol.Utils.getTransactionReceiptMined(txHash);
 
           let mappingForOldUsername = await protocol.Registry.getRegisteredAddressForName(oldUsername);
@@ -132,7 +129,7 @@ describe('Should change username from maintainer on public', async() => {
           let username = await protocol.Registry.getRegisteredNameForAddress(userAddress);
           let addressTakenFromMapping = await protocol.Registry.getRegisteredAddressForName(newUsername);
 
-          expectEqualStrings(mappingForOldUsername,"");
+          expectEqualStrings(mappingForOldUsername,"0x0000000000000000000000000000000000000000");
           expectEqualStrings(username, newUsername);
           expectEqualStrings(userAddress, addressTakenFromMapping);
       } catch (error) {
