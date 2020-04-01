@@ -9,6 +9,11 @@ import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 
+/**
+ * @title           TwoKeyRegistry contract which is used for users registration
+ * @notice          Completely managed by trusted maintainers
+ * @author          Nikola Madjarevic (@madjarevicn)
+ */
 contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
     using Call for *;
