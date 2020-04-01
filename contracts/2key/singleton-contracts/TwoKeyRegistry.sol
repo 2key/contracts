@@ -25,10 +25,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
 
 
-    event UserNameChanged(
-        address owner,
-        string name
-    );
 
 
     /**
@@ -84,9 +80,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
         // Set mapping username => address
         PROXY_STORAGE_CONTRACT.setAddress(keyHashUserNameToAddress, _userAddress);
-
-        // Emit event that username is added or changed
-        emit UserNameChanged(_userAddress, _username);
     }
 
 
@@ -249,12 +242,12 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
      * @notice          Function where username can be changed
      *
      * @param           newUsername is the new username user wants to add
-     * @param           userAddress is the ethereum address of the user
+     * @param           userPublicAddress is the ethereum address of the user
      * @param           signature is the signature of the user
      */
     function changeUsername(
         string newUsername,
-        address userAddress,
+        address userPublicAddress,
         bytes signature
     )
     public
@@ -268,15 +261,22 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         address messageSigner = Call.recoverHash(hash, signature, 0);
 
         // Assert that the message signer is the _sender in the arguments
-        require(messageSigner == userAddress);
+        require(messageSigner == userPublicAddress);
 
         // Get the storage key for username in structure address => userData
-        bytes32 keyHashUsername = keccak256("addressToUserData", "username", userAddress);
+        bytes32 keyHashUsername = keccak256("addressToUserData", "username", userPublicAddress);
 
         // Set new username
         PROXY_STORAGE_CONTRACT.setString(keyHashUsername, newUsername);
 
-        addOrChangeUsernameInternal(newUsername, userAddress);
+        addOrChangeUsernameInternal(newUsername, userPublicAddress);
+
+        // Emit event on TwoKeyEventSource that the username is changed
+        ITwoKeyEventSourceEvents(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+            .emitHandleChangedEvent(
+                getEthereumToPlasma(userPublicAddress),
+                newUsername
+            );
     }
 
 

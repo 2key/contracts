@@ -63,5 +63,11 @@ contract ITwoKeyEventSourceEvents {
     external;
 
 
+    function emitHandleChangedEvent(
+        address _userPlasmaAddress,
+        string _newHandle
+    )
+    public;
+
 
 }

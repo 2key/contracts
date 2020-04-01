@@ -205,6 +205,10 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint amountOfTokens
     );
 
+    event HandleChanged(
+        address userPlasmaAddress,
+        string newHandle
+    );
 
 
     /**
@@ -574,6 +578,21 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     onlyAllowedContracts
     {
         emit TokenWithdrawnFromPurchasesHandler(_campaignAddress, _conversionID, _tokensAmountWithdrawn);
+    }
+
+
+    function emitHandleChangedEvent(
+        address _userPlasmaAddress,
+        string _newHandle
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+
+        emit HandleChanged(
+            _userPlasmaAddress,
+            _newHandle
+        );
     }
 
 

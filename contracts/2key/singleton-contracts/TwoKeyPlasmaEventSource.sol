@@ -121,6 +121,15 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
 
 
     /**
+     * @notice          Event emitted when user changes his handle
+     */
+    event HandleChanged(
+        address userPlasmaAddress,
+        string newHandle
+    );
+
+
+    /**
      * @notice          Modifier restricting calls only to TwoKeyPlasmaFactory contract
      */
     modifier onlyTwoKeyPlasmaFactory {
@@ -301,6 +310,26 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     onlyTwoKeyPlasmaRegistry
     {
         emit Plasma2Handle(_plasma, _handle);
+    }
+
+
+    /**
+     * @notice          Function to emit event when user changes his handle
+     *
+     * @param           _userPlasmaAddress is the users plasma address
+     * @param           _newHandle is the new username user wants to set
+     */
+    function emitHandleChangedEvent(
+        address _userPlasmaAddress,
+        string _newHandle
+    )
+    public
+    onlyTwoKeyPlasmaRegistry
+    {
+        emit HandleChanged(
+            _userPlasmaAddress,
+            _newHandle
+        );
     }
 
 }
