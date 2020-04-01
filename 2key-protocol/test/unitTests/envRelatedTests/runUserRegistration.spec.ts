@@ -121,6 +121,7 @@ describe('Should change username from maintainer on public', async() => {
       try {
 
           let oldUsername = await protocol.Registry.getRegisteredNameForAddress(userAddress);
+          console.log('oldUsername',oldUsername);
 
           let txHash = await protocol.Registry.changeUsername(newUsername, userAddress, signature, address)
           console.log(txHash);
