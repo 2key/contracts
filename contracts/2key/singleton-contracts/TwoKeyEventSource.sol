@@ -507,7 +507,7 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     public
     {
         require(isAddressMaintainer(msg.sender) == true);
-
+        ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setReRegistrationFeeForUser(_address, _registrationFee);
         emit Debt(_address, _registrationFee, true, "ETH");
     }
 

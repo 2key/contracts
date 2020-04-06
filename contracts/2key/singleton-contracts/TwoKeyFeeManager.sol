@@ -61,7 +61,32 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
-    //TODO: Create function for adding new type of debt (re-registration)
+
+
+    function setDebtInternal(
+        address _plasmaAddress,
+        uint _registrationFee
+    )
+    internal
+    {
+        // Generate the key for debt
+        bytes32 keyHashForUserDebt = keccak256(_userPlasmaToDebtInETH, _plasmaAddress);
+
+        // Get current debt
+        uint currentDebt = PROXY_STORAGE_CONTRACT.getUint(keyHashForUserDebt);
+
+        // Add on current debt new debt
+        PROXY_STORAGE_CONTRACT.setUint(keyHashForUserDebt,currentDebt.add(_registrationFee));
+
+        //Get the key for the total debts in eth
+        bytes32 key = keccak256(_totalDebtsInETH);
+
+        //Get the total debts from storage contract and increase by _registrationFee
+        uint totalDebts = _registrationFee.add(PROXY_STORAGE_CONTRACT.getUint(key));
+
+        //Set new value for totalDebts
+        PROXY_STORAGE_CONTRACT.setUint(key, totalDebts);
+    }
 
     function setReRegistrationFeeForUser(
         address _plasmaAddress,
@@ -69,8 +94,10 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
-
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
+        setDebtInternal(_plasmaAddress, _reRegistrationFee);
     }
+
 
     /**
      * @notice Function which will submit registration fees
@@ -96,17 +123,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         //Set that debt is submitted
         PROXY_STORAGE_CONTRACT.setBool(keyHashIsDebtSubmitted, true);
 
-        //Set the debt for the user
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userPlasmaToDebtInETH, _plasmaAddress), _registrationFee);
-
-        //Get the key for the total debts in eth
-        bytes32 key = keccak256(_totalDebtsInETH);
-
-        //Get the total debts from storage contract and increase by _registrationFee
-        uint totalDebts = _registrationFee.add(PROXY_STORAGE_CONTRACT.getUint(key));
-
-        //Set new value for totalDebts
-        PROXY_STORAGE_CONTRACT.setUint(key, totalDebts);
+        setDebtInternal(_plasmaAddress, _registrationFee);
     }
 
     /**
@@ -201,7 +218,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(key);
         PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debtPaying));
 
-        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).(
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
             _plasmaAddress,
             _debtPaying,
             false,
