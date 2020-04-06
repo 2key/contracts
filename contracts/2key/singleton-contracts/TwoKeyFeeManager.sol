@@ -61,6 +61,16 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         initialized = true;
     }
 
+    //TODO: Create function for adding new type of debt (re-registration)
+
+    function setReRegistrationFeeForUser(
+        address _plasmaAddress,
+        uint _reRegistrationFee
+    )
+    public
+    {
+
+    }
 
     /**
      * @notice Function which will submit registration fees
@@ -191,7 +201,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(key);
         PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debtPaying));
 
-        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).(
             _plasmaAddress,
             _debtPaying,
             false,

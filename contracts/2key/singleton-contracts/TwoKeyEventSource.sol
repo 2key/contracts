@@ -500,6 +500,17 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit Debt(_address, _registrationFee, true, "ETH");
     }
 
+    function userReRegistered(
+        address _address,
+        uint _registrationFee
+    )
+    public
+    {
+        require(isAddressMaintainer(msg.sender) == true);
+
+        emit Debt(_address, _registrationFee, true, "ETH");
+    }
+
     /**
      * @notice Function which will emit every time some debt is increased or paid
      * @param _plasmaAddress is the address of the user we are increasing/decreasing debt for
