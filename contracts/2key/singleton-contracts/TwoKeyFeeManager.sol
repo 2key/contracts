@@ -88,22 +88,39 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setUint(key, totalDebts);
     }
 
-    function setReRegistrationFeeForUser(
+    /**
+     * @notice          Function which will be used to add additional debts for user
+     *                  such as re-registration, and probably more things in the future
+     *
+     * @param           _plasmaAddress is user plasma address
+     * @param           _debtAmount is the amount of debt we're adding to current debt
+     * @param           _debtType is selector which will restrict that same debt is submitted
+     *                  multiple times
+     */
+    function addDebtForUser(
         address _plasmaAddress,
-        uint _reRegistrationFee
+        uint _debtAmount,
+        string _debtType
     )
     public
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
-        setDebtInternal(_plasmaAddress, _reRegistrationFee);
+
+        bytes32 keyHashForDebtType = keccak256(_plasmaAddress, _debtType);
+
+        require(PROXY_STORAGE_CONTRACT.getBool(keyHashForDebtType) == false);
+
+        PROXY_STORAGE_CONTRACT.setBool(keyHashForDebtType, true);
+
+        setDebtInternal(_plasmaAddress, _debtAmount);
     }
 
 
     /**
-     * @notice Function which will submit registration fees
-     * It can be called only once par _address
-     * @param _plasmaAddress is the address of the user
-     * @param _registrationFee is the amount paid for the registration
+     * @notice          Function which will submit registration fees
+     *                  It can be called only once par _address
+     * @param           _plasmaAddress is the address of the user
+     * @param           _registrationFee is the amount paid for the registration
      */
     function setRegistrationFeeForUser(
         address _plasmaAddress,
@@ -127,8 +144,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function to check for the user if registration debt is submitted
-     * @param _plasmaAddress is users plasma address
+     * @notice          Function to check for the user if registration debt is submitted
+     * @param           _plasmaAddress is users plasma address
      */
     function isRegistrationDebtSubmittedForTheUser(
         address _plasmaAddress
@@ -142,9 +159,9 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function where maintainer can set debts per user
-     * @param usersPlasmas is the array of user plasma addresses
-     * @param fees is the array containing fees which 2key paid for user
+     * @notice          Function where maintainer can set debts per user
+     * @param           usersPlasmas is the array of user plasma addresses
+     * @param           fees is the array containing fees which 2key paid for user
      * Only maintainer is eligible to call this function.
      */
     function setRegistrationFeesForUsers(
@@ -181,8 +198,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Getter where we can check how much ETH user owes to 2key.network for his registration
-     * @param _userPlasma is user plasma address
+     * @notice          Getter where we can check how much ETH user owes to 2key.network for his registration
+     * @param           _userPlasma is user plasma address
      */
     function getDebtForUser(
         address _userPlasma
@@ -196,9 +213,9 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Function to check if user has some debts and if yes, take them from _amount
-     * @param _plasmaAddress is the plasma address of the user
-     * @param _debtPaying is the part or full debt user is paying
+     * @notice          Function to check if user has some debts and if yes, take them from _amount
+     * @param           _plasmaAddress is the plasma address of the user
+     * @param           _debtPaying is the part or full debt user is paying
      */
     function payDebtWhenConvertingOrWithdrawingProceeds(
         address _plasmaAddress,
@@ -318,7 +335,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice Function to get status of the debts
+     * @notice          Function to get status of the debts
      */
     function getDebtsSummary()
     public
@@ -337,6 +354,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         totalPaidIn2Key
         );
     }
+
 
     function withdrawEtherCollected()
     public
