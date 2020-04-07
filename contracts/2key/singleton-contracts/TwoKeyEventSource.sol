@@ -501,14 +501,14 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     }
 
     function userReRegistered(
-        address _address,
+        address _plasmaAddress,
         uint _registrationFee
     )
     public
     {
         require(isAddressMaintainer(msg.sender) == true);
-        ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setReRegistrationFeeForUser(_address, _registrationFee);
-        emit Debt(_address, _registrationFee, true, "ETH");
+        ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setReRegistrationFeeForUser(_plasmaAddress, _registrationFee);
+        emit Debt(_plasmaAddress, _registrationFee, true, "ETH");
     }
 
     /**
