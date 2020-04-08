@@ -10,6 +10,7 @@ import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/IKyberNetworkInterface.sol";
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../libraries/SafeMath.sol";
@@ -307,6 +308,68 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		// Increase them by earnings added now and store
 		PROXY_STORAGE_CONTRACT.setUint(keyHashEarningsPerCampaign, currentEarningsForThisCampaign.add(moderatorTokens));
 	}
+
+
+    /**
+     * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
+     *                  contract, it can be called only by TwoKeyAdmin.sol contract
+     *
+     * @param           liquidityConversionRatesContractAddress is the address of liquidity conversion rates contract
+                        the right address depending on environment can be found in configurationFiles/kyberAddresses.json
+                        It's named "pricing" in the json object
+     */
+	function setLiquidityParametersInKyber(
+        address liquidityConversionRatesContractAddress,
+        uint _rInFp,
+        uint _pMinInFp,
+        uint _numFpBits,
+        uint _maxCapBuyInWei,
+        uint _maxCapSellInWei,
+        uint _feeInBps,
+        uint _maxTokenToEthRateInPrecision,
+        uint _minTokenToEthRateInPrecision
+	)
+	public
+	onlyTwoKeyCongress
+	{
+        // Call on the contract set liquidity params
+        IKyberNetworkInterface(liquidityConversionRatesContractAddress).setLiquidityParams(
+            _rInFp,
+            _pMinInFp,
+            _numFpBits,
+            _maxCapBuyInWei,
+            _maxCapSellInWei,
+            _feeInBps,
+            _maxTokenToEthRateInPrecision,
+            _minTokenToEthRateInPrecision
+        );
+	}
+
+
+    /**
+     * @notice          Function to call withdraw on KyberReserve.sol contract
+     *                  It can be only called by TwoKeyAdmin.sol contract
+     *
+     * @param           kyberReserveContractAddress is the address of kyber reserve contract
+     *                  right address depending on environment can be found in configurationFiles/kyberAddresses.json
+                        It's named "reserve" in the json object
+     */
+    function withdrawTokensFromKyberReserve(
+        address kyberReserveContractAddress,
+        ERC20 tokenToWithdraw,
+        uint amountToBeWithdrawn,
+        address receiverAddress
+    )
+    public
+    onlyTwoKeyCongress
+    {
+        // Call on the contract withdraw function
+        IKyberNetworkInterface(kyberReserveContractAddress).withdraw(
+            tokenToWithdraw,
+            amountToBeWithdrawn,
+            receiverAddress
+        );
+    }
 
 
 	/**
