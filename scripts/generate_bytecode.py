@@ -142,9 +142,8 @@ def generate_bytecode_for_setting_liquidity_params(
 
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name
-
+    print('Action being performed: ',arg1)
     print('\n')
-
     if(arg1 == "transfer2KeyTokens"):
         generate_bytecode_for_transfering_tokens(sys.argv[2], sys.argv[3])
     if(arg1 == "upgradeContract"):
