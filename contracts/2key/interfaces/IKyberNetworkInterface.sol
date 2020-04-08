@@ -26,5 +26,5 @@ contract IKyberNetworkInterface {
     /**
      * @notice          Function to withdraw either ETH or 2KEY token from KyberReserve.sol contract
      */
-    function withdraw(ERC20 token, uint amount, address destination) public onlyOperator returns(bool)
+    function withdraw(ERC20 token, uint amount, address destination) public returns(bool);
 }
