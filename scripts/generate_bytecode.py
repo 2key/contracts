@@ -102,6 +102,44 @@ def generate_bytecode_for_changing_moderator_fee_on_plasma(moderator_fee):
     values = [moderator_fee]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_setting_liquidity_params(
+        _kyberLiquidityPricing,
+        _rInFp,
+        _pMinInFp,
+        _numFpBits,
+        _maxCapBuyInWei,
+        _maxCapSellInWei,
+        _feeInBps,
+        _maxTokenToEthRateInPrecision,
+        _minTokenToEthRateInPrecision
+    ):
+
+    _rInFp = int(_rInFp)
+    _pMinInFp = int(_pMinInFp)
+    _numFpBits = int(_numFpBits)
+    _maxCapBuyInWei = int(_maxCapBuyInWei)
+    _maxCapSellInWei = int(_maxCapSellInWei)
+    _feeInBps = int(_feeInBps)
+    _maxTokenToEthRateInPrecision = int(_maxTokenToEthRateInPrecision)
+    _minTokenToEthRateInPrecision = int(_minTokenToEthRateInPrecision)
+
+
+    method_name_and_params = "setLiquidityParametersInKyber(address,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)"
+    types = ["address","uint256","uint256","uint256","uint256","uint256","uint256","uint256","uint256"]
+    values = [
+        _kyberLiquidityPricing,
+        _rInFp,
+        _pMinInFp,
+        _numFpBits,
+        _maxCapBuyInWei,
+        _maxCapSellInWei,
+        _feeInBps,
+        _maxTokenToEthRateInPrecision,
+        _minTokenToEthRateInPrecision
+    ]
+
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 if __name__ == "__main__":
     arg1 = sys.argv[1] #Method name
 
@@ -133,4 +171,16 @@ if __name__ == "__main__":
         generate_bytecode_for_taking_fees_from_manager()
     if(arg1 == "setModeratorFeePlasma"):
         generate_bytecode_for_changing_moderator_fee_on_plasma(sys.argv[2])
+    if(arg1 == "setLiquidityParamsKyber"):
+        generate_bytecode_for_setting_liquidity_params(
+            sys.argv[2],
+            sys.argv[3],
+            sys.argv[4],
+            sys.argv[5],
+            sys.argv[6],
+            sys.argv[7],
+            sys.argv[8],
+            sys.argv[9],
+            sys.argv[10]
+         )
     print_line()
