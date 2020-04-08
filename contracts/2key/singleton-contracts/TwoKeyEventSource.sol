@@ -500,15 +500,16 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit Debt(_address, _registrationFee, true, "ETH");
     }
 
-    function userReRegistered(
+    function addAdditionalDebtForUser(
         address _plasmaAddress,
-        uint _registrationFee
+        uint _debtAmount,
+        string _debtType
     )
     public
     {
         require(isAddressMaintainer(msg.sender) == true);
-        ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setReRegistrationFeeForUser(_plasmaAddress, _registrationFee);
-        emit Debt(_plasmaAddress, _registrationFee, true, "ETH");
+        ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).addDebtForUser(_plasmaAddress, _debtAmount, _debtType);
+        emit Debt(_plasmaAddress, _debtAmount, true, "ETH");
     }
 
     /**
