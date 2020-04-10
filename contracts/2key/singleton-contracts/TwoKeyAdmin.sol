@@ -352,7 +352,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
      *
      * @param           kyberReserveContractAddress is the address of kyber reserve contract
      *                  right address depending on environment can be found in configurationFiles/kyberAddresses.json
-                        It's named "reserve" in the json object
+                        It's named "reserve" in the json object.
      */
     function withdrawTokensFromKyberReserve(
         address kyberReserveContractAddress,
