@@ -8,14 +8,14 @@
 - Checksum the output in the console (should be like this - example)
 
 ```angular2html
-_rInFp: 7696581394
-_pMinInFp: 27487790
+_rInFp: 10995116277
+_pMinInFp: 57437387
 _numFpBits: 40
 _maxCapBuyInWei: 5000000000000000000
 _maxCapSellInWei: 5000000000000000000
-_feeInBps: 25
-_maxTokenToEthRateInPrecision: 100000000000000
-_minTokenToEthRateInPrecision: 25000000000000
+_feeInBps: 30
+_maxTokenToEthRateInPrecision: 208956000000000
+_minTokenToEthRateInPrecision: 52239000000000
 ```
 
 - Go to 2key/contracts repository
