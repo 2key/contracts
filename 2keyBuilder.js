@@ -387,22 +387,22 @@ async function deployUpgrade(networks, args) {
             await runDeployCPCFirstTime(networks[i]);
         }
 
-        // if(singletonsToBeUpgraded.length > 0) {
-        //     for(let j=0; j<singletonsToBeUpgraded.length; j++) {
-        //         /* eslint-disable no-await-in-loop */
-        //         console.log(networks[i], singletonsToBeUpgraded[j]);
-        //         if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
-        //             console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
-        //             if(networks[i].includes('private') || networks[i].includes('plasma')) {
-        //                 await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-        //             }
-        //         } else {
-        //             if(networks[i].includes('public')) {
-        //                 await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-        //             }
-        //         }
-        //     }
-        // }
+        if(singletonsToBeUpgraded.length > 0) {
+            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+                /* eslint-disable no-await-in-loop */
+                console.log(networks[i], singletonsToBeUpgraded[j]);
+                if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
+                    console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
+                    if(networks[i].includes('private') || networks[i].includes('plasma')) {
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                    }
+                } else {
+                    if(networks[i].includes('public')) {
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                    }
+                }
+            }
+        }
 
         if(tokenSellToBePatched.length > 0) {
             if(networks[i].includes('public')) {
@@ -416,9 +416,9 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        // if(cpcChanged.length > 0) {
-        //     await runDeployCPCCampaignMigration(networks[i]);
-        // }
+        if(cpcChanged.length > 0) {
+            await runDeployCPCCampaignMigration(networks[i]);
+        }
 
 
         /* eslint-enable no-await-in-loop */
