@@ -1,8 +1,10 @@
-import createWeb3 from "./_web3";
-import {rpcUrls} from "../constants/smallConstants";
+import createWeb3 from "../_web3";
 const { env } = process;
+const rpcUrls = [env.RPC_URL];
+import {generateMnemonic} from "bip39";
 
-//TODO: maybe, should be memoized in future
+
+// @ts-ignore
 const web3Switcher = {
   deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
   aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
@@ -15,6 +17,7 @@ const web3Switcher = {
   test: () => createWeb3(env.MNEMONIC_TEST, rpcUrls),
   buyer: () => createWeb3(env.MNEMONIC_BUYER, rpcUrls),
   guest: () => createWeb3('mnemonic words should be here but for some reason they are missing', rpcUrls),
+  guest_user: () => createWeb3(generateMnemonic(),rpcUrls)
 };
 
 export default web3Switcher;
