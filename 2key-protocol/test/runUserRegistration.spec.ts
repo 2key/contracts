@@ -87,27 +87,31 @@ const tryToRegisterUser = async (user, from) => {
   console.log('REGISTERING', user.name);
   const registerData: IRegistryData = {};
   try {
+    console.log('Action1')
     registerData.signedUser = await twoKeyProtocol.Registry.signUserData2Registry(from, user.name, user.fullname, user.email)
   } catch {
     console.log('Error in Registry.signUserData');
   }
   try {
+    console.log('Action2')
     registerData.signedWallet = await twoKeyProtocol.Registry.signWalletData2Registry(from, user.name, user.walletname);
   } catch {
     console.log('Error in Registry.singWalletData');
   }
   try {
+    console.log('Action3')
     registerData.signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
   } catch {
     console.log('Error Registry.signPlasma');
   }
   try {
+    console.log('Action4')
     registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
   } catch (e) {
-    console.log('Error Plasma.signEthereum');
     console.log(e);
   }
   try {
+    console.log('Action5')
     registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
   } catch (e) {
     console.log('Error Plasma.signedUsername');
