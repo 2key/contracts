@@ -3,7 +3,8 @@ const { env } = process;
 const rpcUrls = [env.RPC_URL];
 import {generateMnemonic} from "bip39";
 
-//TODO: maybe, should be memoized in future
+
+// @ts-ignore
 const web3Switcher = {
   deployer: () => createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls),
   aydnep: () => createWeb3(env.MNEMONIC_AYDNEP, rpcUrls),
