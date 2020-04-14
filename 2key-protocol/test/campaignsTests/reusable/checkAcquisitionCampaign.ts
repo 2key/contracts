@@ -76,6 +76,9 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
           from,
         )
       );
+
+      const areRewardsBoughtWithEther = await protocol.AcquisitionCampaign.checkIfRewardsAreBoughtWithEther(campaignAddress);
+      expect(areRewardsBoughtWithEther).to.be.equal(true);
     }).timeout(60000);
   }
 
