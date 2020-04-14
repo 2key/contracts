@@ -165,24 +165,38 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
 
      */
     function add_plasma2ethereum(
-        address plasma_address,
-        bytes sig
+        address plasmaAddress,
+        bytes signature
     )
     public
     onlyMaintainer
     {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
-        require (sig.length == 65);
+        // Generate hash
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
 
-        address eth_address = Call.recoverHash(hash,sig,0);
+        // Require that signature is valid length
+        require (signature.length == 65);
 
-        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_plasma2ethereum, plasma_address));
-        require(ethereum == address(0) || ethereum == eth_address);
+        // Recover ethereumAddress from signature
+        address ethereumAddress = Call.recoverHash(hash,sig,0);
 
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_plasma2ethereum, plasma_address), eth_address);
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_ethereum2plasma,eth_address), plasma_address);
+        // Require that ethereum address is not equal address(0)
+        require(ethereumAddress != address(0));
 
-        emitPlasma2Ethereum(plasma_address, eth_address);
+        // Require that plasma stored in contract for this ethereum address = address(0)
+        address plasmaStoredInContract = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_ethereum2plasma,ethereumAddress));
+        require(plasmaStoredInContract == address(0));
+
+        // Require that ethereum stored in contract for this plasma address = address(0)
+        address ethereumStoredInContract = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_plasma2ethereum, plasmaAddress));
+        require(ethereumStoredInContract == address(0));
+
+        // Save to the contract state mapping _ethereum2plasma nad _plasma2ethereum
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_plasma2ethereum, plasmaAddress), ethereumAddress);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_ethereum2plasma,ethereumAddress), plasmaAddress);
+
+        // Emit event that plasma and ethereum addresses are being linked
+        emitPlasma2Ethereum(plasmaAddress, ethereumAddress);
     }
 
     /**
