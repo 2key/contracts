@@ -71,10 +71,8 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         bytes32 keyHashUserNameToAddress = keccak256("username2currentAddress", usernameBytes32);
         bytes32 keyHashAddressToUserName = keccak256("address2username", _userAddress);
 
-        // check if name is taken
-        if (PROXY_STORAGE_CONTRACT.getAddress(keyHashUserNameToAddress) != address(0)) {
-            revert();
-        }
+        // Assert that username is not taken
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashUserNameToAddress) == address(0));
 
         // Set mapping address => username
         PROXY_STORAGE_CONTRACT.setString(keyHashAddressToUserName, _username);
@@ -114,6 +112,10 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         // Assert that the message signer is the _sender in the arguments
         require(message_signer == _userAddress);
 
+        // Throw if user address already has some username assigned
+        bytes memory currentUsernameAssignedToAddress = bytes(address2username(_userAddress));
+        require(currentUsernameAssignedToAddress.length == 0);
+
         // Generate the keys for the storage contract
         bytes32 keyHashUsername = keccak256("addressToUserData", "username", _userAddress);
         bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _userAddress);
@@ -124,7 +126,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setString(keyHashFullName, _fullName);
         PROXY_STORAGE_CONTRACT.setString(keyHashEmail, _email);
 
-
+        // Here also the validation for uniqueness for this username will be done
         addOrChangeUsernameInternal(_username, _userAddress);
     }
 
@@ -145,10 +147,11 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     )
     internal
     {
-        bytes32 usernameHex = stringToBytes32(username);
-        address usersAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", usernameHex));
+        // Get user address from the storage for this username
+        address usersAddress = getUserName2UserAddress(username);
 
-        require(usersAddress == _address); // validating that username exists
+        // Validate that it's same user
+        require(usersAddress == _address);
 
         string memory concatenatedValues = strConcat(username,_username_walletName,"");
 
@@ -158,11 +161,20 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         require(message_signer == _address);
 
         bytes32 walletTag = stringToBytes32(_username_walletName);
-        bytes32 keyHashAddress2WalletTag = keccak256("address2walletTag", _address);
-        PROXY_STORAGE_CONTRACT.setBytes32(keyHashAddress2WalletTag, walletTag);
 
+        // Require that this wallet tag is not assigned to any other address
         bytes32 keyHashWalletTag2Address = keccak256("walletTag2address", walletTag);
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashWalletTag2Address) == address(0));
+
+        // Save in the contract state this walletTag2address mapping
         PROXY_STORAGE_CONTRACT.setAddress(keyHashWalletTag2Address, _address);
+
+        // Require that address doesn't have any previously assigned walletTag
+        bytes32 keyHashAddress2WalletTag = keccak256("address2walletTag", _address);
+        require(PROXY_STORAGE_CONTRACT.getBytes32(keyHashAddress2WalletTag) == bytes32(0));
+
+        // Save in the contract state this address2walletTag mapping
+        PROXY_STORAGE_CONTRACT.setBytes32(keyHashAddress2WalletTag, walletTag);
     }
 
 
@@ -196,16 +208,21 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     )
     internal
     {
+        // Generate the hash
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(ethereumAddress))));
+
+        // Recover plasma address from the hash by signature
         address plasmaAddress = Call.recoverHash(hash,signature,0);
 
+        // Generate the keys for the storage for 2 mappings we want to check and update
         bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasmaAddress);
         bytes32 keyHashEthereumToPlasma = keccak256("ethereum2plasma", ethereumAddress);
 
+        // Assert that both of this address currently don't exist in our system
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == address(0));
+        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == address(0));
 
-        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashPlasmaToEthereum) == ethereumAddress, "cant change eth=>plasma");
-        require(PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == address(0) || PROXY_STORAGE_CONTRACT.getAddress(keyHashEthereumToPlasma) == plasmaAddress);
-
+        // Store the addresses
         PROXY_STORAGE_CONTRACT.setAddress(keyHashPlasmaToEthereum, ethereumAddress);
         PROXY_STORAGE_CONTRACT.setAddress(keyHashEthereumToPlasma, plasmaAddress);
     }
@@ -308,7 +325,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         address ethereumAddress = Call.recoverHash(hash,externalSignature,0);
 
         require(ethereumAddress != address(0));
-
         // Link plasma 2 ethereum
         addPlasma2EthereumInternal(signature, ethereumAddress);
         // Set note
@@ -331,40 +347,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         bytes32 usernameBytes = stringToBytes32(_username);
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", usernameBytes));
     }
-
-
-//    /**
-//     */
-//    function deleteUser(
-//        string userName
-//    )
-//    public
-//    {
-//        require(isMaintainer(msg.sender));
-//        bytes32 userNameHex = stringToBytes32(userName);
-//        address _ethereumAddress = username2currentAddress[userNameHex];
-//        username2currentAddress[userNameHex] = address(0);
-//
-//        address2username[_ethereumAddress] = "";
-//
-//        bytes32 walletTag = address2walletTag[_ethereumAddress];
-//        address2walletTag[_ethereumAddress] = bytes32(0);
-//        walletTag2address[walletTag] = address(0);
-//
-//        address plasma = ethereum2plasma[_ethereumAddress];
-//        ethereum2plasma[_ethereumAddress] = address(0);
-//        PROXY_STORAGE_CONTRACT.deleteAddress()
-//        plasma2ethereum[plasma] = address(0);
-//
-//        UserData memory userdata = addressToUserData[_ethereumAddress];
-//        userdata.username = "";
-//        userdata.fullName = "";
-//        userdata.email = "";
-//        addressToUserData[_ethereumAddress] = userdata;
-//
-//        notes[_ethereumAddress] = "";
-//    }
-
 
     /**
      * @notice          Function to read from the mapping plasma=>ethereum
