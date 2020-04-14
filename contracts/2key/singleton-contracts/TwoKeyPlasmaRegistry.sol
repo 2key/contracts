@@ -66,6 +66,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaRegistryStorage(_proxyStorage);
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), 2);
+
         initialized = true;
     }
 
@@ -86,6 +87,36 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
             .getContractProxyAddress(contractName);
     }
 
+    function emitUsernameChangedEvent(
+        address plasmaAddress,
+        string newHandle
+    )
+    internal
+    {
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitHandleChangedEvent(plasmaAddress, newHandle);
+    }
+
+
+    function emitPlasma2Ethereum(
+        address plasma,
+        address ethereum
+    )
+    internal
+    {
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2EthereumEvent(plasma, ethereum);
+    }
+
+    function emitPlasma2Handle(
+        address plasma,
+        string handle
+    )
+    internal
+    {
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2HandleEvent(plasma, handle);
+    }
 
     /**
      * @notice          Function to link username and address once signature is validated
@@ -102,16 +133,30 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     public
     onlyMaintainer
     {
+        // Generate the hash
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
+
+        // Validate signature length
         require (signature.length == 65);
 
+        // Recover plasma address from the hash
         address plasma = Call.recoverHash(hash,signature,0);
+
+        // Assert that plasma address recovered is same as the one passed int he arguments
         require(plasma == plasmaAddress);
 
+        // Assert that this username is not pointing to any address
         require(getUsernameToAddress(username) == address(0));
+
+        // Assert that this address is not pointing to any username
+        bytes memory currentUserNameForThisAddress = bytes(getAddressToUsername(plasmaAddress));
+        require(currentUserNameForThisAddress.length == 0);
+
+        // Store _addressToUsername and  _usernameToAddress
         PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), username);
         PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasmaAddress);
 
+        // Emit event that plasma and username are linked
         emitPlasma2Handle(plasmaAddress, username);
     }
 
@@ -181,35 +226,18 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         emitUsernameChangedEvent(plasmaAddress, newUsername);
     }
 
-    function emitUsernameChangedEvent(
-        address plasmaAddress,
-        string newHandle
+    /**
+     * @notice Function where Congress on plasma can set moderator fee
+     * @param feePercentage is the feePercentage in uint (ether units)
+     * example if you want to set 1%  then feePercentage = 1
+     */
+    function setModeratorFee(
+        uint feePercentage
     )
-    internal
+    public
+    onlyTwoKeyPlasmaCongress
     {
-        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
-        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitHandleChangedEvent(plasmaAddress, newHandle);
-    }
-
-
-    function emitPlasma2Ethereum(
-        address plasma,
-        address ethereum
-    )
-    internal
-    {
-        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
-        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2EthereumEvent(plasma, ethereum);
-    }
-
-    function emitPlasma2Handle(
-        address plasma,
-        string handle
-    )
-    internal
-    {
-        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
-        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2HandleEvent(plasma, handle);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), feePercentage);
     }
 
     function plasma2ethereum(
@@ -265,20 +293,6 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
             keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
         address recoveredAddress = Call.recoverHash(hash, signature, 0);
         return recoveredAddress;
-    }
-
-    /**
-     * @notice Function where Congress on plasma can set moderator fee
-     * @param feePercentage is the feePercentage in uint (ether units)
-     * example if you want to set 1%  then feePercentage = 1
-     */
-    function setModeratorFee(
-        uint feePercentage
-    )
-    public
-    onlyTwoKeyPlasmaCongress
-    {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), feePercentage);
     }
 
     /**
