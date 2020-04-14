@@ -162,7 +162,10 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
 
 
     /**
-
+     * @notice          Function to map plasma2ethereum and ethereum2plasma
+     *
+     * @param           plasmaAddress is the user plasma address
+     * @param           signature is the signature generated when the message was signed
      */
     function add_plasma2ethereum(
         address plasmaAddress,
@@ -178,7 +181,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         require (signature.length == 65);
 
         // Recover ethereumAddress from signature
-        address ethereumAddress = Call.recoverHash(hash,sig,0);
+        address ethereumAddress = Call.recoverHash(hash,signature,0);
 
         // Require that ethereum address is not equal address(0)
         require(ethereumAddress != address(0));
@@ -241,9 +244,9 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     }
 
     /**
-     * @notice Function where Congress on plasma can set moderator fee
-     * @param feePercentage is the feePercentage in uint (ether units)
-     * example if you want to set 1%  then feePercentage = 1
+     * @notice          Function where Congress on plasma can set moderator fee
+     * @param           feePercentage is the feePercentage in uint (ether units)
+     *                  example if you want to set 1%  then feePercentage = 1
      */
     function setModeratorFee(
         uint feePercentage
@@ -293,8 +296,8 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     }
 
     /**
-     * @notice Function to validate if signature is valid
-     * @param signature is the signature
+     * @notice          Function to validate if signature is valid
+     * @param           signature is the signature
      */
     function recover(
         bytes signature
@@ -310,7 +313,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     }
 
     /**
-     * @notice Function to return moderator fee
+     * @notice          Function to return moderator fee
      */
     function getModeratorFee()
     public
