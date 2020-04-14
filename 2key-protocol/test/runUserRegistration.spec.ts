@@ -1,7 +1,8 @@
+import registerUserFromBackend, {IRegistryData} from "./helpers/_registerUserFromBackend";
+
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
-import registerUserFromBackend, {IRegistryData} from "./_registerUserFromBackend";
 import {TwoKeyProtocol} from '../src';
 import web3Switcher from "./helpers/web3Switcher";
 import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "./helpers/twoKeyProtocol";
