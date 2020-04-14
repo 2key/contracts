@@ -12,7 +12,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     bool isCampaignInitialized; // Once this is set to true can't be modified
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-    bool boughtRewardsWithEther;
+    bool public boughtRewardsWithEther;
 
     uint public usd2KEYrateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
