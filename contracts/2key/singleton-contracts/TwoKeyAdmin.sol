@@ -320,6 +320,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		uint minApprovedConversionRate
 	)
 	public
+	onlyTwoKeyCongress
 	{
 		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).swapDaiAvailableToFillReserveFor2KEY(
 			daiAmountToBeExchanged,
