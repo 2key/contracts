@@ -327,7 +327,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (bool)
     {
-        PROXY_STORAGE_CONTRACT.getBool(key);
+        return PROXY_STORAGE_CONTRACT.getBool(key);
     }
 
 
@@ -650,7 +650,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     onlyValidatedContracts
-    returns (uint)
     {
         uint campaignID = getContractId(msg.sender);
         //TODO: Check there's enough 2key and DAI to complete tx
