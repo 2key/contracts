@@ -920,6 +920,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         require(minConversionRate >= approvedMinConversionRate.mul(95).div(100));
 
+        dai.approve(kyberProxyContract, amountOfDAIToSwap);
+
         uint received2KEYTokens = proxyContract.swapTokenToToken(dai, amountOfDAIToSwap, twoKeyToken, minConversionRate);
 
         emit DAI2KEYSwapped(amountOfDAIToSwap, received2KEYTokens);
