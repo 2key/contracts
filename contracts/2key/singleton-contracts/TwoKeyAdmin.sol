@@ -309,8 +309,14 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keyHashEarningsPerCampaign, currentEarningsForThisCampaign.add(moderatorTokens));
 	}
 
-	function exchangeAvailableDAIFor2KEYThroughKyber(
 
+	/**
+	 * @notice			Function to swap some DAI tokens from Upgradable exchange for 2KEY
+	 *
+	 * @param			Amount of DAI tokens to be exchanged for 2KEY tokens
+	 */
+	function exchangeAvailableDAIFor2KEYThroughKyber(
+		uint daiAmountToBeExchanged
 	)
 	public
 	{
