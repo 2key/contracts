@@ -15,8 +15,9 @@ spinner() {
 spinner 2
 
 
-echo "TwoKeyAdmin new version:                    1.0.15"
-echo "TwoKeyRegistry new version:                  1.0.5"
+echo "TwoKeyAdmin new version:                    1.0.16"
+echo "TwoKeyUpgradableExchange new version:       1.0.7"
+echo "TwoKeyRegistry new version:                 1.0.5"
 echo "TOKEN_SELL campaign new version:            1.0.35"
 
 
@@ -26,8 +27,9 @@ echo "Destination for execution: 0xf4797416e6b6835114390591d3ac6a531a061396"
 
 cd ../..
 
-python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.15
+python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.16
 python3 generate_bytecode.py upgradeContract TwoKeyRegistry 1.0.5
+python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.7
 python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.35
 
 
