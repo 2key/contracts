@@ -160,6 +160,7 @@ module.exports = async function deploy(deployer) {
         }
     });
 
+
     if(flag == false) {
         console.log('No update will be performed');
         return;
@@ -173,7 +174,8 @@ module.exports = async function deploy(deployer) {
 
     console.log(contractName);
 
-    if(contractName == "TwoKeyUpgradableExchange") {
+    //contractName == "TwoKeyUpgradableExchange"
+    if(false) {
         await deployer.deploy(PriceDiscovery)
             .then(() => deployer.link(PriceDiscovery, TwoKeyUpgradableExchange))
             .then(() => deployer.deploy(contract)
