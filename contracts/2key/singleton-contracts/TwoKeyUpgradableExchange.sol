@@ -76,6 +76,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint _numberOfContracts
     );
 
+    event DAI2KEYSwapped(
+        uint _daisSent,
+        uint _twoKeyReceived
+    );
 
     /**
      * @notice          Constructor of the contract, can be called only once
@@ -116,6 +120,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     modifier onlyValidatedContracts {
         address twoKeyCampaignValidator = getAddressFromTwoKeySingletonRegistry(_twoKeyCampaignValidator);
         require(ITwoKeyCampaignValidator(twoKeyCampaignValidator).isCampaignValidated(msg.sender) == true);
+        _;
+    }
+
+
+    /**
+     * @notice          Modifier which will validate if msg sender is TwoKeyAdmin contract
+     */
+    modifier onlyTwoKeyAdmin {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
+        require(msg.sender == twoKeyAdmin);
         _;
     }
 
@@ -829,6 +843,31 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
+     * @notice          Function to get expected rate from Kyber contract for swapping DAI to 2KEY
+     * @param           amountDAIWei is the amount of dais we want to swap
+     * @param           dai is DAI token
+     * @param           twoKeyToken is ERC20 2KEY token
+     */
+    function getKyberExpectedRateDAI2KEY(
+        uint amountDAIWei,
+        ERC20 dai,
+        ERC20 twoKeyToken
+    )
+    public
+    view
+    returns (uint)
+    {
+        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
+
+        uint minConversionRate;
+        (minConversionRate,) = proxyContract.getExpectedRate(dai,twoKeyToken, amountDAIWei);
+
+        return minConversionRate;
+    }
+
+
+    /**
      * @notice          Function to start hedging some ether amount
      * @param           amountToBeHedged is the amount we'd like to hedge
      * @dev             only maintainer can call this function
@@ -856,6 +895,35 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         emit HedgedEther(stableCoinUnits, ratio, numberOfContracts());
     }
 
+    /**
+     * @notice          Function to send available DAI to Kyber and get 2KEY tokens
+     *
+     * @param           amountOfDAIToSwap is the amount of DAI tokens we want to swap
+     * @param           approvedMinConversionRate is the approved minimal conversion rate we can get
+     */
+    function swapDaiAvailableToFillReserveFor2KEY(
+        uint amountOfDAIToSwap,
+        uint approvedMinConversionRate
+    )
+    public
+    onlyTwoKeyAdmin
+    {
+        require(daiWeiAvailableToFill2KEYReserve() >= amountOfDAIToSwap);
+
+        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
+
+        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
+        ERC20 twoKeyToken = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy));
+
+        uint minConversionRate = getKyberExpectedRateDAI2KEY(amountOfDAIToSwap, dai, twoKeyToken);
+
+        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100));
+
+        uint received2KEYTokens = proxyContract.swapTokenToToken(dai, amountOfDAIToSwap, twoKeyToken, minConversionRate);
+
+        emit DAI2KEYSwapped(amountOfDAIToSwap, received2KEYTokens);
+    }
 
     function calculateHedgedAndReceivedForDefinedChunk(
         uint numberOfContractsCurrently,
@@ -1178,10 +1246,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      */
     function withdrawEther()
     public
+    onlyTwoKeyAdmin
     {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
-        require(msg.sender == twoKeyAdmin);
-        _forwardFunds(twoKeyAdmin);
+        _forwardFunds(msg.sender);
     }
 
 
@@ -1193,10 +1260,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint _tokenAmount
     )
     public
+    onlyTwoKeyAdmin
     {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
-        require(msg.sender == twoKeyAdmin);
-        ERC20(_erc20TokenAddress).transfer(twoKeyAdmin, _tokenAmount);
+        ERC20(_erc20TokenAddress).transfer(msg.sender, _tokenAmount);
     }
 
     /**

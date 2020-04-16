@@ -313,14 +313,18 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	/**
 	 * @notice			Function to swap some DAI tokens from Upgradable exchange for 2KEY
 	 *
-	 * @param			Amount of DAI tokens to be exchanged for 2KEY tokens
+	 * @param			daiAmountToBeExchanged of DAI tokens to be exchanged for 2KEY tokens
 	 */
 	function exchangeAvailableDAIFor2KEYThroughKyber(
-		uint daiAmountToBeExchanged
+		uint daiAmountToBeExchanged,
+		uint minApprovedConversionRate
 	)
 	public
 	{
-
+		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).swapDaiAvailableToFillReserveFor2KEY(
+			daiAmountToBeExchanged,
+			minApprovedConversionRate
+		);
 	}
 
     /**
