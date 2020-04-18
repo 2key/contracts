@@ -8,7 +8,8 @@ export default async function createCpcCampaign(campaignData: ICreateCPC, storag
 
   const campaignObject = {
     ...campaignData,
-    bountyPerConversionWei: parseFloat(protocol.Utils.toWei(campaignData.bountyPerConversionWei,'ether').toString())
+    bountyPerConversionWei: parseFloat(protocol.Utils.toWei(campaignData.bountyPerConversionWei,'ether').toString()),
+    campaignCurrency: campaignData.campaignCurrency
   };
 
   const campaign = await protocol.CPCCampaign.createCPCCampaign(

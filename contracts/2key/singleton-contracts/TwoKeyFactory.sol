@@ -262,6 +262,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
     function createProxyForCPCCampaign(
         string _url,
         uint _bountyPerConversion,
+        string _campaignCurrency,
         address _mirrorCampaignOnPlasma,
         string _nonSingletonHash
     )
@@ -275,6 +276,7 @@ contract TwoKeyFactory is Upgradeable, ITwoKeySingletonUtils {
             _url,
             _mirrorCampaignOnPlasma,
             _bountyPerConversion,
+            _campaignCurrency,
             getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")
         );
 

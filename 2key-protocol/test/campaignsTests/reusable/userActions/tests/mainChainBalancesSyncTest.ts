@@ -17,6 +17,7 @@ export default function mainChainBalancesSyncTest(
     const {campaignAddress, campaign} = storage;
 
     const numberOfInfluencers = await protocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
+
     const resp = await protocol.CPCCampaign.getInfluencersAndBalances(
       campaignAddress, 0, numberOfInfluencers
     );
@@ -25,21 +26,24 @@ export default function mainChainBalancesSyncTest(
 
     const balanceBefore =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
 
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.pushBalancesForInfluencers(
+    let txHash = await protocol.CPCCampaign.pushBalancesForInfluencers(
         campaignPublicAddress,
         resp.influencers,
         resp.balances.map(balance => protocol.Utils.toWei(balance,'ether')),
         address
-      )
     );
 
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.distributeRewardsBetweenInfluencers(
+    let receipt = await protocol.Utils.getTransactionReceiptMined(
+      txHash
+    );
+
+    let txHash1 = await protocol.CPCCampaign.distributeRewardsBetweenInfluencers(
         campaignPublicAddress,
         resp.influencers,
         address,
-      )
+    );
+    let receipt1 = await protocol.Utils.getTransactionReceiptMined(
+      txHash1
     );
 
     const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);

@@ -119,6 +119,7 @@ contract IHandleCampaignDeployment {
         string _url,
         address _mirrorCampaignOnPlasma,
         uint _bountyPerConversion,
+        string _campaignCurrency,
         address _twoKeyEconomy
     )
     public;

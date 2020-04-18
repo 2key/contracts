@@ -20,6 +20,7 @@ const  campaignData: ICreateCPCTest = {
   // referrerQuota: 1,
   // etherForRewards: 3,
   targetClicks: 99999999,
+  campaignCurrency: "USD"
 };
 
 describe(

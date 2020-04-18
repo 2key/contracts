@@ -22,6 +22,7 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         string _url,
         address _mirrorCampaignOnPlasma,
         uint _bountyPerConversion,
+        string _campaignCurrency,
         address _twoKeyEconomy
     )
     public
@@ -50,8 +51,12 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
         // Set bounty per conversion
         bountyPerConversion = _bountyPerConversion;
 
-        //Set mirror campaign on plasma
+        // Set mirror campaign on plasma
         mirrorCampaignOnPlasma = _mirrorCampaignOnPlasma;
+
+        // Set the currency for the campaign
+        campaignCurrency = _campaignCurrency;
+
     }
 
 }

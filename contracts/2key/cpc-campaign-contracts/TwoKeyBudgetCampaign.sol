@@ -35,7 +35,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	mapping(address => uint256) referrerPlasma2TotalEarnings2key;	// Total earnings per referrer
 
-	string public campaignRewardsCurrency; 			// Can be either DAI or USD at the moment
+	string public campaignCurrency; 			// Can be either DAI or USD at the moment
 	address public campaignCurrencyTokenAddress; 	// Can be either DAI or 2KEY at the moment
 
 	/**
@@ -77,7 +77,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyContractor
 	{
 		require(isInventoryAdded == false);
-		require(keccak256("2KEY") == keccak256(campaignRewardsCurrency));
+		require(keccak256("USD") == keccak256(campaignCurrency));
 		rewardsInventoryAmount = get2KEYTokensBalance();
 		isInventoryAdded = true;
 	}
@@ -87,7 +87,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyContractor
 	{
 		require(isInventoryAdded == false);
-		require(keccak256("DAI") == keccak256(campaignRewardsCurrency));
+		require(keccak256("DAI") == keccak256(campaignCurrency));
 //		rewardsInventoryAmount = IERC20().balanceOf(address(this));
 	}
 
