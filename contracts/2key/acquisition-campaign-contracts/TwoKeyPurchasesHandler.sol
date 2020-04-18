@@ -5,11 +5,12 @@ import "../interfaces/IERC20.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../libraries/SafeMath.sol";
 import "../interfaces/ITwoKeyConversionHandler.sol";
+import "../campaign-mutual-contracts/InitializeCampaign.sol";
 
 /**
  * @author Nikola Madjarevic
  */
-contract TwoKeyPurchasesHandler is UpgradeableCampaign {
+contract TwoKeyPurchasesHandler is UpgradeableCampaign, InitializeCampaign {
 
     //Safe math for math operations
     using SafeMath for *;
@@ -21,7 +22,6 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     mapping(uint => uint) public portionToUnlockingDate;
 
 
-    bool initialized;
     bool isDistributionDateChanged;
 
     address proxyConversionHandler;
@@ -67,8 +67,9 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
     )
     public
     {
+        initializeCampaign();
+
         require(values[4] > 0 && values[4] <= 100);
-        require(initialized == false);
 
         tokenDistributionDate = values[2];
         maxDistributionDateShiftInDays = values[3];
@@ -106,7 +107,6 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
                 portionToUnlockingDate[i] = bonusVestingStartDate.add((i-1).mul(numberOfDaysBetweenPortions.mul(1 days)));
             }
         }
-        initialized = true;
     }
 
 

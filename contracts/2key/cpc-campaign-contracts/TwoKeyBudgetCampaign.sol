@@ -17,8 +17,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
 	 */
-
-
 	bytes32 public merkleRoot;						// Merkle root
 	address public mirrorCampaignOnPlasma;			// Address of campaign deployed to plasma network
 	bool public isValidated;						// Flag to determine if campaign is validated
@@ -30,13 +28,15 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	bool public isInventoryAdded;					// Selector if inventory is added
 	bool public boughtRewardsWithEther;				// Variable to let us know if rewards have been bought with Ether
 	uint public usd2KEYrateWei;						// Dollar to 2key rate in WEI at the moment of adding inventory
-	uint public bountyPerConversion;				// Bounty how contractor wants referrers to split per conversion
+	uint public bountyPerConversion;				// Bounty per click, specified in campaign rewards currency
 	uint public rewardsInventoryAmount;				// Amount for rewards inventory
 	uint public moderatorTotalEarnings;				// Amount representing how much moderator has earned
 	uint public moderatorEarningsBalance;			// Amount representing how much moderator has now
 
 	mapping(address => uint256) referrerPlasma2TotalEarnings2key;	// Total earnings per referrer
 
+	string public campaignRewardsCurrency; 			// Can be either DAI or USD at the moment
+	address public campaignCurrencyTokenAddress; 	// Can be either DAI or 2KEY at the moment
 
 	/**
      * @notice Function to validate that contracts plasma and public are well mirrored
@@ -48,11 +48,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isValidated = true;
 	}
 
-
 	/**
      * @notice Internal function to check the balance of the specific ERC20 on this contract
      */
-	function getTokenBalance()
+	function get2KEYTokensBalance()
 	internal
 	view
 	returns (uint)
@@ -70,10 +69,33 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 
-    /**
-	 * @notice Function to add fiat inventory for rewards
-	 * @dev only contractor can add this inventory
+	/**
+	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
 	 */
+	function addDirectly2KEYAsInventory()
+	public
+	onlyContractor
+	{
+		require(isInventoryAdded == false);
+		require(keccak256("2KEY") == keccak256(campaignRewardsCurrency));
+		rewardsInventoryAmount = get2KEYTokensBalance();
+		isInventoryAdded = true;
+	}
+
+	function addDirectlyDAIAsInventory()
+	public
+	onlyContractor
+	{
+		require(isInventoryAdded == false);
+		require(keccak256("DAI") == keccak256(campaignRewardsCurrency));
+//		rewardsInventoryAmount = IERC20().balanceOf(address(this));
+	}
+
+
+	/**
+     * @notice Function to add fiat inventory for rewards
+     * @dev only contractor can add this inventory
+     */
 	function buyReferralBudgetWithEth()
 	public
 	onlyContractor
@@ -264,17 +286,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	}
 
-	/**
-	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
-	 */
-	function addDirectly2KEYAsInventory()
-	public
-	onlyContractor
-	{
-		require(isInventoryAdded == false);
-		rewardsInventoryAmount = getTokenBalance();
-		isInventoryAdded = true;
-	}
 
 
 	/**
@@ -284,8 +295,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     public
     onlyContractor
 	{
-		require(merkleRoot != 0, 'Campaign not ended yet - merkle root is not set.');
-		uint campaignRewardsBalance = getTokenBalance();
+		require(merkleRoot != 0);
+		uint campaignRewardsBalance = get2KEYTokensBalance();
 
 		uint rewardsNotSpent = campaignRewardsBalance.sub(reservedAmount2keyForRewards);
 		if(rewardsNotSpent > 0) {
@@ -321,7 +332,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyMaintainer
 	{
-		require(merkleRoot == 0, 'merkle root already defined');
+		require(merkleRoot == 0);
 		merkleRoot = _merkleRoot;
 	}
 
@@ -441,10 +452,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     view
     returns (uint)
     {
-        uint currentERC20Balance = getTokenBalance();
+        uint currentERC20Balance = get2KEYTokensBalance();
         return currentERC20Balance.sub(reservedAmount2keyForRewards);
     }
-
-
-
 }

@@ -36,11 +36,12 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
     )
     public
     {
+
+        initializeCampaign();
         require(values[1] >= values[0]);
         require(values[4] > values[3]);
         require(values[5] <= 100*(10**18));
 
-        require(initialized == false);
 
         if(values[0] == values[1]) {
             isFixedInvestmentAmount = true;
@@ -93,8 +94,6 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         conversionHandler = _twoKeyConversionHandler;
 
         ALLOWED_GAP = 1000000000000000000; //1 USD allowed GAP for ETH conversions in case FIAT is campaign currency
-
-        initialized = true;
     }
 
     /**

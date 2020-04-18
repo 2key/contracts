@@ -10,8 +10,9 @@ import "../interfaces/ITwoKeyCampaign.sol";
 import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../libraries/IncentiveModels.sol";
 import "../libraries/Call.sol";
+import "./InitializeCampaign.sol";
 
-contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
+contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels, InitializeCampaign {
 
     using SafeMath for uint256;
 
@@ -19,7 +20,6 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
      * Will be set once initial parameters are set and
      * will never be changed after that
      */
-    bool initialized;
 
     IncentiveModel incentiveModel; //Incentive model for rewards address twoKeyMaintainersRegistry;
 

@@ -7,8 +7,9 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyCampaignLogicHandler.sol";
+import "./InitializeCampaign.sol";
 
-contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConverterStates {
+contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConverterStates, InitializeCampaign {
 
     using SafeMath for uint256;
 
@@ -16,9 +17,7 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
 
     event ConversionCreated(uint conversionId);
 
-    bool isCampaignInitialized;
     uint numberOfConversions;
-
 
     /**
      * This array will represent counter values where position will be index (which counter) and value will be actual counter value
