@@ -26,16 +26,19 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
     )
     public
     {
-        // Requirement for campaign initialization
-        require(isCampaignInitialized == false);
+        // Set that campaign is initialized and unable calling this function anymore
+        initializeCampaign();
 
         // Set the contractor of the campaign
         contractor = _contractor;
 
+        // Set address of TWO_KEY_SINGLETON_REGISTRY
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
 
+        // Set address of twoKeyEventSource
         twoKeyEventSource = TwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"));
 
+        // Set address of twoKeyEconomy
         twoKeyEconomy = _twoKeyEconomy;
 
         // Set the moderator of the campaign
@@ -49,8 +52,6 @@ contract TwoKeyCPCCampaign is UpgradeableCampaign, TwoKeyBudgetCampaign {
 
         //Set mirror campaign on plasma
         mirrorCampaignOnPlasma = _mirrorCampaignOnPlasma;
-
-        isCampaignInitialized = true;
     }
 
 }

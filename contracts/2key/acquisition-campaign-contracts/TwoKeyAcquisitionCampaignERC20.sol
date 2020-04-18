@@ -39,7 +39,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     )
     public
     {
-        require(isCampaignInitialized == false); // Security layer to make sure the function will act as a constructor
+        // Make sure that this function can be called only once and campaign is initialized
+        initializeCampaign();
+
         require(values[0] <= 100*(10**18)); // Require that max referral reward is less than 100%
 
         contractor = _contractor;
@@ -71,8 +73,6 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         logicHandler = _twoKeyAcquisitionLogicHandler;
         conversionHandler = _conversionHandler;
         assetContractERC20 = _assetContractERC20;
-
-        isCampaignInitialized = true;
     }
 
 

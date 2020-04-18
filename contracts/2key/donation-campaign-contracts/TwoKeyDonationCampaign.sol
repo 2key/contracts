@@ -17,8 +17,6 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
  */
 contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveModels, TwoKeyCampaign {
 
-    bool initialized;
-
     bool acceptsFiat; // Will determine if fiat conversion can be created or not
 
 
@@ -33,7 +31,7 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
     )
     public
     {
-        require(initialized == false);
+        initializeCampaign();
         require(numberValues[0] <= 100*(10**18)); //Require that max referral reward percent is less than 100%
         contractor = _contractor;
         moderator = _moderator;
@@ -62,8 +60,6 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
 
         //Because of stack depth
         ITwoKeyDonationConversionHandler(conversionHandler).setExpiryConversionInHours(numberValues[10]);
-
-        initialized = true;
     }
 
 

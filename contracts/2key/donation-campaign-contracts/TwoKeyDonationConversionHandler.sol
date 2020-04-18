@@ -14,8 +14,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     Conversion [] public conversions;
     InvoiceToken public erc20InvoiceToken; // ERC20 token which will be issued as an invoice
 
-
-
     ITwoKeyDonationCampaign twoKeyCampaign;
 
     string currency;
@@ -55,8 +53,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     )
     public
     {
-        require(isCampaignInitialized == false);
-
+        initializeCampaign();
         counters = new uint[](12);
         twoKeyCampaign = ITwoKeyDonationCampaign(_twoKeyDonationCampaign);
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
@@ -67,7 +64,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
         erc20InvoiceToken = new InvoiceToken(tokenName,tokenSymbol,address(this));
         // Emit an event with deployed token address, name, and symbol
         emit InvoiceTokenCreated(address(erc20InvoiceToken), tokenName, tokenSymbol);
-        isCampaignInitialized = true;
     }
 
     function setExpiryConversionInHours(

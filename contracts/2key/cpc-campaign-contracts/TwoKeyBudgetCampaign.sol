@@ -121,7 +121,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(isInventoryAdded == false);
 
 		uint daiBalance = getTokenBalance(getAddressFromTwoKeySingletonRegistry("DAI"));
-		
+
 
 
 	}
@@ -310,6 +310,18 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	}
 
+	/**
+	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
+	 */
+	function addDirectly2KEYAsInventory()
+	public
+	onlyContractor
+	{
+		require(isInventoryAdded == false);
+		rewardsInventoryAmount = getTokenBalance();
+		isInventoryAdded = true;
+	}
+
 
 	/**
      * @notice 			Function to withdraw remaining rewards inventory in the contract
@@ -355,7 +367,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyMaintainer
 	{
-		require(merkleRoot == 0, 'merkle root already defined');
+		require(merkleRoot == 0);
 		merkleRoot = _merkleRoot;
 	}
 

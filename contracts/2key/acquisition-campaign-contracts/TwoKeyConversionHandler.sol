@@ -52,7 +52,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     )
     public
     {
-        require(isCampaignInitialized == false);
+        initializeCampaign();
         counters = new uint[](11);
 
         expiryConversionInHours = values[0];
@@ -74,7 +74,6 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         assetContractERC20 =_assetContractERC20;
         twoKeyEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource");
         twoKeyBaseReputationRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry");
-        isCampaignInitialized = true;
     }
 
 

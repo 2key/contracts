@@ -28,8 +28,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
     )
     public
     {
-        require(initialized == false);
-
+        initializeCampaign();
         twoKeyCampaign = _twoKeyDonationCampaign;
         conversionHandler = _twoKeyDonationConversionHandler;
 
@@ -69,7 +68,6 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         ALLOWED_GAP = 1000000000000000000; //1 USD allowed GAP for ETH conversions in case FIAT is campaign currency
 
         ownerPlasma = plasmaOf(contractor);
-        initialized = true;
     }
 
     function checkAllRequirementsForConversionAndTotalRaised(address converter, uint conversionAmount, uint debtPaid) public returns (bool,uint) {
