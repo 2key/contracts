@@ -978,6 +978,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         }
     }
 
+    function buy2KEYWithStableCoin(
+        uint _stableCoinUnits,
+        address _beneficiary
+    )
+    public
+    onlyValidatedContracts
+    {
+        //TODO: to be implemented, need to sync with BE team
+    }
+
 
     /**
      * @notice          Function which will be called by 2key campaigns if user wants to withdraw his earnings in stableCoins
