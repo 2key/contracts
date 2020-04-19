@@ -185,18 +185,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @dev             Determines how ETH is stored/forwarded on purchases.
-     */
-    function _forwardFunds(
-        address twoKeyAdminAddress
-    )
-    internal
-    {
-        twoKeyAdminAddress.transfer(msg.value);
-    }
-
-
-    /**
      * @notice          Function to calculate how much pnercentage will be deducted from values
      */
     function calculatePercentageToDeduct(
@@ -1250,8 +1238,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyTwoKeyAdmin
     {
-        //TODO: Fix msg.value not existing
-        _forwardFunds(msg.sender);
+        (msg.sender).transfer(address(this).balance);
     }
 
 
