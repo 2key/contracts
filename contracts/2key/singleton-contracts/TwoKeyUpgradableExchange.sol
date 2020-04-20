@@ -11,7 +11,10 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/IBancorContract.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/ITwoKeyReg.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
+
 import "../upgradability/Upgradeable.sol";
+
 
 import "../libraries/SafeMath.sol";
 import "../libraries/GetCode.sol";
@@ -461,12 +464,18 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
         uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
-        uint _daiWeiToReduce = getUSDStableCoinAmountFrom2keyUnits(amountOfTokensWithdrawn, _contractID);
+        uint _daiWeiToReduceFromAvailableAndFillReserve = getUSDStableCoinAmountFrom2keyUnits(amountOfTokensWithdrawn, _contractID);
 
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiToReduce));
-        setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailable.sub(_daiWeiToReduce));
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiToReduceFromAvailableAndFillReserve));
+        setUint(_daiWeiAvailableToWithdrawKeyHash, _daiWeiAvailable.sub(_daiWeiToReduceFromAvailableAndFillReserve));
+
+        // Emit the event that DAI is released
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDAIReleasedAsIncome(
+            msg.sender,
+            _daiWeiToReduceFromAvailableAndFillReserve
+        );
     }
 
 
@@ -661,17 +670,23 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
         // Get DAI available
-        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(campaignID);
+        uint _daiWeiAvailableToWithdrawAndFillReserve = daiWeiAvailableToWithdraw(campaignID);
 
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable));
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailableToWithdrawAndFillReserve));
 
         // Set DAI available for this campaign to 0 since we will release everything to reserve
         setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
 
         // Send the tokens to the campaign
         _processPurchase(msg.sender, amountOf2KeyRequested);
+
+        // Emit the event that DAI is released
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDAIReleasedAsIncome(
+            msg.sender,
+            _daiWeiAvailableToWithdrawAndFillReserve
+        );
     }
 
 
@@ -748,12 +763,19 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
-        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(_contractID);
+        uint _daiWeiAvailableToWithdrawAndFillReserve = daiWeiAvailableToWithdraw(_contractID);
 
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable));
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailableToWithdrawAndFillReserve));
         setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
+
+        // Emit the event that DAI is released
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDAIReleasedAsIncome(
+            msg.sender,
+            _daiWeiAvailableToWithdrawAndFillReserve
+        );
+
     }
 
     /**
@@ -790,10 +812,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractID);
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
-        uint _daiWeiAvailable = daiWeiAvailableToWithdraw(contractID);
+        uint _daiWeiAvailableToWithdrawAndFillReserve = daiWeiAvailableToWithdraw(contractID);
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailable));
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailableToWithdrawAndFillReserve));
         setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
 
         //Take 2key tokens to the liquidity pool
@@ -801,6 +823,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             msg.sender,
             address(this),
             amountOf2key
+        );
+
+        // Emit the event that DAI is released
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDAIReleasedAsIncome(
+            msg.sender,
+            _daiWeiAvailableToWithdrawAndFillReserve
         );
     }
 

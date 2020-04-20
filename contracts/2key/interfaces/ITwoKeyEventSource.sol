@@ -73,4 +73,10 @@ contract ITwoKeyEventSource {
         uint _amountOfTokens
     )
     public;
+
+    function emitDAIReleasedAsIncome(
+        address _campaignContractAddress,
+        uint _amountOfDAI
+    )
+    public;
 }

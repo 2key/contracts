@@ -210,6 +210,10 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         string newHandle
     );
 
+    event DaiReleased(
+        address contractSenderAddress,
+        uint amountOfDAI
+    );
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -607,6 +611,26 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+
+    /**
+     * @notice          Function to emit an event whenever DAI is released as an income
+     *
+     * @param           _campaignContractAddress is campaign contract address
+     * @param           _amountOfDAI is the amount of DAI being released
+     */
+    function emitDAIReleasedAsIncome(
+        address _campaignContractAddress,
+        uint _amountOfDAI
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange"));
+
+        emit DaiReleased(
+            _campaignContractAddress,
+            _amountOfDAI
+        );
+    }
 
     /**
      * @notice Function to check adequate plasma address for submitted eth address
