@@ -16,8 +16,9 @@ spinner 2
 
 
 echo "TwoKeyAdmin new version:                    1.0.16"
-echo "TwoKeyUpgradableExchange new version:       1.0.7"
+echo "TwoKeyUpgradableExchange new version:       1.0.8"
 echo "TwoKeyRegistry new version:                 1.0.5"
+echo "TwoKeyEventSource new version:              1.0.12"
 echo "TOKEN_SELL campaign new version:            1.0.35"
 
 
@@ -29,7 +30,8 @@ cd ../..
 
 python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.16
 python3 generate_bytecode.py upgradeContract TwoKeyRegistry 1.0.5
-python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.7
+python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.8
+python3 generate_bytecode.py upgradeContract TwoKeyEventSource 1.0.12
 python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.35
 
 
