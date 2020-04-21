@@ -363,6 +363,34 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         );
 	}
 
+	/**
+	 * @notice			Contract to disable trade through Kyber
+	 *
+	 * @param			reserveContract is the address of reserve contract
+	 */
+	function disableTradeInKyber(
+		address reserveContract
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IKyberNetworkInterface(reserveContract).disableTrade();
+	}
+
+
+	/**
+	 * @notice			Contract to enable trade through Kyber
+	 *
+	 * @param			reserveContract is the address of reserve contract
+	 */
+	function enableTradeInKyber(
+		address reserveContract
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IKyberNetworkInterface(reserveContract).enableTrade();
+	}
 
     /**
      * @notice          Function to call withdraw on KyberReserve.sol contract
