@@ -541,7 +541,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	view
 	returns (uint)
 	{
-		PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
 	}
 
 
