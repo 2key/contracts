@@ -328,6 +328,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		);
 	}
 
+
     /**
      * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
      *                  contract, it can be called only by TwoKeyAdmin.sol contract
@@ -363,6 +364,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         );
 	}
 
+
 	/**
 	 * @notice			Contract to disable trade through Kyber
 	 *
@@ -391,6 +393,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		IKyberNetworkInterface(reserveContract).enableTrade();
 	}
+
 
     /**
      * @notice          Function to call withdraw on KyberReserve.sol contract
@@ -432,7 +435,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
 	}
-
 
 
 	/**
@@ -478,7 +480,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return getUint(_rewardReleaseAfter);
 	}
-
 
 
 	/**
