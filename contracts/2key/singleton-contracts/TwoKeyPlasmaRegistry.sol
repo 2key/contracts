@@ -224,10 +224,10 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         // Take the signer of the message
         address messageSigner = Call.recoverHash(hash, signature, 0);
 
-        // Assert that the message signer is the _sender in the arguments
-        require(messageSigner == userPublicAddress);
-
         address plasmaAddress = ethereum2plasma(userPublicAddress);
+
+        // Assert that the message signer is the _sender in the arguments
+        require(messageSigner == plasmaAddress);
 
         // Get current username for this user
         string memory currentUsername = getAddressToUsername(plasmaAddress);
