@@ -22,12 +22,8 @@ contract IKyberNetworkInterface {
         uint _minTokenToEthRateInPrecision
     ) public;
 
-
-    /**
-     * @notice          Function to withdraw either ETH or 2KEY token from KyberReserve.sol contract
-     */
     function withdraw(ERC20 token, uint amount, address destination) public returns(bool);
-
     function disableTrade() public returns (bool);
     function enableTrade() public returns (bool);
+    function withdrawEther(uint amount, address sendTo) external;
 }

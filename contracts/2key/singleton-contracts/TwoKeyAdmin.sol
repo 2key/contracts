@@ -420,6 +420,25 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+	/**
+	 * @notice			Function to withdraw ether from Kyber reserve
+	 *
+	 * @param			kyberReserveContractAddress is the address of reserve
+	 * @param			amountOfEth is the amount of Ether to be withdrawn, in WEI
+	 */
+	function withdrawEtherFromKyberReserve(
+		address kyberReserveContractAddress,
+		uint amountOfEth
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IKyberNetworkInterface(kyberReserveContractAddress).withdrawEther(
+			amountOfEth,
+			address(this)
+		);
+	}
+
 
 	/**
 	 * @notice 			Function to get uint from the storage
