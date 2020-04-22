@@ -146,8 +146,7 @@ describe('CPC campaign', () => {
     it('should set on plasma contract inventory amount from maintainer', async() => {
         printTestNumber();
         let amountOfTokensAdded = await twoKeyProtocol.CPCCampaign.getInitialBountyAmount(campaignPublicAddress);
-        let maxNumberOfConversions = Math.floor(amountOfTokensAdded / parseFloat(twoKeyProtocol.Utils.fromWei(campaignObject.bountyPerConversionWei,'ether').toString()));
-        let txHash = await twoKeyProtocol.CPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), maxNumberOfConversions, twoKeyProtocol.plasmaAddress);
+        let txHash = await twoKeyProtocol.CPCCampaign.setTotalBountyPlasma(campaignAddress, twoKeyProtocol.Utils.toWei(amountOfTokensAdded,'ether'), twoKeyProtocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
 
     it('should set that public contract is valid from maintainer', async() => {
@@ -160,15 +159,6 @@ describe('CPC campaign', () => {
         let txHash = await twoKeyProtocol.CPCCampaign.validatePublicContract(campaignAddress, from);
         await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(TIMEOUT_LENGTH);
-
-    it('should get max number of conversions', async() => {
-        printTestNumber();
-        let maxNumberOfConversions = await twoKeyProtocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
-        console.log(maxNumberOfConversions);
-        expect(maxNumberOfConversions).to.be.equal(98);
-    }).timeout(TIMEOUT_LENGTH);
-
-
 
     it('should proof that plasma contract is validated well from maintainer side', async() => {
         printTestNumber();
