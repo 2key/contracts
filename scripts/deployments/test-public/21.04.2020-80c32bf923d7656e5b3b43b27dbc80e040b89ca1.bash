@@ -15,13 +15,13 @@ spinner() {
 spinner 2
 
 
-echo "TwoKeyAdmin new version:                    1.0.17"
+echo "TwoKeyAdmin new version:                    1.0.18"
 
 echo "Destination for execution: 0xf4797416e6b6835114390591d3ac6a531a061396"
 
 cd ../..
 
-python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.17
+python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.18
 
 
 
