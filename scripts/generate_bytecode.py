@@ -114,6 +114,12 @@ def generate_bytecode_for_disabling_kyber_trade(reserve_contract_address):
     values = [reserve_contract_address]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_withdrawing_ether_from_reserve(reserve_contract_address, amount_of_ether):
+    amount_of_ether = int(amount_of_ether)
+    method_name_and_params = "withdrawEtherFromKyberReserve(address,uint256)"
+    types = ["address","uint256"]
+    values = [reserve_contract_address, amount_of_ether]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
@@ -199,4 +205,6 @@ if __name__ == "__main__":
         generate_bytecode_for_enabling_kyber_trade(sys.argv[2])
     if(arg1 == "disableKyberTrade"):
         generate_bytecode_for_disabling_kyber_trade(sys.argv[2])
+    if(arg1 == "withdrawEtherFromReserve"):
+        generate_bytecode_for_withdrawing_ether_from_reserve(sys.argv[2],sys.argv[3])
     print_line()

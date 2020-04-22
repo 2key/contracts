@@ -22,3 +22,17 @@ _minTokenToEthRateInPrecision: 52239000000000
 - `$ cd scripts/deployments/test-public`
 - `Checksum that the values passed in the script 11.04.2020-setLiquidityParams-kyber.bash are matching the ones you got in the log`
 - Execute the script `$ bash ./11.04.2020-setLiquidityParams-kyber.bash`
+
+
+#### How to change on-going reserve with some params
+
+- First of all need to run `disableTrade()` function in KyberReserve contract. That
+can be done by calling the following bytecode generator 
+and executing it through `TwoKeyCongress.sol`: `$ python3 generate_bytecode disableKyberTrade`
+- After Kyber trade is disabled, for the rebalancing you need to pull ETH from contract (leave how much you want)
+That can be done by calling the following bytecode generator and executing it through `TwoKeyCongress.sol`:
+ `$ python3 generate_bytecode withdrawEtherFromReserve <kyber_reserve_address> <amount_in_wei>`
+- Then again `setLiquidityParams` should be called
+- After all, we must make sure to enable trade in Kyber by calling 
+ `disableTrade()` function in KyberReserve contract. 
+
