@@ -15,8 +15,7 @@ spinner() {
 spinner 2
 
 
-echo "Set liquidity params through TwoKeyAdmin contract on Kyber network"
-
+echo "Kyber APR maintainance"
 echo "Destination for execution is TwoKeyAdmin address : 0x8430db5eba7745eab1904d173129b7965190055a"
 
 cd ../..
