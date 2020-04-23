@@ -24,7 +24,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      3 pendingConversions
      4 rejectedConversions
      5 executedConversions
-     6 totalBounty
+     6 totalBountyPaid
      */
     uint [] counters;               // Array of counters, described above
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
@@ -856,6 +856,17 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
     }
 
-
+    /**
+     * @notice          Function to return total bounty for campaign,
+     *                  how much of the bounty is available and how much
+     *                  of the total bounty is being paid
+     */
+    function getAvailableBountyForCampaign()
+    public
+    view
+    returns (uint,uint,uint)
+    {
+        return (totalBountyForCampaign,totalBountyForCampaign.sub(counters[6]), counters[6]);
+    }
 
 }
