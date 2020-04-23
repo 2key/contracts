@@ -126,6 +126,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         Conversion storage c = conversions[conversionId];
         // Update state of conversion to EXECUTED
         c.state = ConversionState.EXECUTED;
+
+        // Get the address of plasma event source
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+
         // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
         if(getNumberOfUsersToContractor(converter) > 0 && counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign) {
             //Get moderator fee percentage
@@ -142,6 +146,10 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             c.bountyPaid = bountyToBeDistributed;
             //Increment how much bounty is paid
             counters[6] = counters[6] + bountyToBeDistributed; // Total bounty paid
+
+            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitConversionPaidEvent(
+                conversionId
+            );
         }
 
         counters[0]--; //Decrement number of pending converters
@@ -150,7 +158,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         counters[5]++; //increment number of executed conversions
 
         //Emit event through TwoKeyEventSource that conversion is approved and executed
-        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionExecutedEvent(
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitConversionExecutedEvent(
             conversionId
         );
     }
