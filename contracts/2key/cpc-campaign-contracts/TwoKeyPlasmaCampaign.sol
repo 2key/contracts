@@ -68,15 +68,32 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    modifier contractNotLocked {                    // Modifier which requires that contract is not locked (locked == ended)
-        require(merkleRoot == 0);
-        _;
+    /**
+     * @notice          Function to check if campaign is active in terms of time set
+     */
+    function isCampaignActiveInTermsOfTime()
+    internal
+    view
+    returns (bool)
+    {
+        if(campaignStartTime <= block.timestamp && block.timestamp <= campaignEndTime) {
+            return true;
+        }
+        return false;
     }
 
-    modifier onlyIfContractActiveInTermsOfTime {    // Modifier which requires that contract is active in terms of time
-        require(campaignStartTime <= block.timestamp && block.timestamp <= campaignEndTime);
-        _;
+
+    /**
+     * @notice          Function to check if contractor decided to end campaign
+     */
+    function isCampaignEndedByContractor()
+    internal
+    view
+    returns (bool)
+    {
+        return merkleRoot == 0 ? false : true;
     }
+
 
     /**
      * @dev             Transfer tokens from one address to another
