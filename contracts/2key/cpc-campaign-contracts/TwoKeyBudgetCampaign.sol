@@ -31,7 +31,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	bool public boughtRewardsWithEther;				// Variable to let us know if rewards have been bought with Ether
 	uint public usd2KEYrateWei;						// Dollar to 2key rate in WEI at the moment of adding inventory
 	uint public bountyPerConversion;				// Bounty how contractor wants referrers to split per conversion
-	uint public rewardsInventoryAmount;				// Amount for rewards inventory
+	uint public initialInventoryAmount;				// Amount for rewards inventory added firstly
 	uint public moderatorTotalEarnings;				// Amount representing how much moderator has earned
 	uint public moderatorEarningsBalance;			// Amount representing how much moderator has now
 
@@ -70,10 +70,24 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 
-    /**
-	 * @notice Function to add fiat inventory for rewards
-	 * @dev only contractor can add this inventory
+	/**
+	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
 	 */
+	function addDirectly2KEYAsInventory()
+	public
+	onlyContractor
+	{
+		require(isInventoryAdded == false);
+		require(merkleRoot == 0); // Require thata campaign is not locked
+		initialInventoryAmount = getTokenBalance();
+		isInventoryAdded = true;
+	}
+
+
+	/**
+     * @notice Function to add fiat inventory for rewards
+     * @dev only contractor can add this inventory
+     */
 	function buyReferralBudgetWithEth()
 	public
 	onlyContractor
@@ -83,7 +97,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(isInventoryAdded == false);
 
 		boughtRewardsWithEther = true;
-		(rewardsInventoryAmount,usd2KEYrateWei) = buyTokensFromUpgradableExchange(msg.value, address(this));
+		(initialInventoryAmount,usd2KEYrateWei) = buyTokensFromUpgradableExchange(msg.value, address(this));
 
 		isInventoryAdded = true;
 	}
@@ -262,18 +276,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			balance
 		);
 
-	}
-
-	/**
-	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
-	 */
-	function addDirectly2KEYAsInventory()
-	public
-	onlyContractor
-	{
-		require(isInventoryAdded == false);
-		rewardsInventoryAmount = getTokenBalance();
-		isInventoryAdded = true;
 	}
 
 
