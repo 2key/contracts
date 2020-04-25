@@ -18,13 +18,12 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * be implemented by all budget campaigns in future
 	 */
 
-
 	bytes32 public merkleRoot;						// Merkle root
 	address public mirrorCampaignOnPlasma;			// Address of campaign deployed to plasma network
 	bool public isValidated;						// Flag to determine if campaign is validated
-	address[] activeInfluencers;					// Active influencer means that he has at least on participation in successful conversion
+	address[] activeInfluencers;						// Active influencer means that he has at least on participation in successful conversion
 
-	mapping(address => bool) isActiveInfluencer;	// Mapping active influencers
+	mapping(address => bool) isActiveInfluencer;		// Mapping active influencers
 	mapping(address => uint) activeInfluencer2idx;	// His index position in the array
 
 	bool public isInventoryAdded;					// Selector if inventory is added
