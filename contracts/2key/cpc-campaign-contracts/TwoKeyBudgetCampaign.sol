@@ -17,7 +17,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
 	 */
-
+	uint [] bountiesAdded;
 	bytes32 public merkleRoot;						// Merkle root
 	address public mirrorCampaignOnPlasma;			// Address of campaign deployed to plasma network
 	bool public isValidated;						// Flag to determine if campaign is validated
@@ -67,8 +67,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		IERC20(twoKeyEconomy).transfer(receiver, amount);
 	}
-
-
+		//TODO: Add funnel for adding inventory multiple times
 	/**
 	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
 	 */
@@ -77,11 +76,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyContractor
 	{
 		require(isInventoryAdded == false);
-		require(merkleRoot == 0); // Require thata campaign is not locked
+		require(merkleRoot == 0); // Require that campaign is not locked
 		initialInventoryAmount = getTokenBalance();
 		isInventoryAdded = true;
 	}
-
 
 	/**
      * @notice Function to add fiat inventory for rewards
