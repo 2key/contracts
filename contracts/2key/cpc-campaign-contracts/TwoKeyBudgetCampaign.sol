@@ -79,8 +79,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyContractor
 	{
 		require(isInventoryAdded == false);
+
 		require(keccak256("USD") == keccak256(campaignCurrency));
 		rewardsInventoryAmount = get2KEYTokensBalance();
+
 		isInventoryAdded = true;
 	}
 
