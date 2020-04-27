@@ -87,44 +87,28 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
      *
      * @param           _username is the username of the user
      * @param           _userAddress is the address of the user
-     * @param           _fullName is the full name of the user
-     * @param           _email is the email address of the user
-     * @param           signature is the message user signed with his wallet
      */
     function addName(
         string _username,
-        address _userAddress,
-        string _fullName,
-        string _email,
-        bytes signature
+        address _userAddress
     )
     internal
     {
-        // Concat the arguments
-        string memory concatenatedValues = strConcat(_username, _fullName, _email);
-        // Generate hash
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
-            keccak256(abi.encodePacked(concatenatedValues))));
-
-        // Take the signer of the message
-        address message_signer = Call.recoverHash(hash, signature, 0);
-
-        // Assert that the message signer is the _sender in the arguments
-        require(message_signer == _userAddress);
+//        // Concat the arguments
+//        string memory concatenatedValues = strConcat(_username, _fullName, _email);
+//        // Generate hash
+//        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
+//            keccak256(abi.encodePacked(concatenatedValues))));
+//
+//        // Take the signer of the message
+//        address message_signer = Call.recoverHash(hash, signature, 0);
+//
+//        // Assert that the message signer is the _sender in the arguments
+//        require(message_signer == _userAddress);
 
         // Throw if user address already has some username assigned
         bytes memory currentUsernameAssignedToAddress = bytes(address2username(_userAddress));
         require(currentUsernameAssignedToAddress.length == 0);
-
-        // Generate the keys for the storage contract
-        bytes32 keyHashUsername = keccak256("addressToUserData", "username", _userAddress);
-        bytes32 keyHashFullName = keccak256("addressToUserData", "fullName", _userAddress);
-        bytes32 keyHashEmail = keccak256("addressToUserData", "email", _userAddress);
-
-        // Set the values
-        PROXY_STORAGE_CONTRACT.setString(keyHashUsername, _username);
-        PROXY_STORAGE_CONTRACT.setString(keyHashFullName, _fullName);
-        PROXY_STORAGE_CONTRACT.setString(keyHashEmail, _email);
 
         // Here also the validation for uniqueness for this username will be done
         addOrChangeUsernameInternal(_username, _userAddress);
@@ -198,21 +182,21 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     /**
      * @notice          Function to map plasma and ethereum addresses for the user
      *
-     * @param           signature is the message user signed so we can take his plasma_address
      * @param           ethereumAddress is the ethereum address of the user who signed the message
+     * @param           plasmaAddress is the plasma address of the user who signed the message
      *
      */
     function addPlasma2EthereumInternal(
-        bytes signature,
-        address ethereumAddress
+        address ethereumAddress,
+        address plasmaAddress
     )
     internal
     {
-        // Generate the hash
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(ethereumAddress))));
-
-        // Recover plasma address from the hash by signature
-        address plasmaAddress = Call.recoverHash(hash,signature,0);
+//        // Generate the hash
+//        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum address")),keccak256(abi.encodePacked(ethereumAddress))));
+//
+//        // Recover plasma address from the hash by signature
+//        address plasmaAddress = Call.recoverHash(hash,signature,0);
 
         // Generate the keys for the storage for 2 mappings we want to check and update
         bytes32 keyHashPlasmaToEthereum = keccak256("plasma2ethereum", plasmaAddress);
@@ -232,27 +216,17 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
      *
      * @param           _username is the username user want's to set
      * @param           _userAddress is the address of the user
-     * @param           _fullName is users full name
-     * @param           _email is the email address of the user
-     * @param           _username_walletName is the concatenated username and wallet name
-     * @param           _signatureUsername is the signature for name
-     * @param           _signatureWalletName is the signature for wallet name
      *
      */
     function addNameAndSetWalletName(
         string _username,
-        address _userAddress,
-        string _fullName,
-        string _email,
-        string _username_walletName,
-        bytes _signatureUsername,
-        bytes _signatureWalletName
+        address _userAddress
     )
     public
     onlyMaintainer
     {
-        addName(_username, _userAddress, _fullName, _email, _signatureUsername);
-        setWalletName(_username, _userAddress, _username_walletName, _signatureWalletName);
+        addName(_username, _userAddress);
+//        setWalletName(_username, _userAddress);
     }
 
 
@@ -305,30 +279,25 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice          Function to link plasma and ethereum addresses, and set the note for the user
-     *
-     * @param           signature is the signature containing various information
-     * @param           note is the note user wants to set
-     * @param           externalSignature is the external signature user created
+     * @notice          Function to link plasma and ethereum addresses
      */
     function setPlasma2EthereumAndNoteSigned(
-        bytes signature,
-        bytes note,
-        bytes externalSignature
+        address ethereum,
+        address plasma
     )
     public
     onlyMaintainer
     {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
-            keccak256(abi.encodePacked(signature,note))));
-
-        address ethereumAddress = Call.recoverHash(hash,externalSignature,0);
-
-        require(ethereumAddress != address(0));
+//        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to ethereum-plasma")),
+//            keccak256(abi.encodePacked(signature,note))));
+//
+//        address ethereumAddress = Call.recoverHash(hash,externalSignature,0);
+//
+//        require(ethereumAddress != address(0));
         // Link plasma 2 ethereum
-        addPlasma2EthereumInternal(signature, ethereumAddress);
+        addPlasma2EthereumInternal(ethereum, plasma);
         // Set note
-        setNoteInternal(note, ethereumAddress);
+//        setNoteInternal(note, ethereumAddress);
     }
 
 

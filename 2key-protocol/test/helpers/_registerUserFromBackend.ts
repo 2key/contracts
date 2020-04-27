@@ -28,8 +28,8 @@ export interface IRegistryData {
     signedUsername?: ISignedUsername,
 }
 
-async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereum, signedWallet, signedUsername }: IRegistryData = {}) {
-    // console.log('registerUserFromBackend', signedUser, signedPlasma, signedEthereum, signedWallet);
+async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereum, signedWallet, signedUsername }: IRegistryData = {}, userPublic, userPlasma) {
+    console.log('registerUserFromBackend', signedUser, signedPlasma, signedEthereum, signedWallet);
     console.log('\r\n');
     if (!signedUser && ! signedPlasma && !signedEthereum) {
         console.log('Nothing todo!');
@@ -72,7 +72,12 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     try {
         if (signedUser && signedWallet) {
             const txHash = await twoKeyProtocol.Registry.addNameAndWalletName(address, signedUser.name, signedUser.address, signedUser.fullname, signedUser.email, signedWallet.walletname, signedUser.signature, signedWallet.signature);
-            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
+            let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            console.log('Receipt for addNameAndSetWalletName');
+            console.log('---------------------------------------------------------------')
+            console.log(receipt);
+            console.log('---------------------------------------------------------------')
+            receipts.push(receipt);
         } else {
             try {
                 if (signedUser) {
@@ -99,8 +104,13 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     }
     if (signedPlasma) {
         try {
-            const txHash = await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma);
-            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
+            const txHash = await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma, userPublic, userPlasma);
+            console.log('Receipt for addPlasmaToEthereumAndNoteSigned');
+            console.log('---------------------------------------------------------------')
+            let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            console.log(receipt);
+            console.log('---------------------------------------------------------------')
+            receipts.push(receipt);
         } catch (e) {
             console.log('Error in Registry.addPlasma2EthereumByUser');
             return Promise.reject(e);
@@ -131,7 +141,7 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
 if (process.argv[2] && process.argv[2].startsWith('{')) {
     console.log(process.argv[2]);
     const data = JSON.parse(process.argv[2]);
-    registerUserFromBackend(data).then(() => {
+    registerUserFromBackend(data, process.argv[3],process.argv[4]).then(() => {
         console.log('done');
         process.exit(0);
     })

@@ -8,11 +8,10 @@ const TIMEOUT_LENGTH = 60000;
 
 const {[userIds.guest]: guest, ...availableUsers} = availableUsersInitial;
 
-const tryToRegisterUser = async ({protocol: twoKeyProtocol, ...user}, from) => {
+const tryToRegisterUser = async ({protocol: twoKeyProtocol, ...user}, from, fromPlasma) => {
 
   const registerData: IRegistryData = {};
   let error = false;
-
   try {
     registerData.signedUser = await twoKeyProtocol.Registry.signUserData2Registry(from, user.name, user.fullname, user.email)
   } catch {
@@ -40,7 +39,8 @@ const tryToRegisterUser = async ({protocol: twoKeyProtocol, ...user}, from) => {
   }
 
   try {
-    await registerUserFromBackend(registerData);
+      console.log('Here', from, twoKeyProtocol.plasmaAddress);
+    await registerUserFromBackend(registerData, from , twoKeyProtocol.plasmaAddress);
   } catch {
     error = true;
   }
@@ -56,7 +56,7 @@ describe('Should register all users on contract', async () => {
     const key = usersKeys[i];
     await it(`should register ${key}`, async () => {
       const {web3: {address}, ...user} = availableUsers[key];
-      await tryToRegisterUser(user, address);
+      await tryToRegisterUser(user, address, availableUsers[key].protocol.plasmaAddress);
     }).timeout(TIMEOUT_LENGTH);
   }
 });
