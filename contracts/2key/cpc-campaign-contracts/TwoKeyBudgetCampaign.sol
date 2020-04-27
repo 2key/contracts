@@ -76,8 +76,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyContractor
 	{
 		require(isInventoryAdded == false);
-		require(merkleRoot == 0); // Require that campaign is not locked
+
 		initialInventoryAmount = getTokenBalance();
+
 		isInventoryAdded = true;
 	}
 

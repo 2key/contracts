@@ -10,7 +10,7 @@ import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyDeepFreezeTokenPool.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/IUpgradableExchange.sol";
-import "../interfaces/IKyberNetworkInterface.sol";
+import "../interfaces/IKyberReserveInterface.sol";
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../libraries/SafeMath.sol";
@@ -352,7 +352,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	onlyTwoKeyCongress
 	{
         // Call on the contract set liquidity params
-        IKyberNetworkInterface(liquidityConversionRatesContractAddress).setLiquidityParams(
+        IKyberReserveInterface(liquidityConversionRatesContractAddress).setLiquidityParams(
             _rInFp,
             _pMinInFp,
             _numFpBits,
@@ -376,7 +376,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		IKyberNetworkInterface(reserveContract).disableTrade();
+		IKyberReserveInterface(reserveContract).disableTrade();
 	}
 
 
@@ -391,7 +391,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		IKyberNetworkInterface(reserveContract).enableTrade();
+		IKyberReserveInterface(reserveContract).enableTrade();
 	}
 
 
@@ -413,7 +413,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     onlyTwoKeyCongress
     {
         // Call on the contract withdraw function
-        IKyberNetworkInterface(kyberReserveContractAddress).withdraw(
+        IKyberReserveInterface(kyberReserveContractAddress).withdraw(
             tokenToWithdraw,
             amountToBeWithdrawn,
             receiverAddress
@@ -433,7 +433,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		IKyberNetworkInterface(kyberReserveContractAddress).withdrawEther(
+		IKyberReserveInterface(kyberReserveContractAddress).withdrawEther(
 			amountOfEth,
 			address(this)
 		);
