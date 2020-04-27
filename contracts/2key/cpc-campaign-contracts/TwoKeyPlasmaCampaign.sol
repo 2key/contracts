@@ -24,7 +24,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      3 pendingConversions
      4 rejectedConversions
      5 executedConversions
-     6 totalBounty
+     6 totalBountyPaid
      */
     uint [] counters;               // Array of counters, described above
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
@@ -43,7 +43,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     address public contractorPublicAddress;         // Contractor address on public chain
     address public mirrorCampaignOnPublic;          // Address of campaign deployed to public eth network
     uint public moderatorTotalEarnings;             // Total rewards which are going to moderator
-    uint public maxNumberOfConversions;             // Maximal number of conversions campaign can support
 
     uint campaignStartTime;                         // Time when campaign start
     uint campaignEndTime;                           // Time when campaign ends
@@ -426,23 +425,15 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *                  and how many tokens are paid per conversion for the influencers
      * @dev             This can be only called by maintainer
      * @param           _totalBounty is the total bounty for this campaign
-     * @param           _maxNumberOfConversions is the maximal number of conversions campaign can support
      */
     function setTotalBounty(
-        uint _totalBounty,
-        uint _maxNumberOfConversions
+        uint _totalBounty
     )
     public
     onlyMaintainer
     {
-        // So if contractor adds more bounty we can increase it
+        // Leave that contractor can increase bounty if he wants
         totalBountyForCampaign = totalBountyForCampaign.add(_totalBounty);
-        if(_totalBounty == 0 && bountyPerConversionWei == 0) {
-            maxNumberOfConversions = _maxNumberOfConversions == 0 ? uint256(-1) : _maxNumberOfConversions;
-        } else {
-            maxNumberOfConversions = totalBountyForCampaign.div(bountyPerConversionWei);
-            require(maxNumberOfConversions == _maxNumberOfConversions);
-        }
     }
 
 
@@ -865,6 +856,17 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
     }
 
-
+    /**
+     * @notice          Function to return total bounty for campaign,
+     *                  how much of the bounty is available and how much
+     *                  of the total bounty is being paid
+     */
+    function getAvailableBountyForCampaign()
+    public
+    view
+    returns (uint,uint,uint)
+    {
+        return (totalBountyForCampaign,totalBountyForCampaign.sub(counters[6]), counters[6]);
+    }
 
 }

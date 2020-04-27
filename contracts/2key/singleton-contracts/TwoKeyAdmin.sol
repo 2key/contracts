@@ -328,6 +328,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		);
 	}
 
+
     /**
      * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
      *                  contract, it can be called only by TwoKeyAdmin.sol contract
@@ -364,6 +365,36 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+	/**
+	 * @notice			Contract to disable trade through Kyber
+	 *
+	 * @param			reserveContract is the address of reserve contract
+	 */
+	function disableTradeInKyber(
+		address reserveContract
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IKyberNetworkInterface(reserveContract).disableTrade();
+	}
+
+
+	/**
+	 * @notice			Contract to enable trade through Kyber
+	 *
+	 * @param			reserveContract is the address of reserve contract
+	 */
+	function enableTradeInKyber(
+		address reserveContract
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IKyberNetworkInterface(reserveContract).enableTrade();
+	}
+
+
     /**
      * @notice          Function to call withdraw on KyberReserve.sol contract
      *                  It can be only called by TwoKeyAdmin.sol contract
@@ -389,6 +420,25 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+	/**
+	 * @notice			Function to withdraw ether from Kyber reserve
+	 *
+	 * @param			kyberReserveContractAddress is the address of reserve
+	 * @param			amountOfEth is the amount of Ether to be withdrawn, in WEI
+	 */
+	function withdrawEtherFromKyberReserve(
+		address kyberReserveContractAddress,
+		uint amountOfEth
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IKyberNetworkInterface(kyberReserveContractAddress).withdrawEther(
+			amountOfEth,
+			address(this)
+		);
+	}
+
 
 	/**
 	 * @notice 			Function to get uint from the storage
@@ -404,7 +454,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
 	}
-
 
 
 	/**
@@ -450,7 +499,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return getUint(_rewardReleaseAfter);
 	}
-
 
 
 	/**
@@ -513,7 +561,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	view
 	returns (uint)
 	{
-		PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
 	}
 
 

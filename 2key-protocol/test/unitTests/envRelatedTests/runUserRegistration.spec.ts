@@ -97,15 +97,17 @@ describe('Setup of users data', async () => {
 });
 
 let signature;
+let signaturePlasma;
 let userAddress;
 let newUsername;
-describe('Should generate signature to change username', async() => {
-  await it('should generate signature to change username for Nikola user', async() => {
+describe('Should generate signatures to change username', async() => {
+  await it('should generate signatures to change username for Nikola user', async() => {
       let {protocol, web3: {address, mnemonic}} = availableUsers[userIds.nikola];
       try {
         newUsername = Math.random().toString(36).substr(2, 5);
         userAddress = address;
         signature = await protocol.Registry.signNewUsername2Registry(address, newUsername);
+        signaturePlasma = await protocol.PlasmaEvents.signNewUsername2PlasmaRegistry(protocol.plasmaAddress, newUsername);
       } catch (error) {
           if (error.message !== 'gas required exceeds allowance or always failing transaction') {
               throw error;
@@ -142,7 +144,7 @@ describe('Should change username from maintainer on private', async() => {
   await it('should change username from the maintainer address for Nikola user on PRIVATE network', async() => {
       const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.buyer];
       try {
-            await protocol.PlasmaEvents.changeUsername(newUsername, userAddress, signature, protocol.plasmaAddress);
+            await protocol.PlasmaEvents.changeUsername(newUsername, userAddress, signaturePlasma, protocol.plasmaAddress);
       } catch (error) {
           console.log('Error: ',error);
       }

@@ -93,6 +93,14 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
 
 
     /**
+     * @notice          Event emitted whenever conversion which is executed is being paid
+     */
+    event ConversionPaid(
+        address campaignAddressPlasma,
+        uint conversionID
+    );
+
+    /**
      * @notice          Event emitted when conversion on budget campaigns is rejected
      */
     event ConversionRejected(
@@ -204,7 +212,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
      * @param           conversionID is the ID of the conversion being executed
      */
     function emitConversionExecutedEvent(
-    uint conversionID
+        uint conversionID
     )
     public
     onlyWhitelistedCampaigns
@@ -213,6 +221,21 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
             msg.sender,
             conversionID
         );
+    }
+
+
+    /**
+     * @notice          Function to emit event that conversion is being paid
+     *
+     * @param           conversionID is the ID of conversion being executed
+     */
+    function emitConversionPaidEvent(
+        uint conversionID
+    )
+    public
+    onlyWhitelistedCampaigns
+    {
+        emit ConversionPaid(msg.sender, conversionID);
     }
 
 

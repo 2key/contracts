@@ -17,19 +17,20 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
 	 */
+	uint [] bountiesAdded;
 	bytes32 public merkleRoot;						// Merkle root
 	address public mirrorCampaignOnPlasma;			// Address of campaign deployed to plasma network
 	bool public isValidated;						// Flag to determine if campaign is validated
-	address[] activeInfluencers;					// Active influencer means that he has at least on participation in successful conversion
+	address[] activeInfluencers;						// Active influencer means that he has at least on participation in successful conversion
 
-	mapping(address => bool) isActiveInfluencer;	// Mapping active influencers
+	mapping(address => bool) isActiveInfluencer;		// Mapping active influencers
 	mapping(address => uint) activeInfluencer2idx;	// His index position in the array
 
 	bool public isInventoryAdded;					// Selector if inventory is added
 	bool public boughtRewardsWithEther;				// Variable to let us know if rewards have been bought with Ether
 	uint public usd2KEYrateWei;						// Dollar to 2key rate in WEI at the moment of adding inventory
-	uint public bountyPerConversion;				// Bounty per click, specified in campaign rewards currency
-	uint public rewardsInventoryAmount;				// Amount for rewards inventory
+	uint public bountyPerConversion;				// Bounty how contractor wants referrers to split per conversion
+	uint public initialInventoryAmount;				// Amount for rewards inventory added firstly
 	uint public moderatorTotalEarnings;				// Amount representing how much moderator has earned
 	uint public moderatorEarningsBalance;			// Amount representing how much moderator has now
 
@@ -47,6 +48,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		isValidated = true;
 	}
+
 
 	/**
      * @notice Internal function to check the balance of the specific ERC20 on this contract
@@ -105,7 +107,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(isInventoryAdded == false);
 
 		boughtRewardsWithEther = true;
-		(rewardsInventoryAmount,usd2KEYrateWei) = buyTokensFromUpgradableExchange(msg.value, address(this));
+		(initialInventoryAmount,usd2KEYrateWei) = buyTokensFromUpgradableExchange(msg.value, address(this));
 
 		isInventoryAdded = true;
 	}
@@ -286,6 +288,17 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	}
 
+	/**
+	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
+	 */
+	function addDirectly2KEYAsInventory()
+	public
+	onlyContractor
+	{
+		require(isInventoryAdded == false);
+		rewardsInventoryAmount = getTokenBalance();
+		isInventoryAdded = true;
+	}
 
 
 	/**
@@ -455,4 +468,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
         uint currentERC20Balance = get2KEYTokensBalance();
         return currentERC20Balance.sub(reservedAmount2keyForRewards);
     }
+
+
+
 }

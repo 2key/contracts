@@ -102,6 +102,25 @@ def generate_bytecode_for_changing_moderator_fee_on_plasma(moderator_fee):
     values = [moderator_fee]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_enabling_kyber_trade(reserve_contract_address):
+    method_name_and_params = "enableTradeInKyber(address)"
+    types = ["address"]
+    values = [reserve_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_disabling_kyber_trade(reserve_contract_address):
+    method_name_and_params = "disableTradeInKyber(address)"
+    types = ["address"]
+    values = [reserve_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_withdrawing_ether_from_reserve(reserve_contract_address, amount_of_ether):
+    amount_of_ether = int(amount_of_ether)
+    method_name_and_params = "withdrawEtherFromKyberReserve(address,uint256)"
+    types = ["address","uint256"]
+    values = [reserve_contract_address, amount_of_ether]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
         _rInFp,
@@ -181,5 +200,11 @@ if __name__ == "__main__":
             sys.argv[8],
             sys.argv[9],
             sys.argv[10]
-         )
+        )
+    if(arg1 == "enableKyberTrade"):
+        generate_bytecode_for_enabling_kyber_trade(sys.argv[2])
+    if(arg1 == "disableKyberTrade"):
+        generate_bytecode_for_disabling_kyber_trade(sys.argv[2])
+    if(arg1 == "withdrawEtherFromReserve"):
+        generate_bytecode_for_withdrawing_ether_from_reserve(sys.argv[2],sys.argv[3])
     print_line()

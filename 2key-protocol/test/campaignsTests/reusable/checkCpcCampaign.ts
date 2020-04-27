@@ -149,22 +149,16 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
     const amountOfTokensAvailable = await protocol.CPCCampaign.getInitialBountyAmount(campaign.campaignAddressPublic);
 
-    const maxNumberOfConversionsCalculated = campaignParams.targetClicks
-      || Math.floor(
-        amountOfTokensAvailable /
-        campaignParams.bountyPerConversionWei
-      );
-
     await protocol.CPCCampaign.setTotalBountyPlasma(
       campaignAddress,
       protocol.Utils.toWei(amountOfTokensAvailable, 'ether'),
-      maxNumberOfConversionsCalculated,
       protocol.plasmaAddress
     );
-    await new Promise(resolve => setTimeout(resolve, 4000));
-    const maxNumberOfConversions = await protocol.CPCCampaign.getMaxNumberOfConversions(campaignAddress);
 
-    expect(maxNumberOfConversions).to.be.equal(maxNumberOfConversionsCalculated);
+    await new Promise(resolve => setTimeout(resolve, 4000));
+
+    const bounty = await protocol.CPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
+    expect(bounty.totalBounty).to.be.equal(amountOfTokensAvailable);
   }).timeout(TIMEOUT_LENGTH);
 
   it('should set that public contract is valid from maintainer', async () => {
