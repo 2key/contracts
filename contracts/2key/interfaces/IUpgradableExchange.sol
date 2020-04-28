@@ -72,4 +72,9 @@ contract IUpgradableExchange {
         uint approvedMinConversionRate
     )
     public;
+
+    function setKyberReserveInterfaceContractAddress(
+        address kyberReserveContractAddress
+    )
+    public;
 }

@@ -1324,10 +1324,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address kyberReserveContractAddress
     )
     public
-    onlyMaintainer
+    onlyTwoKeyAdmin
     {
-        // Require this method to be called only once. We can delete it once it's shipped to the production
-        require(getAddress(keccak256(kyberReserveContractAddress)) == address(0));
         setAddress(keccak256(_kyberReserveContract), kyberReserveContractAddress);
     }
 

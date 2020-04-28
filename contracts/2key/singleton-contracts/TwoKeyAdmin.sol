@@ -439,6 +439,17 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		);
 	}
 
+	function setKyberReserveContractAddressOnUpgradableExchange(
+		address kyberReserveContractAddress
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).setKyberReserveInterfaceContractAddress(
+			kyberReserveContractAddress
+		);
+	}
+
 
 	/**
 	 * @notice 			Function to get uint from the storage
