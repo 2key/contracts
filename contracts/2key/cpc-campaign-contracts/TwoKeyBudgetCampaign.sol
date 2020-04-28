@@ -38,7 +38,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 	/**
-     * @notice Function to validate that contracts plasma and public are well mirrored
+     * @notice 			Function to validate that contracts plasma and public are well mirrored
      */
 	function validateContractFromMaintainer()
 	public
@@ -49,7 +49,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 	/**
-     * @notice Internal function to check the balance of the specific ERC20 on this contract
+     * @notice 			Internal function to check the balance of the specific ERC20 on this contract
      */
 	function getTokenBalance()
 	internal
@@ -59,6 +59,12 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return IERC20(twoKeyEconomy).balanceOf(address(this));
 	}
 
+	/**
+	 * @notice 			Function to transfer 2KEY tokens
+	 *
+	 * @param			receiver is the address of tokens receiver
+	 * @param			amount is the amount of tokens to be transfered
+	 */
 	function transfer2KEY(
 		address receiver,
 		uint amount
@@ -67,9 +73,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		IERC20(twoKeyEconomy).transfer(receiver, amount);
 	}
+
 		//TODO: Add funnel for adding inventory multiple times
 	/**
-	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
+	 * @notice 			Function which assumes that contractor already called approve function on 2KEY token contract
 	 */
 	function addDirectly2KEYAsInventory()
 	public
@@ -83,8 +90,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 	/**
-     * @notice Function to add fiat inventory for rewards
-     * @dev only contractor can add this inventory
+     * @notice 			Function to add fiat inventory for rewards
+     * @dev				only contractor can add this inventory
      */
 	function buyReferralBudgetWithEth()
 	public
@@ -100,6 +107,11 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isInventoryAdded = true;
 	}
 
+
+	/**
+	 * @notice			Function to rebalance the rates in the contract depending of
+	 *					either 2KEY price went up or down after we bought tokens
+	 */
     function rebalanceRates()
     public
     onlyMaintainer
@@ -145,8 +157,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
     /**
-     * @notice Function which will reduce influencers balance in case 2key rate went up
-     * @param newRate is the new rate of 2key token
+     * @notice 			Function which will reduce influencers balance in case 2key rate went up
+     * @param 			newRate is the new rate of 2key token
      */
     function reduceBalance(
         uint newRate
@@ -187,8 +199,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     }
 
     /**
-     * @notice Function which will increase influencers balance in case 2key rate went down
-     * @param newRate is the new rate of 2key token
+     * @notice 			Function which will increase influencers balance in case 2key rate went down
+     * @param 			newRate is the new rate of 2key token
      */
     function increaseBalance(
         uint newRate
@@ -226,9 +238,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
     /**
-     * @notice Function to distribute rewards between all the influencers
-     * which have earned the reward once campaign is done
-     * @param influencers is the array of influencers
+     * @notice 			Function to distribute rewards between all the influencers
+     * 					which have earned the reward once campaign is done
+     * @param 			influencers is the array of influencers
      */
 	function distributeRewardsBetweenInfluencers(
 		address [] influencers
@@ -253,9 +265,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 	/**
-	 * @notice Wrapper function to pay the registration fee
-	 * @param influencerPlasma is the plasma address of the influencer
-	 * @param balance is the balance influencer earned
+	 * @notice 			Wrapper function to pay the registration fee
+	 * @param 			influencerPlasma is the plasma address of the influencer
+	 * @param 			balance is the balance influencer earned
 	 */
 	function payFeeForRegistration(
 		address influencerPlasma,
@@ -278,7 +290,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 	/**
-     * @notice Function to withdraw remaining rewards inventory in the contract
+     * @notice 			Function to withdraw remaining rewards inventory in the contract
      */
 	function withdrawRemainingRewardsInventory()
     public
@@ -294,7 +306,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 	/**
-	 * @notice validate a merkle proof.
+	 * @notice 			Function to validate the Merkle Proof
 	 */
 	function checkMerkleProof(
 		address influencer,
@@ -311,9 +323,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 	/**
-     * @notice set a merkle root of the amount each (active) influencer received.
-     *         (active influencer is an influencer that received a bounty)
-     *         the idea is that the contractor calls computeMerkleRoot on plasma and then set the value manually
+     * @notice 			set a merkle root of the amount each (active) influencer received.
+     *         			(active influencer is an influencer that received a bounty)
+     *         			the idea is that the contractor calls computeMerkleRoot on plasma and then set the value manually
      */
 	function setMerkleRoot(
 		bytes32 _merkleRoot
@@ -327,7 +339,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 	/**
-     * @notice Allow maintainers to push balances table
+     * @notice 			Allow maintainers to push balances table
+     *
+     * @param			influencers is the array of influencers
+     * @param			balances is the array of their balances
      */
 	function pushBalancesForInfluencers(
 		address [] influencers,
@@ -352,9 +367,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 	/**
-	 * @notice Function to set moderator earnings for the campaign
-	 * @param totalEarnings is the total amount of 2KEY tokens moderator earned
-	 * This function can be called only once.
+	 * @notice 			Function to set moderator earnings for the campaign
+	 * @param 			totalEarnings is the total amount of 2KEY tokens moderator earned
+	 * 					This function can be called only once.
 	 */
 	function setModeratorEarnings(
 		uint totalEarnings
@@ -370,7 +385,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	}
 
 	/**
-	 * @notice Function where maintainer can push earnings of moderator for the campaign
+	 * @notice 			Function where maintainer can push earnings of moderator for the campaign
 	 */
 	function distributeModeratorEarnings()
 	public
@@ -387,6 +402,13 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		moderatorEarningsBalance = 0;
 	}
 
+
+	/**
+	 * @notice 			Function to get array of influencers and their rewards
+	 *
+	 * @param			start is the starting index of influencers array
+	 * @param			end is the ending index of influencers array
+ 	 */
 	function getInfluencersWithPendingRewards(
 		uint start,
 		uint end
@@ -408,16 +430,24 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return (influencers, balances);
 	}
 
-
-	function getPlasmaOf(address _a)
+	/**
+	 * @notice			Function to get plasma address of a user
+	 *
+	 * @param			_address is the address for which we want to take plasma address
+	 */
+	function getPlasmaOf(address _address)
 	internal
 	view
 	returns (address)
 	{
-		return twoKeyEventSource.plasmaOf(_a);
+		return twoKeyEventSource.plasmaOf(_address);
 	}
 
-
+	/**
+	 * @notice			Function to get referrer total rewards and his current balance
+	 *
+	 * @param			_referrerPlasma is the plasma address of referrer (influencer)
+	 */
 	function getReferrerTotalRewardsAndCurrentBalance(
 		address _referrerPlasma
 	)
@@ -428,6 +458,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return (referrerPlasma2TotalEarnings2key[_referrerPlasma], referrerPlasma2Balances2key[_referrerPlasma]);
 	}
 
+
+	/**
+	 * @notice			Function to get the amount of bounty reserved for rewards
+	 */
 	function getReservedAmountForRewards()
 	public
 	view
@@ -436,6 +470,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return reservedAmount2keyForRewards;
 	}
 
+	/**
+	 * @notice			Function to get current available inventory on the contract
+ 	 */
     function getAvailableInventory()
     public
     view
