@@ -17,6 +17,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
 	 */
+
 	uint [] bountiesAdded;
 	bytes32 public merkleRoot;						// Merkle root
 	address public mirrorCampaignOnPlasma;			// Address of campaign deployed to plasma network
