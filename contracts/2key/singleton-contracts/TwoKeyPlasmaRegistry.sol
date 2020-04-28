@@ -162,6 +162,48 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
 
 
     /**
+     * @notice          Function to re-link username and address
+     *
+     * @param           signature is the signature user created
+     * @param           plasmaAddress is the plasma address of the user
+     * @param           username is username user want to set
+     */
+    function changeLinkedUsernameForAddress(
+        bytes signature,
+        address plasmaAddress,
+        string username
+    )
+    public
+    onlyMaintainer
+    {
+        // This can be called as many times as long plasma and ethereum are not linked
+        // Afterwards, only changeUsername can be called
+        require(plasma2ethereum(plasmaAddress) == address(0));
+        // Generate the hash
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
+
+        // Validate signature length
+        require (signature.length == 65);
+
+        // Recover plasma address from the hash
+        address plasma = Call.recoverHash(hash,signature,0);
+
+        // Assert that plasma address recovered is same as the one passed int he arguments
+        require(plasma == plasmaAddress);
+
+        // Assert that this username is not pointing to any address
+        require(getUsernameToAddress(username) == address(0));
+
+        // Store _addressToUsername and  _usernameToAddress
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), username);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasmaAddress);
+
+        // Emit event that plasma and username are linked
+        emitPlasma2Handle(plasmaAddress, username);
+    }
+
+
+    /**
      * @notice          Function to map plasma2ethereum and ethereum2plasma
      *
      * @param           plasmaAddress is the user plasma address
@@ -242,6 +284,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
 
         emitUsernameChangedEvent(plasmaAddress, newUsername);
     }
+
 
     /**
      * @notice          Function where Congress on plasma can set moderator fee
