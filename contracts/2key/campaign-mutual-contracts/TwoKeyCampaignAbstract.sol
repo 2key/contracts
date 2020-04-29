@@ -10,6 +10,8 @@ contract TwoKeyCampaignAbstract is ArcToken {
     using SafeMath for uint256;
     using Call for *;
 
+    bool isCampaignInitialized; // Representing if campaign "constructor" was called
+
     address public TWO_KEY_SINGLETON_REGISTRY;
 
     uint256 maxReferralRewardPercent; // maxReferralRewardPercent is actually bonus percentage in ETH
