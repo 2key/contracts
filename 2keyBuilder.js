@@ -434,7 +434,7 @@ async function deploy() {
     try {
         deployment = true;
         console.log("Removing truffle build, the whole folder will be deleted: ", buildPath);
-        rmDir(buildPath);
+        await rmDir(buildPath);
         await pullTenderlyConfiguration();
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
