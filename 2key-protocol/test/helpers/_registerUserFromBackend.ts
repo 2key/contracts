@@ -56,16 +56,16 @@ async function registerUserFromBackend({ signature, plasmaAddress, ethereumAddre
     const receipts = [];
 
     try {
-        const txHash = await twoKeyProtocol.Registry.addNameByMaintainer(username, ethereumAddress, address);
+        const txHash = await twoKeyProtocol.Registry.batchRegistrationByMaintainer(signature, username, ethereumAddress, plasmaAddress,address);
         let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-        console.log('Gas used for addName: ', receipt.gasUsed);
+        console.log('Gas used for batched registration (addName + addPlasma2Ethereum) : ', receipt.gasUsed);
         receipts.push(receipt);
     } catch (e) {
         console.log('Error in adding name by maintainer', e);
         return Promise.reject(e);
     }
 
-    try {
+    /*try {
         const txHash = await twoKeyProtocol.Registry.addPlasma2EthereumByMaintainer(signature, plasmaAddress, ethereumAddress, address);
         let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log('Gas used for addPlasma2Ethereum', receipt.gasUsed);
@@ -73,7 +73,7 @@ async function registerUserFromBackend({ signature, plasmaAddress, ethereumAddre
     } catch (e) {
         console.log('Error in setting plasma to ethereum by maintainer public chain', e);
         return Promise.reject(e);
-    }
+    }*/
 
     try {
         const txHash = await twoKeyProtocol.PlasmaEvents.setPlasma2EthereumByMaintainer(signature, plasmaAddress, ethereumAddress);

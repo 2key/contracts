@@ -92,8 +92,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         string _username,
         address _userEthereumAddress
     )
-    public
-    onlyMaintainer
+    internal
     {
         // Throw if user address already has some username assigned
         bytes memory currentUsernameAssignedToAddress = bytes(address2username(_userEthereumAddress));
@@ -101,6 +100,20 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
         // Here also the validation for uniqueness for this username will be done
         addOrChangeUsernameInternal(_username, _userEthereumAddress);
+    }
+
+
+    function registerUserByMaintainer(
+        bytes signature,
+        string username,
+        address ethereumAddress,
+        address plasmaAddress
+    )
+    public
+    onlyMaintainer
+    {
+        addName(username, ethereumAddress);
+        addPlasma2Ethereum(signature,plasmaAddress,ethereumAddress);
     }
 
 
@@ -118,8 +131,7 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         address plasmaAddress,
         address ethereumAddress
     )
-    public
-    onlyMaintainer
+    internal
     {
         // Generate the hash
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
