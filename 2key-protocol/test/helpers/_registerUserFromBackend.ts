@@ -11,30 +11,15 @@ import { ISignedPlasma, ISignedWalletData } from '../../src/registry/interfaces'
 import { ISignedEthereum, ISignedUsername } from '../../src/plasma/interfaces';
 
 
-interface IUser {
-    name: string,
-    address: string,
-    fullname: string,
-    email: string,
-    signature: string,
-}
-
 
 export interface IRegistryData {
-    signedUser?: IUser,
-    signedPlasma?: ISignedPlasma,
-    signedEthereum?: ISignedEthereum,
-    signedWallet?: ISignedWalletData,
-    signedUsername?: ISignedUsername,
+    signature?: string,
+    plasmaAddress?: string,
+    ethereumAddress?: string,
+    username?: string
 }
 
-async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereum, signedWallet, signedUsername }: IRegistryData = {}) {
-    // console.log('registerUserFromBackend', signedUser, signedPlasma, signedEthereum, signedWallet);
-    console.log('\r\n');
-    if (!signedUser && ! signedPlasma && !signedEthereum) {
-        console.log('Nothing todo!');
-        return Promise.resolve(true);
-    }
+async function registerUserFromBackend({ signature, plasmaAddress, ethereumAddress, username }: IRegistryData) {
     const deployerMnemonic = process.env.MNEMONIC_AYDNEP;
     const eventsNetUrls = [process.env.PLASMA_RPC_URL];
     const deployerPK = process.env.MNEMONIC_AYDNEP ? null : '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec';
@@ -69,61 +54,43 @@ async function registerUserFromBackend({ signedUser, signedPlasma, signedEthereu
     });
 
     const receipts = [];
+
     try {
-        if (signedUser && signedWallet) {
-            const txHash = await twoKeyProtocol.Registry.addNameAndWalletName(address, signedUser.name, signedUser.address, signedUser.fullname, signedUser.email, signedWallet.walletname, signedUser.signature, signedWallet.signature);
-            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
-        } else {
-            try {
-                if (signedUser) {
-                    const txHash = await twoKeyProtocol.Registry.addName(signedUser.name, signedUser.address, signedUser.fullname, signedUser.email, signedUser.signature, address);
-                    receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
-                }
-            } catch (e) {
-                console.log('Error in Registry.addName');
-                throw e;
-            }
-            if (signedWallet) {
-                try {
-                    const txHash = await twoKeyProtocol.Registry.setWalletName(address, signedWallet);
-                    receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
-                } catch (e) {
-                    console.log('Error in Registry.setWalletName');
-                    throw e;
-                }
-            }
-        }
+        const txHash = await twoKeyProtocol.Registry.addNameByMaintainer(username, ethereumAddress, address);
+        let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log('Gas used for addName: ', receipt.gasUsed);
+        receipts.push(receipt);
     } catch (e) {
-        console.log('Error in user/wallet', e);
+        console.log('Error in adding name by maintainer', e);
         return Promise.reject(e);
     }
-    if (signedPlasma) {
-        try {
-            const txHash = await twoKeyProtocol.Registry.addPlasma2EthereumByUser(address, signedPlasma);
-            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash));
-        } catch (e) {
-            console.log('Error in Registry.addPlasma2EthereumByUser');
-            return Promise.reject(e);
-        }
+
+    try {
+        const txHash = await twoKeyProtocol.Registry.addPlasma2EthereumByMaintainer(signature, plasmaAddress, ethereumAddress, address);
+        let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        console.log('Gas used for addPlasma2Ethereum', receipt.gasUsed);
+        receipts.push(receipt);
+    } catch (e) {
+        console.log('Error in setting plasma to ethereum by maintainer public chain', e);
+        return Promise.reject(e);
     }
-    if (signedEthereum) {
-        try {
-            const txHash = await twoKeyProtocol.PlasmaEvents.setPlasmaToEthereumOnPlasma(signedEthereum.plasmaAddress, signedEthereum.plasma2ethereumSignature);
-            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
-        } catch (e) {
-            console.log('Error in PlasmaEvents.setPlasmaToEthereumOnPlasma');
-            throw e;
-        }
+
+    try {
+        const txHash = await twoKeyProtocol.PlasmaEvents.setPlasma2EthereumByMaintainer(signature, plasmaAddress, ethereumAddress);
+        receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
+    } catch (e) {
+        console.log('Error in setting plasma to ethereum by maintainer on plasma chain',e);
+        return Promise.reject(e);
     }
-    if (signedUsername) {
-        try {
-            const txHash = await twoKeyProtocol.PlasmaEvents.setUsernameToPlasmaOnPlasma(signedUsername.plasma2usernameSignature, signedUsername.plasmaAddress, signedUsername.username);
-            receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
-        } catch (e) {
-            console.log('Error in PlasmaEvents.setUsernameToPlasmaOnPlasma');
-            return Promise.reject(e);
-        }
+
+    try {
+        const txHash = await twoKeyProtocol.PlasmaEvents.setUsernameToPlasmaOnPlasma(plasmaAddress, username);
+        receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
+    } catch (e) {
+        console.log('Error in setting username to plasma on plasma registry', e);
+        return Promise.reject(e);
     }
+
     return receipts;
 }
 

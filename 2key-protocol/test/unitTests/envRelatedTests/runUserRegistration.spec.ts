@@ -10,32 +10,17 @@ const {[userIds.guest]: guest, ...availableUsers} = availableUsersInitial;
 
 const tryToRegisterUser = async ({protocol: twoKeyProtocol, ...user}, from) => {
 
-  const registerData: IRegistryData = {};
+
   let error = false;
+  let registerData: IRegistryData = {};
+
+  registerData.ethereumAddress = from;
+  registerData.plasmaAddress = twoKeyProtocol.plasmaAddress;
+  registerData.username = user.name;
 
   try {
-    registerData.signedUser = await twoKeyProtocol.Registry.signUserData2Registry(from, user.name, user.fullname, user.email)
+    registerData.signature = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
   } catch {
-    error = true;
-  }
-  try {
-    registerData.signedWallet = await twoKeyProtocol.Registry.signWalletData2Registry(from, user.name, user.walletname);
-  } catch {
-    error = true;
-  }
-  try {
-    registerData.signedPlasma = await twoKeyProtocol.Registry.signPlasma2Ethereum(from);
-  } catch {
-    error = true;
-  }
-  try {
-    registerData.signedEthereum = await twoKeyProtocol.PlasmaEvents.signPlasmaToEthereum(from);
-  } catch {
-    error = true;
-  }
-  try {
-    registerData.signedUsername = await twoKeyProtocol.PlasmaEvents.signUsernameToPlasma(user.name)
-  } catch (e) {
     error = true;
   }
 
@@ -55,6 +40,7 @@ describe('Should register all users on contract', async () => {
   for (let i = 0; i < usersKeys.length; i += 1) {
     const key = usersKeys[i];
     await it(`should register ${key}`, async () => {
+        // address = ethereum address of user being registered
       const {web3: {address}, ...user} = availableUsers[key];
       await tryToRegisterUser(user, address);
     }).timeout(TIMEOUT_LENGTH);
@@ -100,6 +86,8 @@ let signature;
 let signaturePlasma;
 let userAddress;
 let newUsername;
+
+
 describe('Should generate signatures to change username', async() => {
   await it('should generate signatures to change username for Nikola user', async() => {
       let {protocol, web3: {address, mnemonic}} = availableUsers[userIds.nikola];

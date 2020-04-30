@@ -15,10 +15,14 @@ export default function hedgingEthTest(
     const {balance: {ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);
     const amountForHedge = parseFloat(ETH.toString());
 
+    let txHash = await protocol.UpgradableExchange.startHedgingEth(
+        amountForHedge,
+        hedgeRate,
+        address
+    );
+
     await protocol.Utils.getTransactionReceiptMined(
-      await protocol.UpgradableExchange.startHedgingEth(
-        amountForHedge, hedgeRate, address
-      ),
+      txHash
     );
 
     const upgradableExchangeBalanceAfter = await protocol.getBalance(protocol.twoKeyUpgradableExchange.address);

@@ -70,23 +70,6 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         initialized = true;
     }
 
-
-    /**
-     * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
-     *
-     * @param           contractName is the name of the contract
-     */
-    function getAddressFromTwoKeySingletonRegistry(
-        string contractName
-    )
-    internal
-    view
-    returns (address)
-    {
-        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
-            .getContractProxyAddress(contractName);
-    }
-
     function emitUsernameChangedEvent(
         address plasmaAddress,
         string newHandle
@@ -121,30 +104,16 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     /**
      * @notice          Function to link username and address once signature is validated
      *
-     * @param           signature is the signature user created
      * @param           plasmaAddress is the plasma address of the user
      * @param           username is username user want to set
      */
     function linkUsernameAndAddress(
-        bytes signature,
         address plasmaAddress,
         string username
     )
     public
     onlyMaintainer
     {
-        // Generate the hash
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
-
-        // Validate signature length
-        require (signature.length == 65);
-
-        // Recover plasma address from the hash
-        address plasma = Call.recoverHash(hash,signature,0);
-
-        // Assert that plasma address recovered is same as the one passed int he arguments
-        require(plasma == plasmaAddress);
-
         // Assert that this username is not pointing to any address
         require(getUsernameToAddress(username) == address(0));
 
@@ -164,12 +133,10 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     /**
      * @notice          Function to re-link username and address
      *
-     * @param           signature is the signature user created
      * @param           plasmaAddress is the plasma address of the user
      * @param           username is username user want to set
      */
     function changeLinkedUsernameForAddress(
-        bytes signature,
         address plasmaAddress,
         string username
     )
@@ -179,17 +146,6 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         // This can be called as many times as long plasma and ethereum are not linked
         // Afterwards, only changeUsername can be called
         require(plasma2ethereum(plasmaAddress) == address(0));
-        // Generate the hash
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
-
-        // Validate signature length
-        require (signature.length == 65);
-
-        // Recover plasma address from the hash
-        address plasma = Call.recoverHash(hash,signature,0);
-
-        // Assert that plasma address recovered is same as the one passed int he arguments
-        require(plasma == plasmaAddress);
 
         // Assert that this username is not pointing to any address
         require(getUsernameToAddress(username) == address(0));
@@ -206,12 +162,14 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     /**
      * @notice          Function to map plasma2ethereum and ethereum2plasma
      *
+     * @param           signature is the msg signed with users public address
      * @param           plasmaAddress is the user plasma address
-     * @param           signature is the signature generated when the message was signed
+     * @param           ethereumAddress is the ethereum address of user
      */
-    function add_plasma2ethereum(
+    function addPlasma2Ethereum(
+        bytes signature,
         address plasmaAddress,
-        bytes signature
+        address ethereumAddress
     )
     public
     onlyMaintainer
@@ -219,14 +177,11 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         // Generate hash
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
 
-        // Require that signature is valid length
-        require (signature.length == 65);
-
         // Recover ethereumAddress from signature
-        address ethereumAddress = Call.recoverHash(hash,signature,0);
+        address recoveredEthereumAddress = Call.recoverHash(hash,signature,0);
 
-        // Require that ethereum address is not equal address(0)
-        require(ethereumAddress != address(0));
+        // Require that recoveredEthereumAddress is same as one passed in method argument
+        require(recoveredEthereumAddress == ethereumAddress);
 
         // Require that plasma stored in contract for this ethereum address = address(0)
         address plasmaStoredInContract = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_ethereum2plasma,ethereumAddress));
@@ -243,6 +198,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         // Emit event that plasma and ethereum addresses are being linked
         emitPlasma2Ethereum(plasmaAddress, ethereumAddress);
     }
+
 
     /**
      * @notice          Function where username can be changed
@@ -355,6 +311,23 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         return recoveredAddress;
     }
 
+
+    /**
+     * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
+     *
+     * @param           contractName is the name of the contract
+     */
+    function getAddressFromTwoKeySingletonRegistry(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
+    }
+
     /**
      * @notice          Function to return moderator fee
      */
@@ -366,8 +339,11 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         return PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorFeePercentage));
     }
 
+    /**
+     * @notice          Function to get TwoKeyPlasmaCongress address
+     */
     function getCongressAddress()
-    public
+    internal
     view
     returns (address)
     {
