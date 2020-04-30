@@ -82,27 +82,15 @@ describe('Setup of users data', async () => {
   }).timeout(TIMEOUT_LENGTH);
 });
 
-let signature;
-let signaturePlasma;
 let userAddress;
 let newUsername;
 
-
-describe('Should generate signatures to change username', async() => {
-  await it('should generate signatures to change username for Nikola user', async() => {
-      let {protocol, web3: {address, mnemonic}} = availableUsers[userIds.nikola];
-      try {
+describe('Should generate new random username ', async() => {
+    await it('should generate new random username for specific user', async() => {
+        let {protocol, web3: {address, mnemonic}} = availableUsers[userIds.nikola];
         newUsername = Math.random().toString(36).substr(2, 5);
         userAddress = address;
-        signature = await protocol.Registry.signNewUsername2Registry(address, newUsername);
-        signaturePlasma = await protocol.PlasmaEvents.signNewUsername2PlasmaRegistry(protocol.plasmaAddress, newUsername);
-      } catch (error) {
-          if (error.message !== 'gas required exceeds allowance or always failing transaction') {
-              throw error;
-          }
-          console.log('\x1b[31m', 'Probably test has been already run after latest deploy');
-      }
-  }).timeout(TIMEOUT_LENGTH);
+    }).timeout(TIMEOUT_LENGTH);
 });
 
 describe('Should change username from maintainer on public', async() => {
@@ -110,9 +98,10 @@ describe('Should change username from maintainer on public', async() => {
       const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.deployer];
       try {
           let oldUsername = await protocol.Registry.getRegisteredNameForAddress(userAddress);
+          let txHash = await protocol.Registry.changeUsername(newUsername, userAddress, address)
+          let receipt = await protocol.Utils.getTransactionReceiptMined(txHash);
 
-          let txHash = await protocol.Registry.changeUsername(newUsername, userAddress, signature, address)
-          await protocol.Utils.getTransactionReceiptMined(txHash);
+          console.log('Gas used for changing username on TwoKeyRegistry: ', receipt.gasUsed);
 
           let mappingForOldUsername = await protocol.Registry.getRegisteredAddressForName(oldUsername);
 
@@ -132,7 +121,7 @@ describe('Should change username from maintainer on private', async() => {
   await it('should change username from the maintainer address for Nikola user on PRIVATE network', async() => {
       const {protocol, web3: {address, mnemonic}} = availableUsers[userIds.buyer];
       try {
-            await protocol.PlasmaEvents.changeUsername(newUsername, userAddress, signaturePlasma, protocol.plasmaAddress);
+            await protocol.PlasmaEvents.changeUsername(newUsername, userAddress,protocol.plasmaAddress);
       } catch (error) {
           console.log('Error: ',error);
       }

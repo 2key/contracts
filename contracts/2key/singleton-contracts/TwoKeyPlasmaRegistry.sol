@@ -205,30 +205,19 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
      *
      * @param           newUsername is the new username user wants to add
      * @param           userPublicAddress is the ethereum address of the user
-     * @param           signature is the signature of the user
      */
     function changeUsername(
         string newUsername,
-        address userPublicAddress,
-        bytes signature
+        address userPublicAddress
     )
     public
     onlyMaintainer
     {
-        // Generate hash
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
-            keccak256(abi.encodePacked(newUsername))));
-
-        // Take the signer of the message
-        address messageSigner = Call.recoverHash(hash, signature, 0);
-
-        address plasmaAddress = ethereum2plasma(userPublicAddress);
-
-        // Assert that the message signer is the _sender in the arguments
-        require(messageSigner == plasmaAddress);
-
         // Get current username for this user
         string memory currentUsername = getAddressToUsername(plasmaAddress);
+
+        // Get the plasma address for this ethereum address
+        address plasmaAddress = ethereum2plasma(userPublicAddress);
 
         // Delete previous username mapping
         PROXY_STORAGE_CONTRACT.deleteAddress(keccak256(_usernameToAddress, currentUsername));
