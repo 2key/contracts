@@ -539,7 +539,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint)
     {
-        return totalBountyForCampaign.sub(counters[6]);             // Total bounty - bounty PAID for executed conversions
+        return totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6]));             // Total bounty - bounty PAID for executed conversions
     }
 
 
@@ -866,7 +866,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint,uint,uint)
     {
-        return (totalBountyForCampaign,totalBountyForCampaign.sub(counters[6]), counters[6]);
+        return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
     }
 
 }
