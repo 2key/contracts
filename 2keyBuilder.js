@@ -105,6 +105,10 @@ const checkIfFileExistsInDir = (contractName) => {
     return fs.existsSync(artifactPath);
 }
 
+const generateChangelog = async () => {
+    await runProcess('git-chglog',['-o','CHANGELOG.md'])
+};
+
 const getBuildArchPath = () => {
     if(contractsStatus && contractsStatus.current) {
         return buildArchPath.replace('{branch}',`-${contractsStatus.current}`);
@@ -430,7 +434,7 @@ async function deploy() {
     try {
         deployment = true;
         console.log("Removing truffle build, the whole folder will be deleted: ", buildPath);
-        rmDir(buildPath);
+        await rmDir(buildPath);
         await pullTenderlyConfiguration();
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
@@ -549,6 +553,16 @@ async function deploy() {
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
             // Add tenderly to CI/CD
             await runProcess('tenderly',['push', '--tag', npmVersionTag]);
+            // Generate the latest changelog for contracts repo
+            await generateChangelog();
+            // Go to 2key-protocol/src
+            process.chdir(twoKeyProtocolDir);
+            // Generate the changelog for this repository
+            await generateChangelog();
+
+            // Push final commit for the deployment
+            await commitAndPush2KeyProtocolSrc(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
+            await commitAndPushContractsFolder(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
         } else {
             process.exit(0);
         }

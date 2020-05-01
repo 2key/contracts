@@ -10,7 +10,6 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
  */
 contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
-    bool isCampaignInitialized; // Once this is set to true can't be modified
     address assetContractERC20; // Asset contract is address of ERC20 inventory
     bool public boughtRewardsWithEther;
 
