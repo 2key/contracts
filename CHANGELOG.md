@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="v1.4.95-develop"></a>
+## [v1.4.95-develop] - 2020-05-01
+
 <a name="v1.4.94-develop"></a>
 ## [v1.4.94-develop] - 2020-04-28
 
@@ -1871,7 +1874,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.94-develop...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.95-develop...HEAD
+[v1.4.95-develop]: https://github.com/2key/contracts/compare/v1.4.94-develop...v1.4.95-develop
 [v1.4.94-develop]: https://github.com/2key/contracts/compare/v1.4.93-develop...v1.4.94-develop
 [v1.4.93-develop]: https://github.com/2key/contracts/compare/v1.4.92-develop...v1.4.93-develop
 [v1.4.92-develop]: https://github.com/2key/contracts/compare/v1.4.91-develop...v1.4.92-develop
