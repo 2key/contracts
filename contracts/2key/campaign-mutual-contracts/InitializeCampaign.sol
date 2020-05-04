@@ -9,6 +9,10 @@ contract InitializeCampaign {
     function initializeCampaign()
     internal
     {
+        // Require that this method is not called
         require(isCampaignInitialized == false);
+
+        // Initialize campaign
+        isCampaignInitialized = true;
     }
 }

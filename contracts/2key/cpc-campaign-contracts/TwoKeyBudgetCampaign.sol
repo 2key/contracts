@@ -310,18 +310,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	}
 
-	/**
-	 * @notice Function which assumes that contractor already called approve function on 2KEY token contract
-	 */
-	function addDirectly2KEYAsInventory()
-	public
-	onlyContractor
-	{
-		require(isInventoryAdded == false);
-		rewardsInventoryAmount = getTokenBalance();
-		isInventoryAdded = true;
-	}
-
 
 	/**
      * @notice 			Function to withdraw remaining rewards inventory in the contract
