@@ -111,20 +111,6 @@ describe(
 
     usersActions(
       {
-        userKey: userIds.aydnep,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-        ],
-        campaignData,
-        storage,
-        expectError: true,
-      }
-    );
-
-    usersActions(
-      {
         userKey: userIds.test,
         actions: [
           // campaignUserActions.checkMerkleProof,
