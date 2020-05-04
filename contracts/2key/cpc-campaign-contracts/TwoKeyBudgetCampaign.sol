@@ -52,12 +52,14 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	/**
      * @notice 			Internal function to check the balance of the specific ERC20 on this contract
      */
-	function getTokenBalance()
+	function getTokenBalance(
+		address token
+	)
 	internal
 	view
 	returns (uint)
 	{
-		return IERC20(twoKeyEconomy).balanceOf(address(this));
+		return IERC20(token).balanceOf(address(this));
 	}
 
 	/**
@@ -85,7 +87,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		require(isInventoryAdded == false);
 
-		initialInventoryAmount = getTokenBalance();
+		initialInventoryAmount = getTokenBalance(twoKeyEconomy);
 
 		isInventoryAdded = true;
 	}
@@ -107,6 +109,25 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		isInventoryAdded = true;
 	}
+
+	/**
+	 * @notice			Function where user can add inventory directly as DAI tokens
+	 *
+	 */
+	function addInventoryAsDAI()
+	public
+	onlyContractor
+	{
+		require(isInventoryAdded == false);
+
+		uint daiBalance = getTokenBalance(getAddressFromTwoKeySingletonRegistry("DAI"));
+		
+
+
+	}
+
+
+
 
 
 	/**
@@ -298,7 +319,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     onlyContractor
 	{
 		require(merkleRoot != 0, 'Campaign not ended yet - merkle root is not set.');
-		uint campaignRewardsBalance = getTokenBalance();
+		uint campaignRewardsBalance = getTokenBalance(twoKeyEconomy);
 
 		uint rewardsNotSpent = campaignRewardsBalance.sub(reservedAmount2keyForRewards);
 		if(rewardsNotSpent > 0) {
@@ -479,7 +500,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     view
     returns (uint)
     {
-        uint currentERC20Balance = getTokenBalance();
+        uint currentERC20Balance = getTokenBalance(twoKeyEconomy);
         return currentERC20Balance.sub(reservedAmount2keyForRewards);
     }
 
