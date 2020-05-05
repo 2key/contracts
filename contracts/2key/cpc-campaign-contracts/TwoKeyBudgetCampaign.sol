@@ -334,7 +334,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyMaintainer
 	{
-		require(merkleRoot == 0, 'merkle root already defined');
+		require(merkleRoot == 0);
 		merkleRoot = _merkleRoot;
 	}
 
@@ -365,6 +365,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			// Update total earned
 			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(balances[i]);
 		}
+		require(reservedAmount2keyForRewards <= getTokenBalance());
 	}
 
 	/**
