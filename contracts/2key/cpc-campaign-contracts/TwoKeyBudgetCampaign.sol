@@ -334,7 +334,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyMaintainer
 	{
-		require(merkleRoot == 0, 'merkle root already defined');
+		require(merkleRoot == 0);
 		merkleRoot = _merkleRoot;
 	}
 
