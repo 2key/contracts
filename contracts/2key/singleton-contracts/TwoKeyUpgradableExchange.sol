@@ -43,24 +43,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     ITwoKeyUpgradableExchangeStorage public PROXY_STORAGE_CONTRACT;
 
     /**
-     * @notice          Event for token purchase logging
-     *
-     * @param           purchaser who paid for the tokens
-     * @param           receiver is who got the tokens
-     * @param           weiReceived is how weis paid for purchase
-     * @param           tokensBought is the amount of tokens purchased
-     * @param           rate is the global variable rate on the contract
-     */
-    event TokenPurchase(
-        address indexed purchaser,
-        address indexed receiver,
-        uint256 weiReceived,
-        uint256 tokensBought,
-        uint256 rate
-    );
-
-
-    /**
      * @notice          This event will be fired every time a withdraw is executed
      */
     event WithdrawExecuted(
@@ -181,10 +163,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      */
     function _processPurchase(
         address _beneficiary,
-        uint256 _tokenAmount
+        uint256 _tokenAmount,
+        uint _contractID
     )
     internal
     {
+        // Update how much 2KEY tokens we sent to msg.sender contract
+        bytes32 sent2keyToContractKeyHash = keccak256("sent2keyToContract", _contractID);
+        setUint(sent2keyToContractKeyHash, sent2keyToContract(_contractID).add(_tokenAmount));
+        // Send tokens
         _deliverTokens(_beneficiary, _tokenAmount);
     }
 
@@ -664,15 +651,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyValidatedContracts
     {
-        uint campaignID = getContractId(msg.sender);
+        uint contractId = getContractId(msg.sender);
         //TODO: Check there's enough 2key and DAI to complete tx
         // Get key for how much DAI is available for this contract to withdraw
-        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", campaignID);
+        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", contractId);
         // Get key for total available to fill reserve
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
 
         // Get DAI available
-        uint _daiWeiAvailableToWithdrawAndFillReserve = daiWeiAvailableToWithdraw(campaignID);
+        uint _daiWeiAvailableToWithdrawAndFillReserve = daiWeiAvailableToWithdraw(contractId);
 
         uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
 
@@ -682,13 +669,89 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
 
         // Send the tokens to the campaign
-        _processPurchase(msg.sender, amountOf2KeyRequested);
+        _processPurchase(msg.sender, amountOf2KeyRequested, contractId);
 
         // Emit the event that DAI is released
         ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDAIReleasedAsIncome(
             msg.sender,
             _daiWeiAvailableToWithdrawAndFillReserve
         );
+    }
+
+    function getRateDAItoUSD()
+    internal
+    view
+    returns(uint)
+    {
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+
+        uint eth_usd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
+        uint eth_dai = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("DAI");
+        /**
+         *         eth_usd represents how many dollars is worth 1 ETH
+         *         eth_dai represents how many dais is worth 1 ETH
+
+         *         1 Eth = eth_usd $
+         *         1 ETH = eth_dai DAI
+         *         eth_usd $ = eth_dai DAI
+         *         ==> 1 DAI = eth_usd/eth_dai $
+         *
+         */
+        uint dai_usd = (eth_usd.mul(10**18)).div(eth_dai);
+        return dai_usd;
+    }
+
+    function updateSellRatePrice(
+        uint newTokenPrice
+    )
+    internal
+    {
+        // update sellRate2KEY of the token
+        bytes32 sellRateKeyHash = keccak256("sellRate2key");
+
+        // Set the new token price after this purchase
+        setUint(sellRateKeyHash, newTokenPrice);
+
+    }
+
+    function buy2KEYTokensWithDAI(
+        uint amountDAI,
+        address beneficiary
+    )
+    public
+    onlyValidatedContracts
+    returns (uint,uint)
+    {
+        uint totalTokensBought;
+        uint averageTokenPriceForPurchase;
+        uint newTokenPrice;
+
+        // Get the rate
+        uint dai_usd = getRateDAItoUSD();
+
+        // Calculate total purchase amount worth in Dollars
+        uint purchaseAmountInUSD = amountDAI.mul(dai_usd).div(10**18);
+
+        // Calculate amount of tokens receiving and avg price per purchase
+        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = get2KEYTokenPriceAndAmountOfTokensReceiving(msg.value);
+
+        // Update the 2KEY token sell price to the latest
+        updateSellRatePrice(newTokenPrice);
+
+        // Take DAI tokens from campaign contract
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI")).transferFrom(msg.sender, address(this), amountDAI);
+
+        // check if contract is first time interacting with this one
+        uint contractId = getContractId(msg.sender);
+
+        // Check if the contract exists
+        if(contractId == 0) {
+            contractId = addNewContract(msg.sender);
+        }
+
+        _processPurchase(beneficiary, totalTokensBought, contractId);
+
+        return (totalTokensBought, averageTokenPriceForPurchase);
     }
 
 
@@ -713,11 +776,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = getTokenAmountToBeSold(msg.value);
 
-        // update sellRate2KEY of the token
-        bytes32 sellRateKeyHash = keccak256("sellRate2key");
-
-        // Set the new token price after this purchase
-        setUint(sellRateKeyHash, newTokenPrice);
+        updateSellRatePrice(newTokenPrice);
 
         // update weiRaised by this contract
         bytes32 weiRaisedKeyHash = keccak256("weiRaised");
@@ -736,22 +795,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 ethReceivedFromContractKeyHash = keccak256("ethReceivedFromContract", contractId);
         setUint(ethReceivedFromContractKeyHash, ethReceivedFromContract(contractId).add(msg.value));
 
-        // Update how much 2KEY tokens we sent to msg.sender contract
-        bytes32 sent2keyToContractKeyHash = keccak256("sent2keyToContract", contractId);
-        setUint(sent2keyToContractKeyHash, sent2keyToContract(contractId).add(totalTokensBought));
-
         updateEthWeiAvailableToHedge(contractId, msg.value);
 
-        _processPurchase(_beneficiary, totalTokensBought);
-
-
-        emit TokenPurchase(
-            msg.sender,
-            _beneficiary,
-            msg.value,
-            totalTokensBought,
-            averageTokenPriceForPurchase
-        );
+        _processPurchase(_beneficiary, totalTokensBought, contractId);
 
         return (totalTokensBought, averageTokenPriceForPurchase);
     }
@@ -1319,6 +1365,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             expectedRate
         );
     }
+
+
 
     function setKyberReserveInterfaceContractAddress(
         address kyberReserveContractAddress

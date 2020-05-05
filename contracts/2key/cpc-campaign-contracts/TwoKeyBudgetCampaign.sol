@@ -77,7 +77,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		IERC20(twoKeyEconomy).transfer(receiver, amount);
 	}
 
-		//TODO: Add funnel for adding inventory multiple times
+
 	/**
 	 * @notice 			Function which assumes that contractor already called approve function on 2KEY token contract
 	 */
@@ -91,6 +91,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		isInventoryAdded = true;
 	}
+
 
 	/**
      * @notice 			Function to add fiat inventory for rewards
@@ -110,6 +111,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		isInventoryAdded = true;
 	}
 
+
 	/**
 	 * @notice			Function where user can add inventory directly as DAI tokens
 	 *
@@ -121,7 +123,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(isInventoryAdded == false);
 
 		uint daiBalance = getTokenBalance(getAddressFromTwoKeySingletonRegistry("DAI"));
-
+		//TODO: Swap dai for 2KEY
 
 
 	}
