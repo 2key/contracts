@@ -7,6 +7,7 @@ import "../interfaces/storage-contracts/ITwoKeyFeeManagerStorage.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -273,6 +274,41 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+    function calculateEth2KeyRate()
+    internal
+    view
+    returns (uint)
+    {
+        address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
+        uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
+
+        // If there's no existing rate at the moment, compute it
+        if(ethTo2key == 0) {
+            //This means that budget for this campaign was added directly as 2KEY
+            /**
+             1 eth = 200$
+             1 2KEY = 0.06 $
+
+             200 = 0.06 * x
+             x = 200 / 0.06
+             x = 3333,333333333
+             1 eth = 3333,333333 2KEY
+             */
+            uint eth_usd = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).
+            getBaseToTargetRate("USD");
+
+            // get current 2key rate
+            uint twoKey_usd = IUpgradableExchange(upgradableExchange).sellRate2key();
+
+            // Compute rates at this particular moment
+            ethTo2key = eth_usd.mul(10**18).div(twoKey_usd);
+        }
+
+        return ethTo2key;
+    }
+
+
     function payDebtWith2Key(
         address _beneficiaryPublic,
         address _plasmaAddress,
@@ -285,10 +321,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint amountToPay = 0;
 
         if(usersDebtInEth > 0) {
-            address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
-            uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
-            uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
 
+            uint ethTo2key = calculateEth2KeyRate();
             // 2KEY / ETH
             uint debtIn2Key = (usersDebtInEth.mul(ethTo2key)).div(10**18); // ETH * (2KEY / ETH) = 2KEY
 
