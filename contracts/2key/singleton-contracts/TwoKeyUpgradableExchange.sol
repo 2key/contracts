@@ -1140,6 +1140,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint ethReceivedFromContractByNow = ethReceivedFromContract(_contractID);
         uint sent2keyToContractByNow = sent2keyToContract(_contractID);
+        if(sent2keyToContractByNow == 0 || ethReceivedFromContractByNow == 0) {
+            return 0;
+        }
         // Average weighted by eth 2key/eth
         return sent2keyToContractByNow.mul(10**18).div(ethReceivedFromContractByNow);
     }
