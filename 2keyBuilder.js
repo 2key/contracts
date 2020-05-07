@@ -48,6 +48,15 @@ const branch_to_env = {
     "master": "prod"
 };
 
+const envToNetwork = {
+    "prod-hdwallet" : "public.prod-hdwallet,private.prod-hdwallet",
+    "prod-ledger" : "public.prod-ledger,private.prod-hdwallet",
+    "staging-hdwallet" : "public.staging-hdwallet,private.staging-hdwallet",
+    "staging-ledger" : "public.staging-ledger,private.staging-hdwallet",
+    "develop-hdwallet" : "public.staging-hdwallet,private.staging-hdwallet",
+    "develop-ledger" : "public.staging-ledger,private.staging-hdwallet",
+    "local" : "dev-local,plasma-test-local"
+}
 const deployedTo = {};
 
 let contractsStatus;
@@ -429,7 +438,9 @@ async function deployUpgrade(networks, args) {
     }
     await archiveBuild();
 }
+const loadNetworks = (env) => {
 
+}
 async function deploy() {
     try {
         deployment = true;
