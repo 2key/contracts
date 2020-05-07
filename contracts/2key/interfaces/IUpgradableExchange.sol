@@ -12,6 +12,13 @@ contract IUpgradableExchange {
     payable
     returns (uint,uint);
 
+    function buy2KEYTokensWithDAI(
+        uint amountDAI,
+        address beneficiary
+    )
+    public
+    returns (uint,uint);
+
     function buyStableCoinWith2key(
         uint _twoKeyUnits,
         address _beneficiary

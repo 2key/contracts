@@ -123,9 +123,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(isInventoryAdded == false);
 
 		uint daiBalance = getTokenBalance(getAddressFromTwoKeySingletonRegistry("DAI"));
-		//TODO: Swap dai for 2KEY
+		(initialInventoryAmount,usd2KEYrateWei) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).
+			buy2KEYTokensWithDAI(daiBalance, address(this));
 
-
+		isInventoryAdded = true;
 	}
 
 
@@ -388,7 +389,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			// Update total earned
 			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(balances[i]);
 		}
-		require(reservedAmount2keyForRewards <= getTokenBalance());
+		require(reservedAmount2keyForRewards <= getTokenBalance(twoKeyEconomy));
 	}
 
 	/**
