@@ -420,9 +420,9 @@ async function deployUpgrade(networks, args) {
             }
         }
 
-        if(cpcChanged.length > 0) {
-            await runDeployCPCCampaignMigration(networks[i]);
-        }
+        // if(cpcChanged.length > 0) {
+        //     await runDeployCPCCampaignMigration(networks[i]);
+        // }
 
 
         /* eslint-enable no-await-in-loop */
