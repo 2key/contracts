@@ -157,7 +157,7 @@ module.exports = {
           skipDryRun: true,
           network_id: ids["prod-public"],
           gas: 7900000,
-          gasPrice: 8000000000,
+          gasPrice: 40000000000,
       },
 
       'private.prod-hdwallet': {
