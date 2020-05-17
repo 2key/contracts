@@ -124,8 +124,8 @@ def generate_bytecode_for_withdrawing_ether_from_reserve(reserve_contract_addres
 def generate_bytecode_for_withdrawal_of_tokens_from_reserve(reserve_contract_address, token_address, amount, beneficiary):
     amount = int(amount)
     print (amount)
-    method_name_and_params = "withdrawTokensFromKyberReserve(address,address,uint,address)"
-    types = ["address","address","uint","address"]
+    method_name_and_params = "withdrawTokensFromKyberReserve(address,address,uint256,address)"
+    types = ["address","address","uint256","address"]
     values = [reserve_contract_address, token_address, amount, beneficiary]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
