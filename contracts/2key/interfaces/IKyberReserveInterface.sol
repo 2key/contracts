@@ -26,5 +26,6 @@ contract IKyberReserveInterface {
     function disableTrade() public returns (bool);
     function enableTrade() public returns (bool);
     function withdrawEther(uint amount, address sendTo) external;
+    function withdrawToken(ERC20 token, uint amount, address sendTo) external;
     function getDestQty(ERC20 src, ERC20 dest, uint srcQty, uint rate) public view returns(uint);
 }

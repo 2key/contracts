@@ -413,7 +413,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     onlyTwoKeyCongress
     {
         // Call on the contract withdraw function
-        IKyberReserveInterface(kyberReserveContractAddress).withdraw(
+        IKyberReserveInterface(kyberReserveContractAddress).withdrawToken(
             tokenToWithdraw,
             amountToBeWithdrawn,
             receiverAddress
