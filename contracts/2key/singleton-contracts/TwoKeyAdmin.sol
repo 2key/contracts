@@ -395,6 +395,32 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+	/**
+	 * @notice			Function to set contracts on Kyber, mostly used to swap from their
+	 *					staging and production environments
+	 *
+	 * @param			kyberReserveContractAddress is our reserve contract address
+	 * @param			kyberNetworkAddress is the address of kyber network
+	 * @param			conversionRatesContractAddress is the address of conversion rates contract
+	 * @param			sanityRatesContractAddress is the address of sanity rates contract
+	 */
+	function setContractsKyber(
+		address kyberReserveContractAddress,
+		address kyberNetworkAddress,
+		address conversionRatesContractAddress,
+		address sanityRatesContractAddress
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IKyberReserveInterface(kyberReserveContractAddress).setContracts(
+			kyberNetworkAddress,
+			conversionRatesContractAddress,
+			sanityRatesContractAddress
+		);
+	}
+
+
     /**
      * @notice          Function to call withdraw on KyberReserve.sol contract
      *                  It can be only called by TwoKeyAdmin.sol contract

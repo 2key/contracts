@@ -134,6 +134,13 @@ def generate_bytecode_for_setting_kyber_reserve_contract_address(reserve_contrac
     values = [reserve_contract_address]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_setting_contracts_in_kyber(reserve_contract_address, kyber_network, conversion_rates, sanity_rates):
+    method_name_and_params = "setContractsKyber(address,address,address,address)"
+    types = ["address","address","address","address"]
+    values = [reserve_contract_address, kyber_network, conversion_rates, sanity_rates]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
         _rInFp,
@@ -229,5 +236,11 @@ if __name__ == "__main__":
         )
     if(arg1 == "setKyberReserveContract"):
         generate_bytecode_for_setting_kyber_reserve_contract_address(sys.argv[2])
-
+    if(arg1 == "setContracts"):
+        generate_bytecode_for_setting_contracts_in_kyber(
+            sys.argv[2],
+            sys.argv[3],
+            sys.argv[4],
+            sys.argv[5]
+        )
     print_line()
