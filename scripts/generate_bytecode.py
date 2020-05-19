@@ -121,11 +121,25 @@ def generate_bytecode_for_withdrawing_ether_from_reserve(reserve_contract_addres
     values = [reserve_contract_address, amount_of_ether]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_withdrawal_of_tokens_from_reserve(reserve_contract_address, token_address, amount, beneficiary):
+    amount = int(amount)
+    method_name_and_params = "withdrawTokensFromKyberReserve(address,address,uint256,address)"
+    types = ["address","address","uint256","address"]
+    values = [reserve_contract_address, token_address, amount, beneficiary]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 def generate_bytecode_for_setting_kyber_reserve_contract_address(reserve_contract_address):
     method_name_and_params = "setKyberReserveContractAddressOnUpgradableExchange(address)"
     types = ["address"]
     values = [reserve_contract_address]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_setting_contracts_in_kyber(reserve_contract_address, kyber_network, conversion_rates, sanity_rates):
+    method_name_and_params = "setContractsKyber(address,address,address,address)"
+    types = ["address","address","address","address"]
+    values = [reserve_contract_address, kyber_network, conversion_rates, sanity_rates]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
@@ -213,7 +227,20 @@ if __name__ == "__main__":
         generate_bytecode_for_disabling_kyber_trade(sys.argv[2])
     if(arg1 == "withdrawEtherFromReserve"):
         generate_bytecode_for_withdrawing_ether_from_reserve(sys.argv[2],sys.argv[3])
+    if(arg1 == "withdrawTokensFromReserve"):
+        generate_bytecode_for_withdrawal_of_tokens_from_reserve(
+            sys.argv[2],
+            sys.argv[3],
+            int(sys.argv[4]),
+            sys.argv[5]
+        )
     if(arg1 == "setKyberReserveContract"):
         generate_bytecode_for_setting_kyber_reserve_contract_address(sys.argv[2])
-
+    if(arg1 == "setContracts"):
+        generate_bytecode_for_setting_contracts_in_kyber(
+            sys.argv[2],
+            sys.argv[3],
+            sys.argv[4],
+            sys.argv[5]
+        )
     print_line()
