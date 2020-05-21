@@ -364,4 +364,50 @@ contract TwoKeyPlasmaEvents is Upgradeable {
         return plasmaOf(PROXY_STORAGE_CONTRACT.getAddress(keyHash));
     }
 
+
+
+    function getVisitsList(address _c, address _contractor, address _referrer) internal view returns (address[]) {
+        bytes32 keyHash = keccak256(_visits_list, _c, _contractor, _referrer);
+        return PROXY_STORAGE_CONTRACT.getAddressArray(keyHash);
+    }
+
+
+
+    function setVisitsList(address _c, address _contractor, address _referrer, address _visitor) internal {
+        address[] memory visitsList = getVisitsList(_c, _contractor, _referrer);
+        address[] memory newVisitsList = new address[](visitsList.length + 1);
+        for(uint i=0; i< visitsList.length; i++) {
+            newVisitsList[i] = visitsList[i];
+        }
+        newVisitsList[visitsList.length] = _visitor;
+
+        bytes32 keyHash = keccak256(_visits_list, _c, _contractor, _referrer);
+        PROXY_STORAGE_CONTRACT.setAddressArray(keyHash, newVisitsList);
+    }
+
+
+
+    function getVisitsListTimestamps(address _c, address _contractor, address _referrer) public view returns (uint[]) {
+        bytes32 keyHash = keccak256(_visits_list_timestamps, _c, _contractor, _referrer);
+        return PROXY_STORAGE_CONTRACT.getUintArray(keyHash);
+    }
+
+
+
+    function setVisitsListTimestamps(address _c, address _contractor, address _referrer) internal {
+        uint[] memory visitListTimestamps = getVisitsListTimestamps(_c, _contractor, _referrer);
+        uint[] memory newVisitListTimestamps = new uint[](visitListTimestamps.length + 1);
+        for(uint i=0; i< visitListTimestamps.length; i++) {
+            newVisitListTimestamps[i] = visitListTimestamps[i];
+        }
+        newVisitListTimestamps[visitListTimestamps.length] = block.timestamp;
+
+        bytes32 keyHash = keccak256(_visits_list_timestamps, _c, _contractor, _referrer);
+        PROXY_STORAGE_CONTRACT.setUintArray(keyHash, newVisitListTimestamps);
+    }
+
+
+
+
+
 }
