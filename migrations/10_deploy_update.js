@@ -210,7 +210,7 @@ module.exports = async function deploy(deployer) {
                 })
             )
             .then(() => true));
-    } else {
+    } else if(contractName != "TwoKeyUpgradableExchange") {
         deployer.deploy(contract)
             .then(() => contract.deployed()
                 .then(async (contractInstance) => {
