@@ -174,75 +174,37 @@ module.exports = async function deploy(deployer) {
 
     console.log(contractName);
 
-    if(false) {
-        await deployer.deploy(PriceDiscovery)
-            .then(() => deployer.link(PriceDiscovery, TwoKeyUpgradableExchange))
-            .then(() => deployer.deploy(contract)
-            .then(() => contract.deployed()
-                .then(async (contractInstance) => {
-                    console.log('Deployed to selected network');
-                    newImplementationAddress = contractInstance.address;
+    deployer.deploy(contract)
+        .then(() => contract.deployed()
+            .then(async (contractInstance) => {
+                console.log('Deployed to selected network');
+                newImplementationAddress = contractInstance.address;
+            })
+            .then(async () => {
+                console.log('Finding configuration files addresses for desired network');
+
+                let config = await getConfigForTheBranch();
+
+                if(deployer.network.startsWith('dev')) {
+                    registryAddress = TwoKeySingletonesRegistry.address;
+                }
+                else if(deployer.network.startsWith('private') || deployer.network.startsWith('plasma')) {
+                    registryAddress = config.TwoKeyPlasmaSingletoneRegistry.networks[deployer.network_id].address;
+                }
+                else if(deployer.network.startsWith('public')) {
+                    registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
+                }
+
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        console.log('Updating contract: ' + contractName);
+                        let txHash = await updateContract(registryAddress, contractName, newImplementationAddress, deployer);
+                        resolve(txHash);
+                    } catch (e) {
+                        reject(e);
+                    }
                 })
-                .then(async () => {
-                    console.log('Finding configuration files addresses for desired network');
-
-                    let config = await getConfigForTheBranch();
-
-                    if(deployer.network.startsWith('dev')) {
-                        registryAddress = TwoKeySingletonesRegistry.address;
-                    }
-                    else if(deployer.network.startsWith('private') || deployer.network.startsWith('plasma')) {
-                        registryAddress = config.TwoKeyPlasmaSingletoneRegistry.networks[deployer.network_id].address;
-                    }
-                    else if(deployer.network.startsWith('public')) {
-                        registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
-                    }
-
-                    await new Promise(async (resolve, reject) => {
-                        try {
-                            console.log('Updating contract: ' + contractName);
-                            let txHash = await updateContract(registryAddress, contractName, newImplementationAddress, deployer);
-                            resolve(txHash);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    })
-                })
-            )
-            .then(() => true));
-    } else if(contractName != "TwoKeyUpgradableExchange") {
-        deployer.deploy(contract)
-            .then(() => contract.deployed()
-                .then(async (contractInstance) => {
-                    console.log('Deployed to selected network');
-                    newImplementationAddress = contractInstance.address;
-                })
-                .then(async () => {
-                    console.log('Finding configuration files addresses for desired network');
-
-                    let config = await getConfigForTheBranch();
-
-                    if(deployer.network.startsWith('dev')) {
-                        registryAddress = TwoKeySingletonesRegistry.address;
-                    }
-                    else if(deployer.network.startsWith('private') || deployer.network.startsWith('plasma')) {
-                        registryAddress = config.TwoKeyPlasmaSingletoneRegistry.networks[deployer.network_id].address;
-                    }
-                    else if(deployer.network.startsWith('public')) {
-                        registryAddress = config.TwoKeySingletonesRegistry.networks[deployer.network_id].address;
-                    }
-
-                    await new Promise(async (resolve, reject) => {
-                        try {
-                            console.log('Updating contract: ' + contractName);
-                            let txHash = await updateContract(registryAddress, contractName, newImplementationAddress, deployer);
-                            resolve(txHash);
-                        } catch (e) {
-                            reject(e);
-                        }
-                    })
-                })
-            )
-            .then(() => true);
-    }
+            })
+        )
+        .then(() => true);
 };
