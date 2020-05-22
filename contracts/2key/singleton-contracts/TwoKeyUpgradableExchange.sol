@@ -1320,6 +1320,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice          Function which will return how much is 1 2KEY worth USD
+     *
+     * @return          2key to USD to WEI
      */
     function get2KeyToUSDFromKyber()
     public
