@@ -1196,6 +1196,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return 1080000*(10**18);
     }
 
+    /**
+     * @notice          Function to set new spread in wei
+     *
+     * @param           newSpreadWei is the new value for the spread
+     */
+    function setSpreadWei(
+        uint newSpreadWei
+    )
+    public
+    onlyTwoKeyAdmin
+    {
+        setUint(keccak256("spreadWei"), newSpreadWei);
+    }
+
 
     /**
      * @notice          Getter to get spreadWei value
@@ -1207,6 +1221,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         return getUint(keccak256("spreadWei"));
     }
+
 
 
     /**
