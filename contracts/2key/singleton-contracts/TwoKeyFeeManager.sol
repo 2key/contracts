@@ -298,6 +298,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
             uint eth_usd = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).
             getBaseToTargetRate("USD");
 
+            //TODO: Move this to campaign contract and then pass as method argument. In case of much influencers
+            //TODO: it consumes huge amount of gas
             // get current 2key rate
             uint twoKey_usd = IUpgradableExchange(upgradableExchange).sellRate2key();
 
