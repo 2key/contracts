@@ -140,6 +140,12 @@ def generate_bytecode_for_setting_contracts_in_kyber(reserve_contract_address, k
     values = [reserve_contract_address, kyber_network, conversion_rates, sanity_rates]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_setting_new_spread(new_spread_wei):
+    new_spread_wei = int(new_spread_wei)
+    method_name_and_params = "setNewSpreadWei(uint256)"
+    types = ["uint256"]
+    values = [new_spread_wei]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
@@ -243,4 +249,6 @@ if __name__ == "__main__":
             sys.argv[4],
             sys.argv[5]
         )
+    if(arg1 == "setSpread"):
+        generate_bytecode_for_setting_new_spread(sys.argv[2])
     print_line()

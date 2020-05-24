@@ -113,7 +113,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     internal
     {
-        require(balanceOf(me) > 0);
+        //TODO: Make this function be called only once per influencer
         address old_address = public_link_key[me];
         if (old_address == address(0)) {
             public_link_key[me] = new_public_key;
