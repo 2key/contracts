@@ -77,4 +77,9 @@ contract IUpgradableExchange {
         address kyberReserveContractAddress
     )
     public;
+
+    function setSpreadWei(
+        uint newSpreadWei
+    )
+    public;
 }

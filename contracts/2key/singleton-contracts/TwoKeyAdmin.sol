@@ -260,7 +260,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange);
 		IUpgradableExchange(twoKeyUpgradableExchange).withdrawERC20(_tokenAddress, _amountOfTokens);
 	}
 
@@ -322,7 +322,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).swapDaiAvailableToFillReserveFor2KEY(
+		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).swapDaiAvailableToFillReserveFor2KEY(
 			daiAmountToBeExchanged,
 			minApprovedConversionRate
 		);
@@ -471,11 +471,21 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).setKyberReserveInterfaceContractAddress(
+		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).setKyberReserveInterfaceContractAddress(
 			kyberReserveContractAddress
 		);
 	}
 
+	function setNewSpreadWei(
+		uint newSpreadWei
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).setSpreadWei(
+			newSpreadWei
+		);
+	}
 
 	/**
 	 * @notice 			Function to get uint from the storage
