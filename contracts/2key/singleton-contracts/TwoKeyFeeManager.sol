@@ -329,7 +329,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
             // If Eth 2 2Key rate doesn't exist for this contract calculate it
             if(ethTo2key == 0) {
-                ethTo2key = setEth2KeyRateOnWhichDebtGetsPaid();
+                ethTo2key = setEth2KeyRateOnWhichDebtGetsPaid(msg.sender);
             }
 
             // 2KEY / ETH
