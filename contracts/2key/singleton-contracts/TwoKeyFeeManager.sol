@@ -37,7 +37,7 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     string constant _totalPaidIn2Key = "totalPaidIn2Key";
 
     string constant _totalWithdrawnInETH = "totalWithdrawnInETH";
-
+    string constant _eth2KeyRateOnWhichDebtWasPaidPerCampaign = "eth2KeyRateOnWhichDebtWasPaidPerCampaign";
 
     /**
      * Modifier which will allow only completely verified and validated contracts to call some functions
@@ -324,7 +324,14 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
         if(usersDebtInEth > 0) {
 
-            uint ethTo2key = calculateEth2KeyRate();
+            // Get Eth 2 2Key rate for this contract
+            uint ethTo2key = getEth2KeyRateOnWhichDebtWasPaidForCampaign(msg.sender);
+
+            // If Eth 2 2Key rate doesn't exist for this contract calculate it
+            if(ethTo2key == 0) {
+                ethTo2key = setEth2KeyRateOnWhichDebtGetsPaid();
+            }
+
             // 2KEY / ETH
             uint debtIn2Key = (usersDebtInEth.mul(ethTo2key)).div(10**18); // ETH * (2KEY / ETH) = 2KEY
 
@@ -369,6 +376,27 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         IERC20(twoKeyEconomy).transfer(_beneficiaryPublic, _amountOf2keyForRewards.sub(amountToPay));
     }
 
+
+    function getEth2KeyRateOnWhichDebtWasPaidForCampaign(
+        address campaignAddress
+    )
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_eth2KeyRateOnWhichDebtWasPaidPerCampaign,campaignAddress));
+    }
+
+    function setEth2KeyRateOnWhichDebtGetsPaid(
+        address campaignAddress
+    )
+    internal
+    returns (uint)
+    {
+        uint rate = calculateEth2KeyRate();
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_eth2KeyRateOnWhichDebtWasPaidPerCampaign,campaignAddress), rate);
+        return rate;
+    }
 
     /**
      * @notice          Function to get status of the debts
