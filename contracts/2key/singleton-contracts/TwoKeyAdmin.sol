@@ -254,6 +254,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+	/**
+	 * @notice			Function to withdraw 2KEY tokens collected as FEES on TwoKeyFeeManager
+	 * 					contract. It can be done only through Congress
+	 */
 	function withdraw2KEYCollectedFromFeeManager()
 	public
 	onlyTwoKeyCongress
