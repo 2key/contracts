@@ -46,7 +46,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyFeeManager = "TwoKeyFeeManager";
 
 
-	string constant _regFee = "REG_FEE";
+	string constant _sourceFeeManager = "TWO_KEY_FEE_MANAGER";
 	string constant _kyberFee = "KYBER_FEE";
 
 	bool initialized = false;
@@ -249,9 +249,21 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry(_twoKeyFeeManager);
 		uint etherCollected = ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
 
-		uint regFees = getFeesEarnedFromSource(_regFee, "ETH");
-		PROXY_STORAGE_CONTRACT.setUint(keccak256(_feesEarned, _regFee, "ETH"), regFees.add(etherCollected));
+		uint regFees = getFeesEarnedFromSource(_sourceFeeManager, "ETH");
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_feesEarned, _sourceFeeManager, "ETH"), regFees.add(etherCollected));
     }
+
+
+	function withdraw2KEYCollectedFromFeeManager()
+	public
+	onlyTwoKeyCongress
+	{
+		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry(_twoKeyFeeManager);
+		uint collected2KEY = ITwoKeyFeeManager(twoKeyFeeManager).withdraw2KEYCollected();
+
+		uint regFees = getFeesEarnedFromSource(_sourceFeeManager, "2KEY");
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_feesEarned, _sourceFeeManager, "2KEY"), regFees.add(collected2KEY));
+	}
 
 
 	/**

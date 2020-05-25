@@ -505,11 +505,13 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     function withdraw2KEYCollected()
     public
     onlyTwoKeyAdmin
+    returns (uint)
     {
         address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
         uint balance = IERC20(twoKeyEconomy).balanceOf(address(this));
 
         IERC20(twoKeyEconomy).transfer(msg.sender, balance);
+        return balance;
     }
 
 }
