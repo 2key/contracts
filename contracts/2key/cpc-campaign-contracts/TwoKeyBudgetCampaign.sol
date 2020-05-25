@@ -249,6 +249,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyMaintainer
 	{
+		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
 		for(uint i=0; i<influencers.length; i++) {
 			// Get the influencer balance
 			uint balance = referrerPlasma2Balances2key[influencers[i]];
@@ -258,37 +259,18 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 				referrerPlasma2Balances2key[influencers[i]] = 0;
 				// Reduce reserved amount for rewards
 				reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
-				// Pay fee
-				payFeeForRegistration(influencers[i], balance);
+				// Approve twoKeyFeeManager to take 2key tokens in amount of balance from this contract
+				IERC20(twoKeyEconomy).approve(twoKeyFeeManager, balance);
+				// Pay debt, Fee manager will keep the debt and forward leftover to the influencer
+				ITwoKeyFeeManager(twoKeyFeeManager).payDebtWith2KeyV2(
+					twoKeyEventSource.ethereumOf(influencers[i]),
+					influencers[i],
+					balance,
+					twoKeyEconomy
+				);
 			}
 		}
 	}
-
-
-	/**
-	 * @notice 			Wrapper function to pay the registration fee
-	 * @param 			influencerPlasma is the plasma address of the influencer
-	 * @param 			balance is the balance influencer earned
-	 */
-	function payFeeForRegistration(
-		address influencerPlasma,
-		uint balance
-	)
-	internal
-	{
-		// Get the address of TwoKeyFeeManager contract
-		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
-		// Approve twoKeyFeeManager to take 2key tokens in amount of balance from this contract
-		IERC20(twoKeyEconomy).approve(twoKeyFeeManager, balance);
-		// Pay debt, Fee manager will keep the debt and forward leftover to the influencer
-		ITwoKeyFeeManager(twoKeyFeeManager).payDebtWith2Key(
-			twoKeyEventSource.ethereumOf(influencerPlasma),
-			influencerPlasma,
-			balance
-		);
-
-	}
-
 
 	/**
      * @notice 			Function to withdraw remaining rewards inventory in the contract

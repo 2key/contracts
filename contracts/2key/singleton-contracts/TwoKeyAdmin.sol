@@ -30,6 +30,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
 	string constant _daiWithdrawnFromUpgradableExchange = "daiWithdrawnFromUpgradableExchange";
 	string constant _moderatorEarningsPerCampaign = "moderatorEarningsPerCampaign";
+	string constant _feesEarned = "feesEarned";
+	string constant _feesWithdrawn = "feesWithdrawn";
 
 
 	/**
@@ -41,7 +43,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyEconomy = "TwoKeyEconomy";
 	string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
 	string constant _twoKeyEventSource = "TwoKeyEventSource";
+	string constant _twoKeyFeeManager = "TwoKeyFeeManager";
 
+
+	string constant _regFee = "REG_FEE";
+	string constant _kyberFee = "KYBER_FEE";
 
 	bool initialized = false;
 
@@ -240,8 +246,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyTwoKeyCongress
     {
-        address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
-        ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
+        address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry(_twoKeyFeeManager);
+		uint etherCollected = ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
+
+		uint regFees = getFeesEarnedFromSource(_regFee, "ETH");
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_feesEarned, _regFee, "ETH"), regFees.add(etherCollected));
     }
 
 
@@ -611,6 +620,23 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
 	}
 
+
+	/**
+	 * @notice 			Function to get fees / earnings from specific source and in specific currency
+	 *
+	 * @param			sourceName is the name of the income source, for now it can be REG_FEE, KYBER_FEE
+	 * @param			currency is specifically for REG_FEE since it can be paid in 2KEY, ETH, DAI,...
+	 */
+	function getFeesEarnedFromSource(
+		string sourceName,
+		string currency
+	)
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesEarned,sourceName,currency));
+	}
 
 	/**
 	 * @notice Free ether is always accepted :)
