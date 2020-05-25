@@ -265,8 +265,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry(_twoKeyFeeManager);
 		uint collected2KEY = ITwoKeyFeeManager(twoKeyFeeManager).withdraw2KEYCollected();
 
-		uint regFees = getFeesEarnedFromSource(_sourceFeeManager, "2KEY");
-		PROXY_STORAGE_CONTRACT.setUint(keccak256(_feesEarned, _sourceFeeManager, "2KEY"), regFees.add(collected2KEY));
+		uint regFees = getFeesEarnedFromSource(_sourceFeeManager,"2KEY");
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_feesEarned, _sourceFeeManager,"2KEY"), regFees.add(collected2KEY));
 	}
 
 
