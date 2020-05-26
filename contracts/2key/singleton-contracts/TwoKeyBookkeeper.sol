@@ -17,14 +17,15 @@ contract TwoKeyBookkeeper is Upgradeable, ITwoKeySingletonUtils {
     string constant _totalEarningsAsModerator = "totalEarningsAsModerator";
     string constant _totalWithdrawnFromAdminAsModeratorEarnings = "totalWithdrawnFromAdminAsModeratorEarnings";
 
-    string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
-    string constant _totalWithdrawnFromKyberFees = "feesWithdrawnFromKyber";
-    string constant _totalWithdrawnFromAdminAsKyberFees = "totalWithdrawnFromAdminAsKyberFees";
+    string constant _totalFeesCollectedFromKyber = "totalFeesCollectedFromKyber";
+//    string constant _totalCollectedFromKyberFees = "feesWithdrawnFromKyber";
+    string constant _totalWithdrawnKyberFeesFromAdmin = "totalWithdrawnKyberFeesFromAdmin";
 
-    string constant _feesCollectedFromFeeManagerInCurrency = "feesCollectedFromFeeManagerInCurrency";
-    string constant _totalWithdrawnFromFeeManagerFeesInCurrency = "totalWithdrawnFromFeeManagerFeesInCurrency";
-    string constant _totalWithdrawnFromAdminAsFeeManagerFeesInCurrency = "totalWithdrawnFromAdminAsFeeManagerFeesInCurrency";
+    string constant _feesCollectedInFeeManagerInCurrency = "feesCollectedFromFeeManagerInCurrency";
+    string constant _totalWithdrawnFromFeeManagerToAdminInCurrency = "totalWithdrawnFromFeeManagerToAdminInCurrency";
+    string constant _totalWithdrawnFeeManagerFeesFromAdminInCurrency = "totalWithdrawnFromAdminInCurrency";
 
+    //TODO: Add upgradable exchange DAI released
 
     bool initialized;
 
@@ -82,7 +83,7 @@ contract TwoKeyBookkeeper is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
-        bytes32 keyHashForAmountCollectedFromKyber = keccak256(_feesCollectedFromKyber);
+        bytes32 keyHashForAmountCollectedFromKyber = keccak256(_totalFeesCollectedFromKyber);
 
         uint collectedFromKyberByNow = PROXY_STORAGE_CONTRACT.getUint(keyHashForAmountCollectedFromKyber);
 
