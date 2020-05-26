@@ -1,7 +1,7 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
-contract ITwoKeyBookkeeperStorage {
-    function ITwoKeyBookkeeperStorage(){
+import "../IStructuredStorage.sol";
 
-    }
+contract ITwoKeyBookkeeperStorage is IStructuredStorage {
+
 }

@@ -1,7 +1,8 @@
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.24;
 
-contract TwoKeyBookKeeperStorage {
-    function TwoKeyBookKeeperStorage(){
+import "../upgradability/StructuredStorage.sol";
 
-    }
+
+contract TwoKeyBookKeeperStorage is StructuredStorage {
+
 }
