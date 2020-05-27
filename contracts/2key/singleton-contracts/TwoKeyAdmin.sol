@@ -358,7 +358,15 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
+		uint moderatorEarningsReceived = getAmountOfTokensReceivedAsModerator();
+		uint moderatorEarningsWithdrawn = getAmountOfTokensWithdrawnFromModeratorEarnings();
 
+		require(amountToBeWithdrawn <= moderatorEarningsReceived.sub(moderatorEarningsWithdrawn));
+		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transfer(
+			beneficiary,
+			amountToBeWithdrawn
+		);
+		//TODO: Add events
 	}
 
 	function withdrawFeeManagerEarningsFromAdmin(
@@ -369,7 +377,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-
+		//TODO: Add events
 	}
 
 	function withdrawKyberFeesEarningsFromAdmin(
@@ -379,7 +387,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-
+		//TODO: Add events
 	}
 
 	function withdrawUpgradableExchangeDaiCollectedFromAdmin(
@@ -389,7 +397,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-
+		//TODO: Add events
 	}
 
 	/**
@@ -738,6 +746,14 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
 	}
 
+	function getAmountOfTokensWithdrawnFromModeratorEarnings()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromModeratorEarningsPool));
+	}
+
 	function getAmountReceivedFromFeeManagerInCurrency(
 		string currency
 	)
@@ -748,6 +764,16 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesFromFeeManagerCollectedInCurrency,currency));
 	}
 
+	function getAmountWithdrawnFromFeeManagerEarningsInCurrency(
+		string currency
+	)
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromFeeManagerPoolInCurrency,currency));
+	}
+
 	function getAmountReceivedFromKyber()
 	public
 	view
@@ -755,6 +781,15 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesCollectedFromKyber));
 	}
+
+	function getAmountWithdrawnFromKyberEarnings()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromKyberFeesPool));
+	}
+
 
 	function getAccountingReport()
 	public
