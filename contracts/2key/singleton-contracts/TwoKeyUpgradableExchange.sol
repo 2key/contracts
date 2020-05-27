@@ -562,7 +562,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
                 amountToPay = _totalStableCoins / 4;
             }
 
-            dai.transfer(twoKeyFeeManager, amountToPay);
+            dai.transfer(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"), amountToPay);
             ITwoKeyFeeManager(twoKeyFeeManager).payDebtWithDAI(_userPlasma, totalDebtInDAI, amountToPay);
         }
 
@@ -1268,6 +1268,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         (msg.sender).transfer(address(this).balance);
     }
 
+    function withdrawDAIAvailableToFill2KEYReserve(
+        uint amountOfDAI
+    )
+    public
+    onlyTwoKeyAdmin
+    returns (uint)
+    {
+        uint daiWeiAvailableToFill2keyReserve = daiWeiAvailableToFill2KEYReserve();
+        require(amountOfDAI <= daiWeiAvailableToFill2keyReserve);
+
+        ERC20(getAddress(keccak256(_dai))).transfer(msg.sender, amountOfDAI);
+        bytes32 key = keccak256("daiWeiAvailableToFill2KEYReserve");
+
+        // Set that there's not DAI to fill reserve anymore
+        PROXY_STORAGE_CONTRACT.setUint(key, daiWeiAvailableToFill2keyReserve.sub(amountOfDAI));
+
+        // Return how much have been withdrawn
+        return amountOfDAI;
+    }
 
     /**
      * @notice          Function to withdraw any ERC20 tokens to TwoKeyAdmin
@@ -1279,7 +1298,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyTwoKeyAdmin
     {
+        //TOOD: When we're withdrawing DAI from here, we should update state variable in Admin that is collected
         ERC20(_erc20TokenAddress).transfer(msg.sender, _tokenAmount);
+
     }
 
 

@@ -8,6 +8,7 @@ import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyExchangeRateContract.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -237,10 +238,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
         PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, totalDebtForUser.sub(_debtPaying));
 
-        // Increase amount of total debts paid to 2Key network in ETH
-        bytes32 key = keccak256(_totalPaidInETH);
-        uint totalPaidInEth = PROXY_STORAGE_CONTRACT.getUint(key);
-        PROXY_STORAGE_CONTRACT.setUint(key, totalPaidInEth.add(_debtPaying));
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        ITwoKeyAdmin(twoKeyAdmin).addFeesCollectedInCurrency.value(msg.value)("ETH", msg.value);
 
         ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
             _plasmaAddress,
@@ -262,13 +261,16 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         bytes32 keyHashForDebt = keccak256(_userPlasmaToDebtInETH, _plasmaAddress);
         uint totalDebtForUser = PROXY_STORAGE_CONTRACT.getUint(keyHashForDebt);
 
-        bytes32 keyHashTotalPaidInDAI = keccak256(_totalPaidInDAI);
-        // Set total paid in DAI
-        PROXY_STORAGE_CONTRACT.setUint(keyHashTotalPaidInDAI, _debtAmountPaidDAI.add(PROXY_STORAGE_CONTRACT.getUint(keyHashTotalPaidInDAI)));
+//        bytes32 keyHashTotalPaidInDAI = keccak256(_totalPaidInDAI);
+//        // Set total paid in DAI
+//        PROXY_STORAGE_CONTRACT.setUint(keyHashTotalPaidInDAI, _debtAmountPaidDAI.add(PROXY_STORAGE_CONTRACT.getUint(keyHashTotalPaidInDAI)));
+//
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        ITwoKeyAdmin(twoKeyAdmin).addFeesCollectedInCurrency("DAI", _debtAmountPaidDAI);
 
-        totalDebtForUser = totalDebtForUser - totalDebtForUser.mul(_debtAmountPaidDAI.mul(10**18).div(_totalDebtDAI)).div(10**18);
-
+        totalDebtForUser = totalDebtForUser.sub(totalDebtForUser.mul(_debtAmountPaidDAI.mul(10**18).div(_totalDebtDAI)).div(10**18));
         PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, totalDebtForUser);
+
 
         ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDebtEvent(
             _plasmaAddress,
@@ -280,44 +282,12 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-    function calculateEth2KeyRate()
-    internal
-    view
-    returns (uint)
-    {
-        address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
-        uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
-        uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
-
-        // If there's no existing rate at the moment, compute it
-        if(ethTo2key == 0) {
-            //This means that budget for this campaign was added directly as 2KEY
-            /**
-             1 eth = 200$
-             1 2KEY = 0.06 $
-
-             200 = 0.06 * x
-             x = 200 / 0.06
-             x = 3333,333333333
-             1 eth = 3333,333333 2KEY
-             */
-            uint eth_usd = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).
-            getBaseToTargetRate("USD");
-
-            // get current 2key rate
-            uint twoKey_usd = IUpgradableExchange(upgradableExchange).sellRate2key();
-
-            // Compute rates at this particular moment
-            ethTo2key = eth_usd.mul(10**18).div(twoKey_usd);
-        }
-        return ethTo2key;
-    }
-
     function payDebtWith2KeyV2(
         address _beneficiaryPublic,
         address _plasmaAddress,
         uint _amountOf2keyForRewards,
-        address _twoKeyEconomy
+        address _twoKeyEconomy,
+        address _twoKeyAdmin
     )
     public
     onlyAllowedContracts
@@ -359,21 +329,50 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
             );
 
 
-            // Get keyhash for debt
+            // Update if there's any leftover with debt
             bytes32 keyHashForDebt = keccak256(_userPlasmaToDebtInETH, _plasmaAddress);
-
-            bytes32 keyHashTotalPaidIn2Key = keccak256(_totalPaidIn2Key);
-
-            PROXY_STORAGE_CONTRACT.setUint(keyHashTotalPaidIn2Key, amountToPay.add(PROXY_STORAGE_CONTRACT.getUint(keyHashTotalPaidIn2Key)));
-
             usersDebtInEth = usersDebtInEth.sub(usersDebtInEth.mul(amountToPay.mul(10**18).div(debtIn2Key)).div(10**18));
-
             PROXY_STORAGE_CONTRACT.setUint(keyHashForDebt, usersDebtInEth);
         }
+
+        ITwoKeyAdmin(_twoKeyAdmin).addFeesCollectedInCurrency("2KEY", amountToPay);
         // Take tokens from campaign contract
-        IERC20(_twoKeyEconomy).transferFrom(msg.sender, address(this), _amountOf2keyForRewards);
+        IERC20(_twoKeyEconomy).transferFrom(msg.sender, _twoKeyAdmin, amountToPay);
         // Transfer tokens - debt to influencer
-        IERC20(_twoKeyEconomy).transfer(_beneficiaryPublic, _amountOf2keyForRewards.sub(amountToPay));
+        IERC20(_twoKeyEconomy).transferFrom(msg.sender, _beneficiaryPublic, _amountOf2keyForRewards.sub(amountToPay));
+    }
+
+    function calculateEth2KeyRate()
+    internal
+    view
+    returns (uint)
+    {
+        address upgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        uint contractID = IUpgradableExchange(upgradableExchange).getContractId(msg.sender);
+        uint ethTo2key = IUpgradableExchange(upgradableExchange).getEth2KeyAverageRatePerContract(contractID);
+
+        // If there's no existing rate at the moment, compute it
+        if(ethTo2key == 0) {
+            //This means that budget for this campaign was added directly as 2KEY
+            /**
+             1 eth = 200$
+             1 2KEY = 0.06 $
+
+             200 = 0.06 * x
+             x = 200 / 0.06
+             x = 3333,333333333
+             1 eth = 3333,333333 2KEY
+             */
+            uint eth_usd = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")).
+            getBaseToTargetRate("USD");
+
+            // get current 2key rate
+            uint twoKey_usd = IUpgradableExchange(upgradableExchange).sellRate2key();
+
+            // Compute rates at this particular moment
+            ethTo2key = eth_usd.mul(10**18).div(twoKey_usd);
+        }
+        return ethTo2key;
     }
 
 
@@ -511,6 +510,19 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         uint balance = IERC20(twoKeyEconomy).balanceOf(address(this));
 
         IERC20(twoKeyEconomy).transfer(msg.sender, balance);
+        return balance;
+    }
+
+    function withdrawDAICollected(
+        address _dai
+    )
+    public
+    onlyTwoKeyAdmin
+    returns (uint)
+    {
+        uint balance = IERC20(_dai).balanceOf(address(this));
+
+        IERC20(_dai).transfer(msg.sender, balance);
         return balance;
     }
 

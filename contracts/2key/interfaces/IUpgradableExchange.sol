@@ -82,4 +82,10 @@ contract IUpgradableExchange {
         uint newSpreadWei
     )
     public;
+
+    function withdrawDAIAvailableToFill2KEYReserve(
+        uint amountOfDAI
+    )
+    public
+    returns (uint);
 }

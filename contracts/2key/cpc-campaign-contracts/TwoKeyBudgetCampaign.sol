@@ -250,6 +250,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyMaintainer
 	{
 		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 		for(uint i=0; i<influencers.length; i++) {
 			// Get the influencer balance
 			uint balance = referrerPlasma2Balances2key[influencers[i]];
@@ -266,7 +267,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 					twoKeyEventSource.ethereumOf(influencers[i]),
 					influencers[i],
 					balance,
-					twoKeyEconomy
+					twoKeyEconomy,
+					twoKeyAdmin
 				);
 			}
 		}
