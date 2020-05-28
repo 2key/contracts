@@ -1155,12 +1155,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint _contractID = getContractId(_contractAddress);
         return (
-            ethWeiAvailableToHedge(_contractID),
-            daiWeiAvailableToWithdraw(_contractID),
-            daiWeiReceivedFromHedgingPerContract(_contractID),
-            ethWeiHedgedPerContract(_contractID),
-            sent2keyToContract(_contractID),
-            ethReceivedFromContract(_contractID)
+        ethWeiAvailableToHedge(_contractID),
+        daiWeiAvailableToWithdraw(_contractID),
+        daiWeiReceivedFromHedgingPerContract(_contractID),
+        ethWeiHedgedPerContract(_contractID),
+        sent2keyToContract(_contractID),
+        ethReceivedFromContract(_contractID)
         );
     }
 
@@ -1196,6 +1196,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return 1080000*(10**18);
     }
 
+    /**
+     * @notice          Function to set new spread in wei
+     *
+     * @param           newSpreadWei is the new value for the spread
+     */
+    function setSpreadWei(
+        uint newSpreadWei
+    )
+    public
+    onlyTwoKeyAdmin
+    {
+        setUint(keccak256("spreadWei"), newSpreadWei);
+    }
+
 
     /**
      * @notice          Getter to get spreadWei value
@@ -1209,6 +1223,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+
     /**
      * @notice          Getter for 2key sell rate
      */
@@ -1217,7 +1232,17 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        return getUint(keccak256("sellRate2key"));
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+
+        uint rateFromKyber = get2KeyToUSDFromKyber();
+        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
+        uint rateFromContract = getUint(keccak256("sellRate2key"));
+
+        uint max = rateFromKyber;
+        if(rateFromCoinGecko>max) max = rateFromCoinGecko;
+        if(rateFromContract > max) max = rateFromContract;
+
+        return max;
     }
 
 
@@ -1277,7 +1302,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
      */
     function get2KEYTokenPriceAndAmountOfTokensReceiving(
-         uint purchaseAmountUSDWei
+        uint purchaseAmountUSDWei
     )
     public
     view
@@ -1293,6 +1318,26 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    /**
+     * @notice          Function which will return how much is 1 2KEY worth USD
+     *
+     * @return          2key to USD to WEI
+     */
+    function get2KeyToUSDFromKyber()
+    public
+    view
+    returns (uint)
+    {
+        address twoKeyToken = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
+        address daiToken = getAddress(keccak256(_dai));
+        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, daiToken); // This is how much 1 2KEY is worth in DAI
+        /**
+         * expected rate represents how many dai tokens we will get for 1 2KEY token
+         */
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+        uint daiUsdRate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("DAI-USD");
+        return expectedRate.mul(daiUsdRate).div(10**18);
+    }
 
     /**
      * @notice          Function to get amount of destination tokens to be received if bought
