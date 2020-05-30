@@ -41,7 +41,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
 	string constant _amountWithdrawnFromFeeManagerPoolInCurrency = "amountWithdrawnFromFeeManagerPoolInCurrency";
 	string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
-	string constant _daiCollectedFromUpgradableExchange ="daiCollectedFromUpgradableExchange";
 
 	/**
 	 * Keys for the addresses we're accessing
@@ -316,17 +315,24 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-	function withdrawFeesFromKyber()
+	function withdrawFeesFromKyber(
+		address reserveContract,
+		address pricingContract
+	)
 	public
 	onlyTwoKeyCongress
 	{
-		//TODO: Disable trade
-		//TODO: get available fees
-		//TODO: withdraw 98% of available fees
-		//TODO: Reset counters for available fees to 0
-		//TODO: Re-enable trade on kyber
-		uint amount = 0; //TODO: Add interface for kyber interaction
-		addFeesCollectedFromKyber(amount);
+		disableTradeInKyberInternal(reserveContract);
+		uint availableFees = getKyberAvailableFeesOnReserve(pricingContract);
+		withdrawTokensFromKyberReserveInternal(
+			reserveContract,
+			ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)),
+			availableFees,
+			address(this)
+		);
+		resetFeesCounterOnKyberContract(pricingContract);
+		enableTradeInKyberInternal(reserveContract);
+		addFeesCollectedFromKyber(availableFees);
 	}
 
 	/**
@@ -377,7 +383,24 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		//TODO: Add events
+
+		uint feeManagerEarningsInCurrency = getAmountReceivedFromFeeManagerInCurrency(currency);
+		uint feeManagerEarningsWithdrawn = getAmountWithdrawnFromFeeManagerEarningsInCurrency(currency);
+
+		require(feeManagerEarningsInCurrency.sub(feeManagerEarningsWithdrawn) >= amountToBeWithdrawn);
+
+		if(keccak256(currency) == keccak256("ETH")) {
+			beneficiary.transfer(amountToBeWithdrawn);
+		} else if(keccak256(currency) == keccak256("2KEY")) {
+			IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transfer(
+			beneficiary,
+			amountToBeWithdrawn
+			);
+		} else if(keccak256(currency) == keccak256("DAI")) {
+			// todo get dai address
+		}
+
+
 	}
 
 	function withdrawKyberFeesEarningsFromAdmin(
@@ -387,7 +410,22 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		//TODO: Add events
+		uint kyberTotalReceived = getAmountReceivedFromKyber();
+		uint kyberTotalWithdrawn = getAmountWithdrawnFromKyberEarnings();
+
+		require(amountToBeWithdrawn <= kyberTotalReceived.sub(kyberTotalWithdrawn));
+
+		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transfer(
+			beneficiary,
+			amountToBeWithdrawn
+		);
+
+		PROXY_STORAGE_CONTRACT.setUint(
+			keccak256(_amountWithdrawnFromKyberFeesPool),
+			kyberTotalWithdrawn.add(amountToBeWithdrawn)
+		);
+
+		//Add events
 	}
 
 	function withdrawUpgradableExchangeDaiCollectedFromAdmin(
@@ -511,6 +549,14 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
+		disableTradeInKyberInternal(reserveContract);
+	}
+
+	function disableTradeInKyberInternal(
+		address reserveContract
+	)
+	internal
+	{
 		IKyberReserveInterface(reserveContract).disableTrade();
 	}
 
@@ -526,9 +572,33 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
+		enableTradeInKyberInternal(reserveContract);
+	}
+
+	function enableTradeInKyberInternal(
+		address reserveContract
+	)
+	internal
+	{
 		IKyberReserveInterface(reserveContract).enableTrade();
 	}
 
+	function getKyberAvailableFeesOnReserve(
+		address pricingContract
+	)
+	internal
+	view
+	returns (uint) {
+		return IKyberReserveInterface(pricingContract).collectedFeesInTwei();
+	}
+
+	function resetFeesCounterOnKyberContract(
+		address pricingContract
+	)
+	internal
+	{
+		IKyberReserveInterface(pricingContract).resetCollectedFees();
+	}
 
 	/**
 	 * @notice			Function to set contracts on Kyber, mostly used to swap from their
@@ -573,13 +643,28 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyTwoKeyCongress
     {
-        // Call on the contract withdraw function
-        IKyberReserveInterface(kyberReserveContractAddress).withdrawToken(
-            tokenToWithdraw,
-            amountToBeWithdrawn,
-            receiverAddress
-        );
+		withdrawTokensFromKyberReserveInternal(
+			kyberReserveContractAddress,
+			tokenToWithdraw,
+			amountToBeWithdrawn,
+			receiverAddress
+		);
     }
+
+	function withdrawTokensFromKyberReserveInternal(
+		address kyberReserveContractAddress,
+		ERC20 tokenToWithdraw,
+		uint amountToBeWithdrawn,
+		address receiverAddress
+	)
+	internal
+	{
+		IKyberReserveInterface(kyberReserveContractAddress).withdrawToken(
+			tokenToWithdraw,
+			amountToBeWithdrawn,
+			receiverAddress
+		);
+	}
 
 	/**
 	 * @notice			Function to withdraw ether from Kyber reserve

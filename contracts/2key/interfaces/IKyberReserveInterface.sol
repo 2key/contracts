@@ -6,11 +6,11 @@ import "../ERC20/ERC20.sol";
  */
 contract IKyberReserveInterface {
 
-    /**
-     * @notice          Function to be called on contract LiquidityConversionRates.sol
-     *                  Can be only called by TwoKeyAdmin when we're initially setting
-     *                  up the reserve
-     */
+    // Pricing contract
+    uint public collectedFeesInTwei;
+    // Pricing contract
+    function resetCollectedFees() public;
+    // Pricing contract
     function setLiquidityParams(
         uint _rInFp,
         uint _pMinInFp,
