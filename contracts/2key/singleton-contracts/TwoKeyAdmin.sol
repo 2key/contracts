@@ -879,7 +879,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	function getAccountingReport()
 	public
 	view
-	returns (uint,uint,uint,uint,uint,uint)
+	returns (uint,uint,uint,uint,uint,uint,uint)
 	{
 		uint amountReceivedAsModerator = getAmountOfTokensReceivedAsModerator();
 
@@ -889,7 +889,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 		uint amountReceivedFromKyber = getAmountReceivedFromKyber();
 
-		uint amountOfDAIWithdrawnFromUpgradableExchange = PROXY_STORAGE_CONTRACT.getUint(keccak256(_daiCollectedFromUpgradableExchange));
+		uint amountReceivedFromUpgradableExchangeDAI = PROXY_STORAGE_CONTRACT.getUint(keccak256(_daiCollectedFromUpgradableExchange));
+		uint amountWithdrawnFromAdminFromKyberPool = getAmountWithdrawnFromKyberEarnings();
 
 		return (
 			amountReceivedAsModerator,
@@ -897,7 +898,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 			amountReceivedFromFeeManagerAsETH,
 			amountReceivedFromFeeManagerAs2KEY,
 			amountReceivedFromKyber,
-			amountOfDAIWithdrawnFromUpgradableExchange
+			amountReceivedFromUpgradableExchangeDAI,
+			amountWithdrawnFromAdminFromKyberPool
 		);
 	}
 
