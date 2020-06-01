@@ -438,6 +438,10 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
                 //Decrease bounty for distributed
                 totalBounty2keys = totalBounty2keys.sub(b);
             }
+        } else if(incentiveModel == IncentiveModel.NO_REFERRAL_REWARD) {
+            for(i=0; i<numberOfInfluencers; i++) {
+                referrerPlasmaAddressToCounterOfConversions[influencers[i]] = referrerPlasmaAddressToCounterOfConversions[influencers[i]].add(1);
+            }
         }
     }
 
