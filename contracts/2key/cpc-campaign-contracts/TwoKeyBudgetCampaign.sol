@@ -336,11 +336,11 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		uint i;
 		for(i = 0; i < influencers.length; i++) {
-			if(isActiveInfluencer[influencers[i]]  == false) {
-				activeInfluencer2idx[influencers[i]] = activeInfluencers.length;
-				activeInfluencers.push(influencers[i]);
-				isActiveInfluencer[influencers[i]] = true;
-			}
+//			if(isActiveInfluencer[influencers[i]]  == false) {
+//				activeInfluencer2idx[influencers[i]] = activeInfluencers.length;
+//				activeInfluencers.push(influencers[i]);
+//				isActiveInfluencer[influencers[i]] = true;
+//			}
 			referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(balances[i]);
 			// Update balance
 			reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(balances[i]);
@@ -405,10 +405,12 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		address[] memory influencers = new address[](end-start);
 
 		uint index = 0;
+		uint indexArr = 0;
 		for(index = start; index < end; index++) {
 			address influencer = activeInfluencers[index];
-			balances[index] = referrerPlasma2Balances2key[influencer];
-			influencers[index] = influencer;
+			balances[indexArr] = referrerPlasma2Balances2key[influencer];
+			influencers[indexArr] = influencer;
+			indexArr++;
 		}
 
 		return (influencers, balances);
