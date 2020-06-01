@@ -370,6 +370,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             for(i=0; i<numberOfInfluencers; i++) {
                 updateReferrerMappings(influencers[i], rewards[i], _conversionId);
             }
+        } else if (incentiveModel == IncentiveModel.NO_REFERRAL_REWARD) {
+            for(i=0; i<numberOfInfluencers; i++) {
+                //Count conversion from referrer
+                referrerPlasmaAddressToCounterOfConversions[influencers[i]] = referrerPlasmaAddressToCounterOfConversions[influencers[i]].add(1);
+            }
         }
 
         return numberOfInfluencers;
