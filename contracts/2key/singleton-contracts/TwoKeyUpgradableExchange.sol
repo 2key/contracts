@@ -1377,6 +1377,27 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setAddress(keccak256(_kyberReserveContract), kyberReserveContractAddress);
     }
 
+    function moveDaiFromWithdrawPoolToFillReservePool(
+        address [] cpcCampaigns
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+        uint totalDAI = 0;
+
+        for(i=0; i<cpcCampaigns.length; i++) {
+            uint contractId = getContractId(cpcCampaigns[i]);
+            bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractId);
+            uint _daiWeiAvailableToWithdraw = PROXY_STORAGE_CONTRACT.getUint(_daiWeiAvailableToWithdrawKeyHash);
+            PROXY_STORAGE_CONTRACT.setUint(_daiWeiAvailableToWithdrawKeyHash,0);
+            totalDAI = totalDAI.add(_daiWeiAvailableToWithdraw);
+        }
+        bytes32 keyHashForDaiAvailableToFill2KeyReserve = keccak256("daiWeiAvailableToFill2KEYReserve");
+        uint daiWeiAvailableToFillReserve = PROXY_STORAGE_CONTRACT.getUint(keyHashForDaiAvailableToFill2KeyReserve);
+        PROXY_STORAGE_CONTRACT.setUint(keyHashForDaiAvailableToFill2KeyReserve, daiWeiAvailableToFillReserve.add(totalDAI));
+    }
+
     /**
      * @notice          Fallback function to handle incoming ether
      */
