@@ -204,6 +204,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             _contractorProceeds = _conversionAmount.sub(_maxReferralRewardETHWei.add(_moderatorFeeETHWei));
         }
 
+        updateAmountUserContributed(_converterAddress, _conversionAmount, isConversionFiat);
 
         Conversion memory c = Conversion(contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,
@@ -232,6 +233,19 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         return numberOfConversions - 1;
     }
 
+    function updateAmountUserContributed(
+        address _converterAddress,
+        uint _conversionAmount,
+        bool isConversionFiat
+    )
+    internal
+    {
+        if(isConversionFiat) {
+            amountConverterSpentFiatWei[_converterAddress] = amountConverterSpentFiatWei[_converterAddress].add(_conversionAmount);
+        } else {
+            amountConverterSpentEthWEI[_converterAddress] = amountConverterSpentEthWEI[_converterAddress].add(_conversionAmount);
+        }
+    }
 
     /**
      * @notice Function to perform all the logic which has to be done when we're performing conversion
@@ -260,12 +274,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
             //Update raised funds FIAT once the conversion is executed
             counters[9] = counters[9].add(conversion.conversionAmount);
-
-            //Update amount converter spent in FIAT
-            amountConverterSpentFiatWei[conversion.converter] = amountConverterSpentFiatWei[conversion.converter].add(conversion.conversionAmount);
         } else {
             require(conversion.state == ConversionState.APPROVED);
-            amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
             counters[1] = counters[1].sub(1); //Decrease number of approved conversions
         }
 

@@ -198,6 +198,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             amountOfTokens
         );
 
+        amountConverterSpentEthWEI[c.converter] = amountConverterSpentEthWEI[c.converter].add(c.conversionAmount);
+
         conversions.push(c);
         converterToHisConversions[_converterAddress].push(numberOfConversions);
         emitConvertedEvent(_converterAddress, _conversionAmount, numberOfConversions);
@@ -241,7 +243,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             twoKeyCampaign
         );
 
-        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[8] = counters[8].add(totalReward2keys);
         twoKeyCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
         twoKeyCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
