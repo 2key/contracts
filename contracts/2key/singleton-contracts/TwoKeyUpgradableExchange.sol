@@ -42,22 +42,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyUpgradableExchangeStorage public PROXY_STORAGE_CONTRACT;
 
-    /**
-     * @notice          Event for token purchase logging
-     *
-     * @param           purchaser who paid for the tokens
-     * @param           receiver is who got the tokens
-     * @param           weiReceived is how weis paid for purchase
-     * @param           tokensBought is the amount of tokens purchased
-     * @param           rate is the global variable rate on the contract
-     */
-    event TokenPurchase(
-        address indexed purchaser,
-        address indexed receiver,
-        uint256 weiReceived,
-        uint256 tokensBought,
-        uint256 rate
-    );
 
 
     /**
@@ -761,15 +745,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         _processPurchase(_beneficiary, totalTokensBought);
 
-
-        emit TokenPurchase(
-            msg.sender,
-            _beneficiary,
-            msg.value,
-            totalTokensBought,
-            averageTokenPriceForPurchase
-        );
-
         return (totalTokensBought, averageTokenPriceForPurchase);
     }
 
@@ -1205,7 +1180,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     function getContractAddressFromID(
         uint contractID
     )
-    public
+    internal
     view
     returns (address)
     {
@@ -1216,7 +1191,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @notice          Getter to check how much is pool worth in USD
      */
     function poolWorthUSD()
-    public
+    internal
     view
     returns (uint)
     {
@@ -1287,44 +1262,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice          Withdraw all ether from contract
-     */
-    function withdrawEther()
-    public
-    onlyTwoKeyAdmin
-    {
-        (msg.sender).transfer(address(this).balance);
-    }
-
-
-    /**
-     * @notice          Function to withdraw any ERC20 tokens to TwoKeyAdmin
-     */
-    function withdrawERC20(
-        address _erc20TokenAddress,
-        uint _tokenAmount
-    )
-    public
-    onlyTwoKeyAdmin
-    {
-        ERC20(_erc20TokenAddress).transfer(msg.sender, _tokenAmount);
-    }
-
-
-    /**
-     * @notice          Function to get current pool supply of 2KEY tokens
-     */
-    function getPoolBalanceOf2KeyTokens()
-    public
-    view
-    returns (uint)
-    {
-        address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
-        return ERC20(tokenAddress).balanceOf(address(this));
-    }
-
-
-    /**
      * @notice          Function to get amount of 2KEY receiving, new token price, and average price per token
      *
      * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
@@ -1352,7 +1289,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @return          2key to USD to WEI
      */
     function get2KeyToUSDFromKyber()
-    public
+    internal
     view
     returns (uint)
     {
@@ -1367,34 +1304,44 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return expectedRate.mul(daiUsdRate).div(10**18);
     }
 
-    /**
-     * @notice          Function to get amount of destination tokens to be received if bought
-     *                  by srcAmountWei of srcToken
-     *
-     * @param           srcAmountWei is the amount of tokens in wei we're putting in
-     * @param           srcToken is the address of src token
-     * @param           destToken is the address of destination token
-     *
-     * @return          The amount of tokens which would've been received in case this conversion happen with this rate
-     */
-    function getEstimatedAmountOfTokensForSwapFromKyber(
-        uint srcAmountWei,
-        address srcToken,
-        address destToken
-    )
-    public
+
+    function getPoolBalanceOf2KeyTokens()
+    internal
     view
     returns (uint)
     {
-        uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
-        IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
-        return kyberReserveInterface.getDestQty(
-            ERC20(ETH_TOKEN_ADDRESS),
-            ERC20(getAddress(keccak256(_dai))),
-            srcAmountWei,
-            expectedRate
-        );
+        address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
+        return ERC20(tokenAddress).balanceOf(address(this));
     }
+
+//    /**
+//     * @notice          Function to get amount of destination tokens to be received if bought
+//     *                  by srcAmountWei of srcToken
+//     *
+//     * @param           srcAmountWei is the amount of tokens in wei we're putting in
+//     * @param           srcToken is the address of src token
+//     * @param           destToken is the address of destination token
+//     *
+//     * @return          The amount of tokens which would've been received in case this conversion happen with this rate
+//     */
+//    function getEstimatedAmountOfTokensForSwapFromKyber(
+//        uint srcAmountWei,
+//        address srcToken,
+//        address destToken
+//    )
+//    public
+//    view
+//    returns (uint)
+//    {
+//        uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
+//        IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
+//        return kyberReserveInterface.getDestQty(
+//            ERC20(ETH_TOKEN_ADDRESS),
+//            ERC20(getAddress(keccak256(_dai))),
+//            srcAmountWei,
+//            expectedRate
+//        );
+//    }
 
     function setKyberReserveInterfaceContractAddress(
         address kyberReserveContractAddress

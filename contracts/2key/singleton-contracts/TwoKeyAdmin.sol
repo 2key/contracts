@@ -270,25 +270,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-	/**
-	 * @notice 			Function to withdraw any ERC20 we have on TwoKeyUpgradableExchange contract
-	 *
-	 * @param 			_tokenAddress is the address of the ERC20 token we're willing to take
-	 * @param			_amountOfTokens is the amount of the tokens we're willing to withdraw
-	 *
-	 * @dev 			Restricted only to TwoKeyCongress contract
-	 */
-	function withdrawERC20FromUpgradableExchange(
-		address _tokenAddress,
-		uint _amountOfTokens
-	)
-	public
-	onlyTwoKeyCongress
-	{
-		address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange);
-		IUpgradableExchange(twoKeyUpgradableExchange).withdrawERC20(_tokenAddress, _amountOfTokens);
-	}
-
 
 	/**
 	 * @notice 			Function which will be used take the tokens from the campaign and distribute
