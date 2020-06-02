@@ -288,14 +288,13 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         emitExecutedEvent(conversion.converter, _conversionId, totalUnits);
 
         // Buy tokens from campaign and distribute rewards between referrers
-        if(conversion.maxReferralRewardETHWei > 0) {
-            totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
-                conversion.maxReferralRewardETHWei,
-                conversion.converter,
-                _conversionId,
-                conversion.isConversionFiat
-            );
-        }
+        totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
+            conversion.maxReferralRewardETHWei,
+            conversion.converter,
+            _conversionId,
+            conversion.isConversionFiat
+        );
+
 
         //Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(

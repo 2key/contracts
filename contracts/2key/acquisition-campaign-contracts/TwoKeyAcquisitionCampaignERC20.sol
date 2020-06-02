@@ -251,7 +251,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     returns (uint)
     {
         //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
-        uint totalBounty2keys;
+        uint totalBounty2keys = 0;
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
         if(maxReferralRewardPercent > 0) {
             if(_isConversionFiat) {
@@ -266,12 +266,13 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
             }
             // Update reserved amount
-            //Handle refchain rewards
-            ITwoKeyAcquisitionLogicHandler(logicHandler).updateRefchainRewards(
-                _converter,
-                _conversionId,
-                totalBounty2keys);
         }
+        //Handle refchain rewards
+        ITwoKeyAcquisitionLogicHandler(logicHandler).updateRefchainRewards(
+            _converter,
+            _conversionId,
+            totalBounty2keys);
+
         return totalBounty2keys;
     }
 
