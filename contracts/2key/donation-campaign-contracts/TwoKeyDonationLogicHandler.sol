@@ -97,6 +97,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         return false;
     }
 
+    // Updated
     function checkHowMuchUserCanSpend(
         address _converter
     )
