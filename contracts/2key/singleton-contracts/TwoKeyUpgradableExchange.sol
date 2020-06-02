@@ -13,7 +13,7 @@ import "../interfaces/IBancorContract.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
-
+import "../interfaces/ITwoKeyFactory.sol";
 import "../upgradability/Upgradeable.sol";
 
 
@@ -480,6 +480,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    function updateWithdrawOrReservePoolDependingOnCampaignType(
+        uint contractID,
+        uint _daisReceived,
+        address twoKeyFactory
+    )
+    internal
+    {
+        address campaignAddress = getContractAddressFromID(contractID);
+        string memory campaignType = ITwoKeyFactory(twoKeyFactory).addressToCampaignType(campaignAddress);
+        if(keccak256("CPC_PUBLIC") == keccak256(campaignType)) {
+            // Means everything gets immediately released to support filling reserve
+            bytes32 daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+            setUint(daiWeiAvailableToFill2KEYReserveKeyHash, _daisReceived.add(PROXY_STORAGE_CONTRACT.getUint(daiWeiAvailableToFill2KEYReserveKeyHash)));
+        } else {
+            // Means funds are being able to withdrawn by influencers
+            bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", contractID);
+            setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(contractID).add(_daisReceived));
+        }
+    }
 
     /**
      * @notice          Internal function created to update specific values, separated because of stack depth
@@ -498,14 +517,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     internal
     {
         bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
-        bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", _contractID);
         bytes32 ethWeiHedgedPerContractKeyHash = keccak256("ethWeiHedgedPerContract", _contractID);
         bytes32 daiWeiReceivedFromHedgingPerContractKeyHash = keccak256("daiWeiReceivedFromHedgingPerContract",_contractID);
 
         setUint(daiWeiReceivedFromHedgingPerContractKeyHash, daiWeiReceivedFromHedgingPerContract(_contractID).add(_daisReceived));
         setUint(ethWeiHedgedPerContractKeyHash, ethWeiHedgedPerContract(_contractID).add(_hedgedEthWei));
         setUint(ethWeiAvailableToHedgeKeyHash, _afterHedgingAvailableEthWei);
-        setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(_contractID).add(_daisReceived));
     }
 
     /**
@@ -980,7 +997,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint i;
         uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedgedForThisChunk, _ethWeiHedgedForThisChunk); // Percentage to deduct in WEI (less than 1)
-
+        address twoKeyFactory = getAddressFromTwoKeySingletonRegistry("TwoKeyFactory");
         for(i=_startIndex; i<=_endIndex; i++) {
             if(ethWeiAvailableToHedge(i) > 0) {
                 uint beforeHedgingAvailableEthWeiForContract = ethWeiAvailableToHedge(i);
@@ -989,6 +1006,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
                 uint hedgedEthWei = beforeHedgingAvailableEthWeiForContract.sub(afterHedgingAvailableEthWei);
                 uint daisReceived = hedgedEthWei.mul(_ratio).div(10**18);
+                updateWithdrawOrReservePoolDependingOnCampaignType(i, daisReceived, twoKeyFactory);
                 updateAccountingValues(daisReceived, hedgedEthWei, afterHedgingAvailableEthWei, i);
             }
         }
@@ -1182,6 +1200,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint _contractID = getContractId(_contractAddress);
         return ethReceivedFromContract(_contractID) > 0 ? true : false;
+    }
+
+    function getContractAddressFromID(
+        uint contractID
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("idToContractAddress", contractID));
     }
 
     /**
