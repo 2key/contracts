@@ -41,6 +41,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
 	string constant _amountWithdrawnFromFeeManagerPoolInCurrency = "amountWithdrawnFromFeeManagerPoolInCurrency";
 	string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
+	string constant _amountWithdrawnFromUpgradableExchangeEarningsPool = "amountWithdrawnFromUpgradableExchangeEarningsPool";
 
 	/**
 	 * Keys for the addresses we're accessing
@@ -52,7 +53,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyCampaignValidator = "TwoKeyCampaignValidator";
 	string constant _twoKeyEventSource = "TwoKeyEventSource";
 	string constant _twoKeyFeeManager = "TwoKeyFeeManager";
-
+	string constant _twoKeyMaintainersRegistry = "TwoKeyMaintainersRegistry";
 
 
 	bool initialized = false;
@@ -151,7 +152,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
 		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).addCoreDevs(_coreDevs);
 	}
 
@@ -167,7 +168,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
 		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).addMaintainers(_maintainers);
 	}
 
@@ -183,7 +184,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
 		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).removeCoreDevs(_coreDevs);
 	}
 
@@ -199,7 +200,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	external
 	onlyTwoKeyCongress
 	{
-		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+		address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyMaintainersRegistry);
 		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).removeMaintainers(_maintainers);
 	}
 
@@ -252,6 +253,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return completed;
 	}
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	 *                                                                               *
+	 *				ACCOUNTING (BOOKKEEPING) NECESSARY STUFF                         *
+	 *                                                                               *
+	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 	/**
 	 * @notice 			Function to migrate current Fee manager state and funds to admin and update
@@ -286,8 +292,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 	/**
 	 * @notice			Function to update whenever some funds are arriving to TwoKeyAdmin
+	 *					from TwoKeyFeeManager contract
 	 *
-	 * @param			currency is in which currency we received money
+	 * @param			currency is in which currency contract received asset
 	 * @param			amount is the amount which is received
 	 */
 	function addFeesCollectedInCurrency(
@@ -304,6 +311,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+	/**
+	 * @notice			Function to handle and update state every time there's an
+	 *					income from Kyber network fees
+	 *
+	 * @param			amount is the amount contract have received from there
+	 */
 	function addFeesCollectedFromKyber(
 		uint amount
 	)
@@ -314,7 +327,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(key, feesCollectedFromKyber.add(amount));
 	}
 
-
+	/**
+	 * @notice			Function to withdraw fees collected on Kyber contract to Admin contract
+	 *
+	 * @param			reserveContract	is the address of kyber reserve contract for 2KEY token
+	 * @param			pricingContract is the address of kyber pricing contract for 2KEY token
+	 */
 	function withdrawFeesFromKyber(
 		address reserveContract,
 		address pricingContract
@@ -335,8 +353,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		addFeesCollectedFromKyber(availableFees);
 	}
 
+
 	/**
-	 * @notice 			Function to withdraw any ERC20 we have on TwoKeyUpgradableExchange contract
+	 * @notice 			Function to withdraw DAI we have on TwoKeyUpgradableExchange contract
 	 *
 	 * @param			_amountOfTokens is the amount of the tokens we're willing to withdraw
 	 *
@@ -393,14 +412,16 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 			beneficiary.transfer(amountToBeWithdrawn);
 		} else if(keccak256(currency) == keccak256("2KEY")) {
 			IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transfer(
-			beneficiary,
-			amountToBeWithdrawn
+				beneficiary,
+				amountToBeWithdrawn
 			);
 		} else if(keccak256(currency) == keccak256("DAI")) {
-			// todo get dai address
+			IERC20(getDAIAddress()).transfer(
+				beneficiary,
+				amountToBeWithdrawn
+			);
 		}
-
-
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromFeeManagerPoolInCurrency,currency), feeManagerEarningsWithdrawn.add(amountToBeWithdrawn));
 	}
 
 	function withdrawKyberFeesEarningsFromAdmin(
@@ -435,7 +456,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		//TODO: Add events
+
 	}
 
 	/**
@@ -903,6 +924,22 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		);
 	}
 
+	function getDAIAddress()
+	internal
+	view
+	returns (address)
+	{
+		return PROXY_STORAGE_CONTRACT.getAddress(keccak256("DAI"));
+	}
+
+	function setDAIAddressToStorage(
+		address _dai
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		PROXY_STORAGE_CONTRACT.setAddress(keccak256("DAI"), _dai);
+	}
 
 	/**
 	 * @notice Free ether is always accepted :)
