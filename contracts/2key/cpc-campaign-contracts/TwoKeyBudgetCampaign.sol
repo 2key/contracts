@@ -337,7 +337,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		uint i;
 		for(i = 0; i < influencers.length; i++) {
 			if(isActiveInfluencer[influencers[i]]  == false) {
-				activeInfluencer2idx[influencers[i]] = activeInfluencers.length;
 				activeInfluencers.push(influencers[i]);
 				isActiveInfluencer[influencers[i]] = true;
 			}
