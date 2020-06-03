@@ -253,7 +253,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
         //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
         uint totalBounty2keys = 0;
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
-        if(maxReferralRewardPercent > 0) {
+        if(_maxReferralRewardETHWei > 0) {
             if(_isConversionFiat) {
                 if(usd2KEYrateWei == 0) {
                     usd2KEYrateWei = (IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key());
