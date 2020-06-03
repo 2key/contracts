@@ -20,6 +20,7 @@ cd ../..
 
 
 python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.21
+python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.8
 
 
 
