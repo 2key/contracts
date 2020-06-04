@@ -336,7 +336,7 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         address plasma_address = plasmaOf(_address);
 
         if(_address == contractor) {
-            abi.encodePacked(0, 0, 0, false, false);
+            return abi.encodePacked(0, 0, 0, false, false);
         } else {
             bool isConverter;
             bool isReferrer;

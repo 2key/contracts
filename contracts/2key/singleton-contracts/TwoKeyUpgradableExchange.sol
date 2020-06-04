@@ -13,7 +13,7 @@ import "../interfaces/IBancorContract.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
-
+import "../interfaces/ITwoKeyFactory.sol";
 import "../upgradability/Upgradeable.sol";
 
 
@@ -42,22 +42,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyUpgradableExchangeStorage public PROXY_STORAGE_CONTRACT;
 
-    /**
-     * @notice          Event for token purchase logging
-     *
-     * @param           purchaser who paid for the tokens
-     * @param           receiver is who got the tokens
-     * @param           weiReceived is how weis paid for purchase
-     * @param           tokensBought is the amount of tokens purchased
-     * @param           rate is the global variable rate on the contract
-     */
-    event TokenPurchase(
-        address indexed purchaser,
-        address indexed receiver,
-        uint256 weiReceived,
-        uint256 tokensBought,
-        uint256 rate
-    );
 
 
     /**
@@ -480,6 +464,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    function updateWithdrawOrReservePoolDependingOnCampaignType(
+        uint contractID,
+        uint _daisReceived,
+        address twoKeyFactory
+    )
+    internal
+    {
+        address campaignAddress = getContractAddressFromID(contractID);
+        string memory campaignType = ITwoKeyFactory(twoKeyFactory).addressToCampaignType(campaignAddress);
+        if(keccak256("CPC_PUBLIC") == keccak256(campaignType)) {
+            // Means everything gets immediately released to support filling reserve
+            bytes32 daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+            setUint(daiWeiAvailableToFill2KEYReserveKeyHash, _daisReceived.add(PROXY_STORAGE_CONTRACT.getUint(daiWeiAvailableToFill2KEYReserveKeyHash)));
+        } else {
+            // Means funds are being able to withdrawn by influencers
+            bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", contractID);
+            setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(contractID).add(_daisReceived));
+        }
+    }
 
     /**
      * @notice          Internal function created to update specific values, separated because of stack depth
@@ -562,7 +565,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
                 amountToPay = _totalStableCoins / 4;
             }
 
-            dai.transfer(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"), amountToPay);
+            dai.transfer(twoKeyFeeManager, amountToPay);
             ITwoKeyFeeManager(twoKeyFeeManager).payDebtWithDAI(_userPlasma, totalDebtInDAI, amountToPay);
         }
 
@@ -743,15 +746,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         updateEthWeiAvailableToHedge(contractId, msg.value);
 
         _processPurchase(_beneficiary, totalTokensBought);
-
-
-        emit TokenPurchase(
-            msg.sender,
-            _beneficiary,
-            msg.value,
-            totalTokensBought,
-            averageTokenPriceForPurchase
-        );
 
         return (totalTokensBought, averageTokenPriceForPurchase);
     }
@@ -980,7 +974,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint i;
         uint percentageToDeductWei = calculatePercentageToDeduct(_ethWeiHedgedForThisChunk, _ethWeiHedgedForThisChunk); // Percentage to deduct in WEI (less than 1)
-
+        address twoKeyFactory = getAddressFromTwoKeySingletonRegistry("TwoKeyFactory");
         for(i=_startIndex; i<=_endIndex; i++) {
             if(ethWeiAvailableToHedge(i) > 0) {
                 uint beforeHedgingAvailableEthWeiForContract = ethWeiAvailableToHedge(i);
@@ -989,6 +983,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
                 uint hedgedEthWei = beforeHedgingAvailableEthWeiForContract.sub(afterHedgingAvailableEthWei);
                 uint daisReceived = hedgedEthWei.mul(_ratio).div(10**18);
+                updateWithdrawOrReservePoolDependingOnCampaignType(i, daisReceived, twoKeyFactory);
                 updateAccountingValues(daisReceived, hedgedEthWei, afterHedgingAvailableEthWei, i);
             }
         }
@@ -1184,11 +1179,21 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return ethReceivedFromContract(_contractID) > 0 ? true : false;
     }
 
+    function getContractAddressFromID(
+        uint contractID
+    )
+    internal
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("idToContractAddress", contractID));
+    }
+
     /**
      * @notice          Getter to check how much is pool worth in USD
      */
     function poolWorthUSD()
-    public
+    internal
     view
     returns (uint)
     {
@@ -1323,7 +1328,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
      */
     function get2KEYTokenPriceAndAmountOfTokensReceiving(
-         uint purchaseAmountUSDWei
+        uint purchaseAmountUSDWei
     )
     public
     view
@@ -1345,7 +1350,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @return          2key to USD to WEI
      */
     function get2KeyToUSDFromKyber()
-    public
+    internal
     view
     returns (uint)
     {
@@ -1360,34 +1365,44 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return expectedRate.mul(daiUsdRate).div(10**18);
     }
 
-    /**
-     * @notice          Function to get amount of destination tokens to be received if bought
-     *                  by srcAmountWei of srcToken
-     *
-     * @param           srcAmountWei is the amount of tokens in wei we're putting in
-     * @param           srcToken is the address of src token
-     * @param           destToken is the address of destination token
-     *
-     * @return          The amount of tokens which would've been received in case this conversion happen with this rate
-     */
-    function getEstimatedAmountOfTokensForSwapFromKyber(
-        uint srcAmountWei,
-        address srcToken,
-        address destToken
-    )
-    public
+
+    function getPoolBalanceOf2KeyTokens()
+    internal
     view
     returns (uint)
     {
-        uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
-        IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
-        return kyberReserveInterface.getDestQty(
-            ERC20(ETH_TOKEN_ADDRESS),
-            ERC20(getAddress(keccak256(_dai))),
-            srcAmountWei,
-            expectedRate
-        );
+        address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
+        return ERC20(tokenAddress).balanceOf(address(this));
     }
+
+//    /**
+//     * @notice          Function to get amount of destination tokens to be received if bought
+//     *                  by srcAmountWei of srcToken
+//     *
+//     * @param           srcAmountWei is the amount of tokens in wei we're putting in
+//     * @param           srcToken is the address of src token
+//     * @param           destToken is the address of destination token
+//     *
+//     * @return          The amount of tokens which would've been received in case this conversion happen with this rate
+//     */
+//    function getEstimatedAmountOfTokensForSwapFromKyber(
+//        uint srcAmountWei,
+//        address srcToken,
+//        address destToken
+//    )
+//    public
+//    view
+//    returns (uint)
+//    {
+//        uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
+//        IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
+//        return kyberReserveInterface.getDestQty(
+//            ERC20(ETH_TOKEN_ADDRESS),
+//            ERC20(getAddress(keccak256(_dai))),
+//            srcAmountWei,
+//            expectedRate
+//        );
+//    }
 
     function setKyberReserveInterfaceContractAddress(
         address kyberReserveContractAddress
@@ -1396,6 +1411,27 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyTwoKeyAdmin
     {
         setAddress(keccak256(_kyberReserveContract), kyberReserveContractAddress);
+    }
+
+    function moveDaiFromWithdrawPoolToFillReservePool(
+        address [] cpcCampaigns
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+        uint totalDAI = 0;
+
+        for(i=0; i<cpcCampaigns.length; i++) {
+            uint contractId = getContractId(cpcCampaigns[i]);
+            bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractId);
+            uint _daiWeiAvailableToWithdraw = PROXY_STORAGE_CONTRACT.getUint(_daiWeiAvailableToWithdrawKeyHash);
+            PROXY_STORAGE_CONTRACT.setUint(_daiWeiAvailableToWithdrawKeyHash,0);
+            totalDAI = totalDAI.add(_daiWeiAvailableToWithdraw);
+        }
+        bytes32 keyHashForDaiAvailableToFill2KeyReserve = keccak256("daiWeiAvailableToFill2KEYReserve");
+        uint daiWeiAvailableToFillReserve = PROXY_STORAGE_CONTRACT.getUint(keyHashForDaiAvailableToFill2KeyReserve);
+        PROXY_STORAGE_CONTRACT.setUint(keyHashForDaiAvailableToFill2KeyReserve, daiWeiAvailableToFillReserve.add(totalDAI));
     }
 
     /**

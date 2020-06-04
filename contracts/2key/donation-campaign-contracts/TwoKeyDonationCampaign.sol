@@ -157,9 +157,11 @@ contract TwoKeyDonationCampaign is UpgradeableCampaign, TwoKeyCampaignIncentiveM
     {
         require(msg.sender == conversionHandler);
         //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
-        uint totalBounty2keys;
-        //Buy tokens from upgradable exchange
-        (totalBounty2keys,) = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+        uint totalBounty2keys = 0;
+        if(_maxReferralRewardETHWei > 0) {
+            //Buy tokens from upgradable exchange
+            (totalBounty2keys,) = buyTokensFromUpgradableExchange(_maxReferralRewardETHWei, address(this));
+        }
         //Handle refchain rewards
         ITwoKeyDonationLogicHandler(logicHandler).updateRefchainRewards(
             _converter,
