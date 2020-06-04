@@ -44,7 +44,6 @@ module.exports = function deploy(deployer) {
     }
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        deployer.deploy(MerkleProof);
         deployer.link(Call, TwoKeyCPCCampaign);
         deployer.link(MerkleProof, TwoKeyCPCCampaign);
         deployer.deploy(TwoKeyCPCCampaign)
