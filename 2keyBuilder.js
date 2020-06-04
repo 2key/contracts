@@ -377,9 +377,6 @@ async function deployUpgrade(networks, args) {
     await runTruffleCompile();
     let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged] = await getDiffBetweenLatestTags();
 
-    singletonsToBeUpgraded = ["TwoKeyPlasmaRegistry"];
-    tokenSellToBePatched = [];
-    donationToBePatched = [];
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
         console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
