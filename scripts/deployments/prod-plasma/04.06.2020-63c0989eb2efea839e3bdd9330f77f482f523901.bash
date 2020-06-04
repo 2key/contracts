@@ -15,7 +15,7 @@ spinner 2
 
 echo "Generating bytecodes for changes on plasma network"
 echo "TwoKeyCPCCampaignPlasma patch to 1.0.2"
-echo "Destination for execution: 0xe4dd40e6da89a5f8adc059ce9f0c5826daf32b64"
+echo "Destination for execution: 0xd0043ac71897032d572580ad84359323b5719068"
 cd ../..
 
 python3 generate_bytecode.py approveNewCampaign CPC_PLASMA 1.0.2
