@@ -1148,12 +1148,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint _contractID = getContractId(_contractAddress);
         return (
-            ethWeiAvailableToHedge(_contractID),
-            daiWeiAvailableToWithdraw(_contractID),
-            daiWeiReceivedFromHedgingPerContract(_contractID),
-            ethWeiHedgedPerContract(_contractID),
-            sent2keyToContract(_contractID),
-            ethReceivedFromContract(_contractID)
+        ethWeiAvailableToHedge(_contractID),
+        daiWeiAvailableToWithdraw(_contractID),
+        daiWeiReceivedFromHedgingPerContract(_contractID),
+        ethWeiHedgedPerContract(_contractID),
+        sent2keyToContract(_contractID),
+        ethReceivedFromContract(_contractID)
         );
     }
 
@@ -1267,7 +1267,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
      */
     function get2KEYTokenPriceAndAmountOfTokensReceiving(
-         uint purchaseAmountUSDWei
+        uint purchaseAmountUSDWei
     )
     public
     view
