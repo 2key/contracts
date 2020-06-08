@@ -268,16 +268,14 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	 * 					state variables
 	 * @param			_dai is the address on DAI token (argument due to blockchain env)
 	 */
-	function migrateCurrentFeeManagerStateToAdminAndWithdrawFunds(
-		address _dai
-	)
+	function migrateCurrentFeeManagerStateToAdminAndWithdrawFunds()
 	public
 	onlyTwoKeyCongress
 	{
 		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
 		uint collectedETH = ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
 		uint collected2KEY = ITwoKeyFeeManager(twoKeyFeeManager).withdraw2KEYCollected();
-		uint collectedDAI = ITwoKeyFeeManager(twoKeyFeeManager).withdrawDAICollected(_dai);
+		uint collectedDAI = ITwoKeyFeeManager(twoKeyFeeManager).withdrawDAICollected(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"));
 
 		bytes32 key1 = keccak256(_feesFromFeeManagerCollectedInCurrency, "ETH");
 		uint feesCollectedFromFeeManagerInCurrencyETH = PROXY_STORAGE_CONTRACT.getUint(key1);
@@ -379,7 +377,14 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(key, _amountWithdrawnCurrently.add(collectedDAI));
 	}
 
-
+	/**
+	 * @notice			Function to withdraw moderator earnings from TwoKeyAdmin contract
+	 * 					If 0 is passed as amountToBeWithdrawn, everything available will
+	 *					be withdrawn
+	 *
+	 * @param			beneficiary is the address which is receiving tokens
+	 * @param			amountToBeWithdrawn is the amount of tokens which will be withdrawns
+	 */
 	function withdrawModeratorEarningsFromAdmin(
 		address beneficiary,
 		uint amountToBeWithdrawn
@@ -395,8 +400,13 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 			beneficiary,
 			amountToBeWithdrawn
 		);
+
+
+		//TODO: Update moderator earnings withdrawn
 	}
 
+	//TODO: Add function to BURN moderator earnings from Admin (send to 0x0)
+	//TODO: For all WITHDRAW funnels if amountToBeWithdrawn = 0 then withdraw/burn everything which is there
 	function withdrawFeeManagerEarningsFromAdmin(
 		address beneficiary,
 		string currency,
@@ -427,6 +437,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromFeeManagerPoolInCurrency,currency), feeManagerEarningsWithdrawn.add(amountToBeWithdrawn));
 	}
 
+	/**
+	 * @notice			Function to withdraw earnings collected from Kyber fees from Admin contract
+	 *
+	 * @param			beneficiary is the address which is receiving tokens
+	 * @param			amountToBeWithdrawn is the amount of tokens to be withdrawn
+	 */
 	function withdrawKyberFeesEarningsFromAdmin(
 		address beneficiary,
 		uint amountToBeWithdrawn
@@ -450,6 +466,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		);
 	}
 
+	/**
+	 * @notice 			Function to withdraw DAI collected from UpgradableExchange from Admin
+	 *
+	 * @param			beneficiary is the address which is receiving tokens
+	 * @param			amountToBeWithdrawn is the amount of tokens to be withdrawns
+	 */
 	function withdrawUpgradableExchangeDaiCollectedFromAdmin(
 		address beneficiary,
 		uint amountToBeWithdrawn
