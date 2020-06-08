@@ -564,7 +564,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
                 amountToPay = _totalStableCoins / 4;
             }
 
-            dai.transfer(twoKeyFeeManager, amountToPay);
+            // Funds are going to admin
+            dai.transfer(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"), amountToPay);
             ITwoKeyFeeManager(twoKeyFeeManager).payDebtWithDAI(_userPlasma, totalDebtInDAI, amountToPay);
         }
 
