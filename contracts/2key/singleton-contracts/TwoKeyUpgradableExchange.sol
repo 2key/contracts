@@ -93,7 +93,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setUint(keccak256("spreadWei"), 3**16); // 3% wei
         // 0.06$ Wei
         setUint(keccak256("sellRate2key"),6 * (10**16));// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
-        setUint(keccak256("weiRaised"),0);
         setUint(keccak256("numberOfContracts"), 0); //Number of contracts which have interacted with this contract through buyTokens function
 
         setAddress(keccak256(_dai), _daiAddress);
@@ -725,11 +724,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Set the new token price after this purchase
         setUint(sellRateKeyHash, newTokenPrice);
 
-        // update weiRaised by this contract
-        bytes32 weiRaisedKeyHash = keccak256("weiRaised");
-        uint weiRaised = getUint(weiRaisedKeyHash).add(msg.value);
-        setUint(weiRaisedKeyHash,weiRaised);
-
         // check if contract is first time interacting with this one
         uint contractId = getContractId(msg.sender);
 
@@ -1254,28 +1248,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-    /**
-     * @notice          Getter for weiRaised
-     */
-    function weiRaised()
-    public
-    view
-    returns (uint)
-    {
-        return getUint(keccak256("weiRaised"));
-    }
-
-
-    /**
-     * @notice          Withdraw all ether from contract
-     */
-    function withdrawEther()
-    public
-    onlyTwoKeyAdmin
-    {
-        (msg.sender).transfer(address(this).balance);
-    }
-
     function withdrawDAIAvailableToFill2KEYReserve(
         uint amountOfDAI
     )
@@ -1295,22 +1267,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Return how much have been withdrawn
         return amountOfDAI;
     }
-
-    /**
-     * @notice          Function to withdraw any ERC20 tokens to TwoKeyAdmin
-     */
-    function withdrawERC20(
-        address _erc20TokenAddress,
-        uint _tokenAmount
-    )
-    public
-    onlyTwoKeyAdmin
-    {
-        //TOOD: When we're withdrawing DAI from here, we should update state variable in Admin that is collected
-        ERC20(_erc20TokenAddress).transfer(msg.sender, _tokenAmount);
-
-    }
-
 
     /**
      * @notice          Function to get amount of 2KEY receiving, new token price, and average price per token
