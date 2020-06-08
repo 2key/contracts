@@ -401,8 +401,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 			amountToBeWithdrawn
 		);
 
-
-		//TODO: Update moderator earnings withdrawn
+		bytes32 keyHash = keccak256(_amountWithdrawnFromModeratorEarningsPool);
+		PROXY_STORAGE_CONTRACT.setUint(keyHash, moderatorEarningsWithdrawn.add(amountToBeWithdrawn));
 	}
 
 	//TODO: Add function to BURN moderator earnings from Admin (send to 0x0)
