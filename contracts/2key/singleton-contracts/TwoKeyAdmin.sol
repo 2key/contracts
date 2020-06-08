@@ -394,8 +394,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		uint moderatorEarningsReceived = getAmountOfTokensReceivedAsModerator();
 		uint moderatorEarningsWithdrawn = getAmountOfTokensWithdrawnFromModeratorEarnings();
+		if(amountToBeWithdrawn == 0) {
+			amountToBeWithdrawn = moderatorEarningsReceived.sub(moderatorEarningsWithdrawn);
+		} else {
+			require(amountToBeWithdrawn <= moderatorEarningsReceived.sub(moderatorEarningsWithdrawn));
+		}
 
-		require(amountToBeWithdrawn <= moderatorEarningsReceived.sub(moderatorEarningsWithdrawn));
 		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transfer(
 			beneficiary,
 			amountToBeWithdrawn
@@ -405,6 +409,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keyHash, moderatorEarningsWithdrawn.add(amountToBeWithdrawn));
 	}
 
+//	function burnModeratorEarnings()
 	//TODO: Add function to BURN moderator earnings from Admin (send to 0x0)
 	//TODO: For all WITHDRAW funnels if amountToBeWithdrawn = 0 then withdraw/burn everything which is there
 	function withdrawFeeManagerEarningsFromAdmin(
@@ -419,7 +424,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		uint feeManagerEarningsInCurrency = getAmountCollectedFromFeeManagerInCurrency(currency);
 		uint feeManagerEarningsWithdrawn = getAmountWithdrawnFromFeeManagerEarningsInCurrency(currency);
 
-		require(feeManagerEarningsInCurrency.sub(feeManagerEarningsWithdrawn) >= amountToBeWithdrawn);
+		if(amountToBeWithdrawn == 0) {
+			amountToBeWithdrawn = feeManagerEarningsInCurrency.sub(feeManagerEarningsWithdrawn);
+		} else {
+			require(feeManagerEarningsInCurrency.sub(feeManagerEarningsWithdrawn) >= amountToBeWithdrawn);
+		}
 
 		if(keccak256(currency) == keccak256("ETH")) {
 			beneficiary.transfer(amountToBeWithdrawn);
@@ -453,7 +462,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		uint kyberTotalReceived = getAmountCollectedFromKyber();
 		uint kyberTotalWithdrawn = getAmountWithdrawnFromKyberEarnings();
 
-		require(amountToBeWithdrawn <= kyberTotalReceived.sub(kyberTotalWithdrawn));
+		if(amountToBeWithdrawn == 0) {
+			amountToBeWithdrawn = kyberTotalReceived.sub(kyberTotalWithdrawn);
+		} else {
+			require(amountToBeWithdrawn <= kyberTotalReceived.sub(kyberTotalWithdrawn));
+		}
 
 		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transfer(
 			beneficiary,
@@ -482,17 +495,19 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		uint totalDAICollectedFromPool = getAmountCollectedInDAIFromUpgradableExchange();
 		uint totalDAIWithdrawnFromPool = getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings();
 
-		uint newWithdrawnAmount = totalDAIWithdrawnFromPool.add(amountToBeWithdrawn);
+		if(amountToBeWithdrawn == 0) {
+			amountToBeWithdrawn = totalDAICollectedFromPool.sub(totalDAIWithdrawnFromPool);
+		} else {
+			require(totalDAIWithdrawnFromPool.add(amountToBeWithdrawn) <= totalDAICollectedFromPool);
+		}
 
-		require(newWithdrawnAmount <= totalDAICollectedFromPool);
 
 		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI")).transfer(
 			beneficiary,
 			amountToBeWithdrawn
 		);
 
-
-		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange), newWithdrawnAmount);
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange), totalDAIWithdrawnFromPool.add(amountToBeWithdrawn));
 	}
 
 	/**
