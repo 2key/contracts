@@ -31,17 +31,21 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	/**
 	 * Accounting necessary stuff
 	 */
+
+	//Income to ADMIN
 	string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
 	string constant _moderatorEarningsPerCampaign = "moderatorEarningsPerCampaign";
 	string constant _feesFromFeeManagerCollectedInCurrency = "feesFromFeeManagerCollectedInCurrency";
 	string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
 	string constant _daiCollectedFromUpgradableExchange = "daiCollectedFromUpgradableExchange";
 
-	//TODO: Add everything same for withdrawal from admin
+
+	// Withdrawals from ADMIN
 	string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
 	string constant _amountWithdrawnFromFeeManagerPoolInCurrency = "amountWithdrawnFromFeeManagerPoolInCurrency";
 	string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
-	string constant _amountWithdrawnFromUpgradableExchangeEarningsPool = "amountWithdrawnFromUpgradableExchangeEarningsPool";
+	string constant _amountWithdrawnFromCollectedDaiFromUpgradableExchange = "amountWithdrawnFromCollectedDaiFromUpgradableExchange";
+
 
 	/**
 	 * Keys for the addresses we're accessing
@@ -391,7 +395,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 			beneficiary,
 			amountToBeWithdrawn
 		);
-		//TODO: Add events
 	}
 
 	function withdrawFeeManagerEarningsFromAdmin(
@@ -403,7 +406,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	onlyTwoKeyCongress
 	{
 
-		uint feeManagerEarningsInCurrency = getAmountReceivedFromFeeManagerInCurrency(currency);
+		uint feeManagerEarningsInCurrency = getAmountCollectedFromFeeManagerInCurrency(currency);
 		uint feeManagerEarningsWithdrawn = getAmountWithdrawnFromFeeManagerEarningsInCurrency(currency);
 
 		require(feeManagerEarningsInCurrency.sub(feeManagerEarningsWithdrawn) >= amountToBeWithdrawn);
@@ -416,7 +419,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 				amountToBeWithdrawn
 			);
 		} else if(keccak256(currency) == keccak256("DAI")) {
-			IERC20(getDAIAddress()).transfer(
+			IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI")).transfer(
 				beneficiary,
 				amountToBeWithdrawn
 			);
@@ -431,7 +434,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
-		uint kyberTotalReceived = getAmountReceivedFromKyber();
+		uint kyberTotalReceived = getAmountCollectedFromKyber();
 		uint kyberTotalWithdrawn = getAmountWithdrawnFromKyberEarnings();
 
 		require(amountToBeWithdrawn <= kyberTotalReceived.sub(kyberTotalWithdrawn));
@@ -445,8 +448,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 			keccak256(_amountWithdrawnFromKyberFeesPool),
 			kyberTotalWithdrawn.add(amountToBeWithdrawn)
 		);
-
-		//Add events
 	}
 
 	function withdrawUpgradableExchangeDaiCollectedFromAdmin(
@@ -456,7 +457,20 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyTwoKeyCongress
 	{
+		uint totalDAICollectedFromPool = getAmountCollectedInDAIFromUpgradableExchange();
+		uint totalDAIWithdrawnFromPool = getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings();
 
+		uint newWithdrawnAmount = totalDAIWithdrawnFromPool.add(amountToBeWithdrawn);
+
+		require(newWithdrawnAmount <= totalDAICollectedFromPool);
+
+		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI")).transfer(
+			beneficiary,
+			amountToBeWithdrawn
+		);
+
+
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange), newWithdrawnAmount);
 	}
 
 	/**
@@ -706,6 +720,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		);
 	}
 
+
 	function setKyberReserveContractAddressOnUpgradableExchange(
 		address kyberReserveContractAddress
 	)
@@ -852,15 +867,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
 	}
 
-	function getAmountOfTokensWithdrawnFromModeratorEarnings()
-	public
-	view
-	returns (uint)
-	{
-		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromModeratorEarningsPool));
-	}
-
-	function getAmountReceivedFromFeeManagerInCurrency(
+	function getAmountCollectedFromFeeManagerInCurrency(
 		string currency
 	)
 	public
@@ -868,6 +875,32 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	returns (uint)
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesFromFeeManagerCollectedInCurrency,currency));
+	}
+
+	function getAmountCollectedFromKyber()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesCollectedFromKyber));
+	}
+
+
+	function getAmountCollectedInDAIFromUpgradableExchange()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_daiCollectedFromUpgradableExchange));
+	}
+
+
+	function getAmountOfTokensWithdrawnFromModeratorEarnings()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromModeratorEarningsPool));
 	}
 
 	function getAmountWithdrawnFromFeeManagerEarningsInCurrency(
@@ -880,14 +913,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromFeeManagerPoolInCurrency,currency));
 	}
 
-	function getAmountReceivedFromKyber()
-	public
-	view
-	returns (uint)
-	{
-		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesCollectedFromKyber));
-	}
-
 	function getAmountWithdrawnFromKyberEarnings()
 	public
 	view
@@ -896,50 +921,50 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromKyberFeesPool));
 	}
 
+	function getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange));
+	}
+
 
 	function getAccountingReport()
 	public
 	view
-	returns (uint,uint,uint,uint,uint,uint,uint)
+	returns (bytes)
 	{
 		uint amountReceivedAsModerator = getAmountOfTokensReceivedAsModerator();
 
-		uint amountReceivedFromFeeManagerAsDAI = getAmountReceivedFromFeeManagerInCurrency("DAI");
-		uint amountReceivedFromFeeManagerAsETH = getAmountReceivedFromFeeManagerInCurrency("ETH");
-		uint amountReceivedFromFeeManagerAs2KEY = getAmountReceivedFromFeeManagerInCurrency("2KEY");
+		uint amountReceivedFromFeeManagerAsDAI = getAmountCollectedFromFeeManagerInCurrency("DAI");
+		uint amountReceivedFromFeeManagerAsETH = getAmountCollectedFromFeeManagerInCurrency("ETH");
+		uint amountReceivedFromFeeManagerAs2KEY = getAmountCollectedFromFeeManagerInCurrency("2KEY");
 
-		uint amountReceivedFromKyber = getAmountReceivedFromKyber();
+		uint amountReceivedFromKyber = getAmountCollectedFromKyber();
+		uint amountReceivedFromUpgradableExchangeDAI = getAmountCollectedInDAIFromUpgradableExchange();
 
-		uint amountReceivedFromUpgradableExchangeDAI = PROXY_STORAGE_CONTRACT.getUint(keccak256(_daiCollectedFromUpgradableExchange));
+		uint amountWithdrawnFromModeratorEarningsPool = getAmountOfTokensWithdrawnFromModeratorEarnings();
 		uint amountWithdrawnFromAdminFromKyberPool = getAmountWithdrawnFromKyberEarnings();
+		uint amountWithdrawnFromDAICollectedFromUpgradableExchange = getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings();
+		uint amountWithdrawnFromKyberEarnings = getAmountWithdrawnFromKyberEarnings();
+
 
 		return (
-			amountReceivedAsModerator,
-			amountReceivedFromFeeManagerAsDAI,
-			amountReceivedFromFeeManagerAsETH,
-			amountReceivedFromFeeManagerAs2KEY,
-			amountReceivedFromKyber,
-			amountReceivedFromUpgradableExchangeDAI,
-			amountWithdrawnFromAdminFromKyberPool
+			abi.encodePacked(
+				amountReceivedAsModerator,
+				amountReceivedFromFeeManagerAsDAI,
+				amountReceivedFromFeeManagerAsETH,
+				amountReceivedFromFeeManagerAs2KEY,
+				amountReceivedFromKyber,
+				amountReceivedFromUpgradableExchangeDAI,
+				amountWithdrawnFromAdminFromKyberPool,
+				amountWithdrawnFromDAICollectedFromUpgradableExchange,
+				amountWithdrawnFromKyberEarnings
+			)
 		);
 	}
 
-	function getDAIAddress()
-	internal
-	view
-	returns (address)
-	{
-		return PROXY_STORAGE_CONTRACT.getAddress(keccak256("DAI"));
-	}
-
-	function setDAIAddressToStorage(
-		address _dai
-	)
-	public
-	onlyTwoKeyCongress
-	{
-		PROXY_STORAGE_CONTRACT.setAddress(keccak256("DAI"), _dai);
-	}
 
 	/**
 	 * @notice Free ether is always accepted :)
