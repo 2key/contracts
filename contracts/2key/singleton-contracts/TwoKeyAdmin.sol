@@ -383,7 +383,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	 *					be withdrawn
 	 *
 	 * @param			beneficiary is the address which is receiving tokens
-	 * @param			amountToBeWithdrawn is the amount of tokens which will be withdrawns
+	 * @param			amountToBeWithdrawn is the amount of tokens which will be withdrawn
 	 */
 	function withdrawModeratorEarningsFromAdmin(
 		address beneficiary,
