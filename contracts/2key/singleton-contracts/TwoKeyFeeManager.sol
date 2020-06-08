@@ -261,10 +261,6 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         bytes32 keyHashForDebt = keccak256(_userPlasmaToDebtInETH, _plasmaAddress);
         uint totalDebtForUser = PROXY_STORAGE_CONTRACT.getUint(keyHashForDebt);
 
-//        bytes32 keyHashTotalPaidInDAI = keccak256(_totalPaidInDAI);
-//        // Set total paid in DAI
-//        PROXY_STORAGE_CONTRACT.setUint(keyHashTotalPaidInDAI, _debtAmountPaidDAI.add(PROXY_STORAGE_CONTRACT.getUint(keyHashTotalPaidInDAI)));
-//
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
         ITwoKeyAdmin(twoKeyAdmin).addFeesCollectedInCurrency("DAI", _debtAmountPaidDAI);
 
