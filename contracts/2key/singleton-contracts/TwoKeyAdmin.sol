@@ -986,6 +986,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		uint amountWithdrawnFromDAICollectedFromUpgradableExchange = getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings();
 		uint amountWithdrawnFromKyberEarnings = getAmountWithdrawnFromKyberEarnings();
 
+		uint amountWithdrawnFromFeesManagerEarningsInDAI = getAmountWithdrawnFromFeeManagerEarningsInCurrency("DAI");
+		uint amountWithdrawnFromFeesManagerEarningsInETH = getAmountWithdrawnFromFeeManagerEarningsInCurrency("ETH");
+		uint amountWithdrawnFromFeesManagerEarningsIn2KEY = getAmountWithdrawnFromFeeManagerEarningsInCurrency("2KEY");
 
 		return (
 			abi.encodePacked(
@@ -997,7 +1000,10 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 				amountReceivedFromUpgradableExchangeDAI,
 				amountWithdrawnFromAdminFromKyberPool,
 				amountWithdrawnFromDAICollectedFromUpgradableExchange,
-				amountWithdrawnFromKyberEarnings
+				amountWithdrawnFromKyberEarnings,
+				amountWithdrawnFromFeesManagerEarningsInDAI,
+				amountWithdrawnFromFeesManagerEarningsInETH,
+				amountWithdrawnFromFeesManagerEarningsIn2KEY
 			)
 		);
 	}
