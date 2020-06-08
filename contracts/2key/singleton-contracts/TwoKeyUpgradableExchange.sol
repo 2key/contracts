@@ -666,6 +666,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     onlyValidatedContracts
+    returns (uint)
     {
         uint campaignID = getContractId(msg.sender);
         //TODO: Check there's enough 2key and DAI to complete tx
@@ -692,6 +693,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             msg.sender,
             _daiWeiAvailableToWithdrawAndFillReserve
         );
+        // Return the amount of 2KEY tokens necessary for rebalancing
+        return amountOf2KeyRequested;
     }
 
 
