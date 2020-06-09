@@ -241,7 +241,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     /**
      * @notice 			Function to distribute rewards between all the influencers
      * 					which have earned the reward once campaign is done
-     * @param 			influencers is the array of influencers (plasma addresses)
+     * @param 			influencers is the array of influencers
      */
 	function distributeRewardsBetweenInfluencers(
 		address [] influencers
@@ -260,19 +260,16 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 				referrerPlasma2Balances2key[influencers[i]] = 0;
 				// Reduce reserved amount for rewards
 				reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
-				// Transfer rewards to the influencer
-				IERC20(twoKeyEconomy).transfer(twoKeyEventSource.ethereumOf(influencers[i]), balance);
-
 				// Approve twoKeyFeeManager to take 2key tokens in amount of balance from this contract
-//				IERC20(twoKeyEconomy).approve(twoKeyFeeManager, balance);
+				IERC20(twoKeyEconomy).approve(twoKeyFeeManager, balance);
 				// Pay debt, Fee manager will keep the debt and forward leftover to the influencer
-//				ITwoKeyFeeManager(twoKeyFeeManager).payDebtWith2KeyV2(
-//					twoKeyEventSource.ethereumOf(influencers[i]),
-//					influencers[i],
-//					balance,
-//					twoKeyEconomy,
-//					twoKeyAdmin
-//				);
+				ITwoKeyFeeManager(twoKeyFeeManager).payDebtWith2KeyV2(
+					twoKeyEventSource.ethereumOf(influencers[i]),
+					influencers[i],
+					balance,
+					twoKeyEconomy,
+					twoKeyAdmin
+				);
 			}
 		}
 	}
@@ -329,7 +326,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	/**
      * @notice 			Allow maintainers to push balances table
      *
-     * @param			influencers is the array of influencers (plasma addresses)
+     * @param			influencers is the array of influencers
      * @param			balances is the array of their balances
      */
 	function pushBalancesForInfluencers(
