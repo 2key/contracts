@@ -979,7 +979,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 				getAmountOfTokensWithdrawnFromModeratorEarnings(),
 				getAmountWithdrawnFromKyberEarnings(),
 				getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings(),
-				getAmountWithdrawnFromKyberEarnings(),
 				getAmountWithdrawnFromFeeManagerEarningsInCurrency("DAI"),
 				getAmountWithdrawnFromFeeManagerEarningsInCurrency("ETH"),
 				getAmountWithdrawnFromFeeManagerEarningsInCurrency("2KEY")
