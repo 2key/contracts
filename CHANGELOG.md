@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v1.4.103-develop"></a>
+## [v1.4.103-develop] - 2020-06-09
+### Reverts
+- [#4030](https://github.com/2key/contracts/issues/4030) - remove mainchain registration from budget campaign referrers
+
+
 <a name="v1.4.102-develop"></a>
 ## [v1.4.102-develop] - 2020-06-09
 
@@ -1949,7 +1955,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.102-develop...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.103-develop...HEAD
+[v1.4.103-develop]: https://github.com/2key/contracts/compare/v1.4.102-develop...v1.4.103-develop
 [v1.4.102-develop]: https://github.com/2key/contracts/compare/v1.4.2-master...v1.4.102-develop
 [v1.4.2-master]: https://github.com/2key/contracts/compare/v1.4.1-master...v1.4.2-master
 [v1.4.1-master]: https://github.com/2key/contracts/compare/v1.2.29-staging...v1.4.1-master
