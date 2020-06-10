@@ -14,26 +14,31 @@ import "../libraries/MerkleProof.sol";
 contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	/**
+	 * IN ALL BUDGET TYPE CAMPAIGNS MAPPING: referrerPlasma2Balances2KEY(address => uint) is contained from following:
+	 *  address : referrer PUBLIC address
+	 *  uint : value how much balance he has
+	 */
+
+	/**
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
 	 */
 
 	uint [] bountiesAdded;
-	bytes32 public merkleRoot;						// Merkle root
-	address public mirrorCampaignOnPlasma;			// Address of campaign deployed to plasma network
-	bool public isValidated;						// Flag to determine if campaign is validated
-	address[] activeInfluencers;						// Active influencer means that he has at least on participation in successful conversion
+	bytes32 public merkleRoot;								// Merkle root
+	address public mirrorCampaignOnPlasma;					// Address of campaign deployed to plasma network
+	bool public isValidated;								// Flag to determine if campaign is validated
+	address[] activeInfluencers;								// Active influencer means that he has at least on participation in successful conversion
 
-	mapping(address => bool) isActiveInfluencer;		// Mapping active influencers
-	mapping(address => uint) activeInfluencer2idx;	// His index position in the array
-
-	bool public isInventoryAdded;					// Selector if inventory is added
-	bool public boughtRewardsWithEther;				// Variable to let us know if rewards have been bought with Ether
-	uint public usd2KEYrateWei;						// Dollar to 2key rate in WEI at the moment of adding inventory
-	uint public bountyPerConversion;				// Bounty how contractor wants referrers to split per conversion
-	uint public initialInventoryAmount;				// Amount for rewards inventory added firstly
-	uint public moderatorTotalEarnings;				// Amount representing how much moderator has earned
-	uint public moderatorEarningsBalance;			// Amount representing how much moderator has now
+	mapping(address => bool) isActiveInfluencer;				// Mapping active influencers
+	mapping(address => uint) activeInfluencer2idx;			// His index position in the array
+	bool public isInventoryAdded;							// Selector if inventory is added
+	bool public boughtRewardsWithEther;						// Variable to let us know if rewards have been bought with Ether
+	uint public usd2KEYrateWei;								// Dollar to 2key rate in WEI at the moment of adding inventory
+	uint public bountyPerConversion;						// Bounty how contractor wants referrers to split per conversion
+	uint public initialInventoryAmount;						// Amount for rewards inventory added firstly
+	uint public moderatorTotalEarnings;						// Amount representing how much moderator has earned
+	uint public moderatorEarningsBalance;					// Amount representing how much moderator has now
 
 	mapping(address => uint256) referrerPlasma2TotalEarnings2key;	// Total earnings per referrer
 
@@ -260,16 +265,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 				referrerPlasma2Balances2key[influencers[i]] = 0;
 				// Reduce reserved amount for rewards
 				reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
-				// Approve twoKeyFeeManager to take 2key tokens in amount of balance from this contract
-				IERC20(twoKeyEconomy).approve(twoKeyFeeManager, balance);
-				// Pay debt, Fee manager will keep the debt and forward leftover to the influencer
-				ITwoKeyFeeManager(twoKeyFeeManager).payDebtWith2KeyV2(
-					twoKeyEventSource.ethereumOf(influencers[i]),
-					influencers[i],
-					balance,
-					twoKeyEconomy,
-					twoKeyAdmin
-				);
+				// Transfer rewards to influencer
+				IERC20(twoKeyEconomy).transfer(influencers[i], balance);
 			}
 		}
 	}
@@ -326,7 +323,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	/**
      * @notice 			Allow maintainers to push balances table
      *
-     * @param			influencers is the array of influencers
+     * @param			influencers is the array of influencers - public addresses
      * @param			balances is the array of their balances
      */
 	function pushBalancesForInfluencers(

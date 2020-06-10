@@ -551,6 +551,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     /**
      * @notice          Function to get influencers addresses and balances
+     *                  The values returned for addresses are influencers plasma addresses
      * @param           start is the starting index in the array
      * @param           end is the ending index of the campaign
      */
@@ -565,11 +566,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint[] memory balances = new uint[](end-start);
         address[] memory influencers = new address[](end-start);
 
+        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+
         uint index = 0;
         for(index = start; index < end; index++) {
-            address influencer = activeInfluencers[index];
-            balances[index] = referrerPlasma2Balances2key[influencer];
-            influencers[index] = influencer;
+            address influencerPlasma = activeInfluencers[index];
+            balances[index] = referrerPlasma2Balances2key[influencerPlasma];
+            influencers[index] = ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).plasma2ethereum(influencerPlasma);
         }
 
         return (influencers, balances);
