@@ -566,13 +566,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint[] memory balances = new uint[](end-start);
         address[] memory influencers = new address[](end-start);
 
-        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+
 
         uint index = 0;
         for(index = start; index < end; index++) {
             address influencerPlasma = activeInfluencers[index];
             balances[index] = referrerPlasma2Balances2key[influencerPlasma];
-            influencers[index] = ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).plasma2ethereum(influencerPlasma);
+            influencers[index] = influencerPlasma;
         }
 
         return (influencers, balances);
