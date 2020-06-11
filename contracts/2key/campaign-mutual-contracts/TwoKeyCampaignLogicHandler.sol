@@ -178,11 +178,6 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     view
     returns (uint256[], uint256[])
     {
-        require(
-            ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry)
-                .checkIsAddressMaintainer(msg.sender)
-        );
-
         uint numberOfAddresses = _referrerPlasmaList.length;
         uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);

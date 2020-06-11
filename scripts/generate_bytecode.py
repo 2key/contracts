@@ -147,6 +147,18 @@ def generate_bytecode_for_setting_new_spread(new_spread_wei):
     values = [new_spread_wei]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_migrating_fee_manager_state():
+    method_name_and_params = "migrateCurrentFeeManagerStateToAdminAndWithdrawFunds()"
+    types = []
+    values = []
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_kyber_fees_withdraw_from_reserve(reserve_contract_address, pricing_contract_address):
+    method_name_and_params = "withdrawFeesFromKyber(address,address)"
+    types = ["address","address"]
+    values = [reserve_contract_address, pricing_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
         _rInFp,
@@ -249,6 +261,10 @@ if __name__ == "__main__":
             sys.argv[4],
             sys.argv[5]
         )
+    if(arg1 == "pullKyberFeesFromReserve"):
+        generate_bytecode_for_kyber_fees_withdraw_from_reserve(sys.argv[2],sys.argv[3])
     if(arg1 == "setSpread"):
         generate_bytecode_for_setting_new_spread(sys.argv[2])
+    if(arg1 == "migrateFeeManagerState"):
+        generate_bytecode_for_migrating_fee_manager_state()
     print_line()

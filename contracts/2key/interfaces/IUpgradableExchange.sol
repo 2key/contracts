@@ -57,11 +57,6 @@ contract IUpgradableExchange {
     view
     returns (uint);
 
-    function withdrawERC20(
-        address _erc20TokenAddress,
-        uint _tokenAmount
-    )
-    public;
 
     function releaseAllDAIFromContractToReserve()
     public;
@@ -82,4 +77,10 @@ contract IUpgradableExchange {
         uint newSpreadWei
     )
     public;
+
+    function withdrawDAIAvailableToFill2KEYReserve(
+        uint amountOfDAI
+    )
+    public
+    returns (uint);
 }
