@@ -385,6 +385,22 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
         reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalEarnings);
 	}
 
+	function setAndDistributeModeratorEarnings(
+		uint totalEarnings
+	)
+	public
+	onlyMaintainer
+	{
+		require(moderatorTotalEarnings == 0);
+		// set total earnings
+		moderatorTotalEarnings = totalEarnings;
+		// Get TwoKeyAdmin address
+		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+		//Send 2key tokens to moderator
+		transfer2KEY(twoKeyAdmin, moderatorEarningsBalance);
+		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorEarningsBalance);
+	}
 	/**
 	 * @notice 			Function where maintainer can push earnings of moderator for the campaign
 	 */
