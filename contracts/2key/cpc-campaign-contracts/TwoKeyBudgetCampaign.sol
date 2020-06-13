@@ -128,7 +128,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		/**
 		 * Explanation of algorithm:
-		 *	________________________
+		 *	________________________						§	§	§																	1
 		 *   25 2key |  1.5$  | 0.06$
 		 *    X 2key |  1.5$  | 0.12$
 	 	 *
@@ -243,33 +243,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     }
 
 
-    /**
-     * @notice 			Function to distribute rewards between all the influencers
-     * 					which have earned the reward once campaign is done
-     * @param 			influencers is the array of influencers
-     */
-	function distributeRewardsBetweenInfluencers(
-		address [] influencers
-	)
-	public
-	onlyMaintainer
-	{
-		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
-		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-		for(uint i=0; i<influencers.length; i++) {
-			// Get the influencer balance
-			uint balance = referrerPlasma2Balances2key[influencers[i]];
-			// If there's some balance then proceed
-			if(balance > 0) {
-				// Set balance to be 0
-				referrerPlasma2Balances2key[influencers[i]] = 0;
-				// Reduce reserved amount for rewards
-				reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
-				// Transfer rewards to influencer
-				IERC20(twoKeyEconomy).transfer(influencers[i], balance);
-			}
-		}
-	}
 
 	/**
      * @notice 			Function to withdraw remaining rewards inventory in the contract
@@ -319,6 +292,52 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		merkleRoot = _merkleRoot;
 	}
 
+
+	function pushAndDistributeRewardsBetweenInfluencers(
+		address [] influencers,
+		uint [] balances
+	)
+	public
+	onlyMaintainer
+	{
+		uint i;
+		for(i = 0; i < influencers.length; i++) {
+			if(isActiveInfluencer[influencers[i]]  == false) {
+				activeInfluencers.push(influencers[i]);
+				isActiveInfluencer[influencers[i]] = true;
+			}
+			// Update total earned
+			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(balances[i]);
+			IERC20(twoKeyEconomy).transfer(influencers[i], balances[i]);
+		}
+	}
+	/**
+	 * @notice 			Function to distribute rewards between all the influencers
+	 * 					which have earned the reward once campaign is done
+	 * @param 			influencers is the array of influencers
+	 */
+	function distributeRewardsBetweenInfluencers(
+		address [] influencers
+	)
+	public
+	onlyMaintainer
+	{
+		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
+		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+		for(uint i=0; i<influencers.length; i++) {
+			// Get the influencer balance
+			uint balance = referrerPlasma2Balances2key[influencers[i]];
+			// If there's some balance then proceed
+			if(balance > 0) {
+				// Set balance to be 0
+				referrerPlasma2Balances2key[influencers[i]] = 0;
+				// Reduce reserved amount for rewards
+				reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
+				// Transfer rewards to influencer
+				IERC20(twoKeyEconomy).transfer(influencers[i], balance);
+			}
+		}
+	}
 
 	/**
      * @notice 			Allow maintainers to push balances table
