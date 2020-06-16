@@ -67,6 +67,10 @@ async function start() {
     `type=volume,source=${volumeName},target=/geth/data`,
     containerName,
     '--nodiscover',
+    '--syncmode',
+    'full',
+    '--gcmode',
+    'archive',
     '--rpc',
     '--rpcapi',
     'db,personal,eth,net,web3,debug,txpool,miner',
@@ -90,7 +94,7 @@ async function start() {
     '--gasprice',
     '2000000000',
     '--targetgaslimit',
-    '8000000',
+    '8000000'
   ];
   /*
   if (!fs.existsSync(datadir)) {

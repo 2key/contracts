@@ -24,23 +24,40 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * be implemented by all budget campaigns in future
 	 */
 
-	uint [] bountiesAdded;
+	struct RebalancedRates {
+		uint priceAtBeginning;
+		uint priceAtRebalancingTime;
+		uint ratio;
+	}
+
+	event RebalancedRatesEvent (
+		uint priceAtBeginning,
+		uint priceAtRebalancingTime,
+		uint ratio,
+		uint amountOfTokensTransferedInAction,
+		string actionPerformedWithUpgradableExchange
+);
+
+
 	bytes32 public merkleRoot;								// Merkle root
 	address public mirrorCampaignOnPlasma;					// Address of campaign deployed to plasma network
 	bool public isValidated;								// Flag to determine if campaign is validated
-	address[] activeInfluencers;								// Active influencer means that he has at least on participation in successful conversion
 
-	mapping(address => bool) isActiveInfluencer;				// Mapping active influencers
-	mapping(address => uint) activeInfluencer2idx;			// His index position in the array
 	bool public isInventoryAdded;							// Selector if inventory is added
 	bool public boughtRewardsWithEther;						// Variable to let us know if rewards have been bought with Ether
+	bool public contractorWithdrawnLeftOverTokens;			// Variable which will let us know if contractor has withdrawn leftover
+
 	uint public usd2KEYrateWei;								// Dollar to 2key rate in WEI at the moment of adding inventory
 	uint public bountyPerConversion;						// Bounty how contractor wants referrers to split per conversion
 	uint public initialInventoryAmount;						// Amount for rewards inventory added firstly
 	uint public moderatorTotalEarnings;						// Amount representing how much moderator has earned
-	uint public moderatorEarningsBalance;					// Amount representing how much moderator has now
+
+	uint public leftOverTokensForContractor;
+	uint public totalRewardsDistributed;
 
 	mapping(address => uint256) referrerPlasma2TotalEarnings2key;	// Total earnings per referrer
+
+	RebalancedRates rebalancedRatesStruct; // Instance of rebalanced rates structure
 
 
 	/**
@@ -80,7 +97,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		IERC20(twoKeyEconomy).transfer(receiver, amount);
 	}
 
-		//TODO: Add funnel for adding inventory multiple times
 	/**
 	 * @notice 			Function which assumes that contractor already called approve function on 2KEY token contract
 	 */
@@ -119,25 +135,13 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 *					either 2KEY price went up or down after we bought tokens
 	 */
     function rebalanceRates()
-    public
-    onlyMaintainer
+    internal
     {
         address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
-        // Function which will be used to rebalance rates
+
+        // Take the current usd to 2KEY rate
         uint usd2KEYRateWeiNow = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
 
-		/**
-		 * Explanation of algorithm:
-		 *	________________________						§	§	§																	1
-		 *   25 2key |  1.5$  | 0.06$
-		 *    X 2key |  1.5$  | 0.12$
-	 	 *
-		 *	25 2KEY * 0.06$ = X 2KEY * 0.12$
-		 *
-		 *   ==> X 2KEY = (25 2KEY * 0.06$) / (0.12$)
-		 *   ==> X 2KEY = 1.5 2KEY $ / (0.12$)
-		 *   ==> X 2KEY = 12.5 2KEY
-		 */
         //Now check if rate went up
         if(usd2KEYRateWeiNow > usd2KEYrateWei) {
             uint tokensToBeGivenBackToExchange = reduceBalance(usd2KEYRateWeiNow);
@@ -145,16 +149,12 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
             IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchange, tokensToBeGivenBackToExchange);
 			// Call the function to release all DAI for this contract to reserve and to take approved amount of 2key back to liquidity pool
 			IUpgradableExchange(twoKeyUpgradableExchange).returnLeftoverAfterRebalancing(tokensToBeGivenBackToExchange);
-            // Reduce the reserved amount for the amount we're returning back
-            reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(tokensToBeGivenBackToExchange);
         }
         // Check if rate went down
         else if(usd2KEYRateWeiNow < usd2KEYrateWei) {
             uint tokensToBeTakenFromExchange = increaseBalance(usd2KEYRateWeiNow);
             // Get more tokens we need
             IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancing(tokensToBeTakenFromExchange);
-            // Increase reserved amount of tokens for the rewards
-            reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(tokensToBeTakenFromExchange);
         } else {
             // In this case we just need to release all the DAI but neither send or take 2KEY tokens
             IUpgradableExchange(twoKeyUpgradableExchange).releaseAllDAIFromContractToReserve();
@@ -172,35 +172,31 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     internal
     returns (uint)
     {
-        uint amountToReturnToExchange;
-
-        for(uint i=0; i<activeInfluencers.length; i++) {
-			//Taking current influencer balance in 2key
-            uint balance = referrerPlasma2Balances2key[activeInfluencers[i]];
-
-			// Computing the new balance for the influencer
-            uint newBalance = balance.mul(usd2KEYrateWei).div(newRate);
-
-			// Assigning new balance to the influencer
-            referrerPlasma2Balances2key[activeInfluencers[i]] = newBalance;
-
-			// Assign new total earned
-			referrerPlasma2TotalEarnings2key[activeInfluencers[i]] = newBalance;
-
-			// Amount to return
-            amountToReturnToExchange = amountToReturnToExchange.add(balance.sub(newBalance));
-        }
-
-        // Rebalancing for the moderator
-        uint newModeratorBalance = moderatorEarningsBalance.mul(usd2KEYrateWei).div(newRate);
-
-        // Adding how much we have to return to exchange
-        amountToReturnToExchange = amountToReturnToExchange.add(moderatorEarningsBalance.sub(newModeratorBalance));
-
-        // Updating state vars
-        moderatorEarningsBalance = newModeratorBalance;
-        moderatorTotalEarnings = newModeratorBalance;
-
+		// Get the current balance for rewards (moderator + influencers)
+		uint currentBalance = reservedAmount2keyForRewards;
+		// Compute what's going to be the new balance for moderator and influencers together
+		uint newBalance = currentBalance.mul(usd2KEYrateWei).div(newRate);
+		// Compute how much will stay as leftover and will be returned to exchange
+		uint amountToReturnToExchange = currentBalance.sub(newBalance);
+		// Compute the ratio in wei
+		uint ratioInWEI = usd2KEYrateWei.mul(10**18).div(newRate);
+		// Create struct which will store what was old and new rate after rebalancing + it's ratio
+		rebalancedRatesStruct = RebalancedRates(
+			usd2KEYrateWei,
+			newRate,
+			ratioInWEI
+		);
+		// Reduce the reserved amount for the amount we're returning back
+		reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(amountToReturnToExchange);
+		// Emit rebalanced rates event
+        emit RebalancedRatesEvent(
+			usd2KEYrateWei,
+			newRate,
+			ratioInWEI,
+			amountToReturnToExchange,
+			"RETURN_TOKENS_TO_EXCHANGE"
+		);
+		// Return the amount we're returning to exchange
         return amountToReturnToExchange;
     }
 
@@ -214,49 +210,50 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     internal
     returns (uint)
     {
-        uint amountToGetFromExchange;
+		// Get the current balance for rewards (moderator + influencers)
+		uint currentBalance = reservedAmount2keyForRewards;
+		// Compute what's going to be the new balance for moderator and influencers together
+		uint newBalance = currentBalance.mul(usd2KEYrateWei).div(newRate);
+		// Compute how much will stay as leftover and will be returned to exchange
+		uint amountToGetFromExchange = newBalance.sub(currentBalance);
+		// Compute the ratio in wei
+		uint ratioInWEI = usd2KEYrateWei.mul(10**18).div(newRate);
 
-        for(uint i=0; i<activeInfluencers.length; i++) {
-            uint balance = referrerPlasma2Balances2key[activeInfluencers[i]];
-
-            uint newBalance = balance.mul(usd2KEYrateWei).div(newRate);
-			// Update balance
-            referrerPlasma2Balances2key[activeInfluencers[i]] = newBalance;
-			// Update total earnings
-			referrerPlasma2TotalEarnings2key[activeInfluencers[i]] = newBalance;
-
-            amountToGetFromExchange = amountToGetFromExchange.add(newBalance.sub(balance));
-        }
-
-        // Rebalancing for the moderator
-        uint newModeratorBalance = moderatorEarningsBalance.mul(usd2KEYrateWei).div(newRate);
-
-        // Adding how much we have to return to exchange
-        amountToGetFromExchange = amountToGetFromExchange.add(newModeratorBalance.sub(moderatorEarningsBalance));
-
-        // Updating state vars
-        moderatorEarningsBalance = newModeratorBalance;
-        moderatorTotalEarnings = newModeratorBalance;
-
+		// Create struct which will store what was old and new rate after rebalancing + it's ratio
+		rebalancedRatesStruct = RebalancedRates(
+			usd2KEYrateWei,
+			newRate,
+			ratioInWEI
+		);
+		// Reduce the reserved amount for the amount we're returning back
+		reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(amountToGetFromExchange);
+		// Emit rebalanced rates event
+		emit RebalancedRatesEvent(
+			usd2KEYrateWei,
+			newRate,
+			ratioInWEI,
+			amountToGetFromExchange,
+			"GET_TOKENS_FROM_EXCHANGE"
+		);
 
         return amountToGetFromExchange;
     }
 
 
-
 	/**
      * @notice 			Function to withdraw remaining rewards inventory in the contract
+     *
+     * 					Contractor can call it only once
      */
 	function withdrawRemainingRewardsInventory()
     public
     onlyContractor
 	{
 		require(merkleRoot != 0, 'Campaign not ended yet - merkle root is not set.');
-		uint campaignRewardsBalance = getTokenBalance();
 
-		uint rewardsNotSpent = campaignRewardsBalance.sub(reservedAmount2keyForRewards);
-		if(rewardsNotSpent > 0) {
-			IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
+		if(contractorWithdrawnLeftOverTokens == false) {
+			contractorWithdrawnLeftOverTokens = true;
+			IERC20(twoKeyEconomy).transfer(contractor, leftOverTokensForContractor);
 		}
 	}
 
@@ -277,22 +274,48 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		return MerkleProof.verifyProof(proof,merkleRoot,keccak256(abi.encodePacked(influencer,amount)));
 	}
 
+
 	/**
      * @notice 			set a merkle root of the amount each (active) influencer received.
      *         			(active influencer is an influencer that received a bounty)
      *         			the idea is that the contractor calls computeMerkleRoot on plasma and then set the value manually
+     * 					And reserve tokens for rewards for influencers
      */
-	function setMerkleRoot(
-		bytes32 _merkleRoot
+	function setMerkleRootReserveTokensAndRebalanceRates(
+		bytes32 _merkleRoot,
+		uint totalAmountForRewards
 	)
 	public
 	onlyMaintainer
 	{
+		// Check that MerkleRoot is not set already
 		require(merkleRoot == 0);
+		// Set MerkleRoot
 		merkleRoot = _merkleRoot;
+		// Allocate reserved amount of tokens for rewards
+		reservedAmount2keyForRewards = totalAmountForRewards;
+		// Require that on contract is persisted more or equal then necessary for rewards
+		require(totalAmountForRewards <= getTokenBalance());
+		// Rebalance rates, it's also going to affect contract tokens balance + reserved amount for rewards
+		if(usd2KEYrateWei> 0) {
+			rebalanceRates();
+		} else {
+			// Since we're using it later on, ratio is 1 in case the budget was directly added
+			rebalancedRatesStruct = RebalancedRates(0,0,10**18);
+		}
+		// Get how many tokens are on the contract after rebalancing
+		uint amountOfTokensOnContractAfterRebalancing = getTokenBalance();
+		// The leftover goes to contractor
+		leftOverTokensForContractor = amountOfTokensOnContractAfterRebalancing.sub(reservedAmount2keyForRewards);
 	}
 
 
+	/**
+	 * @notice			Function to push and distribute rewards between influencers
+	 *
+	 * @param 			influencers is the array of addresses (public) of influencers
+	 * @param			balances is the array of balances for the influencers
+	 */
 	function pushAndDistributeRewardsBetweenInfluencers(
 		address [] influencers,
 		uint [] balances
@@ -300,22 +323,34 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	public
 	onlyMaintainer
 	{
+		// Get the ratio of rebalancing
+		uint rebalancingRatio = rebalancedRatesStruct.ratio;
+		// Counter for influencers
 		uint i;
-		uint totalBountyToBeDistributed = 0;
+		// Create counter for how much is total distributed in this iteration
+		uint totalDistributed = 0;
+
 		for(i = 0; i < influencers.length; i++) {
-			if(isActiveInfluencer[influencers[i]]  == false) {
-				activeInfluencers.push(influencers[i]);
-				isActiveInfluencer[influencers[i]] = true;
-			}
-			// Update total earned
-			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(balances[i]);
-			IERC20(twoKeyEconomy).transfer(influencers[i], balances[i]);
-			totalBountyToBeDistributed = totalBountyToBeDistributed.add(balances[i]);
+			// Compute how much will be influencer reward with rebalancing ratio
+			uint rebalancedInfluencerBalance = balances[i].mul(rebalancedRatesStruct.ratio).div(10**18);
+			// Update total earnings for influencer
+			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(rebalancedInfluencerBalance);
+			// Transfer tokens to influencer
+			IERC20(twoKeyEconomy).transfer(influencers[i], rebalancedInfluencerBalance);
+			// Add this amount to total distributed in this iteration
+			totalDistributed = totalDistributed.add(rebalancedInfluencerBalance);
 		}
-		reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBountyToBeDistributed);
+
+		// Update global how much was total distributed in this iteration
+		totalRewardsDistributed = totalRewardsDistributed.add(totalDistributed);
+		// Require that total rewards we distributed are less or equal than reserved amount 2KEY for rewards
+		require(totalRewardsDistributed <= reservedAmount2keyForRewards);
 	}
 
-
+	/**
+	 * @notice			Function to distribute rewards for moderator
+	 * @param			totalEarnings is the amount for moderator before rebalancing
+	 */
 	function setAndDistributeModeratorEarnings(
 		uint totalEarnings
 	)
@@ -323,8 +358,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyMaintainer
 	{
 		require(moderatorTotalEarnings == 0);
-		// set total earnings
-		moderatorTotalEarnings = totalEarnings;
+		// Since we did rebalancing we need to change moderator total earnings
+		moderatorTotalEarnings = totalEarnings.mul(rebalancedRatesStruct.ratio).div(10**18);
 		// Get TwoKeyAdmin address
 		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 		//Send 2key tokens to moderator
@@ -332,55 +367,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
 		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorTotalEarnings);
 		// reduce reserved amount of tokens
-		reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(moderatorTotalEarnings);
+		totalRewardsDistributed = totalRewardsDistributed.add(moderatorTotalEarnings);
 	}
 
 
-	/**
-	 * @notice 			Function where maintainer will reserve total bounty
-	 *					for influencers and moderator before distribution
-	 *
-	 * @param			totalAmountForRewards is the total bounty to be reserved
-	 */
-	function reserveTokensForModeratorAndInfluencers(
-		uint totalAmountForRewards
-	)
-	public
-	onlyMaintainer
-	{
-		require(reservedAmount2keyForRewards == 0);
-		reservedAmount2keyForRewards = totalAmountForRewards;
-		require(totalAmountForRewards <= getTokenBalance());
-	}
-
-	/**
-	 * @notice 			Function to get array of influencers and their rewards
-	 *
-	 * @param			start is the starting index of influencers array
-	 * @param			end is the ending index of influencers array
- 	 */
-	function getInfluencersWithPendingRewards(
-		uint start,
-		uint end
-	)
-	public
-	view
-	returns (address[], uint[])
-	{
-		uint[] memory balances = new uint[](end-start);
-		address[] memory influencers = new address[](end-start);
-
-		uint index = 0;
-		uint indexArr = 0;
-		for(index = start; index < end; index++) {
-			address influencer = activeInfluencers[index];
-			balances[indexArr] = referrerPlasma2Balances2key[influencer];
-			influencers[indexArr] = influencer;
-			indexArr++;
-		}
-
-		return (influencers, balances);
-	}
 
 	/**
 	 * @notice			Function to get plasma address of a user
@@ -434,6 +424,31 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
         return currentERC20Balance.sub(reservedAmount2keyForRewards);
     }
 
+	function getInventoryStatus()
+	public
+	view
+	returns (uint,uint,uint)
+	{
+		return (
+			totalRewardsDistributed, // how much is currently distributed
+			reservedAmount2keyForRewards.sub(totalRewardsDistributed), // how much is left to be distributed
+			leftOverTokensForContractor // how much contractor got back
+		);
+	}
 
+	/**
+	 * @notice			Function to get and return the status for rebalancing
+	 */
+	function getRebalancingStatus()
+	public
+	view
+	returns (uint,uint,uint)
+	{
+		return (
+			rebalancedRatesStruct.priceAtBeginning,
+			rebalancedRatesStruct.priceAtRebalancingTime,
+			rebalancedRatesStruct.ratio
+		);
+	}
 
 }
