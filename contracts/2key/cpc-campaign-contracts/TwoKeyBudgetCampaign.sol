@@ -301,6 +301,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyMaintainer
 	{
 		uint i;
+		uint totalBountyToBeDistributed = 0;
 		for(i = 0; i < influencers.length; i++) {
 			if(isActiveInfluencer[influencers[i]]  == false) {
 				activeInfluencers.push(influencers[i]);
@@ -309,82 +310,11 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			// Update total earned
 			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(balances[i]);
 			IERC20(twoKeyEconomy).transfer(influencers[i], balances[i]);
+			totalBountyToBeDistributed = totalBountyToBeDistributed.add(balances[i]);
 		}
+		reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBountyToBeDistributed);
 	}
 
-	//	/**
-//	 * @notice 			Function to distribute rewards between all the influencers
-//	 * 					which have earned the reward once campaign is done
-//	 * @param 			influencers is the array of influencers
-//	 */
-//	function distributeRewardsBetweenInfluencers(
-//		address [] influencers
-//	)
-//	public
-//	onlyMaintainer
-//	{
-//		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
-//		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-//		for(uint i=0; i<influencers.length; i++) {
-//			// Get the influencer balance
-//			uint balance = referrerPlasma2Balances2key[influencers[i]];
-//			// If there's some balance then proceed
-//			if(balance > 0) {
-//				// Set balance to be 0
-//				referrerPlasma2Balances2key[influencers[i]] = 0;
-//				// Reduce reserved amount for rewards
-//				reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(balance);
-//				// Transfer rewards to influencer
-//				IERC20(twoKeyEconomy).transfer(influencers[i], balance);
-//			}
-//		}
-//	}
-
-//	/**
-//     * @notice 			Allow maintainers to push balances table
-//     *
-//     * @param			influencers is the array of influencers - public addresses
-//     * @param			balances is the array of their balances
-//     */
-//	function pushBalancesForInfluencers(
-//		address [] influencers,
-//		uint [] balances
-//	)
-//	public
-//	onlyMaintainer
-//	{
-//		uint i;
-//		for(i = 0; i < influencers.length; i++) {
-//			if(isActiveInfluencer[influencers[i]]  == false) {
-//				activeInfluencers.push(influencers[i]);
-//				isActiveInfluencer[influencers[i]] = true;
-//			}
-//			referrerPlasma2Balances2key[influencers[i]] = referrerPlasma2Balances2key[influencers[i]].add(balances[i]);
-//			// Update balance
-//			reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(balances[i]);
-//			// Update total earned
-//			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(balances[i]);
-//		}
-//		require(reservedAmount2keyForRewards <= getTokenBalance());
-//	}
-
-//	/**
-//	 * @notice 			Function to set moderator earnings for the campaign
-//	 * @param 			totalEarnings is the total amount of 2KEY tokens moderator earned
-//	 * 					This function can be called only once.
-//	 */
-//	function setModeratorEarnings(
-//		uint totalEarnings
-//	)
-//	public
-//	onlyMaintainer
-//	{
-//		require(moderatorTotalEarnings == 0);
-//		moderatorTotalEarnings = totalEarnings;
-//		moderatorEarningsBalance = totalEarnings;
-//
-//        reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalEarnings);
-//	}
 
 	function setAndDistributeModeratorEarnings(
 		uint totalEarnings
@@ -398,29 +328,30 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		// Get TwoKeyAdmin address
 		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 		//Send 2key tokens to moderator
-		transfer2KEY(twoKeyAdmin, moderatorEarningsBalance);
+		transfer2KEY(twoKeyAdmin, moderatorTotalEarnings);
 		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorEarningsBalance);
+		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorTotalEarnings);
+		// reduce reserved amount of tokens
+		reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(moderatorTotalEarnings);
 	}
 
-//	/**
-//	 * @notice 			Function where maintainer can push earnings of moderator for the campaign
-//	 */
-//	function distributeModeratorEarnings()
-//	public
-//	onlyMaintainer
-//	{
-//		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-//		//Send 2key tokens to moderator
-//		transfer2KEY(twoKeyAdmin, moderatorEarningsBalance);
-//		// Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-//		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorEarningsBalance);
-//        // Update reserved amount of tokens
-//        reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(moderatorEarningsBalance);
-//        // Set moderator balance to 0
-//		moderatorEarningsBalance = 0;
-//	}
 
+	/**
+	 * @notice 			Function where maintainer will reserve total bounty
+	 *					for influencers and moderator before distribution
+	 *
+	 * @param			totalAmountForRewards is the total bounty to be reserved
+	 */
+	function reserveTokensForModeratorAndInfluencers(
+		uint totalAmountForRewards
+	)
+	public
+	onlyMaintainer
+	{
+		require(reservedAmount2keyForRewards == 0);
+		reservedAmount2keyForRewards = totalAmountForRewards;
+		require(totalAmountForRewards <= getTokenBalance());
+	}
 
 	/**
 	 * @notice 			Function to get array of influencers and their rewards
