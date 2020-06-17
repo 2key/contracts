@@ -1341,8 +1341,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
         IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
         return kyberReserveInterface.getDestQty(
-            ERC20(ETH_TOKEN_ADDRESS),
-            ERC20(getAddress(keccak256(_dai))),
+            ERC20(srcToken),
+            ERC20(destToken),
             srcAmountWei,
             expectedRate
         );
