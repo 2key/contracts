@@ -23,6 +23,8 @@ export default function merkleCopyTest(
     await protocol.Utils.getTransactionReceiptMined(
       txHash
     );
+    console.log(txHash);
+
     await new Promise(resolve => setTimeout(resolve, 4000));
     const rootOnPublic = await protocol.CPCCampaign.getMerkleRootFromPublic(campaignAddress);
     expect(root).to.be.equal(rootOnPublic);

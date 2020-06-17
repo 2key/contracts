@@ -30,13 +30,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		uint ratio;
 	}
 
-	event RebalancedRatesEvent (
-		uint priceAtBeginning,
-		uint priceAtRebalancingTime,
-		uint ratio,
-		uint amountOfTokensTransferedInAction,
-		string actionPerformedWithUpgradableExchange
-);
+
 
 
 	bytes32 public merkleRoot;								// Merkle root
@@ -156,9 +150,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
             // Get more tokens we need
             IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancing(tokensToBeTakenFromExchange);
         } else {
-            // In this case we just need to release all the DAI but neither send or take 2KEY tokens
-            IUpgradableExchange(twoKeyUpgradableExchange).releaseAllDAIFromContractToReserve();
-        }
+			rebalancedRatesStruct = RebalancedRates(0,0,10**18);
+		}
     }
 
 
@@ -188,14 +181,15 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		);
 		// Reduce the reserved amount for the amount we're returning back
 		reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(amountToReturnToExchange);
-		// Emit rebalanced rates event
-        emit RebalancedRatesEvent(
+
+		twoKeyEventSource.emitRebalancedRatesEvent(
 			usd2KEYrateWei,
 			newRate,
 			ratioInWEI,
 			amountToReturnToExchange,
 			"RETURN_TOKENS_TO_EXCHANGE"
 		);
+
 		// Return the amount we're returning to exchange
         return amountToReturnToExchange;
     }
@@ -225,10 +219,11 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			newRate,
 			ratioInWEI
 		);
-		// Reduce the reserved amount for the amount we're returning back
+		// Increase the reserved amount for the amount we're returning back
 		reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(amountToGetFromExchange);
-		// Emit rebalanced rates event
-		emit RebalancedRatesEvent(
+
+		// Emit rebalanced event
+		twoKeyEventSource.emitRebalancedRatesEvent(
 			usd2KEYrateWei,
 			newRate,
 			ratioInWEI,
@@ -332,7 +327,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		for(i = 0; i < influencers.length; i++) {
 			// Compute how much will be influencer reward with rebalancing ratio
-			uint rebalancedInfluencerBalance = balances[i].mul(rebalancedRatesStruct.ratio).div(10**18);
+			uint rebalancedInfluencerBalance = balances[i].mul(rebalancingRatio).div(10**18);
 			// Update total earnings for influencer
 			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(rebalancedInfluencerBalance);
 			// Transfer tokens to influencer
@@ -368,6 +363,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(moderatorTotalEarnings);
 		// reduce reserved amount of tokens
 		totalRewardsDistributed = totalRewardsDistributed.add(moderatorTotalEarnings);
+
 	}
 
 
@@ -427,12 +423,13 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	function getInventoryStatus()
 	public
 	view
-	returns (uint,uint,uint)
+	returns (uint,uint,uint,uint)
 	{
 		return (
 			totalRewardsDistributed, // how much is currently distributed
-			reservedAmount2keyForRewards.sub(totalRewardsDistributed), // how much is left to be distributed
-			leftOverTokensForContractor // how much contractor got back
+			reservedAmount2keyForRewards, // how much was total reserved for influencers and moderator
+			leftOverTokensForContractor, // how much contractor got back
+			getTokenBalance()
 		);
 	}
 

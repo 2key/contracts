@@ -79,4 +79,14 @@ contract ITwoKeyEventSource {
         uint _amountOfDAI
     )
     public;
+
+
+    function emitRebalancedRatesEvent(
+        uint priceAtBeginning,
+        uint priceAtRebalancingTime,
+        uint ratio,
+        uint amountOfTokensTransferedInAction,
+        string actionPerformedWithUpgradableExchange
+    )
+    external;
 }

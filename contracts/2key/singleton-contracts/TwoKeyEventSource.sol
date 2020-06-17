@@ -212,6 +212,14 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint amountOfDAI
     );
 
+    event RebalancedRatesEvent (
+        uint priceAtBeginning,
+        uint priceAtRebalancingTime,
+        uint ratio,
+        uint amountOfTokensTransferedInAction,
+        string actionPerformedWithUpgradableExchange
+    );
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -586,6 +594,25 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit TokenWithdrawnFromPurchasesHandler(_campaignAddress, _conversionID, _tokensAmountWithdrawn);
     }
 
+
+    function emitRebalancedRatesEvent(
+        uint priceAtBeginning,
+        uint priceAtRebalancingTime,
+        uint ratio,
+        uint amountOfTokensTransferedInAction,
+        string actionPerformedWithUpgradableExchange
+    )
+    external
+    onlyAllowedContracts
+    {
+        emit RebalancedRatesEvent(
+            priceAtBeginning,
+            priceAtRebalancingTime,
+            ratio,
+            amountOfTokensTransferedInAction,
+            actionPerformedWithUpgradableExchange
+        );
+    }
 
     function emitHandleChangedEvent(
         address _userPlasmaAddress,
