@@ -17,15 +17,13 @@ export default function merkleCopyTest(
     const {campaignAddress} = storage;
 
     const root = await protocol.CPCCampaign.getMerkleRootFromPlasma(campaignAddress);
-    let txHash;
-    console.log(txHash = await protocol.CPCCampaign.setMerkleRootAndPushTotalRewards(campaignAddress, address));
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    let txHash = await protocol.CPCCampaign.setMerkleRootAndPushTotalRewards(campaignAddress, address);
+
     await protocol.Utils.getTransactionReceiptMined(
       txHash
     );
-
-    console.log(txHash);
     await new Promise(resolve => setTimeout(resolve, 4000));
-
     const rootOnPublic = await protocol.CPCCampaign.getMerkleRootFromPublic(campaignAddress);
     expect(root).to.be.equal(rootOnPublic);
   }).timeout(60000);
