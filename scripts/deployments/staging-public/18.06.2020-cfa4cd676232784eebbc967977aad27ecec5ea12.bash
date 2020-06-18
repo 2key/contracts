@@ -19,7 +19,7 @@ echo "Destination for execution: 0x178a57d07d77bd6e2de7236d67a399e2f10c46d9"
 cd ../..
 
 
-python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.8
+python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.9
 python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.23
 python3 generate_bytecode.py approveNewCampaign DONATION 1.0.23
 
