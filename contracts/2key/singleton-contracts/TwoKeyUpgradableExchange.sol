@@ -1195,7 +1195,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
+        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
+            .getBaseToTargetRate("2KEY-USD");
         uint currentAmountOfTokens = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy))
             .balanceOf(address(this));
         return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
