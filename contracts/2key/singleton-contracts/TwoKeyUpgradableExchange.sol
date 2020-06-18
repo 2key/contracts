@@ -1244,11 +1244,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
-        uint max = rateFromKyber;
-        if(rateFromCoinGecko>max) max = rateFromCoinGecko;
-        if(rateFromContract > max) max = rateFromContract;
+        uint avgPrice = (rateFromKyber.add(rateFromCoinGecko).add(rateFromContract)).div(3);
 
-        return max;
+        return avgPrice;
     }
 
 
