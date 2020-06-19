@@ -1188,8 +1188,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        // 1.08 M Dollars in WEI
-        return 1080000*(10**18);
+        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
+            .getBaseToTargetRate("2KEY-USD");
+        uint currentAmountOfTokens = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy))
+            .balanceOf(address(this));
+        return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
     }
 
     /**
@@ -1234,11 +1237,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
-        uint max = rateFromKyber;
-        if(rateFromCoinGecko>max) max = rateFromCoinGecko;
-        if(rateFromContract > max) max = rateFromContract;
+        uint avgPrice = (rateFromKyber.add(rateFromCoinGecko).add(rateFromContract)).div(3);
 
-        return max;
+        return avgPrice;
     }
 
 
