@@ -36,6 +36,7 @@ export const incentiveModels = {
 export const exchangeRates = {
   usd: 100,
   usdDai: 0.099,
+  usd2Key: 0.06
 };
 
 export const hedgeRate = 1000;

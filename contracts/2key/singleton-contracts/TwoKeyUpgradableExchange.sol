@@ -1191,10 +1191,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @notice          Getter to check how much is pool worth in USD
      */
     function poolWorthUSD()
-    internal
+    public
     view
     returns (uint)
     {
+//        return (1080000*(10**18));
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
             .getBaseToTargetRate("2KEY-USD");
         uint currentAmountOfTokens = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy))
