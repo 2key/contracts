@@ -128,7 +128,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	 * @notice			Function to rebalance the rates in the contract depending of
 	 *					either 2KEY price went up or down after we bought tokens
 	 */
-    function rebalanceRates()
+    function rebalanceRates(
+		uint amountToRebalance
+	)
     internal
     {
         address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
@@ -136,9 +138,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
         // Take the current usd to 2KEY rate
         uint usd2KEYRateWeiNow = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
 
+		uint amountAfterRebalancing = amountToRebalance;
         //Now check if rate went up
         if(usd2KEYRateWeiNow > usd2KEYrateWei) {
-            uint tokensToBeGivenBackToExchange = reduceBalance(usd2KEYRateWeiNow);
+            uint tokensToBeGivenBackToExchange = reduceBalance(usd2KEYRateWeiNow, amountToRebalance);
 			// Approve upgradable exchange to take leftover back
             IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchange, tokensToBeGivenBackToExchange);
 			// Call the function to release all DAI for this contract to reserve and to take approved amount of 2key back to liquidity pool
@@ -146,7 +149,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
         }
         // Check if rate went down
         else if(usd2KEYRateWeiNow < usd2KEYrateWei) {
-            uint tokensToBeTakenFromExchange = increaseBalance(usd2KEYRateWeiNow);
+            uint tokensToBeTakenFromExchange = increaseBalance(usd2KEYRateWeiNow, amountToRebalance);
             // Get more tokens we need
             IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancing(tokensToBeTakenFromExchange);
         } else {
@@ -160,13 +163,13 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
      * @param 			newRate is the new rate of 2key token
      */
     function reduceBalance(
-        uint newRate
+        uint newRate,
+		uint amountToRebalance
     )
     internal
     returns (uint)
     {
-		// Get the current balance for rewards (moderator + influencers)
-		uint currentBalance = reservedAmount2keyForRewards;
+		uint currentBalance = amountToRebalance;
 		// Compute what's going to be the new balance for moderator and influencers together
 		uint newBalance = currentBalance.mul(usd2KEYrateWei).div(newRate);
 		// Compute how much will stay as leftover and will be returned to exchange
@@ -179,8 +182,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			newRate,
 			ratioInWEI
 		);
-		// Reduce the reserved amount for the amount we're returning back
-		reservedAmount2keyForRewards = reservedAmount2keyForRewards.sub(amountToReturnToExchange);
 
 		twoKeyEventSource.emitRebalancedRatesEvent(
 			usd2KEYrateWei,
@@ -199,13 +200,13 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
      * @param 			newRate is the new rate of 2key token
      */
     function increaseBalance(
-        uint newRate
+        uint newRate,
+		uint amountToRebalance
     )
     internal
     returns (uint)
     {
-		// Get the current balance for rewards (moderator + influencers)
-		uint currentBalance = reservedAmount2keyForRewards;
+		uint currentBalance = amountToRebalance;
 		// Compute what's going to be the new balance for moderator and influencers together
 		uint newBalance = currentBalance.mul(usd2KEYrateWei).div(newRate);
 		// Compute how much will stay as leftover and will be returned to exchange
@@ -219,8 +220,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			newRate,
 			ratioInWEI
 		);
-		// Increase the reserved amount for the amount we're returning back
-		reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(amountToGetFromExchange);
 
 		// Emit rebalanced event
 		twoKeyEventSource.emitRebalancedRatesEvent(
@@ -287,19 +286,22 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		require(merkleRoot == 0);
 		// Set MerkleRoot
 		merkleRoot = _merkleRoot;
-		// Allocate reserved amount of tokens for rewards
-		reservedAmount2keyForRewards = totalAmountForRewards;
+		// Amount of tokens on contract
+		uint amountOfTokensOnContract = getTokenBalance();
 		// Require that on contract is persisted more or equal then necessary for rewards
-		require(totalAmountForRewards <= getTokenBalance());
+		require(totalAmountForRewards <= amountOfTokensOnContract);
 		// Rebalance rates, it's also going to affect contract tokens balance + reserved amount for rewards
 		if(usd2KEYrateWei> 0) {
-			rebalanceRates();
+			rebalanceRates(amountOfTokensOnContract);
 		} else {
 			// Since we're using it later on, ratio is 1 in case the budget was directly added
 			rebalancedRatesStruct = RebalancedRates(0,0,10**18);
 		}
 		// Get how many tokens are on the contract after rebalancing
 		uint amountOfTokensOnContractAfterRebalancing = getTokenBalance();
+
+		// The reserved amount for moderator and influencers
+		reservedAmount2keyForRewards = totalAmountForRewards.mul(rebalancedRatesStruct.ratio).div(10**18);
 		// The leftover goes to contractor
 		leftOverTokensForContractor = amountOfTokensOnContractAfterRebalancing.sub(reservedAmount2keyForRewards);
 	}
