@@ -15,6 +15,7 @@ const {env} = process;
 const timeout = 60000;
 const usdSymbol = 'USD';
 const usdDaiSymbol = 'USD/DAI';
+const usd2KeySymbol = '2KEY-USD'
 
 describe(
   'TwoKeyExchangeRateContract',
@@ -46,6 +47,7 @@ describe(
       expect(value).to.be.eq(usdRate);
     }).timeout(timeout);
 
+
     it('should set dollar/dai rate', async () => {
       const usdDaiRate = 50;
 
@@ -62,17 +64,19 @@ describe(
     it('should set dollar and dollar/dai rates with one request', async () => {
       const usdRate = exchangeRates.usd;
       const usdDaiRate = exchangeRates.usdDai;
+      const usd2KeyRate = exchangeRates.usd2Key;
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValues(
-        [usdSymbol, usdDaiSymbol],
-        [usdRate, usdDaiRate],
+        [usdSymbol, usdDaiSymbol, usd2KeySymbol],
+        [usdRate, usdDaiRate, usd2KeyRate],
         from);
       await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
       let usdValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdSymbol);
       let usdDaiValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdDaiSymbol);
-
+      let usd2KeyValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usd2KeySymbol);
       expect(usdValue).to.be.eq(usdRate);
       expect(usdDaiValue).to.be.eq(usdDaiRate);
+      expect(usd2KeyValue).to.be.eq(usd2KeyRate);
     }).timeout(timeout);
 
     it('should correctly exchange eth to dollar', async () => {
