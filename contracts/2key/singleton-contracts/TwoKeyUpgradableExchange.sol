@@ -1191,8 +1191,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 //        return (1080000*(10**18));
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
             .getBaseToTargetRate("2KEY-USD");
-        uint currentAmountOfTokens = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy))
-            .balanceOf(address(this));
+        uint currentAmountOfTokens = getPoolBalanceOf2KeyTokens();
         return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
     }
 
@@ -1272,7 +1271,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice          Function to get amount of 2KEY receiving, new token price, and average price per token
-     *
+     *i
      * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
      */
     function get2KEYTokenPriceAndAmountOfTokensReceiving(
