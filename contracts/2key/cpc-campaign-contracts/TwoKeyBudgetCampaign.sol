@@ -138,7 +138,6 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
         // Take the current usd to 2KEY rate
         uint usd2KEYRateWeiNow = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
 
-		uint amountAfterRebalancing = amountToRebalance;
         //Now check if rate went up
         if(usd2KEYRateWeiNow > usd2KEYrateWei) {
             uint tokensToBeGivenBackToExchange = reduceBalance(usd2KEYRateWeiNow, amountToRebalance);
