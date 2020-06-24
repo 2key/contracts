@@ -18,8 +18,7 @@ echo "Generating bytecodes for changes on public network"
 echo "Destination for execution: 0x178a57d07d77bd6e2de7236d67a399e2f10c46d9"
 cd ../..
 
-python3 generate_bytecode.py upgradeContract TwoKeyEventSource 1.0.8
-python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.10
+python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.12
 
 
 
