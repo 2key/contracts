@@ -520,5 +520,19 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     }
 
 
+	/**
+	 * @notice			Function to get and return the status for rebalancing
+	 */
+	function getRebalancingStatus()
+	public
+	view
+	returns (uint,uint,uint)
+	{
+		return (
+			rebalancedRatesStruct.priceAtBeginning,
+			rebalancedRatesStruct.priceAtRebalancingTime,
+			rebalancedRatesStruct.ratio
+		);
+	}
 
 }
