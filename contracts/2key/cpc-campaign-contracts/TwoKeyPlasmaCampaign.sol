@@ -14,6 +14,9 @@ import "../libraries/MerkleProof.sol";
 
 contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAbstract {
 
+    // TODO: After rebalancing is done maintainer should update all the values and push the ratio
+    // staging : rebalanceRates() -> submitRebalancingResultToPlasma
+    // develop: setMerkleRootPushRewardsAndRebalanceRates() -> submitRebalancingResultToPlasma
     uint constant N = 2048;  //constant number
     IncentiveModel incentiveModel;  //Incentive model for rewards
 
