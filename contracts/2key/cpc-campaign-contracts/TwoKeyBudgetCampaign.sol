@@ -41,8 +41,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	mapping(address => uint256) referrerPlasma2TotalEarnings2key;	// Total earnings per referrer
 
 	struct RebalancedRates {
-		uint priceBeforeRebalancing;
-		uint priceAfterRebalancing;
+		uint priceAtBeginning;
+		uint priceAtRebalancingTime;
 		uint ratio;
 	}
 
