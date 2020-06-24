@@ -557,41 +557,41 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 //		);
 //	}
 
-//
-//    /**
-//     * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
-//     *                  contract, it can be called only by TwoKeyAdmin.sol contract
-//     *
-//     * @param           liquidityConversionRatesContractAddress is the address of liquidity conversion rates contract
-//                        the right address depending on environment can be found in configurationFiles/kyberAddresses.json
-//                        It's named "pricing" in the json object
-//     */
-//	function setLiquidityParametersInKyber(
-//        address liquidityConversionRatesContractAddress,
-//        uint _rInFp,
-//        uint _pMinInFp,
-//        uint _numFpBits,
-//        uint _maxCapBuyInWei,
-//        uint _maxCapSellInWei,
-//        uint _feeInBps,
-//        uint _maxTokenToEthRateInPrecision,
-//        uint _minTokenToEthRateInPrecision
-//	)
-//	public
-//	onlyTwoKeyCongress
-//	{
-//        // Call on the contract set liquidity params
-//        IKyberReserveInterface(liquidityConversionRatesContractAddress).setLiquidityParams(
-//            _rInFp,
-//            _pMinInFp,
-//            _numFpBits,
-//            _maxCapBuyInWei,
-//            _maxCapSellInWei,
-//            _feeInBps,
-//            _maxTokenToEthRateInPrecision,
-//            _minTokenToEthRateInPrecision
-//        );
-//	}
+
+    /**
+     * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
+     *                  contract, it can be called only by TwoKeyAdmin.sol contract
+     *
+     * @param           liquidityConversionRatesContractAddress is the address of liquidity conversion rates contract
+                        the right address depending on environment can be found in configurationFiles/kyberAddresses.json
+                        It's named "pricing" in the json object
+     */
+	function setLiquidityParametersInKyber(
+        address liquidityConversionRatesContractAddress,
+        uint _rInFp,
+        uint _pMinInFp,
+        uint _numFpBits,
+        uint _maxCapBuyInWei,
+        uint _maxCapSellInWei,
+        uint _feeInBps,
+        uint _maxTokenToEthRateInPrecision,
+        uint _minTokenToEthRateInPrecision
+	)
+	public
+	onlyTwoKeyCongress
+	{
+        // Call on the contract set liquidity params
+        IKyberReserveInterface(liquidityConversionRatesContractAddress).setLiquidityParams(
+            _rInFp,
+            _pMinInFp,
+            _numFpBits,
+            _maxCapBuyInWei,
+            _maxCapSellInWei,
+            _feeInBps,
+            _maxTokenToEthRateInPrecision,
+            _minTokenToEthRateInPrecision
+        );
+	}
 
 
 	/**
@@ -741,28 +741,28 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 //		);
 //	}
 
+//
+//	function setKyberReserveContractAddressOnUpgradableExchange(
+//		address kyberReserveContractAddress
+//	)
+//	external
+//	onlyTwoKeyCongress
+//	{
+//		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).setKyberReserveInterfaceContractAddress(
+//			kyberReserveContractAddress
+//		);
+//	}
 
-	function setKyberReserveContractAddressOnUpgradableExchange(
-		address kyberReserveContractAddress
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).setKyberReserveInterfaceContractAddress(
-			kyberReserveContractAddress
-		);
-	}
-
-	function setNewSpreadWei(
-		uint newSpreadWei
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).setSpreadWei(
-			newSpreadWei
-		);
-	}
+//	function setNewSpreadWei(
+//		uint newSpreadWei
+//	)
+//	external
+//	onlyTwoKeyCongress
+//	{
+//		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).setSpreadWei(
+//			newSpreadWei
+//		);
+//	}
 
 	/**
 	 * @notice 			Function to get uint from the storage
