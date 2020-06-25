@@ -137,7 +137,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     internal
     view
-    returns (address[],address[],uint8[],address)
+    returns (address[],address[],address)
     {
         address old_address;
         assembly
@@ -150,14 +150,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         address[] memory influencers;
         address[] memory keys;
-        uint8[] memory weights;
-        (influencers, keys, weights) = Call.recoverSig(sig, old_key, _converter);
+        (influencers, keys,) = Call.recoverSig(sig, old_key, _converter);
 
         require(
             influencers[influencers.length-1] == _converter
         );
 
-        return (influencers, keys, weights, old_address);
+        return (influencers, keys, old_address);
     }
 
 
@@ -177,7 +176,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         address[] memory influencers;
         address[] memory keys;
         address old_address;
-        (influencers, keys,, old_address) = getInfluencersKeysAndWeightsFromSignature(sig, _converter);
+        (influencers, keys,old_address) = getInfluencersKeysAndWeightsFromSignature(sig, _converter);
         uint i;
         address new_address;
         uint numberOfInfluencers = influencers.length;
@@ -911,13 +910,14 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         // Set the rebalancing ratio
         rebalancingRatio = ratio;
 
+        uint one_eth = 10**18;
         // Rebalance fixed values
-        totalBountyForCampaign = totalBountyForCampaign.mul(rebalancingRatio).div(10**18);
-        bountyPerConversionWei = bountyPerConversionWei.mul(rebalancingRatio).div(10**18);
+        totalBountyForCampaign = totalBountyForCampaign.mul(rebalancingRatio).div(one_eth);
+        bountyPerConversionWei = bountyPerConversionWei.mul(rebalancingRatio).div(one_eth);
 
         // Rebalance earnings of moderator and influencers
-        moderatorTotalEarnings = moderatorTotalEarnings.mul(rebalancingRatio).div(10**18);
-        counters[6] = counters[6].mul(rebalancingRatio).div(10**18);
+        moderatorTotalEarnings = moderatorTotalEarnings.mul(rebalancingRatio).div(one_eth);
+        counters[6] = counters[6].mul(rebalancingRatio).div(one_eth);
     }
 
     /**
@@ -939,10 +939,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         uint i;
 
+        uint one_eth = 10**18;
         for(i=start; i<end; i++) {
             address influencer = activeInfluencers[i];
-            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(10**18);
-            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(10**18);
+            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
+            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
         }
     }
 
