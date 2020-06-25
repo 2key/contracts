@@ -65,11 +65,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint _numberOfContracts
     );
 
-    event DAI2KEYSwapped(
-        uint _daisSent,
-        uint _twoKeyReceived
-    );
-
     /**
      * @notice          Constructor of the contract, can be called only once
      *
@@ -886,53 +881,51 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         emit HedgedEther(stableCoinUnits, ratio, numberOfContracts());
     }
 
-//    /**
-//     * @notice          Function to send available DAI to Kyber and get 2KEY tokens
-//     *
-//     * @param           amountOfDAIToSwap is the amount of DAI tokens we want to swap
-//     * @param           approvedMinConversionRate is the approved minimal conversion rate we can get
-//     */
-//    function swapDaiAvailableToFillReserveFor2KEY(
-//        uint amountOfDAIToSwap,
-//        uint approvedMinConversionRate
-//    )
-//    public
-//    onlyTwoKeyAdmin
-//    {
-//        // Generate the key hash for dai available to fill 2KEY reserve
-//        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
-//
-//        // Get amount of DAI available for this operation
-//        uint daiWeiAvailableToFill2KEYReserve = getUint(_daiWeiAvailableToFill2KEYReserveKeyHash);
-//
-//        // Require that we have more than enough dai's to perform this swap
-//        require(daiWeiAvailableToFill2KEYReserve >= amountOfDAIToSwap);
-//
-//        // Get and instantiate kyber proxy contract
-//        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
-//        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
-//
-//        // Instantiate dai and 2KEY token
-//        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
-//        ERC20 twoKeyToken = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy));
-//
-//        // Get minConversionRate from Kyber
-//        uint minConversionRate = getKyberExpectedRate(amountOfDAIToSwap, dai, twoKeyToken);
-//
-//        // Allow at most 5% spread
-//        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100));
-//
-//        // Approve kyberProxyContract to take DAIs
-//        dai.approve(kyberProxyContract, amountOfDAIToSwap);
-//
-//        // Perform swap and account how many 2KEY tokens received
-//        uint received2KEYTokens = proxyContract.swapTokenToToken(dai, amountOfDAIToSwap, twoKeyToken, minConversionRate);
-//
-//        // Update DAI tokens available to fill reserve
-//        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, daiWeiAvailableToFill2KEYReserve.sub(amountOfDAIToSwap));
-//
-//        emit DAI2KEYSwapped(amountOfDAIToSwap, received2KEYTokens);
-//    }
+    /**
+     * @notice          Function to send available DAI to Kyber and get 2KEY tokens
+     *
+     * @param           amountOfDAIToSwap is the amount of DAI tokens we want to swap
+     * @param           approvedMinConversionRate is the approved minimal conversion rate we can get
+     */
+    function swapDaiAvailableToFillReserveFor2KEY(
+        uint amountOfDAIToSwap,
+        uint approvedMinConversionRate
+    )
+    public
+    onlyTwoKeyAdmin
+    {
+        // Generate the key hash for dai available to fill 2KEY reserve
+        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+
+        // Get amount of DAI available for this operation
+        uint daiWeiAvailableToFill2KEYReserve = getUint(_daiWeiAvailableToFill2KEYReserveKeyHash);
+
+        // Require that we have more than enough dai's to perform this swap
+        require(daiWeiAvailableToFill2KEYReserve >= amountOfDAIToSwap);
+
+        // Get and instantiate kyber proxy contract
+        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
+
+        // Instantiate dai and 2KEY token
+        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
+        ERC20 twoKeyToken = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy));
+
+        // Get minConversionRate from Kyber
+        uint minConversionRate = getKyberExpectedRate(amountOfDAIToSwap, dai, twoKeyToken);
+
+        // Allow at most 5% spread
+        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100));
+
+        // Approve kyberProxyContract to take DAIs
+        dai.approve(kyberProxyContract, amountOfDAIToSwap);
+
+        // Perform swap and account how many 2KEY tokens received
+        uint received2KEYTokens = proxyContract.swapTokenToToken(dai, amountOfDAIToSwap, twoKeyToken, minConversionRate);
+
+        // Update DAI tokens available to fill reserve
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, daiWeiAvailableToFill2KEYReserve.sub(amountOfDAIToSwap));
+    }
 
 
     function calculateHedgedAndReceivedForDefinedChunk(
@@ -1195,27 +1188,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-//        return (1080000*(10**18));
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
             .getBaseToTargetRate("2KEY-USD");
-        uint currentAmountOfTokens = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy))
-            .balanceOf(address(this));
+        uint currentAmountOfTokens = getPoolBalanceOf2KeyTokens();
         return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
     }
 
-    /**
-     * @notice          Function to set new spread in wei
-     *
-     * @param           newSpreadWei is the new value for the spread
-     */
-    function setSpreadWei(
-        uint newSpreadWei
-    )
-    public
-    onlyTwoKeyAdmin
-    {
-        setUint(keccak256("spreadWei"), newSpreadWei);
-    }
+//    /**
+//     * @notice          Function to set new spread in wei
+//     *
+//     * @param           newSpreadWei is the new value for the spread
+//     */
+//    function setSpreadWei(
+//        uint newSpreadWei
+//    )
+//    public
+//    onlyTwoKeyAdmin
+//    {
+//        setUint(keccak256("spreadWei"), newSpreadWei);
+//    }
 
 
     /**
@@ -1279,7 +1270,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice          Function to get amount of 2KEY receiving, new token price, and average price per token
-     *
+     *i
      * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
      */
     function get2KEYTokenPriceAndAmountOfTokensReceiving(
@@ -1330,64 +1321,35 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return ERC20(tokenAddress).balanceOf(address(this));
     }
 
-//    /**
-//     * @notice          Function to get amount of destination tokens to be received if bought
-//     *                  by srcAmountWei of srcToken
-//     *
-//     * @param           srcAmountWei is the amount of tokens in wei we're putting in
-//     * @param           srcToken is the address of src token
-//     * @param           destToken is the address of destination token
-//     *
-//     * @return          The amount of tokens which would've been received in case this conversion happen with this rate
-//     */
-//    function getEstimatedAmountOfTokensForSwapFromKyber(
-//        uint srcAmountWei,
-//        address srcToken,
-//        address destToken
-//    )
-//    public
-//    view
-//    returns (uint)
-//    {
-//        uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
-//        IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
-//        return kyberReserveInterface.getDestQty(
-//            ERC20(ETH_TOKEN_ADDRESS),
-//            ERC20(getAddress(keccak256(_dai))),
-//            srcAmountWei,
-//            expectedRate
-//        );
-//    }
-
-    function setKyberReserveInterfaceContractAddress(
-        address kyberReserveContractAddress
+    /**
+     * @notice          Function to get amount of destination tokens to be received if bought
+     *                  by srcAmountWei of srcToken
+     *
+     * @param           srcAmountWei is the amount of tokens in wei we're putting in
+     * @param           srcToken is the address of src token
+     * @param           destToken is the address of destination token
+     *
+     * @return          The amount of tokens which would've been received in case this conversion happen with this rate
+     */
+    function getEstimatedAmountOfTokensForSwapFromKyber(
+        uint srcAmountWei,
+        address srcToken,
+        address destToken
     )
     public
-    onlyTwoKeyAdmin
+    view
+    returns (uint)
     {
-        setAddress(keccak256(_kyberReserveContract), kyberReserveContractAddress);
+        uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
+        IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
+        return kyberReserveInterface.getDestQty(
+            ERC20(srcToken),
+            ERC20(destToken),
+            srcAmountWei,
+            expectedRate
+        );
     }
 
-    function moveDaiFromWithdrawPoolToFillReservePool(
-        address [] cpcCampaigns
-    )
-    public
-    onlyMaintainer
-    {
-        uint i;
-        uint totalDAI = 0;
-
-        for(i=0; i<cpcCampaigns.length; i++) {
-            uint contractId = getContractId(cpcCampaigns[i]);
-            bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractId);
-            uint _daiWeiAvailableToWithdraw = PROXY_STORAGE_CONTRACT.getUint(_daiWeiAvailableToWithdrawKeyHash);
-            PROXY_STORAGE_CONTRACT.setUint(_daiWeiAvailableToWithdrawKeyHash,0);
-            totalDAI = totalDAI.add(_daiWeiAvailableToWithdraw);
-        }
-        bytes32 keyHashForDaiAvailableToFill2KeyReserve = keccak256("daiWeiAvailableToFill2KEYReserve");
-        uint daiWeiAvailableToFillReserve = PROXY_STORAGE_CONTRACT.getUint(keyHashForDaiAvailableToFill2KeyReserve);
-        PROXY_STORAGE_CONTRACT.setUint(keyHashForDaiAvailableToFill2KeyReserve, daiWeiAvailableToFillReserve.add(totalDAI));
-    }
 
     /**
      * @notice          Fallback function to handle incoming ether
