@@ -159,12 +159,6 @@ def generate_bytecode_for_kyber_fees_withdraw_from_reserve(reserve_contract_addr
     values = [reserve_contract_address, pricing_contract_address]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
-def generate_bytecode_for_kyber_fees_withdraw_from_reserve(reserve_contract_address, pricing_contract_address):
-    method_name_and_params = "withdrawFeesFromKyber(address,address)"
-    types = ["address","address"]
-    values = [reserve_contract_address, pricing_contract_address]
-    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
-
 def generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(amount_of_token):
     amount_of_token = int(amount_of_token)
     method_name_and_params = "withdrawDAIAvailableToFillReserveFromUpgradableExchange(uint256)"
