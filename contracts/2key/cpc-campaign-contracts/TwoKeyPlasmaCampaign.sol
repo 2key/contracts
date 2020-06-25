@@ -53,6 +53,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
     mapping(address => uint) activeInfluencer2idx;  // Mapping which will say what is influencers index in the array
 
+    uint public rebalancingRatio;          //Initially rebalancing ratio is 1
+
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
 
 
@@ -113,7 +115,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     internal
     {
-        //TODO: Make this function be called only once per influencer
         address old_address = public_link_key[me];
         if (old_address == address(0)) {
             public_link_key[me] = new_public_key;
@@ -490,19 +491,36 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         if(_sig.length > 0) {
             _referrerAddress = recover(_sig);
         }
-        else {
-            _referrerAddress = _referrerAddress;
-        }
 
         uint len = _conversionIds.length;
         uint[] memory earnings = new uint[](len);
 
         for(uint i=0; i<len; i++) {
-            earnings[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][_conversionIds[i]];
+            // Since this value is only accessible from here, we won't change it in the state but in the getter
+            earnings[i] = getRebalancedReferrerEarningsPerConversion(_referrerAddress, _conversionIds[i]);
         }
 
         uint referrerBalance = referrerPlasma2Balances2key[_referrerAddress];
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
+    }
+
+    /**
+     * @notice          Internal function to return rebalanced earning for conversion per influencer
+     *                  That is the only value which is not changed in the contract state itself, since
+     *                  it will require very complex transaction computation
+     *
+     * @param           _referrerAddress is the address of referrer
+     * @param           conversionID is the id of conversion
+     */
+    function getRebalancedReferrerEarningsPerConversion(
+        address _referrerAddress,
+        uint conversionID
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return referrerPlasma2EarningsPerConversion[_referrerAddress][conversionID].mul(rebalancingRatio).div(10**18);
     }
 
 
@@ -737,7 +755,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-
     /**
      * @notice          compute a merkle proof that influencer and amount are in one of the merkle_roots.
      *                  this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
@@ -873,6 +890,60 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     returns (uint,uint,uint)
     {
         return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
+    }
+
+    /**
+     * @notice          Function which will be called only once, after we did rebalancing
+     *                  on the mainchain contract, so it will adjust all values to rebalanced
+     *                  rates. In case there was no
+     *                  rebalancing, calling this function won't change anything in state
+     *                  since rebalancingRatio initialy is 1 ETH and in all modifications it's divided
+     *                  by 1 ETH so it results as neutral for multiplication
+     *
+     * @param           ratio is the rebalancingRatio
+     */
+    function adjustRebalancingResultsAndSetRatio(
+        uint ratio
+    )
+    public
+    onlyMaintainer
+    {
+        // Set the rebalancing ratio
+        rebalancingRatio = ratio;
+
+        // Rebalance fixed values
+        totalBountyForCampaign = totalBountyForCampaign.mul(rebalancingRatio).div(10**18);
+        bountyPerConversionWei = bountyPerConversionWei.mul(rebalancingRatio).div(10**18);
+
+        // Rebalance earnings of moderator and influencers
+        moderatorTotalEarnings = moderatorTotalEarnings.mul(rebalancingRatio).div(10**18);
+        counters[6] = counters[6].mul(rebalancingRatio).div(10**18);
+    }
+
+    /**
+     * @notice          Function where maintainer will adjust influencers earnings
+     *                  after rebalancing is done on the contract. In case there was no
+     *                  rebalancing, calling this function won't change anything in state
+     *                  since rebalancingRatio initialy is 1 ETH and in all modifications it's divided
+     *                  by 1 ETH so it results as neutral for multiplication
+     *
+     * @param           start is the starting index
+     * @param           end is the ending index of influencers
+     */
+    function rebalanceInfluencersValues(
+        uint start,
+        uint end
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+
+        for(i=start; i<end; i++) {
+            address influencer = activeInfluencers[i];
+            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(10**18);
+            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(10**18);
+        }
     }
 
 }
