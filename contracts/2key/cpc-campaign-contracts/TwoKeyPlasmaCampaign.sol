@@ -53,7 +53,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
     mapping(address => uint) activeInfluencer2idx;  // Mapping which will say what is influencers index in the array
 
-    uint public rebalancingRatio = 10**18;          //Initially rebalancing ratio is 1
+    uint public rebalancingRatio;          //Initially rebalancing ratio is 1
 
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
 

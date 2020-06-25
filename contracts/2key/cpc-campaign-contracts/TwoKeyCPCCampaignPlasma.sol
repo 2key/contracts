@@ -52,6 +52,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
 
+        rebalancingRatio = 10**18;
         counters = new uint[](8);                                       // Initialize array of counters
 
     }
