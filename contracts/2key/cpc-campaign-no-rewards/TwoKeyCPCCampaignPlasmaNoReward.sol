@@ -26,7 +26,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
     Conversion [] conversions;          // Array of all conversions
 
 
-    function setInitialParamsCPCCampaignPlasma(
+    function setInitialParamsCPCCampaignPlasmaNoRewards(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
         string _url,

@@ -42,10 +42,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     uint campaignStartTime;                         // Time when campaign start
     uint campaignEndTime;                           // Time when campaign ends
 
-    address[] activeInfluencers;                     // Active influencer means that he has at least on participation in successful conversion
-    mapping(address => bool) isActiveInfluencer;     // Mapping which will say if influencer is active or not
-    mapping(address => uint) activeInfluencer2idx;   // Mapping which will say what is influencers index in the array
-
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
 
 
@@ -296,23 +292,9 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         uint i;
         for(i=0; i<numberOfInfluencers; i++) {
             //Count conversion from referrer
-            checkIsActiveInfluencerAndAddToQueue(influencers[i]);
             referrerPlasmaAddressToCounterOfConversions[influencers[i]] = referrerPlasmaAddressToCounterOfConversions[influencers[i]].add(1);
         }
         return numberOfInfluencers;
-    }
-
-
-    function checkIsActiveInfluencerAndAddToQueue(
-        address _influencer
-    )
-    internal
-    {
-        if(!isActiveInfluencer[_influencer]) {
-            activeInfluencer2idx[_influencer] = activeInfluencers.length;
-            activeInfluencers.push(_influencer);
-            isActiveInfluencer[_influencer] = true;
-        }
     }
 
 
@@ -391,32 +373,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
 
 
     /**
-     * @notice          Function to get all active influencers
-     */
-    function getActiveInfluencers()
-    public
-    view
-    returns (address[])
-    {
-        return activeInfluencers;
-    }
-
-
-    /**
-     * @notice          Function to get number of active influencers
-                        which is represented as the length of the array
-                        they're stored in
-     */
-    function getNumberOfActiveInfluencers()
-    public
-    view
-    returns (uint)
-    {
-        return activeInfluencers.length;
-    }
-
-
-    /**
      * @notice          Function to get super stats for an address which will include
      *                  if that address is an influencer, if he's a converter, also if he have joined the chain
                         and his ethereum address
@@ -437,6 +393,16 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         return (isReferrer, isAddressConverter, isJoined, ethereumOf(_address));
     }
 
+
+    function getReferrerToCounterOfConversions(
+        address influencerPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return referrerPlasmaAddressToCounterOfConversions[influencerPlasma];
+    }
 
     /**
      * @notice          Function to check if the address is the converter or not
@@ -466,15 +432,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     {
         require(isApprovedConverter[_converter] == false);
         isApprovedConverter[_converter] = true;
-    }
-
-
-    /**
-     * @notice          Function to check the balance of the referrer
-     * @param           _referrer we want to check earnings for
-     */
-    function getReferrerBalance(address _referrer) public view returns (uint) {
-        return referrerPlasma2Balances2key[_referrer];
     }
 
 
