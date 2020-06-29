@@ -386,7 +386,7 @@ async function deployUpgrade(networks, args) {
         console.log('CPC contracts changed: ', cpcChanged);
 
 
-        // Deploy the CPC contracts
+        // Deploy the CPC No Rewards contracts
         if(process.argv.includes('cpc-no-rewards-deploy')) {
             console.log("Deploying CPC NO REWARDS campaign for the first time to the network");
             await runDelpoyCPCNoRewardsFirstTime(networks[i]);
