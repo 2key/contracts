@@ -102,10 +102,10 @@ contract TwoKeyPlasmaFactory is Upgradeable {
             numberValuesArray
         );
 
-        setCampaignCreatedThroughFactory(proxyPlasmaCPC);
+        setCampaignCreatedThroughFactory(proxyPlasmaCPCNoRewards);
         setAddressToCampaignType(proxyPlasmaCPCNoRewards, "CPC_NO_REWARDS_PLASMA");
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
-        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPC, msg.sender);
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPCNoRewards, msg.sender);
     }
 
     /**
