@@ -33,8 +33,7 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to
 
-    bytes32[] merkle_roots;
-    bytes32 public merkleRoot;
+    bool public isContractLocked;
 
     bool public isValidated;                        // Validator if campaign is validated from maintainer side
     address public contractorPublicAddress;         // Contractor address on public chain
@@ -43,31 +42,31 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     uint campaignStartTime;                         // Time when campaign start
     uint campaignEndTime;                           // Time when campaign ends
 
-    address[] activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
-    mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
-    mapping(address => uint) activeInfluencer2idx;  // Mapping which will say what is influencers index in the array
+    address[] activeInfluencers;                     // Active influencer means that he has at least on participation in successful conversion
+    mapping(address => bool) isActiveInfluencer;     // Mapping which will say if influencer is active or not
+    mapping(address => uint) activeInfluencer2idx;   // Mapping which will say what is influencers index in the array
 
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
 
 
-    modifier onlyMaintainer {                       // Modifier restricting calls only to maintainers
+    modifier onlyMaintainer {                        // Modifier restricting calls only to maintainers
         require(isMaintainer(msg.sender));
         _;
     }
 
 
-    modifier isCampaignValidated {                  // Checking if the campaign is created through TwoKeyPlasmaFactory
+    modifier isCampaignValidated {                   // Checking if the campaign is created through TwoKeyPlasmaFactory
         require(isValidated == true);
         _;
     }
 
 
-    modifier contractNotLocked {                    // Modifier which requires that contract is not locked (locked == ended)
-        require(merkleRoot == 0);
+    modifier contractNotLocked {                     // Modifier which requires that contract is not locked (locked == ended)
+        require(isContractLocked == false);
         _;
     }
 
-    modifier onlyIfContractActiveInTermsOfTime {    // Modifier which requires that contract is active in terms of time
+    modifier onlyIfContractActiveInTermsOfTime {     // Modifier which requires that contract is active in terms of time
         require(campaignStartTime <= block.timestamp && block.timestamp <= campaignEndTime);
         _;
     }
@@ -238,6 +237,7 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         return counter;
     }
 
+
     /**
      * @notice          Function to get public link key of an address
      * @param           me is the address we're checking public link key
@@ -341,21 +341,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         return influencers;
     }
 
-
-    /**
-     * @notice          Internal helper function to recover the signature
-     */
-    function recover(
-        bytes signature
-    )
-    internal
-    view
-    returns (address)
-    {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
-        return Call.recoverHash(hash, signature, 0);
-    }
 
     /**
      * @notice          Function to get if address is joined on-chain or not
@@ -494,45 +479,16 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
 
 
     /**
-     * @notice          compute a merkle root of the active influencers and the amount they received.
-     *                  (active influencer is an influencer that received a bounty)
-     *                  this function needs to be called many times until merkle_root is not 2.
-     *                  In each call a merkle tree of up to N leaves (pair of active-influencer and amount) is
-     *                  computed and the result is added to merkle_roots. N should be a power of 2 for example N=2048.
-     *                  On all calls you have to use the same N value.
-     *                  Once you the leaves are computed you need to call this function one more time to compute the
-     *                  merkle_root of the entire tree from the intermidate results in merkle_roots
+     * @notice          Function where maintainer can lock contract which leads to
+     *                  dissallowment of new conversions creating
+     *
      */
-    function computeMerkleRoots()
+    function lockContractFromMaintainer()
     public
     onlyMaintainer
     {
-        require(merkleRoot == 0 || merkleRoot == 2, 'merkle root already defined');
-
-        uint numberOfInfluencers = activeInfluencers.length;
-        if (numberOfInfluencers == 0) {
-            merkleRoot = bytes32(1);
-            return;
-        }
-        merkleRoot = bytes32(2); // indicate that the merkle root is being computed
-
-        uint start = merkle_roots.length * N;
-        if (start >= numberOfInfluencers) {
-            merkleRoot = MerkleProof.computeMerkleRootInternal(merkle_roots);
-            return;
-        }
-
-        uint n = numberOfInfluencers - start;
-        if (n > N) {
-            n = N;
-        }
-        bytes32[] memory hashes = new bytes32[](n);
-        for (uint i = 0; i < n; i++) {
-            address influencer = activeInfluencers[i+start];
-            uint amount = referrerPlasma2Balances2key[influencer];
-            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-        }
-        merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
+        require(isContractLocked == false);
+        isContractLocked = true;
     }
 
 }
