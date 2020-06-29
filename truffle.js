@@ -149,7 +149,7 @@ module.exports = {
           skipDryRun: true,
           network_id: ids["prod-public"],
           gas: 8000000,
-          gasPrice: 32000000000,
+          gasPrice: 36000000000,
       },
 
       'public.prod-hdwallet': {
@@ -164,7 +164,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["prod-private"]),
           skipDryRun: true,
           network_id: ids["prod-private"],
-          gas: 9000000,
+          gas: 8000000,
           gasPrice: 0,
       },
 

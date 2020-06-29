@@ -803,6 +803,19 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+//	/**
+//	 * @notice			Setter in case TwoKeyCongress decides to change the release date
+//	 */
+//	function setNewTwoKeyRewardsReleaseDate(
+//		uint256 newDate
+//	)
+//	external
+//	onlyTwoKeyCongress
+//	{
+//		PROXY_STORAGE_CONTRACT.setUint(keccak256(_rewardReleaseAfter),newDate);
+//	}
+
+
 	/**
 	 * @notice			Setter in case TwoKeyCongress decides to change integrator fee percent
 	 */

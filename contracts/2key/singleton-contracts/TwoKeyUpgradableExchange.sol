@@ -1188,26 +1188,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-//        return (1080000*(10**18));
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
             .getBaseToTargetRate("2KEY-USD");
         uint currentAmountOfTokens = getPoolBalanceOf2KeyTokens();
         return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
     }
 
-    /**
-     * @notice          Function to set new spread in wei
-     *
-     * @param           newSpreadWei is the new value for the spread
-     */
-    function setSpreadWei(
-        uint newSpreadWei
-    )
-    public
-    onlyTwoKeyAdmin
-    {
-        setUint(keccak256("spreadWei"), newSpreadWei);
-    }
+//    /**
+//     * @notice          Function to set new spread in wei
+//     *
+//     * @param           newSpreadWei is the new value for the spread
+//     */
+//    function setSpreadWei(
+//        uint newSpreadWei
+//    )
+//    public
+//    onlyTwoKeyAdmin
+//    {
+//        setUint(keccak256("spreadWei"), newSpreadWei);
+//    }
 
 
     /**

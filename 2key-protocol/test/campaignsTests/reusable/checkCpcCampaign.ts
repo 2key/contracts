@@ -112,6 +112,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
           reward = campaignParams.bountyPerConversionWei * campaignParams.targetClicks
             / eth2usd * boughtRate;
         }
+
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.CPCCampaign
             .buyTokensForReferralRewards(
