@@ -277,6 +277,18 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
 
     }
 
+    function payDebtWith2KeyV2(
+        address _beneficiaryPublic,
+        address _plasmaAddress,
+        uint _amountOf2keyForRewards,
+        address _twoKeyEconomy
+    )
+    public
+    onlyAllowedContracts
+    {
+        address _twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        payDebtWith2KeyV2Internal(_beneficiaryPublic,_plasmaAddress,_amountOf2keyForRewards,_twoKeyEconomy,_twoKeyAdmin);
+    }
 
     function payDebtWith2KeyV2(
         address _beneficiaryPublic,
@@ -287,6 +299,18 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     onlyAllowedContracts
+    {
+        payDebtWith2KeyV2Internal(_beneficiaryPublic,_plasmaAddress,_amountOf2keyForRewards,_twoKeyEconomy,_twoKeyAdmin);
+    }
+
+    function payDebtWith2KeyV2Internal(
+        address _beneficiaryPublic,
+        address _plasmaAddress,
+        uint _amountOf2keyForRewards,
+        address _twoKeyEconomy,
+        address _twoKeyAdmin
+    )
+    internal
     {
         uint usersDebtInEth = getDebtForUser(_plasmaAddress);
         uint amountToPay = 0;
@@ -337,6 +361,8 @@ contract TwoKeyFeeManager is Upgradeable, ITwoKeySingletonUtils {
         // Transfer tokens - debt to influencer
         IERC20(_twoKeyEconomy).transferFrom(msg.sender, _beneficiaryPublic, _amountOf2keyForRewards.sub(amountToPay));
     }
+
+
 
     function calculateEth2KeyRate()
     internal
