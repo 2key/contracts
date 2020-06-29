@@ -38,6 +38,7 @@ const {
     ipfsGet,
     runDeployCPCCampaignMigration,
     runDeployCPCFirstTime,
+    runDelpoyCPCNoRewardsFirstTime,
     runTruffleCompile
 } = require('./helpers');
 
@@ -386,9 +387,9 @@ async function deployUpgrade(networks, args) {
 
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-deploy')) {
-            console.log("Deploying CPC campaign for the first time to the network");
-            await runDeployCPCFirstTime(networks[i]);
+        if(process.argv.includes('cpc-no-rewards-deploy')) {
+            console.log("Deploying CPC NO REWARDS campaign for the first time to the network");
+            await runDelpoyCPCNoRewardsFirstTime(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
