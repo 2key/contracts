@@ -16,9 +16,8 @@ export default function merkleCopyTest(
     const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
-    const root = await protocol.CPCCampaign.getMerkleRootFromPlasma(campaignAddress);
     await new Promise(resolve => setTimeout(resolve, 1000));
-    let txHash = await protocol.CPCCampaign.setMerkleRootAndPushTotalRewards(campaignAddress, address);
+    let txHash = await protocol.CPCCampaign.lockContractAndPushTotalRewards(campaignAddress, address);
 
     await protocol.Utils.getTransactionReceiptMined(
       txHash
@@ -26,7 +25,7 @@ export default function merkleCopyTest(
     console.log(txHash);
 
     await new Promise(resolve => setTimeout(resolve, 4000));
-    const rootOnPublic = await protocol.CPCCampaign.getMerkleRootFromPublic(campaignAddress);
-    expect(root).to.be.equal(rootOnPublic);
+    const isLocked = await protocol.CPCCampaign.isContractLocked(campaignAddress, "PUBLIC");
+    expect(isLocked).to.be.equal(true);
   }).timeout(60000);
 }

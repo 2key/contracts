@@ -36,8 +36,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to
 
-    bytes32[] merkle_roots;
-    bytes32 public merkleRoot;
+    bool public isContractLocked;
 
     bool public isValidated;                        // Validator if campaign is validated from maintainer side
     address public contractorPublicAddress;         // Contractor address on public chain
@@ -71,7 +70,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     modifier contractNotLocked {                    // Modifier which requires that contract is not locked (locked == ended)
-        require(merkleRoot == 0);
+        require(isContractLocked == false);
         _;
     }
 
@@ -425,6 +424,17 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         mirrorCampaignOnPublic = _mirrorCampaign;
     }
 
+    /**
+     * @notice          Function where maintainer will lock the contract
+     */
+    function lockContractFromMaintainer()
+    public
+    onlyMaintainer
+    {
+        isContractLocked = true;
+    }
+
+
 
     /**
      * @notice          Function where maintainer will set on plasma network the total bounty amount
@@ -755,130 +765,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          compute a merkle proof that influencer and amount are in one of the merkle_roots.
-     *                  this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
-     * @param           _influencer the influencer for which we want to get a Merkle proof
-     * @return          index to merkle_roots
-     * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_roots[index],
-     *                  which prove that (_influencer,amount) are inside the root.
-     *
-     *                  The returned proof is only the first part of a proof to merkle_root.
-     *                  The idea is that the code here does some of the work and the dApp code does the rest
-     *                  of the work to get a full proof
-     *                  See https://github.com/2key/web3-alpha/commit/105b0b17ab3d20662b1e2171d84be25089962b68
-     */
-//    function getMerkleProofBaseFromRoots(
-//        address _influencer
-//    )
-//    internal
-//    view
-//    returns (uint, bytes32[])
-//    {
-//
-//        if (isActiveInfluencer[_influencer] == false) {
-//            return (0, new bytes32[](0));
-//        }
-//
-//        uint influencer_idx = activeInfluencer2idx[_influencer];
-//
-//        uint start = N * (influencer_idx / N);
-//
-//        influencer_idx = influencer_idx.sub(start);
-//
-//        uint n = activeInfluencers.length.sub(start);
-//
-//        if (n > N) {
-//            n = N;
-//        }
-//
-//        bytes32[] memory hashes = new bytes32[](n);
-//        uint i;
-//
-//        for (i = 0; i < n; i++) {
-//            address influencer = activeInfluencers[i+start];
-//            uint amount = referrerPlasma2Balances2key[influencer];
-//            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-//        }
-//
-//        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
-//    }
-
-    /**
-     * @notice          compute a merkle proof that influencer and amount are in the the merkle_root.
-     *                  this function can be called only after you called computeMerkleRoots one or
-     *                  more times until merkle_root is not 2
-     * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_root,
-     *                  which prove that (_influencer,amount) are inside the root.
-     */
-//    function getMerkleProofFromRoots()
-//    public
-//    view
-//    returns (bytes32[])
-//    {
-//        address _influencer = msg.sender;
-//        bytes32[] memory proof0;
-//        uint start;
-//        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
-//        if (proof0.length == 0) {
-//            return proof0; // return failury
-//        }
-//        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
-//        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
-//        uint i;
-//        for (i = 0; i < proof0.length; i++) {
-//            proof[i] = proof0[i];
-//        }
-//        for (i = 0; i < proof1.length; i++) {
-//            proof[i+proof0.length] = proof1[i];
-//        }
-//
-//        return proof;
-//    }
-
-
-    /**
-     * @notice          compute a merkle root of the active influencers and the amount they received.
-     *                  (active influencer is an influencer that received a bounty)
-     *                  this function needs to be called many times until merkle_root is not 2.
-     *                  In each call a merkle tree of up to N leaves (pair of active-influencer and amount) is
-     *                  computed and the result is added to merkle_roots. N should be a power of 2 for example N=2048.
-     *                  On all calls you have to use the same N value.
-     *                  Once you the leaves are computed you need to call this function one more time to compute the
-     *                  merkle_root of the entire tree from the intermidate results in merkle_roots
-     */
-    function computeMerkleRoots()
-    public
-    onlyMaintainer
-    {
-        require(merkleRoot == 0 || merkleRoot == 2, 'merkle root already defined');
-
-        uint numberOfInfluencers = activeInfluencers.length;
-        if (numberOfInfluencers == 0) {
-            merkleRoot = bytes32(1);
-            return;
-        }
-        merkleRoot = bytes32(2); // indicate that the merkle root is being computed
-
-        uint start = merkle_roots.length * N;
-        if (start >= numberOfInfluencers) {
-            merkleRoot = MerkleProof.computeMerkleRootInternal(merkle_roots);
-            return;
-        }
-
-        uint n = numberOfInfluencers - start;
-        if (n > N) {
-            n = N;
-        }
-        bytes32[] memory hashes = new bytes32[](n);
-        for (uint i = 0; i < n; i++) {
-            address influencer = activeInfluencers[i+start];
-            uint amount = referrerPlasma2Balances2key[influencer];
-            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-        }
-        merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
-    }
-
-    /**
      * @notice          Function to return total bounty for campaign,
      *                  how much of the bounty is available and how much
      *                  of the total bounty is being paid
@@ -890,6 +776,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
     }
+
 
     /**
      * @notice          Function which will be called only once, after we did rebalancing
@@ -920,6 +807,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         counters[6] = counters[6].mul(rebalancingRatio).div(one_eth);
     }
 
+
     /**
      * @notice          Function where maintainer will adjust influencers earnings
      *                  after rebalancing is done on the contract. In case there was no
@@ -946,5 +834,130 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
         }
     }
+
+
+    /**
+     * @notice          compute a merkle proof that influencer and amount are in one of the merkle_roots.
+     *                  this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
+     * @param           _influencer the influencer for which we want to get a Merkle proof
+     * @return          index to merkle_roots
+     * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_roots[index],
+     *                  which prove that (_influencer,amount) are inside the root.
+     *
+     *                  The returned proof is only the first part of a proof to merkle_root.
+     *                  The idea is that the code here does some of the work and the dApp code does the rest
+     *                  of the work to get a full proof
+     *                  See https://github.com/2key/web3-alpha/commit/105b0b17ab3d20662b1e2171d84be25089962b68
+     */
+    //    function getMerkleProofBaseFromRoots(
+    //        address _influencer
+    //    )
+    //    internal
+    //    view
+    //    returns (uint, bytes32[])
+    //    {
+    //
+    //        if (isActiveInfluencer[_influencer] == false) {
+    //            return (0, new bytes32[](0));
+    //        }
+    //
+    //        uint influencer_idx = activeInfluencer2idx[_influencer];
+    //
+    //        uint start = N * (influencer_idx / N);
+    //
+    //        influencer_idx = influencer_idx.sub(start);
+    //
+    //        uint n = activeInfluencers.length.sub(start);
+    //
+    //        if (n > N) {
+    //            n = N;
+    //        }
+    //
+    //        bytes32[] memory hashes = new bytes32[](n);
+    //        uint i;
+    //
+    //        for (i = 0; i < n; i++) {
+    //            address influencer = activeInfluencers[i+start];
+    //            uint amount = referrerPlasma2Balances2key[influencer];
+    //            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+    //        }
+    //
+    //        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
+    //    }
+
+    /**
+     * @notice          compute a merkle proof that influencer and amount are in the the merkle_root.
+     *                  this function can be called only after you called computeMerkleRoots one or
+     *                  more times until merkle_root is not 2
+     * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_root,
+     *                  which prove that (_influencer,amount) are inside the root.
+     */
+    //    function getMerkleProofFromRoots()
+    //    public
+    //    view
+    //    returns (bytes32[])
+    //    {
+    //        address _influencer = msg.sender;
+    //        bytes32[] memory proof0;
+    //        uint start;
+    //        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
+    //        if (proof0.length == 0) {
+    //            return proof0; // return failury
+    //        }
+    //        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
+    //        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
+    //        uint i;
+    //        for (i = 0; i < proof0.length; i++) {
+    //            proof[i] = proof0[i];
+    //        }
+    //        for (i = 0; i < proof1.length; i++) {
+    //            proof[i+proof0.length] = proof1[i];
+    //        }
+    //
+    //        return proof;
+    //    }
+
+
+    //    /**
+    //     * @notice          compute a merkle root of the active influencers and the amount they received.
+    //     *                  (active influencer is an influencer that received a bounty)
+    //     *                  this function needs to be called many times until merkle_root is not 2.
+    //     *                  In each call a merkle tree of up to N leaves (pair of active-influencer and amount) is
+    //     *                  computed and the result is added to merkle_roots. N should be a power of 2 for example N=2048.
+    //     *                  On all calls you have to use the same N value.
+    //     *                  Once you the leaves are computed you need to call this function one more time to compute the
+    //     *                  merkle_root of the entire tree from the intermidate results in merkle_roots
+    //     */
+    //    function computeMerkleRoots()
+    //    public
+    //    onlyMaintainer
+    //    {
+    //        require(merkleRoot == 0 || merkleRoot == 2, 'merkle root already defined');
+    //
+    //        uint numberOfInfluencers = activeInfluencers.length;
+    //        if (numberOfInfluencers == 0) {
+    //            merkleRoot = bytes32(1);
+    //            return;
+    //        }
+    //        merkleRoot = bytes32(2); // indicate that the merkle root is being computed
+    //
+    //        uint start = merkle_roots.length * N;
+    //        if (start >= numberOfInfluencers) {
+    //            merkleRoot = MerkleProof.computeMerkleRootInternal(merkle_roots);
+    //            return;
+    //        }
+    //
+    //        uint n = numberOfInfluencers - start;
+    //        if (n > N) {
+    //            n = N;
+    //        }
+    //        bytes32[] memory hashes = new bytes32[](n);
+    //        for (uint i = 0; i < n; i++) {
+    //            address influencer = activeInfluencers[i+start];
+    //            uint amount = referrerPlasma2Balances2key[influencer];
+    //            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+    //        }
+    //        merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
+    //    }
 
 }

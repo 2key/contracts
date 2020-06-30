@@ -20,8 +20,8 @@ export default function lockContractTest(
 
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    const merkleRoot = Number(await protocol.CPCCampaign.getMerkleRootFromPlasma(campaignAddress));
+    const isContractLocked = await protocol.CPCCampaign.isContractLocked(campaignAddress,"PLASMA");
 
-    expect(merkleRoot).to.be.gt(0);
+    expect(isContractLocked).to.be.eq(true);
   }).timeout(60000);
 }

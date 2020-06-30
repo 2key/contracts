@@ -6,7 +6,7 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
-import "../libraries/MerkleProof.sol";
+//import "../libraries/MerkleProof.sol";
 
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
@@ -33,7 +33,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 
-	bytes32 public merkleRoot;								// Merkle root
+	bool public isContractLocked;							// If the contract is locked
 	address public mirrorCampaignOnPlasma;					// Address of campaign deployed to plasma network
 	bool public isValidated;								// Flag to determine if campaign is validated
 
@@ -242,7 +242,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     public
     onlyContractor
 	{
-		require(merkleRoot != 0, 'Campaign not ended yet - merkle root is not set.');
+		require(isContractLocked == true, 'Campaign not ended yet - contract is still not locked.');
 
 		if(contractorWithdrawnLeftOverTokens == false) {
 			contractorWithdrawnLeftOverTokens = true;
@@ -250,22 +250,22 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		}
 	}
 
-	/**
-	 * @notice 			Function to validate the Merkle Proof
-	 */
-	function checkMerkleProof(
-		address influencer,
-		bytes32[] proof,
-		uint amount
-	)
-	public
-	view
-	returns (bool)
-	{
-		if(merkleRoot == 0) // merkle root was not yet set by contractor
-			return false;
-		return MerkleProof.verifyProof(proof,merkleRoot,keccak256(abi.encodePacked(influencer,amount)));
-	}
+//	/**
+//	 * @notice 			Function to validate the Merkle Proof
+//	 */
+//	function checkMerkleProof(
+//		address influencer,
+//		bytes32[] proof,
+//		uint amount
+//	)
+//	public
+//	view
+//	returns (bool)
+//	{
+//		if(merkleRoot == 0) // merkle root was not yet set by contractor
+//			return false;
+//		return MerkleProof.verifyProof(proof,merkleRoot,keccak256(abi.encodePacked(influencer,amount)));
+//	}
 
 
 	/**
@@ -274,17 +274,16 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
      *         			the idea is that the contractor calls computeMerkleRoot on plasma and then set the value manually
      * 					And reserve tokens for rewards for influencers
      */
-	function setMerkleRootReserveTokensAndRebalanceRates(
-		bytes32 _merkleRoot,
+	function lockContractReserveTokensAndRebalanceRates(
 		uint totalAmountForRewards
 	)
 	public
 	onlyMaintainer
 	{
 		// Check that MerkleRoot is not set already
-		require(merkleRoot == 0);
+		require(isContractLocked == false);
 		// Set MerkleRoot
-		merkleRoot = _merkleRoot;
+		isContractLocked = true;
 		// Amount of tokens on contract
 		uint amountOfTokensOnContract = getTokenBalance();
 		// Require that on contract is persisted more or equal then necessary for rewards
