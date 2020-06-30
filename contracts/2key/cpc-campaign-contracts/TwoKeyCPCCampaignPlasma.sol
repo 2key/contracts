@@ -92,6 +92,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         counters[0]++; //Increase number of pending converters and conversions
         counters[3]++; //Increase number of pending conversions
 
+        converters.push(msg.sender);
+
         //Emit conversion event through TwoKeyPlasmaEvents
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
             mirrorCampaignOnPublic,
@@ -152,6 +154,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 conversionId
             );
         }
+
+        updateReputationPointsOnConversionExecutedEvent(converter);
 
         counters[0]--; //Decrement number of pending converters
         counters[1]++; //increment number approved converters

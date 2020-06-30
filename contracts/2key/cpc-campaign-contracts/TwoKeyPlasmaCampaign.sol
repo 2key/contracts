@@ -31,6 +31,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
 
+    // All influencers and converters
+    mapping(address => int) addressToReputationPoints;
+    address [] public converters;
 
     mapping(address => bool) isApprovedConverter;               // Determinator if converter has already 1 successful conversion
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
@@ -832,6 +835,24 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             address influencer = activeInfluencers[i];
             referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
             referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
+        }
+    }
+
+    function updateReputationPointsOnConversionExecutedEvent(
+        address converter
+    )
+    public
+    {
+        int initialRewardWei = 10**18;
+
+        addressToReputationPoints[contractor] = addressToReputationPoints[contractor] + initialRewardWei;
+        // As converter a user can get rewarded only once
+        addressToReputationPoints[converter] = initialRewardWei;
+
+        address[] memory referrers = getReferrers(converter);
+
+        for(int i=0; i<int(referrers.length); i++) {
+            addressToReputationPoints[referrers[uint(i)]] = addressToReputationPoints[referrers[uint(i)]] + initialRewardWei/(i+1);
         }
     }
 
