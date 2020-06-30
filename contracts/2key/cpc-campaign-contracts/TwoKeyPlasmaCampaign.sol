@@ -843,7 +843,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     public
     {
-        int initialRewardWei = 10**18;
+        int initialRewardWei = 10**18; // 1 point initial
 
         addressToReputationPoints[contractor] = addressToReputationPoints[contractor] + initialRewardWei;
         // As converter a user can get rewarded only once
@@ -853,6 +853,24 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         for(int i=0; i<int(referrers.length); i++) {
             addressToReputationPoints[referrers[uint(i)]] = addressToReputationPoints[referrers[uint(i)]] + initialRewardWei/(i+1);
+        }
+    }
+
+    function updateReputationPointsOnConversionRejectedEvent(
+        address converter
+    )
+    public
+    {
+        int initialRewardWei = (10**18) / 2; // 0.5 points initial
+
+        addressToReputationPoints[contractor] = addressToReputationPoints[contractor] - initialRewardWei;
+        // As converter a user can get rewarded only once
+        addressToReputationPoints[converter] = 0 - initialRewardWei;
+
+        address[] memory referrers = getReferrers(converter);
+
+        for(int i=0; i<int(referrers.length); i++) {
+            addressToReputationPoints[referrers[uint(i)]] = addressToReputationPoints[referrers[uint(i)]] - initialRewardWei/(i+1);
         }
     }
 
