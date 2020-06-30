@@ -767,18 +767,18 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    /**
-     * @notice          Function to return total bounty for campaign,
-     *                  how much of the bounty is available and how much
-     *                  of the total bounty is being paid
-     */
-    function getAvailableBountyForCampaign()
-    public
-    view
-    returns (uint,uint,uint)
-    {
-        return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
-    }
+//    /**
+//     * @notice          Function to return total bounty for campaign,
+//     *                  how much of the bounty is available and how much
+//     *                  of the total bounty is being paid
+//     */
+//    function getAvailableBountyForCampaign()
+//    public
+//    view
+//    returns (uint,uint,uint)
+//    {
+//        return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
+//    }
 
 
     /**
