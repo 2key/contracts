@@ -51,7 +51,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     address[] activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
-    mapping(address => uint) activeInfluencer2idx;  // Mapping which will say what is influencers index in the array
 
     uint public rebalancingRatio;          //Initially rebalancing ratio is 1
 
@@ -403,7 +402,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     internal
     {
         if(!isActiveInfluencer[_influencer]) {
-            activeInfluencer2idx[_influencer] = activeInfluencers.length;
             activeInfluencers.push(_influencer);
             isActiveInfluencer[_influencer] = true;
         }
