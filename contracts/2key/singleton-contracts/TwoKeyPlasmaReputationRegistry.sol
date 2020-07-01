@@ -229,12 +229,12 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
      * @notice Function to fetch reputation points per address
      * @param _plasmaAddress is the address of the user we want to check points for
      */
-    function getRewardsByAddress(
+    function getResultsByAddress(
         address _plasmaAddress
     )
     public
     view
-    returns (int,int,int)
+    returns (int,int,int,int)
     {
         bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, _plasmaAddress);
         int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
@@ -245,13 +245,16 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, _plasmaAddress);
         int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
 
+        bytes32 keyHashPlasmaAddressToFeedback = keccak256(_plasmaAddress2Feedback, _plasmaAddress);
+        int feedbackScore = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedback);
+
 
         return (
             contractorScore,
             converterScore,
-            referrerScore
+            referrerScore,
+            feedbackScore
         );
-
     }
 
 }
