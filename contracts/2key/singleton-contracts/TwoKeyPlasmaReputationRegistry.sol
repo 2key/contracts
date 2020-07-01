@@ -29,7 +29,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     string constant _plasmaAddress2converterGlobalReputationScoreWei = "plasmaAddress2converterGlobalReputationScoreWei";
     string constant _plasmaAddress2referrerGlobalReputationScoreWei = "plasmaAddress2referrerGlobalReputationScoreWei";
 
-    string constant _plasmaAddress2Feedback = "plasmaAddress2Feedback";
+    string constant _plasmaAddress2Role2Feedback = "plasmaAddress2Role2Feedback";
 
 
     /**
@@ -133,7 +133,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     {
         require(isRoleExisting(_role) == true);
         // generate key hash for current score
-        bytes32 keyHashPlasmaAddressToFeedback = keccak256(_plasmaAddress2Feedback, _plasmaAddress);
+        bytes32 keyHashPlasmaAddressToFeedback = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, _role);
         // Load current score
         int currentScore = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedback);
         // Add to current score points gained
@@ -150,7 +150,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     {
         require(isRoleExisting(_role) == true);
         // generate key hash for current score
-        bytes32 keyHashPlasmaAddressToFeedback = keccak256(_plasmaAddress2Feedback, _plasmaAddress);
+        bytes32 keyHashPlasmaAddressToFeedback = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, _role);
         // Load current score
         int currentScore = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedback);
         // Deduct from current score points lost
@@ -229,12 +229,12 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
      * @notice Function to fetch reputation points per address
      * @param _plasmaAddress is the address of the user we want to check points for
      */
-    function getResultsByAddress(
+    function getReputationResultsByAddress(
         address _plasmaAddress
     )
     public
     view
-    returns (int,int,int,int)
+    returns (int,int,int)
     {
         bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, _plasmaAddress);
         int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
@@ -245,15 +245,34 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, _plasmaAddress);
         int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
 
-        bytes32 keyHashPlasmaAddressToFeedback = keccak256(_plasmaAddress2Feedback, _plasmaAddress);
-        int feedbackScore = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedback);
-
-
         return (
             contractorScore,
             converterScore,
-            referrerScore,
-            feedbackScore
+            referrerScore
+        );
+    }
+
+
+    function getFeedbackResultsByAddress(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (int,int,int)
+    {
+        bytes32 keyHashPlasmaAddressToFeedbackAsContractor = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "CONTRACTOR");
+        int feedbackScoreContractor = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsContractor);
+
+        bytes32 keyHashPlasmaAddressToFeedbackAsConverter = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "CONVERTER");
+        int feedbackScoreConverter = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsConverter);
+
+        bytes32 keyHashPlasmaAddressToFeedbackAsReferrer = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "REFERRER");
+        int feedbackScoreReferrer = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsReferrer);
+
+        return (
+            feedbackScoreContractor,
+            feedbackScoreConverter,
+            feedbackScoreReferrer
         );
     }
 
