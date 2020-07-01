@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
 
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
@@ -31,9 +32,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
 
-    // All influencers and converters
-    mapping(address => int) addressToReputationPoints;
-    address [] public converters;
+    address [] converters;
 
     mapping(address => bool) isApprovedConverter;               // Determinator if converter has already 1 successful conversion
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
@@ -838,40 +837,23 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         }
     }
 
+
     function updateReputationPointsOnConversionExecutedEvent(
         address converter
     )
-    public
+    internal
     {
-        int initialRewardWei = 10**18; // 1 point initial
-
-        addressToReputationPoints[contractor] = addressToReputationPoints[contractor] + initialRewardWei;
-        // As converter a user can get rewarded only once
-        addressToReputationPoints[converter] = initialRewardWei;
-
-        address[] memory referrers = getReferrers(converter);
-
-        for(int i=0; i<int(referrers.length); i++) {
-            addressToReputationPoints[referrers[uint(i)]] = addressToReputationPoints[referrers[uint(i)]] + initialRewardWei/(i+1);
-        }
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+            .updateReputationPointsForExecutedConversion(converter, contractor);
     }
 
     function updateReputationPointsOnConversionRejectedEvent(
         address converter
     )
-    public
+    internal
     {
-        int initialRewardWei = (10**18) / 2; // 0.5 points initial
-
-        addressToReputationPoints[contractor] = addressToReputationPoints[contractor] - initialRewardWei;
-        // As converter a user can get rewarded only once
-        addressToReputationPoints[converter] = 0 - initialRewardWei;
-
-        address[] memory referrers = getReferrers(converter);
-
-        for(int i=0; i<int(referrers.length); i++) {
-            addressToReputationPoints[referrers[uint(i)]] = addressToReputationPoints[referrers[uint(i)]] - initialRewardWei/(i+1);
-        }
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+            .updateReputationPointsForRejectedConversions(converter, contractor);
     }
 
 
