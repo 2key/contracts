@@ -253,6 +253,10 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     }
 
 
+    /**
+      * @notice Function to fetch feedback points per address
+      * @param _plasmaAddress is the address of the user we want to check points for
+      */
     function getFeedbackResultsByAddress(
         address _plasmaAddress
     )
