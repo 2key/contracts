@@ -469,7 +469,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         if(keccak256("CPC_PUBLIC") == keccak256(campaignType)) {
             // Means everything gets immediately released to support filling reserve
             bytes32 daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
-            setUint(daiWeiAvailableToFill2KEYReserveKeyHash, _daisReceived.add(PROXY_STORAGE_CONTRACT.getUint(daiWeiAvailableToFill2KEYReserveKeyHash)));
+            setUint(daiWeiAvailableToFill2KEYReserveKeyHash, _daisReceived.add(getUint(daiWeiAvailableToFill2KEYReserveKeyHash)));
         } else {
             // Means funds are being able to withdrawn by influencers
             bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", contractID);
@@ -1195,7 +1195,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("idToContractAddress", contractID));
+        return getAddress(keccak256("idToContractAddress", contractID));
     }
 
     /**
