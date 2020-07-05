@@ -38,7 +38,8 @@ const {
     ipfsGet,
     runDeployCPCCampaignMigration,
     runDeployCPCFirstTime,
-    runTruffleCompile
+    runTruffleCompile,
+    runDeployPlasmaReputation
 } = require('./helpers');
 
 
@@ -388,7 +389,7 @@ async function deployUpgrade(networks, args) {
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-deploy')) {
             console.log("Deploying CPC campaign for the first time to the network");
-            await runDeployCPCFirstTime(networks[i]);
+            await runDeployPlasmaReputation(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
