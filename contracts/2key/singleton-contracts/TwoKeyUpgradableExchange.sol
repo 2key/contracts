@@ -516,7 +516,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint contractId = getContractId(contractAddress);
         bytes32 keyHashDaiWeiAvailableToWithdraw = keccak256('daiWeiAvailableToWithdraw', contractId);
-        PROXY_STORAGE_CONTRACT.setUint(keyHashDaiWeiAvailableToWithdraw, daiWeiAvailableToWithdraw(contractId).sub(daiAmount));
+        setUint(keyHashDaiWeiAvailableToWithdraw, daiWeiAvailableToWithdraw(contractId).sub(daiAmount));
     }
 
 
@@ -1279,7 +1279,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 key = keccak256("daiWeiAvailableToFill2KEYReserve");
 
         // Set that there's not DAI to fill reserve anymore
-        PROXY_STORAGE_CONTRACT.setUint(key, daiWeiAvailableToFill2keyReserve.sub(amountOfDAI));
+        setUint(key, daiWeiAvailableToFill2keyReserve.sub(amountOfDAI));
 
         // Return how much have been withdrawn
         return amountOfDAI;
