@@ -223,61 +223,57 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         }
     }
 
-    //TODO: getReputationForUser(plasma) return (converter_rep, referrer_rep, converter_feedback, referrer_feedback)
-    //TODO: getReputationForContractor(plasma) return (contractor_rep, contractor_Feedback)
 
     /**
-     * @notice Function to fetch reputation points per address
-     * @param _plasmaAddress is the address of the user we want to check points for
+     * @notice          Function to get reputation and feedback score in case he's an influencer & converter
      */
-    function getReputationResultsByAddress(
+    function getReputationForUser(
         address _plasmaAddress
     )
     public
     view
-    returns (int,int,int)
+    returns (int,int,int,int)
     {
-        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, _plasmaAddress);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-
         bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, _plasmaAddress);
-        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
+        int converterReputationScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
 
         bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, _plasmaAddress);
-        int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+        int referrerReputationScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+
+        bytes32 keyHashPlasmaAddressToFeedbackAsConverter = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "CONVERTER");
+        int converterFeedbackScore = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsConverter);
+
+        bytes32 keyHashPlasmaAddressToFeedbackAsReferrer = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "REFERRER");
+        int referrerFeedbackScore = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsReferrer);
 
         return (
-            contractorScore,
-            converterScore,
-            referrerScore
+            converterReputationScore,
+            referrerReputationScore,
+            converterFeedbackScore,
+            referrerFeedbackScore
         );
     }
 
 
     /**
-      * @notice Function to fetch feedback points per address
-      * @param _plasmaAddress is the address of the user we want to check points for
-      */
-    function getFeedbackResultsByAddress(
+     * @notice          Function to get reputation and feedback score in case he's a business page (contractor)
+     */
+    function getReputationForContractor(
         address _plasmaAddress
     )
     public
     view
-    returns (int,int,int)
+    returns (int,int)
     {
+        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, _plasmaAddress);
+        int contractorReputationScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+
         bytes32 keyHashPlasmaAddressToFeedbackAsContractor = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "CONTRACTOR");
-        int feedbackScoreContractor = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsContractor);
-
-        bytes32 keyHashPlasmaAddressToFeedbackAsConverter = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "CONVERTER");
-        int feedbackScoreConverter = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsConverter);
-
-        bytes32 keyHashPlasmaAddressToFeedbackAsReferrer = keccak256(_plasmaAddress2Role2Feedback, _plasmaAddress, "REFERRER");
-        int feedbackScoreReferrer = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsReferrer);
+        int contractorFeedbackScore = PROXY_STORAGE_CONTRACT.getInt(keyHashPlasmaAddressToFeedbackAsContractor);
 
         return (
-            feedbackScoreContractor,
-            feedbackScoreConverter,
-            feedbackScoreReferrer
+            contractorReputationScore,
+            contractorFeedbackScore
         );
     }
 
