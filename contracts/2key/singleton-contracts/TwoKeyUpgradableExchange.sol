@@ -130,7 +130,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     )
     private
     {
-        require(_beneficiary != address(0),'beneficiary address can not be 0' );
         require(_weiAmount != 0, 'wei amount can not be 0');
     }
 
@@ -726,19 +725,41 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             contractId = addNewContract(msg.sender);
         }
 
-        // Update how much ether we received from msg.sender contract
-        bytes32 ethReceivedFromContractKeyHash = keccak256("ethReceivedFromContract", contractId);
-        setUint(ethReceivedFromContractKeyHash, ethReceivedFromContract(contractId).add(msg.value));
-
-        // Update how much 2KEY tokens we sent to msg.sender contract
-        bytes32 sent2keyToContractKeyHash = keccak256("sent2keyToContract", contractId);
-        setUint(sent2keyToContractKeyHash, sent2keyToContract(contractId).add(totalTokensBought));
-
-        updateEthWeiAvailableToHedge(contractId, msg.value);
+        setHedgingInformationAndContractStats(
+            contractId,
+            totalTokensBought,
+            msg.value
+        );
 
         _processPurchase(_beneficiary, totalTokensBought);
 
         return (totalTokensBought, averageTokenPriceForPurchase);
+    }
+
+    /**
+     * @notice          Internal function to update the state in case tokens were bought for influencers
+     *
+     * @param           contractID is the ID of the contract
+     * @param           amountOfTokensBeingSentToContract is the amount of 2KEY tokens being sent to the contract
+     * @param           purchaseAmountETH is the amount of ETH spent to purchase tokens
+     */
+    function setHedgingInformationAndContractStats(
+        uint contractID,
+        uint amountOfTokensBeingSentToContract,
+        uint purchaseAmountETH
+    )
+    internal
+    {
+        // Update how much ether we received from msg.sender contract
+        bytes32 ethReceivedFromContractKeyHash = keccak256("ethReceivedFromContract", contractID);
+        setUint(ethReceivedFromContractKeyHash, ethReceivedFromContract(contractID).add(purchaseAmountETH));
+
+        // Update how much 2KEY tokens we sent to msg.sender contract
+        bytes32 sent2keyToContractKeyHash = keccak256("sent2keyToContract", contractID);
+        setUint(sent2keyToContractKeyHash, sent2keyToContract(contractID).add(amountOfTokensBeingSentToContract));
+
+        updateEthWeiAvailableToHedge(contractID, purchaseAmountETH);
+
     }
 
 
@@ -848,37 +869,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return minConversionRate;
     }
 
-
-    /**
-     * @notice          Function to start hedging some ether amount
-     * @param           amountToBeHedged is the amount we'd like to hedge
-     * @dev             only maintainer can call this function
-     */
-    function startHedging(
-        uint amountToBeHedged,
-        uint approvedMinConversionRate
-    )
-    public
-    onlyMaintainer
-    {
-        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
-        if(amountToBeHedged > address(this).balance) {
-            amountToBeHedged = address(this).balance;
-        }
-        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
-        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
-
-        // Get minimal conversion rate for the swap of ETH->DAI token
-        uint minConversionRate = getKyberExpectedRate(amountToBeHedged, ETH_TOKEN_ADDRESS, address(dai));
-
-        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
-        uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
-        // Get the ratio between ETH and DAI for this hedging
-        uint ratio = calculateRatioBetweenDAIandETH(amountToBeHedged, stableCoinUnits);
-        //Emit event with important data
-        emit HedgedEther(stableCoinUnits, ratio, numberOfContracts());
-    }
-
     /**
      * @notice          Function to send available DAI to Kyber and get 2KEY tokens
      *
@@ -923,6 +913,36 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         // Update DAI tokens available to fill reserve
         setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, daiWeiAvailableToFill2KEYReserve.sub(amountOfDAIToSwap));
+    }
+
+    /**
+     * @notice          Function to start hedging some ether amount
+     * @param           amountToBeHedged is the amount we'd like to hedge
+     * @dev             only maintainer can call this function
+     */
+    function startHedging(
+        uint amountToBeHedged,
+        uint approvedMinConversionRate
+    )
+    public
+    onlyMaintainer
+    {
+        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
+        if(amountToBeHedged > address(this).balance) {
+            amountToBeHedged = address(this).balance;
+        }
+        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
+
+        // Get minimal conversion rate for the swap of ETH->DAI token
+        uint minConversionRate = getKyberExpectedRate(amountToBeHedged, ETH_TOKEN_ADDRESS, address(dai));
+
+        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
+        uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
+        // Get the ratio between ETH and DAI for this hedging
+        uint ratio = calculateRatioBetweenDAIandETH(amountToBeHedged, stableCoinUnits);
+        //Emit event with important data
+        emit HedgedEther(stableCoinUnits, ratio, numberOfContracts());
     }
 
 
@@ -1217,7 +1237,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         return getUint(keccak256("spreadWei"));
     }
-
 
 
     /**
