@@ -130,7 +130,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     )
     private
     {
-        require(_weiAmount != 0, 'wei amount can not be 0');
+        require(_weiAmount != 0);
     }
 
 
