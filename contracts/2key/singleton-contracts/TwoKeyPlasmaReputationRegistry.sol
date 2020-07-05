@@ -223,7 +223,8 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         }
     }
 
-
+    //TODO: getReputationForUser(plasma) return (converter_rep, referrer_rep, converter_feedback, referrer_feedback)
+    //TODO: getReputationForContractor(plasma) return (contractor_rep, contractor_Feedback)
 
     /**
      * @notice Function to fetch reputation points per address

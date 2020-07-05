@@ -204,4 +204,6 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
     }
 
+    //TODO: getReputationForUser(plasma) return (converter_rep, referrer_rep)
+    //TODO: getReputationForContractor(plasma) return (contractor_rep)
 }
