@@ -365,13 +365,11 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
 
 const checkIfContractIsPlasma = (contractName) => {
-    if(contractName.includes('Plasma')) {
-        return true;
-    }
-    return false;
+    return !!contractName.includes('Plasma');
+
 };
 
-async function deployUpgrade(networks, args) {
+async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
 
@@ -478,7 +476,7 @@ async function deploy() {
 
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
-                await deployUpgrade(networks, process.argv);
+                await deployUpgrade(networks);
             }
             if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);
