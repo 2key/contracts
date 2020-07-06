@@ -396,16 +396,12 @@ async function deployUpgrade(networks) {
                 console.log(networks[i], singletonsToBeUpgraded[j]);
                 if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
                     console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
-                    if(singletonsToBeUpgraded[j] !== 'TwoKeyPlasmaReputationRegistry') {
-                        if(networks[i].includes('private') || networks[i].includes('plasma')) {
-                            await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-                        }
+                    if(networks[i].includes('private') || networks[i].includes('plasma')) {
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 } else {
                     if(networks[i].includes('public')) {
-                        if(singletonsToBeUpgraded[j] !== 'TwoKeyPlasmaReputationRegistry') {
-                            await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-                        }
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 }
             }
