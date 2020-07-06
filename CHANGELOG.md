@@ -2,6 +2,18 @@
 ## [Unreleased]
 
 
+<a name="v1.2.38-staging"></a>
+## [v1.2.38-staging] - 2020-07-07
+### Reverts
+- Add minor fix
+
+
+<a name="v1.4.110-develop"></a>
+## [v1.4.110-develop] - 2020-07-06
+
+<a name="v1.4.109-develop"></a>
+## [v1.4.109-develop] - 2020-07-05
+
 <a name="v1.4.7-master"></a>
 ## [v1.4.7-master] - 2020-06-29
 
@@ -1817,11 +1829,11 @@
 <a name="dev-local/plasma-ap-20180824113133"></a>
 ## [dev-local/plasma-ap-20180824113133] - 2018-08-24
 
-<a name="dev-local/plasma-ap-20180823174032"></a>
-## [dev-local/plasma-ap-20180823174032] - 2018-08-23
-
 <a name="dev-2key-20180823180315"></a>
 ## [dev-2key-20180823180315] - 2018-08-23
+
+<a name="dev-local/plasma-ap-20180823174032"></a>
+## [dev-local/plasma-ap-20180823174032] - 2018-08-23
 
 <a name="dev-ap/plasma-ap-20180823172140"></a>
 ## [dev-ap/plasma-ap-20180823172140] - 2018-08-23
@@ -2012,7 +2024,10 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.7-master...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.2.38-staging...HEAD
+[v1.2.38-staging]: https://github.com/2key/contracts/compare/v1.4.110-develop...v1.2.38-staging
+[v1.4.110-develop]: https://github.com/2key/contracts/compare/v1.4.109-develop...v1.4.110-develop
+[v1.4.109-develop]: https://github.com/2key/contracts/compare/v1.4.7-master...v1.4.109-develop
 [v1.4.7-master]: https://github.com/2key/contracts/compare/v1.4.108-develop...v1.4.7-master
 [v1.4.108-develop]: https://github.com/2key/contracts/compare/v1.4.6-master...v1.4.108-develop
 [v1.4.6-master]: https://github.com/2key/contracts/compare/v1.2.37-staging...v1.4.6-master
@@ -2606,9 +2621,9 @@
 [dev-local-20180827095332]: https://github.com/2key/contracts/compare/dev-local-20180827094239...dev-local-20180827095332
 [dev-local-20180827094239]: https://github.com/2key/contracts/compare/rinkeby-infura-20180824122545...dev-local-20180827094239
 [rinkeby-infura-20180824122545]: https://github.com/2key/contracts/compare/dev-local/plasma-ap-20180824113133...rinkeby-infura-20180824122545
-[dev-local/plasma-ap-20180824113133]: https://github.com/2key/contracts/compare/dev-local/plasma-ap-20180823174032...dev-local/plasma-ap-20180824113133
-[dev-local/plasma-ap-20180823174032]: https://github.com/2key/contracts/compare/dev-2key-20180823180315...dev-local/plasma-ap-20180823174032
-[dev-2key-20180823180315]: https://github.com/2key/contracts/compare/dev-ap/plasma-ap-20180823172140...dev-2key-20180823180315
+[dev-local/plasma-ap-20180824113133]: https://github.com/2key/contracts/compare/dev-2key-20180823180315...dev-local/plasma-ap-20180824113133
+[dev-2key-20180823180315]: https://github.com/2key/contracts/compare/dev-local/plasma-ap-20180823174032...dev-2key-20180823180315
+[dev-local/plasma-ap-20180823174032]: https://github.com/2key/contracts/compare/dev-ap/plasma-ap-20180823172140...dev-local/plasma-ap-20180823174032
 [dev-ap/plasma-ap-20180823172140]: https://github.com/2key/contracts/compare/dev-ap/plasma-ap-20180823133418...dev-ap/plasma-ap-20180823172140
 [dev-ap/plasma-ap-20180823133418]: https://github.com/2key/contracts/compare/dev-2key/plasma-ap-20180823132908...dev-ap/plasma-ap-20180823133418
 [dev-2key/plasma-ap-20180823132908]: https://github.com/2key/contracts/compare/dev-ap/plasma-ap-20180823085615...dev-2key/plasma-ap-20180823132908
