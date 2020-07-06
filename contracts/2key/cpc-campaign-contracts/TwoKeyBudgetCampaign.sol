@@ -14,6 +14,12 @@ import "../libraries/MerkleProof.sol";
 contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 	/**
+	 * IN ALL BUDGET TYPE CAMPAIGNS MAPPING: referrerPlasma2Balances2KEY(address => uint) is contained from following:
+	 *  address : referrer PUBLIC address
+	 *  uint : value how much balance he has
+	 */
+
+	/**
 	 * This is the BudgetCampaign contract abstraction which will
 	 * be implemented by all budget campaigns in future
 	 */
