@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
 
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
@@ -754,6 +755,97 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
+//    /**
+//     * @notice          Function to return total bounty for campaign,
+//     *                  how much of the bounty is available and how much
+//     *                  of the total bounty is being paid
+//     */
+//    function getAvailableBountyForCampaign()
+//    public
+//    view
+//    returns (uint,uint,uint)
+//    {
+//        return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
+//    }
+
+
+    /**
+     * @notice          Function which will be called only once, after we did rebalancing
+     *                  on the mainchain contract, so it will adjust all values to rebalanced
+     *                  rates. In case there was no
+     *                  rebalancing, calling this function won't change anything in state
+     *                  since rebalancingRatio initialy is 1 ETH and in all modifications it's divided
+     *                  by 1 ETH so it results as neutral for multiplication
+     *
+     * @param           ratio is the rebalancingRatio
+     */
+    function adjustRebalancingResultsAndSetRatio(
+        uint ratio
+    )
+    public
+    onlyMaintainer
+    {
+        // Set the rebalancing ratio
+        rebalancingRatio = ratio;
+
+        uint one_eth = 10**18;
+        // Rebalance fixed values
+        totalBountyForCampaign = totalBountyForCampaign.mul(rebalancingRatio).div(one_eth);
+        bountyPerConversionWei = bountyPerConversionWei.mul(rebalancingRatio).div(one_eth);
+
+        // Rebalance earnings of moderator and influencers
+        moderatorTotalEarnings = moderatorTotalEarnings.mul(rebalancingRatio).div(one_eth);
+        counters[6] = counters[6].mul(rebalancingRatio).div(one_eth);
+    }
+
+
+    /**
+     * @notice          Function where maintainer will adjust influencers earnings
+     *                  after rebalancing is done on the contract. In case there was no
+     *                  rebalancing, calling this function won't change anything in state
+     *                  since rebalancingRatio initialy is 1 ETH and in all modifications it's divided
+     *                  by 1 ETH so it results as neutral for multiplication
+     *
+     * @param           start is the starting index
+     * @param           end is the ending index of influencers
+     */
+    function rebalanceInfluencersValues(
+        uint start,
+        uint end
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+
+        uint one_eth = 10**18;
+        for(i=start; i<end; i++) {
+            address influencer = activeInfluencers[i];
+            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
+            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
+        }
+    }
+
+
+    function updateReputationPointsOnConversionExecutedEvent(
+        address converter
+    )
+    internal
+    {
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+            .updateReputationPointsForExecutedConversion(converter, contractor);
+    }
+
+    function updateReputationPointsOnConversionRejectedEvent(
+        address converter
+    )
+    internal
+    {
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+            .updateReputationPointsForRejectedConversions(converter, contractor);
+    }
+
+
     /**
      * @notice          compute a merkle proof that influencer and amount are in one of the merkle_roots.
      *                  this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
@@ -767,41 +859,41 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *                  of the work to get a full proof
      *                  See https://github.com/2key/web3-alpha/commit/105b0b17ab3d20662b1e2171d84be25089962b68
      */
-//    function getMerkleProofBaseFromRoots(
-//        address _influencer
-//    )
-//    internal
-//    view
-//    returns (uint, bytes32[])
-//    {
-//
-//        if (isActiveInfluencer[_influencer] == false) {
-//            return (0, new bytes32[](0));
-//        }
-//
-//        uint influencer_idx = activeInfluencer2idx[_influencer];
-//
-//        uint start = N * (influencer_idx / N);
-//
-//        influencer_idx = influencer_idx.sub(start);
-//
-//        uint n = activeInfluencers.length.sub(start);
-//
-//        if (n > N) {
-//            n = N;
-//        }
-//
-//        bytes32[] memory hashes = new bytes32[](n);
-//        uint i;
-//
-//        for (i = 0; i < n; i++) {
-//            address influencer = activeInfluencers[i+start];
-//            uint amount = referrerPlasma2Balances2key[influencer];
-//            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-//        }
-//
-//        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
-//    }
+    //    function getMerkleProofBaseFromRoots(
+    //        address _influencer
+    //    )
+    //    internal
+    //    view
+    //    returns (uint, bytes32[])
+    //    {
+    //
+    //        if (isActiveInfluencer[_influencer] == false) {
+    //            return (0, new bytes32[](0));
+    //        }
+    //
+    //        uint influencer_idx = activeInfluencer2idx[_influencer];
+    //
+    //        uint start = N * (influencer_idx / N);
+    //
+    //        influencer_idx = influencer_idx.sub(start);
+    //
+    //        uint n = activeInfluencers.length.sub(start);
+    //
+    //        if (n > N) {
+    //            n = N;
+    //        }
+    //
+    //        bytes32[] memory hashes = new bytes32[](n);
+    //        uint i;
+    //
+    //        for (i = 0; i < n; i++) {
+    //            address influencer = activeInfluencers[i+start];
+    //            uint amount = referrerPlasma2Balances2key[influencer];
+    //            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+    //        }
+    //
+    //        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
+    //    }
 
     /**
      * @notice          compute a merkle proof that influencer and amount are in the the merkle_root.
@@ -810,30 +902,30 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_root,
      *                  which prove that (_influencer,amount) are inside the root.
      */
-//    function getMerkleProofFromRoots()
-//    public
-//    view
-//    returns (bytes32[])
-//    {
-//        address _influencer = msg.sender;
-//        bytes32[] memory proof0;
-//        uint start;
-//        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
-//        if (proof0.length == 0) {
-//            return proof0; // return failury
-//        }
-//        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
-//        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
-//        uint i;
-//        for (i = 0; i < proof0.length; i++) {
-//            proof[i] = proof0[i];
-//        }
-//        for (i = 0; i < proof1.length; i++) {
-//            proof[i+proof0.length] = proof1[i];
-//        }
-//
-//        return proof;
-//    }
+    //    function getMerkleProofFromRoots()
+    //    public
+    //    view
+    //    returns (bytes32[])
+    //    {
+    //        address _influencer = msg.sender;
+    //        bytes32[] memory proof0;
+    //        uint start;
+    //        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
+    //        if (proof0.length == 0) {
+    //            return proof0; // return failury
+    //        }
+    //        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
+    //        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
+    //        uint i;
+    //        for (i = 0; i < proof0.length; i++) {
+    //            proof[i] = proof0[i];
+    //        }
+    //        for (i = 0; i < proof1.length; i++) {
+    //            proof[i+proof0.length] = proof1[i];
+    //        }
+    //
+    //        return proof;
+    //    }
 
 
     /**

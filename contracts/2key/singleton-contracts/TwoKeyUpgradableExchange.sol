@@ -130,8 +130,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     )
     private
     {
-        require(_beneficiary != address(0),'beneficiary address can not be 0' );
-        require(_weiAmount != 0, 'wei amount can not be 0');
+        require(_weiAmount != 0);
     }
 
 
@@ -470,7 +469,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         if(keccak256("CPC_PUBLIC") == keccak256(campaignType)) {
             // Means everything gets immediately released to support filling reserve
             bytes32 daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
-            setUint(daiWeiAvailableToFill2KEYReserveKeyHash, _daisReceived.add(PROXY_STORAGE_CONTRACT.getUint(daiWeiAvailableToFill2KEYReserveKeyHash)));
+            setUint(daiWeiAvailableToFill2KEYReserveKeyHash, _daisReceived.add(getUint(daiWeiAvailableToFill2KEYReserveKeyHash)));
         } else {
             // Means funds are being able to withdrawn by influencers
             bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", contractID);
@@ -495,14 +494,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     internal
     {
         bytes32 ethWeiAvailableToHedgeKeyHash = keccak256("ethWeiAvailableToHedge", _contractID);
-        bytes32 daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", _contractID);
         bytes32 ethWeiHedgedPerContractKeyHash = keccak256("ethWeiHedgedPerContract", _contractID);
         bytes32 daiWeiReceivedFromHedgingPerContractKeyHash = keccak256("daiWeiReceivedFromHedgingPerContract",_contractID);
 
         setUint(daiWeiReceivedFromHedgingPerContractKeyHash, daiWeiReceivedFromHedgingPerContract(_contractID).add(_daisReceived));
         setUint(ethWeiHedgedPerContractKeyHash, ethWeiHedgedPerContract(_contractID).add(_hedgedEthWei));
         setUint(ethWeiAvailableToHedgeKeyHash, _afterHedgingAvailableEthWei);
-        setUint(daiWeiAvailableToWithdrawKeyHash, daiWeiAvailableToWithdraw(_contractID).add(_daisReceived));
     }
 
     /**
@@ -519,7 +516,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint contractId = getContractId(contractAddress);
         bytes32 keyHashDaiWeiAvailableToWithdraw = keccak256('daiWeiAvailableToWithdraw', contractId);
-        PROXY_STORAGE_CONTRACT.setUint(keyHashDaiWeiAvailableToWithdraw, daiWeiAvailableToWithdraw(contractId).sub(daiAmount));
+        setUint(keyHashDaiWeiAvailableToWithdraw, daiWeiAvailableToWithdraw(contractId).sub(daiAmount));
     }
 
 
@@ -728,19 +725,41 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             contractId = addNewContract(msg.sender);
         }
 
-        // Update how much ether we received from msg.sender contract
-        bytes32 ethReceivedFromContractKeyHash = keccak256("ethReceivedFromContract", contractId);
-        setUint(ethReceivedFromContractKeyHash, ethReceivedFromContract(contractId).add(msg.value));
-
-        // Update how much 2KEY tokens we sent to msg.sender contract
-        bytes32 sent2keyToContractKeyHash = keccak256("sent2keyToContract", contractId);
-        setUint(sent2keyToContractKeyHash, sent2keyToContract(contractId).add(totalTokensBought));
-
-        updateEthWeiAvailableToHedge(contractId, msg.value);
+        setHedgingInformationAndContractStats(
+            contractId,
+            totalTokensBought,
+            msg.value
+        );
 
         _processPurchase(_beneficiary, totalTokensBought);
 
         return (totalTokensBought, averageTokenPriceForPurchase);
+    }
+
+    /**
+     * @notice          Internal function to update the state in case tokens were bought for influencers
+     *
+     * @param           contractID is the ID of the contract
+     * @param           amountOfTokensBeingSentToContract is the amount of 2KEY tokens being sent to the contract
+     * @param           purchaseAmountETH is the amount of ETH spent to purchase tokens
+     */
+    function setHedgingInformationAndContractStats(
+        uint contractID,
+        uint amountOfTokensBeingSentToContract,
+        uint purchaseAmountETH
+    )
+    internal
+    {
+        // Update how much ether we received from msg.sender contract
+        bytes32 ethReceivedFromContractKeyHash = keccak256("ethReceivedFromContract", contractID);
+        setUint(ethReceivedFromContractKeyHash, ethReceivedFromContract(contractID).add(purchaseAmountETH));
+
+        // Update how much 2KEY tokens we sent to msg.sender contract
+        bytes32 sent2keyToContractKeyHash = keccak256("sent2keyToContract", contractID);
+        setUint(sent2keyToContractKeyHash, sent2keyToContract(contractID).add(amountOfTokensBeingSentToContract));
+
+        updateEthWeiAvailableToHedge(contractID, purchaseAmountETH);
+
     }
 
 
@@ -850,37 +869,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return minConversionRate;
     }
 
-
-    /**
-     * @notice          Function to start hedging some ether amount
-     * @param           amountToBeHedged is the amount we'd like to hedge
-     * @dev             only maintainer can call this function
-     */
-    function startHedging(
-        uint amountToBeHedged,
-        uint approvedMinConversionRate
-    )
-    public
-    onlyMaintainer
-    {
-        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
-        if(amountToBeHedged > address(this).balance) {
-            amountToBeHedged = address(this).balance;
-        }
-        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
-        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
-
-        // Get minimal conversion rate for the swap of ETH->DAI token
-        uint minConversionRate = getKyberExpectedRate(amountToBeHedged, ETH_TOKEN_ADDRESS, address(dai));
-
-        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
-        uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
-        // Get the ratio between ETH and DAI for this hedging
-        uint ratio = calculateRatioBetweenDAIandETH(amountToBeHedged, stableCoinUnits);
-        //Emit event with important data
-        emit HedgedEther(stableCoinUnits, ratio, numberOfContracts());
-    }
-
     /**
      * @notice          Function to send available DAI to Kyber and get 2KEY tokens
      *
@@ -925,6 +913,36 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         // Update DAI tokens available to fill reserve
         setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, daiWeiAvailableToFill2KEYReserve.sub(amountOfDAIToSwap));
+    }
+
+    /**
+     * @notice          Function to start hedging some ether amount
+     * @param           amountToBeHedged is the amount we'd like to hedge
+     * @dev             only maintainer can call this function
+     */
+    function startHedging(
+        uint amountToBeHedged,
+        uint approvedMinConversionRate
+    )
+    public
+    onlyMaintainer
+    {
+        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
+        if(amountToBeHedged > address(this).balance) {
+            amountToBeHedged = address(this).balance;
+        }
+        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
+        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
+
+        // Get minimal conversion rate for the swap of ETH->DAI token
+        uint minConversionRate = getKyberExpectedRate(amountToBeHedged, ETH_TOKEN_ADDRESS, address(dai));
+
+        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100)); //Means our rate can be at most same as their rate, because they're giving the best rate
+        uint stableCoinUnits = proxyContract.swapEtherToToken.value(amountToBeHedged)(dai,minConversionRate);
+        // Get the ratio between ETH and DAI for this hedging
+        uint ratio = calculateRatioBetweenDAIandETH(amountToBeHedged, stableCoinUnits);
+        //Emit event with important data
+        emit HedgedEther(stableCoinUnits, ratio, numberOfContracts());
     }
 
 
@@ -1177,7 +1195,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256("idToContractAddress", contractID));
+        return getAddress(keccak256("idToContractAddress", contractID));
     }
 
     /**
@@ -1221,7 +1239,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-
     /**
      * @notice          Getter for 2key sell rate
      */
@@ -1262,7 +1279,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         bytes32 key = keccak256("daiWeiAvailableToFill2KEYReserve");
 
         // Set that there's not DAI to fill reserve anymore
-        PROXY_STORAGE_CONTRACT.setUint(key, daiWeiAvailableToFill2keyReserve.sub(amountOfDAI));
+        setUint(key, daiWeiAvailableToFill2keyReserve.sub(amountOfDAI));
 
         // Return how much have been withdrawn
         return amountOfDAI;
@@ -1348,6 +1365,44 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             srcAmountWei,
             expectedRate
         );
+    }
+
+    function moveModeratorEarningsToFillReservePool(
+        address campaignContract
+    )
+    public
+    onlyMaintainer
+    {
+        uint i = 0;
+        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+
+        uint _contractID = getContractId(campaignContract);
+        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
+        uint _daiWeiAvailable = getUint(_daiWeiAvailableToWithdrawKeyHash);
+        uint currentlyAvailableToFillReserve = getUint(_daiWeiAvailableToFill2KEYReserveKeyHash);
+        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, currentlyAvailableToFillReserve.add(_daiWeiAvailable));
+        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
+    }
+
+    /**
+     * @notice          Function to fix all PPC available to withdraw method functions
+     * @param           contracts is the array of all ppc campaigns (public addresses)
+     */
+    function setPPCCampaignsAvailableToWithdrawToZero(
+        address [] contracts
+    )
+    public
+    onlyMaintainer
+    {
+        uint i = 0;
+
+        for(i = 0; i<contracts.length; i++) {
+            // Get the contract ID
+            uint _contractID = getContractId(contracts[i]);
+
+            bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
+            setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
+        }
     }
 
 

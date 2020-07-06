@@ -38,7 +38,8 @@ const {
     ipfsGet,
     runDeployCPCCampaignMigration,
     runDeployCPCFirstTime,
-    runTruffleCompile
+    runTruffleCompile,
+    runDeployPlasmaReputation
 } = require('./helpers');
 
 
@@ -364,13 +365,11 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
 
 const checkIfContractIsPlasma = (contractName) => {
-    if(contractName.includes('Plasma')) {
-        return true;
-    }
-    return false;
+    return !!contractName.includes('Plasma');
+
 };
 
-async function deployUpgrade(networks, args) {
+async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
 
@@ -388,7 +387,7 @@ async function deployUpgrade(networks, args) {
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-deploy')) {
             console.log("Deploying CPC campaign for the first time to the network");
-            await runDeployCPCFirstTime(networks[i]);
+            await runDeployPlasmaReputation(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
@@ -477,7 +476,7 @@ async function deploy() {
 
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
-                await deployUpgrade(networks, process.argv);
+                await deployUpgrade(networks);
             }
             if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);
