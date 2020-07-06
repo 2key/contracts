@@ -549,8 +549,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint)
     {
-        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
-        return ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).getModeratorFee();
+        return ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry")).getModeratorFee();
     }
 
 
@@ -944,43 +943,31 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         require(merkleRoot == 0 || merkleRoot == 2, 'merkle root already defined');
 
-        uint numberOfInfluencers = activeInfluencers.length;
-        if (numberOfInfluencers == 0) {
-            merkleRoot = bytes32(1);
-            return;
-        }
-        merkleRoot = bytes32(2); // indicate that the merkle root is being computed
+//        uint numberOfInfluencers = activeInfluencers.length;
+//        if (numberOfInfluencers == 0) {
+//            merkleRoot = bytes32(1);
+//            return;
+//        }
+//        merkleRoot = bytes32(2); // indicate that the merkle root is being computed
+//
+//        uint start = merkle_roots.length * N;
+//        if (start >= numberOfInfluencers) {
+//            merkleRoot = MerkleProof.computeMerkleRootInternal(merkle_roots);
+//            return;
+//        }
+//
+//        uint n = numberOfInfluencers - start;
+//        if (n > N) {
+//            n = N;
+//        }
+//        bytes32[] memory hashes = new bytes32[](n);
+//        for (uint i = 0; i < n; i++) {
+//            address influencer = activeInfluencers[i+start];
+//            uint amount = referrerPlasma2Balances2key[influencer];
+//            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
+//        }
+//        merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
 
-        uint start = merkle_roots.length * N;
-        if (start >= numberOfInfluencers) {
-            merkleRoot = MerkleProof.computeMerkleRootInternal(merkle_roots);
-            return;
-        }
-
-        uint n = numberOfInfluencers - start;
-        if (n > N) {
-            n = N;
-        }
-        bytes32[] memory hashes = new bytes32[](n);
-        for (uint i = 0; i < n; i++) {
-            address influencer = activeInfluencers[i+start];
-            uint amount = referrerPlasma2Balances2key[influencer];
-            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-        }
-        merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
+        merkleRoot = bytes32(10);
     }
-
-    /**
-     * @notice          Function to return total bounty for campaign,
-     *                  how much of the bounty is available and how much
-     *                  of the total bounty is being paid
-     */
-    function getAvailableBountyForCampaign()
-    public
-    view
-    returns (uint,uint,uint)
-    {
-        return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
-    }
-
 }
