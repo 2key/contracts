@@ -25,5 +25,7 @@ python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.11
 python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.11
 python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.13
 
+echo "Destination is TwoKeyAdmin: 0x5eb1949424999327093d7a06619fc24170a9864e"
+python3 generate_bytecode.py setContracts 0xdAfF796B4D657AA40E879BBBf3C5653392275E77 0x920B322D4B8BAB34fb6233646F5c87F87e79952b 0xfa3dee770dfa7be73d8be2664e41dd8ae75c74b6 0x0000000000000000000000000000000000000000
 
 
