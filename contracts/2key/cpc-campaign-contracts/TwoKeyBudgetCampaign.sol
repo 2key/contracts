@@ -341,6 +341,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			}
 		}
 		else if(contractorWithdrawnLeftover == false) {
+			// In case campaign should have rebalancing as well, we're checking that it happened
+			require(rebalancedRatesStruct.ratio > 0);
 			contractorWithdrawnLeftover = true;
 			IERC20(twoKeyEconomy).transfer(contractor, leftOverForContractor);
 		}
