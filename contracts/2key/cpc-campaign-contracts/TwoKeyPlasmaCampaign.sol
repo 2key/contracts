@@ -70,9 +70,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    modifier contractNotLocked {                    // Modifier which requires that contract is not locked (locked == ended)
-        require(isContractLocked == false);
-        _;
     /**
      * @notice          Function to check if campaign is active in terms of time set
      */
@@ -96,7 +93,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (bool)
     {
-        return merkleRoot == 0 ? false : true;
+        return isContractLocked;
     }
 
 
