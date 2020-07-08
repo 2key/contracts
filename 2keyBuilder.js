@@ -38,7 +38,8 @@ const {
     ipfsGet,
     runDeployCPCCampaignMigration,
     runDeployCPCFirstTime,
-    runTruffleCompile
+    runTruffleCompile,
+    runDeployPlasmaReputation
 } = require('./helpers');
 
 
@@ -104,6 +105,10 @@ const checkIfFileExistsInDir = (contractName) => {
     let artifactPath = `./build/contracts/${contractName}.json`
     return fs.existsSync(artifactPath);
 }
+
+const generateChangelog = async () => {
+    await runProcess('git-chglog',['-o','CHANGELOG.md'])
+};
 
 const getBuildArchPath = () => {
     if(contractsStatus && contractsStatus.current) {
@@ -360,13 +365,11 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
 
 const checkIfContractIsPlasma = (contractName) => {
-    if(contractName.includes('Plasma')) {
-        return true;
-    }
-    return false;
+    return !!contractName.includes('Plasma');
+
 };
 
-async function deployUpgrade(networks, args) {
+async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
 
@@ -384,7 +387,7 @@ async function deployUpgrade(networks, args) {
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-deploy')) {
             console.log("Deploying CPC campaign for the first time to the network");
-            await runDeployCPCFirstTime(networks[i]);
+            await runDeployPlasmaReputation(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
@@ -430,7 +433,7 @@ async function deploy() {
     try {
         deployment = true;
         console.log("Removing truffle build, the whole folder will be deleted: ", buildPath);
-        rmDir(buildPath);
+        await rmDir(buildPath);
         await pullTenderlyConfiguration();
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
@@ -473,7 +476,7 @@ async function deploy() {
 
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
-                await deployUpgrade(networks, process.argv);
+                await deployUpgrade(networks);
             }
             if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);
@@ -549,6 +552,16 @@ async function deploy() {
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
             // Add tenderly to CI/CD
             await runProcess('tenderly',['push', '--tag', npmVersionTag]);
+            // Generate the latest changelog for contracts repo
+            await generateChangelog();
+            // Go to 2key-protocol/src
+            process.chdir(twoKeyProtocolDir);
+            // Generate the changelog for this repository
+            await generateChangelog();
+
+            // Push final commit for the deployment
+            await commitAndPush2KeyProtocolSrc(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
+            await commitAndPushContractsFolder(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
         } else {
             process.exit(0);
         }

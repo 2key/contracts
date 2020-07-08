@@ -4,13 +4,13 @@ import "../ERC20/ERC20.sol";
 /**
  * @notice Interface which will be used for 2KEY system to interact with Kyber smart-contracts
  */
-contract IKyberNetworkInterface {
+contract IKyberReserveInterface {
 
-    /**
-     * @notice          Function to be called on contract LiquidityConversionRates.sol
-     *                  Can be only called by TwoKeyAdmin when we're initially setting
-     *                  up the reserve
-     */
+    // Pricing contract
+    uint public collectedFeesInTwei;
+    // Pricing contract
+    function resetCollectedFees() public;
+    // Pricing contract
     function setLiquidityParams(
         uint _rInFp,
         uint _pMinInFp,
@@ -26,4 +26,7 @@ contract IKyberNetworkInterface {
     function disableTrade() public returns (bool);
     function enableTrade() public returns (bool);
     function withdrawEther(uint amount, address sendTo) external;
+    function withdrawToken(ERC20 token, uint amount, address sendTo) external;
+    function setContracts(address _kyberNetwork, address _conversionRates, address _sanityRates) public;
+    function getDestQty(ERC20 src, ERC20 dest, uint srcQty, uint rate) public view returns(uint);
 }

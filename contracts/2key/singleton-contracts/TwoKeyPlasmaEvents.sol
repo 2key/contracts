@@ -201,7 +201,6 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
         setJoinedFrom(campaignAddress, contractor, last_address, referrer);
         setVisitedFrom(campaignAddress, contractor, last_address, referrer);
-        setVisitsList(campaignAddress, contractor, referrer, last_address);
         emit Joined(campaignAddress, plasmaOf(referrer), last_address);
     }
 
@@ -253,10 +252,7 @@ contract TwoKeyPlasmaEvents is Upgradeable {
 
                 if (getJoinedFrom(c, contractor, new_address) == address(0)) {
                     setVisitedFrom(c, contractor, new_address, old_address);
-                    setVisitedFromTime(c,contractor,new_address,old_address);
                 }
-                setVisitsList(c, contractor, old_address, new_address);
-                setVisitsListTimestamps(c, contractor, old_address);
                 emit Visited(new_address, c, contractor, old_address);
             }
             old_address = new_address;

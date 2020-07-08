@@ -1,4 +1,4 @@
-#### How to calculate arguments for APR when maintaining it
+#### How to calculate arguments for APR when maintaining it or setting up the new one
 - Set the amount of ETH to be in the reserve **(initial_ether_amount)**
 - Get ETH -> DAI rate on kyber swap **(eth/dai)**
 - Get latest rate for DAI -> 2KEY either from the TwoKeyUpgradableExchange.sol 

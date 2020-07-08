@@ -168,11 +168,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     );
 
     event UserRegistered(
-        string _name,
-        address _address,
-        string _fullName,
-        string _email,
-        string _username_walletName
+        string _handle,
+        address _address
     );
 
     event Executed(
@@ -213,6 +210,14 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     event DaiReleased(
         address contractSenderAddress,
         uint amountOfDAI
+    );
+
+    event RebalancedRatesEvent (
+        uint priceAtBeginning,
+        uint priceAtRebalancingTime,
+        uint ratio,
+        uint amountOfTokensTransferedInAction,
+        string actionPerformedWithUpgradableExchange
     );
 
     /**
@@ -481,26 +486,19 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice Function to emit event every time user is registered
-     * @param _name is the name of the user
+     * @param _handle is the handle of the user
      * @param _address is the address of the user
-     * @param _fullName is the full user name
-     * @param _email is users email
-     * @param _username_walletName is = concat(username,'_',walletName)
      */
     function userRegistered(
-        string _name,
+        string _handle,
         address _address,
-        string _fullName,
-        string _email,
-        string _username_walletName,
         uint _registrationFee
     )
     external
     {
         require(isAddressMaintainer(msg.sender) == true);
-
         ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setRegistrationFeeForUser(_address, _registrationFee);
-        emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
+        emit UserRegistered(_handle, _address);
         emit Debt(_address, _registrationFee, true, "ETH");
     }
 
@@ -596,6 +594,25 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit TokenWithdrawnFromPurchasesHandler(_campaignAddress, _conversionID, _tokensAmountWithdrawn);
     }
 
+
+    function emitRebalancedRatesEvent(
+        uint priceAtBeginning,
+        uint priceAtRebalancingTime,
+        uint ratio,
+        uint amountOfTokensTransferedInAction,
+        string actionPerformedWithUpgradableExchange
+    )
+    external
+    onlyAllowedContracts
+    {
+        emit RebalancedRatesEvent(
+            priceAtBeginning,
+            priceAtRebalancingTime,
+            ratio,
+            amountOfTokensTransferedInAction,
+            actionPerformedWithUpgradableExchange
+        );
+    }
 
     function emitHandleChangedEvent(
         address _userPlasmaAddress,

@@ -25,21 +25,16 @@ export default function mainChainBalancesSyncTest(
 
     const balanceBefore =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
 
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.pushBalancesForInfluencers(
+    let txHash = await protocol.CPCCampaign.pushAndDistributeInfluencersRewards(
         campaignPublicAddress,
         resp.influencers,
         resp.balances.map(balance => protocol.Utils.toWei(balance,'ether')),
         address
-      )
     );
 
+    console.log(txHash);
     await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.distributeRewardsBetweenInfluencers(
-        campaignPublicAddress,
-        resp.influencers,
-        address,
-      )
+      txHash
     );
 
     const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);

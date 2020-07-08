@@ -55,7 +55,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
 
-        counters = new uint[](8);                                       // Initialize array of counters
+        rebalancingRatio = 10**18;
+        counters = new uint[](7);                                       // Initialize array of counters
 
     }
 
@@ -92,6 +93,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         converterToConversionId[msg.sender] = conversionId;
         counters[0]++; //Increase number of pending converters and conversions
         counters[3]++; //Increase number of pending conversions
+
+        converters.push(msg.sender);
 
         //Emit conversion event through TwoKeyPlasmaEvents
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
@@ -158,6 +161,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             }
         }
 
+        updateReputationPointsOnConversionExecutedEvent(converter);
+
         counters[0]--; //Decrement number of pending converters
         counters[1]++; //increment number approved converters
         counters[3]--; // Decrement number of pending conversions
@@ -194,6 +199,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         require(c.state == ConversionState.PENDING_APPROVAL);
         c.state = ConversionState.REJECTED;
+
+        // Update the reputation points
+        updateReputationPointsOnConversionRejectedEvent(converter);
 
         counters[0]--; //reduce number of pending converters
         counters[2]++; //increase number of rejected converters

@@ -121,6 +121,51 @@ def generate_bytecode_for_withdrawing_ether_from_reserve(reserve_contract_addres
     values = [reserve_contract_address, amount_of_ether]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_withdrawal_of_tokens_from_reserve(reserve_contract_address, token_address, amount, beneficiary):
+    amount = int(amount)
+    method_name_and_params = "withdrawTokensFromKyberReserve(address,address,uint256,address)"
+    types = ["address","address","uint256","address"]
+    values = [reserve_contract_address, token_address, amount, beneficiary]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_setting_kyber_reserve_contract_address(reserve_contract_address):
+    method_name_and_params = "setKyberReserveContractAddressOnUpgradableExchange(address)"
+    types = ["address"]
+    values = [reserve_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_setting_contracts_in_kyber(reserve_contract_address, kyber_network, conversion_rates, sanity_rates):
+    method_name_and_params = "setContractsKyber(address,address,address,address)"
+    types = ["address","address","address","address"]
+    values = [reserve_contract_address, kyber_network, conversion_rates, sanity_rates]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_setting_new_spread(new_spread_wei):
+    new_spread_wei = int(new_spread_wei)
+    method_name_and_params = "setNewSpreadWei(uint256)"
+    types = ["uint256"]
+    values = [new_spread_wei]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_migrating_fee_manager_state():
+    method_name_and_params = "migrateCurrentFeeManagerStateToAdminAndWithdrawFunds()"
+    types = []
+    values = []
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_kyber_fees_withdraw_from_reserve(reserve_contract_address, pricing_contract_address):
+    method_name_and_params = "withdrawFeesFromKyber(address,address)"
+    types = ["address","address"]
+    values = [reserve_contract_address, pricing_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(amount_of_token):
+    amount_of_token = int(amount_of_token)
+    method_name_and_params = "withdrawDAIAvailableToFillReserveFromUpgradableExchange(uint256)"
+    types = ["uint256"]
+    values = [amount_of_token]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
         _rInFp,
@@ -207,4 +252,28 @@ if __name__ == "__main__":
         generate_bytecode_for_disabling_kyber_trade(sys.argv[2])
     if(arg1 == "withdrawEtherFromReserve"):
         generate_bytecode_for_withdrawing_ether_from_reserve(sys.argv[2],sys.argv[3])
+    if(arg1 == "withdrawTokensFromReserve"):
+        generate_bytecode_for_withdrawal_of_tokens_from_reserve(
+            sys.argv[2],
+            sys.argv[3],
+            int(sys.argv[4]),
+            sys.argv[5]
+        )
+    if(arg1 == "setKyberReserveContract"):
+        generate_bytecode_for_setting_kyber_reserve_contract_address(sys.argv[2])
+    if(arg1 == "setContracts"):
+        generate_bytecode_for_setting_contracts_in_kyber(
+            sys.argv[2],
+            sys.argv[3],
+            sys.argv[4],
+            sys.argv[5]
+        )
+    if(arg1 == "pullKyberFeesFromReserve"):
+        generate_bytecode_for_kyber_fees_withdraw_from_reserve(sys.argv[2],sys.argv[3])
+    if(arg1 == "setSpread"):
+        generate_bytecode_for_setting_new_spread(sys.argv[2])
+    if(arg1 == "migrateFeeManagerState"):
+        generate_bytecode_for_migrating_fee_manager_state()
+    if(arg1 == "withdrawDAIFromUpgradableExchangeToAdmin"):
+        generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(sys.argv[2])
     print_line()
