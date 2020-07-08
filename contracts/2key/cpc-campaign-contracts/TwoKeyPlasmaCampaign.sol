@@ -32,8 +32,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
 
-    address [] converters;
-
     mapping(address => bool) isApprovedConverter;               // Determinator if converter has already 1 successful conversion
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to

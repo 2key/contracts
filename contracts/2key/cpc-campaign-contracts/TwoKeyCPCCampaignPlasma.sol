@@ -92,8 +92,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         counters[0]++; //Increase number of pending converters and conversions
         counters[3]++; //Increase number of pending conversions
 
-        converters.push(msg.sender);
-
         //Emit conversion event through TwoKeyPlasmaEvents
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
             mirrorCampaignOnPublic,
