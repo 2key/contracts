@@ -191,11 +191,15 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         // Get the conversion ID
         uint conversionId = converterToConversionId[converter];
-
+        // Get the converter signature
+        bytes memory signature = converterToSignature[converter];
+        // Distribute arcs so we can track his referral chain
+        distributeArcsIfNecessary(converter, signature);
         // Get the conversion object
         Conversion storage c = conversions[conversionId];
-
+        // Require that conversion state is pending approval
         require(c.state == ConversionState.PENDING_APPROVAL);
+        // Set state to be rejected
         c.state = ConversionState.REJECTED;
 
         // Update the reputation points
