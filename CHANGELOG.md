@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="v1.4.10-master"></a>
+## [v1.4.10-master] - 2020-07-09
+
 <a name="v1.4.9-master"></a>
 ## [v1.4.9-master] - 2020-07-09
 ### Reverts
@@ -2054,7 +2057,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.9-master...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.10-master...HEAD
+[v1.4.10-master]: https://github.com/2key/contracts/compare/v1.4.9-master...v1.4.10-master
 [v1.4.9-master]: https://github.com/2key/contracts/compare/v1.4.114-develop...v1.4.9-master
 [v1.4.114-develop]: https://github.com/2key/contracts/compare/v1.4.113-develop...v1.4.114-develop
 [v1.4.113-develop]: https://github.com/2key/contracts/compare/v1.2.40-staging...v1.4.113-develop
