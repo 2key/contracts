@@ -385,7 +385,8 @@ async function deployUpgrade(networks) {
 
         // Deploy the CPC contracts
         if(process.argv.includes('deploy-reputation')) {
-            if(networks[i].includes('plasma')) {
+            console.log('Entered here');
+            if(networks[i].includes('private')) {
                 console.log("Deploying CPC campaign for the first time to the network");
                 await runDeployPlasmaReputation(networks[i]);
             }
