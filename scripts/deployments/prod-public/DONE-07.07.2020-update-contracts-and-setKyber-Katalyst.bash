@@ -19,6 +19,7 @@ echo "Destination for execution: 0x60ece4a5be3fd7594e9f24c2948cce5ce3c6dde7"
 cd ../..
 
 python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.12
+python3 generate_bytecode.py upgradeContract TwoKeyBaseReputationRegistry 1.0.1
 python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.11
 
 
