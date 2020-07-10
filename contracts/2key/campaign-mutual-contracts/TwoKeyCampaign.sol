@@ -498,6 +498,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	function withdrawContractorInternal()
 	internal
 	{
+		require(contractorBalance > 0);
 		uint balance = contractorBalance;
 		contractorBalance = 0;
 		(balance,) = payFeesForUser(msg.sender, balance);
