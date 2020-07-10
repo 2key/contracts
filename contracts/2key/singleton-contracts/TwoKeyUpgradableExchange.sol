@@ -880,7 +880,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint approvedMinConversionRate
     )
     public
-    onlyTwoKeyAdmin
+    onlyMaintainer
     {
         // Generate the key hash for dai available to fill 2KEY reserve
         bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
