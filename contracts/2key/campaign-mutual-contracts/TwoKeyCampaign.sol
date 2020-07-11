@@ -461,6 +461,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
     }
 
 
+
 	/**
 	 * @notice Function to get balance of influencer for his plasma address
 	 * @param _influencer is the plasma address of influencer
