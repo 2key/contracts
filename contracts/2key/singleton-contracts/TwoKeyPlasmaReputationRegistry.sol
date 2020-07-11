@@ -225,7 +225,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
         PROXY_STORAGE_CONTRACT.setInt(
             keyHashContractorScore,
-            contractorScoreAsReferrer - initialPunishmentWei/(length+1)
+                contractorScore - initialPunishmentWei/(length+1)
         );
     }
 
