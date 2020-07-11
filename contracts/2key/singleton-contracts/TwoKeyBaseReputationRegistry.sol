@@ -194,6 +194,41 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         return (converterReputationScore, referrerReputationScore);
     }
 
+    function getGlobalReputationForUser(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (int)
+    {
+        int converterReputationScore;
+        int referrerReputationScore;
+
+        (converterReputationScore, referrerReputationScore) = getReputationForUser(_plasmaAddress);
+
+        return (converterReputationScore + referrerReputationScore);
+    }
+
+
+    function getGlobalReputationForUsers(
+        address [] plasmaAddresses
+    )
+    public
+    view
+    returns (int[])
+    {
+        uint len = plasmaAddresses.length;
+
+        int [] memory reputations = new int[](len);
+
+        uint i;
+
+        for(i=0; i<len; i++) {
+            reputations[i] = getGlobalReputationForUser(plasmaAddresses[i]);
+        }
+
+        return (reputations);
+    }
 
     /**
      * @notice          Function to get reputation for user in case he's contractor
@@ -214,4 +249,24 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         return (contractorReputationScore);
     }
 
+
+    function getGlobalReputationForContractors(
+        address [] plasmaAddresses
+    )
+    public
+    view
+    returns (int[])
+    {
+        uint len = plasmaAddresses.length;
+
+        int [] memory reputations = new int[](len);
+
+        uint i;
+
+        for(i=0; i<len; i++) {
+            reputations[i] = getReputationForContractor(plasmaAddresses[i]);
+        }
+
+        return (reputations);
+    }
 }

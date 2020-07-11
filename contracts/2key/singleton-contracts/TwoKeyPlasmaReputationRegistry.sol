@@ -254,6 +254,31 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function to get global reputation for specific user
+     */
+    function getGlobalReputationForUser(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (int)
+    {
+        int converterReputationScore;
+        int referrerReputationScore;
+        int converterFeedbackScore;
+        int referrerFeedbackScore;
+
+        (
+            converterReputationScore,
+            referrerReputationScore,
+            converterFeedbackScore,
+            referrerFeedbackScore
+        ) = getReputationForUser(_plasmaAddress);
+
+        return (converterReputationScore + referrerReputationScore + converterFeedbackScore + referrerFeedbackScore);
+    }
+
 
     /**
      * @notice          Function to get reputation and feedback score in case he's a business page (contractor)
@@ -277,4 +302,67 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function to get global reputation for contractor (business)
+     */
+    function getGlobalReputationForContractor(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (int)
+    {
+        int contractorReputationScore;
+        int contractorFeedbackScore;
+        (contractorReputationScore,contractorFeedbackScore) = getReputationForContractor(_plasmaAddress);
+
+        return (contractorReputationScore + contractorFeedbackScore);
+    }
+
+
+    /**
+     * @notice          Function to return global reputation for requested users
+     * @param           addresses is an array of plasma addresses of users
+     */
+    function getGlobalReputationForUsers(
+        address [] addresses
+    )
+    public
+    view
+    returns (int[]) {
+        uint len = addresses.length;
+
+        int [] memory reputations = new int[](len);
+
+        uint i;
+
+        for(i=0; i<len; i++) {
+            reputations[i] = getGlobalReputationForUser(addresses[i]);
+        }
+
+        return (reputations);
+    }
+
+    /**
+     * @notice          Function to get global reputations for contractors
+     * @param           addresses is an array of plasma addresses of contractors (businesses)
+     */
+    function getGlobalReputationForContractors(
+        address [] addresses
+    )
+    public
+    view
+    returns (int[])
+    {
+        uint len = addresses.length;
+
+        int [] memory reputations = new int[](len);
+
+        uint i;
+        for(i=0; i<len; i++) {
+            reputations[i] = getGlobalReputationForContractor(addresses[i]);
+        }
+
+        return (reputations);
+    }
 }
