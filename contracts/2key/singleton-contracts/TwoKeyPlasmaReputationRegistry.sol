@@ -206,21 +206,27 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     {
         int initialPunishmentWei = (10**18) / 2;
 
-        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, contractor);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore - initialPunishmentWei);
-
         bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialPunishmentWei);
 
         address[] memory referrers = getReferrers(msg.sender, converter);
 
-        for(int i=0; i<int(referrers.length); i++) {
+        int length = int(referrers.length);
+
+        for(int i=0; i<length; i++) {
             bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
             PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialPunishmentWei/(i+1));
         }
+
+        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, contractor);
+
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        PROXY_STORAGE_CONTRACT.setInt(
+            keyHashContractorScore,
+            contractorScoreAsReferrer - initialPunishmentWei/(length+1)
+        );
     }
 
 
