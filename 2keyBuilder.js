@@ -383,7 +383,6 @@ async function deployUpgrade(networks) {
         console.log('DONATION to be upgraded: ', donationToBePatched);
         console.log('CPC contracts changed: ', cpcChanged);
 
-
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-deploy')) {
             console.log("Deploying CPC campaign for the first time to the network");
@@ -422,7 +421,6 @@ async function deployUpgrade(networks) {
         if(cpcChanged.length > 0) {
             await runDeployCPCCampaignMigration(networks[i]);
         }
-
 
         /* eslint-enable no-await-in-loop */
     }

@@ -229,8 +229,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			"GET_TOKENS_FROM_EXCHANGE"
 		);
 
-        return amountToGetFromExchange;
-    }
+		return amountToGetFromExchange;
+	}
 
 
 	/**
