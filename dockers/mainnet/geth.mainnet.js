@@ -88,13 +88,11 @@ async function start() {
     '--wsport=8546',
     '--wsorigins',
     '*',
-    '--mine',
-    '--minerthreads',
-    '1',
     '--gasprice',
     '2000000000',
     '--targetgaslimit',
-    '8000000'
+    '8000000',
+    '--dev',
   ];
   /*
   if (!fs.existsSync(datadir)) {
