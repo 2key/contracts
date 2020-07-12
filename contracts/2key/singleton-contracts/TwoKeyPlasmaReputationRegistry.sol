@@ -23,7 +23,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
 
 
     /**
-     * Storage keys for state
+     * Storage keys
      */
     string constant _plasmaAddress2contractorGlobalReputationScoreWei = "plasmaAddress2contractorGlobalReputationScoreWei";
     string constant _plasmaAddress2converterGlobalReputationScoreWei = "plasmaAddress2converterGlobalReputationScoreWei";
