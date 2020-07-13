@@ -384,12 +384,9 @@ async function deployUpgrade(networks) {
         console.log('CPC contracts changed: ', cpcChanged);
 
         // Deploy the CPC contracts
-        if(process.argv.includes('deploy-reputation')) {
-            console.log('Entered here');
-            if(networks[i].includes('private')) {
-                console.log("Deploying CPC campaign for the first time to the network");
-                await runDeployPlasmaReputation(networks[i]);
-            }
+        if(process.argv.includes('cpc-deploy')) {
+            console.log("Deploying CPC campaign for the first time to the network");
+            await runDeployPlasmaReputation(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
@@ -399,15 +396,11 @@ async function deployUpgrade(networks) {
                 if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
                     console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
                     if(networks[i].includes('private') || networks[i].includes('plasma')) {
-                        if(singletonsToBeUpgraded[j] !== 'TwoKeyPlasmaReputationRegistry') {
-                            await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-                        }
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 } else {
                     if(networks[i].includes('public')) {
-                        if(singletonsToBeUpgraded[j] !== 'TwoKeyPlasmaReputationRegistry') {
-                            await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
-                        }
+                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
                     }
                 }
             }
