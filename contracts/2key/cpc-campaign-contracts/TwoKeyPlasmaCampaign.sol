@@ -464,8 +464,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     public
     onlyMaintainer
     {
-        // Leave that contractor can increase bounty if he wants
-        totalBountyForCampaign = totalBountyForCampaign.add(_totalBounty);
+        require(totalBountyForCampaign == 0);
+        totalBountyForCampaign = _totalBounty;
     }
 
 
