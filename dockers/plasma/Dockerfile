@@ -1,5 +1,5 @@
 # Build Geth in a stock Go builder container
-FROM madjarevicn/go-ethereum-fork-9m-devmode:latest
+FROM 2key/go-ethereum-devmode-9m:1.0
 
 RUN apk add --no-cache bash gawk sed grep bc coreutils
 
