@@ -11,4 +11,4 @@ fi
 
 echo ">>>>geth $@"
 
-geth --datadir=/geth/data --keystore=/geth/keys --unlock "${UNLOCK_ACCOUNT}" --password "/geth/passwords.txt" "$@"
+geth --datadir=/geth/data "$@"
