@@ -428,7 +428,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     /**
      * @notice          Function where maintainer will set on plasma network the total bounty amount
      *                  and how many tokens are paid per conversion for the influencers
-     * @dev             This can be only called by maintainer
+     * @dev             This can be only called by maintainer, and only once.
      * @param           _totalBounty is the total bounty for this campaign
      */
     function setTotalBounty(
