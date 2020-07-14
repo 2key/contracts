@@ -354,7 +354,9 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		require(moderatorTotalEarnings == 0);
 		// Since we did rebalancing we need to change moderator total earnings
-		moderatorTotalEarnings = totalEarnings.mul(rebalancedRatesStruct.ratio).div(10**18);
+		//no need for the ratio rebalance, as this comes from plasma after rebalancing
+		//moderatorTotalEarnings = totalEarnings.mul(rebalancedRatesStruct.ratio).div(10**18);
+
 		// Get TwoKeyAdmin address
 		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 		//Send 2key tokens to moderator
