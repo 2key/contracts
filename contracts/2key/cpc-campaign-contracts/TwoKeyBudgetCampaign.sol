@@ -94,7 +94,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	/**
 	 * @notice 			Function which assumes that contractor already called approve function on 2KEY token contract
 	 */
-	function  ()
+	function addDirectly2KEYAsInventory()
 	public
 	onlyContractor
 	{
@@ -328,7 +328,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		for(i = 0; i < influencers.length; i++) {
 			// Compute how much will be influencer reward with rebalancing ratio
 			//uint rebalancedInfluencerBalance = balances[i].mul(rebalancingRatio).div(10**18);  //maintainer already serves rebalanced balances from plasma
-            int rebalancedInfluencerBalance = balances[i]
+            uint rebalancedInfluencerBalance = balances[i];
 			// Update total earnings for influencer
 			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(rebalancedInfluencerBalance);
 			// Transfer tokens to influencer
