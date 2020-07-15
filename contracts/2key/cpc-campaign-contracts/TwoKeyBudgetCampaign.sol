@@ -319,7 +319,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyMaintainer
 	{
 		// Get the ratio of rebalancing
-		uint rebalancingRatio = rebalancedRatesStruct.ratio;
+		//uint rebalancingRatio = rebalancedRatesStruct.ratio;
 		// Counter for influencers
 		uint i;
 		// Create counter for how much is total distributed in this iteration
@@ -328,7 +328,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		for(i = 0; i < influencers.length; i++) {
 			// Compute how much will be influencer reward with rebalancing ratio
 			//uint rebalancedInfluencerBalance = balances[i].mul(rebalancingRatio).div(10**18);  //maintainer already serves rebalanced balances from plasma
-            uint rebalancedInfluencerBalance = balances[i]
+            int rebalancedInfluencerBalance = balances[i]
 			// Update total earnings for influencer
 			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(rebalancedInfluencerBalance);
 			// Transfer tokens to influencer
