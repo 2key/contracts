@@ -357,6 +357,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		// Since we did rebalancing we need to change moderator total earnings
 		//no need for the ratio rebalance, as this comes from plasma after rebalancing
 		//moderatorTotalEarnings = totalEarnings.mul(rebalancedRatesStruct.ratio).div(10**18);
+		moderatorTotalEarnings = totalEarnings;
 
 		// Get TwoKeyAdmin address
 		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
