@@ -24,4 +24,4 @@ python3 generate_bytecode.py approveNewCampaign CPC_PLASMA 1.0.42
 
 echo "Destination for execution on public is TwoKeyPlasmaRegistry contract: 0x27bb4f1ec6b8e12afc382003d5e7f94f89ab52e4"
 
-python3 setModeratorFeePlasma 5
+python3 generate_bytecode.py setModeratorFeePlasma 5

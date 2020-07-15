@@ -20,7 +20,7 @@ python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.42
 python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.47
 
 echo "Destination for execution on public is TwoKeyAdmin contract: 0x8430db5eba7745eab1904d173129b7965190055a"
-python3 setModeratorFeePublic 5
+python3 generate_bytecode.py setModeratorFeePublic 5
 
 
 
