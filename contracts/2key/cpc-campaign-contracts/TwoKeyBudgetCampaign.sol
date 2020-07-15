@@ -243,11 +243,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     onlyContractor
 	{
 		require(isContractLocked == true, 'Campaign not ended yet - contract is still not locked.');
+		require(contractorWithdrawnLeftOverTokens == false);
 
-		if(contractorWithdrawnLeftOverTokens == false) {
-			contractorWithdrawnLeftOverTokens = true;
-			IERC20(twoKeyEconomy).transfer(contractor, leftOverTokensForContractor);
-		}
+		IERC20(twoKeyEconomy).transfer(contractor, leftOverTokensForContractor);
+		contractorWithdrawnLeftOverTokens = true;
 	}
 
 //	/**
