@@ -2,9 +2,13 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+import "../interfaces/IERC20.sol";
 import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerStorage.sol";
+import "../libraries/Call.sol";
 
 contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
+
+    using Call for *;
 
     /**
      * State variables
@@ -62,14 +66,55 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
 
     function addDirectly2KEYAsInventory(
-        bytes proofOfOwnershipCampaign,
+        bytes signatureProofingOwnership,
         address campaignPlasma,
         uint amountOfTokens
     )
     public
     {
+        // Proof that user signed a message is contractor
+        require(recoverSignerAddress(campaignPlasma, signatureProofingOwnership) == msg.sender);
 
+        bytes32 keyHashForInitialBudget = keccak256(_contractor2campaignPlasma2initialBudget2Key, msg.sender, campaignPlasma);
+        // Require that initial budget is not being added, since it can be done only once.
+        require(getUint(keyHashForInitialBudget) == 0);
+
+        // Take tokens from the contractor
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
+            msg.sender,
+            address(this),
+            amountOfTokens
+        );
+
+        // Set initial budget added
+        setUint(keyHashForInitialBudget, amountOfTokens);
     }
+
+    /**
+     * ------------------------------------
+     *          Internal functions
+     * ------------------------------------
+     */
+
+    /**
+     *
+     */
+    function recoverSignerAddress(
+        address campaignPlasmaAddress,
+        bytes signatureProofingOwnership
+    )
+    internal
+    returns (address)
+    {
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked("bytes binding to plasma address")),
+                keccak256(abi.encodePacked(campaignPlasmaAddress))
+            )
+        );
+        return Call.recoverHash(hash,signatureProofingOwnership,0);
+    }
+
 
 
     function pullLeftoverForContractor(
@@ -118,9 +163,35 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     }
 
     /**
-     * ------------------------------------
-     *        Getters and stats
-     * ------------------------------------
+     * ------------------------------------------------
+     *        Internal getters and setters
+     * ------------------------------------------------
+     */
+
+    function getUint(
+        bytes32 key
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(key);
+    }
+
+    function setUint(
+        bytes32 key,
+        uint value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(key,value);
+    }
+
+
+    /**
+     * ------------------------------------------------
+     *              Public getters
+     * ------------------------------------------------
      */
 
     function getDistributedAmountToReferrerByCycleId(
