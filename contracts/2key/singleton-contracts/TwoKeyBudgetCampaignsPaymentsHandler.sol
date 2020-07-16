@@ -13,7 +13,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      * TO BE EXPANDED
      */
 
-    string constant _contractor2campaignPlasma2initialBudget2Key = "contractor2campaignPlasma2initialBudget2Key";
+    string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
     string constant _contractor2campaignPlasma2RebalancedBudget2Key = "contractor2campaignPlasma2RebalancedBudget2Key";
 
     string constant _campaignPlasma2initalRate = "campaignPlasma2initalRate";
@@ -63,13 +63,23 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     }
 
 
+    /**
+     * @notice          Function which will be used in order to add inventory for campaign
+     *                  directly with 2KEY tokens. In order to make this transfer secure,
+     *                  user will firstly have to approve this contract to take from him
+     *                  amount of tokens and then call contract function which will execute
+     *                  transferFrom action. This function can be called only once.
+     *
+     * @param           campaignPlasma is the plasma campaign address which is user adding inventory for.
+     * @param           amountOfTokens is the amount of tokens user adds as inventory.
+     */
     function addDirectly2KEYAsInventory(
         address campaignPlasma,
         uint amountOfTokens
     )
     public
     {
-        bytes32 keyHashForInitialBudget = keccak256(_contractor2campaignPlasma2initialBudget2Key, msg.sender, campaignPlasma);
+        bytes32 keyHashForInitialBudget = keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma);
         // Require that initial budget is not being added, since it can be done only once.
         require(getUint(keyHashForInitialBudget) == 0);
 
@@ -184,6 +194,15 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
     }
 
+    function getInitialBountyForCampaign(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
+    }
 
     function getBountyStatsPerCampaign(
         address campaignPlasma
