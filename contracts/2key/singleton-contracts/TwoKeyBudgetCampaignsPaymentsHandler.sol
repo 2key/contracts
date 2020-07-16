@@ -7,7 +7,6 @@ import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerSto
 
 contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
 
-
     /**
      * State variables
      * TO BE EXPANDED
@@ -20,6 +19,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2rebalancedRate = "campaignPlasma2rebalancedRate";
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
 
+    string constant _numberOfDistributionCycles = "numberOfDistributionCycles";
     string constant _globalDistributionCycleId2referrer2amountDistributed = "globalDistributionCycleId2referrer2amountDistributed";
     string constant _totalAmountDistributedToReferrerEver = "totalAmountDistributedToReferrerEver";
 
@@ -110,18 +110,10 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      */
 
 
-    function setAndDistributeModeratorRewardsForCampaign(
-        address campaignPlasma
-    )
-    onlyMaintainer
-    {
-
-    }
-
-
     function lockContractReserveTokensAndRebalanceRates(
         address campaignPlasma,
-        uint totalAmountForRewards
+        uint totalAmountForReferrerRewards,
+        uint totalAmountForModeratorRewards
     )
     onlyMaintainer
     {
@@ -129,15 +121,43 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     }
 
 
+    /**
+     * @notice          Function to distribute rewards between influencers
+     *
+     * @param           influencers is the array of influencers
+     * @param           balances is the array of corresponding balances for the influencers above
+     *
+     */
     function pushAndDistributeRewardsBetweenInfluencers(
-        address campaignPlasma,
         address [] influencers,
         uint [] balances
     )
     public
     onlyMaintainer
     {
+        // Increment distribution cycle id
+        incrementNumberOfDistributionCycles();
+        // The new one (latest) is the id of this cycle
+        uint cycleId = getNumberOfCycles();
+        // Get the address of 2KEY token
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
+        uint i;
+        // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
+        for(i = 0; i < influencers.length; i++) {
+            // Take the influencer balance
+            uint balance = balances[i];
+            // Transfer required tokens to influencer
+            IERC20(twoKeyEconomy).transfer(influencers[i], balance);
+            // Generate the storage key for influencer
+            bytes32 key = keccak256(
+                _globalDistributionCycleId2referrer2amountDistributed,
+                cycleId,
+                influencers[i]
+            );
+            // Set how much was distributed to this referrer in this cycle
+            setUint(key, balance);
+        }
     }
 
     /**
@@ -166,11 +186,27 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     }
 
 
+    function incrementNumberOfDistributionCycles()
+    internal
+    {
+        bytes32 key = keccak256(_numberOfDistributionCycles);
+        setUint(key,getUint(key) + 1);
+    }
+
+
     /**
      * ------------------------------------------------
      *              Public getters
      * ------------------------------------------------
      */
+
+    function getNumberOfCycles()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_numberOfDistributionCycles));
+    }
 
     function getDistributedAmountToReferrerByCycleId(
         address referrer,
@@ -201,7 +237,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
+        return getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
     }
 
     function getBountyStatsPerCampaign(
