@@ -39,7 +39,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         require(initialized == false);
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
-        PROXY_STORAGE_CONTRACT = _proxyStorageContract;
+        PROXY_STORAGE_CONTRACT = ITwoKeyBudgetCampaignsPaymentsHandlerStorage(_proxyStorageContract);
 
         initialized = true;
     }
