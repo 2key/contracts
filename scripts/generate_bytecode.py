@@ -166,6 +166,13 @@ def generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(am
     values = [amount_of_token]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_contract(beneficiary, amount):
+    amount = int(amount)
+    method_name_and_params = "withdrawUpgradableExchangeDaiCollectedFromAdmin(address,uint256)"
+    types = ["address","uint256"]
+    values = [beneficiary,amount]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
         _rInFp,
@@ -276,4 +283,6 @@ if __name__ == "__main__":
         generate_bytecode_for_migrating_fee_manager_state()
     if(arg1 == "withdrawDAIFromUpgradableExchangeToAdmin"):
         generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(sys.argv[2])
+    if(arg1 == "withdrawUpgradableExchangeDAICollectedFromAdminContract"):
+        generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_contract(sys.argv[2],sys.argv[3])
     print_line()
