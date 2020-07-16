@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerStorage.sol";
 
 contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
 
@@ -10,8 +11,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      * TO BE EXPANDED
      */
 
-    string constant _contractor2campaignPlasma2budget = "contractor2campaign2budget";
-    string constant _contractor2campaignPlasma2RebalancedBudget = "contractor2campaignPlasma2RebalancedBudget";
+    string constant _contractor2campaignPlasma2initialBudget2Key = "contractor2campaignPlasma2initialBudget2Key";
+    string constant _contractor2campaignPlasma2RebalancedBudget2Key = "contractor2campaignPlasma2RebalancedBudget2Key";
 
     string constant _campaignPlasma2initalRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2rebalancedRate = "campaignPlasma2rebalancedRate";
@@ -25,11 +26,22 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasmaToLeftOverForContractor = "campaignPlasmaToLeftOverForContractor";
     string constant _campaignPlasmaToLeftoverWithdrawnByContractor = "campaignPlasmaToLeftoverWithdrawnByContractor";
 
+    ITwoKeyBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
-    function setInitialParams()
+    bool initialized;
+
+    function setInitialParams(
+        address _twoKeySingletonRegistry,
+        address _proxyStorageContract
+    )
     public
     {
+        require(initialized == false);
 
+        TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonRegistry;
+        PROXY_STORAGE_CONTRACT = _proxyStorageContract;
+
+        initialized = true;
     }
 
     /**
@@ -140,7 +152,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     view
     returns (uint,uint,uint,uint)
     {
-        // return (totalBounty, bountyAfterRebalancing, reservedForRewards, contractorLeftover)
+        // return (totalInitial, bountyAfterRebalancing, reservedForRewards, contractorLeftover)
     }
 
 
@@ -153,4 +165,18 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     {
         // return (price before, price after, ratio)
     }
+
+
+    function isCampaignEnded(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (bool)
+    {
+        // Campaign is ended in terms of accepting new PAID conversion once there's rebalancing ratio > 0
+        // No need for any other variables to determine this
+    }
+
+
 }
