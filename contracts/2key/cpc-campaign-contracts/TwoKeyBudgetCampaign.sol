@@ -333,19 +333,23 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     onlyContractor
 	{
 		require(merkleRoot != 0, 'Campaign not ended yet - merkle root is not set.');
+		require(contractorWithdrawnLeftover == false);
+
 		if(usd2KEYrateWei == 0) {
 			uint campaignRewardsBalance = getTokenBalance();
 			uint rewardsNotSpent = campaignRewardsBalance.sub(reservedAmount2keyForRewards);
-			if(rewardsNotSpent > 0) {
-				IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
-			}
+			require(rewardsNotSpent > 0);
+			IERC20(twoKeyEconomy).transfer(contractor, rewardsNotSpent);
+
 		}
-		else if(contractorWithdrawnLeftover == false) {
+		else {
 			// In case campaign should have rebalancing as well, we're checking that it happened
 			require(rebalancedRatesStruct.ratio > 0);
-			contractorWithdrawnLeftover = true;
+			require(leftOverForContractor > 0);
 			IERC20(twoKeyEconomy).transfer(contractor, leftOverForContractor);
 		}
+		// Assert that contractor have withdrawn leftover
+		contractorWithdrawnLeftover = true;
 	}
 
 	/**

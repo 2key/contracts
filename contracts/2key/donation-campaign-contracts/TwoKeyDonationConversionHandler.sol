@@ -315,7 +315,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     {
         Conversion conversion = conversions[_conversionId];
 
-        require(conversion.conversionExpiresAt < block.timestamp);
+        require(conversion.conversionExpiresAt <= block.timestamp);
         require(msg.sender == conversion.converter);
 
         if(conversion.state == ConversionState.PENDING_APPROVAL) {
