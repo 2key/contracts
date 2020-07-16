@@ -62,7 +62,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
 
     function addDirectly2KEYAsInventory(
-        address contractorAddress,
+        bytes proofOfOwnershipCampaign,
+        address campaignPlasma,
         uint amountOfTokens
     )
     public
