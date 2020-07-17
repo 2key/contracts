@@ -171,7 +171,14 @@ const runDeployPlasmaReputation = (network) => new Promise(async(resolve, reject
     }
 });
 
-
+const runDeployPPCNoRewards = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '14', '--to', '14', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
 
 
 /**
@@ -445,5 +452,6 @@ module.exports = {
     runDeployFeeManagerMigration,
     runDeployCPCFirstTime,
     runTruffleCompile,
-    runDeployPlasmaReputation
+    runDeployPlasmaReputation,
+    runDeployPPCNoRewards
 };
