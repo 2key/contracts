@@ -9,6 +9,8 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
 
     string public targetUrl;            // Url being tracked
 
+    enum ConversionPaymentState {PAID, UNPAID}
+
     /**
      * This is the conversion object
      * converterPlasma is the address of converter
@@ -21,6 +23,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         uint bountyPaid;
         uint conversionTimestamp;
         ConversionState state;
+        ConversionPaymentState paymentState;
     }
 
     Conversion [] conversions;          // Array of all conversions
@@ -64,9 +67,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
     function convert(
         bytes signature
     )
-    contractNotLocked
     isCampaignValidated
-    onlyIfContractActiveInTermsOfTime
     public
     {
         // Require that this is his first conversion
@@ -79,7 +80,8 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
             msg.sender,
             0,
             block.timestamp,
-            ConversionState.PENDING_APPROVAL
+            ConversionState.PENDING_APPROVAL,
+            ConversionPaymentState.UNPAID
         );
 
         // Get the ID and update mappings
@@ -108,7 +110,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         address converter
     )
     public
-    contractNotLocked
     onlyMaintainer
     isCampaignValidated
     {
@@ -128,6 +129,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
 
         updateReferralChain(converter, conversionId);
+        updateReputationPointsOnConversionExecutedEvent(converter);
 
         counters[0]--; //Decrement number of pending converters
         counters[1]++; //increment number approved converters
@@ -152,7 +154,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         uint rejectionStatusCode
     )
     public
-    contractNotLocked
     onlyMaintainer
     isCampaignValidated
     {
@@ -160,12 +161,19 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
 
         // Get the conversion ID
         uint conversionId = converterToConversionId[converter];
-
+        // Get the converter signature
+        bytes memory signature = converterToSignature[converter];
+        // Distribute arcs so we can track his referral chain
+        distributeArcsIfNecessary(converter, signature);
         // Get the conversion object
         Conversion storage c = conversions[conversionId];
-
+        // Require that conversion state is pending approval
         require(c.state == ConversionState.PENDING_APPROVAL);
+        // Set state to be rejected
         c.state = ConversionState.REJECTED;
+
+        // Update the reputation points
+        updateReputationPointsOnConversionRejectedEvent(converter);
 
         counters[0]--; //reduce number of pending converters
         counters[2]++; //increase number of rejected converters
@@ -187,7 +195,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
     )
     public
     view
-    returns (address, uint, uint, ConversionState)
+    returns (address, uint, uint, ConversionState, ConversionPaymentState)
     {
         Conversion memory c = conversions[_conversionId];
 
@@ -195,7 +203,8 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
             c.converterPlasma,
             c.bountyPaid,
             c.conversionTimestamp,
-            c.state
+            c.state,
+            c.paymentState
         );
     }
 

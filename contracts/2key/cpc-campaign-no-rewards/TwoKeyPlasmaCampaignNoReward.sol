@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
 
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
@@ -56,16 +57,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         _;
     }
 
-
-    modifier contractNotLocked {                     // Modifier which requires that contract is not locked (locked == ended)
-        require(isContractLocked == false);
-        _;
-    }
-
-    modifier onlyIfContractActiveInTermsOfTime {     // Modifier which requires that contract is active in terms of time
-        require(campaignStartTime <= block.timestamp && block.timestamp <= campaignEndTime);
-        _;
-    }
 
     /**
      * @dev             Transfer tokens from one address to another
@@ -124,7 +115,7 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     )
     internal
     view
-    returns (address[],address[],uint8[],address)
+    returns (address[],address[],address)
     {
         address old_address;
         assembly
@@ -137,14 +128,13 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
 
         address[] memory influencers;
         address[] memory keys;
-        uint8[] memory weights;
-        (influencers, keys, weights) = Call.recoverSig(sig, old_key, _converter);
+        (influencers, keys,) = Call.recoverSig(sig, old_key, _converter);
 
         require(
             influencers[influencers.length-1] == _converter
         );
 
-        return (influencers, keys, weights, old_address);
+        return (influencers, keys, old_address);
     }
 
 
@@ -164,7 +154,7 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         address[] memory influencers;
         address[] memory keys;
         address old_address;
-        (influencers, keys,, old_address) = getInfluencersKeysAndWeightsFromSignature(sig, _converter);
+        (influencers, keys,old_address) = getInfluencersKeysAndWeightsFromSignature(sig, _converter);
         uint i;
         address new_address;
         uint numberOfInfluencers = influencers.length;
@@ -446,6 +436,24 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     {
         require(isContractLocked == false);
         isContractLocked = true;
+    }
+
+    function updateReputationPointsOnConversionExecutedEvent(
+        address converter
+    )
+    internal
+    {
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+        .updateReputationPointsForExecutedConversion(converter, contractor);
+    }
+
+    function updateReputationPointsOnConversionRejectedEvent(
+        address converter
+    )
+    internal
+    {
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+        .updateReputationPointsForRejectedConversions(converter, contractor);
     }
 
 }
