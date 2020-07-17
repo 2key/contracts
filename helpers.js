@@ -117,19 +117,6 @@ const runDeployCPCFirstTime = (network) => new Promise(async(resolve, reject) =>
     }
 });
 
-/**
- *
- * @param network
- * @returns {Promise<unknown>}
- */
-const runDelpoyCPCNoRewardsFirstTime = (network) => new Promise(async(resolve, reject) => {
-    try {
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '13', '--to', '13', '--network', network]);
-        resolve(true);
-    } catch (e) {
-        reject(e);
-    }
-});
 
 /**
  * If there's a need to update, we'll run this function
@@ -174,6 +161,17 @@ const runDeployFeeManagerMigration = (network) => new Promise(async(resolve, rej
         reject(e);
     }
 });
+
+const runDeployPlasmaReputation = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '13', '--to', '13', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
 
 
 /**
@@ -446,6 +444,6 @@ module.exports = {
     runDeployCPCCampaignMigration,
     runDeployFeeManagerMigration,
     runDeployCPCFirstTime,
-    runDelpoyCPCNoRewardsFirstTime,
-    runTruffleCompile
+    runTruffleCompile,
+    runDeployPlasmaReputation
 };

@@ -539,24 +539,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-	/**
-	 * @notice			Function to swap some DAI tokens from Upgradable exchange for 2KEY
-	 *
-	 * @param			daiAmountToBeExchanged of DAI tokens to be exchanged for 2KEY tokens
-	 */
-	function exchangeAvailableDAIFor2KEYThroughKyber(
-		uint daiAmountToBeExchanged,
-		uint minApprovedConversionRate
-	)
-	public
-	onlyTwoKeyCongress
-	{
-		IUpgradableExchange(getAddressFromTwoKeySingletonRegistry(_twoKeyUpgradableExchange)).swapDaiAvailableToFillReserveFor2KEY(
-			daiAmountToBeExchanged,
-			minApprovedConversionRate
-		);
-	}
-
 
     /**
      * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
@@ -681,6 +663,32 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 			receiverAddress
 		);
     }
+
+	/**
+	 * @notice			Function to set contracts on Kyber, mostly used to swap from their
+	 *					staging and production environments
+	 *
+	 * @param			kyberReserveContractAddress is our reserve contract address
+	 * @param			kyberNetworkAddress is the address of kyber network
+	 * @param			conversionRatesContractAddress is the address of conversion rates contract
+	 * @param			sanityRatesContractAddress is the address of sanity rates contract
+	 */
+	function setContractsKyber(
+		address kyberReserveContractAddress,
+		address kyberNetworkAddress,
+		address conversionRatesContractAddress,
+		address sanityRatesContractAddress
+	)
+	external
+	onlyTwoKeyCongress
+	{
+		IKyberReserveInterface(kyberReserveContractAddress).setContracts(
+			kyberNetworkAddress,
+			conversionRatesContractAddress,
+			sanityRatesContractAddress
+		);
+	}
+
 
 	function withdrawTokensFromKyberReserveInternal(
 		address kyberReserveContractAddress,

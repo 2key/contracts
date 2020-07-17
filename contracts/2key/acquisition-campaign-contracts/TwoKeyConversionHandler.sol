@@ -437,6 +437,59 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         emitRejectedEvent(twoKeyCampaign, _converter);
     }
 
+    function rejectConversion(
+        uint conversionID
+    )
+    public
+    onlyContractor
+    {
+        Conversion c = conversions[conversionID];
+
+        // Check the conversion state and update the counters
+        if(c.state == ConversionState.PENDING_APPROVAL) {
+            counters[0] = counters[0].sub(1); //Reduce number of pending conversions
+        } else if(c.state == ConversionState.APPROVED) {
+            counters[1] = counters[1].sub(1); //Reduce number of approved conversions
+        } else {
+            revert('Conversion state is not eligible for rejection');
+        }
+
+        // Set conversion state to REJECTED
+        c.state = ConversionState.REJECTED;
+
+        //Increase number of rejected conversions
+        counters[2] = counters[2].add(1);
+
+        // Update reputation points on rejected conversion
+        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(
+            c.converter,
+            contractor,
+            twoKeyCampaign
+        );
+
+        // Calculate how many tokens we have reserved for this conversion
+        uint reservedAmount = c.baseTokenUnits.add(c.bonusTokenUnits);
+
+        if(reservedAmount > 0) {
+            // Update reserved amount in campaign contract and release tokens
+            twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
+        }
+
+        // Check if we need to return back some ETH to converter
+        if(c.isConversionFiat == false) {
+            twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(c.converter, c.conversionAmount);
+        }
+
+        // Calculate how much in campaign currency was the conversion
+        uint reservedInCampaignCurrencyAmount = conversionToCampaignCurrencyAmountAtTimeOfCreation[conversionID];
+
+        // If the conversion was > 0 then reduce total raised funds for this rejected conversion
+        if(reservedInCampaignCurrencyAmount > 0) {
+            address logicHandler = twoKeyCampaign.logicHandler();
+            ITwoKeyCampaignLogicHandler(logicHandler).reduceTotalRaisedFundsAfterConversionRejected(reservedInCampaignCurrencyAmount);
+        }
+    }
+
 
     /**
      * @notice Function to cancel conversion and get back money
@@ -449,7 +502,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     external
     {
         Conversion conversion = conversions[_conversionId];
-        require(conversion.conversionExpiresAt < block.timestamp);
+        require(conversion.conversionExpiresAt <= block.timestamp);
         require(msg.sender == conversion.converter);
 
         if(conversion.state == ConversionState.PENDING_APPROVAL) {

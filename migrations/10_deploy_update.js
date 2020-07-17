@@ -40,7 +40,7 @@ const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage')
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
 const TwoKeyPlasmaEventSourceStorage = artifacts.require('TwoKeyPlasmaEventSourceStorage');
-
+const TwoKeyPlasmaReputationRegistry = artifacts.require('TwoKeyPlasmaReputationRegistry');
 const Call = artifacts.require('Call');
 const PriceDiscovery = artifacts.require('PriceDiscovery');
 
@@ -134,7 +134,8 @@ let contractsArtifacts = {
     TwoKeyPlasmaRegistryStorage,
     TwoKeyPlasmaSingletoneRegistry,
     TwoKeyPlasmaFactory,
-    TwoKeyPlasmaEventSource
+    TwoKeyPlasmaEventSource,
+    TwoKeyPlasmaReputationRegistry
 };
 
 

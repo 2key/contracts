@@ -6,7 +6,7 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 
 import "../campaign-mutual-contracts/TwoKeyCampaign.sol";
-import "../libraries/MerkleProof.sol";
+//import "../libraries/MerkleProof.sol";
 
 /**
  * @author Nikola Madjarevic (https://github.com/madjarevicn)
@@ -33,7 +33,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 
 
-	bytes32 public merkleRoot;								// Merkle root
+	bool public isContractLocked;							// If the contract is locked
 	address public mirrorCampaignOnPlasma;					// Address of campaign deployed to plasma network
 	bool public isValidated;								// Flag to determine if campaign is validated
 
@@ -229,8 +229,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 			"GET_TOKENS_FROM_EXCHANGE"
 		);
 
-        return amountToGetFromExchange;
-    }
+		return amountToGetFromExchange;
+	}
 
 
 	/**
@@ -242,30 +242,29 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
     public
     onlyContractor
 	{
-		require(merkleRoot != 0, 'Campaign not ended yet - merkle root is not set.');
+		require(isContractLocked == true, 'Campaign not ended yet - contract is still not locked.');
+		require(contractorWithdrawnLeftOverTokens == false);
 
-		if(contractorWithdrawnLeftOverTokens == false) {
-			contractorWithdrawnLeftOverTokens = true;
-			IERC20(twoKeyEconomy).transfer(contractor, leftOverTokensForContractor);
-		}
+		IERC20(twoKeyEconomy).transfer(contractor, leftOverTokensForContractor);
+		contractorWithdrawnLeftOverTokens = true;
 	}
 
-	/**
-	 * @notice 			Function to validate the Merkle Proof
-	 */
-	function checkMerkleProof(
-		address influencer,
-		bytes32[] proof,
-		uint amount
-	)
-	public
-	view
-	returns (bool)
-	{
-		if(merkleRoot == 0) // merkle root was not yet set by contractor
-			return false;
-		return MerkleProof.verifyProof(proof,merkleRoot,keccak256(abi.encodePacked(influencer,amount)));
-	}
+//	/**
+//	 * @notice 			Function to validate the Merkle Proof
+//	 */
+//	function checkMerkleProof(
+//		address influencer,
+//		bytes32[] proof,
+//		uint amount
+//	)
+//	public
+//	view
+//	returns (bool)
+//	{
+//		if(merkleRoot == 0) // merkle root was not yet set by contractor
+//			return false;
+//		return MerkleProof.verifyProof(proof,merkleRoot,keccak256(abi.encodePacked(influencer,amount)));
+//	}
 
 
 	/**
@@ -274,17 +273,16 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
      *         			the idea is that the contractor calls computeMerkleRoot on plasma and then set the value manually
      * 					And reserve tokens for rewards for influencers
      */
-	function setMerkleRootReserveTokensAndRebalanceRates(
-		bytes32 _merkleRoot,
+	function lockContractReserveTokensAndRebalanceRates(
 		uint totalAmountForRewards
 	)
 	public
 	onlyMaintainer
 	{
 		// Check that MerkleRoot is not set already
-		require(merkleRoot == 0);
+		require(isContractLocked == false);
 		// Set MerkleRoot
-		merkleRoot = _merkleRoot;
+		isContractLocked = true;
 		// Amount of tokens on contract
 		uint amountOfTokensOnContract = getTokenBalance();
 		// Require that on contract is persisted more or equal then necessary for rewards
@@ -320,7 +318,7 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	onlyMaintainer
 	{
 		// Get the ratio of rebalancing
-		uint rebalancingRatio = rebalancedRatesStruct.ratio;
+		//uint rebalancingRatio = rebalancedRatesStruct.ratio;
 		// Counter for influencers
 		uint i;
 		// Create counter for how much is total distributed in this iteration
@@ -328,7 +326,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 
 		for(i = 0; i < influencers.length; i++) {
 			// Compute how much will be influencer reward with rebalancing ratio
-			uint rebalancedInfluencerBalance = balances[i].mul(rebalancingRatio).div(10**18);
+			//uint rebalancedInfluencerBalance = balances[i].mul(rebalancingRatio).div(10**18);  //maintainer already serves rebalanced balances from plasma
+            uint rebalancedInfluencerBalance = balances[i];
 			// Update total earnings for influencer
 			referrerPlasma2TotalEarnings2key[influencers[i]] = referrerPlasma2TotalEarnings2key[influencers[i]].add(rebalancedInfluencerBalance);
 			// Transfer tokens to influencer
@@ -355,7 +354,10 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 	{
 		require(moderatorTotalEarnings == 0);
 		// Since we did rebalancing we need to change moderator total earnings
-		moderatorTotalEarnings = totalEarnings.mul(rebalancedRatesStruct.ratio).div(10**18);
+		//no need for the ratio rebalance, as this comes from plasma after rebalancing
+		//moderatorTotalEarnings = totalEarnings.mul(rebalancedRatesStruct.ratio).div(10**18);
+		moderatorTotalEarnings = totalEarnings;
+
 		// Get TwoKeyAdmin address
 		address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 		//Send 2key tokens to moderator

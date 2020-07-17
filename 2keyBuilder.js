@@ -38,8 +38,8 @@ const {
     ipfsGet,
     runDeployCPCCampaignMigration,
     runDeployCPCFirstTime,
-    runDelpoyCPCNoRewardsFirstTime,
-    runTruffleCompile
+    runTruffleCompile,
+    runDeployPlasmaReputation
 } = require('./helpers');
 
 
@@ -365,13 +365,11 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
 
 const checkIfContractIsPlasma = (contractName) => {
-    if(contractName.includes('Plasma')) {
-        return true;
-    }
-    return false;
+    return !!contractName.includes('Plasma');
+
 };
 
-async function deployUpgrade(networks, args) {
+async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
 
@@ -385,11 +383,10 @@ async function deployUpgrade(networks, args) {
         console.log('DONATION to be upgraded: ', donationToBePatched);
         console.log('CPC contracts changed: ', cpcChanged);
 
-
-        // Deploy the CPC No Rewards contracts
-        if(process.argv.includes('cpc-no-rewards-deploy')) {
-            console.log("Deploying CPC NO REWARDS campaign for the first time to the network");
-            await runDelpoyCPCNoRewardsFirstTime(networks[i]);
+        // Deploy the CPC contracts
+        if(process.argv.includes('cpc-deploy')) {
+            console.log("Deploying CPC campaign for the first time to the network");
+            await runDeployPlasmaReputation(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
@@ -424,7 +421,6 @@ async function deployUpgrade(networks, args) {
         if(cpcChanged.length > 0) {
             await runDeployCPCCampaignMigration(networks[i]);
         }
-
 
         /* eslint-enable no-await-in-loop */
     }
@@ -478,7 +474,7 @@ async function deploy() {
 
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
-                await deployUpgrade(networks, process.argv);
+                await deployUpgrade(networks);
             }
             if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);

@@ -61,13 +61,6 @@ contract IUpgradableExchange {
     function releaseAllDAIFromContractToReserve()
     public;
 
-
-    function swapDaiAvailableToFillReserveFor2KEY(
-        uint amountOfDAIToSwap,
-        uint approvedMinConversionRate
-    )
-    public;
-
     function setKyberReserveInterfaceContractAddress(
         address kyberReserveContractAddress
     )

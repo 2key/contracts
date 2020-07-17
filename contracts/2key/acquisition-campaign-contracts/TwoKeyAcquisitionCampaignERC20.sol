@@ -15,7 +15,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
     uint public usd2KEYrateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
-
+    bool public withdrawUnsoldTokensCalled;
 
     /**
      * @notice This function is simulation for the constructor, since we're relying on proxies
@@ -426,6 +426,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
      */
     function withdrawUnsoldTokens() public onlyContractor {
         require(ITwoKeyAcquisitionLogicHandler(logicHandler).canContractorWithdrawUnsoldTokens() == true);
+        require(withdrawUnsoldTokensCalled == false);
         uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
         IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
 
@@ -440,6 +441,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
                 }
             }
         }
+        withdrawUnsoldTokensCalled = true;
     }
 
 
