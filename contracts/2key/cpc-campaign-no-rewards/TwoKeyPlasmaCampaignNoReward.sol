@@ -41,6 +41,7 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     address public mirrorCampaignOnPublic;          // Address of campaign deployed to public eth network
 
     uint campaignStartTime;                         // Time when campaign start
+    //TODO: maybe we can remove end time since those clicks are not payable
     uint campaignEndTime;                           // Time when campaign ends
 
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
