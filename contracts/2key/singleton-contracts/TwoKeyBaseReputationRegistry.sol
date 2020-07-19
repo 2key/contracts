@@ -176,7 +176,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
                 referrers[uint(i)],
                 "REFERRER",
                 "MONETARY",
-                initialRewardWei*(-1)
+                reward*(-1)
             );
         }
     }

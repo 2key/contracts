@@ -293,7 +293,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
 
         emit ReputationUpdated(
             contractor,
-            "REFERRER",
+            "CONTRACTOR",
             "BUDGET",
             contractorPunishment*(-1)
         );
