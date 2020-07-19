@@ -136,26 +136,30 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         if(!isCampaignEndedByContractor() && isCampaignActiveInTermsOfTime()) {
             // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
             if(getNumberOfUsersToContractor(converter) > 0 && counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign) {
-                //Get moderator fee percentage
-                uint moderatorFeePercent = getModeratorFeePercent();
-                //Calculate moderator fee to be taken from bounty
-                uint moderatorFee = bountyPerConversionWei.mul(moderatorFeePercent).div(100);
-                //Add earnings to moderator total earnings
-                moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFee);
-                //Left to be distributed between influencers
-                uint bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFee);
+                uint bountyToBeDistributed = 0;
+
+                if(bountyPerConversionWei > 0) {
+                    //Get moderator fee percentage
+                    uint moderatorFeePercent = getModeratorFeePercent();
+                    //Calculate moderator fee to be taken from bounty
+                    uint moderatorFee = bountyPerConversionWei.mul(moderatorFeePercent).div(100);
+                    //Add earnings to moderator total earnings
+                    moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFee);
+                    //Left to be distributed between influencers
+                    bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFee);
+                    //Update paid bounty
+                    c.bountyPaid = bountyToBeDistributed;
+                    // Update that conversion is being paid
+                    c.paymentState = ConversionPaymentState.PAID;
+                    //Increment how much bounty is paid
+                    counters[6] = counters[6] + bountyToBeDistributed; // Total bounty paid
+                    // emit event that conversion is being paid
+                    ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitConversionPaidEvent(
+                        conversionId
+                    );
+                }
                 //Distribute rewards between referrers
                 updateRewardsBetweenInfluencers(converter, conversionId, bountyToBeDistributed);
-                //Update paid bounty
-                c.bountyPaid = bountyToBeDistributed;
-                // Update that conversion is being paid
-                c.paymentState = ConversionPaymentState.PAID;
-                //Increment how much bounty is paid
-                counters[6] = counters[6] + bountyToBeDistributed; // Total bounty paid
-
-                ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitConversionPaidEvent(
-                    conversionId
-                );
             }
         }
 
