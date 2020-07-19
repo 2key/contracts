@@ -32,6 +32,18 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyBaseReputationRegistryStorage public PROXY_STORAGE_CONTRACT;
 
+
+    /**
+     * @notice          Event which will be emitted every time reputation of a user
+     *                  is getting changed. Either positive or negative.
+     */
+    event ReputationUpdated(
+        address _plasmaAddress,
+        string _role, //role in (CONTRACTOR,REFERRER,CONVERTER)
+        string _type, // type in (MONETARY,BUDGET,FEEDBACK)
+        int _points
+    );
+
     /**
      * @notice Since using singletone pattern, this is replacement for the constructor
      * @param _twoKeySingletoneRegistry is the address of registry of all singleton contracts
@@ -79,16 +91,37 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + initialRewardWei);
 
+        emit ReputationUpdated(
+            plasmaOf(contractor),
+            "CONTRACTOR",
+            "MONETARY",
+            initialRewardWei
+        );
+
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + initialRewardWei);
+
+        emit ReputationUpdated(
+            plasmaOf(converter),
+            "CONVERTER",
+            "MONETARY",
+            initialRewardWei
+        );
 
         address[] memory referrers = getReferrers(converter, campaign);
 
         for(int i=0; i<int(referrers.length); i++) {
             bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + initialRewardWei/(i+1));
+            int reward = initialRewardWei/(i+1);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + reward);
+            emit ReputationUpdated(
+                referrers[uint(i)],
+                "REFERRER",
+                "MONETARY",
+                reward
+            );
         }
     }
 
@@ -113,16 +146,38 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore - initialRewardWei);
 
+        emit ReputationUpdated(
+            plasmaOf(contractor),
+            "CONTRACTOR",
+            "MONETARY",
+            initialRewardWei*(-1)
+        );
+
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialRewardWei);
+
+        emit ReputationUpdated(
+            plasmaOf(converter),
+            "CONVERTER",
+            "MONETARY",
+            initialRewardWei * (-1)
+        );
 
         address[] memory referrers = getReferrers(converter, campaign);
 
         for(int i=0; i<int(referrers.length); i++) {
             bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialRewardWei/(i+1));
+            int reward = initialRewardWei/(i+1);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - reward);
+
+            emit ReputationUpdated(
+                referrers[uint(i)],
+                "REFERRER",
+                "MONETARY",
+                initialRewardWei*(-1)
+            );
         }
     }
 
@@ -268,5 +323,15 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         }
 
         return (reputations);
+    }
+
+    function plasmaOf(
+        address _address
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeyReg(getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry)).getEthereumToPlasma(_address);
     }
 }
