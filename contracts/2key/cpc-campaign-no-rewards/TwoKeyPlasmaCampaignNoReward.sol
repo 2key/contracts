@@ -38,7 +38,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
 
     bool public isValidated;                        // Validator if campaign is validated from maintainer side
     address public contractorPublicAddress;         // Contractor address on public chain
-    address public mirrorCampaignOnPublic;          // Address of campaign deployed to public eth network
 
     uint campaignStartTime;                         // Time when campaign start
     //TODO: maybe we can remove end time since those clicks are not payable
