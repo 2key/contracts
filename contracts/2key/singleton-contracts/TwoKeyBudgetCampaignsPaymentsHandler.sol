@@ -67,7 +67,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     public
     payable
     {
-
+        //TODO: Think about DAI payments instead of ETH, and buy inventory with DAI
     }
 
 
@@ -91,6 +91,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         // Require that initial budget is not being added, since it can be done only once.
         require(getUint(keyHashForInitialBudget) == 0);
+        // Set initial budget added
+        setUint(keyHashForInitialBudget, amountOfTokens);
 
         // Set that contractor is the msg.sender of this method for the campaign passed
         setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
@@ -102,8 +104,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             amountOfTokens
         );
 
-        // Set initial budget added
-        setUint(keyHashForInitialBudget, amountOfTokens);
     }
 
 
@@ -117,6 +117,14 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             getAddress(keccak256(_campaignPlasma2contractor,campaignPlasmaAddress)) == msg.sender
         );
 
+        // Get the leftover for contractor
+        uint leftoverForContractor = getUint(
+            keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasmaAddress)
+        );
+
+        // Check that he has some leftover
+        require(leftoverForContractor > 0);
+
         // Generate key if contractor have withdrawn his leftover for specific campaign
         bytes32 key = keccak256(_campaignPlasmaToLeftoverWithdrawnByContractor, campaignPlasmaAddress);
 
@@ -125,11 +133,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         // State that now he has withdrawn the tokens.
         setBool(key, true);
-
-        // Get the leftover for contractor
-        uint leftoverForContractor = getUint(
-            keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasmaAddress)
-        );
 
         transfer2KEY(
             msg.sender,
