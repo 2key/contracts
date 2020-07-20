@@ -46,7 +46,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     event FeedbackSubmitted(
         address _plasmaAddress,
         string _role, //role in (CONTRACTOR,REFERRER,CONVERTER)
-        string _type, // type in (MONETARY,BUDGET,FEEDBACK)
+        string _type, // type in (MONETARY,BUDGET)
         int _points,
         address _reporterPlasma,
         address _campaignAddress
@@ -146,6 +146,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     function addPositiveFeedbackByMaintainer(
         address _plasmaAddress,
         string _role,
+        string _type,
         int _pointsGained,
         address _reporterPlasma,
         address _campaignAddress
@@ -164,7 +165,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         emit FeedbackSubmitted(
             _plasmaAddress,
             _role,
-            "FEEDBACK",
+            _type,
             _pointsGained,
             _reporterPlasma,
             _campaignAddress
@@ -174,6 +175,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     function addNegativeFeedbackByMaintainer(
         address _plasmaAddress,
         string _role,
+        string _type,
         int _pointsLost,
         address _reporterPlasma,
         address _campaignAddress
@@ -192,7 +194,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         emit FeedbackSubmitted(
             _plasmaAddress,
             _role,
-            "FEEDBACK",
+            _type,
             _pointsLost*(-1),
             _reporterPlasma,
             _campaignAddress
