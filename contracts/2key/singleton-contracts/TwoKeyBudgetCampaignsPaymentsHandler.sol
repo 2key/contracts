@@ -2,8 +2,11 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+
 import "../interfaces/IERC20.sol";
 import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerStorage.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
+
 import "../libraries/SafeMath.sol";
 
 contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
@@ -128,7 +131,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasmaAddress)
         );
 
-        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
+        transfer2KEY(
             msg.sender,
             leftoverForContractor
         );
@@ -181,16 +184,13 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint rebalancedReferrerRewards = totalAmountForReferrerRewards.mul(rebalancingRatio).div(10**18);
         uint rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
 
+        // Set moderator earnings for this campaign and immediately distribute them
+        setAndDistributeModeratorEarnings(campaignPlasma, rebalancedModeratorRewards);
+
         // Reserve amount for influencers
         setUint(
             keccak256(_campaignPlasmaToReservedAmountForRewards, campaignPlasma),
             rebalancedReferrerRewards
-        );
-
-        // Reserve amount for moderator
-        setUint(
-            keccak256(_campaignPlasmaToModeratorEarnings, campaignPlasma),
-            rebalancedModeratorRewards
         );
 
         // Leftover for contractor
@@ -258,6 +258,32 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return (amountOfTokens, 10**18);
     }
 
+
+    function setAndDistributeModeratorEarnings(
+        address campaignPlasma,
+        uint rebalancedModeratorRewards
+    )
+    internal
+    {
+        // Reserve amount for moderator
+        setUint(
+            keccak256(_campaignPlasmaToModeratorEarnings, campaignPlasma),
+            rebalancedModeratorRewards
+        );
+
+        // Get twoKeyAdmin address
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+        // Transfer 2KEY tokens to moderator
+        transfer2KEY(
+            twoKeyAdmin,
+            rebalancedModeratorRewards
+        );
+
+        // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(rebalancedModeratorRewards);
+    }
+
     /**
      * ------------------------------------------------
      *        Internal getters and setters
@@ -321,11 +347,30 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         PROXY_STORAGE_CONTRACT.setAddress(key,value);
     }
 
+
     function incrementNumberOfDistributionCycles()
     internal
     {
         bytes32 key = keccak256(_numberOfDistributionCycles);
         setUint(key,getUint(key) + 1);
+    }
+
+    /**
+     * @notice 			Function to transfer 2KEY tokens
+     *
+     * @param			receiver is the address of tokens receiver
+     * @param			amount is the amount of tokens to be transfered
+     */
+    function transfer2KEY(
+        address receiver,
+        uint amount
+    )
+    internal
+    {
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
+            receiver,
+            amount
+        );
     }
 
 
