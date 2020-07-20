@@ -41,7 +41,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         address _plasmaAddress,
         string _role, //role in (CONTRACTOR,REFERRER,CONVERTER)
         string _type, // type in (MONETARY,BUDGET,FEEDBACK)
-        int _points
+        int _points,
+        address _campaignAddress
     );
 
     /**
@@ -95,7 +96,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
             plasmaOf(contractor),
             "CONTRACTOR",
             "MONETARY",
-            initialRewardWei
+            initialRewardWei,
+            msg.sender
         );
 
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
@@ -106,7 +108,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
             plasmaOf(converter),
             "CONVERTER",
             "MONETARY",
-            initialRewardWei
+            initialRewardWei,
+            msg.sender
         );
 
         address[] memory referrers = getReferrers(converter, campaign);
@@ -116,12 +119,15 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
             int reward = initialRewardWei/(i+1);
             PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + reward);
+
             emit ReputationUpdated(
                 referrers[uint(i)],
                 "REFERRER",
                 "MONETARY",
-                reward
+                reward,
+                msg.sender
             );
+
         }
     }
 
@@ -150,7 +156,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
             plasmaOf(contractor),
             "CONTRACTOR",
             "MONETARY",
-            initialRewardWei*(-1)
+            initialRewardWei*(-1),
+            msg.sender
         );
 
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
@@ -161,7 +168,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
             plasmaOf(converter),
             "CONVERTER",
             "MONETARY",
-            initialRewardWei * (-1)
+            initialRewardWei * (-1),
+            msg.sender
         );
 
         address[] memory referrers = getReferrers(converter, campaign);
@@ -176,7 +184,8 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
                 referrers[uint(i)],
                 "REFERRER",
                 "MONETARY",
-                reward*(-1)
+                reward*(-1),
+                msg.sender
             );
         }
     }

@@ -39,7 +39,17 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         address _plasmaAddress,
         string _role, //role in (CONTRACTOR,REFERRER,CONVERTER)
         string _type, // type in (MONETARY,BUDGET,FEEDBACK)
-        int _points
+        int _points,
+        address _campaignAddress
+    );
+
+    event FeedbackSubmitted(
+        address _plasmaAddress,
+        string _role, //role in (CONTRACTOR,REFERRER,CONVERTER)
+        string _type, // type in (MONETARY,BUDGET,FEEDBACK)
+        int _points,
+        address _reporterPlasma,
+        address _campaignAddress
     );
 
     /**
@@ -136,7 +146,9 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     function addPositiveFeedbackByMaintainer(
         address _plasmaAddress,
         string _role,
-        int _pointsGained
+        int _pointsGained,
+        address _reporterPlasma,
+        address _campaignAddress
     )
     public
     onlyMaintainer
@@ -149,18 +161,22 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         // Add to current score points gained
         PROXY_STORAGE_CONTRACT.setInt(keyHashPlasmaAddressToFeedback, currentScore + _pointsGained);
 
-        emit ReputationUpdated(
+        emit FeedbackSubmitted(
             _plasmaAddress,
             _role,
             "FEEDBACK",
-            _pointsGained
+            _pointsGained,
+            _reporterPlasma,
+            _campaignAddress
         );
     }
 
     function addNegativeFeedbackByMaintainer(
         address _plasmaAddress,
         string _role,
-        int _pointsLost
+        int _pointsLost,
+        address _reporterPlasma,
+        address _campaignAddress
     )
     public
     onlyMaintainer
@@ -173,11 +189,13 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         // Deduct from current score points lost
         PROXY_STORAGE_CONTRACT.setInt(keyHashPlasmaAddressToFeedback, currentScore - _pointsLost);
 
-        emit ReputationUpdated(
+        emit FeedbackSubmitted(
             _plasmaAddress,
             _role,
             "FEEDBACK",
-            _pointsLost*(-1)
+            _pointsLost*(-1),
+            _reporterPlasma,
+            _campaignAddress
         );
     }
 
@@ -204,7 +222,8 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             contractor,
             "CONTRACTOR",
             "BUDGET",
-            initialRewardWei
+            initialRewardWei,
+            msg.sender
         );
 
         bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, converter);
@@ -215,7 +234,8 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             converter,
             "CONVERTER",
             "BUDGET",
-            initialRewardWei
+            initialRewardWei,
+            msg.sender
         );
 
         address[] memory referrers = getReferrers(msg.sender, converter);
@@ -229,7 +249,8 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
                 referrers[uint(i)],
                 "REFERRER",
                 "BUDGET",
-                reward
+                reward,
+                msg.sender
             );
         }
 
@@ -259,7 +280,8 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             converter,
             "CONVERTER",
             "BUDGET",
-            initialPunishmentWei*(-1)
+            initialPunishmentWei*(-1),
+            msg.sender
         );
 
 
@@ -277,7 +299,8 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
                 referrers[uint(i)],
                 "REFERRER",
                 "BUDGET",
-                reward*(-1)
+                reward*(-1),
+                msg.sender
             );
         }
 
@@ -295,7 +318,8 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             contractor,
             "CONTRACTOR",
             "BUDGET",
-            contractorPunishment*(-1)
+            contractorPunishment*(-1),
+            msg.sender
         );
     }
 
