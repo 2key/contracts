@@ -4,8 +4,11 @@ import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerStorage.sol";
+import "../libraries/SafeMath.sol";
 
 contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
+
+    using SafeMath for *;
 
     /**
      * State variables
@@ -14,6 +17,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
     string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
     string constant _contractor2campaignPlasma2RebalancedBudget2Key = "contractor2campaignPlasma2RebalancedBudget2Key";
+    string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
 
     string constant _campaignPlasma2initalRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2rebalancedRate = "campaignPlasma2rebalancedRate";
@@ -110,13 +114,62 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      */
 
 
-    function lockContractReserveTokensAndRebalanceRates(
+    function endCampaignReserveTokensAndRebalanceRates(
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
         uint totalAmountForModeratorRewards
     )
     onlyMaintainer
     {
+        // Generate key for storage variable isCampaignEnded
+        bytes32 keyIsCampaignEnded = keccak256(_campaignPlasma2isCampaignEnded, campaignPlasma);
+
+        // Require that campaign is not ended yet
+        require(getBool(keyIsCampaignEnded) == false);
+
+        // End campaign
+        setBool(keyIsCampaignEnded, true);
+
+        // Get how many tokens were inserted at the beginning
+        uint amountOfTokensOnCampaign = getInitialBountyForCampaign(campaignPlasma);
+
+        // Require that there was enough tokens to support this operation
+        require(
+            totalAmountForModeratorRewards + totalAmountForReferrerRewards <= amountOfTokensOnCampaign
+        );
+
+        uint initial2KEYRate = getUint(keccak256(_campaignPlasma2initalRate,campaignPlasma));
+
+        uint rebalancingRatio = 10**18;
+
+        if(initial2KEYRate > 0) {
+            (amountOfTokensOnCampaign, rebalancingRatio)
+                = rebalanceRates(campaignPlasma, amountOfTokensOnCampaign);
+        } else {
+            // Set that rebalancing ratio is 0 in other case
+            setUint(keccak256(_campaignPlasma2rebalancingRatio,campaignPlasma), rebalancingRatio);
+        }
+
+        uint rebalancedReferrerRewards = totalAmountForReferrerRewards.mul(rebalancingRatio).div(10**18);
+        uint rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
+
+        // Reserve amount for influencers
+        setUint(
+            keccak256(_campaignPlasmaToReservedAmountForRewards, campaignPlasma),
+            rebalancedReferrerRewards
+        );
+
+        // Reserve amount for moderator
+        setUint(
+            keccak256(_campaignPlasmaToModeratorEarnings, campaignPlasma),
+            rebalancedModeratorRewards
+        );
+
+        // Leftover for contractor
+        setUint(
+            keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasma),
+            amountOfTokensOnCampaign.sub(rebalancedReferrerRewards.add(rebalancedModeratorRewards))
+        );
 
     }
 
@@ -162,6 +215,23 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
     /**
      * ------------------------------------------------
+     *        Internal functions performing logic operations
+     * ------------------------------------------------
+     */
+
+    function rebalanceRates(
+        address campaignPlasma,
+        uint amountOfTokens
+    )
+    internal
+    returns (uint,uint)
+    {
+        // TODO: Implement logic
+        return (amountOfTokens, 10**18);
+    }
+
+    /**
+     * ------------------------------------------------
      *        Internal getters and setters
      * ------------------------------------------------
      */
@@ -183,6 +253,25 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     internal
     {
         PROXY_STORAGE_CONTRACT.setUint(key,value);
+    }
+
+    function getBool(
+        bytes32 key
+    )
+    internal
+    view
+    returns (bool)
+    {
+        return PROXY_STORAGE_CONTRACT.getBool(key);
+    }
+
+    function setBool(
+        bytes32 key,
+        bool value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setBool(key,value);
     }
 
 
@@ -207,6 +296,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     {
         return getUint(keccak256(_numberOfDistributionCycles));
     }
+
 
     function getDistributedAmountToReferrerByCycleId(
         address referrer,
@@ -260,18 +350,5 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     {
         // return (price before, price after, ratio)
     }
-
-
-    function isCampaignEnded(
-        address campaignPlasma
-    )
-    public
-    view
-    returns (bool)
-    {
-        // Campaign is ended in terms of accepting new PAID conversion once there's rebalancing ratio > 0
-        // No need for any other variables to determine this
-    }
-
 
 }
