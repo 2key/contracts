@@ -24,7 +24,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
     string constant _campaignPlasma2contractor = "campaignPlasma2contractor";
 
-    string constant _campaignPlasma2initalRate = "campaignPlasma2initalRate";
+    string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2rebalancedRate = "campaignPlasma2rebalancedRate";
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
 
@@ -177,7 +177,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint rebalancingRatio = 10**18;
 
         // If budget added directly as 2KEY it will be 0
-        uint initial2KEYRate = getUint(keccak256(_campaignPlasma2initalRate,campaignPlasma));
+        uint initial2KEYRate = getUint(keccak256(_campaignPlasma2initialRate,campaignPlasma));
 
         if(initial2KEYRate > 0) {
             (amountOfTokensOnCampaign, rebalancingRatio)
@@ -456,6 +456,13 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // return (totalInitial, bountyAfterRebalancing, reservedForRewards, contractorLeftover)
     }
 
+    /**
+     * @notice          Function to return rebalancing results for selected campaign
+     *                  If campaign was not rebalanced, both initialRate and rebalancedRate
+     *                  will be 0, and rebalancingRatio will be equal 10**18
+     *
+     * @param           campaignPlasma is the plasma address of the campaign
+     */
     function getRebalancingResults(
         address campaignPlasma
     )
@@ -463,7 +470,11 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     view
     returns (uint,uint,uint)
     {
-        // return (price before, price after, ratio)
+        return (
+            getUint(keccak256(_campaignPlasma2initialRate, campaignPlasma)),
+            getUint(keccak256(_campaignPlasma2rebalancedRate, campaignPlasma)),
+            getUint(keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma))
+        );
     }
 
     function getTotalTokensReservedForRewards()
