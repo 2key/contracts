@@ -16,6 +16,6 @@ echo "Generating bytecodes for changes on public network"
 echo "Destination for execution of contracts patches: 0xf4797416e6b6835114390591d3ac6a531a061396"
 cd ../..
 
-python3 generate_bytecode.py upgradeContract TwoKeyBaseReputationRegistry 1.0.4
+python3 generate_bytecode.py upgradeContract TwoKeyBaseReputationRegistry 1.0.5
 python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.49
 
