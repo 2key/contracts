@@ -141,6 +141,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      */
 
 
+    //TODO: Discuss with @eitan there's no need to store total amount for referrer rewards.
     function endCampaignReserveTokensAndRebalanceRates(
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
