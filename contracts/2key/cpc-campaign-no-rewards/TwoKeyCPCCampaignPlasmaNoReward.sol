@@ -93,7 +93,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
 
         //Emit conversion event through TwoKeyPlasmaEvents
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
-            mirrorCampaignOnPublic,
+            address(0),
             conversionId,
             contractor,
             msg.sender
