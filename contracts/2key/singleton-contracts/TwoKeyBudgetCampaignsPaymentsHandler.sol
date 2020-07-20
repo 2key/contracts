@@ -230,13 +230,14 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     public
     onlyMaintainer
     {
-        //TODO: Think about additional safeguard
         // Increment distribution cycle id
         incrementNumberOfDistributionCycles();
         // The new one (latest) is the id of this cycle
         uint cycleId = getNumberOfCycles();
         // Get the address of 2KEY token
         address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+        uint totalDistributed = 0;
 
         uint i;
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
@@ -253,7 +254,15 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             );
             // Set how much was distributed to this referrer in this cycle
             setUint(key, balance);
+
+            totalDistributed = totalDistributed.add(balance);
         }
+
+        // Set global total distrubted
+        setUint(
+            keccak256(_totalTokensDistributedForRewards),
+            totalDistributed + getTotalTokensDistributedForRewards()
+        );
     }
 
     /**
