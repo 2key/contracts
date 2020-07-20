@@ -18,6 +18,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
     string constant _contractor2campaignPlasma2RebalancedBudget2Key = "contractor2campaignPlasma2RebalancedBudget2Key";
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
+    string constant _campaignPlasma2contractor = "campaignPlasma2contractor";
 
     string constant _campaignPlasma2initalRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2rebalancedRate = "campaignPlasma2rebalancedRate";
@@ -84,8 +85,12 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     public
     {
         bytes32 keyHashForInitialBudget = keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma);
+
         // Require that initial budget is not being added, since it can be done only once.
         require(getUint(keyHashForInitialBudget) == 0);
+
+        // Set that contractor is the msg.sender of this method for the campaign passed
+        setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
 
         // Take tokens from the contractor
         IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
@@ -104,7 +109,29 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     )
     public
     {
+        // Require that this function is possible to call only by contractor
+        require(
+            getAddress(keccak256(_campaignPlasma2contractor,campaignPlasmaAddress)) == msg.sender
+        );
 
+        // Generate key if contractor have withdrawn his leftover for specific campaign
+        bytes32 key = keccak256(_campaignPlasmaToLeftoverWithdrawnByContractor, campaignPlasmaAddress);
+
+        // Require that he didn't withdraw it
+        require(getBool(key) == false);
+
+        // State that now he has withdrawn the tokens.
+        setBool(key, true);
+
+        // Get the leftover for contractor
+        uint leftoverForContractor = getUint(
+            keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasmaAddress)
+        );
+
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
+            msg.sender,
+            leftoverForContractor
+        );
     }
 
     /**
@@ -274,6 +301,24 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         PROXY_STORAGE_CONTRACT.setBool(key,value);
     }
 
+    function getAddress(
+        bytes32 key
+    )
+    internal
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(key);
+    }
+
+    function setAddress(
+        bytes32 key,
+        address value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(key,value);
+    }
 
     function incrementNumberOfDistributionCycles()
     internal
