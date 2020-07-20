@@ -6,6 +6,7 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 
 import "../libraries/SafeMath.sol";
 
@@ -31,7 +32,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _globalDistributionCycleId2referrer2amountDistributed = "globalDistributionCycleId2referrer2amountDistributed";
     string constant _totalAmountDistributedToReferrerEver = "totalAmountDistributedToReferrerEver";
 
-    string constant _campaignPlasmaToReservedAmountForRewards = "campaignPlasmaToReservedAmountForRewards";
+    string constant _totalTokensReservedForRewards = "totalTokensReservedForRewards";
+    string constant _totalTokensDistributedForRewards = "totalTokensDistributedForRewards";
     string constant _campaignPlasmaToModeratorEarnings = "campaignPlasmaToModeratorEarnings";
     string constant _campaignPlasmaToLeftOverForContractor = "campaignPlasmaToLeftOverForContractor";
     string constant _campaignPlasmaToLeftoverWithdrawnByContractor = "campaignPlasmaToLeftoverWithdrawnByContractor";
@@ -147,7 +149,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      */
 
 
-    //TODO: Discuss with @eitan there's no need to store total amount for referrer rewards.
     function endCampaignReserveTokensAndRebalanceRates(
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
@@ -172,36 +173,46 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             totalAmountForModeratorRewards + totalAmountForReferrerRewards <= amountOfTokensOnCampaign
         );
 
-        uint initial2KEYRate = getUint(keccak256(_campaignPlasma2initalRate,campaignPlasma));
-
+        // Neutral for rebalancing = 1ETH
         uint rebalancingRatio = 10**18;
+
+        // If budget added directly as 2KEY it will be 0
+        uint initial2KEYRate = getUint(keccak256(_campaignPlasma2initalRate,campaignPlasma));
 
         if(initial2KEYRate > 0) {
             (amountOfTokensOnCampaign, rebalancingRatio)
                 = rebalanceRates(campaignPlasma, amountOfTokensOnCampaign);
         } else {
-            // Set that rebalancing ratio is 0 in other case
+            // Set that rebalancing ratio is 1 in other case
             setUint(keccak256(_campaignPlasma2rebalancingRatio,campaignPlasma), rebalancingRatio);
         }
 
         uint rebalancedReferrerRewards = totalAmountForReferrerRewards.mul(rebalancingRatio).div(10**18);
         uint rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
-
+        uint leftoverForContractor = amountOfTokensOnCampaign.sub(rebalancedReferrerRewards.add(rebalancedModeratorRewards));
         // Set moderator earnings for this campaign and immediately distribute them
         setAndDistributeModeratorEarnings(campaignPlasma, rebalancedModeratorRewards);
 
-        // Reserve amount for influencers
+        // Update total amount of tokens reserved for the rewards
         setUint(
-            keccak256(_campaignPlasmaToReservedAmountForRewards, campaignPlasma),
-            rebalancedReferrerRewards
+            keccak256(_totalTokensReservedForRewards),
+            rebalancedReferrerRewards + getTotalTokensReservedForRewards()
         );
 
         // Leftover for contractor
         setUint(
             keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasma),
-            amountOfTokensOnCampaign.sub(rebalancedReferrerRewards.add(rebalancedModeratorRewards))
+            leftoverForContractor
         );
 
+        // Emit an event to checksum all the balances per campaign
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+            .emitEndedBudgetCampaign(
+                campaignPlasma,
+                rebalancedReferrerRewards,
+                leftoverForContractor,
+                rebalancedModeratorRewards
+            );
     }
 
 
@@ -219,6 +230,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     public
     onlyMaintainer
     {
+        //TODO: Think about additional safeguard
         // Increment distribution cycle id
         incrementNumberOfDistributionCycles();
         // The new one (latest) is the id of this cycle
@@ -424,6 +436,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
     }
 
+
     function getBountyStatsPerCampaign(
         address campaignPlasma
     )
@@ -434,7 +447,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // return (totalInitial, bountyAfterRebalancing, reservedForRewards, contractorLeftover)
     }
 
-
     function getRebalancingResults(
         address campaignPlasma
     )
@@ -443,6 +455,22 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     returns (uint,uint,uint)
     {
         // return (price before, price after, ratio)
+    }
+
+    function getTotalTokensReservedForRewards()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalTokensReservedForRewards));
+    }
+
+    function getTotalTokensDistributedForRewards()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalTokensDistributedForRewards));
     }
 
 }

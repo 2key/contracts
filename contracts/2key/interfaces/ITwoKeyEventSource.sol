@@ -79,4 +79,12 @@ contract ITwoKeyEventSource {
         uint _amountOfDAI
     )
     public;
+
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint reservedAmountForReferrerRewards,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public;
 }

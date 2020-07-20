@@ -220,6 +220,14 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         string actionPerformedWithUpgradableExchange
     );
 
+    event EndedBudgetCampaign (
+        address campaignPlasmaAddress,
+        uint reservedAmountForReferrerRewards,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    );
+
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -646,6 +654,24 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit DaiReleased(
             _campaignContractAddress,
             _amountOfDAI
+        );
+    }
+
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint reservedAmountForReferrerRewards,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
+        emit EndedBudgetCampaign(
+            campaignPlasmaAddress,
+            reservedAmountForReferrerRewards,
+            contractorLeftover,
+            moderatorEarningsDistributed
         );
     }
 
