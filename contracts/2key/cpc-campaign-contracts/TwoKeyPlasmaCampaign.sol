@@ -847,6 +847,14 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             address influencer = activeInfluencers[i];
             referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
             referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
+
+            // Update it payments handler contract
+            ITwoKeyPlasmaBudgetCampaignsPaymentsHandler(
+                getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler")
+            ).setRebalancedReferrerEarnings(
+                influencer,
+                referrerPlasma2Balances2key[influencer]
+            );
         }
     }
 
