@@ -334,6 +334,11 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return getUint(key);
     }
 
+    /**
+     * @notice          Function to check if distribution cycle was submitted
+     *
+     * @param           cycleId is the ID of cycle which is distributed
+     */
     function getIfDistributionCyclePaymentsSubmitted(
         uint cycleId
     )
