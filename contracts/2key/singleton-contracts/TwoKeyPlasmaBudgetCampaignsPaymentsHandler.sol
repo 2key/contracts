@@ -14,6 +14,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
     string constant _campaignPlasma2Referrer2rebalancedEarnings = "campaignPlasma2Referrer2rebalancedEarnings";
+    string constant _distributionCyclePaymentSubmitted = "distributionCyclePaymentSubmitted";
+
+    string constant _referrer2CycleId2TotalDistributedInCycle = "referrer2CycleId2TotalDistributedInCycle";
     string constant _referrer2TotalEarnings = "referrer2TotalEarnings";
     string constant _referrer2TotalEarningsPaid = "referrer2TotalEarningsPaid";
     string constant _referrer2TotalEarningsPending = "referrer2TotalEarningsPending";
@@ -61,10 +64,10 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
     /**
-      * ------------------------------------------------
-      *        Internal getters and setters
-      * ------------------------------------------------
-      */
+     * ------------------------------------------------
+     *        Internal getters and setters
+     * ------------------------------------------------
+     */
 
 
     function getUint(
@@ -140,13 +143,64 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
+    function setReferrerTotalEarningsPaid(
+        address referrer,
+        uint amount
+    )
+    internal
+    {
+        bytes32 keyTotalDistributed = keccak256(
+            _referrer2TotalEarningsPaid,
+            referrer
+        );
 
+        // Increment currently total distributed for the amount distributed in this iteration
+        setUint(
+            keyTotalDistributed,
+            getUint(keyTotalDistributed) + amount
+        );
+    }
+
+    function setReferrerEarningsPerDistributionCycle(
+        uint cycleId,
+        address referrer,
+        uint amount
+    )
+    internal
+    {
+        bytes32 key = keccak256(
+            _referrer2CycleId2TotalDistributedInCycle,
+            cycleId,
+            referrer
+        );
+
+        setUint(key, amount);
+    }
+
+    function setDistributionPaymentCycleSubmitted(
+        uint cycleId
+    )
+    internal
+    {
+        bytes32 key = keccak256(
+            _distributionCyclePaymentSubmitted,
+            cycleId
+        );
+
+        setBool(key, true);
+    }
+
+    /**
+     * ------------------------------------------------
+     *        External function calls
+     * ------------------------------------------------
+     */
 
     function setRebalancedReferrerEarnings(
         address referrer,
         uint balance
     )
-    public
+    external
     onlyBudgetCampaigns
     {
         address campaignPlasma = msg.sender;
@@ -181,6 +235,60 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
 
+
+    /**
+     * ------------------------------------------------
+     *        Maintainer function calls
+     * ------------------------------------------------
+     */
+
+
+    function updateReferrersBalancesAfterDistribution(
+        uint cycleId,
+        address [] referrers,
+        uint [] balances
+    )
+    public
+    onlyMaintainer
+    {
+        // Safeguard against submitting multiple times same results for distribution cycle
+        require(getIfDistributionCyclePaymentsSubmitted(cycleId) == false);
+
+        // Set that this distribution cycle is submitted
+        setDistributionPaymentCycleSubmitted(cycleId);
+
+        // Take the array length
+        uint length = referrers.length;
+        uint i;
+        // Iterate through all referrers
+        for(i = 0; i < length; i++) {
+            // Update how much referrer received in this distribution cycle
+            setReferrerEarningsPerDistributionCycle(
+                cycleId,
+                referrers[i],
+                balances[i]
+            );
+
+            // Increase total earnings paid to referrer by the balance being paid in this cycle
+            setReferrerTotalEarningsPaid(
+                referrers[i],
+                balances[i]
+            );
+        }
+    }
+
+
+    /**
+     * ------------------------------------------------
+     *        Public getters
+     * ------------------------------------------------
+     */
+
+    /**
+     * @notice          Function to get referrer pending balance to be distributed
+     *
+     * @param           referrer is the plasma address of referrer
+     */
     function getReferrerPendingBalance(
         address referrer
     )
@@ -199,6 +307,46 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
 
         return (getUint(keyTotalEarnings) - getUint(keyTotalDistributed));
+    }
+
+
+    /**
+     * @notice          Function to return amount referrer have received in selected
+     *                  distribution cycle (id)
+     *
+     * @param           referrer is the referrer plasma address
+     * @param           cycleId is the id of distribution cycle
+     */
+    function getAmountReferrerReceivedInCycle(
+        address referrer,
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        bytes32 key = keccak256(
+            _referrer2CycleId2TotalDistributedInCycle,
+            cycleId,
+            referrer
+        );
+
+        return getUint(key);
+    }
+
+    function getIfDistributionCyclePaymentsSubmitted(
+        uint cycleId
+    )
+    public
+    view
+    returns (bool)
+    {
+        bytes32 key = keccak256(
+            _distributionCyclePaymentSubmitted,
+            cycleId
+        );
+
+        return getBool(key);
     }
 
 }
