@@ -128,7 +128,10 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         // Get the address of plasma event source
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
 
+        // Update referral chain
         updateReferralChain(converter, conversionId);
+
+        // Update reputation points for influencers, converter, and contractor
         updateReputationPointsOnConversionExecutedEvent(converter);
 
         counters[0]--; //Decrement number of pending converters
