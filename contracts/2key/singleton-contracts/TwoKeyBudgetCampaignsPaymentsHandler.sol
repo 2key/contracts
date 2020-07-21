@@ -63,12 +63,14 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      */
 
 
-    function buyReferralBudgetWithETH(
-        address campaignPlasmaAddress
+    function buyReferralBudgetWithDAI(
+        address campaignPlasmaAddress,
+        uint amountOfTokens
     )
     public
     payable
     {
+
         //TODO: Think about DAI payments instead of ETH, and buy inventory with DAI
     }
 
