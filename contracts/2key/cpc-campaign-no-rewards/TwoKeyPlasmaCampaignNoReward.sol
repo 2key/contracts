@@ -34,7 +34,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to
 
-    bool public isContractLocked;
 
     bool public isValidated;                        // Validator if campaign is validated from maintainer side
     address public contractorPublicAddress;         // Contractor address on public chain
@@ -424,19 +423,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         isApprovedConverter[_converter] = true;
     }
 
-
-    /**
-     * @notice          Function where maintainer can lock contract which leads to
-     *                  dissallowment of new conversions creating
-     *
-     */
-    function lockContractFromMaintainer()
-    public
-    onlyMaintainer
-    {
-        require(isContractLocked == false);
-        isContractLocked = true;
-    }
 
     function updateReputationPointsOnConversionExecutedEvent(
         address converter
