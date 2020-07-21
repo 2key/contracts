@@ -149,6 +149,15 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      */
 
 
+    /**
+     * @notice          Function to end selected budget campaign by maintainer, and perform
+     *                  actions regarding rebalancing, reserving tokens, and distributing
+     *                  moderator earnings, as well as calculating leftover for contractor
+     *
+     * @param           campaignPlasma is the plasma address of the campaign
+     * @param           totalAmountForReferrerRewards is the total amount before rebalancing referrers earned
+     * @param           totalAmountForModeratorRewards is the total amount moderator earned before rebalancing
+     */
     function endCampaignReserveTokensAndRebalanceRates(
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
@@ -217,7 +226,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
 
     /**
-     * @notice          Function to distribute rewards between influencers
+     * @notice          Function to distribute rewards between influencers, increment global cycle id,
+     *                  and update how much rewards are ever being distributed from this contract
      *
      * @param           influencers is the array of influencers
      * @param           balances is the array of corresponding balances for the influencers above
@@ -240,21 +250,27 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint totalDistributed = 0;
 
         uint i;
+
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
         for(i = 0; i < influencers.length; i++) {
+
             // Take the influencer balance
             uint balance = balances[i];
+
             // Transfer required tokens to influencer
             IERC20(twoKeyEconomy).transfer(influencers[i], balance);
+
             // Generate the storage key for influencer
             bytes32 key = keccak256(
                 _globalDistributionCycleId2referrer2amountDistributed,
                 cycleId,
                 influencers[i]
             );
+
             // Set how much was distributed to this referrer in this cycle
             setUint(key, balance);
 
+            // Sum up to totalDistributed
             totalDistributed = totalDistributed.add(balance);
         }
 
@@ -271,25 +287,19 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      * ------------------------------------------------
      */
 
-    function rebalanceRates(
-        address campaignPlasma,
-        uint amountOfTokens
-    )
-    internal
-    returns (uint,uint)
-    {
-        // TODO: Implement logic
-        return (amountOfTokens, 10**18);
-    }
-
-
+    /**
+     * @notice          Function to set how many tokens are being distributed to moderator
+     *                  as well as distribute them.
+     * @param           campaignPlasma is the plasma address of selected campaign
+     * @param           rebalancedModeratorRewards is the amount for moderator after rebalancing
+     */
     function setAndDistributeModeratorEarnings(
         address campaignPlasma,
         uint rebalancedModeratorRewards
     )
     internal
     {
-        // Reserve amount for moderator
+        // Account amount moderator earned on this campaign
         setUint(
             keccak256(_campaignPlasmaToModeratorEarnings, campaignPlasma),
             rebalancedModeratorRewards
@@ -306,6 +316,47 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
         ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(rebalancedModeratorRewards);
+    }
+
+    function rebalanceRates(
+        address campaignPlasma,
+        uint amountOfTokens
+    )
+    internal
+    returns (uint,uint)
+    {
+        // TODO: Implement logic
+        return (amountOfTokens, 10**18);
+    }
+
+
+    /**
+     * @notice          Function whenever called, will increment number of distribution cycles
+     */
+    function incrementNumberOfDistributionCycles()
+    internal
+    {
+        bytes32 key = keccak256(_numberOfDistributionCycles);
+        setUint(key,getUint(key) + 1);
+    }
+
+
+    /**
+     * @notice 			Function to transfer 2KEY tokens
+     *
+     * @param			receiver is the address of tokens receiver
+     * @param			amount is the amount of tokens to be transfered
+     */
+    function transfer2KEY(
+        address receiver,
+        uint amount
+    )
+    internal
+    {
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
+            receiver,
+            amount
+        );
     }
 
     /**
@@ -371,33 +422,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         PROXY_STORAGE_CONTRACT.setAddress(key,value);
     }
 
-
-    function incrementNumberOfDistributionCycles()
-    internal
-    {
-        bytes32 key = keccak256(_numberOfDistributionCycles);
-        setUint(key,getUint(key) + 1);
-    }
-
-    /**
-     * @notice 			Function to transfer 2KEY tokens
-     *
-     * @param			receiver is the address of tokens receiver
-     * @param			amount is the amount of tokens to be transfered
-     */
-    function transfer2KEY(
-        address receiver,
-        uint amount
-    )
-    internal
-    {
-        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
-            receiver,
-            amount
-        );
-    }
-
-
     /**
      * ------------------------------------------------
      *              Public getters
@@ -413,18 +437,31 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     }
 
 
+    /**
+     * @notice          Function to get how much referrer received from selected distribution cycle id
+     *
+     * @param           cycleId is the distribution cycle id
+     * @param           referrer is the plasma address of referrer
+     */
     function getDistributedAmountToReferrerByCycleId(
-        address referrer,
-        uint cycleId
+        uint cycleId,
+        address referrer
     )
     public
     view
     returns (uint)
     {
+        // Generate the storage key
+        bytes32 key = keccak256(
+            _globalDistributionCycleId2referrer2amountDistributed,
+            cycleId,
+            referrer
+        );
 
+        return getUint(key);
     }
 
-
+    // TODO: Iterate through all the distribution cycles
     function getTotalAmountDistributedToReferrer(
         address referrer
     )
@@ -435,6 +472,11 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
     }
 
+    /**
+     * @notice          Function to get how much was initial bounty for selected camapaign in 2KEY tokens
+     *
+     * @param           campaignPlasma is the plasma address of the campaign
+     */
     function getInitialBountyForCampaign(
         address campaignPlasma
     )
@@ -445,16 +487,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
     }
 
-
-    function getBountyStatsPerCampaign(
-        address campaignPlasma
-    )
-    public
-    view
-    returns (uint,uint,uint,uint)
-    {
-        // return (totalInitial, bountyAfterRebalancing, reservedForRewards, contractorLeftover)
-    }
 
     /**
      * @notice          Function to return rebalancing results for selected campaign
@@ -477,6 +509,9 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+    /**
+     * @notice          Function to get total amount of tokens reserved for rewards
+     */
     function getTotalTokensReservedForRewards()
     public
     view
@@ -485,6 +520,9 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return PROXY_STORAGE_CONTRACT.getUint(keccak256(_totalTokensReservedForRewards));
     }
 
+    /**
+     * @notice          Function to get total amount of tokens distributed for rewards
+     */
     function getTotalTokensDistributedForRewards()
     public
     view
