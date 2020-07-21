@@ -461,15 +461,38 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getUint(key);
     }
 
-    // TODO: Iterate through all the distribution cycles
+
+    /**
+     * @notice          Function to get how much referrer have received cumulative in all
+     *                  distribution cycles
+     * @param           referrer is referrer plasma address
+     * @param           start is the index
+     * @param           end is the last index
+     */
     function getTotalAmountDistributedToReferrer(
-        address referrer
+        address referrer,
+        uint start,
+        uint end
     )
     public
     view
     returns (uint)
     {
+        // Total rewards distributed are now 0
+        uint totalEarnings = 0;
 
+        // Get amount of cycles
+        uint lastCycle = getNumberOfCycles();
+
+        // Fetch last index to avoid out of bounds
+        uint lastIndex = end > lastCycle ? lastCycle : end;
+
+        // Iterate through cycles
+        for(uint i=start; i<=lastIndex; i++) {
+            totalEarnings = totalEarnings + getDistributedAmountToReferrerByCycleId(i, referrer);
+        }
+
+        return totalEarnings;
     }
 
     /**
