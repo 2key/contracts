@@ -13,7 +13,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
-    string constant _campaignPlasma2Referrer2earnings = "campaignPlasma2Referrer2rebalancedEarnings";
+    string constant _campaignPlasma2Referrer2rebalancedEarnings = "campaignPlasma2Referrer2rebalancedEarnings";
     string constant _referrer2TotalEarnings = "referrer2TotalEarnings";
     string constant _referrer2TotalEarningsPaid = "referrer2TotalEarningsPaid";
     string constant _referrer2TotalEarningsPending = "referrer2TotalEarningsPending";
@@ -65,6 +65,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
       *        Internal getters and setters
       * ------------------------------------------------
       */
+
 
     function getUint(
         bytes32 key
@@ -139,9 +140,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
-    // This contract has to store referrers rebalanced rates per campaign
 
-    function setReferrerEarnings(
+
+    function setRebalancedReferrerEarnings(
         address referrer,
         uint balance
     )
@@ -150,8 +151,54 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     {
         address campaignPlasma = msg.sender;
 
+        // Generate the key for referrer total earnings from this campaign
+        bytes32 keyTotalPerCampaign = keccak256(
+            _campaignPlasma2Referrer2rebalancedEarnings,
+            campaignPlasma,
+            referrer
+        );
 
-        // TODO: Add modifier only PPC campaigns can call this
+        // Require that referrer didn't receive any rewards from this camapign in the past
+        // Acting as a safeguard agains maintainer double calls
+        require(getUint(keyTotalPerCampaign) == 0);
+
+        // Set referrer total earnings per campaign
+        setUint(
+            keyTotalPerCampaign,
+            balance
+        );
+
+        // Generate the key for referrer total earnings
+        bytes32 keyTotalEarnings = keccak256(
+            _referrer2TotalEarnings, referrer
+        );
+
+        // Add additional amount to referrer total earnings
+        setUint(
+            keyTotalEarnings,
+            getUint(keyTotalEarnings) + balance
+        );
+    }
+
+
+    function getReferrerPendingBalance(
+        address referrer
+    )
+    public
+    view
+    returns (uint)
+    {
+        bytes32 keyTotalEarnings = keccak256(
+            _referrer2TotalEarnings,
+            referrer
+        );
+
+        bytes32 keyTotalDistributed = keccak256(
+            _referrer2TotalEarningsPaid,
+            referrer
+        );
+
+        return (getUint(keyTotalEarnings) - getUint(keyTotalDistributed));
     }
 
 }
