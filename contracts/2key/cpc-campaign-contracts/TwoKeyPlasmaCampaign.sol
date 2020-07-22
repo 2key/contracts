@@ -30,6 +30,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint [] counters;               // Array of counters, described above
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
+
+    mapping(address => uint256) internal referrer2distributionRebalancingRatio;
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
 
 
@@ -53,6 +55,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
 
     uint public rebalancingRatio;          //Initially rebalancing ratio is 1
+    uint public initialRate2KEY;            // Rate at which 2KEY is bought at campaign creation
 
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
 
@@ -308,24 +311,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    /**
-     * @notice          Function to validate that contracts plasma and public are well mirrored
-     * @dev             This function can be called only by maintainer
-     */
-    function validateContractFromMaintainer()
-    public
-    onlyMaintainer
-    {
-        isValidated = true;
-        // Emit the event to link plasma and public for TheGraph
-        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
-            .emitCPCCampaignMirrored(
-                address(this),
-                mirrorCampaignOnPublic
-            );
-    }
-
-
     function getReferrersBalancesAndTotalEarnings(
         address[] _referrerPlasmaList
     )
@@ -426,21 +411,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Will be called only once in a lifetime, immediately after campaign on public network is deployed
-     * @dev             This can be only called by contractor
-     * @param           _mirrorCampaign is the campaign address on public network
-     */
-    function setMirrorCampaign(
-        address _mirrorCampaign
-    )
-    public
-    onlyContractor
-    {
-        require(mirrorCampaignOnPublic == address(0));
-        mirrorCampaignOnPublic = _mirrorCampaign;
-    }
-
-    /**
      * @notice          Function where maintainer will lock the contract
      */
     function lockContractFromMaintainer()
@@ -451,21 +421,24 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-
     /**
      * @notice          Function where maintainer will set on plasma network the total bounty amount
      *                  and how many tokens are paid per conversion for the influencers
      * @dev             This can be only called by maintainer
      * @param           _totalBounty is the total bounty for this campaign
      */
-    function setTotalBounty(
-        uint _totalBounty
+    function setTotalBountyAndInitialRateAndValidateCampaign(
+        uint _totalBounty,
+        uint _initialRate2KEY
     )
     public
     onlyMaintainer
     {
-        require(totalBountyForCampaign == 0);
+        require(isValidated == false);
+
+        isValidated = true;
         totalBountyForCampaign = _totalBounty;
+        initialRate2KEY = _initialRate2KEY;
     }
 
 
@@ -847,14 +820,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             address influencer = activeInfluencers[i];
             referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
             referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
-
-            // Update it payments handler contract
-            ITwoKeyPlasmaBudgetCampaignsPaymentsHandler(
-                getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler")
-            ).setRebalancedReferrerEarnings(
-                influencer,
-                referrerPlasma2Balances2key[influencer]
-            );
         }
     }
 
