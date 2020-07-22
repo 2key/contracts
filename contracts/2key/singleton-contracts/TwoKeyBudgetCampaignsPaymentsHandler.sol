@@ -188,7 +188,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint rebalancingRatio = 10**18;
 
         // If budget added directly as 2KEY it will be 0
-        uint initial2KEYRate = getUint(keccak256(_campaignPlasma2initialRate,campaignPlasma));
+        uint initial2KEYRate = getInitial2KEYRateForCampaign(campaignPlasma);
 
         if(initial2KEYRate > 0) {
             (amountOfTokensOnCampaign, rebalancingRatio)
@@ -528,10 +528,25 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     returns (uint,uint,uint)
     {
         return (
-            getUint(keccak256(_campaignPlasma2initialRate, campaignPlasma)),
+            getInitial2KEYRateForCampaign(campaignPlasma),
             getUint(keccak256(_campaignPlasma2rebalancedRate, campaignPlasma)),
             getUint(keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma))
         );
+    }
+
+
+    /**
+     * @notice          Function to retrieve the initial rate at which 2KEY tokens were bought if
+     *                  were bought at all. Otherwise it returns 0.
+     */
+    function getInitial2KEYRateForCampaign(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_campaignPlasma2initialRate, campaignPlasma));
     }
 
     /**
