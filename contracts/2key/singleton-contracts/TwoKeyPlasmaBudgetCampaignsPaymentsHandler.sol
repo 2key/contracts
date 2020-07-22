@@ -16,6 +16,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     string constant _campaignPlasma2Referrer2rebalancedEarnings = "campaignPlasma2Referrer2rebalancedEarnings";
     string constant _distributionCyclePaymentSubmitted = "distributionCyclePaymentSubmitted";
 
+    string constant _campaignPlasma2Referrer2Balance = "campaignPlasma2Referrer2Balance";
+
     string constant _referrer2CycleId2TotalDistributedInCycle = "referrer2CycleId2TotalDistributedInCycle";
     string constant _referrer2TotalEarnings = "referrer2TotalEarnings";
     string constant _referrer2TotalEarningsPaid = "referrer2TotalEarningsPaid";
@@ -231,6 +233,34 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         setUint(
             keyTotalEarnings,
             getUint(keyTotalEarnings) + balance
+        );
+    }
+
+    /**
+     * @notice          Function to update referrer rewards whenever there're executed conversions
+     *                  which are PAID.
+     *
+     * @param           referrer is the address of referrer
+     * @param           amount is the amount of tokens he earned
+     */
+    function updateReferrerRewards(
+        address referrer,
+        uint amount
+    )
+    external
+    onlyBudgetCampaigns
+    {
+        address campaignPlasma = msg.sender;
+
+        bytes32 key = keccak256(
+            _campaignPlasma2Referrer2Balance,
+            campaignPlasma,
+            referrer
+        );
+
+        setUint(
+            key,
+            amount + getUint(key)
         );
     }
 

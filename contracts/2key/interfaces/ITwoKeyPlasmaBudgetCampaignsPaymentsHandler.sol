@@ -6,4 +6,10 @@ contract ITwoKeyPlasmaBudgetCampaignsPaymentsHandler {
         uint balance
     )
     external;
+
+    function updateReferrerRewards(
+        address referrer,
+        uint amount
+    )
+    external;
 }
