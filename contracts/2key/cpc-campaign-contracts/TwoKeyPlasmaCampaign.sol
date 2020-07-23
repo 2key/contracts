@@ -32,6 +32,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
 
     mapping(address => uint256) internal referrer2distributionRebalancingRatio;
+
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
 
 
@@ -54,10 +55,21 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     address[] activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
 
-    uint public rebalancingRatio;          //Initially rebalancing ratio is 1
+
     uint public initialRate2KEY;            // Rate at which 2KEY is bought at campaign creation
 
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
+
+
+    struct Payment {
+        uint referrerPendingBalance;
+        uint totalRewardsEarnedBeforeRebalancing;
+        uint totalRewardsDistributedAfterRebalancing;
+        uint rebalancingRatio;
+        uint timestamp;
+    }
+
+
 
 
     modifier onlyMaintainer {                       // Modifier restricting calls only to maintainers
@@ -518,7 +530,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint)
     {
-        return referrerPlasma2EarningsPerConversion[_referrerAddress][conversionID].mul(rebalancingRatio).div(10**18);
+//        return referrerPlasma2EarningsPerConversion[_referrerAddress][conversionID].mul(rebalancingRatio).div(10**18);
     }
 
 
@@ -766,34 +778,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 //    }
 
 
-    /**
-     * @notice          Function which will be called only once, after we did rebalancing
-     *                  on the mainchain contract, so it will adjust all values to rebalanced
-     *                  rates. In case there was no
-     *                  rebalancing, calling this function won't change anything in state
-     *                  since rebalancingRatio initialy is 1 ETH and in all modifications it's divided
-     *                  by 1 ETH so it results as neutral for multiplication
-     *
-     * @param           ratio is the rebalancingRatio
-     */
-    function adjustRebalancingResultsAndSetRatio(
-        uint ratio
-    )
-    public
-    onlyMaintainer
-    {
-        // Set the rebalancing ratio
-        rebalancingRatio = ratio;
-
-        uint one_eth = 10**18;
-        // Rebalance fixed values
-        totalBountyForCampaign = totalBountyForCampaign.mul(rebalancingRatio).div(one_eth);
-        bountyPerConversionWei = bountyPerConversionWei.mul(rebalancingRatio).div(one_eth);
-
-        // Rebalance earnings of moderator and influencers
-        moderatorTotalEarnings = moderatorTotalEarnings.mul(rebalancingRatio).div(one_eth);
-        counters[6] = counters[6].mul(rebalancingRatio).div(one_eth);
-    }
 
 
     /**
@@ -818,8 +802,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint one_eth = 10**18;
         for(i=start; i<end; i++) {
             address influencer = activeInfluencers[i];
-            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
-            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
+//            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
+//            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
         }
     }
 

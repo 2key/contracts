@@ -15,12 +15,21 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
     string constant _campaignPlasma2Referrer2rebalancedEarnings = "campaignPlasma2Referrer2rebalancedEarnings";
     string constant _distributionCyclePaymentSubmitted = "distributionCyclePaymentSubmitted";
-
-    string constant _campaignPlasma2Referrer2Balance = "campaignPlasma2Referrer2Balance";
-
     string constant _referrer2CycleId2TotalDistributedInCycle = "referrer2CycleId2TotalDistributedInCycle";
+
+    // Mapping initial rate at which inventory was bought to campaign address
+    string constant _campaignPlasma2InitialRate = "campaignPlasma2InitialRate";
+    // Mapping referrer to all campaigns he participated at
+    string constant _referrer2campaignAddresses = "referrer2campaignAddresses";
+    // Mapping referrer to campaigns to pending balances there
+    string constant _referrer2campaignPlasma2PendingBalance = "referrer2campaignPlasma2PendingBalance";
+    // Mapping referrer to total rebalanced earnings per campaign
+    string constant _referrer2campaignPlasma2totalEarningsRebalanced = "referrer2campaignPlasma2totalEarnings";
+    // Mapping referrer to his total earnings ever
     string constant _referrer2TotalEarnings = "referrer2TotalEarnings";
+    // Mapping referrer to total earnings paid
     string constant _referrer2TotalEarningsPaid = "referrer2TotalEarningsPaid";
+    // Mapping referrer to total earnings pending
     string constant _referrer2TotalEarningsPending = "referrer2TotalEarningsPending";
 
 
@@ -129,6 +138,41 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         PROXY_STORAGE_CONTRACT.setAddress(key,value);
     }
 
+
+    function getAddressArray(
+        bytes32 key
+    )
+    internal
+    view
+    returns (address [])
+    {
+        return PROXY_STORAGE_CONTRACT.getAddressArray(key);
+    }
+
+
+
+    function pushAddressToArray(
+        bytes32 key,
+        address value
+    )
+    internal
+    {
+        address[] memory currentArray = PROXY_STORAGE_CONTRACT.getAddressArray(key);
+
+        uint newLength = currentArray.length + 1;
+
+        address [] memory newArray = new address[](newLength);
+
+        uint i;
+
+        for(i=0; i<newLength - 1; i++) {
+            newArray[i] = currentArray[i];
+        }
+
+        // Append the last value there.
+        newArray[i] = value;
+    }
+
     /**
      * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
      *
@@ -145,52 +189,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
-    function setReferrerTotalEarningsPaid(
-        address referrer,
-        uint amount
-    )
-    internal
-    {
-        bytes32 keyTotalDistributed = keccak256(
-            _referrer2TotalEarningsPaid,
-            referrer
-        );
 
-        // Increment currently total distributed for the amount distributed in this iteration
-        setUint(
-            keyTotalDistributed,
-            getUint(keyTotalDistributed) + amount
-        );
-    }
-
-    function setReferrerEarningsPerDistributionCycle(
-        uint cycleId,
-        address referrer,
-        uint amount
-    )
-    internal
-    {
-        bytes32 key = keccak256(
-            _referrer2CycleId2TotalDistributedInCycle,
-            cycleId,
-            referrer
-        );
-
-        setUint(key, amount);
-    }
-
-    function setDistributionPaymentCycleSubmitted(
-        uint cycleId
-    )
-    internal
-    {
-        bytes32 key = keccak256(
-            _distributionCyclePaymentSubmitted,
-            cycleId
-        );
-
-        setBool(key, true);
-    }
 
     /**
      * ------------------------------------------------
@@ -198,79 +197,23 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
      * ------------------------------------------------
      */
 
-    function setRebalancedReferrerEarnings(
-        address referrer,
-        uint balance
+
+
+
+    function addCampaignInWhichReferrersParticipated(
+        address campaignPlasma,
+        address [] referrerParticipants
     )
-    external
-    onlyBudgetCampaigns
+    public
+    onlyMaintainer
     {
-        address campaignPlasma = msg.sender;
+        uint length = referrerParticipants.length;
 
-        // Generate the key for referrer total earnings from this campaign
-        bytes32 keyTotalPerCampaign = keccak256(
-            _campaignPlasma2Referrer2rebalancedEarnings,
-            campaignPlasma,
-            referrer
-        );
+        uint i;
+        for(i=0; i<length; i++) {
 
-        // Require that referrer didn't receive any rewards from this camapign in the past
-        // Acting as a safeguard agains maintainer double calls
-        require(getUint(keyTotalPerCampaign) == 0);
-
-        // Set referrer total earnings per campaign
-        setUint(
-            keyTotalPerCampaign,
-            balance
-        );
-
-        // Generate the key for referrer total earnings
-        bytes32 keyTotalEarnings = keccak256(
-            _referrer2TotalEarnings, referrer
-        );
-
-        // Add additional amount to referrer total earnings
-        setUint(
-            keyTotalEarnings,
-            getUint(keyTotalEarnings) + balance
-        );
+        }
     }
-
-    /**
-     * @notice          Function to update referrer rewards whenever there're executed conversions
-     *                  which are PAID.
-     *
-     * @param           referrer is the address of referrer
-     * @param           amount is the amount of tokens he earned
-     */
-    function updateReferrerRewards(
-        address referrer,
-        uint amount
-    )
-    external
-    onlyBudgetCampaigns
-    {
-        address campaignPlasma = msg.sender;
-
-        bytes32 key = keccak256(
-            _campaignPlasma2Referrer2Balance,
-            campaignPlasma,
-            referrer
-        );
-
-        setUint(
-            key,
-            amount + getUint(key)
-        );
-    }
-
-
-
-    /**
-     * ------------------------------------------------
-     *        Maintainer function calls
-     * ------------------------------------------------
-     */
 
 
     function updateReferrersBalancesAfterDistribution(
@@ -315,32 +258,6 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
      */
 
     /**
-     * @notice          Function to get referrer pending balance to be distributed
-     *
-     * @param           referrer is the plasma address of referrer
-     */
-    function getReferrerPendingBalance(
-        address referrer
-    )
-    public
-    view
-    returns (uint)
-    {
-        bytes32 keyTotalEarnings = keccak256(
-            _referrer2TotalEarnings,
-            referrer
-        );
-
-        bytes32 keyTotalDistributed = keccak256(
-            _referrer2TotalEarningsPaid,
-            referrer
-        );
-
-        return (getUint(keyTotalEarnings) - getUint(keyTotalDistributed));
-    }
-
-
-    /**
      * @notice          Function to return amount referrer have received in selected
      *                  distribution cycle (id)
      *
@@ -382,6 +299,21 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
 
         return getBool(key);
+    }
+
+    function getCampaignsReferrerParticipatedIn(
+        address referrer
+    )
+    public
+    view
+    returns (address[]) {
+
+        bytes32 key = keccak256(
+            _referrer2campaignAddresses,
+            referrer
+        );
+
+        return getAddressArray(key);
     }
 
 }
