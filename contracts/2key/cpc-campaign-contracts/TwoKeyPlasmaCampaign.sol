@@ -28,6 +28,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      6 totalBountyPaid
      */
     uint [] counters;               // Array of counters, described above
+
+    uint numberOfPaidClicksAchieved;
+    uint numberOfTotalPaidClicksSupported;
+
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
@@ -466,6 +470,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         require(totalBountyForCampaign == 0);
         totalBountyForCampaign = _totalBounty;
+        // It's going to round the value.
+        numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversionWei);
     }
 
 
@@ -627,12 +633,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     /**
      * @notice          Function to get total bounty available and bounty per conversion
      */
-    function getTotalBountyAndBountyPerConversion()
+    function getBountyAndClicksStats()
     public
     view
-    returns (uint,uint)
+    returns (uint,uint,uint,uint)
     {
-        return (totalBountyForCampaign, bountyPerConversionWei);
+        return (totalBountyForCampaign, bountyPerConversionWei, numberOfPaidClicksAchieved, numberOfTotalPaidClicksSupported);
     }
 
 
