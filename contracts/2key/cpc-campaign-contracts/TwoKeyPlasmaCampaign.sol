@@ -53,7 +53,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
 
     uint public rebalancingRatio;          //Initially rebalancing ratio is 1
-
+    bool ratesRebalanced;
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
 
 
@@ -287,7 +287,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint)
     {
-        return (referrerPlasma2Balances2key[_influencer]);
+        return rebalanceValue(referrerPlasma2Balances2key[_influencer]);
     }
 
 
@@ -338,8 +338,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = referrerPlasma2Balances2key[_referrerPlasmaList[i]];
-            referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
+            referrersPendingPlasmaBalance[i] = rebalanceValue(referrerPlasma2Balances2key[_referrerPlasmaList[i]]);
+            referrersTotalEarningsPlasmaBalance[i] = rebalanceValue(referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]]);
         }
 
         return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
@@ -525,8 +525,14 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             earnings[i] = getRebalancedReferrerEarningsPerConversion(_referrerAddress, _conversionIds[i]);
         }
 
-        uint referrerBalance = referrerPlasma2Balances2key[_referrerAddress];
-        return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
+        uint referrerBalance = rebalanceValue(referrerPlasma2Balances2key[_referrerAddress]);
+        return (
+            referrerBalance,
+            rebalanceValue(referrerPlasma2TotalEarnings2key[_referrerAddress]),
+            referrerPlasmaAddressToCounterOfConversions[_referrerAddress],
+            earnings,
+            _referrerAddress
+        );
     }
 
     /**
@@ -610,7 +616,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint index = 0;
         for(index = start; index < end; index++) {
             address influencer = activeInfluencers[index];
-            balances[index] = referrerPlasma2Balances2key[influencer];
+            balances[index] = rebalanceValue(referrerPlasma2Balances2key[influencer]);
             influencers[index] = influencer;
         }
 
@@ -718,7 +724,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (bool,bool,bool,address)
     {
-        bool isReferrer = referrerPlasma2TotalEarnings2key[_address] > 0 ? true : false;
+        bool isReferrer = rebalanceValue(referrerPlasma2TotalEarnings2key[_address]) > 0 ? true : false;
         bool isAddressConverter = isApprovedConverter[_address];
         bool isJoined = getAddressJoinedStatus(_address);
 
@@ -754,15 +760,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         require(isApprovedConverter[_converter] == false);
         isApprovedConverter[_converter] = true;
-    }
-
-
-    /**
-     * @notice          Function to check the balance of the referrer
-     * @param           _referrer we want to check earnings for
-     */
-    function getReferrerBalance(address _referrer) public view returns (uint) {
-        return referrerPlasma2Balances2key[_referrer];
     }
 
 
@@ -809,45 +806,30 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     public
     onlyMaintainer
     {
+        // Safeguard against calling this multiple times!
+        require(ratesRebalanced == false);
+        ratesRebalanced = true;
         // Set the rebalancing ratio
         rebalancingRatio = ratio;
 
-        uint one_eth = 10**18;
         // Rebalance fixed values
-        totalBountyForCampaign = totalBountyForCampaign.mul(rebalancingRatio).div(one_eth);
-        bountyPerConversionWei = bountyPerConversionWei.mul(rebalancingRatio).div(one_eth);
+        totalBountyForCampaign = rebalanceValue(totalBountyForCampaign);
+        bountyPerConversionWei = rebalanceValue(bountyPerConversionWei);
 
         // Rebalance earnings of moderator and influencers
-        moderatorTotalEarnings = moderatorTotalEarnings.mul(rebalancingRatio).div(one_eth);
-        counters[6] = counters[6].mul(rebalancingRatio).div(one_eth);
+        moderatorTotalEarnings = rebalanceValue(moderatorTotalEarnings);
+        counters[6] = rebalanceValue(counters[6]);
     }
 
 
-    /**
-     * @notice          Function where maintainer will adjust influencers earnings
-     *                  after rebalancing is done on the contract. In case there was no
-     *                  rebalancing, calling this function won't change anything in state
-     *                  since rebalancingRatio initialy is 1 ETH and in all modifications it's divided
-     *                  by 1 ETH so it results as neutral for multiplication
-     *
-     * @param           start is the starting index
-     * @param           end is the ending index of influencers
-     */
-    function rebalanceInfluencersValues(
-        uint start,
-        uint end
+    function rebalanceValue(
+        uint value
     )
-    public
-    onlyMaintainer
+    internal
+    view
+    returns (uint)
     {
-        uint i;
-
-        uint one_eth = 10**18;
-        for(i=start; i<end; i++) {
-            address influencer = activeInfluencers[i];
-            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
-            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
-        }
+        return value.mul(rebalancingRatio).div(10**18);
     }
 
 
