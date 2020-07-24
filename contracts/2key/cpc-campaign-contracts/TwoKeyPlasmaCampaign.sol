@@ -60,6 +60,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     address[] activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
 
+    /**
+     * ------------------------------------------------------------------------------------
+     *                          MODIFIERS AND EVENTS
+     * ------------------------------------------------------------------------------------
+     */
 
     // Modifier restricting calls only to maintainers
     modifier onlyMaintainer {
@@ -146,12 +151,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *
      * @param           _from address The address which you want to send tokens from ALREADY converted to plasma
      * @param           _to address The address which you want to transfer to ALREADY converted to plasma
-     * @param           _value uint256 the amount of tokens to be transferred
      */
     function transferFrom(
         address _from,
-        address _to,
-        uint256 _value
+        address _to
     )
     internal
     {
@@ -249,7 +252,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             new_address = influencers[i];
 
             if (received_from[new_address] == 0) {
-                transferFrom(old_address, new_address, 1);
+                transferFrom(old_address, new_address);
             } else {
                 require(received_from[new_address] == old_address);
             }
@@ -419,6 +422,54 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).plasma2ethereum(_address);
     }
 
+    /**
+     * @notice          Internal function to get moderator fee percent
+     * @return          The fee in percentage which is going to moderator -> for now it's undivisible integer
+     */
+    function getModeratorFeePercent()
+    internal
+    view
+    returns (uint)
+    {
+        return ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry")).getModeratorFee();
+    }
+
+
+    /**
+     * @notice          Function to rebalance selected value, assuming both
+     *                  input parameters are in wei units
+     *
+     * @param           value to be rebalanced
+     * @param           ratio is the ratio by which we rebalance
+     */
+    function rebalanceValue(
+        uint value,
+        uint ratio
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return value.mul(10**18).div(ratio);
+    }
+
+    /**
+     * @notice          Function to get rebalancing ratio for selected referrer
+     *                  If the rebalancing ratio is not submitted yet, it will
+     *                  default to 1 ETH
+     *
+     * @param           _referrerPlasma is referrer plasma address
+     */
+    function getRebalancingRatioForReferrer(
+        address _referrerPlasma
+    )
+    internal
+    view
+    returns (uint)
+    {
+        Payment memory p = referrerToPayment[_referrerPlasma];
+        return p.rebalancingRatio != 0 ? p.rebalancingRatio : 10**18;
+    }
 
     /**
      * ------------------------------------------------------------------------------------
@@ -520,6 +571,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
     }
+
 
     /**
      * @notice          Function where maintainer will lock the contract
@@ -632,20 +684,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             rebalancedEarnings
         );
     }
-
-
-    /**
-     * @notice          Internal function to get moderator fee percent
-     * @return          The fee in percentage which is going to moderator -> for now it's undivisible integer
-     */
-    function getModeratorFeePercent()
-    internal
-    view
-    returns (uint)
-    {
-        return ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry")).getModeratorFee();
-    }
-
 
     /**
      * @notice          Function to get available bounty at the moment
@@ -809,40 +847,4 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         totalBountyForCampaign = counters[6];
     }
 
-
-    /**
-     * @notice          Function to rebalance selected value, assuming both
-     *                  input parameters are in wei units
-     *
-     * @param           value to be rebalanced
-     * @param           ratio is the ratio by which we rebalance
-     */
-    function rebalanceValue(
-        uint value,
-        uint ratio
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return value.mul(10**18).div(ratio);
-    }
-
-    /**
-     * @notice          Function to get rebalancing ratio for selected referrer
-     *                  If the rebalancing ratio is not submitted yet, it will
-     *                  default to 1 ETH
-     *
-     * @param           _referrerPlasma is referrer plasma address
-     */
-    function getRebalancingRatioForReferrer(
-        address _referrerPlasma
-    )
-    internal
-    view
-    returns (uint)
-    {
-        Payment memory p = referrerToPayment[_referrerPlasma];
-        return p.rebalancingRatio != 0 ? p.rebalancingRatio : 10**18;
-    }
 }
