@@ -45,7 +45,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         contractor = _contractor;                                       // Assigning address of contractor
         moderator = _moderator;                                         // Assigning address of moderator
         targetUrl = _url;                                               // Set the URL being tracked for the campaign
-        contractorPublicAddress = ethereumOf(_contractor);              // Set contractor contractorPublicAddress
         campaignStartTime = numberValues[0];                            // Set when campaign starts
         campaignEndTime = numberValues[1];                              // Set when campaign ends
         conversionQuota = numberValues[2];                              // Set conversion quota
@@ -70,7 +69,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     function convert(
         bytes signature
     )
-    isCampaignValidated
+    isBountyAdded
     public
     {
         // Require that this is his first conversion
@@ -96,7 +95,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         //Emit conversion event through TwoKeyPlasmaEvents
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
-            mirrorCampaignOnPublic,
+            address(0),
             conversionId,
             contractor,
             msg.sender
@@ -114,7 +113,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     )
     public
     onlyMaintainer
-    isCampaignValidated
+    isBountyAdded
     {
         //Check if converter don't have any executed conversions before and approve him
         oneTimeApproveConverter(converter);
@@ -139,8 +138,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
             if(
                 getNumberOfUsersToContractor(converter) > 0 &&
-                counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign &&
-                bountyPerConversionWei > 0
+                counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign
             ) {
                 //Get moderator fee percentage
                 uint moderatorFeePercent = getModeratorFeePercent();
@@ -191,7 +189,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     )
     public
     onlyMaintainer
-    isCampaignValidated
+    isBountyAdded
     {
         require(isApprovedConverter[converter] == false);
 

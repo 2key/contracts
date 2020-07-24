@@ -18,6 +18,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint constant N = 2048;  //constant number
     IncentiveModel incentiveModel;  //Incentive model for rewards
 
+    struct Payment {
+        uint rebalancingRatio;
+        uint timestamp;
+    }
+
     /**
      0 pendingConverters
      1 approvedConverters
@@ -28,61 +33,72 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      6 totalBountyPaid
      */
     uint [] counters;               // Array of counters, described above
+
+    // Referrer necessary data
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
-
-    mapping(address => uint256) internal referrer2distributionRebalancingRatio;
-
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
+    mapping(address => Payment) public referrerToPayment;
 
-
+    // Converter necessary data
     mapping(address => bool) isApprovedConverter;               // Determinator if converter has already 1 successful conversion
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to
 
+    // public available integers
     bool public isContractLocked;
-
-    bool public isValidated;                        // Validator if campaign is validated from maintainer side
-    address public contractorPublicAddress;         // Contractor address on public chain
-    address public mirrorCampaignOnPublic;          // Address of campaign deployed to public eth network
     uint public moderatorTotalEarnings;             // Total rewards which are going to moderator
+    uint public initialRate2KEY;                   // Rate at which 2KEY is bought at campaign creation
 
+    // Internal contract values
     uint campaignStartTime;                         // Time when campaign start
     uint campaignEndTime;                           // Time when campaign ends
     uint totalBountyForCampaign;                    // Total 2key tokens amount staked for the campaign
     uint bountyPerConversionWei;                    // Amount of 2key tokens which are going to be paid per conversion
 
+
     address[] activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
 
 
-    uint public initialRate2KEY;            // Rate at which 2KEY is bought at campaign creation
-
-    event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
-
-
-    struct Payment {
-        uint referrerPendingBalance;
-        uint totalRewardsEarnedBeforeRebalancing;
-        uint totalRewardsDistributedAfterRebalancing;
-        uint rebalancingRatio;
-        uint timestamp;
-    }
-
-
-
-
-    modifier onlyMaintainer {                       // Modifier restricting calls only to maintainers
+    // Modifier restricting calls only to maintainers
+    modifier onlyMaintainer {
         require(isMaintainer(msg.sender));
         _;
     }
 
-
-    modifier isCampaignValidated {                  // Checking if the campaign is created through TwoKeyPlasmaFactory
-        require(isValidated == true);
+    // Checking if the campaign is created through TwoKeyPlasmaFactory
+    modifier isBountyAdded {
+        require(totalBountyForCampaign > 0);
         _;
     }
 
+    // Event which will be fired every time conversion is created
+    event ConversionCreated(
+        uint conversionId
+    );
+
+    /**
+     * ------------------------------------------------------------------------------------
+     *                          Internal contract functions
+     * ------------------------------------------------------------------------------------
+     */
+
+    /**
+     * @notice          Function to check if the user is maintainer or not
+     * @param           _address is the address of the user
+     * @return          true/false depending if he's maintainer or not
+     */
+    function isMaintainer(
+        address _address
+    )
+    internal
+    view
+    returns (bool)
+    {
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaMaintainersRegistry");
+        return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(_address);
+    }
 
     /**
      * @notice          Function to check if campaign is active in terms of time set
@@ -108,6 +124,19 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     returns (bool)
     {
         return isContractLocked;
+    }
+
+    /**
+     * @notice          Internal function to make converter approved if it's his 1st conversion
+     * @param           _converter is the plasma address of the converter
+     */
+    function oneTimeApproveConverter(
+        address _converter
+    )
+    internal
+    {
+        require(isApprovedConverter[_converter] == false);
+        isApprovedConverter[_converter] = true;
     }
 
 
@@ -154,6 +183,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         }
         public_link_key[me] = new_public_key;
     }
+
+
 
 
     /**
@@ -251,6 +282,116 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return getNumberOfUsersToContractor(_converter);
     }
 
+    function updateReputationPointsOnConversionExecutedEvent(
+        address converter
+    )
+    internal
+    {
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+        .updateReputationPointsForExecutedConversion(converter, contractor);
+    }
+
+    function updateReputationPointsOnConversionRejectedEvent(
+        address converter
+    )
+    internal
+    {
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+        .updateReputationPointsForRejectedConversions(converter, contractor);
+    }
+
+    function updateRewardsBetweenInfluencers(
+        address _converter,
+        uint _conversionId,
+        uint _bountyForDistribution
+    )
+    internal
+    returns (uint)
+    {
+        //Get all the influencers
+        address[] memory influencers = getReferrers(_converter);
+
+        //Get array length
+        uint numberOfInfluencers = influencers.length;
+
+        uint i;
+        uint reward;
+        if(incentiveModel == IncentiveModel.VANILLA_AVERAGE) {
+            reward = IncentiveModels.averageModelRewards(_bountyForDistribution, numberOfInfluencers);
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], reward, _conversionId);
+            }
+        } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
+            uint rewardForLast;
+            // Calculate reward for regular ones and for the last
+            (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(_bountyForDistribution, numberOfInfluencers);
+            if(numberOfInfluencers > 0) {
+                //Update equal rewards to all influencers but last
+                for(i=0; i<numberOfInfluencers - 1; i++) {
+                    updateReferrerMappings(influencers[i], reward, _conversionId);
+                }
+                //Update reward for last
+                updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
+            }
+        } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
+            // Get rewards per referrer
+            uint [] memory rewards = IncentiveModels.powerLawRewards(_bountyForDistribution, numberOfInfluencers, 2);
+            //Iterate through all referrers and distribute rewards
+            for(i=0; i<numberOfInfluencers; i++) {
+                updateReferrerMappings(influencers[i], rewards[i], _conversionId);
+            }
+        }
+        return numberOfInfluencers;
+    }
+
+    function updateReferrerMappings(
+        address referrerPlasma,
+        uint reward,
+        uint conversionId
+    )
+    internal
+    {
+        checkIsActiveInfluencerAndAddToQueue(referrerPlasma);
+        referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
+        referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
+        referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
+        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
+    }
+
+
+    function checkIsActiveInfluencerAndAddToQueue(
+        address _influencer
+    )
+    internal
+    {
+        if(!isActiveInfluencer[_influencer]) {
+            activeInfluencers.push(_influencer);
+            isActiveInfluencer[_influencer] = true;
+        }
+    }
+
+
+    /**
+     * @notice           Function to get ethereum address for passed plasma address
+     * @param            _address is the address we're getting ETH address for
+     */
+    function ethereumOf(
+        address _address
+    )
+    internal
+    view
+    returns (address)
+    {
+        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
+        return ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).plasma2ethereum(_address);
+    }
+
+
+    /**
+     * ------------------------------------------------------------------------------------
+     *                          Public getters
+     * ------------------------------------------------------------------------------------
+     */
 
     /**
      * @notice 		    Function to get number of influencers between submimtted user and contractor
@@ -306,23 +447,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    /**
-     * @notice          Function to check if the user is maintainer or not
-     * @param           _address is the address of the user
-     * @return          true/false depending if he's maintainer or not
-     */
-    function isMaintainer(
-        address _address
-    )
-    internal
-    view
-    returns (bool)
-    {
-        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaMaintainersRegistry");
-        return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(_address);
-    }
-
-
     function getReferrersBalancesAndTotalEarnings(
         address[] _referrerPlasmaList
     )
@@ -340,85 +464,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         }
 
         return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
-    }
-
-
-    function updateRewardsBetweenInfluencers(
-        address _converter,
-        uint _conversionId,
-        uint _bountyForDistribution
-    )
-    internal
-    returns (uint)
-    {
-        //Get all the influencers
-        address[] memory influencers = getReferrers(_converter);
-
-        //Get array length
-        uint numberOfInfluencers = influencers.length;
-
-        uint i;
-        uint reward;
-        if(incentiveModel == IncentiveModel.VANILLA_AVERAGE) {
-            reward = IncentiveModels.averageModelRewards(_bountyForDistribution, numberOfInfluencers);
-            for(i=0; i<numberOfInfluencers; i++) {
-                updateReferrerMappings(influencers[i], reward, _conversionId);
-            }
-        } else if (incentiveModel == IncentiveModel.VANILLA_AVERAGE_LAST_3X) {
-            uint rewardForLast;
-            // Calculate reward for regular ones and for the last
-            (reward, rewardForLast) = IncentiveModels.averageLast3xRewards(_bountyForDistribution, numberOfInfluencers);
-            if(numberOfInfluencers > 0) {
-                //Update equal rewards to all influencers but last
-                for(i=0; i<numberOfInfluencers - 1; i++) {
-                    updateReferrerMappings(influencers[i], reward, _conversionId);
-                }
-                //Update reward for last
-                updateReferrerMappings(influencers[numberOfInfluencers-1], rewardForLast, _conversionId);
-            }
-        } else if(incentiveModel == IncentiveModel.VANILLA_POWER_LAW) {
-            // Get rewards per referrer
-            uint [] memory rewards = IncentiveModels.powerLawRewards(_bountyForDistribution, numberOfInfluencers, 2);
-            //Iterate through all referrers and distribute rewards
-            for(i=0; i<numberOfInfluencers; i++) {
-                updateReferrerMappings(influencers[i], rewards[i], _conversionId);
-            }
-        } else if (incentiveModel == IncentiveModel.NO_REFERRAL_REWARD) {
-            for(i=0; i<numberOfInfluencers; i++) {
-                //Count conversion from referrer
-                checkIsActiveInfluencerAndAddToQueue(influencers[i]);
-                referrerPlasmaAddressToCounterOfConversions[influencers[i]] = referrerPlasmaAddressToCounterOfConversions[influencers[i]].add(1);
-            }
-        }
-
-        return numberOfInfluencers;
-    }
-
-
-    function updateReferrerMappings(
-        address referrerPlasma,
-        uint reward,
-        uint conversionId
-    )
-    internal
-    {
-        checkIsActiveInfluencerAndAddToQueue(referrerPlasma);
-        referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
-        referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
-        referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
-        referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
-    }
-
-
-    function checkIsActiveInfluencerAndAddToQueue(
-        address _influencer
-    )
-    internal
-    {
-        if(!isActiveInfluencer[_influencer]) {
-            activeInfluencers.push(_influencer);
-            isActiveInfluencer[_influencer] = true;
-        }
     }
 
 
@@ -446,9 +491,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     public
     onlyMaintainer
     {
-        require(isValidated == false);
-
-        isValidated = true;
+        require(totalBountyForCampaign == 0);
         totalBountyForCampaign = _totalBounty;
         initialRate2KEY = _initialRate2KEY;
     }
@@ -530,7 +573,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint)
     {
-//        return referrerPlasma2EarningsPerConversion[_referrerAddress][conversionID].mul(rebalancingRatio).div(10**18);
+        return referrerPlasma2EarningsPerConversion[_referrerAddress][conversionID].mul(rebalancingRatio).div(10**18);
     }
 
 
@@ -636,22 +679,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice           Function to get ethereum address for passed plasma address
-     * @param            _address is the address we're getting ETH address for
-     */
-    function ethereumOf(
-        address _address
-    )
-    internal
-    view
-    returns (address)
-    {
-        address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry");
-        return ITwoKeyPlasmaRegistry(twoKeyPlasmaRegistry).plasma2ethereum(_address);
-    }
-
-
-    /**
      * @notice          Function to get value of all counters
      */
     function getCounters()
@@ -729,29 +756,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Internal function to make converter approved if it's his 1st conversion
-     * @param           _converter is the plasma address of the converter
-     */
-    function oneTimeApproveConverter(
-        address _converter
-    )
-    internal
-    {
-        require(isApprovedConverter[_converter] == false);
-        isApprovedConverter[_converter] = true;
-    }
-
-
-    /**
-     * @notice          Function to check the balance of the referrer
-     * @param           _referrer we want to check earnings for
-     */
-    function getReferrerBalance(address _referrer) public view returns (uint) {
-        return referrerPlasma2Balances2key[_referrer];
-    }
-
-
-    /**
      * @notice          Function to update state of the contract that the bounty is withdrawn
      * @dev             Only contractor can update this function
      */
@@ -762,193 +766,4 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         // Make total bounty to be only what is for influencers, so another getter will return 0
         totalBountyForCampaign = counters[6];
     }
-
-
-//    /**
-//     * @notice          Function to return total bounty for campaign,
-//     *                  how much of the bounty is available and how much
-//     *                  of the total bounty is being paid
-//     */
-//    function getAvailableBountyForCampaign()
-//    public
-//    view
-//    returns (uint,uint,uint)
-//    {
-//        return (totalBountyForCampaign,totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6])), moderatorTotalEarnings.add(counters[6]));
-//    }
-
-
-
-
-    /**
-     * @notice          Function where maintainer will adjust influencers earnings
-     *                  after rebalancing is done on the contract. In case there was no
-     *                  rebalancing, calling this function won't change anything in state
-     *                  since rebalancingRatio initialy is 1 ETH and in all modifications it's divided
-     *                  by 1 ETH so it results as neutral for multiplication
-     *
-     * @param           start is the starting index
-     * @param           end is the ending index of influencers
-     */
-    function rebalanceInfluencersValues(
-        uint start,
-        uint end
-    )
-    public
-    onlyMaintainer
-    {
-        uint i;
-
-        uint one_eth = 10**18;
-        for(i=start; i<end; i++) {
-            address influencer = activeInfluencers[i];
-//            referrerPlasma2Balances2key[influencer] = referrerPlasma2Balances2key[influencer].mul(rebalancingRatio).div(one_eth);
-//            referrerPlasma2TotalEarnings2key[influencer] = referrerPlasma2TotalEarnings2key[influencer].mul(rebalancingRatio).div(one_eth);
-        }
-    }
-
-
-    function updateReputationPointsOnConversionExecutedEvent(
-        address converter
-    )
-    internal
-    {
-        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
-            .updateReputationPointsForExecutedConversion(converter, contractor);
-    }
-
-    function updateReputationPointsOnConversionRejectedEvent(
-        address converter
-    )
-    internal
-    {
-        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
-            .updateReputationPointsForRejectedConversions(converter, contractor);
-    }
-
-
-    /**
-     * @notice          compute a merkle proof that influencer and amount are in one of the merkle_roots.
-     *                  this function can be called only after you called computeMerkleRoots one or more times until merkle_root is not 2
-     * @param           _influencer the influencer for which we want to get a Merkle proof
-     * @return          index to merkle_roots
-     * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_roots[index],
-     *                  which prove that (_influencer,amount) are inside the root.
-     *
-     *                  The returned proof is only the first part of a proof to merkle_root.
-     *                  The idea is that the code here does some of the work and the dApp code does the rest
-     *                  of the work to get a full proof
-     *                  See https://github.com/2key/web3-alpha/commit/105b0b17ab3d20662b1e2171d84be25089962b68
-     */
-    //    function getMerkleProofBaseFromRoots(
-    //        address _influencer
-    //    )
-    //    internal
-    //    view
-    //    returns (uint, bytes32[])
-    //    {
-    //
-    //        if (isActiveInfluencer[_influencer] == false) {
-    //            return (0, new bytes32[](0));
-    //        }
-    //
-    //        uint influencer_idx = activeInfluencer2idx[_influencer];
-    //
-    //        uint start = N * (influencer_idx / N);
-    //
-    //        influencer_idx = influencer_idx.sub(start);
-    //
-    //        uint n = activeInfluencers.length.sub(start);
-    //
-    //        if (n > N) {
-    //            n = N;
-    //        }
-    //
-    //        bytes32[] memory hashes = new bytes32[](n);
-    //        uint i;
-    //
-    //        for (i = 0; i < n; i++) {
-    //            address influencer = activeInfluencers[i+start];
-    //            uint amount = referrerPlasma2Balances2key[influencer];
-    //            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-    //        }
-    //
-    //        return (start/N, MerkleProof.getMerkleProofInternal(influencer_idx, hashes));
-    //    }
-
-    /**
-     * @notice          compute a merkle proof that influencer and amount are in the the merkle_root.
-     *                  this function can be called only after you called computeMerkleRoots one or
-     *                  more times until merkle_root is not 2
-     * @return          proof - array of hashes that can be used with _influencer and amount to compute the merkle_root,
-     *                  which prove that (_influencer,amount) are inside the root.
-     */
-    //    function getMerkleProofFromRoots()
-    //    public
-    //    view
-    //    returns (bytes32[])
-    //    {
-    //        address _influencer = msg.sender;
-    //        bytes32[] memory proof0;
-    //        uint start;
-    //        (start, proof0) = getMerkleProofBaseFromRoots(_influencer);
-    //        if (proof0.length == 0) {
-    //            return proof0; // return failury
-    //        }
-    //        bytes32[] memory proof1 = MerkleProof.getMerkleProofInternal(start, merkle_roots);
-    //        bytes32[] memory proof = new bytes32[](proof0.length + proof1.length);
-    //        uint i;
-    //        for (i = 0; i < proof0.length; i++) {
-    //            proof[i] = proof0[i];
-    //        }
-    //        for (i = 0; i < proof1.length; i++) {
-    //            proof[i+proof0.length] = proof1[i];
-    //        }
-    //
-    //        return proof;
-    //    }
-
-
-    //    /**
-    //     * @notice          compute a merkle root of the active influencers and the amount they received.
-    //     *                  (active influencer is an influencer that received a bounty)
-    //     *                  this function needs to be called many times until merkle_root is not 2.
-    //     *                  In each call a merkle tree of up to N leaves (pair of active-influencer and amount) is
-    //     *                  computed and the result is added to merkle_roots. N should be a power of 2 for example N=2048.
-    //     *                  On all calls you have to use the same N value.
-    //     *                  Once you the leaves are computed you need to call this function one more time to compute the
-    //     *                  merkle_root of the entire tree from the intermidate results in merkle_roots
-    //     */
-    //    function computeMerkleRoots()
-    //    public
-    //    onlyMaintainer
-    //    {
-    //        require(merkleRoot == 0 || merkleRoot == 2, 'merkle root already defined');
-    //
-    //        uint numberOfInfluencers = activeInfluencers.length;
-    //        if (numberOfInfluencers == 0) {
-    //            merkleRoot = bytes32(1);
-    //            return;
-    //        }
-    //        merkleRoot = bytes32(2); // indicate that the merkle root is being computed
-    //
-    //        uint start = merkle_roots.length * N;
-    //        if (start >= numberOfInfluencers) {
-    //            merkleRoot = MerkleProof.computeMerkleRootInternal(merkle_roots);
-    //            return;
-    //        }
-    //
-    //        uint n = numberOfInfluencers - start;
-    //        if (n > N) {
-    //            n = N;
-    //        }
-    //        bytes32[] memory hashes = new bytes32[](n);
-    //        for (uint i = 0; i < n; i++) {
-    //            address influencer = activeInfluencers[i+start];
-    //            uint amount = referrerPlasma2Balances2key[influencer];
-    //            hashes[i] = keccak256(abi.encodePacked(influencer,amount));
-    //        }
-    //        merkle_roots.push(MerkleProof.computeMerkleRootInternal(hashes));
-    //    }
-
 }
