@@ -468,17 +468,22 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     /**
      * @notice          Function to get balance of influencer for his plasma address
-     * @param           _influencer is the plasma address of influencer
+     * @param           _referrer is the plasma address of influencer
      * @return          balance in 2KEY wei's units
      */
     function getReferrerPlasmaBalance(
-        address _influencer
+        address _referrer
     )
     public
     view
     returns (uint)
     {
-        return (referrerPlasma2Balances2key[_influencer]);
+        return (
+            rebalanceValue(
+                referrerPlasma2Balances2key[_referrer],
+                getRebalancingRatioForReferrer(_referrer)
+            )
+        );
     }
 
 
@@ -498,8 +503,19 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
 
         for (uint i=0; i<numberOfAddresses; i++){
-            referrersPendingPlasmaBalance[i] = referrerPlasma2Balances2key[_referrerPlasmaList[i]];
-            referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings2key[_referrerPlasmaList[i]];
+            address referrer = _referrerPlasmaList[i];
+
+            uint referrerRebalancingRatio = getRebalancingRatioForReferrer(referrer);
+
+            referrersPendingPlasmaBalance[i] = rebalanceValue(
+                referrerPlasma2Balances2key[referrer],
+                referrerRebalancingRatio
+            );
+
+            referrersTotalEarningsPlasmaBalance[i] = rebalanceValue(
+                referrerPlasma2TotalEarnings2key[referrer],
+                referrerRebalancingRatio
+            );
         }
 
         return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
@@ -514,6 +530,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         isContractLocked = true;
     }
+
+
     /**
      * @notice          Function where maintainer will set on plasma network the total bounty amount
      *                  and how many tokens are paid per conversion for the influencers
@@ -545,6 +563,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     returns (uint)
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler"));
+
         uint rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
         Payment memory p = Payment(rebalancingRatio, block.timestamp);
         referrerToPayment[_referrer] = p;
@@ -591,24 +610,29 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     public
     view
-    returns (uint,uint,uint,uint[],address)
+    returns (uint,uint,uint,uint[])
     {
         uint len = _conversionIds.length;
-        uint[] memory earnings = new uint[](len);
+        uint[] memory rebalancedEarnings = new uint[](len);
 
         uint rebalancingRatioForInfluencer = getRebalancingRatioForReferrer(_referrerAddress);
 
         for(uint i=0; i<len; i++) {
             // Since this value is only accessible from here, we won't change it in the state but in the getter
-            earnings[i] = rebalanceValue(
+            rebalancedEarnings[i] = rebalanceValue(
                 referrerPlasma2EarningsPerConversion[_referrerAddress][i],
                 rebalancingRatioForInfluencer
             );
         }
 
-        uint referrerBalance = referrerPlasma2Balances2key[_referrerAddress];
-        return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
+        return (
+            rebalanceValue(referrerPlasma2Balances2key[_referrerAddress], rebalancingRatioForInfluencer),
+            rebalanceValue(referrerPlasma2TotalEarnings2key[_referrerAddress], rebalancingRatioForInfluencer),
+            referrerPlasmaAddressToCounterOfConversions[_referrerAddress],
+            rebalancedEarnings
+        );
     }
+
 
     /**
      * @notice          Internal function to get moderator fee percent
@@ -649,6 +673,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (address[], uint[])
     {
+        //TODO: Need to check in which scope this function will be called
         uint[] memory balances = new uint[](end-start);
         address[] memory influencers = new address[](end-start);
 
@@ -785,6 +810,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
+    /**
+     * @notice          Function to rebalance selected value, assuming both
+     *                  input parameters are in wei units
+     *
+     * @param           value to be rebalanced
+     * @param           ratio is the ratio by which we rebalance
+     */
     function rebalanceValue(
         uint value,
         uint ratio
@@ -796,7 +828,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return value.mul(10**18).div(ratio);
     }
 
-
+    /**
+     * @notice          Function to get rebalancing ratio for selected referrer
+     *                  If the rebalancing ratio is not submitted yet, it will
+     *                  default to 1 ETH
+     *
+     * @param           _referrerPlasma is referrer plasma address
+     */
     function getRebalancingRatioForReferrer(
         address _referrerPlasma
     )
