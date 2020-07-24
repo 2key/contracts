@@ -77,7 +77,7 @@ library MerkleProof {
     bytes32[] hashes
   )
   internal
-  view
+  pure
   returns (bytes32[])
   {
     uint numberOfInfluencers = hashes.length;
