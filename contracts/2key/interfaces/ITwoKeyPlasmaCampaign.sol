@@ -1,6 +1,18 @@
 pragma solidity ^0.4.24;
 
 contract ITwoKeyPlasmaCampaign {
-    uint public initialRate2KEY;            // Rate at which 2KEY is bought at campaign creation
+    function computeAndSetRebalancingRatioForReferrer(
+        address _referrer,
+        uint _currentRate2KEY
+    )
+    public
+    returns (uint);
 
+    function getActiveInfluencers(
+        uint start,
+        uint end
+    )
+    public
+    view
+    returns (address[]);
 }

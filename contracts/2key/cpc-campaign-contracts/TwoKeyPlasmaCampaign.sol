@@ -699,34 +699,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Function to get influencers addresses and balances
-     * @param           start is the starting index in the array
-     * @param           end is the ending index of the campaign
-     */
-    function getInfluencersAndBalances(
-        uint start,
-        uint end
-    )
-    public
-    view
-    returns (address[], uint[])
-    {
-        //TODO: Need to check in which scope this function will be called
-        uint[] memory balances = new uint[](end-start);
-        address[] memory influencers = new address[](end-start);
-
-        uint index = 0;
-        for(index = start; index < end; index++) {
-            address influencer = activeInfluencers[index];
-            balances[index] = referrerPlasma2Balances2key[influencer];
-            influencers[index] = influencer;
-        }
-
-        return (influencers, balances);
-    }
-
-
-    /**
      * @notice          Function to get total bounty available and bounty per conversion
      */
     function getTotalBountyAndBountyPerConversion()
@@ -773,12 +745,25 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     /**
      * @notice          Function to get all active influencers
      */
-    function getActiveInfluencers()
+    function getActiveInfluencers(
+        uint start,
+        uint end
+    )
     public
     view
     returns (address[])
     {
-        return activeInfluencers;
+        address[] memory influencers = new address[](end-start);
+
+        uint index = 0;
+        uint i = 0;
+        for(i = start; i < end; i++) {
+            address influencer = activeInfluencers[index];
+            influencers[i] = influencer;
+            i++;
+        }
+
+        return influencers;
     }
 
 

@@ -6,6 +6,7 @@ import "../interfaces/storage-contracts/ITwoKeyPlasmaBudgetCampaignsPaymentsHand
 import "../interfaces/ITwoKeyPlasmaFactory.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeyPlasmaCampaign.sol";
 
 contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
@@ -198,22 +199,36 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
      */
 
 
-
-
-    function addCampaignInWhichReferrersParticipated(
+    /**
+     * @notice          Function where maintainer will submit N calls and store campaign
+     *                  inside array of campaigns for influencers that it's not distributed but ended
+     *
+     * @param           campaignPlasma is the plasma address of campaign
+     * @param           start is the start index
+     * @param           end is the ending index
+     */
+    function markCampaignAsDoneAndAssignToActiveInfluencers(
         address campaignPlasma,
-        address [] referrerParticipants
+        uint start,
+        uint end
     )
     public
     onlyMaintainer
     {
-        uint length = referrerParticipants.length;
+        address[] memory influencers = ITwoKeyPlasmaCampaign(campaignPlasma).getActiveInfluencers(start,end);
 
         uint i;
-        for(i=0; i<length; i++) {
+        uint len = influencers.length;
 
+        for(i=0; i<len; i++) {
+            bytes32 key = keccak256(
+                _referrer2campaignAddresses,
+                influencers[i]
+            );
+            pushAddressToArray(key, campaignPlasma);
         }
     }
+
 
 
     /**
