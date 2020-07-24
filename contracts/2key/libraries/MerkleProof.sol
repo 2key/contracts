@@ -45,6 +45,7 @@ library MerkleProof {
     bytes32[] hashes
   )
   internal
+  pure
   returns (bytes32)
   {
     uint n = hashes.length;
