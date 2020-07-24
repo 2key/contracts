@@ -126,6 +126,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return isContractLocked;
     }
 
+
     /**
      * @notice          Internal function to make converter approved if it's his 1st conversion
      * @param           _converter is the plasma address of the converter
@@ -163,6 +164,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         received_from[_to] = _from;
     }
 
+
     /**
      * @notice          Private function to set public link key to plasma address
      *
@@ -183,8 +185,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         }
         public_link_key[me] = new_public_key;
     }
-
-
 
 
     /**
@@ -261,6 +261,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         }
     }
 
+
     /**
      * @notice 		    Function which will distribute arcs if that is necessary
      *
@@ -282,6 +283,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return getNumberOfUsersToContractor(_converter);
     }
 
+
+    /**
+     * @notice          Function to call TwoKeyPlasmaReputationRegistry contract and update
+     *                  reputation points for the influencers after conversion is executed
+     *
+     * @param           converter is the address of the converter which got rejected
+     */
     function updateReputationPointsOnConversionExecutedEvent(
         address converter
     )
@@ -291,6 +299,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         .updateReputationPointsForExecutedConversion(converter, contractor);
     }
 
+
+    /**
+     * @notice          Function to call TwoKeyPlasmaReputationRegistry contract and update
+     *                  reputation points for the influencers after conversion is rejected
+     *
+     * @param           converter is the address of the converter which got rejected
+     */
     function updateReputationPointsOnConversionRejectedEvent(
         address converter
     )
@@ -300,6 +315,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         .updateReputationPointsForRejectedConversions(converter, contractor);
     }
 
+    /**
+     * @notice          Function to update rewards between influencers when conversion gets executed
+     *
+     * @param           _converter is the address of converter
+     * @param           _conversionId is the ID of conversion
+     * @param           _bountyForDistribution is the total bounty for distribution for that conversion
+     */
     function updateRewardsBetweenInfluencers(
         address _converter,
         uint _conversionId,
@@ -344,6 +366,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return numberOfInfluencers;
     }
 
+
+    /**
+     * @notice          Internal function to update referrer mappings
+     * @param           referrerPlasma is referrer plasma address
+     * @param           reward is the reward referrer received
+     * @param           conversionId is the id of conversion for which influencer gets rewarded
+     */
     function updateReferrerMappings(
         address referrerPlasma,
         uint reward,
@@ -359,6 +388,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
+    /**
+     * @notice          Function to check if influencer is persisted on the contract and add him to queue
+     * @param           _influencer is the address of influencer
+     */
     function checkIsActiveInfluencerAndAddToQueue(
         address _influencer
     )
@@ -417,6 +450,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return counter;
     }
 
+
     /**
      * @notice          Function to get public link key of an address
      * @param           me is the address we're checking public link key
@@ -430,6 +464,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         return public_link_key[me];
     }
+
 
     /**
      * @notice          Function to get balance of influencer for his plasma address
@@ -447,6 +482,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
+    /**
+     * @notice          Function to get referrers balances and total earnings
+     * @param           _referrerPlasmaList the list of referrers
+     */
     function getReferrersBalancesAndTotalEarnings(
         address[] _referrerPlasmaList
     )
@@ -466,7 +505,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
     }
 
-
     /**
      * @notice          Function where maintainer will lock the contract
      */
@@ -476,8 +514,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         isContractLocked = true;
     }
-
-
     /**
      * @notice          Function where maintainer will set on plasma network the total bounty amount
      *                  and how many tokens are paid per conversion for the influencers
@@ -496,6 +532,25 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         initialRate2KEY = _initialRate2KEY;
     }
 
+
+    /**
+     * @notice          At the moment when we want to do payouts for influencers, we
+     *                  rebalance their values against price at which tokens were bought.
+     */
+    function computeAndSetRebalancingRatioForReferrer(
+        address _referrer,
+        uint _currentRate2KEY
+    )
+    public
+    returns (uint)
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler"));
+        uint rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
+        Payment memory p = Payment(rebalancingRatio, block.timestamp);
+        referrerToPayment[_referrer] = p;
+
+        return rebalancingRatio;
+    }
 
     /**
      * @notice          Function to return referrers participated in the referral chain
@@ -528,70 +583,32 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *                  of conversions created from their link
      *
      * @param           _referrerAddress is the address of the referrer (plasma address)
-     * @param           _sig is the signature of the referrer
      * @param           _conversionIds is the array of conversion ids we want earnings for
      */
     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
         address _referrerAddress,
-        bytes _sig,
         uint[] _conversionIds
     )
     public
     view
     returns (uint,uint,uint,uint[],address)
     {
-
-        if(_sig.length > 0) {
-            _referrerAddress = recover(_sig);
-        }
-
         uint len = _conversionIds.length;
         uint[] memory earnings = new uint[](len);
 
+        uint rebalancingRatioForInfluencer = getRebalancingRatioForReferrer(_referrerAddress);
+
         for(uint i=0; i<len; i++) {
             // Since this value is only accessible from here, we won't change it in the state but in the getter
-            earnings[i] = getRebalancedReferrerEarningsPerConversion(_referrerAddress, _conversionIds[i]);
+            earnings[i] = rebalanceValue(
+                referrerPlasma2EarningsPerConversion[_referrerAddress][i],
+                rebalancingRatioForInfluencer
+            );
         }
 
         uint referrerBalance = referrerPlasma2Balances2key[_referrerAddress];
         return (referrerBalance, referrerPlasma2TotalEarnings2key[_referrerAddress], referrerPlasmaAddressToCounterOfConversions[_referrerAddress], earnings, _referrerAddress);
     }
-
-    /**
-     * @notice          Internal function to return rebalanced earning for conversion per influencer
-     *                  That is the only value which is not changed in the contract state itself, since
-     *                  it will require very complex transaction computation
-     *
-     * @param           _referrerAddress is the address of referrer
-     * @param           conversionID is the id of conversion
-     */
-    function getRebalancedReferrerEarningsPerConversion(
-        address _referrerAddress,
-        uint conversionID
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return referrerPlasma2EarningsPerConversion[_referrerAddress][conversionID].mul(rebalancingRatio).div(10**18);
-    }
-
-
-    /**
-     * @notice          Internal helper function to recover the signature
-     */
-    function recover(
-        bytes signature
-    )
-    internal
-    view
-    returns (address)
-    {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding referrer to plasma")),
-            keccak256(abi.encodePacked("GET_REFERRER_REWARDS"))));
-        return Call.recoverHash(hash, signature, 0);
-    }
-
 
     /**
      * @notice          Internal function to get moderator fee percent
@@ -765,5 +782,30 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         // Make total bounty to be only what is for influencers, so another getter will return 0
         totalBountyForCampaign = counters[6];
+    }
+
+
+    function rebalanceValue(
+        uint value,
+        uint ratio
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return value.mul(10**18).div(ratio);
+    }
+
+
+    function getRebalancingRatioForReferrer(
+        address _referrerPlasma
+    )
+    internal
+    view
+    returns (uint)
+    {
+        Payment memory p = referrerToPayment[_referrerPlasma];
+
+        return p.rebalancingRatio != 0 ? p.rebalancingRatio : 10**18;
     }
 }

@@ -216,70 +216,11 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
 
-    function updateReferrersBalancesAfterDistribution(
-        uint cycleId,
-        address [] referrers,
-        uint [] balances
-    )
-    public
-    onlyMaintainer
-    {
-        // Safeguard against submitting multiple times same results for distribution cycle
-        require(getIfDistributionCyclePaymentsSubmitted(cycleId) == false);
-
-        // Set that this distribution cycle is submitted
-        setDistributionPaymentCycleSubmitted(cycleId);
-
-        // Take the array length
-        uint length = referrers.length;
-        uint i;
-        // Iterate through all referrers
-        for(i = 0; i < length; i++) {
-            // Update how much referrer received in this distribution cycle
-            setReferrerEarningsPerDistributionCycle(
-                cycleId,
-                referrers[i],
-                balances[i]
-            );
-
-            // Increase total earnings paid to referrer by the balance being paid in this cycle
-            setReferrerTotalEarningsPaid(
-                referrers[i],
-                balances[i]
-            );
-        }
-    }
-
-
     /**
      * ------------------------------------------------
      *        Public getters
      * ------------------------------------------------
      */
-
-    /**
-     * @notice          Function to return amount referrer have received in selected
-     *                  distribution cycle (id)
-     *
-     * @param           referrer is the referrer plasma address
-     * @param           cycleId is the id of distribution cycle
-     */
-    function getAmountReferrerReceivedInCycle(
-        address referrer,
-        uint cycleId
-    )
-    public
-    view
-    returns (uint)
-    {
-        bytes32 key = keccak256(
-            _referrer2CycleId2TotalDistributedInCycle,
-            cycleId,
-            referrer
-        );
-
-        return getUint(key);
-    }
 
     /**
      * @notice          Function to check if distribution cycle was submitted
