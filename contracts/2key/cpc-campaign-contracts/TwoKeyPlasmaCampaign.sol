@@ -805,7 +805,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     returns (uint)
     {
         Payment memory p = referrerToPayment[_referrerPlasma];
-
         return p.rebalancingRatio != 0 ? p.rebalancingRatio : 10**18;
     }
 }
