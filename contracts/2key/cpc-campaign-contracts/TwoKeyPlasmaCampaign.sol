@@ -447,7 +447,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint ratio
     )
     internal
-    view
+    pure
     returns (uint)
     {
         return value.mul(10**18).div(ratio);
@@ -599,6 +599,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         require(totalBountyForCampaign == 0);
         totalBountyForCampaign = _totalBounty;
+        // If tokens are sent directly to campaign, initial rate should be 0
         initialRate2KEY = _initialRate2KEY;
     }
 
@@ -616,7 +617,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler"));
 
-        uint rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
+        uint rebalancingRatio = 10**18;
+
+        if(initialRate2KEY != 0) {
+            rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
+        }
+
         Payment memory p = Payment(rebalancingRatio, block.timestamp);
         referrerToPayment[_referrer] = p;
 
