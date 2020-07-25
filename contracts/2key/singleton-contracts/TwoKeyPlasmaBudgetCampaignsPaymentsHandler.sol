@@ -24,7 +24,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     string constant _referrer2campaignAddresses = "referrer2campaignAddresses";
 
     // Mapping referrer to how much rebalanced amount he has pending
-    string constant _referrer2rebalancedPending = "referrer2rebalancedPending";
+    string constant _referrer2cycleId2rebalancedAmount = "referrer2cycleId2rebalancedAmount";
 
     ITwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -197,6 +197,26 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
+    function deleteReferrerPendingCampaigns(
+        bytes32 key
+    )
+    internal
+    {
+        deleteAddressArray(key);
+    }
+
+    function setReferrerToRebalancedAmountPendingForCycle(
+        address referrer,
+        uint cycleId,
+        uint amount
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_referrer2cycleId2rebalancedAmount, referrer, cycleId),
+            amount
+        );
+    }
 
     /**
      * ------------------------------------------------------------------------------------------------
@@ -241,7 +261,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
      */
     function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
         address [] referrers,
-        uint currentRate2KEY
+        uint currentRate2KEY,
+        uint cycleId
     )
     public
     onlyMaintainer
@@ -275,16 +296,43 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             );
 
             // Store referrer total payout amount
-            setReferrerToRebalancedAmountPending(referrer, referrerTotalPayoutAmount);
+            setReferrerToRebalancedAmountPendingForCycle(
+                referrer,
+                cycleId,
+                referrerTotalPayoutAmount
+            );
         }
     }
-
 
     /**
      * ------------------------------------------------
      *        Public getters
      * ------------------------------------------------
      */
+
+    /**
+     * @notice          Function to get pending balances for influencers to be distributed
+     * @param           referrers is the array of referrers passed previously to function
+     *                  rebalanceInfluencerRatesAndPrepareForRewardsDistribution
+     */
+    function getReferrersPendingBalances(
+        address [] referrers,
+        uint cycleId
+    )
+    public
+    view
+    returns (uint[])
+    {
+        uint numberOfReferrers = referrers.length;
+        uint [] memory balances = new uint[](numberOfReferrers);
+
+        uint i;
+        for(i = 0; i < numberOfReferrers; i++) {
+            balances[i] = getReferrerToTotalRebalancedAmountForCycleId(referrers[i], cycleId);
+        }
+
+        return balances;
+    }
 
     /**
      * @notice          Function to check if distribution cycle was submitted
@@ -327,33 +375,23 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return getAddressArray(key);
     }
 
-    function deleteReferrerPendingCampaigns(
-        bytes32 key
-    )
-    internal
-    {
-        deleteAddressArray(key);
-    }
 
-    function getRebalancedPendingAmountForReferrer(
-        address referrer
+    function getReferrerToTotalRebalancedAmountForCycleId(
+        address referrer,
+        uint cycleId
     )
     public
     view
     returns (uint)
     {
-        return getUint(keccak256(_referrer2rebalancedPending, referrer));
-    }
-
-    function setReferrerToRebalancedAmountPending(
-        address referrer,
-        uint amount
-    )
-    internal
-    {
-        PROXY_STORAGE_CONTRACT.setUint(
-            keccak256(_referrer2rebalancedPending, referrer),
-            amount
+        return getUint(
+            keccak256(
+                _referrer2cycleId2rebalancedAmount,
+                referrer,
+                cycleId
+            )
         );
     }
+
+
 }
