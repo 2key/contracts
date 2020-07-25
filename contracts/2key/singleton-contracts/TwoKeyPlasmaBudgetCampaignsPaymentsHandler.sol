@@ -14,25 +14,17 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
-    string constant _campaignPlasma2Referrer2rebalancedEarnings = "campaignPlasma2Referrer2rebalancedEarnings";
+    // Mapping if distribution cycle is submitted
     string constant _distributionCyclePaymentSubmitted = "distributionCyclePaymentSubmitted";
+
+    // Mapping how much referrer received in distribution cycle
     string constant _referrer2CycleId2TotalDistributedInCycle = "referrer2CycleId2TotalDistributedInCycle";
 
-    // Mapping initial rate at which inventory was bought to campaign address
-    string constant _campaignPlasma2InitialRate = "campaignPlasma2InitialRate";
     // Mapping referrer to all campaigns he participated at
     string constant _referrer2campaignAddresses = "referrer2campaignAddresses";
-    // Mapping referrer to campaigns to pending balances there
-    string constant _referrer2campaignPlasma2PendingBalance = "referrer2campaignPlasma2PendingBalance";
-    // Mapping referrer to total rebalanced earnings per campaign
-    string constant _referrer2campaignPlasma2totalEarningsRebalanced = "referrer2campaignPlasma2totalEarnings";
-    // Mapping referrer to his total earnings ever
-    string constant _referrer2TotalEarnings = "referrer2TotalEarnings";
-    // Mapping referrer to total earnings paid
-    string constant _referrer2TotalEarningsPaid = "referrer2TotalEarningsPaid";
-    // Mapping referrer to total earnings pending
-    string constant _referrer2TotalEarningsPending = "referrer2TotalEarningsPending";
 
+    // Mapping referrer to how much rebalanced amount he has pending
+    string constant _referrer2rebalancedPending = "referrer2rebalancedPending";
 
     ITwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -172,6 +164,21 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
         // Append the last value there.
         newArray[i] = value;
+
+        // Store this array
+        PROXY_STORAGE_CONTRACT.setAddressArray(key, newArray);
+    }
+
+    /**
+     * @notice          Function to delete address array for specific influencer
+     */
+    function deleteAddressArray(
+        bytes32 key
+    )
+    internal
+    {
+        address [] memory emptyArray = new address[](0);
+        PROXY_STORAGE_CONTRACT.setAddressArray(key, emptyArray);
     }
 
     /**
@@ -191,18 +198,17 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
 
-
     /**
-     * ------------------------------------------------
-     *        External function calls
-     * ------------------------------------------------
+     * ------------------------------------------------------------------------------------------------
+     *              EXTERNAL FUNCTION CALLS - MAINTAINER ACTIONS CAMPAIGN ENDING FUNNEL
+     * ------------------------------------------------------------------------------------------------
      */
-
 
     /**
      * @notice          Function where maintainer will submit N calls and store campaign
      *                  inside array of campaigns for influencers that it's not distributed but ended
      *
+     *                  END CAMPAIGN OPERATION ON PLASMA CHAIN
      * @param           campaignPlasma is the plasma address of campaign
      * @param           start is the start index
      * @param           end is the ending index
@@ -229,6 +235,49 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         }
     }
 
+
+    /**
+     * @notice          At the point when we want to do the payment
+     */
+    function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
+        address [] referrers,
+        uint currentRate2KEY
+    )
+    public
+    onlyMaintainer
+    {
+        uint numberOfReferrers = referrers.length;
+        uint i;
+        uint j;
+        for(i=0; i<numberOfReferrers; i++) {
+            // Load current referrer
+            address referrer = referrers[i];
+            // Get all the campaigns of specific referrer
+            address[] memory referrerCampaigns = getCampaignsReferrerHasPendingBalances(referrer);
+            // Get number of pending campaigns for this referrer
+            uint numberOfCampaigns = referrerCampaigns.length;
+            // Calculate how much is total payout for this referrer
+            uint referrerTotalPayoutAmount = 0;
+            // Iterate through campaigns
+            for(j = 0; j < referrerCampaigns.length; j++) {
+                // Load campaign address
+                address campaignAddress = referrerCampaigns[j];
+                // Update on plasma campaign contract rebalancing ratio at this moment
+                referrerTotalPayoutAmount =
+                referrerTotalPayoutAmount + ITwoKeyPlasmaCampaign(campaignAddress).computeAndSetRebalancingRatioForReferrer(
+                    referrer,
+                    currentRate2KEY
+                );
+            }
+            // Delete referrer campaigns which are pending rewards
+            deleteReferrerPendingCampaigns(
+                keccak256(_referrer2campaignAddresses, referrer)
+            );
+
+            // Store referrer total payout amount
+            setReferrerToRebalancedAmountPending(referrer, referrerTotalPayoutAmount);
+        }
+    }
 
 
     /**
@@ -257,7 +306,13 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return getBool(key);
     }
 
-    function getCampaignsReferrerParticipatedIn(
+    /**
+     * @notice          Function to get campaign where referrer is having pending
+     *                  balance. If empty array, means all rewards are already being
+     *                  distributed.
+     * @param           referrer is the plasma address of referrer
+     */
+    function getCampaignsReferrerHasPendingBalances(
         address referrer
     )
     public
@@ -272,4 +327,33 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return getAddressArray(key);
     }
 
+    function deleteReferrerPendingCampaigns(
+        bytes32 key
+    )
+    internal
+    {
+        deleteAddressArray(key);
+    }
+
+    function getRebalancedPendingAmountForReferrer(
+        address referrer
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_referrer2rebalancedPending, referrer));
+    }
+
+    function setReferrerToRebalancedAmountPending(
+        address referrer,
+        uint amount
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_referrer2rebalancedPending, referrer),
+            amount
+        );
+    }
 }

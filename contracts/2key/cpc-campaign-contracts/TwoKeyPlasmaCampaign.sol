@@ -620,7 +620,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         Payment memory p = Payment(rebalancingRatio, block.timestamp);
         referrerToPayment[_referrer] = p;
 
-        return rebalancingRatio;
+        return getReferrerPlasmaBalance(_referrer);
     }
 
     /**
