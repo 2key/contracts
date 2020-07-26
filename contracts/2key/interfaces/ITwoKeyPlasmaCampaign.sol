@@ -6,7 +6,7 @@ contract ITwoKeyPlasmaCampaign {
         uint _currentRate2KEY
     )
     public
-    returns (uint);
+    returns (uint,uint);
 
     function getActiveInfluencers(
         uint start,

@@ -613,7 +613,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint _currentRate2KEY
     )
     public
-    returns (uint)
+    returns (uint,uint)
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler"));
 
@@ -626,7 +626,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         Payment memory p = Payment(rebalancingRatio, block.timestamp);
         referrerToPayment[_referrer] = p;
 
-        return getReferrerPlasmaBalance(_referrer);
+        return (getReferrerPlasmaBalance(_referrer), referrerPlasma2Balances2key[_referrer]);
     }
 
     /**

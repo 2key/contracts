@@ -7,12 +7,21 @@ import "../interfaces/ITwoKeyPlasmaFactory.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaCampaign.sol";
+import "../libraries/SafeMath.sol";
 
 contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
+
+    using SafeMath for *;
 
     bool initialized;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
+
+    // Mapping cycle id to total non rebalanced amount payment
+    string constant _distributionCycle2TotalNonRebalancedPayment = "distributionCycle2TotalNonRebalancedPayment";
+
+    // Mapping cycle id to total rebalanced amount payment
+    string constant _distributionCycleToTotalRebalancedPayment = "distributionCycleToTotalRebalancedPayment";
 
     // Mapping if distribution cycle is submitted
     string constant _distributionCyclePaymentSubmitted = "distributionCyclePaymentSubmitted";
@@ -244,6 +253,25 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+    function setTotalPayoutAndNonRebalancedPayoutForCycle(
+        uint cycleId,
+        uint totalPayout,
+        uint totalNonRebalancedPayout
+    )
+    internal
+    {
+
+        setUint(
+            keccak256(_distributionCycleToTotalRebalancedPayment, cycleId),
+            totalPayout
+        );
+
+        setUint(
+            keccak256(_distributionCycle2TotalNonRebalancedPayment, cycleId),
+            totalNonRebalancedPayout
+        );
+    }
+
     /**
      * ------------------------------------------------------------------------------------------------
      *              EXTERNAL FUNCTION CALLS - MAINTAINER ACTIONS CAMPAIGN ENDING FUNNEL
@@ -293,28 +321,40 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     public
     onlyMaintainer
     {
-        uint numberOfReferrers = referrers.length;
+        // Counters
         uint i;
         uint j;
-        for(i=0; i<numberOfReferrers; i++) {
+
+        // Calculate how much total payout would be for all referrers together in case there was no rebalancing
+        uint amountToBeDistributedInCycleNoRebalanced;
+        uint amountToBeDistributedInCycleRebalanced;
+
+        for(i=0; i<referrers.length; i++) {
             // Load current referrer
             address referrer = referrers[i];
             // Get all the campaigns of specific referrer
             address[] memory referrerCampaigns = getCampaignsReferrerHasPendingBalances(referrer);
-            // Get number of pending campaigns for this referrer
-            uint numberOfCampaigns = referrerCampaigns.length;
             // Calculate how much is total payout for this referrer
             uint referrerTotalPayoutAmount = 0;
             // Iterate through campaigns
             for(j = 0; j < referrerCampaigns.length; j++) {
                 // Load campaign address
                 address campaignAddress = referrerCampaigns[j];
-                // Update on plasma campaign contract rebalancing ratio at this moment
-                referrerTotalPayoutAmount =
-                referrerTotalPayoutAmount + ITwoKeyPlasmaCampaign(campaignAddress).computeAndSetRebalancingRatioForReferrer(
+
+                uint rebalancedAmount;
+                uint nonRebalancedAmount;
+
+                (rebalancedAmount, nonRebalancedAmount) = ITwoKeyPlasmaCampaign(campaignAddress).computeAndSetRebalancingRatioForReferrer(
                     referrer,
                     currentRate2KEY
                 );
+                // Update on plasma campaign contract rebalancing ratio at this moment
+                referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(rebalancedAmount);
+                // Update total payout to be paid
+                amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(nonRebalancedAmount);
+                // Update total payout in case there was no rebalancing, so
+                // The difference can be calculated for this cycle id
+                amountToBeDistributedInCycleRebalanced = amountToBeDistributedInCycleRebalanced.add(rebalancedAmount);
             }
             // Delete referrer campaigns which are pending rewards
             deleteReferrerPendingCampaigns(
@@ -328,6 +368,14 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 referrerTotalPayoutAmount
             );
         }
+
+        // Store total payout
+        setTotalPayoutAndNonRebalancedPayoutForCycle(
+            cycleId,
+            amountToBeDistributedInCycleRebalanced,
+            amountToBeDistributedInCycleNoRebalanced
+        );
+
         // Store all influencers for this distribution cycle.
         setReferrersPerDistributionCycle(cycleId,referrers);
     }
