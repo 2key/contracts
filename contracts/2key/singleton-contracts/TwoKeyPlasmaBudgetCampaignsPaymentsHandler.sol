@@ -253,19 +253,12 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
-    function setTotalPayoutAndNonRebalancedPayoutForCycle(
+    function setTotalNonRebalancedPayoutForCycle(
         uint cycleId,
-        uint totalPayout,
         uint totalNonRebalancedPayout
     )
     internal
     {
-
-        setUint(
-            keccak256(_distributionCycleToTotalRebalancedPayment, cycleId),
-            totalPayout
-        );
-
         setUint(
             keccak256(_distributionCycle2TotalNonRebalancedPayment, cycleId),
             totalNonRebalancedPayout
@@ -327,7 +320,6 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
         // Calculate how much total payout would be for all referrers together in case there was no rebalancing
         uint amountToBeDistributedInCycleNoRebalanced;
-        uint amountToBeDistributedInCycleRebalanced;
 
         for(i=0; i<referrers.length; i++) {
             // Load current referrer
@@ -350,11 +342,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 );
                 // Update on plasma campaign contract rebalancing ratio at this moment
                 referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(rebalancedAmount);
-                // Update total payout to be paid
+
+                // Update total payout to be paid in case there was no rebalancing
                 amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(nonRebalancedAmount);
-                // Update total payout in case there was no rebalancing, so
-                // The difference can be calculated for this cycle id
-                amountToBeDistributedInCycleRebalanced = amountToBeDistributedInCycleRebalanced.add(rebalancedAmount);
             }
             // Delete referrer campaigns which are pending rewards
             deleteReferrerPendingCampaigns(
@@ -370,9 +360,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         }
 
         // Store total payout
-        setTotalPayoutAndNonRebalancedPayoutForCycle(
+        setTotalNonRebalancedPayoutForCycle(
             cycleId,
-            amountToBeDistributedInCycleRebalanced,
             amountToBeDistributedInCycleNoRebalanced
         );
 
@@ -391,23 +380,28 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
      * @param           referrers is the array of referrers passed previously to function
      *                  rebalanceInfluencerRatesAndPrepareForRewardsDistribution
      */
-    function getReferrersPendingBalances(
+    function getPendingReferrersPaymentInformationForCycle(
         address [] referrers,
         uint cycleId
     )
     public
     view
-    returns (uint[])
+    returns (uint[],uint,uint)
     {
         uint numberOfReferrers = referrers.length;
         uint [] memory balances = new uint[](numberOfReferrers);
-
+        uint totalRebalanced;
         uint i;
         for(i = 0; i < numberOfReferrers; i++) {
             balances[i] = getReferrerToTotalRebalancedAmountForCycleId(referrers[i], cycleId);
+            totalRebalanced = totalRebalanced.add(balances[i]);
         }
 
-        return balances;
+        return (
+            balances,
+            totalRebalanced,
+            getTotalNonRebalancedPayoutForCycle(cycleId)
+        );
     }
 
 
@@ -447,6 +441,18 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 referrer,
                 cycleId
             )
+        );
+    }
+
+    function getTotalNonRebalancedPayoutForCycle(
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(
+            keccak256(_distributionCycle2TotalNonRebalancedPayment, cycleId)
         );
     }
 
