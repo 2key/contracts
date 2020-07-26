@@ -17,6 +17,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     // Mapping if distribution cycle is submitted
     string constant _distributionCyclePaymentSubmitted = "distributionCyclePaymentSubmitted";
 
+    // Mapping distribution cycle to referrers being paid in that cycle
+    string constant _distributionCycleIdToReferrersPaid = "distributionCycleIdToReferrersPaid";
+
     // Mapping how much referrer received in distribution cycle
     string constant _referrer2CycleId2TotalDistributedInCycle = "referrer2CycleId2TotalDistributedInCycle";
 
@@ -25,6 +28,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
     // Mapping referrer to how much rebalanced amount he has pending
     string constant _referrer2cycleId2rebalancedAmount = "referrer2cycleId2rebalancedAmount";
+
 
     ITwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -143,6 +147,16 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
 
+    function setAddressArray(
+        bytes32 key,
+        address [] addresses
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setAddressArray(key, addresses);
+    }
+
+
 
     function pushAddressToArray(
         bytes32 key,
@@ -212,9 +226,21 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     )
     internal
     {
-        PROXY_STORAGE_CONTRACT.setUint(
+        setUint(
             keccak256(_referrer2cycleId2rebalancedAmount, referrer, cycleId),
             amount
+        );
+    }
+
+    function setReferrersPerDistributionCycle(
+        uint cycleId,
+        address [] referrers
+    )
+    internal
+    {
+        setAddressArray(
+            keccak256(_distributionCycleIdToReferrersPaid, cycleId),
+            referrers
         );
     }
 
@@ -302,6 +328,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 referrerTotalPayoutAmount
             );
         }
+        // Store all influencers for this distribution cycle.
+        setReferrersPerDistributionCycle(cycleId,referrers);
     }
 
     /**
@@ -334,25 +362,6 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return balances;
     }
 
-    /**
-     * @notice          Function to check if distribution cycle was submitted
-     *
-     * @param           cycleId is the ID of cycle which is distributed
-     */
-    function getIfDistributionCyclePaymentsSubmitted(
-        uint cycleId
-    )
-    public
-    view
-    returns (bool)
-    {
-        bytes32 key = keccak256(
-            _distributionCyclePaymentSubmitted,
-            cycleId
-        );
-
-        return getBool(key);
-    }
 
     /**
      * @notice          Function to get campaign where referrer is having pending
