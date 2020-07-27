@@ -825,17 +825,4 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return converterToSignature[converter].length != 0 ? true : false;
     }
 
-
-    /**
-     * @notice          Function to update state of the contract that the bounty is withdrawn
-     * @dev             Only contractor can update this function
-     */
-    function updateContractorWithdrawnBounty()
-    public
-    onlyContractor
-    {
-        // Make total bounty to be only what is for influencers, so another getter will return 0
-        totalBountyForCampaign = counters[6];
-    }
-
 }
