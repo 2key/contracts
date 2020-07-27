@@ -240,18 +240,23 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint cycleId = getNumberOfCycles();
         // Get the address of 2KEY token
         address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-
-        uint totalDistributed = 0;
-
+        // Get the address of twoKeyUpgradableExchange contract
+        address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        // Total distributed in cycle
+        uint totalDistributed;
+        // Iterator
         uint i;
 
         uint difference;
         // Leads to we need to return some tokens back to Upgradable Exchange
         if(nonRebalancedTotalPayout > rebalancedTotalPayout) {
             difference = nonRebalancedTotalPayout.sub(rebalancedTotalPayout);
+            // TODO: Finish this funnel and add event
+
         } else {
             // Leads to we need to get more tokens from Upgradable Exchange
             difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
+            // TODO: Finish this funnel and add event
         }
 
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
@@ -494,6 +499,16 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     returns (uint)
     {
         return getUint(keccak256(_campaignPlasma2initialRate, campaignPlasma));
+    }
+
+    function getTotalDistributedInCycle(
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_distributionCycleToTotalDistributed, cycleId));
     }
 
 }
