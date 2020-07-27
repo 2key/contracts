@@ -17,6 +17,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
+    string constant _numberOfCycles = "numberOfCycles";
+
     // Mapping cycle id to total non rebalanced amount payment
     string constant _distributionCycle2TotalNonRebalancedPayment = "distributionCycle2TotalNonRebalancedPayment";
 
@@ -265,6 +267,22 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+    function addNewDistributionCycle()
+    internal
+    returns (uint)
+    {
+        bytes32 key = keccak256(_numberOfCycles);
+
+        uint incrementedNumberOfCycles = getUint(key) + 1;
+
+        setUint(
+            key,
+            incrementedNumberOfCycles
+        );
+
+        return incrementedNumberOfCycles;
+    }
+
     /**
      * ------------------------------------------------------------------------------------------------
      *              EXTERNAL FUNCTION CALLS - MAINTAINER ACTIONS CAMPAIGN ENDING FUNNEL
@@ -308,8 +326,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
      */
     function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
         address [] referrers,
-        uint currentRate2KEY,
-        uint cycleId
+        uint currentRate2KEY
     )
     public
     onlyMaintainer
@@ -317,6 +334,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         // Counters
         uint i;
         uint j;
+
+        // Increment number of distribution cycles and get the id
+        uint cycleId = addNewDistributionCycle();
 
         // Calculate how much total payout would be for all referrers together in case there was no rebalancing
         uint amountToBeDistributedInCycleNoRebalanced;
@@ -456,5 +476,12 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+    function getNumberOfDistributionCycles()
+    public
+    view
+    returns (uint)
+    {
+        getUint(keccak256(_numberOfCycles));
+    }
 
 }
