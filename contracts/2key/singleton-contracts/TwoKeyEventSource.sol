@@ -222,7 +222,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     event EndedBudgetCampaign (
         address campaignPlasmaAddress,
-        uint reservedAmountForReferrerRewards,
         uint contractorLeftover,
         uint moderatorEarningsDistributed
     );
@@ -659,7 +658,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     function emitEndedBudgetCampaign(
         address campaignPlasmaAddress,
-        uint reservedAmountForReferrerRewards,
         uint contractorLeftover,
         uint moderatorEarningsDistributed
     )
@@ -669,7 +667,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
         emit EndedBudgetCampaign(
             campaignPlasmaAddress,
-            reservedAmountForReferrerRewards,
             contractorLeftover,
             moderatorEarningsDistributed
         );

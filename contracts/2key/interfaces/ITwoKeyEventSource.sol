@@ -82,7 +82,6 @@ contract ITwoKeyEventSource {
 
     function emitEndedBudgetCampaign(
         address campaignPlasmaAddress,
-        uint reservedAmountForReferrerRewards,
         uint contractorLeftover,
         uint moderatorEarningsDistributed
     )

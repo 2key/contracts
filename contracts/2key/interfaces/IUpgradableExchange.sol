@@ -50,6 +50,7 @@ contract IUpgradableExchange {
     )
     public;
 
+
     function getMore2KeyTokensForRebalancing(
         uint amountOf2KeyRequested
     )
@@ -76,4 +77,15 @@ contract IUpgradableExchange {
     )
     public
     returns (uint);
+
+    function returnTokensBackToExchangeV1(
+        uint amountOfTokensToReturn
+    )
+    public;
+
+
+    function getMore2KeyTokensForRebalancingV1(
+        uint amountOfTokensRequested
+    )
+    public;
 }

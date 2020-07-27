@@ -690,6 +690,29 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+    function getMore2KeyTokensForRebalancingV1(
+        uint amountOfTokensRequested
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+        _processPurchase(msg.sender, amountOfTokensRequested);
+    }
+
+    function returnTokensBackToExchangeV1(
+        uint amountOfTokensToReturn
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+        // Take the tokens from the contract
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transferFrom(
+            msg.sender,
+            address(this),
+            amountOfTokensToReturn
+        );
+    }
+
     /**
      * @notice          Function to buyTokens from TwoKeyUpgradableExchange
      * @param           _beneficiary is the address which will receive the tokens
