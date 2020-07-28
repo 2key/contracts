@@ -150,12 +150,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFee);
                 //Left to be distributed between influencers
                 bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFee);
-                //Update paid bounty
+                //Update paid bounty for influencers
                 c.bountyPaid = bountyToBeDistributed;
                 // Update that conversion is being paid
                 c.paymentState = ConversionPaymentState.PAID;
                 //Increment how much bounty is paid
-                counters[6] = counters[6] + bountyToBeDistributed; // Total bounty paid
+                counters[6] = counters[6] + bountyPerConversionWei; // Total bounty paid including moderator fee
                 // Increment number of paid clicks by 1
                 numberOfPaidClicksAchieved++;
                 // emit event that conversion is being paid
