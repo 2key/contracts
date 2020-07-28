@@ -819,6 +819,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         // Safeguard against calling this multiple times!
         require(ratesRebalanced == false);
+        // Safeguard against submitting 0 value
+        require(ratio != 0);
+        // Set that rates are rebalanced
         ratesRebalanced = true;
         // Set the rebalancing ratio
         rebalancingRatio = ratio;
