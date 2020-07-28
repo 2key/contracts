@@ -7,6 +7,8 @@ import "../interfaces/ITwoKeyPlasmaFactory.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaCampaign.sol";
+import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+
 import "../libraries/SafeMath.sol";
 
 contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
@@ -306,15 +308,25 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     public
     onlyMaintainer
     {
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+
         address[] memory influencers = ITwoKeyPlasmaCampaign(campaignPlasma).getActiveInfluencers(start,end);
 
         uint i;
         uint len = influencers.length;
 
         for(i=0; i<len; i++) {
+            address referrer = influencers[i];
+
+            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitAddedPendingRewards(
+                campaignPlasma,
+                referrer,
+                ITwoKeyPlasmaCampaign(campaignPlasma).getReferrerPlasmaBalance(referrer)
+            );
+
             bytes32 key = keccak256(
                 _referrer2campaignAddresses,
-                influencers[i]
+                referrer
             );
             pushAddressToArray(key, campaignPlasma);
         }
@@ -356,11 +368,12 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 uint rebalancedAmount;
                 uint nonRebalancedAmount;
 
+                // Update on plasma campaign contract rebalancing ratio at this moment
                 (rebalancedAmount, nonRebalancedAmount) = ITwoKeyPlasmaCampaign(campaignAddress).computeAndSetRebalancingRatioForReferrer(
                     referrer,
                     currentRate2KEY
                 );
-                // Update on plasma campaign contract rebalancing ratio at this moment
+
                 referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(rebalancedAmount);
 
                 // Update total payout to be paid in case there was no rebalancing
@@ -370,8 +383,16 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             deleteReferrerPendingCampaigns(
                 keccak256(_referrer2campaignAddresses, referrer)
             );
-
-            // Store referrer total payout amount
+            //TODO: After mainchain distribution is done, maintainer comes back to plasma and sets that
+            //TODO: referrer2cycleId2amountDistributed
+            //TODO: don't delete array of campaigns, update on every pending plasma campaign that:
+            //TODO: -> _referrer2campaignAddresses -> _referrer2pendingCampaignAddresses
+            //TODO: -> _referrer2campaignAddresses -> _referrer2inProgressCampaignAddress
+            //TODO: Before deleting copy them to inProgress and then delete.
+            //TODO: After distribution done and
+            // - totalRewards = keep same with ratio
+            // - pendingRewards = 0
+            // Store referrer total payout amount for this cycle
             setReferrerToRebalancedAmountPendingForCycle(
                 referrer,
                 cycleId,

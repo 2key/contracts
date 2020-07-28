@@ -28,7 +28,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
      */
     string constant _twoKeyPlasmaRegistry = "TwoKeyPlasmaRegistry";
     string constant _twoKeyPlasmaFactory = "TwoKeyPlasmaFactory";
-
+    string constant _twoKeyPlasmaBudgetCampaignsPaymentsHandler = "TwoKeyPlasmaBudgetCampaignsPaymentsHandler";
 
 
     /**
@@ -127,6 +127,14 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         address proxyPublicAddress
     );
 
+    /**
+     * @notice          Event emitted every time we submit rewards
+     */
+    event AddedPendingRewards(
+        address contractAddress,
+        address influencer,
+        uint rewards
+    );
 
     /**
      * @notice          Event emitted when user changes his handle
@@ -165,6 +173,11 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         _;
     }
 
+    modifier onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler {
+        address twoKeyPlasmaBudgetCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaBudgetCampaignsPaymentsHandler);
+        require(msg.sender == twoKeyPlasmaBudgetCampaignsPaymentsHandler);
+        _;
+    }
 
     /**
      * @notice          Function to return proxy address of the contract registered
@@ -352,6 +365,21 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         emit HandleChanged(
             _userPlasmaAddress,
             _newHandle
+        );
+    }
+
+    function emitAddedPendingRewards(
+        address campaignPlasma,
+        address influencer,
+        uint amountOfTokens
+    )
+    public
+    onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler
+    {
+        emit AddedPendingRewards(
+            campaignPlasma,
+            influencer,
+            amountOfTokens
         );
     }
 

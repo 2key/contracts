@@ -15,4 +15,11 @@ contract ITwoKeyPlasmaCampaign {
     public
     view
     returns (address[]);
+
+    function getReferrerPlasmaBalance(
+        address _referrer
+    )
+    public
+    view
+    returns (uint);
 }

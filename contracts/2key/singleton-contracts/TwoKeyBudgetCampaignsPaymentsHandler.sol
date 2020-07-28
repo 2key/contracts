@@ -229,15 +229,12 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         address [] influencers,
         uint [] balances,
         uint nonRebalancedTotalPayout,
-        uint rebalancedTotalPayout
+        uint rebalancedTotalPayout,
+        uint cycleId
     )
     public
     onlyMaintainer
     {
-        // Increment distribution cycle id
-        incrementNumberOfDistributionCycles();
-        // The new one (latest) is the id of this cycle
-        uint cycleId = getNumberOfCycles();
         // Get the address of 2KEY token
         address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
         // Get the address of twoKeyUpgradableExchange contract

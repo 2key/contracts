@@ -619,6 +619,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         uint rebalancingRatio = 10**18;
 
+        // This is in case inventory NOT added directly as 2KEY
         if(initialRate2KEY != 0) {
             rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
         }
