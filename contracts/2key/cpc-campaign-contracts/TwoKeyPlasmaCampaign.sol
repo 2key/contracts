@@ -471,7 +471,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         require(totalBountyForCampaign == 0);
         totalBountyForCampaign = _totalBounty;
         // It's going to round the value.
-        numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversionWei);
+        if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
+            numberOfTotalPaidClicksSupported = 0;
+        } else {
+            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversionWei);
+        }
+
     }
 
 
