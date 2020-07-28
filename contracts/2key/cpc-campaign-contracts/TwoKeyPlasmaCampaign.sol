@@ -31,6 +31,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     uint numberOfPaidClicksAchieved;
     uint numberOfTotalPaidClicksSupported;
+    uint moderatorFeePerConversion;
 
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
