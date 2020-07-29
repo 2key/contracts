@@ -228,17 +228,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             msg.sender
         );
 
-        bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, converter);
-        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + initialRewardWei);
-
-        emit ReputationUpdated(
-            converter,
-            "CONVERTER",
-            "BUDGET",
-            initialRewardWei,
-            msg.sender
-        );
+        updateConverterScore(converter, initialRewardWei);
 
         address[] memory referrers = getReferrers(msg.sender, converter);
 
@@ -277,18 +267,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     {
         int initialPunishmentWei = (10**18) / 2;
 
-        bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, converter);
-        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialPunishmentWei);
-
-        emit ReputationUpdated(
-            converter,
-            "CONVERTER",
-            "BUDGET",
-            initialPunishmentWei*(-1),
-            msg.sender
-        );
-
+        updateConverterScoreOnRejectedConversion(converter, initialPunishmentWei);
 
         address[] memory referrers = getReferrers(msg.sender, converter);
 
@@ -330,6 +309,33 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         );
     }
 
+    function updateConverterScoreOnRejectedConversion(
+        address converter,
+        int reward
+    )
+    internal
+    {
+        updateConverterScore(converter, reward*(-1));
+    }
+
+    function updateConverterScore(
+        address converter,
+        int reward
+    )
+    internal
+    {
+        bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, converter);
+        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + reward);
+
+        emit ReputationUpdated(
+            converter,
+            "CONVERTER",
+            "BUDGET",
+            reward,
+            msg.sender
+        );
+    }
 
     /**
      * @notice          Function to get reputation and feedback score in case he's an influencer & converter
