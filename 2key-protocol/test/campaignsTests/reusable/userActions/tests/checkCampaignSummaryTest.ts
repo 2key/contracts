@@ -104,7 +104,7 @@ export default function checkCampaignSummaryTest(
     if (storage.campaignType === campaignTypes.cpc) {
       expectEqualNumbers(
         summary.totalBounty,
-        summary.executedConversions * campaignData.bountyPerConversionWei * (1 - feePercent),
+        summary.executedConversions * campaignData.bountyPerConversionWei,
         'totalBounty'
       );
     } else {
