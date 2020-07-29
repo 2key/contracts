@@ -96,7 +96,7 @@ export default function checkCampaignSummaryTest(
       'executedConversions',
     );
     expectEqualNumbers(
-      summary.totalBounty,
+      summary.totalBounty*0.98,
       storage.totalBounty,
       'totalBounty',
     );
