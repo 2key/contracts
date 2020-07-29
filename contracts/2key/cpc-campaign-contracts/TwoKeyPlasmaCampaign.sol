@@ -501,7 +501,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         while (numberOfInfluencers > 0) {
             influencer = getReceivedFrom(influencer);
             numberOfInfluencers--;
-            influencers[numberOfInfluencers] = influencer;
+            influencers[numberOfInfluencers] = influencer;  //TODO this orders influencers in their place on the chain, so contractor(if he's here) will be o, and the last one will be the last index
         }
         return influencers;
     }
