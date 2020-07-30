@@ -1390,44 +1390,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
-    function moveModeratorEarningsToFillReservePool(
-        address campaignContract
-    )
-    public
-    onlyMaintainer
-    {
-        uint i = 0;
-        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
-
-        uint _contractID = getContractId(campaignContract);
-        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
-        uint _daiWeiAvailable = getUint(_daiWeiAvailableToWithdrawKeyHash);
-        uint currentlyAvailableToFillReserve = getUint(_daiWeiAvailableToFill2KEYReserveKeyHash);
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, currentlyAvailableToFillReserve.add(_daiWeiAvailable));
-        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
-    }
-
-    /**
-     * @notice          Function to fix all PPC available to withdraw method functions
-     * @param           contracts is the array of all ppc campaigns (public addresses)
-     */
-    function setPPCCampaignsAvailableToWithdrawToZero(
-        address [] contracts
-    )
-    public
-    onlyMaintainer
-    {
-        uint i = 0;
-
-        for(i = 0; i<contracts.length; i++) {
-            // Get the contract ID
-            uint _contractID = getContractId(contracts[i]);
-
-            bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
-            setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
-        }
-    }
-
 
     /**
      * @notice          Fallback function to handle incoming ether
