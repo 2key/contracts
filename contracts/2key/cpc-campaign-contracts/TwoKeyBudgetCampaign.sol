@@ -120,6 +120,8 @@ contract TwoKeyBudgetCampaign is TwoKeyCampaign {
 		boughtRewardsWithEther = true;
 		(initialInventoryAmount,usd2KEYrateWei) = buyTokensFromUpgradableExchange(msg.value, address(this));
 
+		rebalancedRatesStruct.priceAtBeginning = usd2KEYrateWei;
+
 		isInventoryAdded = true;
 	}
 

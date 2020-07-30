@@ -54,6 +54,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
 
+        // Calculate moderator fee per every conversion
+        moderatorFeePerConversion = bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
+        rebalancingRatio = 10**18;
         counters = new uint[](7);                                       // Initialize array of counters
 
     }
@@ -139,20 +142,18 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 getNumberOfUsersToContractor(converter) > 0 &&
                 counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign
             ) {
-                //Get moderator fee percentage
-                uint moderatorFeePercent = getModeratorFeePercent();
-                //Calculate moderator fee to be taken from bounty
-                uint moderatorFee = bountyPerConversionWei.mul(moderatorFeePercent).div(100);
                 //Add earnings to moderator total earnings
-                moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFee);
+                moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFeePerConversion);
                 //Left to be distributed between influencers
-                bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFee);
-                //Update paid bounty
+                bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFeePerConversion);
+                //Update paid bounty for influencers
                 c.bountyPaid = bountyToBeDistributed;
                 // Update that conversion is being paid
                 c.paymentState = ConversionPaymentState.PAID;
                 //Increment how much bounty is paid
-                counters[6] = counters[6] + bountyToBeDistributed; // Total bounty paid
+                counters[6] = counters[6] + bountyPerConversionWei; // Total bounty paid including moderator fee
+                // Increment number of paid clicks by 1
+                numberOfPaidClicksAchieved++;
                 // emit event that conversion is being paid
                 ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitConversionPaidEvent(
                     conversionId

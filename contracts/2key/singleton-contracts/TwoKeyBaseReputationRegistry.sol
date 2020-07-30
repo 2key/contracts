@@ -88,17 +88,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     {
         int initialRewardWei = 10*(10**18);
 
-        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, contractor);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + initialRewardWei);
-
-        emit ReputationUpdated(
-            plasmaOf(contractor),
-            "CONTRACTOR",
-            "MONETARY",
-            initialRewardWei,
-            msg.sender
-        );
+        updateContractorScore(contractor, initialRewardWei);
 
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
@@ -114,10 +104,12 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
         address[] memory referrers = getReferrers(converter, campaign);
 
-        for(int i=0; i<int(referrers.length); i++) {
+        int j=0;
+        int len = int(referrers.length) - 1;
+        for(int i=len; i>=0; i--) {
             bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            int reward = initialRewardWei/(i+1);
+            int reward = initialRewardWei/(j+1);
             PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + reward);
 
             emit ReputationUpdated(
@@ -128,6 +120,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
                 msg.sender
             );
 
+            j++;
         }
     }
 
@@ -147,18 +140,7 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     {
         int initialRewardWei = 5*(10**18);
 
-
-        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, contractor);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore - initialRewardWei);
-
-        emit ReputationUpdated(
-            plasmaOf(contractor),
-            "CONTRACTOR",
-            "MONETARY",
-            initialRewardWei*(-1),
-            msg.sender
-        );
+        updateContractorScoreOnRejectedConversion(contractor, initialRewardWei);
 
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
@@ -174,10 +156,11 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
         address[] memory referrers = getReferrers(converter, campaign);
 
-        for(int i=0; i<int(referrers.length); i++) {
+        int j=0;
+        for(int i=int(referrers.length)-1; i>=0; i--) {
             bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            int reward = initialRewardWei/(i+1);
+            int reward = initialRewardWei/(j+1);
             PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - reward);
 
             emit ReputationUpdated(
@@ -187,7 +170,36 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
                 reward*(-1),
                 msg.sender
             );
+            j++;
         }
+    }
+
+    function updateContractorScoreOnRejectedConversion(
+        address contractor,
+        int reward
+    )
+    internal
+    {
+        updateContractorScore(contractor, reward*(-1));
+    }
+
+    function updateContractorScore(
+        address contractor,
+        int reward
+    )
+    internal
+    {
+        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, contractor);
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + reward);
+
+        emit ReputationUpdated(
+            plasmaOf(contractor),
+            "CONTRACTOR",
+            "MONETARY",
+            reward,
+            msg.sender
+        );
     }
 
     /**

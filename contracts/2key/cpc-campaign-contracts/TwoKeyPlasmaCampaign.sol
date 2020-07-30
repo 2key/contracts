@@ -35,6 +35,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint [] counters;               // Array of counters, described above
 
     // Referrer necessary data
+
+    uint numberOfPaidClicksAchieved;
+    uint numberOfTotalPaidClicksSupported;
+    uint moderatorFeePerConversion;
+
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
@@ -587,7 +592,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     /**
      * @notice          Function where maintainer will set on plasma network the total bounty amount
      *                  and how many tokens are paid per conversion for the influencers
-     * @dev             This can be only called by maintainer
+     * @dev             This can be only called by maintainer, and only once.
      * @param           _totalBounty is the total bounty for this campaign
      */
     function setTotalBountyAndInitialRateAndValidateCampaign(
@@ -601,6 +606,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         totalBountyForCampaign = _totalBounty;
         // If tokens are sent directly to campaign, initial rate should be 0
         initialRate2KEY = _initialRate2KEY;
+        // It's going to round the value.
+        if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
+            numberOfTotalPaidClicksSupported = 0;
+        } else {
+            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversionWei);
+        }
+
     }
 
 
@@ -650,7 +662,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         while (numberOfInfluencers > 0) {
             influencer = getReceivedFrom(influencer);
             numberOfInfluencers--;
-            influencers[numberOfInfluencers] = influencer;
+            influencers[numberOfInfluencers] = influencer;  //TODO this orders influencers in their place on the chain, so contractor(if he's here) will be o, and the last one will be the last index
         }
         return influencers;
     }
@@ -701,19 +713,19 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint)
     {
-        return totalBountyForCampaign.sub(moderatorTotalEarnings.add(counters[6]));             // Total bounty - bounty PAID for executed conversions
+        return totalBountyForCampaign.sub(counters[6]);             // Total bounty - bounty PAID for executed conversions
     }
 
 
     /**
      * @notice          Function to get total bounty available and bounty per conversion
      */
-    function getTotalBountyAndBountyPerConversion()
+    function getBountyAndClicksStats()
     public
     view
-    returns (uint,uint)
+    returns (uint,uint,uint,uint)
     {
-        return (totalBountyForCampaign, bountyPerConversionWei);
+        return (totalBountyForCampaign, bountyPerConversionWei, numberOfPaidClicksAchieved, numberOfTotalPaidClicksSupported);
     }
 
 
@@ -802,7 +814,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (bool,bool,bool,address)
     {
-        bool isReferrer = referrerPlasma2TotalEarnings2key[_address] > 0 ? true : false;
+        bool isReferrer = rebalanceValue(referrerPlasma2TotalEarnings2key[_address]) > 0 ? true : false;
         bool isAddressConverter = isApprovedConverter[_address];
         bool isJoined = getAddressJoinedStatus(_address);
 

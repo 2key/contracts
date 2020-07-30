@@ -81,7 +81,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
         await protocol.Utils.getTransactionReceiptMined(
           await withBalanceProtocol.transfer2KEYTokens(
             campaignPublicAddress,
-            withBalanceProtocol.Utils.toWei(reward, 'ether'),
+            withBalanceProtocol.Utils.toWei(reward*1.001, 'ether'),
             addressWithBalance,
           )
         );
@@ -94,7 +94,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
         expectEqualNumbers(
           (inventoryAfter - inventoryBefore),
-          reward,
+            reward*1.001,
         );
       });
     } else {
@@ -117,7 +117,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
           await protocol.CPCCampaign
             .buyTokensForReferralRewards(
               campaignAddress,
-              protocol.Utils.toWei(reward, 'ether'),
+              protocol.Utils.toWei(reward*1.001, 'ether'),
               address
             )
         );
@@ -125,7 +125,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
         expectEqualNumbers(
           (inventoryAfter - inventoryBefore),
-          reward * eth2usd / boughtRate,
+          reward*1.001 * eth2usd / boughtRate,
         );
       }).timeout(TIMEOUT_LENGTH);
     }
