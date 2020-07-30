@@ -56,7 +56,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         // Calculate moderator fee per every conversion
         moderatorFeePerConversion = bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
-        rebalancingRatio = 10**18;
         counters = new uint[](7);                                       // Initialize array of counters
 
     }
