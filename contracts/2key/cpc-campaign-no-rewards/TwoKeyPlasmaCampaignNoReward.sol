@@ -39,7 +39,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     address public contractorPublicAddress;         // Contractor address on public chain
 
     uint campaignStartTime;                         // Time when campaign start
-    //TODO: maybe we can remove end time since those clicks are not payable
     uint campaignEndTime;                           // Time when campaign ends
 
     event ConversionCreated(uint conversionId);     // Event which will be fired every time conversion is created
@@ -53,6 +52,14 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
 
     modifier isCampaignValidated {                   // Checking if the campaign is created through TwoKeyPlasmaFactory
         require(isValidated == true);
+        _;
+    }
+
+    /**
+     * @notice          Function to check if campaign is active in terms of time set
+     */
+    modifier isCampaignActiveInTermsOfTime {
+        require(campaignStartTime <= block.timestamp && block.timestamp <= campaignEndTime);
         _;
     }
 

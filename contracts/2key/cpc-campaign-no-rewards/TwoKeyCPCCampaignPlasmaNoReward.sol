@@ -50,9 +50,9 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         conversionQuota = numberValues[2];                              // Set conversion quota
         totalSupply_ = numberValues[3];                                 // Set total supply
 
-        incentiveModel = IncentiveModel.NO_REFERRAL_REWARD;               // Set the incentiveModel selected for the campaign
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
+        incentiveModel = IncentiveModel.NO_REFERRAL_REWARD;             // Set the incentiveModel selected for the campaign
 
         counters = new uint[](7);                                       // Initialize array of counters
     }
@@ -112,6 +112,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
     public
     onlyMaintainer
     isCampaignValidated
+    isCampaignActiveInTermsOfTime
     {
         //Check if converter don't have any executed conversions before and approve him
         oneTimeApproveConverter(converter);
