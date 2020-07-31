@@ -43,7 +43,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;    // Assigning address of _twoKeyPlasmaSingletonRegistry
         contractor = _contractor;                                       // Assigning address of contractor
         targetUrl = _url;                                               // Set the URL being tracked for the campaign
-        contractorPublicAddress = ethereumOf(_contractor);              // Set contractor contractorPublicAddress
 
         campaignStartTime = numberValues[0];                            // Set when campaign starts
         campaignEndTime = numberValues[1];                              // Set when campaign ends
@@ -52,6 +51,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
 
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
+
         incentiveModel = IncentiveModel.NO_REFERRAL_REWARD;             // Set the incentiveModel selected for the campaign
 
         counters = new uint[](7);                                       // Initialize array of counters
