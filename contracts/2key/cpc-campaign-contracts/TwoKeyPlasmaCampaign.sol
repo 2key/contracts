@@ -814,7 +814,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (bool,bool,bool,address)
     {
-        bool isReferrer = rebalanceValue(referrerPlasma2TotalEarnings2key[_address]) > 0 ? true : false;
+        bool isReferrer = isActiveInfluencer[_address];
         bool isAddressConverter = isApprovedConverter[_address];
         bool isJoined = getAddressJoinedStatus(_address);
 
