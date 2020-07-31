@@ -39,7 +39,8 @@ const {
     runDeployCPCCampaignMigration,
     runDeployCPCFirstTime,
     runTruffleCompile,
-    runDeployPlasmaReputation
+    runDeployPlasmaReputation,
+    runDeployPPCNoRewards
 } = require('./helpers');
 
 
@@ -384,9 +385,9 @@ async function deployUpgrade(networks) {
         console.log('CPC contracts changed: ', cpcChanged);
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-deploy')) {
-            console.log("Deploying CPC campaign for the first time to the network");
-            await runDeployPlasmaReputation(networks[i]);
+        if(process.argv.includes('cpc-no-rewards-deploy')) {
+            console.log("Deploying CPC No Rewards campaign type for the first time to the network");
+            await runDeployPPCNoRewards(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {

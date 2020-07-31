@@ -17,6 +17,7 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
     string constant _addressToCampaignType = "addressToCampaignType";
     string constant _isCampaignCreatedThroughFactory = "isCampaignCreatedThroughFactory";
+
     ITwoKeyPlasmaFactoryStorage PROXY_STORAGE_CONTRACT;
 
 
@@ -86,6 +87,27 @@ contract TwoKeyPlasmaFactory is Upgradeable {
         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPC, msg.sender);
     }
 
+    function createPlasmaCPCNoRewardsCampaign(
+        string _url,
+        uint[] numberValuesArray
+    )
+    public
+    {
+        address proxyPlasmaCPCNoRewards = createProxyForCampaign("CPC_NO_REWARDS_PLASMA","TwoKeyCPCCampaignPlasmaNoReward");
+
+        IHandleCampaignDeploymentPlasma(proxyPlasmaCPCNoRewards).setInitialParamsCPCCampaignPlasmaNoRewards(
+            TWO_KEY_PLASMA_SINGLETON_REGISTRY,
+            msg.sender,
+            _url,
+            numberValuesArray
+        );
+
+        setCampaignCreatedThroughFactory(proxyPlasmaCPCNoRewards);
+        setAddressToCampaignType(proxyPlasmaCPCNoRewards, "CPC_NO_REWARDS_PLASMA");
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPCNoRewards, msg.sender);
+    }
+
     /**
      * @notice Internal function which will set that campaign is created through the factory
      * and whitelist that address
@@ -137,7 +159,5 @@ contract TwoKeyPlasmaFactory is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
-
-
 
 }
