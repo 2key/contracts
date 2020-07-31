@@ -20,7 +20,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
      */
     struct Conversion {
         address converterPlasma;
-        uint bountyPaid;
         uint conversionTimestamp;
         ConversionState state;
         ConversionPaymentState paymentState;
@@ -78,7 +77,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         // Create conversion
         Conversion memory c = Conversion(
             msg.sender,
-            0,
             block.timestamp,
             ConversionState.PENDING_APPROVAL,
             ConversionPaymentState.UNPAID
@@ -87,6 +85,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         // Get the ID and update mappings
         uint conversionId = conversions.length;
         conversions.push(c);
+
         converterToConversionId[msg.sender] = conversionId;
         counters[0]++; //Increase number of pending converters and conversions
         counters[3]++; //Increase number of pending conversions
@@ -199,13 +198,12 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
     )
     public
     view
-    returns (address, uint, uint, ConversionState, ConversionPaymentState)
+    returns (address, uint, ConversionState, ConversionPaymentState)
     {
         Conversion memory c = conversions[_conversionId];
 
         return (
             c.converterPlasma,
-            c.bountyPaid,
             c.conversionTimestamp,
             c.state,
             c.paymentState
