@@ -2,8 +2,6 @@
 require('babel-register');
 require('regenerator-runtime/runtime');
 
-const LedgerWalletProvider = require('truffle-ledger-provider');
-
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const LedgerProvider = require('./LedgerProvider');
 
