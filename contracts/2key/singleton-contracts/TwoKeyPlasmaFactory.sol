@@ -155,6 +155,20 @@ contract TwoKeyPlasmaFactory is Upgradeable {
     }
 
     /**
+     * @notice          Getter to return the non singleton hash assigned to campaign
+     * @param           campaignAddress is the address of campaign
+     */
+    function getNonSingletonHashForCampaign(
+        address campaignAddress
+    )
+    public
+    view
+    returns (string)
+    {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256(_campaignAddressToNonSingletonHash, campaignAddress));
+    }
+
+    /**
      * @notice internal function to set address to campaign type
      * @param _campaignAddress is the address of campaign
      * @param _campaignType is the type of campaign (String)
