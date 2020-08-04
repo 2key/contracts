@@ -17,6 +17,7 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
     string constant _addressToCampaignType = "addressToCampaignType";
     string constant _isCampaignCreatedThroughFactory = "isCampaignCreatedThroughFactory";
+    string constant _campaignAddressToNonSingletonHash = "campaignAddressToNonSingletonHash";
 
     ITwoKeyPlasmaFactoryStorage PROXY_STORAGE_CONTRACT;
 
@@ -89,7 +90,8 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
     function createPlasmaCPCNoRewardsCampaign(
         string _url,
-        uint[] numberValuesArray
+        uint[] numberValuesArray,
+        string _nonSingletonHash
     )
     public
     {
@@ -102,10 +104,26 @@ contract TwoKeyPlasmaFactory is Upgradeable {
             numberValuesArray
         );
 
+        setCampaignToNonSingletonHash(proxyPlasmaCPCNoRewards, _nonSingletonHash);
         setCampaignCreatedThroughFactory(proxyPlasmaCPCNoRewards);
         setAddressToCampaignType(proxyPlasmaCPCNoRewards, "CPC_NO_REWARDS_PLASMA");
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPCNoRewards, msg.sender);
+    }
+
+    /**
+     * @notice          For PPC campaigns we store their non singleton hash
+     * @param           _campaignAddress is the address of campaign
+     * @param           _nonSingletonHash is the non singleton hash
+     */
+    function setCampaignToNonSingletonHash(
+        address _campaignAddress,
+        string _nonSingletonHash
+    )
+    internal
+    {
+        bytes32 key = keccak256(_campaignAddressToNonSingletonHash,_campaignAddress);
+        PROXY_STORAGE_CONTRACT.setString(key, _nonSingletonHash);
     }
 
     /**
