@@ -1325,7 +1325,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
          */
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
         // This returns how much dollars is worth 1 ether
-        uint ethUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("ETH-USD");
+        uint ethUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
         // Returns final rate how much 2KEY is worth USD
         return expectedRate.mul(ethUsd).div(10**18);
     }
