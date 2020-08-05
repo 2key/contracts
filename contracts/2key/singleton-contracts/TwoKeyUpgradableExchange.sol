@@ -1249,7 +1249,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
-        uint rateFromKyber = get2KeyToUSDFromKyber();
+        uint rateFromKyber = get2KeyToUSDRateFromKyber();
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
@@ -1313,20 +1313,21 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      *
      * @return          2key to USD to WEI
      */
-    function get2KeyToUSDFromKyber()
+    function get2KeyToUSDRateFromKyber()
     internal
     view
     returns (uint)
     {
         address twoKeyToken = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
-        address daiToken = getAddress(keccak256(_dai));
-        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, daiToken); // This is how much 1 2KEY is worth in DAI
+        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, ETH_TOKEN_ADDRESS); // This is how much 1 2KEY is worth in ETH
         /**
-         * expected rate represents how many dai tokens we will get for 1 2KEY token
+         * expected rate represents how many eth is worth 1 twoKey
          */
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-        uint daiUsdRate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("DAI-USD");
-        return expectedRate.mul(daiUsdRate).div(10**18);
+        // This returns how much dollars is worth 1 ether
+        uint ethUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
+        // Returns final rate how much 2KEY is worth USD
+        return expectedRate.mul(ethUsd).div(10**18);
     }
 
 
@@ -1366,44 +1367,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             srcAmountWei,
             expectedRate
         );
-    }
-
-    function moveModeratorEarningsToFillReservePool(
-        address campaignContract
-    )
-    public
-    onlyMaintainer
-    {
-        uint i = 0;
-        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
-
-        uint _contractID = getContractId(campaignContract);
-        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
-        uint _daiWeiAvailable = getUint(_daiWeiAvailableToWithdrawKeyHash);
-        uint currentlyAvailableToFillReserve = getUint(_daiWeiAvailableToFill2KEYReserveKeyHash);
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, currentlyAvailableToFillReserve.add(_daiWeiAvailable));
-        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
-    }
-
-    /**
-     * @notice          Function to fix all PPC available to withdraw method functions
-     * @param           contracts is the array of all ppc campaigns (public addresses)
-     */
-    function setPPCCampaignsAvailableToWithdrawToZero(
-        address [] contracts
-    )
-    public
-    onlyMaintainer
-    {
-        uint i = 0;
-
-        for(i = 0; i<contracts.length; i++) {
-            // Get the contract ID
-            uint _contractID = getContractId(contracts[i]);
-
-            bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",_contractID);
-            setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
-        }
     }
 
 
