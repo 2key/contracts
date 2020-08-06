@@ -20,7 +20,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
      */
     struct Conversion {
         address converterPlasma;
-        uint bountyPaid;
         uint conversionTimestamp;
         ConversionState state;
         ConversionPaymentState paymentState;
@@ -43,7 +42,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;    // Assigning address of _twoKeyPlasmaSingletonRegistry
         contractor = _contractor;                                       // Assigning address of contractor
         targetUrl = _url;                                               // Set the URL being tracked for the campaign
-        contractorPublicAddress = ethereumOf(_contractor);              // Set contractor contractorPublicAddress
 
         campaignStartTime = numberValues[0];                            // Set when campaign starts
         campaignEndTime = numberValues[1];                              // Set when campaign ends
@@ -52,6 +50,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
 
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
+
         incentiveModel = IncentiveModel.NO_REFERRAL_REWARD;             // Set the incentiveModel selected for the campaign
 
         counters = new uint[](7);                                       // Initialize array of counters
@@ -78,7 +77,6 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         // Create conversion
         Conversion memory c = Conversion(
             msg.sender,
-            0,
             block.timestamp,
             ConversionState.PENDING_APPROVAL,
             ConversionPaymentState.UNPAID
@@ -87,6 +85,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         // Get the ID and update mappings
         uint conversionId = conversions.length;
         conversions.push(c);
+
         converterToConversionId[msg.sender] = conversionId;
         counters[0]++; //Increase number of pending converters and conversions
         counters[3]++; //Increase number of pending conversions
@@ -199,13 +198,12 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
     )
     public
     view
-    returns (address, uint, uint, ConversionState, ConversionPaymentState)
+    returns (address, uint, ConversionState, ConversionPaymentState)
     {
         Conversion memory c = conversions[_conversionId];
 
         return (
             c.converterPlasma,
-            c.bountyPaid,
             c.conversionTimestamp,
             c.state,
             c.paymentState

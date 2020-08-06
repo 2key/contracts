@@ -1272,7 +1272,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
-        uint rateFromKyber = get2KeyToUSDFromKyber();
+        uint rateFromKyber = get2KeyToUSDRateFromKyber();
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
@@ -1321,12 +1321,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint,uint,uint)
     {
         uint currentPrice = sellRate2key();
-
+        uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
+        uint poolWorth = currentPrice.mul(balanceOfTokens).div(10**18);
         return PriceDiscovery.buyTokensFromExchangeRealignPrice(
             purchaseAmountUSDWei,
             currentPrice,
-            getPoolBalanceOf2KeyTokens(),
-            poolWorthUSD()
+            balanceOfTokens,
+            poolWorth
         );
     }
 
@@ -1335,20 +1336,21 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      *
      * @return          2key to USD to WEI
      */
-    function get2KeyToUSDFromKyber()
+    function get2KeyToUSDRateFromKyber()
     internal
     view
     returns (uint)
     {
         address twoKeyToken = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
-        address daiToken = getAddress(keccak256(_dai));
-        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, daiToken); // This is how much 1 2KEY is worth in DAI
+        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, ETH_TOKEN_ADDRESS); // This is how much 1 2KEY is worth in ETH
         /**
-         * expected rate represents how many dai tokens we will get for 1 2KEY token
+         * expected rate represents how many eth is worth 1 twoKey
          */
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-        uint daiUsdRate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("DAI-USD");
-        return expectedRate.mul(daiUsdRate).div(10**18);
+        // This returns how much dollars is worth 1 ether
+        uint ethUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
+        // Returns final rate how much 2KEY is worth USD
+        return expectedRate.mul(ethUsd).div(10**18);
     }
 
 

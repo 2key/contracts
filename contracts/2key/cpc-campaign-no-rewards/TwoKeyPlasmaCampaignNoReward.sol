@@ -28,15 +28,14 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
      6 totalBountyPaid
      */
     uint [] counters;               // Array of counters, described above
+
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
 
     mapping(address => bool) isApprovedConverter;               // Determinator if converter has already 1 successful conversion
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to
 
-
     bool public isValidated;                        // Validator if campaign is validated from maintainer side
-    address public contractorPublicAddress;         // Contractor address on public chain
 
     uint campaignStartTime;                         // Time when campaign start
     uint campaignEndTime;                           // Time when campaign ends
@@ -48,7 +47,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
         require(isMaintainer(msg.sender));
         _;
     }
-
 
     modifier isCampaignValidated {                   // Checking if the campaign is created through TwoKeyPlasmaFactory
         require(isValidated == true);
@@ -69,12 +67,10 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
      *
      * @param           _from address The address which you want to send tokens from ALREADY converted to plasma
      * @param           _to address The address which you want to transfer to ALREADY converted to plasma
-     * @param           _value uint256 the amount of tokens to be transferred
      */
     function transferFrom(
         address _from,
-        address _to,
-        uint256 _value
+        address _to
     )
     internal
     {
@@ -171,7 +167,7 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
             new_address = influencers[i];
 
             if (received_from[new_address] == 0) {
-                transferFrom(old_address, new_address, 1);
+                transferFrom(old_address, new_address);
             } else {
                 require(received_from[new_address] == old_address);
             }
