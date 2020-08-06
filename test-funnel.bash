@@ -10,6 +10,11 @@ while test $# -gt 0; do
     testsPath='2key-protocol/test/campaignsTests/variations/cpc/*.spec.ts'
     shift
     ;;
+  --cpcNoRewards)
+    shift
+    testsPath='2key-protocol/test/campaignsTests/variations/cpcNoRewards/*.spec.ts'
+    shift
+    ;;
   --mvp)
     shift
     testsPath='2key-protocol/test/campaignsTests/variations/mvp/*.spec.ts'
