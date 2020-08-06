@@ -270,12 +270,16 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     }
 
 
+    /**
+     * @notice          Function to update referral chain on executed/rejected conversions
+     * @param           _converter is the converter address
+     * @param           _conversionId is the id of conversion
+     */
     function updateReferralChain(
         address _converter,
         uint _conversionId
     )
     internal
-    returns (uint)
     {
         //Get all the influencers
         address[] memory influencers = getReferrers(_converter);
@@ -286,7 +290,6 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
             //Count conversion from referrer
             referrerPlasmaAddressToCounterOfConversions[influencers[i]] = referrerPlasmaAddressToCounterOfConversions[influencers[i]].add(1);
         }
-        return numberOfInfluencers;
     }
 
 
