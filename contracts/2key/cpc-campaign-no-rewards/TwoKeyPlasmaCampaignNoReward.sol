@@ -386,6 +386,11 @@ contract TwoKeyPlasmaCampaignNoReward is TwoKeyCampaignIncentiveModels, TwoKeyCa
     }
 
 
+    /**
+     * @notice          Function to fetch how much conversions have been after selected influencer
+     *
+     * @param           influencerPlasma is the plasma address of influencer
+     */
     function getReferrerToCounterOfConversions(
         address influencerPlasma
     )
