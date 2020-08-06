@@ -22,6 +22,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
         address converterPlasma;
         uint conversionTimestamp;
         ConversionState state;
+        ConversionPaymentState paymentState;
     }
 
     Conversion [] conversions;          // Array of all conversions
