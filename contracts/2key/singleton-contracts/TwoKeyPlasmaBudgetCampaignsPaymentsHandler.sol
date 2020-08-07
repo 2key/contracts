@@ -36,8 +36,11 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     // Mapping how much referrer received in distribution cycle
     string constant _referrer2CycleId2TotalDistributedInCycle = "referrer2CycleId2TotalDistributedInCycle";
 
-    // Mapping referrer to all campaigns he participated at
-    string constant _referrer2campaignAddresses = "referrer2campaignAddresses";
+    // Mapping referrer to all campaigns he participated at and are having pending distribution
+    string constant _referrer2pendingCampaignAddresses = "referrer2pendingCampaignAddresses";
+
+    // Mapping referrer to all campaigns that are in progress of distribution
+    string constant _referrer2inProgressCampaignAddress = "referrer2inProgressCampaignAddress";
 
     // Mapping referrer to how much rebalanced amount he has pending
     string constant _referrer2cycleId2rebalancedAmount = "referrer2cycleId2rebalancedAmount";
@@ -325,7 +328,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             );
 
             bytes32 key = keccak256(
-                _referrer2campaignAddresses,
+                _referrer2pendingCampaignAddresses,
                 referrer
             );
             pushAddressToArray(key, campaignPlasma);
@@ -379,9 +382,11 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 // Update total payout to be paid in case there was no rebalancing
                 amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(nonRebalancedAmount);
             }
+
+
             // Delete referrer campaigns which are pending rewards
             deleteReferrerPendingCampaigns(
-                keccak256(_referrer2campaignAddresses, referrer)
+                keccak256(_referrer2pendingCampaignAddresses, referrer)
             );
             //TODO: After mainchain distribution is done, maintainer comes back to plasma and sets that
             //TODO: referrer2cycleId2amountDistributed
@@ -460,7 +465,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     returns (address[]) {
 
         bytes32 key = keccak256(
-            _referrer2campaignAddresses,
+            _referrer2pendingCampaignAddresses,
             referrer
         );
 
