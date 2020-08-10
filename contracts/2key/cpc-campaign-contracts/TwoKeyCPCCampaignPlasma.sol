@@ -122,7 +122,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         // Get the converter signature
         bytes memory signature = converterToSignature[converter];
         // Distribute arcs if necessary
-        distributeArcsIfNecessary(converter, signature);
+        distributeArcsIfNecessary(converter, signature, true);
         //Get the conversion id
         uint conversionId = converterToConversionId[converter];
         // Get the conversion object
@@ -199,7 +199,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         // Get the converter signature
         bytes memory signature = converterToSignature[converter];
         // Distribute arcs so we can track his referral chain
-        distributeArcsIfNecessary(converter, signature);
+        distributeArcsIfNecessary(converter, signature, false);
         // Get the conversion object
         Conversion storage c = conversions[conversionId];
         // Require that conversion state is pending approval
