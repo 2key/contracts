@@ -91,7 +91,6 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
         string memory _username_walletName,
         bytes signature
     )
-    public
     pure
     returns (address)
     {
@@ -104,20 +103,25 @@ contract TwoKeySignatureValidator is Upgradeable, Utils, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice Function to validate signature which will sign plasma2ethereum bindings
-     * @param plasmaAddress
-     * @param signature
+     * @notice          Function to validate signature which will sign plasma2ethereum bindings
+     * @param           plasmaAddress is the address
+     * @param           signature is the signature
      * @return if signature is good it will resolve address, otherwise it will be address(0)
     */
 
     function validatePlasmaToEthereum(
-        string plasmaAddress,
+        address plasmaAddress,
         bytes signature
     )
     public
     pure
     returns (address) {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked("bytes binding to plasma address")),
+                keccak256(abi.encodePacked(plasmaAddress))
+            )
+        );
 
         // Recover ethereumAddress from signature
         address recoveredEthereumAddress = Call.recoverHash(hash,signature,0);
