@@ -14,8 +14,10 @@ spinner() {
 spinner 2
 
 
-echo "Destination for execution on plasma is TwoKeyPlasmaRegistry contract: 0x52f15890accdf9dac9b98f5afb177d83a4211e08"
-python3 generate_bytecode.py setModeratorFeePlasma 5
+echo "Destination for execution on public is TwoKeyAdmin contract: 0x5eb1949424999327093d7a06619fc24170a9864e"
+cd ../..
+
+python3 generate_bytecode.py setModeratorFeePublic 5
 
 
 
