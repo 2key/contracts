@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="v1.2.50-staging"></a>
+## [v1.2.50-staging] - 2020-08-12
+
 <a name="v1.4.132-develop"></a>
 ## [v1.4.132-develop] - 2020-08-11
 
@@ -2150,7 +2153,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.132-develop...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.2.50-staging...HEAD
+[v1.2.50-staging]: https://github.com/2key/contracts/compare/v1.4.132-develop...v1.2.50-staging
 [v1.4.132-develop]: https://github.com/2key/contracts/compare/v1.4.131-develop...v1.4.132-develop
 [v1.4.131-develop]: https://github.com/2key/contracts/compare/v1.4.130-develop...v1.4.131-develop
 [v1.4.130-develop]: https://github.com/2key/contracts/compare/v1.4.14-master...v1.4.130-develop
