@@ -159,7 +159,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      */
     function transferFrom(
         address _from,
-        address _to
+        address _to,
+        bool isConversionApproval
     )
     internal
     {
