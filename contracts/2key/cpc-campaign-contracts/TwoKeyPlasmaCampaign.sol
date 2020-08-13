@@ -163,12 +163,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     internal
     {
-        require(balances[_from] > 0);
+        if(isConversionApproval == true) {
+            require(balances[_from] > 0);
 
-        balances[_from] = balances[_from].sub(1);
-        balances[_to] = balances[_to].add(conversionQuota);
-        totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
-
+            balances[_from] = balances[_from].sub(1);
+            balances[_to] = balances[_to].add(conversionQuota);
+            totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
+        }
         received_from[_to] = _from;
     }
 
@@ -239,7 +240,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      */
     function distributeArcsBasedOnSignature(
         bytes sig,
-        address _converter
+        address _converter,
+        bool isConversionApproval
     )
     internal
     {
@@ -257,7 +259,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             new_address = influencers[i];
 
             if (received_from[new_address] == 0) {
-                transferFrom(old_address, new_address);
+                transferFrom(old_address, new_address, isConversionApproval);
             } else {
                 require(received_from[new_address] == old_address);
             }
@@ -280,13 +282,14 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      */
     function distributeArcsIfNecessary(
         address _converter,
-        bytes signature
+        bytes signature,
+        bool isConversionApproval
     )
     internal
     returns (uint)
     {
         if(received_from[_converter] == address(0)) {
-            distributeArcsBasedOnSignature(signature, _converter);
+            distributeArcsBasedOnSignature(signature, _converter, isConversionApproval);
         }
         return getNumberOfUsersToContractor(_converter);
     }

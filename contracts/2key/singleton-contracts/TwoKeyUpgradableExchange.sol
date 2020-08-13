@@ -1272,15 +1272,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
-        uint rateFromKyber = get2KeyToUSDRateFromKyber();
+//        uint rateFromKyber = get2KeyToUSDRateFromKyber();
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
-        uint max = rateFromKyber;
-        if(rateFromCoinGecko>max) max = rateFromCoinGecko;
-        if(rateFromContract > max) max = rateFromContract;
-
-        return max;
+        return rateFromCoinGecko > rateFromContract ? rateFromCoinGecko : rateFromContract;
     }
 
 
@@ -1331,27 +1327,27 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
-    /**
-     * @notice          Function which will return how much is 1 2KEY worth USD
-     *
-     * @return          2key to USD to WEI
-     */
-    function get2KeyToUSDRateFromKyber()
-    internal
-    view
-    returns (uint)
-    {
-        address twoKeyToken = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
-        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, ETH_TOKEN_ADDRESS); // This is how much 1 2KEY is worth in ETH
-        /**
-         * expected rate represents how many eth is worth 1 twoKey
-         */
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-        // This returns how much dollars is worth 1 ether
-        uint ethUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
-        // Returns final rate how much 2KEY is worth USD
-        return expectedRate.mul(ethUsd).div(10**18);
-    }
+//    /**
+//     * @notice          Function which will return how much is 1 2KEY worth USD
+//     *
+//     * @return          2key to USD to WEI
+//     */
+//    function get2KeyToUSDRateFromKyber()
+//    internal
+//    view
+//    returns (uint)
+//    {
+//        address twoKeyToken = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
+//        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, ETH_TOKEN_ADDRESS); // This is how much 1 2KEY is worth in ETH
+//        /**
+//         * expected rate represents how many eth is worth 1 twoKey
+//         */
+//        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+//        // This returns how much dollars is worth 1 ether
+//        uint ethUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
+//        // Returns final rate how much 2KEY is worth USD
+//        return expectedRate.mul(ethUsd).div(10**18);
+//    }
 
 
     function getPoolBalanceOf2KeyTokens()
