@@ -30,7 +30,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      3 pendingConversions
      4 rejectedConversions
      5 executedConversions
-     6 totalBountyPaid
+     6 totalBountyPaidToReferrers
      */
     uint [] counters;               // Array of counters, described above
 
@@ -823,6 +823,19 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         bool isJoined = getAddressJoinedStatus(_address);
 
         return (isReferrer, isAddressConverter, isJoined, ethereumOf(_address));
+    }
+
+
+    /**
+     * @notice          Function to get total rewards to be distributed to referrer
+     *                  as well as total moderator earnings for this campaign
+     */
+    function getTotalReferrerRewardsAndTotalModeratorEarnings()
+    public
+    view
+    returns (uint,uint)
+    {
+        return (counters[6], moderatorTotalEarnings);
     }
 
 
