@@ -406,15 +406,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             deleteReferrerPendingCampaigns(
                 keccak256(_referrer2pendingCampaignAddresses, referrer)
             );
-            //TODO: After mainchain distribution is done, maintainer comes back to plasma and sets that
-            //TODO: referrer2cycleId2amountDistributed
-            //TODO: don't delete array of campaigns, update on every pending plasma campaign that:
-            //TODO: -> _referrer2campaignAddresses -> _referrer2pendingCampaignAddresses
-            //TODO: -> _referrer2campaignAddresses -> _referrer2inProgressCampaignAddress
-            //TODO: Before deleting copy them to inProgress and then delete.
-            //TODO: After distribution done and
-            // - totalRewards = keep same with ratio
-            // - pendingRewards = 0
+
             // Store referrer total payout amount for this cycle
             setReferrerToRebalancedAmountPendingForCycle(
                 referrer,
@@ -490,7 +482,12 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return getAddressArray(key);
     }
 
-
+    /**
+     * @notice          Function to get how much rebalanced earnings referrer got
+     *                  for specific distribution cycle id
+     * @param           referrer is the referrer plasma address
+     * @param           cycleId is distribution cycle id
+     */
     function getReferrerToTotalRebalancedAmountForCycleId(
         address referrer,
         uint cycleId
@@ -508,6 +505,10 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function to get total payout for specific cycle non rebalanced
+     * @param           cycleId is the id of distribution cycle
+     */
     function getTotalNonRebalancedPayoutForCycle(
         uint cycleId
     )
@@ -520,6 +521,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function to get exact amount of distribution cycles
+     */
     function getNumberOfDistributionCycles()
     public
     view
