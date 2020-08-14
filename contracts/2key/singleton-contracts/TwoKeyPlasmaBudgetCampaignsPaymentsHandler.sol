@@ -173,6 +173,19 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
 
+    function copyAddressArray(
+        bytes32 keyArrayToCopy,
+        bytes32 keyArrayToStore
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setAddressArray(
+            keyArrayToStore,
+            getAddressArray(keyArrayToCopy)
+        );
+    }
+
+
 
     function pushAddressToArray(
         bytes32 key,
