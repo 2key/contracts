@@ -67,7 +67,6 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
     function createPlasmaCPCCampaign(
         string _url,
-        address _moderator,
         uint[] numberValuesArray,
         string _nonSingletonHash
     )
@@ -78,7 +77,6 @@ contract TwoKeyPlasmaFactory is Upgradeable {
         IHandleCampaignDeploymentPlasma(proxyPlasmaCPC).setInitialParamsCPCCampaignPlasma(
             TWO_KEY_PLASMA_SINGLETON_REGISTRY,
             msg.sender,
-            _moderator,
             _url,
             numberValuesArray
         );
