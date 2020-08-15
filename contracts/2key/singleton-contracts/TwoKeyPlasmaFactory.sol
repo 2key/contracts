@@ -68,7 +68,8 @@ contract TwoKeyPlasmaFactory is Upgradeable {
     function createPlasmaCPCCampaign(
         string _url,
         address _moderator,
-        uint[] numberValuesArray
+        uint[] numberValuesArray,
+        string _nonSingletonHash
     )
     public
     {
@@ -82,6 +83,7 @@ contract TwoKeyPlasmaFactory is Upgradeable {
             numberValuesArray
         );
 
+        setCampaignToNonSingletonHash(proxyPlasmaCPC, _nonSingletonHash);
         setCampaignCreatedThroughFactory(proxyPlasmaCPC);
         setAddressToCampaignType(proxyPlasmaCPC, "CPC_PLASMA");
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
