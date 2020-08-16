@@ -17,6 +17,8 @@ contract TwoKeyPlasmaFactory is Upgradeable {
 
     string constant _addressToCampaignType = "addressToCampaignType";
     string constant _isCampaignCreatedThroughFactory = "isCampaignCreatedThroughFactory";
+    string constant _campaignAddressToNonSingletonHash = "campaignAddressToNonSingletonHash";
+
     ITwoKeyPlasmaFactoryStorage PROXY_STORAGE_CONTRACT;
 
 
@@ -86,6 +88,44 @@ contract TwoKeyPlasmaFactory is Upgradeable {
         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPC, msg.sender);
     }
 
+    function createPlasmaCPCNoRewardsCampaign(
+        string _url,
+        uint[] numberValuesArray,
+        string _nonSingletonHash
+    )
+    public
+    {
+        address proxyPlasmaCPCNoRewards = createProxyForCampaign("CPC_NO_REWARDS_PLASMA","TwoKeyCPCCampaignPlasmaNoReward");
+
+        IHandleCampaignDeploymentPlasma(proxyPlasmaCPCNoRewards).setInitialParamsCPCCampaignPlasmaNoRewards(
+            TWO_KEY_PLASMA_SINGLETON_REGISTRY,
+            msg.sender,
+            _url,
+            numberValuesArray
+        );
+
+        setCampaignToNonSingletonHash(proxyPlasmaCPCNoRewards, _nonSingletonHash);
+        setCampaignCreatedThroughFactory(proxyPlasmaCPCNoRewards);
+        setAddressToCampaignType(proxyPlasmaCPCNoRewards, "CPC_NO_REWARDS_PLASMA");
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+        ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitCPCCampaignCreatedEvent(proxyPlasmaCPCNoRewards, msg.sender);
+    }
+
+    /**
+     * @notice          For PPC campaigns we store their non singleton hash
+     * @param           _campaignAddress is the address of campaign
+     * @param           _nonSingletonHash is the non singleton hash
+     */
+    function setCampaignToNonSingletonHash(
+        address _campaignAddress,
+        string _nonSingletonHash
+    )
+    internal
+    {
+        bytes32 key = keccak256(_campaignAddressToNonSingletonHash,_campaignAddress);
+        PROXY_STORAGE_CONTRACT.setString(key, _nonSingletonHash);
+    }
+
     /**
      * @notice Internal function which will set that campaign is created through the factory
      * and whitelist that address
@@ -115,6 +155,20 @@ contract TwoKeyPlasmaFactory is Upgradeable {
     }
 
     /**
+     * @notice          Getter to return the non singleton hash assigned to campaign
+     * @param           campaignAddress is the address of campaign
+     */
+    function getNonSingletonHashForCampaign(
+        address campaignAddress
+    )
+    public
+    view
+    returns (string)
+    {
+        return PROXY_STORAGE_CONTRACT.getString(keccak256(_campaignAddressToNonSingletonHash, campaignAddress));
+    }
+
+    /**
      * @notice internal function to set address to campaign type
      * @param _campaignAddress is the address of campaign
      * @param _campaignType is the type of campaign (String)
@@ -137,7 +191,5 @@ contract TwoKeyPlasmaFactory is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
         .getContractProxyAddress(contractName);
     }
-
-
 
 }

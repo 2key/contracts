@@ -2,8 +2,6 @@
 require('babel-register');
 require('regenerator-runtime/runtime');
 
-const LedgerWalletProvider = require('truffle-ledger-provider');
-
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const LedgerProvider = require('./LedgerProvider');
 
@@ -19,7 +17,8 @@ const rpcs = {
     'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
     'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
     'dev-ganache': 'https://localhost:7545',
-    'infura-ropsten' : `https://ropsten.infura.io/v3/${config.infura_id}`
+    'dev-local': 'http://localhost:8545',
+    'plasma-test-local': 'http://localhost:18545'
 };
 
 const ids = {
@@ -29,8 +28,8 @@ const ids = {
     'staging-private' : 182,
     'prod-public' : 1,
     'prod-private' : 180,
-    'dev-ganache': 5777,
-    'infura-ropsten': 3
+    'dev-local': 8086,
+    'plasma-test-local': 8087
 };
 
 const createLedgerProvider = (rpc, id) => () =>
@@ -51,31 +50,16 @@ module.exports = {
   plugins: ["truffle-security"],
 
   networks: {
-      'dev-ganache': {
-          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-ganache"]),
-          skipDryRun: true,
-          network_id: ids["dev-ganache"],
-          gas: 8000000,
-          gasPrice: 120000000000,
-      },
-      'plasma-ganache': {
-          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-ganache"]),
-          skipDryRun: true,
-          network_id: ids["dev-ganache"],
-          gas: 8000000,
-          gasPrice: 120000000000,
-      },
-
       'dev-local': {
-          provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
-          network_id: 8086, // Match any network id
+          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-local"]),
+          network_id: ids["dev-local"], // Match any network id
           gas: 8000000,
           gasPrice: 15500000000
       },
 
       'plasma-test-local': {
-          provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
-          network_id: 8087, // Match any network id
+          provider: () => new HDWalletProvider(mnemonic, rpcs["plasma-test-local"]),
+          network_id: ids["plasma-test-local"], // Match any network id
           gas: 8000000,
           gasPrice: 0
       },
@@ -175,14 +159,6 @@ module.exports = {
           gas: 9000000,
           gasPrice: 0,
       },
-
-      // 'plasma-test-local': {
-      //     provider: () => new HDWalletProvider(mnemonic, 'https://rpc-staging.private.test.k8s.2key.net'),
-      //     network_id: 182,
-      //     gas: 7900000,
-      //     gasPrice: '0x0',
-      //     skipDryRun: true
-      // },
 
       'public.prod-ropsten-hdwallet': {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),

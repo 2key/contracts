@@ -1,11 +1,11 @@
 pragma solidity ^0.4.24;
 
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
-import "./TwoKeyPlasmaCampaign.sol";
 import "../TwoKeyConversionStates.sol";
+import "./TwoKeyPlasmaCampaignNoReward.sol";
 
 
-contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
+contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCampaignNoReward, TwoKeyConversionStates {
 
     string public targetUrl;            // Url being tracked
 
@@ -20,7 +20,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
      */
     struct Conversion {
         address converterPlasma;
-        uint bountyPaid;
         uint conversionTimestamp;
         ConversionState state;
         ConversionPaymentState paymentState;
@@ -29,10 +28,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     Conversion [] conversions;          // Array of all conversions
 
 
-    function setInitialParamsCPCCampaignPlasma(
+    function setInitialParamsCPCCampaignPlasmaNoRewards(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
-        address _moderator,
         string _url,
         uint [] numberValues
     )
@@ -43,22 +41,19 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;    // Assigning address of _twoKeyPlasmaSingletonRegistry
         contractor = _contractor;                                       // Assigning address of contractor
-        moderator = _moderator;                                         // Assigning address of moderator
         targetUrl = _url;                                               // Set the URL being tracked for the campaign
-        contractorPublicAddress = ethereumOf(_contractor);              // Set contractor contractorPublicAddress
+
         campaignStartTime = numberValues[0];                            // Set when campaign starts
         campaignEndTime = numberValues[1];                              // Set when campaign ends
         conversionQuota = numberValues[2];                              // Set conversion quota
         totalSupply_ = numberValues[3];                                 // Set total supply
-        incentiveModel = IncentiveModel(numberValues[4]);               // Set the incentiveModel selected for the campaign
-        bountyPerConversionWei = numberValues[5];                       // Set the bountyPerConversionWei amount
+
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
-        // Calculate moderator fee per every conversion
-        moderatorFeePerConversion = bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
-        rebalancingRatio = 10**18;
-        counters = new uint[](7);                                       // Initialize array of counters
 
+        incentiveModel = IncentiveModel.NO_REFERRAL_REWARD;             // Set the incentiveModel selected for the campaign
+
+        counters = new uint[](7);                                       // Initialize array of counters
     }
 
 
@@ -82,7 +77,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         // Create conversion
         Conversion memory c = Conversion(
             msg.sender,
-            0,
             block.timestamp,
             ConversionState.PENDING_APPROVAL,
             ConversionPaymentState.UNPAID
@@ -91,13 +85,14 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         // Get the ID and update mappings
         uint conversionId = conversions.length;
         conversions.push(c);
+
         converterToConversionId[msg.sender] = conversionId;
         counters[0]++; //Increase number of pending converters and conversions
         counters[3]++; //Increase number of pending conversions
 
         //Emit conversion event through TwoKeyPlasmaEvents
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
-            mirrorCampaignOnPublic,
+            address(0),
             conversionId,
             contractor,
             msg.sender
@@ -116,54 +111,27 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     public
     onlyMaintainer
     isCampaignValidated
+    isCampaignActiveInTermsOfTime
     {
         //Check if converter don't have any executed conversions before and approve him
         oneTimeApproveConverter(converter);
         // Get the converter signature
         bytes memory signature = converterToSignature[converter];
         // Distribute arcs if necessary
-        distributeArcsIfNecessary(converter, signature, true);
+        distributeArcsIfNecessary(converter, signature);
         //Get the conversion id
         uint conversionId = converterToConversionId[converter];
         // Get the conversion object
         Conversion storage c = conversions[conversionId];
         // Update state of conversion to EXECUTED
         c.state = ConversionState.EXECUTED;
-
         // Get the address of plasma event source
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
 
-        // The rewards are being distributed only if campaign is not ended by contractor and in timecap allowed
-        if(!isCampaignEndedByContractor() && isCampaignActiveInTermsOfTime()) {
-            uint bountyToBeDistributed = 0;
+        // Update referral chain
+        updateReferralChain(converter, conversionId);
 
-            // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
-            if(
-                getNumberOfUsersToContractor(converter) > 0 &&
-                counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign &&
-                bountyPerConversionWei > 0
-            ) {
-                //Add earnings to moderator total earnings
-                moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFeePerConversion);
-                //Left to be distributed between influencers
-                bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFeePerConversion);
-                //Update paid bounty for influencers
-                c.bountyPaid = bountyToBeDistributed;
-                // Update that conversion is being paid
-                c.paymentState = ConversionPaymentState.PAID;
-                //Increment how much bounty is paid
-                counters[6] = counters[6] + bountyPerConversionWei; // Total bounty paid including moderator fee
-                // Increment number of paid clicks by 1
-                numberOfPaidClicksAchieved++;
-                // emit event that conversion is being paid
-                ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitConversionPaidEvent(
-                    conversionId
-                );
-            }
-            //Distribute rewards between referrers
-            updateRewardsBetweenInfluencers(converter, conversionId, bountyToBeDistributed);
-        }
-
+        // Update reputation points for influencers, converter, and contractor
         updateReputationPointsOnConversionExecutedEvent(converter);
 
         counters[0]--; //Decrement number of pending converters
@@ -199,7 +167,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         // Get the converter signature
         bytes memory signature = converterToSignature[converter];
         // Distribute arcs so we can track his referral chain
-        distributeArcsIfNecessary(converter, signature, false);
+        distributeArcsIfNecessary(converter, signature);
         // Get the conversion object
         Conversion storage c = conversions[conversionId];
         // Require that conversion state is pending approval
@@ -230,13 +198,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     )
     public
     view
-    returns (address, uint, uint, ConversionState, ConversionPaymentState)
+    returns (address, uint, ConversionState, ConversionPaymentState)
     {
         Conversion memory c = conversions[_conversionId];
 
         return (
             c.converterPlasma,
-            c.bountyPaid,
             c.conversionTimestamp,
             c.state,
             c.paymentState

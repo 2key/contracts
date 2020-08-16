@@ -24,7 +24,14 @@ def sendEther(to):
     response = requests.post('http://127.0.0.1:8545/', headers=headers, data=data)
     print (response.text)
 
+
 def sendEtherToAllTestAddresses():
+
+    # Load deployer address as well.
+    with open('../configurationFiles/accountsConfig.json') as f:
+      data = json.load(f)
+
+
     addresses = [
         "0xb3fa520368f2df7bed4df5185101f303f6c7decc",
         "0xbae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7",
@@ -36,7 +43,8 @@ def sendEtherToAllTestAddresses():
         "0x1b00334784ee0360ddf70dfd3a2c53ccf51e5b96",
         "0x084d61962273589bf894c7b8794aa8915a06200f",
         "0xa7f9b1e9a4dbe008d4625898d73dbc2dc3346bf8",
-        "0xa916227584A55CfE94733F03397cE37c0a0f7A74"
+        "0xa916227584A55CfE94733F03397cE37c0a0f7A74",
+        data['address']
     ]
 
     for i in range(0,len(addresses)):

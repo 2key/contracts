@@ -114,7 +114,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         string _role
     )
     internal
-    view
+    pure
     returns (bool) {
         if(
             keccak256(_role) == keccak256("CONVERTER") ||

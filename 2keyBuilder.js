@@ -39,7 +39,8 @@ const {
     runDeployCPCCampaignMigration,
     runDeployCPCFirstTime,
     runTruffleCompile,
-    runDeployPlasmaReputation
+    runDeployPlasmaReputation,
+    runDeployPPCNoRewards
 } = require('./helpers');
 
 
@@ -384,9 +385,9 @@ async function deployUpgrade(networks) {
         console.log('CPC contracts changed: ', cpcChanged);
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-deploy')) {
-            console.log("Deploying CPC campaign for the first time to the network");
-            await runDeployPlasmaReputation(networks[i]);
+        if(process.argv.includes('cpc-no-rewards-deploy')) {
+            console.log("Deploying CPC No Rewards campaign type for the first time to the network");
+            await runDeployPPCNoRewards(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
@@ -548,8 +549,10 @@ async function deploy() {
             process.chdir('../../');
             //Run slack message
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
-            // Add tenderly to CI/CD
-            await runProcess('tenderly',['push', '--tag', npmVersionTag]);
+            if(!process.argv.includes('protocol-only')) {
+                // Add tenderly to CI/CD only in case there have been contracts updated.
+                await runProcess('tenderly', ['push', '--tag', npmVersionTag]);
+            }
             // Generate the latest changelog for contracts repo
             await generateChangelog();
             // Go to 2key-protocol/src
