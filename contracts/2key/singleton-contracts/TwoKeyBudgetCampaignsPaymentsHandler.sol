@@ -109,7 +109,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
 
 
-    function pullLeftoverForContractor(
+    function withdrawLeftoverForContractor(
         address campaignPlasmaAddress
     )
     public
@@ -180,6 +180,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         // Rebalancing everything except referrer rewards
         uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
+        uint amountAfterRebalancing = amountToRebalance;
 
         // Neutral for rebalancing = 1ETH
         uint rebalancingRatio = 10**18;
@@ -188,7 +189,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint initial2KEYRate = getInitial2KEYRateForCampaign(campaignPlasma);
 
         if(initial2KEYRate > 0) {
-            (amountToRebalance, rebalancingRatio)
+            (amountAfterRebalancing, rebalancingRatio)
                 = rebalanceRates(
                     initial2KEYRate,
                     amountToRebalance
@@ -196,7 +197,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         }
 
         uint rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
-        uint leftoverForContractor = amountToRebalance.sub(rebalancedModeratorRewards);
+        uint leftoverForContractor = amountAfterRebalancing.sub(rebalancedModeratorRewards);
 
         // Set moderator earnings for this campaign and immediately distribute them
         setAndDistributeModeratorEarnings(campaignPlasma, rebalancedModeratorRewards);
@@ -251,7 +252,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchange, difference);
             IUpgradableExchange(twoKeyUpgradableExchange).returnTokensBackToExchangeV1(difference);
             // TODO: Add event how much tokens were sent back
-        } else {
+        } else if (nonRebalancedTotalPayout < rebalancedTotalPayout) {
             // Leads to we need to get more tokens from Upgradable Exchange
             difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
             IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancingV1(difference);
@@ -309,7 +310,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
 
         // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(rebalancedModeratorRewards);
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(dModeratorRewards);
     }
 
 
@@ -510,4 +511,20 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getUint(keccak256(_distributionCycleToTotalDistributed, cycleId));
     }
 
+    function getModeratorEarningsAndContractorLeftoverRebalancedForCampaign(
+        address campaignAddress
+    )
+    public
+    view
+    returns (uint,uint)
+    {
+        return (
+            getUint(
+                keccak256(_campaignPlasmaToModeratorEarnings, campaignAddress) //moderator earnings
+            ),
+            getUint(
+                keccak256(_campaignPlasmaToLeftOverForContractor, campaignAddress) // contractor leftover
+            )
+        );
+    }
 }

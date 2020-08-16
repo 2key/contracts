@@ -344,6 +344,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 _referrer2pendingCampaignAddresses,
                 referrer
             );
+
             pushAddressToArray(key, campaignPlasma);
         }
     }
@@ -368,6 +369,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
         // Calculate how much total payout would be for all referrers together in case there was no rebalancing
         uint amountToBeDistributedInCycleNoRebalanced;
+        uint amountToBeDistributedInCycleRebalanced;
 
         for(i=0; i<referrers.length; i++) {
             // Load current referrer
@@ -407,6 +409,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 keccak256(_referrer2pendingCampaignAddresses, referrer)
             );
 
+            amountToBeDistributedInCycleRebalanced = amountToBeDistributedInCycleRebalanced.add(referrerTotalPayoutAmount);
+
             // Store referrer total payout amount for this cycle
             setReferrerToRebalancedAmountPendingForCycle(
                 referrer,
@@ -421,10 +425,15 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             amountToBeDistributedInCycleNoRebalanced
         );
 
+        // TODO: setTotalRebalancedPayoutForCycle as well
         // Store all influencers for this distribution cycle.
         setReferrersPerDistributionCycle(cycleId,referrers);
     }
 
+    //TODO: The last function in distribution cycle has to do following:
+    // 1. move from inProgress to finished
+    // 2. mark all campaigns that specific referrers have received tokens
+    // 3. Emit events that rewards aree being paid (emitPaidPendingRewards)
     /**
      * ------------------------------------------------
      *        Public getters
@@ -481,6 +490,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
         return getAddressArray(key);
     }
+
+    //TODO: Use function above to iterate through all campaigns and fetch their balances and return total
 
     /**
      * @notice          Function to get how much rebalanced earnings referrer got
