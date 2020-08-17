@@ -21,6 +21,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     struct Payment {
         uint rebalancingRatio;
         uint timestamp;
+        bool isReferrerPaid;
     }
 
     /**
@@ -80,6 +81,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     // Checking if the campaign is created through TwoKeyPlasmaFactory
     modifier isBountyAdded {
         require(totalBountyForCampaign > 0);
+        _;
+    }
+
+    // Restricting calls only to plasma campaigns payments handler contract
+    modifier onlyPlasmaBudgetPaymentsHandler {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler"));
         _;
     }
 
@@ -629,9 +636,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint _currentRate2KEY
     )
     public
+    onlyPlasmaBudgetPaymentsHandler
     returns (uint,uint)
     {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler"));
 
         uint rebalancingRatio = 10**18;
 
@@ -640,12 +647,30 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
         }
 
-        Payment memory p = Payment(rebalancingRatio, block.timestamp);
+        Payment memory p = Payment(rebalancingRatio, block.timestamp, false);
         referrerToPayment[_referrer] = p;
 
         return (getReferrerPlasmaBalance(_referrer), referrerPlasma2Balances2key[_referrer]);
     }
 
+    function markReferrerReceivedPaymentForThisCampaign(
+        address _referrer
+    )
+    public
+    onlyPlasmaBudgetPaymentsHandler
+    {
+        // Take current payment structure for the referrer
+        Payment memory p = referrerToPayment[_referrer];
+
+        // Require that referrer is not already paid since he can't get paid twice
+        require(p.isReferrerPaid == false);
+
+        // Set that referrer is paid
+        p.isReferrerPaid = true;
+
+        // Store in mapping
+        referrerToPayment[_referrer] = p;
+    }
     /**
      * @notice          Function to return referrers participated in the referral chain
      * @param           customer is the one who converted

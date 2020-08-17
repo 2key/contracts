@@ -136,6 +136,11 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         uint rewards
     );
 
+    event PaidPendingRewards(
+        address influencer,
+        uint rewards
+    );
+
     /**
      * @notice          Event emitted when user changes his handle
      */
@@ -380,6 +385,19 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
             campaignPlasma,
             influencer,
             amountOfTokens
+        );
+    }
+
+    function emitPaidPendingRewards(
+        address influencer,
+        uint amountPaid
+    )
+    public
+    onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler
+    {
+        emit PaidPendingRewards(
+            influencer,
+            amountPaid
         );
     }
 

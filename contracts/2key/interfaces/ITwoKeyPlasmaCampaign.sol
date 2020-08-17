@@ -1,6 +1,12 @@
 pragma solidity ^0.4.24;
 
 contract ITwoKeyPlasmaCampaign {
+
+    function markReferrerReceivedPaymentForThisCampaign(
+        address _referrer
+    )
+    public;
+
     function computeAndSetRebalancingRatioForReferrer(
         address _referrer,
         uint _currentRate2KEY

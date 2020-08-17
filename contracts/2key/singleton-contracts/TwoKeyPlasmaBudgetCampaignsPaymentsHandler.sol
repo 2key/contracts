@@ -42,6 +42,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     // Mapping referrer to all campaigns that are in progress of distribution
     string constant _referrer2inProgressCampaignAddress = "referrer2inProgressCampaignAddress";
 
+    // Mapping referrer to all campaigns he already received a payment
+    string constant _referrer2finishedAndPaidCampaigns = "referrer2finishedAndPaidCampaigns";
+
     // Mapping referrer to how much rebalanced amount he has pending
     string constant _referrer2cycleId2rebalancedAmount = "referrer2cycleId2rebalancedAmount";
 
@@ -186,6 +189,37 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
 
+    function appendToArray(
+        bytes32 keyBaseArray,
+        bytes32 keyArrayToAppend
+    )
+    internal
+    {
+        address [] memory baseArray = getAddressArray(keyBaseArray);
+        address [] memory arrayToAppend = getAddressArray(keyArrayToAppend);
+
+        uint len = baseArray.length + arrayToAppend.length;
+
+        address [] memory newBaseArray = new address[](len);
+
+        uint i;
+        uint j;
+
+        // Copy base array
+        for(i=0; i< baseArray.length; i++) {
+            newBaseArray[i] = baseArray[i];
+        }
+
+        // Copy array to append
+        for(i=baseArray.length; i<len; i++) {
+            newBaseArray[i] = arrayToAppend[j];
+            j++;
+        }
+
+        setAddressArray(keyBaseArray, newBaseArray);
+    }
+
+
 
     function pushAddressToArray(
         bytes32 key,
@@ -273,6 +307,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+
     function setTotalNonRebalancedPayoutForCycle(
         uint cycleId,
         uint totalNonRebalancedPayout
@@ -282,6 +317,18 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         setUint(
             keccak256(_distributionCycle2TotalNonRebalancedPayment, cycleId),
             totalNonRebalancedPayout
+        );
+    }
+
+    function setTotalRebalancedPayoutForCycle(
+        uint cycleId,
+        uint totalRebalancedPayout
+    )
+    internal
+    {
+        setUint(
+            keccak256(_distributionCycleToTotalRebalancedPayment, cycleId),
+            totalRebalancedPayout
         );
     }
 
@@ -419,21 +466,62 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             );
         }
 
-        // Store total payout
+        // Store total rebalanced payout
+        setTotalRebalancedPayoutForCycle(
+            cycleId,
+            amountToBeDistributedInCycleRebalanced
+        );
+
+        // Store total non-rebalanced payout
         setTotalNonRebalancedPayoutForCycle(
             cycleId,
             amountToBeDistributedInCycleNoRebalanced
         );
 
-        // TODO: setTotalRebalancedPayoutForCycle as well
         // Store all influencers for this distribution cycle.
         setReferrersPerDistributionCycle(cycleId,referrers);
     }
 
-    //TODO: The last function in distribution cycle has to do following:
-    // 1. move from inProgress to finished
-    // 2. mark all campaigns that specific referrers have received tokens
-    // 3. Emit events that rewards aree being paid (emitPaidPendingRewards)
+
+    function finishDistributionCycle(
+        uint cycleId
+    )
+    public
+    {
+        address[] memory referrers = getReferrersForCycleId(cycleId);
+
+        uint i;
+
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+        // Iterate through all referrers
+        for(i=0; i<referrers.length; i++) {
+            // Take referrer address
+            address referrer = referrers[i];
+            // 1. Emit event for every referrer that all his pending rewards are being paid
+            uint amountPaidToReferrer = getTotalReferrerPendingAmount(referrer);
+            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(referrer, amountPaidToReferrer);
+
+            address [] memory referrerInProgressCampaigns = getCampaignsInProgressOfDistribution(referrer);
+            uint j;
+            for(j = 0; j < referrerInProgressCampaigns.length; j++) {
+                // Iterate through all campaigns and mark that referrer got paid for this campaign
+                address campaignAddress = referrerInProgressCampaigns[j];
+                ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
+            }
+
+            // Move from inProgress to finished campagins
+            appendToArray(
+                keccak256(_referrer2finishedAndPaidCampaigns, referrer),
+                keccak256(_referrer2inProgressCampaignAddress, referrer)
+            );
+
+            // Delete array of inProgress campaigns
+            deleteAddressArray(
+                keccak256(_referrer2inProgressCampaignAddress, referrer)
+            );
+        }
+    }
+
     /**
      * ------------------------------------------------
      *        Public getters
@@ -491,7 +579,55 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return getAddressArray(key);
     }
 
-    //TODO: Use function above to iterate through all campaigns and fetch their balances and return total
+    /**
+     * @notice          Function to fetch total pending payout on all campaigns that
+     *                  are not inProgress of payment yet for influencer
+     * @param           referrer is the address of referrer
+     */
+    function getTotalReferrerPendingAmount(
+        address referrer
+    )
+    public
+    view
+    returns (uint)
+    {
+        // Get all pending campaigns for this referrer
+        address[] memory campaigns = getCampaignsReferrerHasPendingBalances(referrer);
+
+        uint i;
+        uint referrerTotalPendingPayout;
+
+        // Iterate through all campaigns
+        for(i = 0; i < campaigns.length; i++) {
+            // Add to total pending payout referrer plasma balance
+            referrerTotalPendingPayout = referrerTotalPendingPayout + ITwoKeyPlasmaCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer);
+        }
+
+        // Return referrer total pending
+        return referrerTotalPendingPayout;
+    }
+
+
+    /**
+     * @notice          Function to get campaign where referrer balance is rebalanced
+     *                  but still not submitted to mainchain
+     * @param           referrer is the plasma address of referrer
+     */
+    function getCampaignsInProgressOfDistribution(
+        address referrer
+    )
+    public
+    view
+    returns (address[])
+    {
+        bytes32 key = keccak256(
+            _referrer2inProgressCampaignAddress,
+            referrer
+        );
+
+        return getAddressArray(key);
+    }
+
 
     /**
      * @notice          Function to get how much rebalanced earnings referrer got
@@ -516,6 +652,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+
     /**
      * @notice          Function to get total payout for specific cycle non rebalanced
      * @param           cycleId is the id of distribution cycle
@@ -533,6 +670,22 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     }
 
     /**
+     * @notice          Function to get total rebalanced payout for specific cycle rebalanced
+     * @param           cycleId is the id of distribution cycle
+     */
+    function getTotalRebalancedPayoutForCycle(
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(
+            keccak256(_distributionCycleToTotalRebalancedPayment, cycleId)
+        );
+    }
+
+    /**
      * @notice          Function to get exact amount of distribution cycles
      */
     function getNumberOfDistributionCycles()
@@ -543,4 +696,16 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         getUint(keccak256(_numberOfCycles));
     }
 
+
+    function getReferrersForCycleId(
+        uint cycleId
+    )
+    public
+    view
+    returns (address[])
+    {
+        return getAddressArray(
+            keccak256(_distributionCycleIdToReferrersPaid, cycleId)
+        );
+    }
 }

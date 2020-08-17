@@ -310,7 +310,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
 
         // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(dModeratorRewards);
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(rebalancedModeratorRewards);
     }
 
 
