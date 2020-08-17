@@ -101,6 +101,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
                 address(this),
                 amountOfTokens
             );
+
             //TODO: Leftover to compute how much is this worth in 2KEY tokens and store that rate (2KEY/USD)
         } else {
             revert('Token symbol is not supported.');

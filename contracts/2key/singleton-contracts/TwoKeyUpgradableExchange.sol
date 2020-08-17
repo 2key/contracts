@@ -652,7 +652,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-
     function getMore2KeyTokensForRebalancing(
         uint amountOf2KeyRequested
     )
@@ -711,6 +710,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             address(this),
             amountOfTokensToReturn
         );
+    }
+
+    function exchangeDaiFor2Key(
+        uint amountDAI
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
     }
 
     /**
