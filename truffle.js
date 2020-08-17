@@ -9,13 +9,13 @@ const config = require('./configurationFiles/accountsConfig.json');
 
 const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 
-//https://rpc.public.prod.k8s.2key.net',
+
 const rpcs = {
     'test-public' : 'https://rpc-dev.public.test.k8s.2key.net',
     'test-private' : 'https://rpc-dev.private.test.k8s.2key.net',
     'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'prod-public' : 'https://mainnet.infura.io/v3/146d8e35075e42fe86227d5a50297502',
+    'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
     'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
     'dev-ganache': 'https://localhost:7545',
     'dev-local': 'http://localhost:8545',
