@@ -1136,6 +1136,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return sent2keyToContractByNow.mul(10**18).div(ethReceivedFromContractByNow);
     }
 
+    function amountOfTokensAvailableToFill2KEYReserve(
+        string tokenSymbol
+    )
+    public
+    view
+    returns (uint)
+    {
+
+    }
 
     /**
      * @notice          Function to check how much dai is available to fill reserve
@@ -1219,6 +1228,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return ethReceivedFromContract(_contractID) > 0 ? true : false;
     }
 
+
+    /**
+     * @notice          Function to get contract address from it's ID
+     * @param           contractID is the ID assigned to contract
+     */
     function getContractAddressFromID(
         uint contractID
     )
@@ -1228,6 +1242,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         return getAddress(keccak256("idToContractAddress", contractID));
     }
+
 
     /**
      * @notice          Getter to check how much is pool worth in USD
@@ -1243,26 +1258,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
     }
 
-//    /**
-//     * @notice          Function to set new spread in wei
-//     *
-//     * @param           newSpreadWei is the new value for the spread
-//     */
-//    function setSpreadWei(
-//        uint newSpreadWei
-//    )
-//    public
-//    onlyTwoKeyAdmin
-//    {
-//        setUint(keccak256("spreadWei"), newSpreadWei);
-//    }
-
 
     /**
      * @notice          Getter to get spreadWei value
      */
     function spreadWei()
-    public
+    internal
     view
     returns (uint)
     {
@@ -1280,7 +1281,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
-//        uint rateFromKyber = get2KeyToUSDRateFromKyber();
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
@@ -1334,28 +1334,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             poolWorth
         );
     }
-
-//    /**
-//     * @notice          Function which will return how much is 1 2KEY worth USD
-//     *
-//     * @return          2key to USD to WEI
-//     */
-//    function get2KeyToUSDRateFromKyber()
-//    internal
-//    view
-//    returns (uint)
-//    {
-//        address twoKeyToken = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
-//        uint expectedRate = getKyberExpectedRate(10**18, twoKeyToken, ETH_TOKEN_ADDRESS); // This is how much 1 2KEY is worth in ETH
-//        /**
-//         * expected rate represents how many eth is worth 1 twoKey
-//         */
-//        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-//        // This returns how much dollars is worth 1 ether
-//        uint ethUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
-//        // Returns final rate how much 2KEY is worth USD
-//        return expectedRate.mul(ethUsd).div(10**18);
-//    }
 
 
     function getPoolBalanceOf2KeyTokens()
