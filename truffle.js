@@ -9,6 +9,7 @@ const config = require('./configurationFiles/accountsConfig.json');
 
 const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 
+
 const rpcs = {
     'test-public' : 'https://rpc-dev.public.test.k8s.2key.net',
     'test-private' : 'https://rpc-dev.private.test.k8s.2key.net',
@@ -133,7 +134,7 @@ module.exports = {
           skipDryRun: true,
           network_id: ids["prod-public"],
           gas: 8000000,
-          gasPrice: 53000000000,
+          gasPrice: 85000000000,
       },
 
       'public.prod-hdwallet': {
