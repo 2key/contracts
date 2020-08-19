@@ -40,7 +40,8 @@ const {
     runDeployCPCFirstTime,
     runTruffleCompile,
     runDeployPlasmaReputation,
-    runDeployPPCNoRewards
+    runDeployPPCNoRewards,
+    runDeployCPCNoRewardsMigration
 } = require('./helpers');
 
 
@@ -88,6 +89,7 @@ const getDiffBetweenLatestTags = async () => {
     let tokenSellCampaignChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/')|| item.includes('/campaign-mutual-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let donationCampaignChanged = diffAllContracts.filter(item => item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let cpcChanged = diffAllContracts.filter(item => item.includes('/cpc-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+    let cpcNoRewardsChanged = diffAllContracts.filter(item => item.includes('/cpc-campaign-no-rewards/')).map(item => item.split('/').pop().replace(".sol",""));
 
     //Restore from archive the latest build so we can check which contracts are new
     restoreFromArchive();
@@ -99,7 +101,7 @@ const getDiffBetweenLatestTags = async () => {
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
-    return [singletonsChanged, tokenSellCampaignChanged, donationCampaignChanged, cpcChanged];
+    return [singletonsChanged, tokenSellCampaignChanged, donationCampaignChanged, cpcChanged, cpcNoRewardsChanged];
 };
 
 const checkIfFileExistsInDir = (contractName) => {
@@ -375,7 +377,7 @@ async function deployUpgrade(networks) {
     const l = networks.length;
 
     await runTruffleCompile();
-    let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged] = await getDiffBetweenLatestTags();
+    let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged, cpcNoRewardsChanged] = await getDiffBetweenLatestTags();
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
@@ -383,6 +385,7 @@ async function deployUpgrade(networks) {
         console.log('TOKEN_SELL to be upgraded: ', tokenSellToBePatched);
         console.log('DONATION to be upgraded: ', donationToBePatched);
         console.log('CPC contracts changed: ', cpcChanged);
+        console.log('CPC NO REWARDS contracts changed: ', cpcNoRewardsChanged);
 
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-no-rewards-deploy')) {
@@ -421,6 +424,10 @@ async function deployUpgrade(networks) {
 
         if(cpcChanged.length > 0) {
             await runDeployCPCCampaignMigration(networks[i]);
+        }
+
+        if(cpcNoRewardsChanged.length > 0) {
+            await runDeployCPCNoRewardsMigration(networks[i]);
         }
 
         /* eslint-enable no-await-in-loop */
