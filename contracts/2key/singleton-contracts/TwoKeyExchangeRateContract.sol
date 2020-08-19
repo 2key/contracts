@@ -145,12 +145,12 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-    function getStableCoinTo2KEYQuota(
+    function getStableCoinTo2KEYQuotaAndCurrent2KEYRate(
         address stableCoinAddress
     )
     public
     view
-    returns (uint)
+    returns (uint,uint)
     {
         // Take the symbol of the token
         string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
@@ -168,7 +168,9 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         uint rate2KEYUSD = getBaseToTargetRateInternal(stringToBytes32("2KEY-USD"));
 
         // Formula : 1 STABLE = (rateStableUSD/rate2KEYUSD) 2KEY
-        return rateStableUSD.mul(10**18).div(rate2KEYUSD);
+        uint stableTo2KEY = rateStableUSD.mul(10**18).div(rate2KEYUSD);
+
+        return (stableTo2KEY, rate2KEYUSD);
     }
 
     function getFiatToStableQuotes(

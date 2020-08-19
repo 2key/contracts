@@ -8,7 +8,7 @@ import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerSto
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IUpgradableExchange.sol";
-
+import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../libraries/SafeMath.sol";
 
 contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
@@ -103,10 +103,25 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             );
 
             // Compute how much 2KEY is worth against this token address
+            address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
-            //TODO: Leftover to compute how much is this worth in 2KEY tokens and store that rate (2KEY/USD)
-        } else {
-            revert('Token symbol is not supported.');
+            uint rateStable2KEY;
+            uint rate2KEYUSD;
+
+            (rateStable2KEY, rate2KEYUSD)= ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinTo2KEYQuota(
+                tokenAddress
+            );
+
+            uint amountOf2KEYTokens = amountOfTokens.mul(rateStable2KEY);
+
+            // Set initial budget of 2KEY
+            setUint(keyHashForInitialBudget, amountOf2KEYTokens);
+
+            // Set the rate at which we have bought 2KEY tokens
+            setUint(
+                keccak256(_campaignPlasma2initialRate, campaignPlasma),
+                rate2KEYUSD
+            );
         }
     }
 
