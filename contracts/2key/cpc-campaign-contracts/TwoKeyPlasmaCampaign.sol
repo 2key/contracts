@@ -114,12 +114,17 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     internal
     {
-        uint arcsToSub = 0;
+        uint arcsToSub = 1;
 
         if(isConversionApproval == true) {
-            arcsToSub = 1;
             require(balances[_from] > 0);
             balances[_from] = balances[_from].sub(arcsToSub);
+        } else {
+            if(balances[from] > 0) {
+                balances[from] = balances[from].sub(arcsToSub);
+            } else {
+                arcsToSub = 0;
+            }
         }
 
         balances[_to] = balances[_to].add(conversionQuota);
