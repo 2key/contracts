@@ -24,8 +24,9 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
     string constant _campaignPlasma2contractor = "campaignPlasma2contractor";
 
+    string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
     string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
-
+    string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
     string constant _numberOfDistributionCycles = "numberOfDistributionCycles";
     string constant _distributionCycleToTotalDistributed = "_distributionCycleToTotalDistributed";
 
@@ -57,76 +58,95 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      * ------------------------------------
      */
 
-
     /**
      * @notice          Function which will be used in order to add inventory for campaign
-     *                  directly with 2KEY tokens or using DAI tokens. In order to make this
+     *                  directly with 2KEY tokens. In order to make this
      *                  transfer secure,
      *                  user will firstly have to approve this contract to take from him
      *                  amount of tokens and then call contract function which will execute
      *                  transferFrom action. This function can be called only once.
      *
      * @param           campaignPlasma is the plasma campaign address which is user adding inventory for.
-     * @param           amountOfTokens is the amount of tokens user adds as inventory in token currency.
+     * @param           amountOf2KEYTokens is the amount of 2KEY tokens user adds to budget
      */
-    function addInventory(
+    function addInventory2KEY(
         address campaignPlasma,
-        uint amountOfTokens,
-        address tokenAddress
+        uint amountOf2KEYTokens
     )
     public
-    payable
     {
-        bytes32 keyHashForInitialBudget = keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma);
-
-        // Require that initial budget is not being added, since it can be done only once.
-        require(getUint(keyHashForInitialBudget) == 0);
-
+        // Require that budget is not previously set and assign amount of 2KEY tokens
+        requireBudgetNotSetAndSetBudget(campaignPlasma, amountOf2KEYTokens);
         // Set that contractor is the msg.sender of this method for the campaign passed
         setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
 
-        if(tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")) {
-            // Take tokens from the contractor
-            IERC20(tokenAddress).transferFrom(
-                msg.sender,
-                address(this),
-                amountOfTokens
-            );
-            // Set initial budget added
-            setUint(keyHashForInitialBudget, amountOfTokens);
-        } else {
-            // Take tokens from the contractor
-            IERC20(tokenAddress).transferFrom(
-                msg.sender,
-                address(this),
-                amountOfTokens
-            );
+        // Take 2KEY tokens from the contractor
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
+            msg.sender,
+            address(this),
+            amountOf2KEYTokens
+        );
+    }
 
-            // Compute how much 2KEY is worth against this token address
-            address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
+    /**
+     * @notice          Function which will be used in order to add inventory for campaign
+     *                  directly with stable coin tokens. In order to make this
+     *                  transfer secure,
+     *                  user will firstly have to approve this contract to take from him
+     *                  amount of tokens and then call contract function which will execute
+     *                  transferFrom action. This function can be called only once.
+     *
+     * @param           campaignPlasma is the plasma campaign address which is user adding inventory for.
+     * @param           amountOfStableCoins is the amount of stable coins user adds to budget
+     * @param           tokenAddress is stableCoinAddress
+     */
+    function addInventory(
+        address campaignPlasma,
+        uint amountOfStableCoins,
+        address tokenAddress
+    )
+    public
+    {
+        // Set that contractor is the msg.sender of this method for the campaign passed
+        setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
 
-            uint rateStable2KEY;
-            uint rate2KEYUSD;
+        // Compute how much 2KEY is worth against this token address
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
-            (rateStable2KEY, rate2KEYUSD)= ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinTo2KEYQuota(
-                tokenAddress
-            );
+        // Fetch Stable to 2KEY quota and 2KEY to USD quota
+        uint rateStable2KEY;
+        uint rate2KEYUSD;
 
-            uint amountOf2KEYTokens = amountOfTokens.mul(rateStable2KEY);
+        // Fetch rates
+        (rateStable2KEY, rate2KEYUSD)= ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinTo2KEYQuota(
+            tokenAddress
+        );
 
-            // Set initial budget of 2KEY
-            setUint(keyHashForInitialBudget, amountOf2KEYTokens);
+        // Calculate amount of 2KEY tokens user should get
+        uint amountOf2KEYTokens = amountOfStableCoins.mul(rateStable2KEY);
 
-            // Set the rate at which we have bought 2KEY tokens
-            setUint(
-                keccak256(_campaignPlasma2initialRate, campaignPlasma),
-                rate2KEYUSD
-            );
-        }
+        // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
+        requireBudgetNotSetAndSetBudget(campaignPlasma, amountOf2KEYTokens);
+
+        // Take stable coins from the contractor
+        IERC20(tokenAddress).transferFrom(
+            msg.sender,
+            address(this),
+            amountOfStableCoins
+        );
+
+        // Set the rate at which we have bought 2KEY tokens
+        setUint(
+            keccak256(_campaignPlasma2initialRate, campaignPlasma),
+            rate2KEYUSD
+        );
     }
 
 
-
+    /**
+     * @notice          Function where contractor can withdraw if there's any leftover on his campaign
+     * @param           campaignPlasmaAddress is plasma address of campaign
+     */
     function withdrawLeftoverForContractor(
         address campaignPlasmaAddress
     )
@@ -142,7 +162,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasmaAddress)
         );
 
-        // Check that he has some leftover
+        // Check that he has some leftover which can be zero in case that campaign is not ended yet
         require(leftoverForContractor > 0);
 
         // Generate key if contractor have withdrawn his leftover for specific campaign
@@ -159,6 +179,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             leftoverForContractor
         );
     }
+
 
     /**
      * ------------------------------------
@@ -225,6 +246,9 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             keccak256(_campaignPlasmaToLeftOverForContractor, campaignPlasma),
             leftoverForContractor
         );
+
+        // Set rebalancing ratio for campaign
+        setRebalancingRatioForCampaign(campaignPlasma, rebalancingRatio);
 
         // Emit an event to checksum all the balances per campaign
         ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
@@ -331,6 +355,25 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(rebalancedModeratorRewards);
     }
 
+    /**
+     * @notice          Function to require that initial budget is not set, which
+     *                  will prevent any way of adding inventory to specific campaigns
+     *                  after it's first time added
+     * @param           campaignPlasma is campaign plasma address
+     */
+    function requireBudgetNotSetAndSetBudget(
+        address campaignPlasma,
+        uint amount2KEYTokens
+    )
+    internal
+    {
+
+        bytes32 keyHashForInitialBudget = keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma);
+        // Require that initial budget is not being added, since it can be done only once.
+        require(getUint(keyHashForInitialBudget) == 0);
+        // Set initial budget added
+        setUint(keyHashForInitialBudget, amount2KEYTokens);
+    }
 
     function rebalanceRates(
         uint initial2KEYRate,
@@ -371,35 +414,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return (rebalancedAmount, rebalancingRatio);
     }
 
-
-    /**
-     * @notice          Function whenever called, will increment number of distribution cycles
-     */
-    function incrementNumberOfDistributionCycles()
-    internal
-    {
-        bytes32 key = keccak256(_numberOfDistributionCycles);
-        setUint(key,getUint(key) + 1);
-    }
-
-
-    /**
-     * @notice 			Function to transfer 2KEY tokens
-     *
-     * @param			receiver is the address of tokens receiver
-     * @param			amount is the amount of tokens to be transfered
-     */
-    function transfer2KEY(
-        address receiver,
-        uint amount
-    )
-    internal
-    {
-        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
-            receiver,
-            amount
-        );
-    }
 
     /**
      * ------------------------------------------------
@@ -474,12 +488,92 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return keccak256(a) == keccak256(b) ? true : false;
     }
 
+
+    /**
+     * @notice          Function whenever called, will increment number of distribution cycles
+     */
+    function incrementNumberOfDistributionCycles()
+    internal
+    {
+        bytes32 key = keccak256(_numberOfDistributionCycles);
+        setUint(key,getUint(key) + 1);
+    }
+
+
+    /**
+     * @notice 			Function to transfer 2KEY tokens
+     *
+     * @param			receiver is the address of tokens receiver
+     * @param			amount is the amount of tokens to be transfered
+     */
+    function transfer2KEY(
+        address receiver,
+        uint amount
+    )
+    internal
+    {
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
+            receiver,
+            amount
+        );
+    }
+
+    /**
+     * @notice          Internal setter function to store how much stable coins were
+     *                  added to fund this campaign
+     * @param           campaignPlasma is plasma campaign address
+     * @param           amountOfStableCoins is the amount used for campaign funding
+     */
+    function setAmountOfStableCoinsUsedToFundCampaign(
+        address campaignPlasma,
+        uint amountOfStableCoins
+    )
+    internal
+    {
+        setUint(
+            keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma),
+            amountOfStableCoins
+        );
+    }
+
+    function setRebalancingRatioForCampaign(
+        address campaignPlasma,
+        uint rebalancingRatio
+    )
+    internal
+    {
+        setUint(
+            keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma),
+            rebalancingRatio
+        );
+    }
+
+
     /**
      * ------------------------------------------------
      *              Public getters
      * ------------------------------------------------
      */
 
+    /**
+     * @notice          Function to return rebalancing ratio for specific campaign,
+     *                  in case campaign was funded with 2KEY will return 1 ETH as neutral
+     * @param           campaignPlasma is plasma campaign address
+     */
+    function getRebalancingRatioForCampaign(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        uint ratio = getUint(keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma));
+        return  ratio != 0 ? ratio : 10**18;
+    }
+
+    /**
+     * @notice          Function to get number of distribution cycles ever
+     */
     function getNumberOfCycles()
     public
     view
@@ -508,6 +602,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     /**
      * @notice          Function to retrieve the initial rate at which 2KEY tokens were bought if
      *                  were bought at all. Otherwise it returns 0.
+     * @param           campaignPlasma is plasma address of the campaign
      */
     function getInitial2KEYRateForCampaign(
         address campaignPlasma
@@ -519,6 +614,11 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getUint(keccak256(_campaignPlasma2initialRate, campaignPlasma));
     }
 
+
+    /**
+     * @notice          Function to get how much is distributed in cycle
+     * @param           cycleId is the ID of that cycle
+     */
     function getTotalDistributedInCycle(
         uint cycleId
     )
@@ -529,6 +629,45 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getUint(keccak256(_distributionCycleToTotalDistributed, cycleId));
     }
 
+
+    /**
+     * @notice          Function to get moderator rebalanced earnings for this campaign
+     * @param           campaignAddress is plasma campaign address
+     */
+    function getModeratorEarningsRebalancedForCampaign(
+        address campaignAddress
+    )
+    public
+    view
+    returns (uint)
+    {
+        return (
+            getUint(keccak256(_campaignPlasmaToModeratorEarnings, campaignAddress)) //moderator earnings)
+        );
+    }
+
+
+    /**
+     * @notice          Function to get contractor rebalanced leftover for campaign
+     * @param           campaignAddress is plasma campaign address
+     */
+    function getContractorRebalancedLeftoverForCampaign(
+        address campaignAddress
+    )
+    public
+    view
+    returns (uint)
+    {
+        return (
+            getUint(keccak256(_campaignPlasmaToLeftOverForContractor, campaignAddress)) // contractor leftover
+        );
+    }
+
+
+    /**
+     * @notice          Function to get moderator earnings and contractor leftover after we rebalanced campaign
+     * @param           campaignAddress is the address of campaign
+     */
     function getModeratorEarningsAndContractorLeftoverRebalancedForCampaign(
         address campaignAddress
     )
@@ -537,12 +676,69 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     returns (uint,uint)
     {
         return (
-            getUint(
-                keccak256(_campaignPlasmaToModeratorEarnings, campaignAddress) //moderator earnings
-            ),
-            getUint(
-                keccak256(_campaignPlasmaToLeftOverForContractor, campaignAddress) // contractor leftover
-            )
+            getModeratorEarningsRebalancedForCampaign(campaignAddress),
+            getContractorRebalancedLeftoverForCampaign(campaignAddress)
         );
+    }
+
+
+    /**
+     * @notice          Function to get balance of stable coins on this contract
+     * @param           stableCoinsAddresses is the array of stable coins addresses we want to fetch
+     *                  balances for
+     */
+    function getBalanceOfStableCoinsOnContract(
+        address [] stableCoinsAddresses
+    )
+    public
+    view
+    returns (uint[])
+    {
+        uint len = stableCoinsAddresses.length;
+        uint [] memory balances = new uint[](len);
+        uint i;
+        for(i = 0; i < len; i++) {
+            balances[i] = IERC20(stableCoinsAddresses[i]).balanceOf(address(this));
+        }
+        return balances;
+    }
+
+
+    /**
+     * @notice          Function to check amount of stable coins used to func ppc campaign
+     * @param           campaignPlasma is campaign plasma address
+     */
+    function getAmountOfStableCoinsUsedToFundCampaign(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma));
+    }
+
+
+    /**
+     * @notice          Function to return summary related to specific campaign
+     * @param           campaignPlasma is plasma campaign of address
+     */
+    function getCampaignSummary(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint,uint,uint,uint,bool,uint,uint)
+    {
+        return (
+            getInitialBountyForCampaign(campaignPlasma),
+            getAmountOfStableCoinsUsedToFundCampaign(campaignPlasma),
+            getInitial2KEYRateForCampaign(campaignPlasma),
+            getContractorRebalancedLeftoverForCampaign(campaignPlasma),
+            getBool(keccak256(_campaignPlasmaToLeftoverWithdrawnByContractor, campaignPlasma)),
+            getModeratorEarningsRebalancedForCampaign(campaignPlasma),
+            getRebalancingRatioForCampaign(campaignPlasma)
+        );
+
     }
 }
