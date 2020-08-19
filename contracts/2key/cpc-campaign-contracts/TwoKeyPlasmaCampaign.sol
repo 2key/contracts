@@ -116,13 +116,19 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         uint arcsToSub = 1;
 
+        // If we are approving converter
         if(isConversionApproval == true) {
+            // Require that referrer has arcs
             require(balances[_from] > 0);
+            // Substract arcsToSub from him
             balances[_from] = balances[_from].sub(arcsToSub);
         } else {
+            // In case of rejecting converter
+            // We check if referrer HAS arcs and sub from him
             if(balances[from] > 0) {
                 balances[from] = balances[from].sub(arcsToSub);
             } else {
+                // If he doesn't have arcs we don't do substraction
                 arcsToSub = 0;
             }
         }
