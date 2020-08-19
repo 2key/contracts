@@ -146,7 +146,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
 
     function getStableCoinTo2KEYQuota(
-        uint amountStableCoins,
         address stableCoinAddress
     )
     public
@@ -166,7 +165,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         uint rateStableUSD = getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
 
         // get usd rate
-        uint rate2KEYUSD = getBaseToTArgetRateInternal(stringToBytes32("2KEY"));
+        uint rate2KEYUSD = getBaseToTargetRateInternal(stringToBytes32("2KEY-USD"));
 
         // Formula : 1 STABLE = (rateStableUSD/rate2KEYUSD) 2KEY
         return rateStableUSD.mul(10**18).div(rate2KEYUSD);
