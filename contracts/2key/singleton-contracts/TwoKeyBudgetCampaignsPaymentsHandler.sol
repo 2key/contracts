@@ -72,7 +72,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     function addInventory(
         address campaignPlasma,
         uint amountOfTokens,
-        string tokenSymbol
+        address tokenAddress
     )
     public
     payable
@@ -85,22 +85,24 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // Set that contractor is the msg.sender of this method for the campaign passed
         setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
 
-        if(equals(tokenSymbol, "2KEY")) {
+        if(tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")) {
             // Take tokens from the contractor
-            IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
+            IERC20(tokenAddress).transferFrom(
                 msg.sender,
                 address(this),
                 amountOfTokens
             );
             // Set initial budget added
             setUint(keyHashForInitialBudget, amountOfTokens);
-        } else if (equals(tokenSymbol, "DAI")) {
+        } else {
             // Take tokens from the contractor
-            IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI")).transferFrom(
+            IERC20(tokenAddress).transferFrom(
                 msg.sender,
                 address(this),
                 amountOfTokens
             );
+
+            // Compute how much 2KEY is worth against this token address
 
             //TODO: Leftover to compute how much is this worth in 2KEY tokens and store that rate (2KEY/USD)
         } else {

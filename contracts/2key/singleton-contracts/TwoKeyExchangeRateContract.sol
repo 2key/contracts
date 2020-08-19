@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradability/Upgradeable.sol";
 import "../libraries/SafeMath.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+import "../interfaces/IERC20.sol";
 
 
 /**
@@ -140,6 +141,29 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         return getBaseToTargetRate(base_target).mul(base_amount);
+    }
+
+    function getStableCoinTo2KEYQuota(
+        uint amountStableCoins,
+        address stableCoinAddress
+    )
+    public
+    view
+    returns (uint)
+    {
+        // Take the symbol of the token
+        string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
+
+        // Check that this symbol is matching address stored in our codebase so we are sure that it's real asset
+        require(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress);
+
+        // get rate against USD (1 STABLE  = rate USD)
+        uint rateStableUSD = getBaseToTargetRateInternal(stringToBytes32(tokenSymbol));
+
+        uint rate2KEYUSD = getBaseToTArgetRateInternal(stringToBytes32("2KEY"));
+
+        // Formula : 1 STABLE = (rateStableUSD/rate2KEYUSD) 2KEY
+        return rateStableUSD.mul(10**18).div(rate2KEYUSD);
     }
 
     function getFiatToStableQuotes(

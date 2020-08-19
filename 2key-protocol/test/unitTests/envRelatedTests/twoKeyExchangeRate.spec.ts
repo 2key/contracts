@@ -14,7 +14,7 @@ const {env} = process;
 
 const timeout = 60000;
 const usdSymbol = 'USD';
-const usdDaiSymbol = 'USD/DAI';
+const usdDaiSymbol = 'USD-DAI';
 const usd2KeySymbol = '2KEY-USD';
 const tusdSymbol = 'TUSD';
 const daiSymbol = 'DAI';
