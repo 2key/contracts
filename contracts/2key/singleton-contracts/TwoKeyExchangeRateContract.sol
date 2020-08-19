@@ -117,6 +117,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         return getBaseToTargetRateInternal(hexedBaseTarget);
     }
 
+
     function getBaseToTargetRateInternal(
         bytes32 baseTarget
     )
@@ -143,6 +144,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         return getBaseToTargetRate(base_target).mul(base_amount);
     }
 
+
     function getStableCoinTo2KEYQuota(
         uint amountStableCoins,
         address stableCoinAddress
@@ -157,9 +159,13 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         // Check that this symbol is matching address stored in our codebase so we are sure that it's real asset
         require(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress);
 
-        // get rate against USD (1 STABLE  = rate USD)
-        uint rateStableUSD = getBaseToTargetRateInternal(stringToBytes32(tokenSymbol));
+        // Generate pair against usd (Example: Symbol = DAI ==> result = 'DAI-USD'
+        string memory tokenSymbolToCurrency = concatenateStrings(tokenSymbol, "-USD");
 
+        // get rate against USD (1 STABLE  = rate USD)
+        uint rateStableUSD = getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
+
+        // get usd rate
         uint rate2KEYUSD = getBaseToTArgetRateInternal(stringToBytes32("2KEY"));
 
         // Formula : 1 STABLE = (rateStableUSD/rate2KEYUSD) 2KEY
@@ -217,4 +223,15 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         }
     }
 
+
+    function concatenateStrings(
+        string a,
+        string b
+    )
+    internal
+    pure
+    returns (string)
+    {
+        return string(abi.encodePacked(a,b));
+    }
 }
