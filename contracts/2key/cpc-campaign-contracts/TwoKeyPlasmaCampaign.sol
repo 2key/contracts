@@ -118,7 +118,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint arcsToSub = 0;
 
         // If previous user in chain has arcs then we're taking them
-        if(balances[from] > 0) {
+        if(balances[_from] > 0) {
             arcsToSub = 1;
         }
 
