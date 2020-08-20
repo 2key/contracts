@@ -233,6 +233,8 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                 const nonSingletonsBytecodes = [];
                 Object.keys(contracts.contracts).forEach(submodule => {
                     if (submodule !== 'singletons') {
+                        console.log('-------------------------');
+                        console.log('SUBMODULE IS: ', submodule)
                         Object.values(contracts.contracts[submodule]).forEach(({ bytecode, abi }) => {
                             nonSingletonsBytecodes.push(bytecode || JSON.stringify(abi));
                         });
