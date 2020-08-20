@@ -622,7 +622,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint dollarAmountWei = _weiAmount.mul(rate).div(10**18);
 
         return get2KEYTokenPriceAndAmountOfTokensReceiving(dollarAmountWei);
-
     }
 
 
@@ -766,6 +765,26 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         return (totalTokensBought, averageTokenPriceForPurchase);
     }
+
+    function buyTokensInternal(
+        uint amountOfStableCoins,
+        address stableCoinAddress
+    )
+    public
+    onlyValidatedContracts
+    returns (uint,uint)
+    {
+        uint totalTokensBought;
+        uint averageTokenPriceForPurchase;
+        uint newTokenPrice;
+
+        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = getTokenAmountToBeSold(msg.value);
+
+        // update sellRate2KEY of the token
+        bytes32 sellRateKeyHash = keccak256("sellRate2key");
+        return (0,0);
+    }
+
 
     /**
      * @notice          Internal function to update the state in case tokens were bought for influencers
@@ -1136,15 +1155,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return sent2keyToContractByNow.mul(10**18).div(ethReceivedFromContractByNow);
     }
 
-    function amountOfTokensAvailableToFill2KEYReserve(
-        string tokenSymbol
-    )
-    public
-    view
-    returns (uint)
-    {
-
-    }
 
     /**
      * @notice          Function to check how much dai is available to fill reserve

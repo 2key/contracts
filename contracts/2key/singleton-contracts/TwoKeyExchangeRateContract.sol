@@ -152,17 +152,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint,uint)
     {
-        // Take the symbol of the token
-        string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
-
-        // Check that this symbol is matching address stored in our codebase so we are sure that it's real asset
-        require(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress);
-
-        // Generate pair against usd (Example: Symbol = DAI ==> result = 'DAI-USD'
-        string memory tokenSymbolToCurrency = concatenateStrings(tokenSymbol, "-USD");
-
         // get rate against USD (1 STABLE  = rate USD)
-        uint rateStableUSD = getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
+        uint rateStableUSD = getStableCoinToUSDQuota(stableCoinAddress);
 
         // get usd rate
         uint rate2KEYUSD = getBaseToTargetRateInternal(stringToBytes32("2KEY-USD"));
@@ -201,6 +192,28 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         }
 
         return pairs;
+    }
+
+    function getStableCoinToUSDQuota(
+        address stableCoin
+    )
+    public
+    view
+    returns (uint)
+    {
+        // Take the symbol of the token
+        string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
+
+        // Check that this symbol is matching address stored in our codebase so we are sure that it's real asset
+        if(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress) {
+            // Generate pair against usd (Example: Symbol = DAI ==> result = 'DAI-USD'
+            string memory tokenSymbolToCurrency = concatenateStrings(tokenSymbol, "-USD");
+
+            // get rate against USD (1 STABLE  = rate USD)
+            return getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
+        }
+        // If stable coin is not matched, return 0 as quota
+        return 0;
     }
 
 
