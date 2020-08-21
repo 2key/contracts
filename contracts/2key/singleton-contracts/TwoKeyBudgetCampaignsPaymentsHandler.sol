@@ -678,6 +678,17 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+    function getIfLeftoverForCampaignIsWithdrawn(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (bool)
+    {
+        bool isWithdrawn = getBool(keccak256(_campaignPlasmaToLeftoverWithdrawnByContractor, campaignPlasma));
+        return isWithdrawn;
+    }
+
 
     /**
      * @notice          Function to get balance of stable coins on this contract
@@ -732,7 +743,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             getAmountOfStableCoinsUsedToFundCampaign(campaignPlasma),
             getInitial2KEYRateForCampaign(campaignPlasma),
             getContractorRebalancedLeftoverForCampaign(campaignPlasma),
-            getBool(keccak256(_campaignPlasmaToLeftoverWithdrawnByContractor, campaignPlasma)),
+            getIfLeftoverForCampaignIsWithdrawn(campaignPlasma),
             getModeratorEarningsRebalancedForCampaign(campaignPlasma),
             getRebalancingRatioForCampaign(campaignPlasma)
         );
