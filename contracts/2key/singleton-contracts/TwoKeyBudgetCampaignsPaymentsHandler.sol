@@ -110,23 +110,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // Set that contractor is the msg.sender of this method for the campaign passed
         setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
 
-        // Compute how much 2KEY is worth against this token address
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract");
 
-        // Fetch Stable to 2KEY quota and 2KEY to USD quota
-        uint rateStable2KEY;
-        uint rate2KEYUSD;
-
-        // Fetch rates
-        (rateStable2KEY, rate2KEYUSD)= ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinTo2KEYQuota(
-            tokenAddress
-        );
-
-        // Calculate amount of 2KEY tokens user should get
-        uint amountOf2KEYTokens = amountOfStableCoins.mul(rateStable2KEY);
-
-        // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
-        requireBudgetNotSetAndSetBudget(campaignPlasma, amountOf2KEYTokens);
+        address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
         // Take stable coins from the contractor
         IERC20(tokenAddress).transferFrom(
@@ -135,10 +120,22 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             amountOfStableCoins
         );
 
+        // Approve twoKeyUpgradableExchange to take this tokens
+        IERC20(tokenAddress).approve(twoKeyUpgradableExchange, amountOfStableCoins);
+
+        uint totalTokensBought;
+        uint tokenPrice;
+
+        // Buy tokens
+        (totalTokensBought, tokenPrice) = IUpgradableExchange(twoKeyUpgradableExchange).buyTokensWithERC20(amountOfStableCoins, tokenAddress);
+
+        // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
+        requireBudgetNotSetAndSetBudget(campaignPlasma, totalTokensBought);
+
         // Set the rate at which we have bought 2KEY tokens
         setUint(
             keccak256(_campaignPlasma2initialRate, campaignPlasma),
-            rate2KEYUSD
+            tokenPrice
         );
     }
 
