@@ -195,7 +195,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     }
 
     function getStableCoinToUSDQuota(
-        address stableCoin
+        address stableCoinAddress
     )
     public
     view
@@ -208,7 +208,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         if(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress) {
             // Generate pair against usd (Example: Symbol = DAI ==> result = 'DAI-USD'
             string memory tokenSymbolToCurrency = concatenateStrings(tokenSymbol, "-USD");
-
             // get rate against USD (1 STABLE  = rate USD)
             return getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
         }

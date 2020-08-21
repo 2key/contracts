@@ -741,11 +741,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = getTokenAmountToBeSold(msg.value);
 
-        // update sellRate2KEY of the token
-        bytes32 sellRateKeyHash = keccak256("sellRate2key");
 
-        // Set the new token price after this purchase
-        setUint(sellRateKeyHash, newTokenPrice);
+        set2KEYSellRateInternal(newTokenPrice);
 
         // check if contract is first time interacting with this one
         uint contractId = getContractId(msg.sender);
@@ -766,9 +763,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return (totalTokensBought, averageTokenPriceForPurchase);
     }
 
-    function buyTokensInternal(
-        uint amountOfStableCoins,
-        address stableCoinAddress
+    function buyTokensWithERC20(
+        uint amountOfTokens,
+        address tokenAddress
     )
     public
     onlyValidatedContracts
@@ -778,17 +775,39 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint averageTokenPriceForPurchase;
         uint newTokenPrice;
 
-        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = getTokenAmountToBeSold(msg.value);
+        // Get the address of twoKeyExchangeRateContract
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
-        // update sellRate2KEY of the token
-        bytes32 sellRateKeyHash = keccak256("sellRate2key");
-        return (0,0);
+        // Get stable coin to dollar rate
+        uint tokenToUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinToUSDQuota(tokenAddress);
+
+        // Convert that amount to USD value
+        uint amountInUSDOfPurchase = amountOfTokens.mul(tokenToUsd).div(10**18);
+
+        // Take the tokens
+        IERC20(tokenAddress).transferFrom(msg.sender, address(this), amountOfTokens);
+
+        // Increment amount of this stable tokens to fill reserve
+        setStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
+
+        // Process price discovery, buy tokens, and get new price
+        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = get2KEYTokenPriceAndAmountOfTokensReceiving(amountInUSDOfPurchase);
+
+        // Set new token price
+        set2KEYSellRateInternal(newTokenPrice);
+
+        // Transfer tokens
+        _processPurchase(msg.sender, totalTokensBought);
+
+        // Return amount of tokens received and average token price for purchase
+        return (totalTokensBought, averageTokenPriceForPurchase);
     }
+
 
 
     /**
      * @notice          Internal function to update the state in case tokens were bought for influencers
-     *
+     *yes
      * @param           contractID is the ID of the contract
      * @param           amountOfTokensBeingSentToContract is the amount of 2KEY tokens being sent to the contract
      * @param           purchaseAmountETH is the amount of ETH spent to purchase tokens
@@ -810,6 +829,32 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         updateEthWeiAvailableToHedge(contractID, purchaseAmountETH);
 
+    }
+
+    function set2KEYSellRateInternal(
+        uint newRate
+    )
+    internal
+    {
+        setUint(
+            keccak256("sellRate2key"),
+            newRate
+        );
+    }
+
+    function setStableCoinsAvailableToFillReserve(
+        uint amountOfStableCoins,
+        address stableCoinAddress
+    )
+    internal
+    {
+        bytes32 key = keccak256("stableCoinToAmountAvailableToFillReserve", stableCoinAddress);
+
+        uint currentBalance = getUint(key);
+        setUint(
+            key,
+            currentBalance.add(amountOfStableCoins)
+        );
     }
 
 

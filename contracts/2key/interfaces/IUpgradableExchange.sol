@@ -5,6 +5,13 @@ contract IUpgradableExchange {
     function buyRate2key() public view returns (uint);
     function sellRate2key() public view returns (uint);
 
+    function buyTokensWithERC20(
+        uint amountOfTokens,
+        address tokenAddress
+    )
+    public
+    returns (uint,uint);
+
     function buyTokens(
         address _beneficiary
     )
