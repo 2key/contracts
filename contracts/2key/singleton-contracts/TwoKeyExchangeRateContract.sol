@@ -145,24 +145,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-    function getStableCoinTo2KEYQuotaAndCurrent2KEYRate(
-        address stableCoinAddress
-    )
-    public
-    view
-    returns (uint,uint)
-    {
-        // get rate against USD (1 STABLE  = rate USD)
-        uint rateStableUSD = getStableCoinToUSDQuota(stableCoinAddress);
-
-        // get usd rate
-        uint rate2KEYUSD = getBaseToTargetRateInternal(stringToBytes32("2KEY-USD"));
-
-        // Formula : 1 STABLE = (rateStableUSD/rate2KEYUSD) 2KEY
-        uint stableTo2KEY = rateStableUSD.mul(10**18).div(rate2KEYUSD);
-
-        return (stableTo2KEY, rate2KEYUSD);
-    }
 
     function getFiatToStableQuotes(
         uint amountInFiatWei,

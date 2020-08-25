@@ -64,6 +64,8 @@ export default function checkCampaignSummaryTest(
     const {campaignAddress} = storage;
 
     const summary = await protocol[campaignContract].getCampaignSummary(campaignAddress, address);
+    const bounty = await protocol[campaignContract].getTotalBountyAndBountyPerConversion(campaignAddress);
+    const bountyPerConversion = bounty.bountyPerConversion;
 
     expectEqualNumbers(
       summary.pendingConverters,
@@ -104,7 +106,7 @@ export default function checkCampaignSummaryTest(
     if (storage.campaignType === campaignTypes.cpc) {
       expectEqualNumbers(
         summary.totalBounty,
-        summary.executedConversions * campaignData.bountyPerConversionWei,
+        summary.executedConversions * bountyPerConversion,
         'totalBounty'
       );
     } else {

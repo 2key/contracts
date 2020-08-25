@@ -18,6 +18,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint constant N = 2048;  //constant number
     IncentiveModel incentiveModel;  //Incentive model for rewards
 
+
     struct Payment {
         uint rebalancingRatio;
         uint timestamp;
@@ -51,10 +52,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to
 
+    bool isBudgetedDirectlyWith2KEY;
+
     // public available integers
     bool public isContractLocked;
     uint public moderatorTotalEarnings;             // Total rewards which are going to moderator
     uint public initialRate2KEY;                   // Rate at which 2KEY is bought at campaign creation
+    bool public isValidated;
 
     // Internal contract values
     uint campaignStartTime;                         // Time when campaign start
@@ -606,16 +610,21 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @dev             This can be only called by maintainer, and only once.
      * @param           _totalBounty is the total bounty for this campaign
      */
-    function setTotalBountyAndInitialRateAndValidateCampaign(
+    function setInitialParamsAndValidateCampaign(
         uint _totalBounty,
-        uint _initialRate2KEY
+        uint _initialRate2KEY,
+        uint _bountyPerConversion2KEY,
+        bool _isBudgetedDirectlyWith2KEY
     )
     public
     onlyMaintainer
     {
-        require(totalBountyForCampaign == 0);
+        require(isValidated == false);
+        // Set total bounty for campaign
         totalBountyForCampaign = _totalBounty;
-        // If tokens are sent directly to campaign, initial rate should be 0
+        // Set bounty per conversion
+        bountyPerConversionWei = _bountyPerConversion2KEY;
+        // Set initial rate at which tokens are purchased
         initialRate2KEY = _initialRate2KEY;
         // It's going to round the value.
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
@@ -624,6 +633,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
             numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversionWei);
         }
 
+        // Calculate moderator fee per every conversion
+        moderatorFeePerConversion = bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
+
+        // Set if campaign is budgeted directly with 2KEY
+        isBudgetedDirectlyWith2KEY = _isBudgetedDirectlyWith2KEY;
+        isValidated = true;
     }
 
 
@@ -643,7 +658,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint rebalancingRatio = 10**18;
 
         // This is in case inventory NOT added directly as 2KEY
-        if(initialRate2KEY != 0) {
+        if(isBudgetedDirectlyWith2KEY == false) {
             rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
         }
 

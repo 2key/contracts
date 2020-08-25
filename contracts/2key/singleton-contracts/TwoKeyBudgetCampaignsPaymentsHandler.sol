@@ -24,8 +24,10 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
     string constant _campaignPlasma2contractor = "campaignPlasma2contractor";
 
+    string constant _campaignPlasma2isBudgetedWith2KeyDirectly = "campaignPlasma2isBudgetedWith2KeyDirectly";
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
     string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
+    string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
     string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
     string constant _numberOfDistributionCycles = "numberOfDistributionCycles";
     string constant _distributionCycleToTotalDistributed = "_distributionCycleToTotalDistributed";
@@ -71,7 +73,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      */
     function addInventory2KEY(
         address campaignPlasma,
-        uint amountOf2KEYTokens
+        uint amountOf2KEYTokens,
+        uint bountyPerConversionFiat
     )
     public
     {
@@ -79,6 +82,30 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         requireBudgetNotSetAndSetBudget(campaignPlasma, amountOf2KEYTokens);
         // Set that contractor is the msg.sender of this method for the campaign passed
         setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
+
+        // Get 2KEY sell rate at the moment
+        uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
+
+        // calculate bounty per conversion 2KEY
+        uint bountyPerConversion2KEY = bountyPerConversionFiat.mul(10**18).div(rate);
+
+        // Calculate and set bounty per conversion in 2KEY units
+        setUint(
+            keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma),
+            bountyPerConversion2KEY
+        );
+
+        // Set rate at which 2KEY is put to campaign
+        setUint(
+            keccak256(_campaignPlasma2initialRate, campaignPlasma),
+            rate
+        );
+
+        // Set that campaign is budgeted directly with 2KEY tokens
+        setBool(
+            keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma),
+            true
+        );
 
         // Take 2KEY tokens from the contractor
         IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
@@ -726,6 +753,22 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma));
     }
 
+    /**
+     * @notice          Function to return bounty per conversion in 2KEY tokens
+     * @param           campaignPlasma is plasma campaign of address requested
+     */
+    function getBountyPerConversion2KEY(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(
+            keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma)
+        );
+    }
+
 
     /**
      * @notice          Function to return summary related to specific campaign
@@ -736,17 +779,57 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     )
     public
     view
-    returns (uint,uint,uint,uint,bool,uint,uint)
+    returns (bytes)
     {
         return (
-            getInitialBountyForCampaign(campaignPlasma),
-            getAmountOfStableCoinsUsedToFundCampaign(campaignPlasma),
-            getInitial2KEYRateForCampaign(campaignPlasma),
-            getContractorRebalancedLeftoverForCampaign(campaignPlasma),
-            getIfLeftoverForCampaignIsWithdrawn(campaignPlasma),
-            getModeratorEarningsRebalancedForCampaign(campaignPlasma),
-            getRebalancingRatioForCampaign(campaignPlasma)
+            abi.encodePacked(
+                getInitialBountyForCampaign(campaignPlasma),
+                getBountyPerConversion2KEY(campaignPlasma),
+                getAmountOfStableCoinsUsedToFundCampaign(campaignPlasma),
+                getInitial2KEYRateForCampaign(campaignPlasma),
+                getContractorRebalancedLeftoverForCampaign(campaignPlasma),
+                getIfLeftoverForCampaignIsWithdrawn(campaignPlasma),
+                getModeratorEarningsRebalancedForCampaign(campaignPlasma),
+                getRebalancingRatioForCampaign(campaignPlasma)
+            )
         );
-
     }
+
+    /**
+     * @notice          Function to fetch inital params computed while adding inventory
+     * @param           campaignPlasma is the plasma address of the campaign being requested
+     */
+    function getInitialParamsForCampaign(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint,uint,uint,bool)
+    {
+        return (
+            getInitialBountyForCampaign(campaignPlasma), // initial bounty for campaign
+            getBountyPerConversion2KEY(campaignPlasma), // bounty per conversion in 2KEY tokens
+            getInitial2KEYRateForCampaign(campaignPlasma), // rate at the moment of inventory adding
+            getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) // Get if campaign is funded directly with 2KEY
+        );
+    }
+
+    /**
+     *
+     */
+    function getRequiredBudget2KEY(
+        string fiatCurrency,
+        uint fiatBudgetAmount
+    )
+    public
+    view
+    returns (uint)
+    {
+        // GET 2KEY - USD rate
+        uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
+
+        // For now ignore fiat currency assuming it's USD always
+        return fiatBudgetAmount.mul(10**18).div(rate);
+    }
+
 }

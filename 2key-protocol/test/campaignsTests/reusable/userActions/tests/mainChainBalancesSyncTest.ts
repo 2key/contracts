@@ -12,37 +12,7 @@ export default function mainChainBalancesSyncTest(
 ) {
   cpcOnly(storage.campaignType);
 
-  it(`should push and distribute balances for influencers to the mainchain from deployer`, async () => {
-    const {protocol, web3:{address}} = availableUsers[userKey];
-    const {campaignAddress, campaign} = storage;
-
-    const numberOfInfluencers = await protocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
-    const resp = await protocol.CPCCampaign.getInfluencersAndBalances(
-      campaignAddress, 0, numberOfInfluencers
-    );
-    // @ts-ignore
-    const campaignPublicAddress = campaign.campaignAddressPublic;
-
-    const balanceBefore =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
-
-    let txHash = await protocol.CPCCampaign.pushAndDistributeInfluencersRewards(
-        campaignPublicAddress,
-        resp.influencers,
-        resp.balances.map(balance => protocol.Utils.toWei(balance,'ether')),
-        address
-    );
-
-    console.log(txHash);
-    await protocol.Utils.getTransactionReceiptMined(
-      txHash
-    );
-
-    const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
-
-      expectEqualNumbers(
-          balanceBefore,
-          balanceAfter + resp.balances.reduce((accum, num) => {accum += num; return accum;}, 0)
-      );
+  it(`should end campaign, reserve tokens, and rebalance rates as well`, async () => {
 
   }).timeout(60000);
 }

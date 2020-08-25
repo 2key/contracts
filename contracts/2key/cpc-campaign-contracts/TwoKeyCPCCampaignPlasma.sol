@@ -48,12 +48,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         conversionQuota = numberValues[2];                              // Set conversion quota
         totalSupply_ = numberValues[3];                                 // Set total supply
         incentiveModel = IncentiveModel(numberValues[4]);               // Set the incentiveModel selected for the campaign
-        bountyPerConversionWei = numberValues[5];                       // Set the bountyPerConversionWei amount
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
 
-        // Calculate moderator fee per every conversion
-        moderatorFeePerConversion = bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
         counters = new uint[](7);                                       // Initialize array of counters
 
     }
