@@ -875,7 +875,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint,uint)
     {
-        return (counters[6], moderatorTotalEarnings);
+        return (counters[6].sub(moderatorTotalEarnings), moderatorTotalEarnings);
     }
 
 

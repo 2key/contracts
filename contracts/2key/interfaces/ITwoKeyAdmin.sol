@@ -5,6 +5,7 @@ contract ITwoKeyAdmin {
     function getDefaultNetworkTaxPercent() public view returns (uint);
     function getTwoKeyRewardsReleaseDate() external view returns(uint);
     function updateReceivedTokensAsModerator(uint amountOfTokens) public;
+    function updateReceivedTokensAsModeratorPPC(uint amountOfTokens, address campaignPlasma) public;
     function addFeesCollectedInCurrency(string currency, uint amount) public payable;
 }
 

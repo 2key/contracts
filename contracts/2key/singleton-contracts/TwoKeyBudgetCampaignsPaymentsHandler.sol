@@ -245,21 +245,20 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
         uint amountAfterRebalancing = amountToRebalance;
 
-        // Neutral for rebalancing = 1ETH
+        uint rebalancedModeratorRewards = totalAmountForModeratorRewards;
         uint rebalancingRatio = 10**18;
 
-        // If budget added directly as 2KEY it will be 0
-        uint initial2KEYRate = getInitial2KEYRateForCampaign(campaignPlasma);
-
-        if(initial2KEYRate > 0) {
+        if(getIsCampaignBudgetedDirectlyWith2KEY(campaignPlasma) == false) {
+            // If budget added as stable coin
             (amountAfterRebalancing, rebalancingRatio)
                 = rebalanceRates(
-                    initial2KEYRate,
+                    getInitial2KEYRateForCampaign(campaignPlasma),
                     amountToRebalance
             );
+            rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
         }
 
-        uint rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
+
         uint leftoverForContractor = amountAfterRebalancing.sub(rebalancedModeratorRewards);
 
         // Set moderator earnings for this campaign and immediately distribute them
@@ -376,7 +375,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
 
         // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModerator(rebalancedModeratorRewards);
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(rebalancedModeratorRewards, campaignPlasma);
     }
 
     /**
@@ -769,6 +768,15 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+    function getIsCampaignBudgetedDirectlyWith2KEY(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (bool)
+    {
+        return getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma));
+    }
 
     /**
      * @notice          Function to return summary related to specific campaign
@@ -810,7 +818,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             getInitialBountyForCampaign(campaignPlasma), // initial bounty for campaign
             getBountyPerConversion2KEY(campaignPlasma), // bounty per conversion in 2KEY tokens
             getInitial2KEYRateForCampaign(campaignPlasma), // rate at the moment of inventory adding
-            getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) // Get if campaign is funded directly with 2KEY
+            getIsCampaignBudgetedDirectlyWith2KEY(campaignPlasma) // Get if campaign is funded directly with 2KEY
         );
     }
 
