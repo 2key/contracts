@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 spinner() {
     chars="/-\|"
 
@@ -14,10 +15,11 @@ spinner() {
 spinner 2
 
 
-echo "Destination for execution on public is TwoKeyAdmin contract: 0x5eb1949424999327093d7a06619fc24170a9864e"
+echo "Set moderator fee to 5% on public contracts"
+
+echo "Destination for execution is TwoKeyAdmin address : 0x31cf9c7847c979313fe27eadfcc847a8a0252d86"
+
+cd ../..
+
 python3 generate_bytecode.py setModeratorFeePublic 5
-
-
-
-
 
