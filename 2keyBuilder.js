@@ -402,7 +402,7 @@ async function deployUpgrade(networks) {
         console.log('CPC NO REWARDS contracts changed: ', cpcNoRewardsChanged);
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-no-rewards-deploy')) {
+        if(process.argv.includes('cpc-no-fees-deploy')) {
             console.log("Deploying 2 new singleton contracts for budget campaigns payments handlers");
             await runDeployPaymentHandlersMigration(networks[i]);
         }
