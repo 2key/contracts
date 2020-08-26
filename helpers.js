@@ -115,7 +115,7 @@ const runDeployCPCNoRewardsMigration = (network) => new Promise(async(resolve, r
 
 const runDeployPaymentHandlersMigration = (network) => new Promise(async(resolve, reject) => {
     try {
-        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '14', '--to', '14', '--network', network, 'update_cpc']);
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '15', '--to', '15', '--network', network, 'update_cpc']);
         resolve(true);
     } catch (e) {
         reject(e);
