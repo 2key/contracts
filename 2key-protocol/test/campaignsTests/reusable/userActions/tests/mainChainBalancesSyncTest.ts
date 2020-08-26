@@ -26,4 +26,30 @@ export default function mainChainBalancesSyncTest(
           {from: address}
       ]);
   }).timeout(60000);
+
+  it('should mark campaign as done and assign to active influencers', async() => {
+      const {protocol, web3:{address}} = availableUsers[userKey];
+      const {campaignAddress, campaign} = storage;
+
+      let numberOfActiveInfluencers = await protocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
+      console.log(numberOfActiveInfluencers);
+      let contractorAddress = await protocol.CPCCampaign.getContractorAddresses(campaignAddress);
+      console.log(contractorAddress);
+      let campaignInstance = await protocol.CPCCampaign._getPlasmaCampaignInstance(campaignAddress);
+      let influencers = await promisify(campaignInstance.getActiveInfluencers,[0,numberOfActiveInfluencers]);
+      let conversion = await protocol.CPCCampaign.getConversion(campaignAddress,0);
+      let referrers = await protocol.CPCCampaign.getReferrers(campaignAddress, conversion.converterPlasma);
+      console.log(referrers);
+      console.log(conversion);
+      console.log('influencers',influencers);
+      console.log('maintainer',protocol.plasmaAddress);
+
+      await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.markCampaignAsDoneAndAssignToActiveInfluencers,[
+          campaignAddress,
+          0,
+          numberOfActiveInfluencers,
+          {from: protocol.plasmaAddress}
+      ]);
+
+  }).timeout(60000);
 }

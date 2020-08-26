@@ -147,18 +147,7 @@ describe(
 
     usersActions(
       {
-        userKey: userIds.test,
-        actions: [
-          // campaignUserActions.checkMerkleProof,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: storage.contractorKey,
+        userKey: userIds.buyer,
         actions: [
           campaignUserActions.checkMainChainBalancesSync,
           campaignUserActions.checkCampaignSummary,

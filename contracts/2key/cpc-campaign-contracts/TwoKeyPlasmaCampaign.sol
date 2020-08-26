@@ -67,7 +67,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint bountyPerConversionWei;                    // Amount of 2key tokens which are going to be paid per conversion
 
 
-    address[] activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
+    address[] public activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
 
     /**
@@ -821,9 +821,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint index = 0;
         uint i = 0;
         for(i = start; i < end; i++) {
-            address influencer = activeInfluencers[index];
-            influencers[i] = influencer;
-            i++;
+            address influencer = activeInfluencers[i];
+            influencers[index] = influencer;
+            index++;
         }
 
         return influencers;
