@@ -27,6 +27,15 @@ export default function mainChainBalancesSyncTest(
           {from: address}
       ]);
       await new Promise(resolve => setTimeout(resolve, 2000));
+      let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
+      let bounties = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
+
+      let contractorLeftover: number = info.initialBounty - bounties.totalModeratorEarnings - bounties.totalAmountForReferrerRewards;
+
+      expect(bounties.totalModeratorEarnings).to.be.equal(info.moderatorEarnings);
+      expect(parseFloat(info.contractorLeftover).toFixed(5)).to.be.equal(parseFloat(contractorLeftover.toString()).toFixed(5));
+      expect(info.isLeftoverWithdrawn).to.be.equal(false);
+      expect(info.rebalancingRatio).to.be.equal(1);
   }).timeout(60000);
 
   it('should mark campaign as done and assign to active influencers', async() => {
@@ -55,13 +64,5 @@ export default function mainChainBalancesSyncTest(
       expect(referrerPendingCampaigns.length).to.be.equal(referrerPendingCampaignsAfter.length - 1);
       expect(referrerPendingCampaignsAfter[referrerPendingCampaignsAfter.length-1]).to.be.equal(campaignAddress);
 
-  }).timeout(60000);
-
-  it('should read from public chain data', async() => {
-      const {protocol, web3:{address}} = availableUsers[userKey];
-      const {campaignAddress, campaign} = storage;
-
-      let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
-      console.log(info);
   }).timeout(60000);
 }
