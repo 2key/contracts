@@ -175,13 +175,24 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     internal
     {
-        if(isConversionApproval == true) {
-            require(balances[_from] > 0);
+        // Initially arcs to sub are 0
+        uint arcsToSub = 0;
 
-            balances[_from] = balances[_from].sub(1);
-            balances[_to] = balances[_to].add(conversionQuota);
-            totalSupply_ = totalSupply_.add(conversionQuota.sub(1));
+        // If previous user in chain has arcs then we're taking them
+        if(balances[_from] > 0) {
+            arcsToSub = 1;
         }
+
+        // If it's conversion approval we require that previous user has arcs
+        if(isConversionApproval == true) {
+            require(arcsToSub == 1);
+        }
+
+
+        balances[_from] = balances[_from].sub(arcsToSub);
+        balances[_to] = balances[_to].add(conversionQuota*arcsToSub);
+        totalSupply_ = totalSupply_.add((conversionQuota*arcsToSub).sub(arcsToSub));
+
         received_from[_to] = _from;
     }
 
@@ -270,7 +281,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         for (i = 0; i < numberOfInfluencers; i++) {
             new_address = influencers[i];
 
-            if (received_from[new_address] == 0) {
+            if (received_from[new_address] == address(0)) {
                 transferFrom(old_address, new_address, isConversionApproval);
             } else {
                 require(received_from[new_address] == old_address);
