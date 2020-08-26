@@ -41,7 +41,8 @@ const {
     runTruffleCompile,
     runDeployPlasmaReputation,
     runDeployPPCNoRewards,
-    runDeployCPCNoRewardsMigration
+    runDeployCPCNoRewardsMigration,
+    runDeployPaymentHandlersMigration
 } = require('./helpers');
 
 
@@ -391,8 +392,8 @@ async function deployUpgrade(networks) {
 
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-no-rewards-deploy')) {
-            console.log("Deploying CPC No Rewards campaign type for the first time to the network");
-            await runDeployPPCNoRewards(networks[i]);
+            console.log("Deploying 2 new singleton contracts for budget campaigns payments handlers");
+            await runDeployPaymentHandlersMigration(networks[i]);
         }
 
         if(singletonsToBeUpgraded.length > 0) {
