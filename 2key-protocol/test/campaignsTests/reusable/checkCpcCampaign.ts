@@ -92,7 +92,6 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
     let initialParams = await protocol.CPCCampaign.getInitialParamsForCampaign(campaignAddress);
 
-    console.log(initialParams);
 
     // This should set total bounty, initial rate and validate campaign
     await promisify(c.setInitialParamsAndValidateCampaign,[
