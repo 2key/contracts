@@ -97,7 +97,7 @@ const getDiffBetweenLatestTags = async () => {
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
+        if(!checkIfContractDeployedEver(singletonsChanged[i])) {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
@@ -105,9 +105,20 @@ const getDiffBetweenLatestTags = async () => {
     return [singletonsChanged, tokenSellCampaignChanged, donationCampaignChanged, cpcChanged, cpcNoRewardsChanged];
 };
 
-const checkIfFileExistsInDir = (contractName) => {
+const checkIfContractDeployedEver = (contractName) => {
     let artifactPath = `./build/contracts/${contractName}.json`
-    return fs.existsSync(artifactPath);
+    let build = {};
+    if (fs.existsSync(artifactPath)) {
+        build = JSON.parse(fs.readFileSync(artifactPath, { encoding: 'utf-8' }));
+        if(Object.keys(build.networks).length > 0) {
+            // this means contract is deployed
+            return true;
+        }
+        return false;
+    } else {
+        return false;
+    }
+
 }
 
 const generateChangelog = async () => {
