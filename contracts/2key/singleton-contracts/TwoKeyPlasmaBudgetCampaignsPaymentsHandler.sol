@@ -392,7 +392,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 referrer
             );
 
-//            pushAddressToArray(key, campaignPlasma);
+            pushAddressToArray(key, campaignPlasma);
         }
     }
 

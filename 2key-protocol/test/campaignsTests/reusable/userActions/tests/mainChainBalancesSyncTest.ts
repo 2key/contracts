@@ -4,6 +4,7 @@ import cpcOnly from "../checks/cpcOnly";
 import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
 import getTwoKeyEconomyAddress from "../../../../helpers/getTwoKeyEconomyAddress";
 import {promisify} from "../../../../../src/utils/promisify";
+import { expect } from "chai";
 
 export default function mainChainBalancesSyncTest(
   {
@@ -32,24 +33,24 @@ export default function mainChainBalancesSyncTest(
       const {campaignAddress, campaign} = storage;
 
       let numberOfActiveInfluencers = await protocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
-      console.log(numberOfActiveInfluencers);
-      let contractorAddress = await protocol.CPCCampaign.getContractorAddresses(campaignAddress);
-      console.log(contractorAddress);
       let campaignInstance = await protocol.CPCCampaign._getPlasmaCampaignInstance(campaignAddress);
       let influencers = await promisify(campaignInstance.getActiveInfluencers,[0,numberOfActiveInfluencers]);
-      let conversion = await protocol.CPCCampaign.getConversion(campaignAddress,0);
-      let referrers = await protocol.CPCCampaign.getReferrers(campaignAddress, conversion.converterPlasma);
-      console.log(referrers);
-      console.log(conversion);
-      console.log('influencers',influencers);
-      console.log('maintainer',protocol.plasmaAddress);
 
-      await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.markCampaignAsDoneAndAssignToActiveInfluencers,[
+      let referrerPendingCampaigns = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
+
+      let txHash = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.markCampaignAsDoneAndAssignToActiveInfluencers,[
           campaignAddress,
           0,
           numberOfActiveInfluencers,
-          {from: protocol.plasmaAddress}
+          {
+              from: protocol.plasmaAddress,
+              gas: 7800000
+          }
       ]);
+
+      let referrerPendingCampaignsAfter = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
+      expect(referrerPendingCampaigns.length).to.be.equal(referrerPendingCampaignsAfter.length - 1);
+      expect(referrerPendingCampaignsAfter[referrerPendingCampaignsAfter.length-1]).to.be.equal(campaignAddress);
 
   }).timeout(60000);
 }
