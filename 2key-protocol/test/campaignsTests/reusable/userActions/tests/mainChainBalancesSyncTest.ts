@@ -26,6 +26,7 @@ export default function mainChainBalancesSyncTest(
         protocol.Utils.toWei(earnings.totalModeratorEarnings,'ether').toString(),
           {from: address}
       ]);
+      await new Promise(resolve => setTimeout(resolve, 2000));
   }).timeout(60000);
 
   it('should mark campaign as done and assign to active influencers', async() => {
@@ -38,7 +39,7 @@ export default function mainChainBalancesSyncTest(
 
       let referrerPendingCampaigns = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
 
-      let txHash = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.markCampaignAsDoneAndAssignToActiveInfluencers,[
+        let txHash = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.markCampaignAsDoneAndAssignToActiveInfluencers,[
           campaignAddress,
           0,
           numberOfActiveInfluencers,
@@ -46,11 +47,21 @@ export default function mainChainBalancesSyncTest(
               from: protocol.plasmaAddress,
               gas: 7800000
           }
-      ]);
+        ]);
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
       let referrerPendingCampaignsAfter = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
       expect(referrerPendingCampaigns.length).to.be.equal(referrerPendingCampaignsAfter.length - 1);
       expect(referrerPendingCampaignsAfter[referrerPendingCampaignsAfter.length-1]).to.be.equal(campaignAddress);
 
+  }).timeout(60000);
+
+  it('should read from public chain data', async() => {
+      const {protocol, web3:{address}} = availableUsers[userKey];
+      const {campaignAddress, campaign} = storage;
+
+      let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
+      console.log(info);
   }).timeout(60000);
 }

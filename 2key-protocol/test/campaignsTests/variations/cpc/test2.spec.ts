@@ -121,7 +121,7 @@ describe(
 
     usersActions(
       {
-        userKey: storage.contractorKey,
+        userKey: userIds.buyer,
         actions: [
           campaignUserActions.checkMainChainBalancesSync,
           campaignUserActions.checkCampaignSummary,

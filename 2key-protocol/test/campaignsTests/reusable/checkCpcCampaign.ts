@@ -56,6 +56,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
     let amountOfTokensWei = protocol.Utils.toWei(amountOfTokens,'ether').toString();
 
+
     await withBalanceProtocol.Utils.getTransactionReceiptMined(
         await withBalanceProtocol.transfer2KEYTokens(address, amountOfTokensWei, addressWithBalance)
     );
@@ -91,6 +92,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
     let initialParams = await protocol.CPCCampaign.getInitialParamsForCampaign(campaignAddress);
 
+    console.log(initialParams);
 
     // This should set total bounty, initial rate and validate campaign
     await promisify(c.setInitialParamsAndValidateCampaign,[

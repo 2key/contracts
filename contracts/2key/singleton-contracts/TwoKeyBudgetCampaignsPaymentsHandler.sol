@@ -796,10 +796,10 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
                 getAmountOfStableCoinsUsedToFundCampaign(campaignPlasma),
                 getInitial2KEYRateForCampaign(campaignPlasma),
                 getContractorRebalancedLeftoverForCampaign(campaignPlasma),
-                getIfLeftoverForCampaignIsWithdrawn(campaignPlasma),
                 getModeratorEarningsRebalancedForCampaign(campaignPlasma),
-                getRebalancingRatioForCampaign(campaignPlasma)
-            )
+                getRebalancingRatioForCampaign(campaignPlasma),
+                getIfLeftoverForCampaignIsWithdrawn(campaignPlasma)
+        )
         );
     }
 
