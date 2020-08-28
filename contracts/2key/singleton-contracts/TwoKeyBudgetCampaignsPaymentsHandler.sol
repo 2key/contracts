@@ -812,7 +812,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     )
     public
     view
-    returns (uint,uint,uint,bool)
+    returns (uint,uint,uint,bool,address)
     {
         return (
             getInitialBountyForCampaign(campaignPlasma), // initial bounty for campaign
