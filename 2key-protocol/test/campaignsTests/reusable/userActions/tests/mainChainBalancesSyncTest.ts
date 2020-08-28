@@ -18,7 +18,7 @@ export default function mainChainBalancesSyncTest(
       //This is the test where maintainer ends campaign, does rates rebalancing, etc.
       const {protocol, web3:{address}} = availableUsers[userKey];
       const {campaignAddress, campaign} = storage;
-      let budgetOnContract = await protocol.CPCCampaign.getInitialParamsForCampaign(campaignAddress);
+
       let earnings = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
       await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.endCampaignReserveTokensAndRebalanceRates,[
         campaignAddress,
@@ -26,7 +26,9 @@ export default function mainChainBalancesSyncTest(
         protocol.Utils.toWei(earnings.totalModeratorEarnings,'ether').toString(),
           {from: address}
       ]);
+
       await new Promise(resolve => setTimeout(resolve, 2000));
+
       let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
       let bounties = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
