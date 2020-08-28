@@ -818,8 +818,19 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             getInitialBountyForCampaign(campaignPlasma), // initial bounty for campaign
             getBountyPerConversion2KEY(campaignPlasma), // bounty per conversion in 2KEY tokens
             getInitial2KEYRateForCampaign(campaignPlasma), // rate at the moment of inventory adding
-            getIsCampaignBudgetedDirectlyWith2KEY(campaignPlasma) // Get if campaign is funded directly with 2KEY
+            getIsCampaignBudgetedDirectlyWith2KEY(campaignPlasma), // Get if campaign is funded directly with 2KEY
+            getCampaignContractor(campaignPlasma) // get contractor of campaign
         );
+    }
+
+    function getCampaignContractor(
+        address campaignAddress
+    )
+    public
+    view
+    returns (address)
+    {
+        return getAddress(keccak256(_campaignPlasma2contractor, campaignAddress));
     }
 
     /**
