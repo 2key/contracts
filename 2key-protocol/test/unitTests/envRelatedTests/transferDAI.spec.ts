@@ -40,22 +40,23 @@ describe(
             let value = 1000;
             let daiAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress("DAI");
             for (let i = 0; i < len; i++) {
-                // Take balance before transfer
-                let balanceBefore = await twoKeyProtocol.ERC20.getERC20Balance(daiAddress, addresses[i]);
+                if(addresses[i] != from) {
+                    // Take balance before transfer
+                    let balanceBefore = await twoKeyProtocol.ERC20.getERC20Balance(daiAddress, addresses[i]);
+                    // Transfer tokens and wait until tx gets mined.
+                    await twoKeyProtocol.Utils.getTransactionReceiptMined(
+                        await twoKeyProtocol.ERC20.transfer(
+                            daiAddress, //dai address
+                            addresses[i],
+                            twoKeyProtocol.Utils.toWei(value, 'ether').toString(),
+                            from
+                        )
+                    );
 
-                // Transfer tokens and wait until tx gets mined.
-                await twoKeyProtocol.Utils.getTransactionReceiptMined(
-                    await twoKeyProtocol.ERC20.transfer(
-                        daiAddress, //dai address
-                        addresses[i],
-                        twoKeyProtocol.Utils.toWei(value, 'ether').toString(),
-                        from
-                    )
-                );
-
-                // Take balance after transfer
-                let balanceAfter = await twoKeyProtocol.ERC20.getERC20Balance(daiAddress, addresses[i]);
-                expect(balanceAfter).to.be.equal(balanceBefore+value);
+                    // Take balance after transfer
+                    let balanceAfter = await twoKeyProtocol.ERC20.getERC20Balance(daiAddress, addresses[i]);
+                    expect(balanceAfter).to.be.equal(balanceBefore+value);
+                } 
             }
         }).timeout(timeout);
     }
