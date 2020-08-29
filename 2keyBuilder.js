@@ -46,6 +46,7 @@ const {
 } = require('./helpers');
 
 
+
 const branch_to_env = {
     "develop": "test",
     "staging": "staging",
@@ -386,11 +387,33 @@ const checkIfContractIsPlasma = (contractName) => {
 
 };
 
+const deployFromFile = () => {
+    let file = JSON.parse(fs.readFileSync('./scripts/deployments/manualDeploy.json', 'utf8'));
+    return file;
+};
+
+/**
+ *  TODO: Improve and change this script to handle following by hierarchy: 
+ *  - if deployment is protocol only or there're contracts to be deployed.
+ *  - if protocol deployment, skip whole contracts process, and proceed to submodule generation
+ *  - if contracts deployment, check if we're deploying contracts by getting diff between latest tags,
+ *  - or we're deplpoying them by specifying in file which contracts we want to deploy
+ *  
+ *  TODO: Improvement for fetching contracts to be deployed: 
+ *  - if singletons, we need list of contracts
+ *  - if campaign contracts, we only need flag with campaign type and if it has to be deployed
+ *  
+ */
+
+
 async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
 
     await runTruffleCompile();
+    // if(process.argv.includes('deploy-from-file')) {
+    //     let singl
+    // } 
     let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged, cpcNoRewardsChanged] = await getDiffBetweenLatestTags();
 
     for (let i = 0; i < l; i += 1) {
@@ -701,7 +724,9 @@ async function main() {
         case '--tenderly':
             await pullTenderlyConfiguration();
             process.exit(0);
-
+        case '--readFile':
+            deployFromFile();
+            process.exit(0);
         default:
             await deploy();
             process.exit(0);
