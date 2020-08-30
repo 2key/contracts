@@ -460,7 +460,7 @@ async function deployUpgrade(networks) {
                     }
                 } else {
                     if(networks[i].includes('public')) {
-                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                        await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 }
             }
@@ -744,7 +744,7 @@ async function main() {
             await pullTenderlyConfiguration();
             process.exit(0);
         case '--readFile':
-            deployFromFile();
+            console.log(getContractsFromFile());
             process.exit(0);
         default:
             await deploy();
