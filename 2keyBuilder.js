@@ -103,7 +103,13 @@ const getDiffBetweenLatestTags = async () => {
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
-    return [singletonsChanged, tokenSellCampaignChanged, donationCampaignChanged, cpcChanged, cpcNoRewardsChanged];
+    return [
+        singletonsChanged, 
+        tokenSellCampaignChanged.length > 0, 
+        donationCampaignChanged.length > 0, 
+        cpcChanged.length > 0, 
+        cpcNoRewardsChanged.length > 0
+    ];
 };
 
 const checkIfContractDeployedEver = (contractName) => {
@@ -387,7 +393,7 @@ const checkIfContractIsPlasma = (contractName) => {
 
 };
 
-const deployFromFile = () => {
+const getContractsFromFile = () => {
     let file = JSON.parse(fs.readFileSync('./scripts/deployments/manualDeploy.json', 'utf8'));
     return file;
 };
@@ -411,19 +417,32 @@ async function deployUpgrade(networks) {
     const l = networks.length;
 
     await runTruffleCompile();
-    // if(process.argv.includes('deploy-from-file')) {
-    //     let singl
-    // } 
-    let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged, cpcNoRewardsChanged] = await getDiffBetweenLatestTags();
+
+    let deployment = {};
+    
+
+    if(process.argv.includes('deploy-from-file')) {
+        let contracts = getContractsFromFile();
+        deployment.singletons = contracts.singletons;
+        deployment.tokenSell = contracts.tokenSell;
+        deployment.donation = contracts.donation;
+        deployment.ppc = contracts.cpc;
+        deployment.cpcNoRewards = contracts.cpcNoRewards;
+    } else {
+        [
+            deployment.singletons,
+            deployment.tokenSell,
+            deployment.donation,
+            deployment.ppc,
+            deployment.cpcNoRewards
+        ] = await getDiffBetweenLatestTags();
+    }
+    
+    console.log(deployment);
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
-        console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
-        console.log('TOKEN_SELL to be upgraded: ', tokenSellToBePatched);
-        console.log('DONATION to be upgraded: ', donationToBePatched);
-        console.log('CPC contracts changed: ', cpcChanged);
-        console.log('CPC NO REWARDS contracts changed: ', cpcNoRewardsChanged);
-
+        
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-no-fees-deploy')) {
             console.log("Deploying 2 new singleton contracts for budget campaigns payments handlers");
@@ -447,23 +466,23 @@ async function deployUpgrade(networks) {
             }
         }
 
-        if(tokenSellToBePatched.length > 0) {
+        if(deployment.tokenSell) {
             if(networks[i].includes('public')) {
                 await runDeployTokenSellCampaignMigration(networks[i]);
             }
         }
 
-        if(donationToBePatched.length > 0) {
+        if(deployment.donation) {
             if(networks[i].includes('public')) {
                 await runDeployDonationCampaignMigration(networks[i]);
             }
         }
 
-        if(cpcChanged.length > 0) {
+        if(deployment.cpc) {
             await runDeployCPCCampaignMigration(networks[i]);
         }
 
-        if(cpcNoRewardsChanged.length > 0) {
+        if(deployment.cpcNoRewards) {
             await runDeployCPCNoRewardsMigration(networks[i]);
         }
 
