@@ -449,14 +449,14 @@ async function deployUpgrade(networks) {
             await runDeployPaymentHandlersMigration(networks[i]);
         }
 
-        if(singletonsToBeUpgraded.length > 0) {
-            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+        if(deployment.singletons.length > 0) {
+            for(let j=0; j<deployment.singletons; j++) {
                 /* eslint-disable no-await-in-loop */
-                console.log(networks[i], singletonsToBeUpgraded[j]);
-                if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
-                    console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
+                console.log(networks[i], deployment.singletons[j]);
+                if(checkIfContractIsPlasma(deployment.singletons[j])) {
+                    console.log('Contract is plasma: ' + deployment.singletons[j]);
                     if(networks[i].includes('private') || networks[i].includes('plasma')) {
-                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                        await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 } else {
                     if(networks[i].includes('public')) {
