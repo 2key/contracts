@@ -450,7 +450,7 @@ async function deployUpgrade(networks) {
         }
 
         if(deployment.singletons.length > 0) {
-            for(let j=0; j<deployment.singletons; j++) {
+            for(let j=0; j<deployment.singletons.length; j++) {
                 /* eslint-disable no-await-in-loop */
                 console.log(networks[i], deployment.singletons[j]);
                 if(checkIfContractIsPlasma(deployment.singletons[j])) {
