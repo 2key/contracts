@@ -20,7 +20,7 @@ python3 generate_bytecode.py upgradeContract TwoKeyAdmin 1.0.32
 python3 generate_bytecode.py upgradeContract TwoKeyEventSource 1.0.15
 python3 generate_bytecode.py upgradeContract TwoKeyExchangeRateContract 1.0.2
 python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.26
-
+python3 generate_bytecode.py upgradeContract TwoKeyBudgetCampaignsPaymentsHandler 1.0.1
 python3 generate_bytecode.py approveNewCampaign CPC_PUBLIC 1.0.53
 
 
