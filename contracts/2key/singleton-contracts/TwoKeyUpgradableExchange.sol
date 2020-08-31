@@ -768,9 +768,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address tokenAddress
     )
     public
-    onlyValidatedContracts
     returns (uint,uint)
     {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
         uint totalTokensBought;
         uint averageTokenPriceForPurchase;
         uint newTokenPrice;
