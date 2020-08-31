@@ -44,43 +44,84 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
 
   it('should directly transfer tokens to campaign', async () => {
-    const {protocol, web3: {address}} = availableUsers[userKey];
+    const {protocol, web3: {address}, web3} = availableUsers[userKey];
     const {protocol: withBalanceProtocol, web3: {address: addressWithBalance}} = availableUsers[userIds.aydnep]; //user with 2keys
     const {campaignAddress, campaign} = storage;
 
     const inventoryBefore = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
-
     let usdTotalAmount = campaignParams.bountyPerConversionUSD * campaignParams.targetClicks;
 
-    let amountOfTokens = await protocol.CPCCampaign.getRequiredBudget2KEY('USD', protocol.Utils.toWei(usdTotalAmount,'ether').toString());
+    if(Math.random() > 0.5) {
+      // Random case budgeting with 2KEY
 
-    let amountOfTokensWei = protocol.Utils.toWei(amountOfTokens,'ether').toString();
+      let amountOfTokens = await protocol.CPCCampaign.getRequiredBudget2KEY('USD', protocol.Utils.toWei(usdTotalAmount,'ether').toString());
 
-
-    await withBalanceProtocol.Utils.getTransactionReceiptMined(
-        await withBalanceProtocol.transfer2KEYTokens(address, amountOfTokensWei, addressWithBalance)
-    );
-
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.ERC20.erc20ApproveAddress(
-        protocol.twoKeyEconomy.address,
-        protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
-          amountOfTokensWei,
-        address
-      )
-    );
-
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
-    );
+      let amountOfTokensWei = protocol.Utils.toWei(amountOfTokens,'ether').toString();
 
 
-    const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
+      await withBalanceProtocol.Utils.getTransactionReceiptMined(
+          await withBalanceProtocol.transfer2KEYTokens(address, amountOfTokensWei, addressWithBalance)
+      );
 
-    expectEqualNumbers(
-      (inventoryAfter - inventoryBefore),
-        amountOfTokens,
-    );
+      await protocol.Utils.getTransactionReceiptMined(
+        await protocol.ERC20.erc20ApproveAddress(
+          protocol.twoKeyEconomy.address,
+          protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
+            amountOfTokensWei,
+          address
+        )
+      );
+
+      await protocol.Utils.getTransactionReceiptMined(
+        await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
+      );
+
+
+      const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
+
+      expectEqualNumbers(
+        (inventoryAfter - inventoryBefore),
+          amountOfTokens,
+      );
+    } else {
+        // Ranadom case budgeting with DAI/TUSD/BUSD/...
+        let amountOfTokensRequired = await protocol.TwoKeyExchangeContract.getFiatToStableQuotes(
+            parseFloat(protocol.Utils.toWei(usdTotalAmount,'ether').toString()),
+            'USD',
+            ['DAI']
+          );
+
+        let amountOfTokensWei = await protocol.Utils.toWei(amountOfTokensRequired.DAI,'ether').toString();
+        let daiAddress = await protocol.SingletonRegistry.getNonUpgradableContractAddress('DAI');
+
+        await protocol.Utils.getTransactionReceiptMined(
+          await protocol.ERC20.erc20ApproveAddress(
+            daiAddress,
+            protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
+            amountOfTokensWei,
+            address
+          )
+        );
+
+        let txHash;
+
+        await protocol.Utils.getTransactionReceiptMined(
+          txHash = await protocol.CPCCampaign.addInventoryWithStableCoin(
+              campaignAddress,
+              amountOfTokensWei,
+              daiAddress,
+              protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(),
+              address
+            )
+
+        );
+
+        console.log(campaignAddress,
+            amountOfTokensWei,
+            daiAddress,
+            protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(),)
+        const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
+    }
   });
 
   it('should set that plasma contract is valid from maintainer', async () => {
@@ -91,7 +132,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
 
     let initialParams = await protocol.CPCCampaign.getInitialParamsForCampaign(campaignAddress);
-
+    console.log(initialParams);
 
     // This should set total bounty, initial rate and validate campaign
     await promisify(c.setInitialParamsAndValidateCampaign,[
