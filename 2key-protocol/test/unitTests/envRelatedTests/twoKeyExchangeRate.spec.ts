@@ -16,8 +16,9 @@ const timeout = 60000;
 const usdSymbol = 'USD';
 const usdDaiSymbol = 'USD-DAI';
 const usd2KeySymbol = '2KEY-USD';
-const tusdSymbol = 'TUSD';
-const daiSymbol = 'DAI';
+const tusdSymbol = 'TUSD-USD';
+const daiSymbol = 'DAI-USD';
+
 
 describe(
   'TwoKeyExchangeRateContract',
@@ -109,5 +110,14 @@ describe(
         console.log(pairs);
 
     }).timeout(timeout);
+
+    it('should get stable coin quota by address', async () => {
+      let daiAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('DAI');
+      console.log(daiAddress);
+      let quota = await twoKeyProtocol.TwoKeyExchangeContract.getStableCoinToUSDQuota(
+        daiAddress
+      );
+      console.log(quota);
+    })
   }
 );

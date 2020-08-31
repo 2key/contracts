@@ -20,24 +20,25 @@ export default function mainChainBalancesSyncTest(
       const {campaignAddress, campaign} = storage;
 
       let earnings = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
-      await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.endCampaignReserveTokensAndRebalanceRates,[
+      let txHash = await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.endCampaignReserveTokensAndRebalanceRates,[
         campaignAddress,
         protocol.Utils.toWei(earnings.totalAmountForReferrerRewards,'ether').toString(),
         protocol.Utils.toWei(earnings.totalModeratorEarnings,'ether').toString(),
-          {from: address}
+          {from: address, gas:7900000}
       ]);
+      console.log(txHash);
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
       let bounties = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
-      let contractorLeftover: number = info.initialBounty - bounties.totalModeratorEarnings - bounties.totalAmountForReferrerRewards;
+      let contractorLeftover: number = info.initialBounty*info.rebalancingRatio - bounties.totalModeratorEarnings - bounties.totalAmountForReferrerRewards;
 
+      console.log(info);
       expect(bounties.totalModeratorEarnings).to.be.equal(info.moderatorEarnings);
       expect(parseFloat(info.contractorLeftover).toFixed(5)).to.be.equal(parseFloat(contractorLeftover.toString()).toFixed(5));
       expect(info.isLeftoverWithdrawn).to.be.equal(false);
-      expect(info.rebalancingRatio).to.be.equal(1);
   }).timeout(60000);
 
   it('should mark campaign as done and assign to active influencers', async() => {
