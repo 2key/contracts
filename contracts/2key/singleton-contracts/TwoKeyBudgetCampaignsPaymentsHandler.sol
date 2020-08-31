@@ -130,7 +130,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     function addInventory(
         address campaignPlasma,
         uint amountOfStableCoins,
-        address tokenAddress
+        address tokenAddress,
+        uint bountyPerConversionFiat
     )
     public
     {
@@ -155,6 +156,19 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         // Buy tokens
         (totalTokensBought, tokenPrice) = IUpgradableExchange(twoKeyUpgradableExchange).buyTokensWithERC20(amountOfStableCoins, tokenAddress);
+
+        // Calculate and set bounty per conversion in 2KEY units
+        uint bountyPerConversion2KEY = bountyPerConversionFiat.mul(10**18).div(tokenPrice);
+
+        setUint(
+            keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma),
+            bountyPerConversion2KEY
+        );
+
+        setUint(
+            keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma),
+            amountOfStableCoins
+        );
 
         // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
         requireBudgetNotSetAndSetBudget(campaignPlasma, totalTokensBought);
@@ -243,21 +257,26 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         // Rebalancing everything except referrer rewards
         uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
+
+        // Amount after rebalancing is initially amount to rebalance
         uint amountAfterRebalancing = amountToRebalance;
 
+        // Initially rebalanced moderator rewards are total moderator rewards
         uint rebalancedModeratorRewards = totalAmountForModeratorRewards;
+
+        // Initial ratio is 1
         uint rebalancingRatio = 10**18;
 
         if(getIsCampaignBudgetedDirectlyWith2KEY(campaignPlasma) == false) {
-            // If budget added as stable coin
+            // If budget added as stable coin we do rebalancing
             (amountAfterRebalancing, rebalancingRatio)
                 = rebalanceRates(
                     getInitial2KEYRateForCampaign(campaignPlasma),
                     amountToRebalance
             );
+
             rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
         }
-
 
         uint leftoverForContractor = amountAfterRebalancing.sub(rebalancedModeratorRewards);
 
@@ -413,10 +432,11 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // Take the current usd to 2KEY rate against we're rebalancing contractor leftover and moderator rewards
         uint usd2KEYRateWeiNow = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
 
+        // Ratio is initial rate divided by new rate, so if rate went up, this will be less than 1
         uint rebalancingRatio = initial2KEYRate.mul(10**18).div(usd2KEYRateWeiNow);
 
         // Calculate new rebalanced amount of tokens
-        uint rebalancedAmount = amountOfTokensToRebalance.mul(rebalancingRatio);
+        uint rebalancedAmount = amountOfTokensToRebalance.mul(rebalancingRatio).div(10**18);
 
         // If price went up, leads to ratio is going to be less than 10**18
         if(rebalancingRatio < 10**18) {
