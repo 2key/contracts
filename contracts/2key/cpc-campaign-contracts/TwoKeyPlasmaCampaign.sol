@@ -633,20 +633,18 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         require(isValidated == false);
         // Set total bounty for campaign
         totalBountyForCampaign = _totalBounty;
+        // Calculate moderator fee per every conversion
+        moderatorFeePerConversion = _bountyPerConversion2KEY.mul(getModeratorFeePercent()).div(100);
         // Set bounty per conversion
-        bountyPerConversionWei = _bountyPerConversion2KEY;
+        bountyPerConversionWei = _bountyPerConversion2KEY.sub(moderatorFeePerConversion);
         // Set initial rate at which tokens are purchased
         initialRate2KEY = _initialRate2KEY;
         // It's going to round the value.
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
             numberOfTotalPaidClicksSupported = 0;
         } else {
-            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversionWei);
+            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(_bountyPerConversion2KEY);
         }
-
-        // Calculate moderator fee per every conversion
-        moderatorFeePerConversion = bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
-
         // Set if campaign is budgeted directly with 2KEY
         isBudgetedDirectlyWith2KEY = _isBudgetedDirectlyWith2KEY;
         isValidated = true;
@@ -780,7 +778,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint,uint,uint,uint)
     {
-        return (totalBountyForCampaign, bountyPerConversionWei, numberOfPaidClicksAchieved, numberOfTotalPaidClicksSupported);
+        return (totalBountyForCampaign, bountyPerConversionWei.add(moderatorFeePerConversion), numberOfPaidClicksAchieved, numberOfTotalPaidClicksSupported);
     }
 
 
@@ -886,7 +884,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     view
     returns (uint,uint)
     {
-        return (counters[6].sub(moderatorTotalEarnings), moderatorTotalEarnings);
+        return (numberOfPaidClicksAchieved.mul(bountyPerConversionWei), moderatorTotalEarnings);
     }
 
 

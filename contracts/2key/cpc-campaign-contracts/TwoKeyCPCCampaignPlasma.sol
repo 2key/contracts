@@ -134,18 +134,16 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
             if(
                 getNumberOfUsersToContractor(converter) > 0 &&
-                counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign
+                counters[6].add(bountyPerConversionWei+moderatorFeePerConversion) <= totalBountyForCampaign
             ) {
                 //Add earnings to moderator total earnings
                 moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFeePerConversion);
-                //Left to be distributed between influencers
-                bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFeePerConversion);
                 //Update paid bounty for influencers
-                c.bountyPaid = bountyToBeDistributed;
+                c.bountyPaid = bountyPerConversionWei;
                 // Update that conversion is being paid
                 c.paymentState = ConversionPaymentState.PAID;
                 //Increment how much bounty is paid
-                counters[6] = counters[6] + bountyPerConversionWei; // Total bounty paid including moderator fee
+                counters[6] = counters[6] + bountyPerConversionWei + moderatorFeePerConversion; // Total bounty paid including moderator fee
                 // Increment number of paid clicks by 1
                 numberOfPaidClicksAchieved++;
                 // emit event that conversion is being paid
@@ -154,7 +152,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 );
             }
             //Distribute rewards between referrers
-            updateRewardsBetweenInfluencers(converter, conversionId, bountyToBeDistributed);
+            updateRewardsBetweenInfluencers(converter, conversionId, bountyPerConversionWei);
         }
 
         updateReputationPointsOnConversionExecutedEvent(converter);
