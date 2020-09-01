@@ -109,11 +109,10 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
           txHash = await protocol.CPCCampaign.addInventoryWithStableCoin(
               campaignAddress,
               amountOfTokensWei,
-              daiAddress,
               protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(),
+              daiAddress,
               address
             )
-
         );
 
         const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
