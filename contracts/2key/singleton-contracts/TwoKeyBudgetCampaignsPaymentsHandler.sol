@@ -130,8 +130,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     function addInventory(
         address campaignPlasma,
         uint amountOfStableCoins,
-        address tokenAddress,
-        uint bountyPerConversionFiat
+        uint bountyPerConversionFiat,
+        address tokenAddress
     )
     public
     {
