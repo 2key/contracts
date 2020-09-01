@@ -104,10 +104,10 @@ const getDiffBetweenLatestTags = async () => {
         }
     }
     return [
-        singletonsChanged, 
-        tokenSellCampaignChanged.length > 0, 
-        donationCampaignChanged.length > 0, 
-        cpcChanged.length > 0, 
+        singletonsChanged,
+        tokenSellCampaignChanged.length > 0,
+        donationCampaignChanged.length > 0,
+        cpcChanged.length > 0,
         cpcNoRewardsChanged.length > 0
     ];
 };
@@ -399,16 +399,16 @@ const getContractsFromFile = () => {
 };
 
 /**
- *  TODO: Improve and change this script to handle following by hierarchy: 
+ *  TODO: Improve and change this script to handle following by hierarchy:
  *  - if deployment is protocol only or there're contracts to be deployed.
  *  - if protocol deployment, skip whole contracts process, and proceed to submodule generation
  *  - if contracts deployment, check if we're deploying contracts by getting diff between latest tags,
  *  - or we're deplpoying them by specifying in file which contracts we want to deploy
- *  
- *  TODO: Improvement for fetching contracts to be deployed: 
+ *
+ *  TODO: Improvement for fetching contracts to be deployed:
  *  - if singletons, we need list of contracts
  *  - if campaign contracts, we only need flag with campaign type and if it has to be deployed
- *  
+ *
  */
 
 
@@ -419,7 +419,7 @@ async function deployUpgrade(networks) {
     await runTruffleCompile();
 
     let deployment = {};
-    
+
 
     if(process.argv.includes('deploy-from-file')) {
         let contracts = getContractsFromFile();
@@ -437,12 +437,12 @@ async function deployUpgrade(networks) {
             deployment.cpcNoRewards
         ] = await getDiffBetweenLatestTags();
     }
-    
+
     console.log(deployment);
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
-        
+
         // Deploy the CPC contracts
         if(process.argv.includes('cpc-no-fees-deploy')) {
             console.log("Deploying 2 new singleton contracts for budget campaigns payments handlers");
@@ -478,7 +478,7 @@ async function deployUpgrade(networks) {
             }
         }
 
-        if(deployment.cpc) {
+        if(deployment.ppc) {
             await runDeployCPCCampaignMigration(networks[i]);
         }
 
