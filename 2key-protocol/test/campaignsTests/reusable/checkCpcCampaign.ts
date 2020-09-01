@@ -49,7 +49,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     const {campaignAddress, campaign} = storage;
 
     const inventoryBefore = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
-    let usdTotalAmount = campaignParams.bountyPerConversionUSD * campaignParams.targetClicks;
+    let usdTotalAmount = campaignParams.bountyPerConversionUSD * campaignParams.targetClicks + 0.1;
 
     if(Math.random() > 0.5) {
       // Random case budgeting with 2KEY
@@ -67,7 +67,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
         await protocol.ERC20.erc20ApproveAddress(
           protocol.twoKeyEconomy.address,
           protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
-            amountOfTokensWei,
+          amountOfTokensWei,
           address
         )
       );
@@ -116,11 +116,8 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
         );
 
-        console.log(campaignAddress,
-            amountOfTokensWei,
-            daiAddress,
-            protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(),)
         const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
+
     }
   });
 

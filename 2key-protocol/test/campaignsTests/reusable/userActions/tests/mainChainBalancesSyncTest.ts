@@ -34,9 +34,10 @@ export default function mainChainBalancesSyncTest(
       let bounties = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
       let contractorLeftover: number = info.initialBounty*info.rebalancingRatio - bounties.totalModeratorEarnings - bounties.totalAmountForReferrerRewards;
-
       console.log(info);
-      expect(bounties.totalModeratorEarnings).to.be.equal(info.moderatorEarnings);
+      console.log(bounties);
+
+      expect(bounties.totalModeratorEarnings.toFixed(5)).to.be.equal((info.moderatorEarnings * info.rebalancingRatio).toFixed(5));
       expect(parseFloat(info.contractorLeftover).toFixed(5)).to.be.equal(parseFloat(contractorLeftover.toString()).toFixed(5));
       expect(info.isLeftoverWithdrawn).to.be.equal(false);
   }).timeout(60000);
