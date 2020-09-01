@@ -110,7 +110,7 @@ module.exports = {
           skipDryRun: true,
           network_id: ids["staging-public"],
           gas: 8000000,
-          gasPrice: 40000000000,
+          gasPrice: 150000000000,
       },
 
       'private.staging-hdwallet': {
