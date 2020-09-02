@@ -742,9 +742,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint rebalancingRatioForInfluencer = getRebalancingRatioForReferrer(_referrerAddress);
 
         for(uint i=0; i<len; i++) {
+            uint conversionId = _conversionIds[i];
             // Since this value is only accessible from here, we won't change it in the state but in the getter
             rebalancedEarnings[i] = rebalanceValue(
-                referrerPlasma2EarningsPerConversion[_referrerAddress][i],
+                referrerPlasma2EarningsPerConversion[_referrerAddress][conversionId],
                 rebalancingRatioForInfluencer
             );
         }
