@@ -14,7 +14,7 @@ const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
 const TwoKeyFeeManager = artifacts.require('TwoKeyFeeManager');
 const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
-
+const TwoKeyPlasmaBudgetCampaignsPaymentsHandler = artifacts.require('TwoKeyPlasmaBudgetCampaignsPaymentsHandler');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
@@ -98,6 +98,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
 
 
 let contractsArtifacts = {
+    TwoKeyPlasmaBudgetCampaignsPaymentsHandler,
     TwoKeyUpgradableExchange,
     TwoKeyAdmin,
     TwoKeyEventSource,
