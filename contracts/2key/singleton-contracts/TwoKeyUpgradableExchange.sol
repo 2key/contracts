@@ -1295,12 +1295,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint currentPrice = sellRate2key();
         uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
-        uint poolWorth = currentPrice.mul(balanceOfTokens).div(10**18);
         return PriceDiscovery.buyTokensFromExchangeRealignPrice(
             purchaseAmountUSDWei,
             currentPrice,
             balanceOfTokens,
-            poolWorth
+            poolWorthUSD()
         );
     }
 
