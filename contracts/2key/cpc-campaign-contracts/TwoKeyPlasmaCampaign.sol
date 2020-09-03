@@ -695,6 +695,23 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         // Store in mapping
         referrerToPayment[_referrer] = p;
     }
+
+    function getReferrerTotalRewardsAndCurrentBalance(
+        address _referrer
+    )
+    public
+    view
+    returns (uint,bool)
+    {
+        Payment memory p = referrerToPayment[_referrer];
+
+        return (
+            getReferrerPlasmaBalance(_referrer),
+            p.isReferrerPaid
+        );
+    }
+
+
     /**
      * @notice          Function to return referrers participated in the referral chain
      * @param           customer is the one who converted
