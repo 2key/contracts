@@ -677,6 +677,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return (getReferrerPlasmaBalance(_referrer), referrerPlasma2Balances2key[_referrer]);
     }
 
+    /**
+     * @notice          Function which will mark that referrer received payment for this campaign
+     * @param           _referrer is the referrer address being receiving funds
+     */
     function markReferrerReceivedPaymentForThisCampaign(
         address _referrer
     )
@@ -696,6 +700,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         referrerToPayment[_referrer] = p;
     }
 
+    /**
+     * @notice          Function to get total referrer rewards and current balance for that campaign
+     *                  Which can be either same or 0.
+     * @param           _referrer is the plasma address of referrer
+     */
     function getReferrerTotalRewardsAndCurrentBalance(
         address _referrer
     )
