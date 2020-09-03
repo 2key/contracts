@@ -497,9 +497,6 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         for(i=0; i<referrers.length; i++) {
             // Take referrer address
             address referrer = referrers[i];
-            // 1. Emit event for every referrer that all his pending rewards are being paid
-            uint amountPaidToReferrer = getTotalReferrerPendingAmount(referrer);
-            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(referrer, amountPaidToReferrer);
 
             address [] memory referrerInProgressCampaigns = getCampaignsInProgressOfDistribution(referrer);
             uint j;
@@ -508,6 +505,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 address campaignAddress = referrerInProgressCampaigns[j];
                 ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
             }
+
+            uint amountPaidToReferrer = getTotalReferrerPendingAmount(referrer);
+            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(referrer, amountPaidToReferrer, referrerInProgressCampaigns);
 
             // Move from inProgress to finished campagins
             appendToArray(
