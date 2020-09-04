@@ -16,7 +16,7 @@ const rpcs = {
     'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
-    'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
+    'prod-private' : 'https://rpc.private.production.k8s.2key.net',
     'dev-ganache': 'https://localhost:7545',
     'dev-local': 'http://localhost:8545',
     'plasma-test-local': 'http://localhost:18545'
