@@ -211,13 +211,20 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     public
     onlyTwoKeyCongress
     {
+        uint latestEpochId = getLatestEpochId();
         // Require that by mistake same epochId can't be submitted twice
-        require(epochId > getLatestEpochId());
+        require(epochId == latestEpochId + 1);
 
         // Set total amount which have to be distributed inside epoch
         setUint(
             keccak256(_epochIdToAmountOf2KEYTotal, epochId),
             totalAmount2KEY
+        );
+
+        // Increment latest epoch Id
+        setUint(
+            keccak256(_latestEpochId),
+            epochId
         );
     }
 
