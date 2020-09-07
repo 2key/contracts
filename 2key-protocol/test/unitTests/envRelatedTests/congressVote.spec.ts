@@ -3,6 +3,7 @@ import {TwoKeyProtocol} from "../../../src";
 import {expect} from "chai";
 import web3Switcher from "../../helpers/web3Switcher";
 import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "../../helpers/twoKeyProtocol";
+import {promisify} from "../../../src/utils/promisify";
 const { env } = process;
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -22,6 +23,8 @@ let transactionBytecode =
 let transactionBytecodeForChangingReleaseDate =
     "0xef33a226000000000000000000000000000000000000000000000000000000000012d687";
 
+let transactionBytecodeForAddingEpochAndAmount =
+    "0x44199221000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000001b1ae4d6e2ef500000";
 describe('TwoKeyCongress contract basic proposal creation, voting, and proposal execution counter.' , () => {
 
     it('should get all members from congress', async() => {
@@ -101,6 +104,69 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         expect(status).to.be.equal('0x1');
     }).timeout(60000);
 
+    it('should submit proposal for adding participation mining rewards', async() => {
+        let jobDescription = 'Add new epoch to add 500 tokens';
+        let txHash: string = await twoKeyProtocol.Congress.newProposal(
+            twoKeyProtocol.twoKeyParticipationMiningPool.address,
+            jobDescription,
+            transactionBytecodeForAddingEpochAndAmount,
+            from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('1. member vote to support proposal', async() => {
+        const {web3, address} = web3Switcher.deployer();
+        from = address;
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support adding epoch", from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('2. member vote to support proposal', async() => {
+        const {web3, address} = web3Switcher.aydnep();
+        from = address;
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support adding epoch", from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('3. member vote to support proposal', async() => {
+        const {web3, address} = web3Switcher.gmail();
+        from = address;
+        twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_GMAIL));
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+
+        let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support adding epoch", from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should get proposal data', async() => {
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+        numberOfProposals = parseFloat(numberOfProposals.toString());
+        let data = await twoKeyProtocol.Congress.getProposalInformations(numberOfProposals-1,from);
+        expect(data.proposalIsExecuted).to.be.equal(false);
+        expect(data.proposalNumberOfVotes).to.be.equal(3);
+    }).timeout(60000);
+
+    it('should advance time and execute proposal',async() => {
+        let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
+        let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals-1, transactionBytecodeForAddingEpochAndAmount, from);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
 });
 
 
