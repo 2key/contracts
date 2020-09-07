@@ -226,6 +226,10 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint moderatorEarningsDistributed
     );
 
+    event ParticipationMiningEpochRegistered(
+        uint epochId,
+        uint amountOf2KEYTotal
+    );
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -671,6 +675,11 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
             moderatorEarningsDistributed
         );
     }
+
+    function emitParticipationMiningEpochRegistered(
+        uint epochId,
+        uint totalAmount
+    )
 
     /**
      * @notice Function to check adequate plasma address for submitted eth address

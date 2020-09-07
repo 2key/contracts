@@ -23,6 +23,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
     string constant _epochInsideYear = "epochInsideYear";
 
+    string constant _epochIdToAmountOf2KEYTotal= "epochIdToAmountOf2KEYToBeDistributed";
+    string constant _epochIdToAmountOf2KEYDistributed = "epochIdToAmountOf2KEYDistributed";
+    string constant _latestEpochId = "latestEpochId";
+
     string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
 
     using SafeMath for *;
@@ -39,6 +43,12 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     modifier onlyTwoKeyAdminOrWhitelistedAddress {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry(_twoKeyAdmin);
         require(msg.sender == twoKeyAdmin || isAddressWhitelisted(msg.sender));
+        _;
+    }
+
+    modifier onlyTwoKeyCongress {
+        address twoKeyCongress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        require(msg.sender == twoKeyCongress);
         _;
     }
 
@@ -193,6 +203,51 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             return counter;
         }
     }
+
+    function registerParticipationMiningEpoch(
+        uint epochId,
+        uint totalAmount2KEY
+    )
+    public
+    onlyTwoKeyCongress
+    {
+        // Require that by mistake same epochId can't be submitted twice
+        require(epochId > getLatestEpochId());
+
+        // Set total amount which have to be distributed inside epoch
+        setUint(
+            keccak256(_epochIdToAmountOf2KEYTotal, epochId),
+            totalAmount2KEY
+        );
+
+
+    }
+
+    /**
+     * @notice          Function to fetch id of latest epoch
+     */
+    function getLatestEpochId()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_latestEpochId));
+    }
+
+    /**
+     * @notice          Function to get amount of 2KEY tokens which have to be distributed in epoch
+     * @param           epochId is the id in the epoch
+     */
+    function getTotalAmountOf2KEYToBeDistributedInEpoch(
+        uint epochId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_epochIdToAmountOf2KEYTotal, epochId));
+    }
+
 
 
     // Internal wrapper method to manipulate storage contract
