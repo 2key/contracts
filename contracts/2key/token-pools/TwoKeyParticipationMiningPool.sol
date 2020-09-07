@@ -65,16 +65,16 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         uint totalAmountOfTokens = getContractBalance(); //120M WEI's
 
-        setUint(_totalAmount2keys, totalAmountOfTokens);
-        setUint(_annualTransferAmountLimit, totalAmountOfTokens.div(10));
-        setUint(_startingDate, block.timestamp);
+        setUint(keccak256(_totalAmount2keys), totalAmountOfTokens);
+        setUint(keccak256(_annualTransferAmountLimit), totalAmountOfTokens.div(10));
+        setUint(keccak256(_startingDate), block.timestamp);
 
         for(uint i=1; i<=10; i++) {
             bytes32 key1 = keccak256(_yearToStartingDate, i);
             bytes32 key2 = keccak256(_yearToTransferedThisYear, i);
 
-            PROXY_STORAGE_CONTRACT.setUint(key1, block.timestamp + i*(1 years));
-            PROXY_STORAGE_CONTRACT.setUint(key2, 0);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(key1), block.timestamp + i*(1 years));
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(key2), 0);
         }
 
         initialized = true;
@@ -100,19 +100,19 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         bytes32 keyHashEpochThisYear = keccak256(_epochInsideYear, year);
 
         //Take the amount transfered this year
-        uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keyTransferedThisYear);
+        uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyTransferedThisYear));
 
         //In case there are <= than 10 years, than we have limits for transfer
         if(year <= 10) {
             //Take the annual transfer amount limit
-            uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
+            uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyAnnualTransferAmountLimit));
 
             //Check that this transfer will not overflow the annual limit
             require(transferedThisYear.add(_amount) <= annualTransferAmountLimit);
         }
 
         //Take the epoch for this year ==> which time this year we're calling this function
-        uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keyHashEpochThisYear);
+        uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyHashEpochThisYear));
 
         //We're always sending tokens to ParticipationPaymentsManager
         address receiver = getAddressFromTwoKeySingletonRegistry(_twoKeyParticipationsManager);
@@ -127,10 +127,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         );
 
         // Increase annual epoch
-        PROXY_STORAGE_CONTRACT.setUint(keyHashEpochThisYear, epochThisYear.add(1));
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(keyHashEpochThisYear), epochThisYear.add(1));
 
         // Increase the amount transfered this year
-        PROXY_STORAGE_CONTRACT.setUint(keyTransferedThisYear, transferedThisYear.add(_amount));
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(keyTransferedThisYear), transferedThisYear.add(_amount));
     }
 
     /**
@@ -189,7 +189,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     view
     returns (uint)
     {
-        uint startingDate = getUint(_startingDate);
+        uint startingDate = getUint(keccak256(_startingDate));
 
         if(block.timestamp > startingDate && block.timestamp < startingDate + 1 years) {
             return 1;
@@ -219,8 +219,41 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             keccak256(_epochIdToAmountOf2KEYTotal, epochId),
             totalAmount2KEY
         );
+    }
 
+    function distributeEpoch(
+        uint epochId,
+        address [] influencers,
+        uint [] rewards
+    )
+    public
+    onlyMaintainer
+    {
+        // Require that this epoch exists
+        require(epochId <= getLatestEpochId());
 
+        uint len = influencers.length;
+        uint i;
+        uint sum = 0;
+
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+        for(i=0; i<len; i++) {
+            // Transfer tokens
+            IERC20(twoKeyEconomy).transfer(influencers[i], rewards[i]);
+            sum = sum.add(rewards[i]);
+        }
+
+        bytes32 keyStorage = keccak256(_epochIdToAmountOf2KEYDistributed, epochId);
+
+        uint totalDistributedForEpoch = getUint(keyStorage) + sum;
+
+        require(totalDistributedForEpoch <= getTotalAmountOf2KEYToBeDistributedInEpoch(epochId));
+
+        setUint(
+            keyStorage,
+            totalDistributedForEpoch
+        );
     }
 
     /**
@@ -252,22 +285,22 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
     // Internal wrapper method to manipulate storage contract
     function setUint(
-        string key,
+        bytes32 key,
         uint value
     )
     internal
     {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
+        PROXY_STORAGE_CONTRACT.setUint(key, value);
     }
 
     // Internal wrapper method to manipulate storage contract
     function getUint(
-        string key
+        bytes32 key
     )
     internal
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
+        return PROXY_STORAGE_CONTRACT.getUint(key);
     }
 }

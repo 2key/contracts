@@ -676,10 +676,11 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
-    function emitParticipationMiningEpochRegistered(
-        uint epochId,
-        uint totalAmount
-    )
+//    function emitParticipationMiningEpochRegistered(
+//        uint epochId,
+//        uint totalAmount
+//    )
+
 
     /**
      * @notice Function to check adequate plasma address for submitted eth address
