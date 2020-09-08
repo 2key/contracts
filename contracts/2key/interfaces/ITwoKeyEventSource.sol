@@ -86,4 +86,17 @@ contract ITwoKeyEventSource {
         uint moderatorEarningsDistributed
     )
     public;
+
+    function emitParticipationMiningEpochRegistered(
+        uint epochId,
+        uint totalAmount
+    )
+    public;
+
+    function emitParticipationEpochDistributed(
+        uint epochId,
+        uint numberOfInfluencers,
+        uint amount2KEYDistributed
+    )
+    public;
 }

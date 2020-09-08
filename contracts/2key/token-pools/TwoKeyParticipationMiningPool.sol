@@ -4,6 +4,7 @@ import "./TokenPool.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyParticipationMiningPoolStorage.sol";
 import "../interfaces/ITwoKeyParticipationPaymentsManager.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
 
 /**
@@ -226,6 +227,11 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             keccak256(_latestEpochId),
             epochId
         );
+
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitParticipationMiningEpochRegistered(
+            epochId,
+            totalAmount2KEY
+        );
     }
 
     function distributeEpoch(
@@ -256,6 +262,13 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         uint totalDistributedForEpoch = getUint(keyStorage) + sum;
 
         require(totalDistributedForEpoch <= getTotalAmountOf2KEYToBeDistributedInEpoch(epochId));
+
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitParticipationEpochDistributed(
+            epochId,
+            len,
+            sum
+        );
+
 
         setUint(
             keyStorage,
