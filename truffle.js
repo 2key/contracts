@@ -109,7 +109,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
           skipDryRun: true,
           network_id: ids["staging-public"],
-          gas: 8000000,
+          gas: 7800000,
           gasPrice: 150000000000,
       },
 
