@@ -25,6 +25,9 @@ let transactionBytecodeForChangingReleaseDate =
 
 let transactionBytecodeForAddingEpochAndAmount =
     "0x44199221000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000001b1ae4d6e2ef500000";
+
+let epochId;
+
 describe('TwoKeyCongress contract basic proposal creation, voting, and proposal execution counter.' , () => {
 
     it('should get all members from congress', async() => {
@@ -166,6 +169,12 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should check that proposal execution went fine on contract',async () => {
+        epochId = 1;
+        let totalTokensToBeDistributedInEpoch = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getTotalAmountOf2KEYToBeDistributedInEpoch,[epochId]);
+        expect(parseFloat(twoKeyProtocol.Utils.fromWei(totalTokensToBeDistributedInEpoch,'ether').toString())).to.be.equal(500);
     }).timeout(60000);
 });
 
