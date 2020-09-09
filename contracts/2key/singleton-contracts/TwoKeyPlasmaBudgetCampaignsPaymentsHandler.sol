@@ -182,9 +182,10 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     )
     internal
     {
+        address [] memory arrayToCopy = getAddressArray(keyArrayToCopy);
         PROXY_STORAGE_CONTRACT.setAddressArray(
             keyArrayToStore,
-            getAddressArray(keyArrayToCopy)
+            arrayToCopy
         );
     }
 
@@ -557,6 +558,21 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function where we can fetch finished and paid campaigns for referrer
+     * @param           referrer is the address of referrer
+     */
+    function getCampaignsFinishedAndPaidForReferrer(
+        address referrer
+    )
+    public
+    view
+    returns (address[])
+    {
+        return getAddressArray(
+            keccak256(_referrer2finishedAndPaidCampaigns, referrer)
+        );
+    }
 
     /**
      * @notice          Function to get campaign where referrer is having pending
