@@ -446,10 +446,9 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(nonRebalancedAmount);
             }
 
-            // First copy address array from pending to inProgress.
-            copyAddressArray(
-                keccak256(_referrer2pendingCampaignAddresses, referrer),
-                keccak256(_referrer2inProgressCampaignAddress, referrer)
+            setAddressArray(
+                keccak256(_referrer2inProgressCampaignAddress, referrer),
+                referrerCampaigns
             );
 
             // Delete referrer campaigns which are pending rewards
