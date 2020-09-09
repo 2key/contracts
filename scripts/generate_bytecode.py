@@ -14,7 +14,7 @@ def generate_selector(method_name_and_params):
 def generate_bytecode(method_name_and_params,types,values):
     method_selector = generate_selector(method_name_and_params)
     packed_args = encode_abi(types,values).hex()
-    bytecode = '0x' + method_selector + packed_args
+    bytecode = method_selector + packed_args
     return (bytecode)
 
 
