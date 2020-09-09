@@ -693,7 +693,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     view
     returns (uint)
     {
-        getUint(keccak256(_numberOfCycles));
+        return getUint(keccak256(_numberOfCycles));
     }
 
 
