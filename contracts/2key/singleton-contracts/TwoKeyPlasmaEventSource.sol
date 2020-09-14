@@ -417,7 +417,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     )
     public
     {
-        //TODO: Add restriction modifier
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaParticipationRewards"));
         emit ParticipationMiningEpoch(
             epochId,
             users,
