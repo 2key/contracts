@@ -150,6 +150,12 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         string newHandle
     );
 
+    event ParticipationMiningEpoch(
+        uint epochId,
+        address [] users,
+        uint [] rewards
+    );
+
 
     /**
      * @notice          Modifier restricting calls only to TwoKeyPlasmaFactory contract
@@ -401,6 +407,21 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
             influencer,
             amountPaid,
             campaignsPaid
+        );
+    }
+
+    function emitAddedParticipationMiningEpoch(
+        uint epochId,
+        address [] users,
+        uint [] rewards
+    )
+    public
+    {
+        //TODO: Add restriction modifier
+        emit ParticipationMiningEpoch(
+            epochId,
+            users,
+            rewards
         );
     }
 
