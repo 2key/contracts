@@ -261,8 +261,22 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     public
     onlyMaintainer
     {
+        // TODO : Verify signature
+//        address [] memory userPendingEpochIds = getPendingEpochsForUser(user);
+//        uint i;
+//        uint len = userPendingEpochIds.length;
+//
+//        uint sumOfRewards;
+//        // Require that all pending epoch ids are covered
+//        for(i=0 ; i < len ; i++) {
+//            require(userPendingEpochIds[i] == epochIds[i]);
+//            sumOfRewards = sumOfRewards.add(getUser)
+//        }
+
+
 
     }
+
 
 
     /**
@@ -278,6 +292,22 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             keccak256(_isEpochRegistrationFinalized, epochId),
             true
         );
+    }
+
+    /**
+     * @notice          Function to get user earnings per epoch
+     * @param           user is the address of user
+     * @param           epochId is the id of the epoch for this user
+     */
+    function getUserEarningsPerEpoch(
+        address user,
+        uint epochId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_userToEarningsPerEpoch, user, epochId));
     }
 
     /**
