@@ -19,6 +19,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
     string constant _userToPendingEpochs = "userToPendingEpochs";
     string constant _userToWithdrawnEpochs = "userToWithdrawnEpochs";
+    string constant _userToWithdrawnEpochs = "userToWithdrawnEpochs";
     string constant _totalRewardsPerEpoch = "totalRewardsPerEpoch";
     string constant _userToSignature = "userToSignature";
     string constant _latestEpochId = "latestEpochId";
@@ -308,6 +309,20 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     returns (uint[])
     {
         return getUintArray(keccak256(_userToPendingEpochs, user));
+    }
+
+    /**
+     * @notice          Function to get epochs user already withdrawn
+     * @param           user is the user address
+     */
+    function getWithdrawnEpochsForUser(
+        address user
+    )
+    public
+    view
+    returns (uint[])
+    {
+        return getUintArray(keccak256(_userToWithdrawnEpochs, user));
     }
 
     /**
