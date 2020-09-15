@@ -4,20 +4,26 @@ import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaParticipationRewardsStorage.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../libraries/SafeMath.sol";
 
 contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
+    using SafeMath for *;
+
     bool initialized;
-    address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
-    ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
-
+    string constant _userToEarningsPerEpoch = "userToEarningsPerEpoch";
     string constant _userToTotalAmountPending = "userToTotalAmountPending";
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
     string constant _userToSignature = "userToSignature";
     string constant _latestEpochId = "latestEpochId";
     string constant _isEpochIdExisting = "isEpochIdExisting";
+
+    address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
+    ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
+
 
 
     function setInitialParams(
@@ -52,10 +58,44 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     onlyMaintainer
     {
         uint totalRewards;
+        // require epoch id doesn't exist
         require(isEpochIdExisting(epochId) == false);
+        // add this epoch
         addNewEpoch(epochId);
 
+        uint i;
 
+        for(i = 0; i < users.length; i++) {
+            bytes32 keyUserPendingBalance = keccak256(_userToTotalAmountPending, users[i]);
+            uint userCurrentPendingBalance = getUint(keyUserPendingBalance);
+
+            // Add to user pending balance amount he earned
+            setUint(
+                keyUserPendingBalance,
+                userCurrentPendingBalance.add(rewards[i])
+            );
+
+            // Set user to earnings per epoch
+            setUint(
+                keccak256(_userToEarningsPerEpoch, users[i], epochId),
+                rewards[i]
+            );
+
+        }
+
+        // Emit event for this epoch so on the graph we can do checksums as well
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitAddedParticipationMiningEpoch(
+            epochId,
+            users,
+            rewards
+        );
+    }
+
+    function submitSignatureForUserWithdrawal(
+
+    )
+    onlyMaintainer
+    {
 
     }
 
