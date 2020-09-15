@@ -2,6 +2,8 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaParticipationRewardsStorage.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
@@ -9,11 +11,13 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
 
+    string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
 
     string constant _userToTotalAmountPending = "userToTotalAmountPending";
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
     string constant _userToSignature = "userToSignature";
     string constant _latestEpochId = "latestEpochId";
+    string constant _isEpochIdExisting = "isEpochIdExisting";
 
 
     function setInitialParams(
@@ -30,28 +34,54 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         initialized = true;
     }
 
+    /**
+     * @notice          Modifier which will be used to restrict calls to only maintainers
+     */
+    modifier onlyMaintainer {
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
+        require(ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender) == true);
+        _;
+    }
+
     function registerParticipationMiningEpoch(
         uint epochId,
-        address [] influencers,
+        address [] users,
         uint [] rewards
     )
     public
-    //TODO: add onlyMaintainer flag
+    onlyMaintainer
     {
         uint totalRewards;
+        require(isEpochIdExisting(epochId) == false);
+        addNewEpoch(epochId);
+
 
 
     }
 
-    /**
-     * @notice          Function to fetch id of latest epoch
-     */
-    function getLatestEpochId()
+
+    function isEpochIdExisting(
+        uint epochId
+    )
     public
     view
-    returns (uint)
+    returns (bool)
     {
-        return getUint(keccak256(_latestEpochId));
+        return getBool(
+            keccak256(_isEpochIdExisting, epochId)
+        );
+    }
+
+
+    function addNewEpoch(
+        uint epochId
+    )
+    internal
+    {
+        setBool(
+            keccak256(_isEpochIdExisting, epochId),
+            true
+        );
     }
 
 
@@ -75,5 +105,41 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     {
         return PROXY_STORAGE_CONTRACT.getUint(key);
     }
+
+    function getBool(
+        bytes32 key
+    )
+    internal
+    view
+    returns (bool)
+    {
+        return PROXY_STORAGE_CONTRACT.getBool(key);
+    }
+
+    function setBool(
+        bytes32 key,
+        bool value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setBool(key,value);
+    }
+
+    /**
+     * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
+     *
+     * @param           contractName is the name of the contract
+     */
+    function getAddressFromTwoKeySingletonRegistry(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
+    }
+
 
 }
