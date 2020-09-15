@@ -19,7 +19,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
     string constant _userToPendingEpochs = "userToPendingEpochs";
     string constant _userToWithdrawnEpochs = "userToWithdrawnEpochs";
-    string constant _userToWithdrawnEpochs = "userToWithdrawnEpochs";
     string constant _totalRewardsPerEpoch = "totalRewardsPerEpoch";
     string constant _userToSignature = "userToSignature";
     string constant _latestEpochId = "latestEpochId";
@@ -250,7 +249,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
 
     /**
-     * @notice
+     * @notice          Function to submit signature for user withdrawal
      */
     function submitSignatureForUserWithdrawal(
         address user,
