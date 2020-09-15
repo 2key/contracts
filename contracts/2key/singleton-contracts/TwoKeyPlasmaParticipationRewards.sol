@@ -19,9 +19,10 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
     string constant _userToPendingEpochs = "userToPendingEpochs";
     string constant _userToWithdrawnEpochs = "userToWithdrawnEpochs";
+    string constant _totalRewardsPerEpoch = "totalRewardsPerEpoch";
     string constant _userToSignature = "userToSignature";
     string constant _latestEpochId = "latestEpochId";
-    string constant _isEpochIdExisting = "isEpochIdExisting";
+    string constant _isEpochRegistrationFinalized = "isEpochRegistrationFinalized";
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
@@ -49,18 +50,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
         require(ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender) == true);
         _;
-    }
-
-
-    function addNewEpoch(
-        uint epochId
-    )
-    internal
-    {
-        setBool(
-            keccak256(_isEpochIdExisting, epochId),
-            true
-        );
     }
 
 
@@ -188,66 +177,105 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     public
     onlyMaintainer
     {
-        uint totalRewards;
-        // require epoch id doesn't exist
-        require(isEpochIdExisting(epochId) == false);
-        // add this epoch
-        addNewEpoch(epochId);
+        require(isEpochRegistrationFinalized(epochId) == false);
 
+        uint totalRewards;
         uint i;
 
         for(i = 0; i < users.length; i++) {
-            bytes32 keyUserPendingBalance = keccak256(_userToTotalAmountPending, users[i]);
-            uint userCurrentPendingBalance = getUint(keyUserPendingBalance);
+            bytes32 keyUserEarningsPerEpoch = keccak256(_userToEarningsPerEpoch, users[i], epochId);
 
-            // Add to user pending balance amount he earned
-            setUint(
-                keyUserPendingBalance,
-                userCurrentPendingBalance.add(rewards[i])
-            );
+            // Only if user is submitted first time for this epoch
+            if(getUint(keyUserEarningsPerEpoch) == 0) {
 
-            // Set user to earnings per epoch
-            setUint(
-                keccak256(_userToEarningsPerEpoch, users[i], epochId),
-                rewards[i]
-            );
+                // Add rewards[i] to total rewards for this epoch in case this user is passed 1st time in this epoch
+                totalRewards = totalRewards.add(rewards[i]);
 
-            addEpochToPendingEpochsForUser(users[i], epochId);
+                // Generate key for user pending balance
+                bytes32 keyUserPendingBalance = keccak256(_userToTotalAmountPending, users[i]);
+
+                // Get current user pending balance
+                uint userCurrentPendingBalance = getUint(keyUserPendingBalance);
+
+                // Set user to earnings per epoch
+                setUint(
+                    keyUserEarningsPerEpoch,
+                    rewards[i]
+                );
+
+                // Add to user pending balance amount he earned
+                setUint(
+                    keyUserPendingBalance,
+                    userCurrentPendingBalance.add(rewards[i])
+                );
+
+                // Add epoch to array of pending epochs for selected user
+                addEpochToPendingEpochsForUser(users[i], epochId);
+
+                // Emit event for each user who got rewarded for this epoch
+                ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitUserRewardedInParticipationMiningEpoch(
+                    epochId,
+                    users[i],
+                    rewards[i]
+                );
+            }
         }
 
-        // Emit event for this epoch so on the graph we can do checksums as well
-        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitAddedParticipationMiningEpoch(
-            epochId,
-            users,
-            rewards
+        bytes32 keyHashTotalRewardsPerEpoch = keccak256(_totalRewardsPerEpoch, epochId);
+
+        // Add total rewards for this epoch
+        setUint(
+            keyHashTotalRewardsPerEpoch,
+            totalRewards + getUint(keyHashTotalRewardsPerEpoch)
         );
+    }
+
+    /**
+     * @notice          Function where maintainer after  he finishes registration for epochId
+     *                  will submit that it's finalized
+     * @param           epochId is the id of the epoch
+     */
+    function finalizeEpoch(
+        uint epochId
+    )
+    public
+    onlyMaintainer
+    {
+        require(isEpochRegistrationFinalized(epochId) == false);
+        setEpochRegistrationFinalized(epochId);
     }
 
 
 
-    function submitSignatureForUserWithdrawal(
 
+    /**
+     * @notice
+     */
+    function submitSignatureForUserWithdrawal(
+        address user,
+        uint [] epochIds,
+        uint totalRewardsPending,
+        bytes signature
     )
+    public
     onlyMaintainer
     {
 
     }
 
 
-
     /**
-     * @notice          Function to return if epoch id is already existing
-     * @param           epochId is id of the epoch
+     * @notice          Internal function to set epoch registration is finalized
+     * @param           epochId is the id of the epoch
      */
-    function isEpochIdExisting(
+    function setEpochRegistrationFinalized(
         uint epochId
     )
-    public
-    view
-    returns (bool)
+    internal
     {
-        return getBool(
-            keccak256(_isEpochIdExisting, epochId)
+        setBool(
+            keccak256(_isEpochRegistrationFinalized, epochId),
+            true
         );
     }
 
@@ -263,8 +291,8 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     returns (uint,uint)
     {
         return (
-        getUint(keccak256(_userToTotalAmountPending, user)),
-        getUint(keccak256(_userToTotalAmountWithdrawn, user))
+            getUint(keccak256(_userToTotalAmountPending, user)),
+            getUint(keccak256(_userToTotalAmountWithdrawn, user))
         );
     }
 
@@ -282,5 +310,37 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getUintArray(keccak256(_userToPendingEpochs, user));
     }
 
+    /**
+     * @notice          Function to get total rewards for epoch
+     * @param           epochId is the ID of the epoch
+     */
+    function getTotalRewardsPerEpoch(
+        uint epochId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(
+            keccak256(_totalRewardsPerEpoch, epochId)
+        );
+    }
+
+
+    /**
+     * @notice          Function to return if epoch id is finished with registration
+     * @param           epochId is id of the epoch
+     */
+    function isEpochRegistrationFinalized(
+        uint epochId
+    )
+    public
+    view
+    returns (bool)
+    {
+        return getBool(
+            keccak256(_isEpochRegistrationFinalized, epochId)
+        );
+    }
 
 }
