@@ -487,6 +487,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         uint cycleId
     )
     public
+    onlyMaintainer
     {
         address[] memory referrers = getReferrersForCycleId(cycleId);
 

@@ -705,7 +705,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *                  Which can be either same or 0.
      * @param           _referrer is the plasma address of referrer
      */
-    function getReferrerTotalRewardsAndCurrentBalance(
+    function getReferrerRebalancedRewardsAndPaymentStatus(
         address _referrer
     )
     public
