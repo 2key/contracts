@@ -335,12 +335,20 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             difference = nonRebalancedTotalPayout.sub(rebalancedTotalPayout);
             IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchange, difference);
             IUpgradableExchange(twoKeyUpgradableExchange).returnTokensBackToExchangeV1(difference);
-            // TODO: Add event how much tokens were sent back
+            ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitRebalancedRewards(
+                cycleId,
+                difference,
+                "RETURN_TOKENS_TO_EXCHANGE"
+            );
         } else if (nonRebalancedTotalPayout < rebalancedTotalPayout) {
             // Leads to we need to get more tokens from Upgradable Exchange
             difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
             IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancingV1(difference);
-            // TODO: Add events how much tokens were taken
+            ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitRebalancedRewards(
+                cycleId,
+                difference,
+                "GET_TOKENS_FROM_EXCHANGE"
+            );
         }
 
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id

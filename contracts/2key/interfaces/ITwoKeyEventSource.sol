@@ -99,4 +99,11 @@ contract ITwoKeyEventSource {
         uint amount2KEYDistributed
     )
     public;
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public;
 }

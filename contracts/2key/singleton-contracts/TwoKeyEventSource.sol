@@ -237,6 +237,12 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint amount2KEYPaid
     );
 
+    event RebalancedRewards(
+        uint cycleId,
+        uint amountOfTokens,
+        string action
+    );
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -679,6 +685,23 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
             campaignPlasmaAddress,
             contractorLeftover,
             moderatorEarningsDistributed
+        );
+    }
+
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
+        emit RebalancedRewards(
+            cycleId,
+            difference,
+            action
         );
     }
 
