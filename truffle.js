@@ -169,19 +169,15 @@ module.exports = {
           gasPrice: 120000000000,
       },
   },
-
-    compilers: {
-          solc: {
-              path: "soljson-v0.4.24+commit.e67f0147.js",
-              version: "0.4.24",
-              build: "commit.e67f0147",
-              settings: {
-                  optimizer: {
-                      enabled: false,
-                      runs: 200,
-                      evmVersion: "byzantium"
-                  }
-              }
-          }
+    solc: {
+        path: "soljson-v0.4.24+commit.e67f0147.js",
+        version: "0.4.24",
+        build: "commit.e67f0147",
+        optimizer: {
+            enabled: true,
+            runs: 200
+        },
+        evmVersion: "byzantium"
     }
+
 };
