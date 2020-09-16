@@ -177,7 +177,7 @@ module.exports = {
               build: "commit.e67f0147",
               settings: {
                   optimizer: {
-                      enabled: true,
+                      enabled: false,
                       runs: 200,
                       evmVersion: "byzantium"
                   }
