@@ -178,6 +178,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     onlyMaintainer
     {
         require(isEpochRegistrationFinalized(epochId) == false);
+        require(epochId > getLatestEpochId());
 
         uint totalRewards;
         uint i;
@@ -227,6 +228,12 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         setUint(
             keyHashTotalRewardsPerEpoch,
             totalRewards + getUint(keyHashTotalRewardsPerEpoch)
+        );
+
+        // Set latest epoch id to be the one submitted
+        setUint(
+            keccak256(_latestEpochId),
+            epochId
         );
     }
 
@@ -370,6 +377,16 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function to get latest submitted epoch id
+     */
+    function getLatestEpochId()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_latestEpochId));
+    }
 
     /**
      * @notice          Function to return if epoch id is finished with registration
