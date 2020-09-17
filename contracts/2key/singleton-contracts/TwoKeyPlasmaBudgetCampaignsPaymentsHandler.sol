@@ -504,11 +504,14 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             uint [] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
             uint j;
             for(j = 0; j < referrerInProgressCampaigns.length; j++) {
+
+                // Load campaign address
+                address campaignAddress = referrerInProgressCampaigns[j];
+
                 // Get referrer earnings for this campaign
                 referrerEarningsPerCampaign[j] = ITwoKeyPlasmaCampaign(campaignAddress).getReferrerPlasmaBalance(referrer);
 
                 // Mark that referrer got paid for this campaign
-                address campaignAddress = referrerInProgressCampaigns[j];
                 ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
             }
 
