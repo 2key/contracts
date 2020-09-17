@@ -292,18 +292,14 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     )
     public
     view
-    returns (bool)
+    returns (address)
     {
         bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked(userAddress)),keccak256(abi.encodePacked(totalRewardsPending))));
 
         // Recover signer message from signature
         address recoveredSignerOfMessage = Call.recoverHash(hash,signature,0);
 
-        // Check if message was properly recovered and signed by maintainer
-        bool isSignedByMaintainer = recoveredSignerOfMessage == msg.sender ? true : false;
-
-        // Return if message is signed by maintainer
-        return isSignedByMaintainer;
+        return recoveredSignerOfMessage;
     }
 
 

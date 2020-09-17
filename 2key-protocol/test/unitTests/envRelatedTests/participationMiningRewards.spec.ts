@@ -119,6 +119,7 @@ describe(
             let user = usersInEpoch[0];
             let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
 
+
             let signature = await Sign.sign_userParticipationRewardsAndAddress(
                 twoKeyProtocol.plasmaWeb3,
                 user,
@@ -126,7 +127,15 @@ describe(
                 twoKeyProtocol.plasmaAddress
             );
 
-            console.log(signature);
+            let messageSigner = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.verifySignatureAndData,[
+                user,
+                pending.toString(),
+                signature
+            ]);
+
+            console.log(messageSigner);
+            console.log(from);
+            console.log(twoKeyProtocol.plasmaAddress);
         }).timeout(timeout);
     }
 );
