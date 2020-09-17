@@ -139,7 +139,8 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     event PaidPendingRewards(
         address influencer,
         uint rewards,
-        address [] campaignsPaid
+        address [] campaignsPaid,
+        uint [] earningsPerCampaign
     );
 
     /**
@@ -398,7 +399,8 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     function emitPaidPendingRewards(
         address influencer,
         uint amountPaid,
-        address [] campaignsPaid
+        address [] campaignsPaid,
+        uint [] earningsPerCampaign
     )
     public
     onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler
@@ -406,7 +408,8 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         emit PaidPendingRewards(
             influencer,
             amountPaid,
-            campaignsPaid
+            campaignsPaid,
+            earningsPerCampaign
         );
     }
 

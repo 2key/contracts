@@ -500,15 +500,27 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             address referrer = referrers[i];
 
             address [] memory referrerInProgressCampaigns = getCampaignsInProgressOfDistribution(referrer);
+            // Create array of referrer earnings per campaign
+            uint [] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
             uint j;
             for(j = 0; j < referrerInProgressCampaigns.length; j++) {
-                // Iterate through all campaigns and mark that referrer got paid for this campaign
+                // Get referrer earnings for this campaign
+                referrerEarningsPerCampaign[j] = ITwoKeyPlasmaCampaign(campaignAddress).getReferrerPlasmaBalance(referrer);
+
+                // Mark that referrer got paid for this campaign
                 address campaignAddress = referrerInProgressCampaigns[j];
                 ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
             }
 
+            // Total amount paid to referrer
             uint amountPaidToReferrer = getReferrerToTotalRebalancedAmountForCycleId(referrer,cycleId);
-            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(referrer, amountPaidToReferrer, referrerInProgressCampaigns);
+
+            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(
+                referrer,
+                amountPaidToReferrer,
+                referrerInProgressCampaigns,
+                referrerEarningsPerCampaign
+            );
 
             // Move from inProgress to finished campagins
             appendToArray(
