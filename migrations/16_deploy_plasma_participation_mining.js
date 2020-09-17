@@ -3,6 +3,7 @@ const TwoKeyPlasmaParticipationRewardsStorage = artifacts.require('TwoKeyPlasmaP
 
 
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
+const Call = artifacts.require('Call');
 
 const fs = require('fs');
 const path = require('path');
@@ -30,7 +31,8 @@ module.exports = function deploy(deployer) {
 
     if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         console.log('Deploying private (plasma)  version of TwoKeyPlasmaParticipationRewards contract');
-        deployer.deploy(TwoKeyPlasmaParticipationRewards)
+        deployer.link(Call, TwoKeyPlasmaParticipationRewards)
+            .then(() => deployer.deploy(TwoKeyPlasmaParticipationRewards))
             .then(() => TwoKeyPlasmaParticipationRewards.deployed())
             .then(() => deployer.deploy(TwoKeyPlasmaParticipationRewardsStorage))
             .then(() => TwoKeyPlasmaParticipationRewardsStorage.deployed())

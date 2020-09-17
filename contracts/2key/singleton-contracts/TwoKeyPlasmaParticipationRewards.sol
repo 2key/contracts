@@ -6,9 +6,11 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 import "../libraries/SafeMath.sol";
+import "../libraries/Call.sol";
 
 contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
+    using Call for *;
     using SafeMath for *;
 
     bool initialized;
@@ -283,6 +285,27 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
     }
 
+    function verifySignatureAndData(
+        address userAddress,
+        uint totalRewardsPending,
+        bytes signature
+    )
+    public
+    view
+    returns (bool)
+    {
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked(userAddress)),keccak256(abi.encodePacked(totalRewardsPending))));
+
+        // Recover signer message from signature
+        address recoveredSignerOfMessage = Call.recoverHash(hash,signature,0);
+
+        // Check if message was properly recovered and signed by maintainer
+        bool isSignedByMaintainer = recoveredSignerOfMessage == msg.sender ? true : false;
+
+        // Return if message is signed by maintainer
+        return isSignedByMaintainer;
+    }
+
 
 
     /**
@@ -332,6 +355,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             getUint(keccak256(_userToTotalAmountWithdrawn, user))
         );
     }
+
 
     /**
      * @notice          Function to get pending epochs for user
