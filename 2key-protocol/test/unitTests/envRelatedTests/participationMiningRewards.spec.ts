@@ -11,14 +11,10 @@ import {TwoKeyProtocol} from "../../../src";
 import getTwoKeyProtocol from "../../helpers/twoKeyProtocol";
 import {promisify} from "../../../src/utils/promisify";
 
+import Sign from "../../../src/sign";
 const {env} = process;
 
 const timeout = 60000;
-const usdSymbol = 'USD';
-const usdDaiSymbol = 'USD-DAI';
-const usd2KeySymbol = '2KEY-USD';
-const tusdSymbol = 'TUSD-USD';
-const daiSymbol = 'DAI-USD';
 
 
 describe(
@@ -117,6 +113,20 @@ describe(
                 // Expect that the last pending epoch id is the on submitted now.
                 expect(userPendingEpochIds[userPendingEpochIds.length-1]).to.be.equal(epochId);
             }
+        }).timeout(timeout);
+
+        it('should sign user rewards and user address by maintainer', async() => {
+            let user = usersInEpoch[0];
+            let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
+
+            let signature = await Sign.sign_userParticipationRewardsAndAddress(
+                twoKeyProtocol.plasmaWeb3,
+                user,
+                pending.toString(),
+                twoKeyProtocol.plasmaAddress
+            );
+
+            console.log(signature);
         }).timeout(timeout);
     }
 );
