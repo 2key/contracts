@@ -507,7 +507,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
             }
 
-            uint amountPaidToReferrer = getTotalReferrerPendingAmount(referrer);
+            uint amountPaidToReferrer = getReferrerToTotalRebalancedAmountForCycleId(referrer,cycleId);
             ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(referrer, amountPaidToReferrer, referrerInProgressCampaigns);
 
             // Move from inProgress to finished campagins
