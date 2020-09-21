@@ -48,6 +48,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     // Mapping referrer to how much rebalanced amount he has pending
     string constant _referrer2cycleId2rebalancedAmount = "referrer2cycleId2rebalancedAmount";
 
+    // Mapping referrer to how much non rebalanced he earned in the cycle
+    string constant _referrer2cycleId2nonRebalancedAmount = "referrer2cycleId2nonRebalancedAmount";
 
     ITwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -426,6 +428,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             address[] memory referrerCampaigns = getCampaignsReferrerHasPendingBalances(referrer);
             // Calculate how much is total payout for this referrer
             uint referrerTotalPayoutAmount = 0;
+            // Calculate referrer total non-rebalanced amount earned
+            uint referrerTotalNonRebalancedAmountForCycle = 0;
             // Iterate through campaigns
             for(j = 0; j < referrerCampaigns.length; j++) {
                 // Load campaign address
@@ -442,10 +446,20 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
                 referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(rebalancedAmount);
 
+                // Store referrer total non-rebalanced amount
+                referrerTotalNonRebalancedAmountForCycle = referrerTotalNonRebalancedAmountForCycle.add(nonRebalancedAmount);
+
                 // Update total payout to be paid in case there was no rebalancing
                 amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(nonRebalancedAmount);
             }
 
+            // Set non rebalanced amount referrer earned in this cycle
+            setUint(
+                keccak256(_referrer2cycleId2nonRebalancedAmount, referrer, cycleId),
+                referrerTotalNonRebalancedAmountForCycle
+            );
+
+            // Set inProgress campaigns
             setAddressArray(
                 keccak256(_referrer2inProgressCampaignAddress, referrer),
                 referrerCampaigns
@@ -456,6 +470,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 keccak256(_referrer2pendingCampaignAddresses, referrer)
             );
 
+            // Calculate total amount to be distributed in cycle rebalanced
             amountToBeDistributedInCycleRebalanced = amountToBeDistributedInCycleRebalanced.add(referrerTotalPayoutAmount);
 
             // Store referrer total payout amount for this cycle
@@ -518,8 +533,12 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             // Total amount paid to referrer
             uint amountPaidToReferrer = getReferrerToTotalRebalancedAmountForCycleId(referrer,cycleId);
 
+            // Total amount non rebalanced
+            uint amountNonRebalancedReferrerEarned = getReferrerEarningsNonRebalancedPerCycle(referrer,cycleId);
+
             ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(
                 referrer,
+                amountNonRebalancedReferrerEarned,
                 amountPaidToReferrer,
                 referrerInProgressCampaigns,
                 referrerEarningsPerCampaign
@@ -727,7 +746,10 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         return getUint(keccak256(_numberOfCycles));
     }
 
-
+    /**
+     * @notice          Function to get referrers for cycle id
+     * @param           cycleId is the cycle id we want referrers paid in
+     */
     function getReferrersForCycleId(
         uint cycleId
     )
@@ -737,6 +759,29 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     {
         return getAddressArray(
             keccak256(_distributionCycleIdToReferrersPaid, cycleId)
+        );
+    }
+
+    /**
+     * @notice          Function to get amount of non rebalanced earnings
+     *                  per specific cycle per referrer
+     * @param           referrer is the referrer address
+     * @param           cycleId is the ID of the cycle.
+     */
+    function getReferrerEarningsNonRebalancedPerCycle(
+        address referrer,
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(
+            keccak256(
+                _referrer2cycleId2nonRebalancedAmount,
+                referrer,
+                cycleId
+            )
         );
     }
 }
