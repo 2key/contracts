@@ -281,18 +281,33 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     public
     onlyMaintainer
     {
-        // TODO : Verify signature
+//        // Recover signer of the message
+//        address messageSigner = recoverSignature(
+//            user,
+//            totalRewardsPending,
+//            signature
+//        );
+//        // For security, we will require that maintainer who signed msg is the maintainer who is sending this tx
+//        require(messageSigner == msg.sender);
+//        // TODO : Verify signature
+//
+//        // get pending epoch ids user have
 //        address [] memory userPendingEpochIds = getPendingEpochsForUser(user);
+//
 //        uint i;
 //        uint len = userPendingEpochIds.length;
 //
+//        // Get sum of all pending epochs
 //        uint sumOfRewards;
-//        // Require that all pending epoch ids are covered
+//
 //        for(i=0 ; i < len ; i++) {
 //            require(userPendingEpochIds[i] == epochIds[i]);
-//            sumOfRewards = sumOfRewards.add(getUser)
+//            sumOfRewards = sumOfRewards.add(getUserEarningsPerEpoch[i]);
 //        }
-
+//
+//        // Require that sum of pending rewards is equaling amount of rewards signed
+//        require(sumOfRewards == totalRewardsPending);
+//
 
 
     }
@@ -312,7 +327,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     )
     public
     view
-    returns (bool)
+    returns (address)
     {
         // Generate hash
         bytes32 hash = keccak256(
