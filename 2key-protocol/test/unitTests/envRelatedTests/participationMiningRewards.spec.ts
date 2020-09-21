@@ -119,24 +119,33 @@ describe(
             let user = usersInEpoch[0];
             let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
 
-            console.log(pending.toString());
+            // Convert to 64 places hex
+            let pendingHex = twoKeyProtocol.Utils.toHex(pending);
+            pendingHex = pendingHex.slice(2);
 
-            let signature = await Sign.sign_userParticipationRewardsAndAddress(
-                twoKeyProtocol.plasmaWeb3,
+            while(pendingHex.length < 64) {
+                pendingHex = '0' + pendingHex;
+            }
+
+            pendingHex = '0x' + pendingHex;
+
+            // Generate signature
+            let signature = await Sign.sign_userRewards(
+                twoKeyProtocol.web3,
                 user,
-                pending.toString(),
-                twoKeyProtocol.plasmaAddress
+                pendingHex.toString(),
+                from
             );
 
+            // Recover the message signer
             let messageSigner = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.verifySignatureAndData,[
                 user,
                 pending.toString(),
                 signature
             ]);
 
-            console.log(messageSigner);
-            console.log(from);
-            console.log(twoKeyProtocol.plasmaAddress);
+            // Assert that the message is signed by proper address
+            expect(messageSigner).to.be.equal(from);
         }).timeout(timeout);
     }
 );

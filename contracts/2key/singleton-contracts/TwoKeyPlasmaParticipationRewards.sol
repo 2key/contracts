@@ -296,7 +296,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     {
         bytes32 hash = keccak256(
             abi.encodePacked(
-                keccak256(abi.encodePacked('binding user address and rewards')),
+                keccak256(abi.encodePacked('bytes binding user rewards')),
                 keccak256(abi.encodePacked(userAddress,totalRewardsPending))
             )
         );
