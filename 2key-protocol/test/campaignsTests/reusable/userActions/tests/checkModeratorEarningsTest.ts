@@ -23,7 +23,7 @@ export default function checkModeratorEarningsTest(
         * bountyPerConversion
         * feePercent;
 
-      expect(earnings).to.be.equal(calculatedEarnings);
+      expect(earnings.toFixed(5)).to.be.equal(calculatedEarnings.toFixed(5));
     })
   }else {
     it('should check moderator earnings', async () => {
