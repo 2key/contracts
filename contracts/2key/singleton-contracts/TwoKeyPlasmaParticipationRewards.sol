@@ -49,9 +49,21 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
      * @notice          Modifier which will be used to restrict calls to only maintainers
      */
     modifier onlyMaintainer {
-        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
-        require(ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender) == true);
+        require(isMaintainer(msg.sender));
         _;
+    }
+
+
+    /**
+     * @notice          Function to check if user is maintainer
+     */
+    function isMaintainer(address _address)
+    internal
+    view
+    returns (bool)
+    {
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
+        return ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(_address);
     }
 
 
@@ -285,15 +297,24 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
     }
 
-    function verifySignatureAndData(
+
+
+    /**
+     * @notice          Function where maintainer can check who signed the message
+     * @param           userAddress is the address of user for who we signed message
+     * @param           totalRewardsPending is the amount of pending rewards user wants to claim
+     * @param           signature is the signature created by maintainer
+     */
+    function recoverSignature(
         address userAddress,
         uint totalRewardsPending,
         bytes signature
     )
     public
     view
-    returns (address)
+    returns (bool)
     {
+        // Generate hash
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked('bytes binding user rewards')),
@@ -302,9 +323,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         );
 
         // Recover signer message from signature
-        address recoveredSignerOfMessage = Call.recoverHash(hash,signature,0);
-
-        return recoveredSignerOfMessage;
+        return Call.recoverHash(hash,signature,0);
     }
 
 

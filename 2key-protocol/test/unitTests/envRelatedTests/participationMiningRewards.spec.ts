@@ -131,21 +131,21 @@ describe(
 
             // Generate signature
             let signature = await Sign.sign_userRewards(
-                twoKeyProtocol.web3,
+                twoKeyProtocol.plasmaWeb3,
                 user,
                 pendingHex.toString(),
-                from
+                twoKeyProtocol.plasmaAddress
             );
 
             // Recover the message signer
-            let messageSigner = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.verifySignatureAndData,[
+            let messageSigner = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.recoverSignature,[
                 user,
                 pending.toString(),
                 signature
             ]);
 
             // Assert that the message is signed by proper address
-            expect(messageSigner).to.be.equal(from);
+            expect(messageSigner).to.be.equal(twoKeyProtocol.plasmaAddress);
         }).timeout(timeout);
     }
 );
