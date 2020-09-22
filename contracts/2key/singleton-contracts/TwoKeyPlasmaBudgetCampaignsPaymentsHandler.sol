@@ -27,14 +27,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
     // Mapping cycle id to total rebalanced amount payment
     string constant _distributionCycleToTotalRebalancedPayment = "distributionCycleToTotalRebalancedPayment";
 
-    // Mapping if distribution cycle is submitted
-    string constant _distributionCyclePaymentSubmitted = "distributionCyclePaymentSubmitted";
-
     // Mapping distribution cycle to referrers being paid in that cycle
     string constant _distributionCycleIdToReferrersPaid = "distributionCycleIdToReferrersPaid";
-
-    // Mapping how much referrer received in distribution cycle
-    string constant _referrer2CycleId2TotalDistributedInCycle = "referrer2CycleId2TotalDistributedInCycle";
 
     // Mapping referrer to all campaigns he participated at and are having pending distribution
     string constant _referrer2pendingCampaignAddresses = "referrer2pendingCampaignAddresses";
@@ -285,7 +279,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         deleteAddressArray(key);
     }
 
-    function setReferrerToRebalancedAmountPendingForCycle(
+    function setReferrerToRebalancedAmountForCycle(
         address referrer,
         uint cycleId,
         uint amount
@@ -298,7 +292,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
-    function setReferrersPerDistributionCycle(
+    function setReferrersPaidPerDistributionCycle(
         uint cycleId,
         address [] referrers
     )
@@ -474,7 +468,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
             amountToBeDistributedInCycleRebalanced = amountToBeDistributedInCycleRebalanced.add(referrerTotalPayoutAmount);
 
             // Store referrer total payout amount for this cycle
-            setReferrerToRebalancedAmountPendingForCycle(
+            setReferrerToRebalancedAmountForCycle(
                 referrer,
                 cycleId,
                 referrerTotalPayoutAmount
@@ -494,7 +488,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         );
 
         // Store all influencers for this distribution cycle.
-        setReferrersPerDistributionCycle(cycleId,referrers);
+        setReferrersPaidPerDistributionCycle(cycleId,referrers);
     }
 
 
@@ -526,7 +520,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 // Get referrer earnings for this campaign
                 referrerEarningsPerCampaign[j] = ITwoKeyPlasmaCampaign(campaignAddress).getReferrerPlasmaBalance(referrer);
 
-                // Mark that referrer got paid for this campaign
+                // Mark that referrer got paid for trebalanceInfluencerRatesAndPrepareForRewardsDistributionhis campaign
                 ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
             }
 

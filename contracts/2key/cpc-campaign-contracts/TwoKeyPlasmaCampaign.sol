@@ -25,6 +25,12 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         bool isReferrerPaid;
     }
 
+    event RebalancedValue(
+        address referrer,
+        uint currentRate2KEYUSD,
+        uint ratio
+    );
+
     /**
      0 pendingConverters
      1 approvedConverters
@@ -481,7 +487,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     pure
     returns (uint)
     {
-        return value.mul(10**18).div(ratio);
+        return value.mul(ratio).div(10**18);
     }
 
     /**
@@ -566,6 +572,19 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
                 getRebalancingRatioForReferrer(_referrer)
             )
         );
+    }
+
+    /**
+     * @notice          Function to get referrer non rebalanced earnings
+     */
+    function getReferrerNonRebalancedBalance(
+        address _referrer
+    )
+    public
+    view
+    returns (uint)
+    {
+        return referrerPlasma2Balances2key[_referrer];
     }
 
 
@@ -669,6 +688,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         // This is in case inventory NOT added directly as 2KEY
         if(isBudgetedDirectlyWith2KEY == false) {
             rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
+             emit RebalancedValue(
+                _referrer,
+                _currentRate2KEY,
+                rebalancingRatio
+             );
         }
 
         Payment memory p = Payment(rebalancingRatio, block.timestamp, false);
