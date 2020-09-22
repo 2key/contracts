@@ -399,6 +399,12 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             keccak256(_userToSignature,user),
             signature
         );
+
+        // Set that user doesn't have anymore pending rewards
+        setUint(
+            keccak256(_userToTotalAmountPending, user),
+            0
+        );
     }
 
     /**
