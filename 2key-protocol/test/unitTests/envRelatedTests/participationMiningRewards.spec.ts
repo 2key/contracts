@@ -23,6 +23,7 @@ describe(
         let from: string;
         let twoKeyProtocol: TwoKeyProtocol;
         let signature: string;
+
         before(
             function () {
                 this.timeout(timeout);
@@ -116,7 +117,7 @@ describe(
         }).timeout(timeout);
 
         it('should sign user rewards and user address by maintainer', async() => {
-            let user = usersInEpoch[1];
+            let user = usersInEpoch[3];
             let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
 
             // Convert to 64 places hex
@@ -149,7 +150,7 @@ describe(
         }).timeout(timeout);
 
         it('should submit signature for specific user and check state changes', async() => {
-            let user = usersInEpoch[1];
+            let user = usersInEpoch[3];
             let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
 
             // Convert to string representation of big number
@@ -168,11 +169,11 @@ describe(
                 pending,
                 signature,
                 {
-                    from: twoKeyProtocol.plasmaAddress
+                    from: twoKeyProtocol.plasmaAddress,
+                    gas: 7000000
                 }
             ]);
 
-            console.log(txHash);
 
             await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -182,12 +183,39 @@ describe(
             userPendingEpochsAfter = userPendingEpochsAfter.map((element) => {return parseInt(element,10)});
             userWithdrawnEpochsAfter = userWithdrawnEpochsAfter.map((element) => {return parseInt(element,10)});
 
-
-            let signature = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.)
             // Require that pending epochs after to be 0
             expect(userPendingEpochsAfter.length).to.be.equal(0);
             // Require that all pending are now withdrawn
             expect(userWithdrawnEpochsAfter.length).to.be.equal(userWithdrawnEpochsBefore.length + userPendingEpochsBefore.length);
         }).timeout(timeout);
+
+        it('should assert that signature on contract is same as signature generated', async() => {
+            let user = usersInEpoch[3];
+            let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
+            expect(signatureOnContract).to.be.equal(signature);
+        }).timeout(timeout);
+
+        it('maintainer should mark that user finished withdrawal on mainchain, and clear his sig', async() => {
+            let user = usersInEpoch[3];
+
+            let txHash = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.markUserFinishedWithdrawalFromMainchainWithSignature,[
+                user,
+                signature,
+                {
+                    from: twoKeyProtocol.plasmaAddress
+                }
+            ]);
+
+            let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
+            expect(signatureOnContract).to.be.equal('0x');
+        }).timeout(timeout);
+
+        it('should check that signature for this user is marked as used and withdrawn', async() => {
+            let user = usersInEpoch[3];
+
+            let isSignatureUsed = await twoKeyProtocol.TwoKeyParticipationMiningPool.getIfSignatureUsedOnMainchainForWithdrawal(user,signature);
+            expect(isSignatureUsed).to.be.equal(true);
+        }).timeout(timeout);
+
     }
 );
