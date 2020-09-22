@@ -25,6 +25,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToSignature = "userToSignature";
     string constant _latestEpochId = "latestEpochId";
     string constant _isEpochRegistrationFinalized = "isEpochRegistrationFinalized";
+    string constant _userToSignatureToMainchainWithdrawalConfirmed = "userToSignatureToMainchainWithdrawalConfirmed";
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
@@ -120,6 +121,26 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         PROXY_STORAGE_CONTRACT.setBool(key,value);
     }
 
+    function setBytes(
+        bytes32 key,
+        bytes value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setBytes(key,value);
+    }
+
+    function getBytes(
+        bytes32 key
+    )
+    internal
+    view
+    returns (bytes)
+    {
+        return PROXY_STORAGE_CONTRACT.getBytes(key);
+    }
+
+
     function getUintArray(
         bytes32 key
     )
@@ -128,6 +149,50 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     returns (uint[])
     {
         return PROXY_STORAGE_CONTRACT.getUintArray(key);
+    }
+
+    function appendArrayToArray(
+        bytes32 keyOfArray,
+        uint [] arrayToAppend
+    )
+    internal
+    {
+        // Load current array
+        uint [] memory currentArray = getUintArray(keyOfArray);
+
+        uint newArrayLength = currentArray.length+ arrayToAppend.length;
+
+        uint [] memory newArray = new uint[](newArrayLength);
+
+        uint i;
+
+        uint j = 0;
+
+        // Append arrays
+        for(i = 0; i < newArrayLength; i++) {
+            if(i < currentArray.length) {
+                newArray[i] = currentArray[i];
+            } else {
+                newArray[i] = arrayToAppend[j];
+                j++;
+            }
+
+        }
+
+        // Store new array in storage.
+        PROXY_STORAGE_CONTRACT.setUintArray(
+            keyOfArray,
+            newArray
+        );
+    }
+
+    function deleteUintArray(
+        bytes32 key
+    )
+    internal
+    {
+        uint [] memory emptyArray = new uint[](0);
+        PROXY_STORAGE_CONTRACT.setUintArray(key, emptyArray);
     }
 
     function appendToUintArray(
@@ -274,44 +339,95 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
      */
     function submitSignatureForUserWithdrawal(
         address user,
-        uint [] epochIds,
         uint totalRewardsPending,
         bytes signature
     )
     public
     onlyMaintainer
     {
-//        // Recover signer of the message
-//        address messageSigner = recoverSignature(
-//            user,
-//            totalRewardsPending,
-//            signature
-//        );
-//        // For security, we will require that maintainer who signed msg is the maintainer who is sending this tx
-//        require(messageSigner == msg.sender);
-//        // TODO : Verify signature
-//
-//        // get pending epoch ids user have
-//        address [] memory userPendingEpochIds = getPendingEpochsForUser(user);
-//
-//        uint i;
-//        uint len = userPendingEpochIds.length;
-//
-//        // Get sum of all pending epochs
-//        uint sumOfRewards;
-//
-//        for(i=0 ; i < len ; i++) {
-//            require(userPendingEpochIds[i] == epochIds[i]);
-//            sumOfRewards = sumOfRewards.add(getUserEarningsPerEpoch[i]);
-//        }
-//
-//        // Require that sum of pending rewards is equaling amount of rewards signed
-//        require(sumOfRewards == totalRewardsPending);
-//
+        bytes memory pendingSignature = getBytes(keccak256(_userToSignature,user));
+        require(pendingSignature.length == 0);
 
+        // Recover signer of the message
+        address messageSigner = recoverSignature(
+            user,
+            totalRewardsPending,
+            signature
+        );
 
+        // For security, we will require that maintainer who signed msg is the maintainer who is sending this tx
+        require(messageSigner == msg.sender);
+
+        // get pending epoch ids user has
+        uint [] memory userPendingEpochIds = getPendingEpochsForUser(user);
+
+        uint i;
+        uint len = userPendingEpochIds.length;
+
+        // Get sum of all pending epochs
+        uint sumOfRewards;
+
+        // Calculate sum on all users rewards
+        for(i=0 ; i < len ; i++) {
+            sumOfRewards = sumOfRewards.add(
+                getUserEarningsPerEpoch(
+                    user,
+                    userPendingEpochIds[i]
+                )
+            );
+        }
+
+        // Require that sum of pending rewards is equaling amount of rewards signed
+        require(sumOfRewards == totalRewardsPending);
+
+        // Append pending epochs to withdrawn epochs
+        appendArrayToArray(
+            keccak256(_userToWithdrawnEpochs, user),
+            userPendingEpochIds
+        );
+
+        // Delete array with pending epochs
+        deleteUintArray(
+            keccak256(
+                _userToPendingEpochs,
+                user
+            )
+        );
+
+        // Set user signature ready for withdrawal
+        setBytes(
+            keccak256(_userToSignature,user),
+            signature
+        );
     }
 
+    /**
+     * @notice          Function which will mark that user finished withdrawal on mainchain
+     * @param           user is the address of user
+     * @param           signature is the signature user used to withdraw on mainchain
+     */
+    function markUserFinishedWithdrawalFromMainchainWithSignature(
+        address user,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        bytes memory pendingSignature = getUserPendingSignature(user);
+        // Require that user signature is matching the one stored on the contract
+        require(keccak256(pendingSignature) == keccak256(signature));
+
+        // Remove signature so user can withdraw again once he earns some rewards
+        PROXY_STORAGE_CONTRACT.deleteBytes(
+            keccak256(_userToSignature, user)
+        );
+
+        // Mark that this signature is used on mainchain and withdrawn funds
+        setBool(
+            keccak256(_userToSignatureToMainchainWithdrawalConfirmed, user, signature),
+            true
+        );
+    }
 
 
     /**
@@ -461,6 +577,36 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getBool(
             keccak256(_isEpochRegistrationFinalized, epochId)
         );
+    }
+
+    /**
+     * @notice          Function to retrieve signature for user which is in progress of withdrawal
+     * @param           user is the user address
+     */
+    function getUserPendingSignature(
+        address user
+    )
+    public
+    view
+    returns (bytes)
+    {
+        return getBytes(keccak256(_userToSignature, user));
+    }
+
+    /**
+     * @notice          Function to check if user used the signature to withdraw from mainchain
+     * @param           user is the user address
+     * @param           signature is the signature user used to withdraw
+     */
+    function getIfSignatureUsedOnMainchainForWithdrawal(
+        address user,
+        bytes signature
+    )
+    public
+    view
+    returns (bool)
+    {
+        return getBool(keccak256(_userToSignatureToMainchainWithdrawalConfirmed, user, signature));
     }
 
 }

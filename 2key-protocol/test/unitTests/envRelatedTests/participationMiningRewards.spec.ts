@@ -22,7 +22,7 @@ describe(
     () => {
         let from: string;
         let twoKeyProtocol: TwoKeyProtocol;
-
+        let signature: string;
         before(
             function () {
                 this.timeout(timeout);
@@ -116,7 +116,7 @@ describe(
         }).timeout(timeout);
 
         it('should sign user rewards and user address by maintainer', async() => {
-            let user = usersInEpoch[0];
+            let user = usersInEpoch[1];
             let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
 
             // Convert to 64 places hex
@@ -130,7 +130,7 @@ describe(
             pendingHex = '0x' + pendingHex;
 
             // Generate signature
-            let signature = await Sign.sign_userRewards(
+            signature = await Sign.sign_userRewards(
                 twoKeyProtocol.plasmaWeb3,
                 user,
                 pendingHex.toString(),
@@ -146,6 +146,48 @@ describe(
 
             // Assert that the message is signed by proper address
             expect(messageSigner).to.be.equal(twoKeyProtocol.plasmaAddress);
+        }).timeout(timeout);
+
+        it('should submit signature for specific user and check state changes', async() => {
+            let user = usersInEpoch[1];
+            let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
+
+            // Convert to string representation of big number
+            pending = pending.toString();
+
+            let userPendingEpochsBefore = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getPendingEpochsForUser,[user]);
+            let userWithdrawnEpochsBefore = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getWithdrawnEpochsForUser,[user]);
+
+            userPendingEpochsBefore = userPendingEpochsBefore.map((element) => {return parseInt(element,10)});
+            userWithdrawnEpochsBefore = userWithdrawnEpochsBefore.map((element) => {return parseInt(element,10)});
+
+
+            // Submit signature
+            let txHash = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.submitSignatureForUserWithdrawal,[
+                user,
+                pending,
+                signature,
+                {
+                    from: twoKeyProtocol.plasmaAddress
+                }
+            ]);
+
+            console.log(txHash);
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            let userPendingEpochsAfter = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getPendingEpochsForUser,[user]);
+            let userWithdrawnEpochsAfter = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getWithdrawnEpochsForUser,[user]);
+
+            userPendingEpochsAfter = userPendingEpochsAfter.map((element) => {return parseInt(element,10)});
+            userWithdrawnEpochsAfter = userWithdrawnEpochsAfter.map((element) => {return parseInt(element,10)});
+
+
+            let signature = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.)
+            // Require that pending epochs after to be 0
+            expect(userPendingEpochsAfter.length).to.be.equal(0);
+            // Require that all pending are now withdrawn
+            expect(userWithdrawnEpochsAfter.length).to.be.equal(userWithdrawnEpochsBefore.length + userPendingEpochsBefore.length);
         }).timeout(timeout);
     }
 );
