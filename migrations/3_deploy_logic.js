@@ -123,6 +123,7 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(PriceDiscovery, TwoKeyUpgradableExchange))
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
+            .then(() => deployer.link(Call, TwoKeyParticipationMiningPool))
             .then(() => deployer.deploy(TwoKeyParticipationMiningPool))
             .then(() => TwoKeyParticipationMiningPool.deployed())
             .then(() => deployer.deploy(TwoKeyParticipationPaymentsManager))
