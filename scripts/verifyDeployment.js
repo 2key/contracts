@@ -109,8 +109,8 @@ const verifyDeployment = async(contracts, networkId, rpc) => {
 
     if(Object.keys(issuesFound).length > 0) {
         for(key in issuesFound) {
-            console.log('Contract: ', key);
-            console.log('Details: \n',issuesFound[key]);
+            console.log('Contract with problem: ', key);
+            console.log('Details:\n', JSON.stringify(issuesFound[key], 0, 3));
         }
     }
 }
