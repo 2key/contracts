@@ -28,7 +28,7 @@ describe(
             function () {
                 this.timeout(timeout);
 
-                const {web3, address} = web3Switcher.deployer();
+                const {web3, address} = web3Switcher.buyer();
 
                 from = address;
                 twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
@@ -170,7 +170,6 @@ describe(
                 signature,
                 {
                     from: twoKeyProtocol.plasmaAddress,
-                    gas: 7000000
                 }
             ]);
 
@@ -205,6 +204,9 @@ describe(
                     from: twoKeyProtocol.plasmaAddress
                 }
             ]);
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
 
             let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
             expect(signatureOnContract).to.be.equal('0x');
