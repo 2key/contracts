@@ -19,6 +19,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToEarningsPerEpoch = "userToEarningsPerEpoch";
     string constant _userToTotalAmountPending = "userToTotalAmountPending";
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
+    string constant _userToTotalAmountInProgressOfWithdrawal = "userToTotalAmountInProgressOfWithdrawal";
     string constant _userToPendingEpochs = "userToPendingEpochs";
     string constant _userToWithdrawnEpochs = "userToWithdrawnEpochs";
     string constant _totalRewardsPerEpoch = "totalRewardsPerEpoch";
@@ -345,8 +346,11 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     public
     onlyMaintainer
     {
+        // Require that user doesn't have any pending signatures
         bytes memory pendingSignature = getBytes(keccak256(_userToSignature,user));
         require(pendingSignature.length == 0);
+        // Require that user withdrawn his previous rewards if he started withdraw process
+        require(getHowMuchUserHaveInProgressOfWithdrawal(user) == 0);
 
         // Recover signer of the message
         address messageSigner = recoverSignature(
@@ -400,6 +404,12 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             signature
         );
 
+        // Set user pending rewards are now in progress of withdrawal
+        setUint(
+            keccak256(_userToTotalAmountInProgressOfWithdrawal,user),
+            totalRewardsPending
+        );
+
         // Set that user doesn't have anymore pending rewards
         setUint(
             keccak256(_userToTotalAmountPending, user),
@@ -432,6 +442,21 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         setBool(
             keccak256(_userToSignatureToMainchainWithdrawalConfirmed, user, signature),
             true
+        );
+        bytes32 totalUserWithdrawalsKeyHash = keccak256(_userToTotalAmountWithdrawn, user);
+
+        uint totalWithdrawn = getUint(totalUserWithdrawalsKeyHash);
+
+        // Add to total withdrawn by user
+        setUint(
+            totalUserWithdrawalsKeyHash,
+            totalWithdrawn.add(getUint(keccak256(_userToTotalAmountInProgressOfWithdrawal, user)))
+        );
+
+        // Set that user has 0 in progress of withdrawal
+        setUint(
+            keccak256(_userToTotalAmountInProgressOfWithdrawal,user),
+            0
         );
     }
 
@@ -613,6 +638,20 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     returns (bool)
     {
         return getBool(keccak256(_userToSignatureToMainchainWithdrawalConfirmed, user, signature));
+    }
+
+    /**
+     * @notice          Function to check how much user have in progress of withdrawal
+     * @param           user is the address of the user
+     */
+    function getHowMuchUserHaveInProgressOfWithdrawal(
+        address user
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_userToTotalAmountInProgressOfWithdrawal, user));
     }
 
 }
