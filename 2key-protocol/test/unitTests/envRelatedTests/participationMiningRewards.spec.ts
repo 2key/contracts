@@ -117,7 +117,7 @@ describe(
         }).timeout(timeout);
 
         it('should sign user rewards and user address by maintainer', async() => {
-            let user = usersInEpoch[3];
+            let user = usersInEpoch[2];
             let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
 
             // Convert to 64 places hex
@@ -145,12 +145,13 @@ describe(
                 signature
             ]);
 
+
             // Assert that the message is signed by proper address
             expect(messageSigner).to.be.equal(twoKeyProtocol.plasmaAddress);
         }).timeout(timeout);
 
         it('should submit signature for specific user and check state changes', async() => {
-            let user = usersInEpoch[3];
+            let user = usersInEpoch[2];
             let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
 
             // Convert to string representation of big number
@@ -173,7 +174,6 @@ describe(
                 }
             ]);
 
-
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             let userPendingEpochsAfter = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getPendingEpochsForUser,[user]);
@@ -182,6 +182,16 @@ describe(
             userPendingEpochsAfter = userPendingEpochsAfter.map((element) => {return parseInt(element,10)});
             userWithdrawnEpochsAfter = userWithdrawnEpochsAfter.map((element) => {return parseInt(element,10)});
 
+            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
+
+            // Assert that amount which was pending is now in progress of withdrawal
+            expect(amountInProgressOfWithdrawal).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(pending,'ether').toString()));
+
+            // Get pending rewards again
+            [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
+
+            // Assert that pending rewards are now 0
+            expect(parseInt(pending.toString())).to.be.equal(0);
             // Require that pending epochs after to be 0
             expect(userPendingEpochsAfter.length).to.be.equal(0);
             // Require that all pending are now withdrawn
@@ -189,13 +199,56 @@ describe(
         }).timeout(timeout);
 
         it('should assert that signature on contract is same as signature generated', async() => {
-            let user = usersInEpoch[3];
+            let user = usersInEpoch[2];
             let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
             expect(signatureOnContract).to.be.equal(signature);
         }).timeout(timeout);
 
+        it('should withdraw tokens from mainchain', async() => {
+            const {web3, address} = web3Switcher.renata();
+
+            from = address;
+            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_RENATA);
+
+            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(from);
+
+            let txHash = await twoKeyProtocol.TwoKeyParticipationMiningPool.withdrawTokensWithSignature(
+                signature,
+                parseFloat(twoKeyProtocol.Utils.toWei(amountInProgressOfWithdrawal,'ether').toString()),
+                from
+            );
+
+            // Wait until receipt is taken
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        }).timeout(timeout);
+
+        it('should check accounting on mainchain after withdrawal is finished', async() => {
+            let user = usersInEpoch[2];
+            // Check if signature is existing
+            let isSignatureExistingOnMainchain = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.isExistingSignature,[signature]);
+
+            // Amount in progress of withdrawal on sidechain
+            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
+
+
+            let amountUserWithdrawnUsingSignature = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getAmountUserWithdrawnUsingSignature,[
+                user,
+                signature
+            ]);
+
+            expect(isSignatureExistingOnMainchain).to.be.equal(true);
+            expect(parseFloat(twoKeyProtocol.Utils.fromWei(amountUserWithdrawnUsingSignature,'ether').toString()))
+                .to.be.equal(amountInProgressOfWithdrawal);
+        }).timeout(timeout);
+
         it('maintainer should mark that user finished withdrawal on mainchain, and clear his sig', async() => {
-            let user = usersInEpoch[3];
+
+            const {web3, address} = web3Switcher.buyer();
+
+            from = address;
+            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+
+            let user = usersInEpoch[2];
 
             let txHash = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.markUserFinishedWithdrawalFromMainchainWithSignature,[
                 user,
@@ -213,10 +266,17 @@ describe(
         }).timeout(timeout);
 
         it('should check that signature for this user is marked as used and withdrawn', async() => {
-            let user = usersInEpoch[3];
+            let user = usersInEpoch[2];
 
             let isSignatureUsed = await twoKeyProtocol.TwoKeyParticipationMiningPool.getIfSignatureUsedOnMainchainForWithdrawal(user,signature);
             expect(isSignatureUsed).to.be.equal(true);
+        }).timeout(timeout);
+
+        it('should check that amount pending withdrawal is 0', async() => {
+            let user = usersInEpoch[2];
+
+            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
+            expect(amountInProgressOfWithdrawal).to.be.equal(0);
         }).timeout(timeout);
 
     }
