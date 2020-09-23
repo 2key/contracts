@@ -105,6 +105,7 @@ const verifyDeployment = async(contracts, networkId, rpc) => {
             };
         }
     }
+
     logLine();
 
     if(Object.keys(issuesFound).length > 0) {
