@@ -42,4 +42,5 @@ yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/congressVote.
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/runUserRegistration.spec.ts
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/twoKeyExchangeRate.spec.ts
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/transferDAI.spec.ts
+yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/participationMiningRewards.spec.ts
 yarn run test:command "$testsPath"
