@@ -6,12 +6,16 @@ import "../interfaces/storage-contracts/ITwoKeyParticipationMiningPoolStorage.so
 import "../interfaces/ITwoKeyParticipationPaymentsManager.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
+import "../libraries/Call.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
 contract TwoKeyParticipationMiningPool is TokenPool {
+
+    using SafeMath for *;
+    using Call for *;
 
     /**
      * Constant keys for storage contract
@@ -23,14 +27,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _yearToTransferedThisYear = "yearToTransferedThisYear";
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
     string constant _epochInsideYear = "epochInsideYear";
-
-    string constant _epochIdToAmountOf2KEYTotal= "epochIdToAmountOf2KEYToBeDistributed";
-    string constant _epochIdToAmountOf2KEYDistributed = "epochIdToAmountOf2KEYDistributed";
-    string constant _latestEpochId = "latestEpochId";
+    string constant _isExistingSignature = "isExistingSignature";
+    string constant _userToSignatureToAmountWithdrawn = "userToSignatureToAmountWithdrawn";
 
     string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
-
-    using SafeMath for *;
 
     /**
      * Pointer to it's proxy storage contract
@@ -79,6 +79,86 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         }
 
         initialized = true;
+    }
+
+    function setBool(
+        bytes32 key,
+        bool value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setBool(key,value);
+    }
+
+    function getBool(
+        bytes32 key
+    )
+    internal
+    view
+    returns (bool)
+    {
+        return PROXY_STORAGE_CONTRACT.getBool(key);
+    }
+
+
+    // Internal wrapper method to manipulate storage contract
+    function setUint(
+        bytes32 key,
+        uint value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(key, value);
+    }
+
+    // Internal wrapper method to manipulate storage contract
+    function getUint(
+        bytes32 key
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(key);
+    }
+
+    function setSignatureIsExisting(
+        bytes signature
+    )
+    internal
+    {
+        setBool(keccak256(_isExistingSignature,signature), true);
+    }
+
+    function isMaintainer(
+        address _address
+    )
+    internal
+    view
+    returns (bool)
+    {
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_address);
+    }
+
+    /**
+     * @notice          Internal function to set the amount user has withdrawn
+                        using specific signature
+     * @param           user is the address of user
+     * @param           signature is the signature created by user
+     * @param           amountWithdrawn is the amount user withdrawn using that signature
+     */
+    function setAmountWithdrawnWithSignature(
+        address user,
+        bytes signature,
+        uint amountWithdrawn
+    )
+    internal
+    {
+        setUint(
+            keccak256(_userToSignatureToAmountWithdrawn, user, signature),
+            amountWithdrawn
+        );
     }
 
 
@@ -205,122 +285,98 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         }
     }
 
-    function registerParticipationMiningEpoch(
-        uint epochId,
-        uint totalAmount2KEY
+    /**
+     * @notice          Function where user can come with signature taken on plasma and
+     *                  withdraw tokens he has earned
+     */
+    function withdrawTokensWithSignature(
+        bytes signature,
+        uint amountOfTokens
     )
     public
-    onlyTwoKeyCongress
     {
-        uint latestEpochId = getLatestEpochId();
-        // Require that by mistake same epochId can't be submitted twice
-        require(epochId == latestEpochId + 1);
-
-        // Set total amount which have to be distributed inside epoch
-        setUint(
-            keccak256(_epochIdToAmountOf2KEYTotal, epochId),
-            totalAmount2KEY
+        // recover signer of signature
+        address messageSigner = recoverSignature(
+            msg.sender,
+            amountOfTokens,
+            signature
         );
 
-        // Increment latest epoch Id
-        setUint(
-            keccak256(_latestEpochId),
-            epochId
-        );
+        // Assert that this signature is signed by maintainer
+        require(isMaintainer(messageSigner) == true);
 
-        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitParticipationMiningEpochRegistered(
-            epochId,
-            totalAmount2KEY
-        );
-    }
+        // First check if this signature is used
+        require(isExistingSignature(signature) == false);
 
-    function distributeEpoch(
-        uint epochId,
-        address [] influencers,
-        uint [] rewards
-    )
-    public
-    onlyMaintainer
-    {
-        // Require that this epoch exists
-        require(epochId <= getLatestEpochId());
+        // Set that signature is existing and can't be used anymore
+        setSignatureIsExisting(signature);
 
-        uint len = influencers.length;
-        uint i;
-        uint sum = 0;
+        // Set the amount of tokens withdrawn by user using this signature
+        setAmountWithdrawnWithSignature(msg.sender, signature, amountOfTokens);
 
-        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-
-        for(i=0; i<len; i++) {
-            // Transfer tokens
-            IERC20(twoKeyEconomy).transfer(influencers[i], rewards[i]);
-            sum = sum.add(rewards[i]);
-        }
-
-        bytes32 keyStorage = keccak256(_epochIdToAmountOf2KEYDistributed, epochId);
-
-        uint totalDistributedForEpoch = getUint(keyStorage) + sum;
-
-        require(totalDistributedForEpoch <= getTotalAmountOf2KEYToBeDistributedInEpoch(epochId));
-
-        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitParticipationEpochDistributed(
-            epochId,
-            len,
-            sum
-        );
-
-
-        setUint(
-            keyStorage,
-            totalDistributedForEpoch
-        );
+        // Transfer ERC20 tokens from pool to user
+        super.transferTokens(msg.sender, amountOfTokens);
     }
 
     /**
-     * @notice          Function to fetch id of latest epoch
+     * @notice          Function where maintainer can check who signed the message
+     * @param           userAddress is the address of user for who we signed message
+     * @param           amountOfTokens is the amount of pending rewards user wants to claim
+     * @param           signature is the signature created by maintainer
      */
-    function getLatestEpochId()
+    function recoverSignature(
+        address userAddress,
+        uint amountOfTokens,
+        bytes signature
+    )
     public
     view
-    returns (uint)
+    returns (address)
     {
-        return getUint(keccak256(_latestEpochId));
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked('bytes binding user rewards')),
+                keccak256(abi.encodePacked(userAddress,amountOfTokens))
+            )
+        );
+
+        // Recover signer message from signature
+        return Call.recoverHash(hash,signature,0);
     }
 
     /**
-     * @notice          Function to get amount of 2KEY tokens which have to be distributed in epoch
-     * @param           epochId is the id in the epoch
+     * @notice          Function to check if signature is already existing,
+                        means that is has been used, and can't be used anymore
+     * @param           signature is the signature created by maintainer
      */
-    function getTotalAmountOf2KEYToBeDistributedInEpoch(
-        uint epochId
+    function isExistingSignature(
+        bytes signature
+    )
+    public
+    view
+    returns (bool)
+    {
+        return getBool(keccak256(_isExistingSignature,signature));
+    }
+
+    /**
+     * @notice          Function to check amount user has withdrawn using specific signature
+     * @param           user is the address of the user
+     * @param           signature is the signature signed by maintainer
+     */
+    function getAmountUserWithdrawnUsingSignature(
+        address user,
+        bytes signature
     )
     public
     view
     returns (uint)
     {
-        return getUint(keccak256(_epochIdToAmountOf2KEYTotal, epochId));
+        return getUint(
+            keccak256(_userToSignatureToAmountWithdrawn, user, signature)
+        );
     }
 
 
-
-    // Internal wrapper method to manipulate storage contract
-    function setUint(
-        bytes32 key,
-        uint value
-    )
-    internal
-    {
-        PROXY_STORAGE_CONTRACT.setUint(key, value);
-    }
-
-    // Internal wrapper method to manipulate storage contract
-    function getUint(
-        bytes32 key
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return PROXY_STORAGE_CONTRACT.getUint(key);
-    }
 }
