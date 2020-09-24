@@ -152,7 +152,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         string newHandle
     );
 
-    event UserRewardedInParticipationMiningEpoch(
+    event RewardsAssignedToUserInParticipationMiningEpoch(
         uint epochId,
         address user,
         uint reward2KeyWei
@@ -416,7 +416,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         );
     }
 
-    function emitUserRewardedInParticipationMiningEpoch(
+    function emitRewardsAssignedToUserInParticipationMiningEpoch(
         uint epochId,
         address user,
         uint reward2KeyWei
@@ -425,7 +425,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaParticipationRewards"));
 
-        emit UserRewardedInParticipationMiningEpoch(
+        emit RewardsAssignedToUserInParticipationMiningEpoch(
             epochId,
             user,
             reward2KeyWei

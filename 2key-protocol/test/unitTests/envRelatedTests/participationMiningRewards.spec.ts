@@ -42,8 +42,7 @@ describe(
         // Generate random rewards for the users
         let  userRewards;
 
-        it('should register participation mining epoch', async () => {
-
+        it('should set users and rewards', async() => {
             usersInEpoch = [
                 "0xf3c7641096bc9dc50d94c572bb455e56efc85412",
                 "0xebadf86c387fe3a4378738dba140da6ce014e974",
@@ -62,43 +61,92 @@ describe(
                 parseFloat(twoKeyProtocol.Utils.toWei(Math.floor(Math.random() * 20)).toString()),
                 parseFloat(twoKeyProtocol.Utils.toWei(Math.floor(Math.random() * 20)).toString()),
             ];
+        }).timeout(timeout);
 
 
+        it('should register participation mining epoch', async () => {
+            // Get latest epoch id
             epochId = parseInt(await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getLatestEpochId,[]),10) + 1;
-            let txHash = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.registerParticipationMiningEpoch,
+
+            let numberOfUsers = usersInEpoch.length;
+            let totalRewards = userRewards.reduce((a,b) => a + b);
+
+            // First step is to register epoch
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(
+                await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.registerEpoch,
+                    [
+                        epochId,
+                        numberOfUsers,
+                        totalRewards,
+                        {
+                            from: twoKeyProtocol.plasmaAddress
+                        }
+                    ]),
+                {web3: twoKeyProtocol.plasmaWeb3}
+            );
+
+
+            let totalUsersInEpoch = await twoKeyProtocol.TwoKeyParticipationMiningPool.getTotalUsersInEpoch(epochId);
+            let epochInProgress = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getEpochIdInProgress,[]);
+            let totalRewardsPerEpoch = await promisify(
+                twoKeyProtocol.twoKeyPlasmaParticipationRewards.getTotalRewardsToBeAssignedInEpoch,[epochId]
+            );
+
+            expect(totalRewardsPerEpoch.toString()).to.be.equal(
+                totalRewards.toString());
+            expect(totalUsersInEpoch).to.be.equal(numberOfUsers);
+            expect(parseInt(epochInProgress)).to.be.equal(epochId);
+        }).timeout(timeout);
+
+        it('should submit users and their rewards in the epoch', async() => {
+
+            let txHash = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.assignRewardsInActiveMiningEpoch,
                 [
                     epochId,
                     usersInEpoch,
                     userRewards,
                     {
-                        from: twoKeyProtocol.plasmaAddress
+                        from: twoKeyProtocol.plasmaAddress,
+                        gas: 7000000
                     }
-                ]
-            );
+                ]);
 
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
+        }).timeout(timeout)
+
+        it('should finalize epoch', async() => {
             await twoKeyProtocol.Utils.getTransactionReceiptMined(
                 await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.finalizeEpoch,
-                [
-                    epochId,
-                    {
-                        from: twoKeyProtocol.plasmaAddress
-                    }
-                ]),
+                    [
+                        epochId,
+                        {
+                            from: twoKeyProtocol.plasmaAddress
+                        }
+                    ]),
                 {web3: twoKeyProtocol.plasmaWeb3}
             );
 
             let isEpochFinalized = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.isEpochRegistrationFinalized,[epochId]);
-
             expect(isEpochFinalized).to.be.equal(true);
         }).timeout(timeout);
 
-        it('should check that total submitted for epoch is equaling sum of all rewards', async() => {
+        it('should check that after epoch is finalized latest epoch id is the one submitted', async() => {
+            let latestEpochId = parseInt(await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getLatestEpochId,[]),10);
+            expect(latestEpochId).to.be.equal(epochId);
+        }).timeout(timeout);
 
+        it('should check that epoch in progress is now equal 0', async() => {
+            let epochInProgress = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getEpochIdInProgress,[]);
+            expect(parseInt(epochInProgress,10)).to.be.equal(0);
+        }).timeout(timeout);
+
+        it('should check that total submitted for epoch is equaling sum of all rewards', async() => {
             let totalRewardsForEpoch = userRewards.reduce((a,b) => a+b,0);
             let totalRewardsForEpochFromContract = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getTotalRewardsPerEpoch,[epochId]);
 
             expect(totalRewardsForEpoch).to.be.equal(parseFloat(totalRewardsForEpochFromContract));
         }).timeout(timeout);
+
 
         it('should check that user balances per this epoch are properly set', async() => {
             // Iterate through all users
@@ -107,7 +155,6 @@ describe(
                 let userRewardsPerEpochFromContract = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserEarningsPerEpoch,[usersInEpoch[i],epochId]);
                 // Expect to be same as the submitted value
                 expect(parseFloat(userRewardsPerEpochFromContract)).to.be.equal(userRewards[i]);
-
                 let userPendingEpochIds = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getPendingEpochsForUser,[usersInEpoch[i]]);
                 // Convert big numbers to uint
                 userPendingEpochIds = userPendingEpochIds.map((element) => {return parseInt(element,10)});
@@ -118,12 +165,13 @@ describe(
 
         it('should sign user rewards and user address by maintainer', async() => {
             let user = usersInEpoch[2];
-            let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
+            let pending = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAmount,[user]);
 
             // Convert to 64 places hex
             let pendingHex = twoKeyProtocol.Utils.toHex(pending);
             pendingHex = pendingHex.slice(2);
 
+            // hex(64)
             while(pendingHex.length < 64) {
                 pendingHex = '0' + pendingHex;
             }
@@ -151,8 +199,15 @@ describe(
         }).timeout(timeout);
 
         it('should submit signature for specific user and check state changes', async() => {
+
+            // Change maintainer because the one signed can't send this message
+            const {web3, address} = web3Switcher.deployer();
+
+            from = address;
+            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
+
             let user = usersInEpoch[2];
-            let [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
+            let pending = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAmount,[user]);
 
             // Convert to string representation of big number
             pending = pending.toString();
@@ -188,7 +243,7 @@ describe(
             expect(amountInProgressOfWithdrawal).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(pending,'ether').toString()));
 
             // Get pending rewards again
-            [pending,withdrawn] = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAndWithdrawn,[user]);
+            pending = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAmount,[user]);
 
             // Assert that pending rewards are now 0
             expect(parseInt(pending.toString())).to.be.equal(0);
@@ -241,7 +296,7 @@ describe(
                 .to.be.equal(amountInProgressOfWithdrawal);
         }).timeout(timeout);
 
-        it('maintainer should mark that user finished withdrawal on mainchain, and clear his sig', async() => {
+        it('should mark that user finished withdrawal on mainchain, and clear his sig, called by maintainer', async() => {
 
             const {web3, address} = web3Switcher.buyer();
 
@@ -258,8 +313,7 @@ describe(
                 }
             ]);
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
 
             let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
             expect(signatureOnContract).to.be.equal('0x');

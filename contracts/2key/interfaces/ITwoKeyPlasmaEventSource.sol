@@ -12,5 +12,5 @@ contract ITwoKeyPlasmaEventSource {
     function emitConversionPaidEvent(uint conversionID) public;
     function emitAddedPendingRewards(address campaignPlasma, address influencer, uint amountOfTokens) public;
     function emitPaidPendingRewards(address influencer, uint amountNonRebalancedReferrerEarned, uint amountPaid, address[] campaignsPaid, uint [] earningsPerCampaign) public;
-    function emitUserRewardedInParticipationMiningEpoch(uint epochId, address user, uint reward2KeyWei) public;
+    function emitRewardsAssignedToUserInParticipationMiningEpoch(uint epochId, address user, uint reward2KeyWei) public;
 }
