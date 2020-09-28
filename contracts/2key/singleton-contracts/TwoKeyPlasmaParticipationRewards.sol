@@ -26,11 +26,11 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _totalRewardsToBeAssignedInEpoch = "totalRewardsToBeAssignedInEpoch";
     string constant _totalUsersInEpoch = "totalUsersInEpoch";
     string constant _userToSignature = "userToSignature";
-    string constant _latestEpochId = "latestEpochId";
+    string constant _latestFinalizedEpochId = "latestEpochId";
     string constant _isEpochRegistrationFinalized = "isEpochRegistrationFinalized";
     string constant _userToSignatureToMainchainWithdrawalConfirmed = "userToSignatureToMainchainWithdrawalConfirmed";
     string constant _epochInProgressOfRegistration = "epochInProgressOfRegistration";
-
+    string constant _declaredEpochIds = "declaredEpochIds";
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
 
@@ -58,6 +58,11 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         _;
     }
 
+    modifier onlyTwoKeyPlasmaCongress {
+        address congress = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getNonUpgradableContractAddress("TwoKeyPlasmaCongress");
+        require(msg.sender == congress);
+        _;
+    }
 
     /**
      * @notice          Function to check if user is maintainer
@@ -199,6 +204,15 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         PROXY_STORAGE_CONTRACT.setUintArray(key, emptyArray);
     }
 
+    function setUintArray(
+        bytes32 key,
+        uint [] value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUintArray(key,value);
+    }
+
     function appendToUintArray(
         bytes32 keyOfArray,
         uint elementToAppend
@@ -245,6 +259,38 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
+    function declareEpochs(
+        uint [] epochIds,
+        uint [] totalRewardsPerEpoch
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        uint[] memory declaredEpochIds = getUintArray(keccak256(_declaredEpochIds));
+
+        uint i;
+        uint j;
+
+        uint newArrayLen = declaredEpochIds.length + epochIds.length;
+        uint [] memory newDeclaredEpochIds = new uint[](newArrayLen);
+
+        for(i = 0; i<declaredEpochIds.length; i++) {
+            newDeclaredEpochIds[i] = declaredEpochIds[i];
+        }
+
+        for(i = declaredEpochIds.length; i < newArrayLen; i++) {
+            newDeclaredEpochIds[i] = epochIds[j];
+
+            // Set in advance total rewards which can be distributed per epoch
+            setUint(
+                keccak256(_totalRewardsToBeAssignedInEpoch,epochIds[j]),
+                totalRewardsPerEpoch[j]
+            );
+        }
+
+        // Set new declared epoch ids
+        setUintArray(keccak256(_declaredEpochIds), newDeclaredEpochIds);
+}
 
     /**
      * @notice          Function to start epoch registration, this will in advance store
@@ -253,23 +299,18 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
      */
     function registerEpoch(
         uint epochId,
-        uint numberOfUsers,
-        uint totalRewards
+        uint numberOfUsers
     )
     public
     onlyMaintainer
     {
+        // Require that epoch is declared
+        require(isEpochIdDeclared(epochId));
         // Require that there's no currently epoch in progress
         uint epochInProgress = getUint(keccak256(_epochInProgressOfRegistration));
         require(epochInProgress == 0);
         // Require that epoch id is equal to latest epoch submitted + 1
-        require(epochId == getLatestEpochId() + 1);
-
-        // Set in advance total rewards which can be distributed per epoch
-        setUint(
-            keccak256(_totalRewardsToBeAssignedInEpoch,epochId),
-            totalRewards
-        );
+        require(epochId == getLatestFinalizedEpochId() + 1);
 
         // Set in advance number of users to be rewarded in epoch
         setUint(
@@ -283,6 +324,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             epochId
         );
     }
+
 
     /**
      * @notice          Function to register new participation mining epoch
@@ -357,13 +399,14 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         // Require that the epoch being finalized is the one in progress
         require(epochId == getEpochIdInProgress());
 
-        require(getTotalRewardsPerEpoch(epochId) == getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId)));
+        //TODO:  Require that total rewards didn't pass allowance
+        require(getTotalRewardsPerEpoch(epochId) <= getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId)));
 
         setEpochRegistrationFinalized(epochId);
 
         // Set latest epoch id to be the one submitted
         setUint(
-            keccak256(_latestEpochId),
+            keccak256(_latestFinalizedEpochId),
             epochId
         );
 
@@ -401,10 +444,11 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             signature
         );
 
+        //TODO: We should make congress declare address which is only credible message signer
+        //TODO:
         // For security we require that message is signed by different maintainer than one sending this tx
-        require(messageSigner != msg.sender);
-        // For security we require that signer is maintainer
-        require(isMaintainer(messageSigner));
+        require(messageSigner == msg.sender);
+
 
         // get pending epoch ids user has
         uint [] memory userPendingEpochIds = getPendingEpochsForUser(user);
@@ -656,12 +700,12 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     /**
      * @notice          Function to get latest submitted epoch id
      */
-    function getLatestEpochId()
+    function getLatestFinalizedEpochId()
     public
     view
     returns (uint)
     {
-        return getUint(keccak256(_latestEpochId));
+        return getUint(keccak256(_latestFinalizedEpochId));
     }
 
     /**
@@ -752,5 +796,24 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     returns (uint)
     {
         return getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId));
+    }
+
+    function getDeclaredEpochIds()
+    public
+    view
+    returns (uint[])
+    {
+        return getUintArray(keccak256(_declaredEpochIds));
+    }
+
+    function isEpochIdDeclared(
+        uint epochId
+    )
+    public
+    view
+    returns (bool)
+    {
+        uint [] memory declaredEpochIds = getDeclaredEpochIds();
+        return declaredEpochIds[epochId-1] == epochId;
     }
 }
