@@ -295,6 +295,9 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     )
     public
     {
+        //TODO: We already have annual safeguards for withdrawal, use the same logic for 2 months period limits
+        //TODO: allowance (4) == regular allowance + leftover(allowance(3))
+        //TODO: allowance (3) == regular allowance + leftover(allowance(2))
         // recover signer of signature
         address messageSigner = recoverSignature(
             msg.sender,
@@ -302,6 +305,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             signature
         );
 
+        //TODO: Later change this that messageSigner is official mining validator
         // Assert that this signature is signed by maintainer
         require(isMaintainer(messageSigner) == true);
 
