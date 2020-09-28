@@ -60,6 +60,50 @@ const loadSingletonRegistry = (web3, networkId) => {
     }
 }
 
+const verifyCampaigns = async(campaigns, networkId, rpc) => {
+    // Show web3 where it needs to look for the Ethereum node
+    let web3 = new Web3(new Web3.providers.HttpProvider(rpc));
+
+    // Load singleton registry contract
+    let SingletonRegistry = loadSingletonRegistry(web3,networkId);
+
+    let issuesFound = {};
+
+    console.log('\n Starting campaigns verification');
+    logLine();
+
+    for(let i=0; i<campaigns.length; i++) {
+        let latestAddedVersion = await promisify(
+            SingletonRegistry.getLatestAddedContractVersion,[campaigns[i]]
+        );
+
+        let latestApprovedVersion = await promisify(
+            SingletonRegistry.getLatestCampaignApprovedVersion,[campaigns[i]]
+        )
+
+        if(latestAddedVersion === latestApprovedVersion) {
+            console.log('|  Verification Status : ✅      |      Campaign type: ', campaigns[i]);
+        } else {
+            console.log('|  Verification Status : ❌      |      Campaign type: ', campaigns[i]);
+            issuesFound[campaigns[i]] = {
+                'Campaign latest added version' : latestAddedVersion,
+                'Campaign latest approved version' : latestApprovedVersion
+            };
+        }
+    }
+
+    logLine();
+
+    if(Object.keys(issuesFound).length > 0) {
+        for(key in issuesFound) {
+            console.log('Contract with problem: ', key);
+            console.log('Details:\n', JSON.stringify(issuesFound[key], 0, 3));
+        }
+    }
+
+
+}
+
 const verifyDeployment = async(contracts, networkId, rpc) => {
     // Show web3 where it needs to look for the Ethereum node
     let web3 = new Web3(new Web3.providers.HttpProvider(rpc));
@@ -129,11 +173,23 @@ const verify = async() => {
         rpcs["public"],
     );
 
+    await verifyCampaigns(
+        constants.campaigns["public"],
+        ids["public"],
+        rpcs["public"],
+    );
+
     // Verify deployment for plasma
     await verifyDeployment(
         contracts.plasmaContracts,
         ids["private"],
         rpcs["private"]
+    );
+
+    await verifyCampaigns(
+        constants.campaigns["private"],
+        ids["private"],
+        rpcs["private"],
     );
 }
 

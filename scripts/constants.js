@@ -29,6 +29,13 @@ module.exports.ids = {
     'master-private' : 180,
 };
 
+module.exports.campaigns = {
+    "public": {
+        "TOKEN_SELL" :  [],
+        "DONATION" : [],
+    },
+    "private": ["CPC_PLASMA", "CPC_NO_REWARDS_PLASMA"]
+};
 
 module.exports.promisify = function (func, args) {
     return new Promise((res, rej) => {
