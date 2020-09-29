@@ -31,10 +31,12 @@ module.exports.ids = {
 
 module.exports.campaigns = {
     "public": {
-        "TOKEN_SELL" :  [],
-        "DONATION" : [],
+        "TOKEN_SELL" : ["TwoKeyAcquisitionCampaignERC20","TwoKeyAcquisitionLogicHandler","TwoKeyConversionHandler","TwoKeyPurchasesHandler"],
+        "DONATION" : ["TwoKeyDonationCampaign", "TwoKeyDonationConversionHandler","TwoKeyDonationLogicHandler"]
     },
-    "private": ["CPC_PLASMA", "CPC_NO_REWARDS_PLASMA"]
+    "private": {
+        "CPC" :  ["CPC_PLASMA", "CPC_NO_REWARDS_PLASMA"]
+    }
 };
 
 module.exports.promisify = function (func, args) {

@@ -72,25 +72,31 @@ const verifyCampaigns = async(campaigns, networkId, rpc) => {
     console.log('\n Starting campaigns verification');
     logLine();
 
-    for(let i=0; i<campaigns.length; i++) {
-        let latestAddedVersion = await promisify(
-            SingletonRegistry.getLatestAddedContractVersion,[campaigns[i]]
-        );
+    for(let campaignType in campaigns) {
+        console.log('Campaign type being verified: ', campaignType);
+        let contracts = campaigns[campaignType];
 
-        let latestApprovedVersion = await promisify(
-            SingletonRegistry.getLatestCampaignApprovedVersion,[campaigns[i]]
-        )
+        for(let i=0; i<contracts.length; i++) {
+            let latestAddedVersion = await promisify(
+                SingletonRegistry.getLatestAddedContractVersion, [contracts[i]]
+            );
 
-        if(latestAddedVersion === latestApprovedVersion) {
-            console.log('|  Verification Status : ✅      |      Campaign type: ', campaigns[i]);
-        } else {
-            console.log('|  Verification Status : ❌      |      Campaign type: ', campaigns[i]);
-            issuesFound[campaigns[i]] = {
-                'Campaign latest added version' : latestAddedVersion,
-                'Campaign latest approved version' : latestApprovedVersion
-            };
+            let latestApprovedVersion = await promisify(
+                SingletonRegistry.getLatestCampaignApprovedVersion, [campaignType]
+            )
+
+            if (latestAddedVersion === latestApprovedVersion) {
+                console.log('|  Verification Status : ✅      |      Contract name: ', contracts[i]);
+            } else {
+                console.log('|  Verification Status : ❌      |      Contract name: ', contracts[i]);
+                issuesFound[campaigns[i]] = {
+                    'Contract latest added version': latestAddedVersion,
+                    'Campaign latest approved version': latestApprovedVersion
+                };
+            }
         }
     }
+
 
     logLine();
 
