@@ -366,7 +366,8 @@ describe(
             );
 
             // Wait until receipt is taken
-            await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+            console.log('Gas required for withdrawal on mainchain is: ', receipt.gasUsed);
         }).timeout(timeout);
 
         it('should check accounting on mainchain after withdrawal is finished', async() => {
