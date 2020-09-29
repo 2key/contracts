@@ -1339,7 +1339,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
-        return rateFromCoinGecko > rateFromContract ? rateFromCoinGecko : rateFromContract;
+        return (rateFromCoinGecko + rateFromContract)/2;
     }
 
 
@@ -1381,12 +1381,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint currentPrice = sellRate2key();
         uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
-        uint poolWorth = currentPrice.mul(balanceOfTokens).div(10**18);
         return PriceDiscovery.buyTokensFromExchangeRealignPrice(
             purchaseAmountUSDWei,
             currentPrice,
             balanceOfTokens,
-            poolWorth
+            poolWorthUSD()
         );
     }
 
