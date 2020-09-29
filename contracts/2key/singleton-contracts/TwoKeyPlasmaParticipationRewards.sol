@@ -286,6 +286,8 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
                 keccak256(_totalRewardsToBeAssignedInEpoch,epochIds[j]),
                 totalRewardsPerEpoch[j]
             );
+
+            j++;
         }
 
         // Set new declared epoch ids
@@ -444,8 +446,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             signature
         );
 
-        //TODO: We should make congress declare address which is only credible message signer
-        //TODO:
+
         // For security we require that message is signed by different maintainer than one sending this tx
         require(messageSigner == msg.sender);
 

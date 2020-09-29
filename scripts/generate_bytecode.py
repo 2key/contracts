@@ -200,6 +200,7 @@ def generate_bytecode_for_declaring_epochs(epoch_ids,rewards):
     types = ["uint256[]","uint256[]"]
     values = [list_of_ids, list_of_rewards]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+    sys.stdout.flush()
 
 
 def generate_bytecode_for_setting_liquidity_params(

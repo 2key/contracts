@@ -225,7 +225,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      * ------------------------------------
      */
 
-
     /**
      * @notice          Function to end selected budget campaign by maintainer, and perform
      *                  actions regarding rebalancing, reserving tokens, and distributing
