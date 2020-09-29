@@ -266,7 +266,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     public
     onlyTwoKeyPlasmaCongress
     {
-        uint[] memory declaredEpochIds = getUintArray(keccak256(_declaredEpochIds));
+        uint[] memory declaredEpochIds = getDeclaredEpochIds();
 
         uint i;
         uint j;
@@ -279,6 +279,9 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         }
 
         for(i = declaredEpochIds.length; i < newArrayLen; i++) {
+            // Double check if epoch id is not already declared
+            require(isEpochIdDeclared(epochIds[j] == false));
+
             newDeclaredEpochIds[i] = epochIds[j];
 
             // Set in advance total rewards which can be distributed per epoch
@@ -769,7 +772,9 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getUint(keccak256(_userToTotalAmountInProgressOfWithdrawal, user));
     }
 
-
+    /**
+     * @notice          Function to get epoch id which is in progress
+     */
     function getEpochIdInProgress()
     public
     view
@@ -778,7 +783,10 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getUint(keccak256(_epochInProgressOfRegistration));
     }
 
-
+    /**
+     * @notice          Function to get total number of users in epoch
+     * @param           epochId is the ID of the epoch
+     */
     function getTotalUsersInEpoch(
         uint epochId
     )
@@ -789,6 +797,10 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getUint(keccak256(_totalUsersInEpoch,epochId));
     }
 
+    /**
+     * @notice          Function to get total rewards to be assigned in the epoch
+     * @param           epochId
+     */
     function getTotalRewardsToBeAssignedInEpoch(
         uint epochId
     )
