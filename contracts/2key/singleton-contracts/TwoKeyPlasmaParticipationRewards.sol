@@ -280,7 +280,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
         for(i = declaredEpochIds.length; i < newArrayLen; i++) {
             // Double check if epoch id is not already declared
-            require(isEpochIdDeclared(epochIds[j] == false));
+            require(isEpochIdDeclared(epochIds[j]) == false);
 
             newDeclaredEpochIds[i] = epochIds[j];
 
@@ -799,7 +799,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
     /**
      * @notice          Function to get total rewards to be assigned in the epoch
-     * @param           epochId
+     * @param           epochId is the ID of the epoch
      */
     function getTotalRewardsToBeAssignedInEpoch(
         uint epochId
