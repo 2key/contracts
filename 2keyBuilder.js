@@ -7,7 +7,7 @@ const { networks: truffleNetworks } = require('./truffle');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
 const whitelist = require('./ContractDeploymentWhiteList.json');
-
+const readline = require('readline');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build');
 const contractsBuildPath = path.join(__dirname, 'build', 'contracts');
@@ -705,6 +705,7 @@ const deployContracts = async (networks, updateArchive) => {
     }
 };
 
+
 async function main() {
     contractsStatus = await contractsGit.status(); // Fetching branch
     const mode = process.argv[2];
@@ -747,6 +748,18 @@ async function main() {
             console.log(getContractsFromFile());
             process.exit(0);
         default:
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+
+            rl.question('You are about to start deployment process. Proceed? [Y/N]', (answer) => {
+                if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+                    process.exit(0);
+                }
+                rl.close();
+            });
+
             await deploy();
             process.exit(0);
     }
