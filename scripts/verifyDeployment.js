@@ -11,6 +11,7 @@ const promisify = constants.promisify;
 
 let rpcs = {};
 let ids = {};
+let issuesFound = {};
 
 const getBranch = async () => {
     return await constants.getGitBranch();
@@ -99,15 +100,6 @@ const verifyCampaigns = async(campaigns, networkId, rpc) => {
 
 
     logLine();
-
-    if(Object.keys(issuesFound).length > 0) {
-        for(key in issuesFound) {
-            console.log('Contract with problem: ', key);
-            console.log('Details:\n', JSON.stringify(issuesFound[key], 0, 3));
-        }
-    }
-
-
 }
 
 const verifyDeployment = async(contracts, networkId, rpc) => {
@@ -116,8 +108,6 @@ const verifyDeployment = async(contracts, networkId, rpc) => {
 
     // Load singleton registry contract
     let SingletonRegistry = loadSingletonRegistry(web3,networkId);
-
-    let issuesFound = {};
 
     // Load the ABI of proxy contracts
     let proxyAbi = proxyContract.abi;
@@ -157,13 +147,6 @@ const verifyDeployment = async(contracts, networkId, rpc) => {
     }
 
     logLine();
-
-    if(Object.keys(issuesFound).length > 0) {
-        for(key in issuesFound) {
-            console.log('Contract with problem: ', key);
-            console.log('Details:\n', JSON.stringify(issuesFound[key], 0, 3));
-        }
-    }
 }
 
 
@@ -197,6 +180,16 @@ const verify = async() => {
         ids["private"],
         rpcs["private"],
     );
+
+    if(Object.keys(issuesFound).length > 0) {
+        logLine();
+        for(key in issuesFound) {
+            console.log('\n');
+            console.log('❌ Contract with problem: ', key);
+            console.log('Details:\n', JSON.stringify(issuesFound[key], 0, 3));
+        }
+        logLine();
+    }
 }
 
 verify();
