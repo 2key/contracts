@@ -755,11 +755,14 @@ async function main() {
 
             const answer = await new Promise(resolve => {
                 rl.question("This will start deployment process. Proceed? [Y/N] ", answer => resolve(answer))
+                rl.close();
             })
 
             if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
                 process.exit(0);
             }
+
+
 
             await deploy();
             process.exit(0);
