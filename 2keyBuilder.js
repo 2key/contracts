@@ -753,17 +753,20 @@ async function main() {
                 output: process.stdout
             });
 
-            rl.question('You are about to start deployment process. Proceed? [Y/N]', (answer) => {
-                if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
-                    process.exit(0);
-                }
-                rl.close();
-            });
+            const answer = await new Promise(resolve => {
+                rl.question("This will start deployment process. Proceed? [Y/N] ", answer => resolve(answer))
+            })
+
+            if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+                process.exit(0);
+            }
 
             await deploy();
             process.exit(0);
     }
 }
+
+
 
 main().catch((e) => {
     console.log(e);
