@@ -1,17 +1,17 @@
 #!/bin/bash
 
-echo "1. Extract latest contracts from 2key-protocol"
+printf "1. Extract latest contracts from 2key-protocol \n"
+rm -rf build/
 yarn run deploy --extract
 
-echo "--------------------------------------------------------"
 
 start=`date +%s`
 
-echo "2. Run verification script"
+printf "\n 2. Run verification script"
 node verifyDeployment.js
 
 end=`date +%s`
 runtime=$((end-start))
 
-echo "✨ Done is $runtime seconds. ✨"
+printf "\n ✨ Done is $runtime seconds. ✨"
 
