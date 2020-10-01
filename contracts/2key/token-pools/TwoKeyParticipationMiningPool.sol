@@ -30,6 +30,11 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _isExistingSignature = "isExistingSignature";
     string constant _userToSignatureToAmountWithdrawn = "userToSignatureToAmountWithdrawn";
 
+
+    string constant _monthlyTransferAllowance = "monthlyTransferAllowance";
+    string constant _dateStartingCountingMonths = "dateStartingCountingMonths";
+    string constant _totalTokensTransferedByNow = "totalTokensTransferedByNow";
+
     string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
 
     /**
@@ -64,7 +69,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         TWO_KEY_SINGLETON_REGISTRY = twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
 
-        uint totalAmountOfTokens = getContractBalance(); //120M WEI's
+        uint totalAmountOfTokens = getContractBalance(); //120M 2KEY's
 
         setUint(keccak256(_totalAmount2keys), totalAmountOfTokens);
         setUint(keccak256(_annualTransferAmountLimit), totalAmountOfTokens.div(10));
@@ -161,6 +166,19 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         );
     }
 
+    function increaseTransferedAmountFromContract(
+        uint amountTransfered
+    )
+    internal
+    {
+        uint currentlyTransfered = getTotalAmountOfTokensTransfered();
+
+        setUint(
+            keccak256(_totalTokensTransferedByNow),
+            currentlyTransfered.add(amountTransfered)
+        );
+    }
+
 
     /**
      * @notice Function which does transfer with special requirements with annual limit
@@ -245,6 +263,30 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
     }
 
+    function setWithdrawalParameters(
+        uint dateStartingCountingMonths
+    )
+    public
+    onlyMaintainer
+    {
+        // Require that this function can be called only once
+        require(getUint(keccak256(_dateStartingCountingMonths)) == 0);
+
+        // Get annual transfer limit
+        uint annualTransferLimit = getUint(keccak256(_annualTransferAmountLimit));
+
+        // Set date when counting months starts
+        setUint(
+            keccak256(_dateStartingCountingMonths),
+            dateStartingCountingMonths
+        );
+
+        // Set monthly transfer allowance
+        setUint(
+            keccak256(_monthlyTransferAllowance),
+            annualTransferLimit.div(12)
+        );
+    }
     /**
      * @notice Function to check if the selected address is whitelisted
      * @param _address is the address we want to get this information
@@ -285,6 +327,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         }
     }
 
+
     /**
      * @notice          Function where user can come with signature taken on plasma and
      *                  withdraw tokens he has earned
@@ -295,9 +338,9 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     )
     public
     {
-        //TODO: We already have annual safeguards for withdrawal, use the same logic for 2 months period limits
-        //TODO: allowance (4) == regular allowance + leftover(allowance(3))
-        //TODO: allowance (3) == regular allowance + leftover(allowance(2))
+        // Assert that amount of tokens to be withdrawn is less than amount of tokens unlocked
+        require(amountOfTokens < getAmountOfTokensUnlockedForWithdrawal(block.timestamp));
+
         // recover signer of signature
         address messageSigner = recoverSignature(
             msg.sender,
@@ -312,6 +355,9 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // First check if this signature is used
         require(isExistingSignature(signature) == false);
 
+        // Increase total tokens transfered from contract
+        increaseTransferedAmountFromContract(amountOfTokens);
+
         // Set that signature is existing and can't be used anymore
         setSignatureIsExisting(signature);
 
@@ -320,6 +366,37 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         // Transfer ERC20 tokens from pool to user
         super.transferTokens(msg.sender, amountOfTokens);
+    }
+
+
+    /**
+     * @notice          Function to calculate amount of tokens available to be withdrawn
+     *                  at current moment which will take care about monthly allowances
+     * @param           timestamp is the timestamp of withdrawal
+     */
+    function getAmountOfTokensUnlockedForWithdrawal(
+        uint timestamp
+    )
+    public
+    view
+    returns (uint)
+    {
+        uint dateStartedCountingMonths = getDateStartingCountingMonths();
+
+        // We do sub here mostly because of underflow
+        uint totalTimePassedFromUnlockingDay = block.timestamp.sub(dateStartedCountingMonths);
+
+        // Get amount of tokens unlocked monthly
+        uint monthlyTransferAllowance = getMonthlyTransferAllowance();
+
+        // Calculate total amount of tokens being unlocked by now
+        uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / 30 + 1) * monthlyTransferAllowance;
+
+        // Get total amount already transfered
+        uint totalTokensTransferedByNow = getTotalAmountOfTokensTransfered();
+
+        // Return tokens available at this moment
+        return (totalUnlockedByNow.sub(totalTokensTransferedByNow));
     }
 
     /**
@@ -381,6 +458,34 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             keccak256(_userToSignatureToAmountWithdrawn, user, signature)
         );
     }
+
+    /**
+     * @notice          Function to get total amount of tokens transfered by now
+     */
+    function getTotalAmountOfTokensTransfered()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_totalTokensTransferedByNow));
+    }
+
+    function getDateStartingCountingMonths()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_dateStartingCountingMonths));
+    }
+
+    function getMonthlyTransferAllowance()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_monthlyTransferAllowance));
+    }
+
 
 
 }
