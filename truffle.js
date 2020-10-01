@@ -11,8 +11,8 @@ const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 
 
 const rpcs = {
-    'test-public' : 'https://rpc-dev.public.test.k8s.2key.net',
-    'test-private' : 'https://rpc-dev.private.test.k8s.2key.net',
+    'test-public' : 'https://rpc-staging.public.test.k8s.2key.net',
+    'test-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
