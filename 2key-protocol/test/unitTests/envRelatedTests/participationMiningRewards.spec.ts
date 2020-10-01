@@ -66,7 +66,6 @@ describe(
         it('should member 1. vote for supporting proposal', async() => {
             numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.numProposals,[]);
             numberOfProposals = parseInt(numberOfProposals,10) - 1;
-            console.log(numberOfProposals);
 
             let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote,[
                 numberOfProposals,
@@ -128,10 +127,11 @@ describe(
                 numberOfProposals,
                 transactionBytecode,
                 {
-                    from: twoKeyProtocol.plasmaAddress
+                    from: twoKeyProtocol.plasmaAddress,
+                    gas: 7000000
                 }
             ]);
-
+            console.log(txHash);
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
             const status = receipt && receipt.status;
             expect(status).to.be.equal('0x1');
@@ -349,6 +349,50 @@ describe(
             let user = usersInEpoch[2];
             let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
             expect(signatureOnContract).to.be.equal(signature);
+        }).timeout(timeout);
+
+
+        it('maintainer should set monthly allowance and date from which is counting starting', async() => {
+            // Change maintainer because the one signed can't send this message
+            const {web3, address} = web3Switcher.buyer();
+
+            from = address;
+            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+
+
+            let monthlyTransferAllowance = await promisify(
+                twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance,[]
+            );
+
+            if(monthlyTransferAllowance.toString() === '0') {
+                let blockNumber = await twoKeyProtocol.Utils.getLatestBlock();
+                let blockTimestamp = await twoKeyProtocol.Utils.getBlockTimestamp(blockNumber);
+
+                await twoKeyProtocol.Utils.getTransactionReceiptMined(
+                  await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.setWithdrawalParameters,[
+                      blockTimestamp,
+                      {
+                          from
+                      }
+                  ])
+                );
+                let dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths,[]);
+                expect(dateStartingCountingMonths.toString()).to.be.equal(blockTimestamp.toString());
+            }
+
+            // We need to assert that monthly transfer allowance is 1M
+            monthlyTransferAllowance = await promisify(
+                twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance,[]
+            );
+
+            monthlyTransferAllowance = parseFloat(
+              twoKeyProtocol.Utils.fromWei(monthlyTransferAllowance,'ether').toString()
+            );
+            expect(monthlyTransferAllowance).to.be.equal(1000000);
+        }).timeout(timeout);
+
+        it('should check that monthly allowances are properly calculating on mainchain', async() => {
+
         }).timeout(timeout);
 
         it('should withdraw tokens from mainchain', async() => {
