@@ -177,7 +177,7 @@ module.exports = async function deploy(deployer) {
     let registryAddress;
 
 
-    console.log(contractName);
+    console.log('Contract updating: ',contractName);
 
     deployer.deploy(contract)
         .then(() => contract.deployed()
