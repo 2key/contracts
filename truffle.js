@@ -13,7 +13,7 @@ const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 const rpcs = {
     'test-public' : 'https://rpc-staging.public.test.k8s.2key.net',
     'test-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'staging-public' : 'https://eivaw4seeb-rpc-staging.public.test.k8s.2key.net',//'https://rpc-staging.public.test.k8s.2key.net',
+    'staging-public' : config.staging_public_endpoint,
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
     'prod-private' : 'https://rpc.private.production.k8s.2key.net',
