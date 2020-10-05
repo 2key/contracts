@@ -31,7 +31,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
     string constant _numberOfDistributionCycles = "numberOfDistributionCycles";
     string constant _distributionCycleToTotalDistributed = "_distributionCycleToTotalDistributed";
-
+    string constant _campaignPlasma2ReferrerRewardsTotal = "campaignPlasma2ReferrerRewardsTotal";
     string constant _campaignPlasmaToModeratorEarnings = "campaignPlasmaToModeratorEarnings";
     string constant _campaignPlasmaToLeftOverForContractor = "campaignPlasmaToLeftOverForContractor";
     string constant _campaignPlasmaToLeftoverWithdrawnByContractor = "campaignPlasmaToLeftoverWithdrawnByContractor";
@@ -281,6 +281,12 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         // Set moderator earnings for this campaign and immediately distribute them
         setAndDistributeModeratorEarnings(campaignPlasma, rebalancedModeratorRewards);
+
+        // Set total amount to use for referrers
+        setUint(
+            keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignPlasma),
+            totalAmountForReferrerRewards
+        );
 
         // Leftover for contractor
         setUint(
@@ -742,6 +748,15 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return isWithdrawn;
     }
 
+    function getNonRebalancedReferrerRewards(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignPlasma));
+    }
 
     /**
      * @notice          Function to get balance of stable coins on this contract
@@ -795,6 +810,9 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+    /**
+     * @notice          Function to check if campaign is budgeted directly with 2KEY
+     */
     function getIsCampaignBudgetedDirectlyWith2KEY(
         address campaignPlasma
     )
@@ -825,6 +843,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
                 getContractorRebalancedLeftoverForCampaign(campaignPlasma),
                 getModeratorEarningsRebalancedForCampaign(campaignPlasma),
                 getRebalancingRatioForCampaign(campaignPlasma),
+                getNonRebalancedReferrerRewards(campaignPlasma),
                 getIfLeftoverForCampaignIsWithdrawn(campaignPlasma)
         )
         );
