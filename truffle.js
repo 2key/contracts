@@ -11,15 +11,14 @@ const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 
 
 const rpcs = {
-    'test-public' : 'https://rpc-staging.public.test.k8s.2key.net',
-    'test-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'staging-public' : config.staging_public_endpoint,
-    'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
-    'prod-private' : 'https://rpc.private.production.k8s.2key.net',
-    'dev-ganache': 'https://localhost:7545',
-    'dev-local': 'http://localhost:8545',
-    'plasma-test-local': 'http://localhost:18545'
+    'test-public' : config["test-public"],
+    'test-private' : config["test-private"],
+    'staging-public' : config["staging-public"],
+    'staging-private' : config["staging-private"],
+    'prod-public' : config["prod-public"],
+    'prod-private' : config["prod-private"],
+    'dev-local': config["dev-local"],
+    'plasma-test-local': config["plasma-test-local"]
 };
 
 const ids = {
