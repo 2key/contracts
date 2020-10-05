@@ -259,6 +259,9 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
+    /**
+     * @notice          Function where TwoKeyPlasmaCongress can declare epoch ids
+     */
     function declareEpochs(
         uint [] epochIds,
         uint [] totalRewardsPerEpoch
@@ -301,6 +304,8 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
      * @notice          Function to start epoch registration, this will in advance store
      *                  number of users to be rewarded and total rewards,
      *                  besides that, it will store epoch id as pending
+     * @param           epochId is the id of epoch
+     * @param           numberOfUsers is the number of users declared in this epoch
      */
     function registerEpoch(
         uint epochId,
@@ -316,12 +321,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         require(epochInProgress == 0);
         // Require that epoch id is equal to latest epoch submitted + 1
         require(epochId == getLatestFinalizedEpochId() + 1);
-
-        // Set in advance number of users to be rewarded in epoch
-        setUint(
-            keccak256(_totalUsersInEpoch, epochId),
-            numberOfUsers
-        );
 
         // Start registration process of this epoch
         setUint(
@@ -348,6 +347,9 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         require(epochId == getEpochIdInProgress());
 
         uint totalRewards;
+
+        uint totalUsersInEpoch = getTotalUsersInEpoch(epochId);
+
         uint i;
 
         for(i = 0; i < users.length; i++) {
@@ -368,6 +370,9 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
                 // Add epoch to array of pending epochs for selected user
                 addEpochToPendingEpochsForUser(users[i], epochId);
 
+                // Increment number of users in epoch
+                totalUsersInEpoch++;
+
                 // Emit event for each user who got rewarded for this epoch
                 ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
                     .emitRewardsAssignedToUserInParticipationMiningEpoch(
@@ -377,6 +382,12 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
                 );
             }
         }
+
+        // Set total users in this epoch
+        setUint(
+            keccak256(_totalUsersInEpoch, epochId),
+            totalUsersInEpoch
+        );
 
         bytes32 keyHashTotalRewardsPerEpoch = keccak256(_totalRewardsInEpoch, epochId);
 

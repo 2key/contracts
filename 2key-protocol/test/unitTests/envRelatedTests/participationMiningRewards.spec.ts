@@ -182,10 +182,7 @@ describe(
                 {web3: twoKeyProtocol.plasmaWeb3}
             );
 
-            let totalUsersInEpoch = await twoKeyProtocol.TwoKeyParticipationMiningPool.getTotalUsersInEpoch(epochId);
             let epochInProgress = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getEpochIdInProgress,[]);
-
-            expect(totalUsersInEpoch).to.be.equal(numberOfUsers);
             expect(parseInt(epochInProgress)).to.be.equal(epochId);
         }).timeout(timeout);
 
@@ -203,6 +200,11 @@ describe(
 
             await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
         }).timeout(timeout)
+
+        it('should get total users in epoch', async() => {
+            let totalUsersInEpoch = await twoKeyProtocol.TwoKeyParticipationMiningPool.getTotalUsersInEpoch(epochId);
+            expect(totalUsersInEpoch).to.be.equal(usersInEpoch.length);
+        }).timeout(timeout);
 
         it('should finalize epoch', async() => {
             await twoKeyProtocol.Utils.getTransactionReceiptMined(
