@@ -1,4 +1,5 @@
 const simpleGit = require('simple-git/promise');
+const config = require('../configurationFiles/accountsConfig.json');
 
 module.exports.getGitBranch = () => new Promise(async(resolve,reject) => {
     try {
@@ -12,12 +13,12 @@ module.exports.getGitBranch = () => new Promise(async(resolve,reject) => {
 
 
 module.exports.rpcs = {
-    'develop-public' : 'https://eivaw4seeb-rpc-staging.public.test.k8s.2key.net',
-    'develop-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'staging-public' : 'https://eivaw4seeb-rpc-staging.public.test.k8s.2key.net',
-    'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'master-public' : 'https://rpc.public.prod.k8s.2key.net',
-    'master-private' : 'https://rpc.private.production.k8s.2key.net',
+    'develop-public' : config["test-public"],
+    'develop-private' : config["test-private"],
+    'staging-public' : config["staging-public"],
+    'staging-private' : config["staging-private"],
+    'master-public' : config["prod-public"],
+    'master-private' : config["prod-private"],
 };
 
 module.exports.ids = {
