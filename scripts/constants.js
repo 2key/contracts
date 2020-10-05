@@ -12,9 +12,9 @@ module.exports.getGitBranch = () => new Promise(async(resolve,reject) => {
 
 
 module.exports.rpcs = {
-    'develop-public' : 'https://rpc-staging.public.test.k8s.2key.net',
+    'develop-public' : 'https://eivaw4seeb-rpc-staging.public.test.k8s.2key.net',
     'develop-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
+    'staging-public' : 'https://eivaw4seeb-rpc-staging.public.test.k8s.2key.net',
     'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
     'master-public' : 'https://rpc.public.prod.k8s.2key.net',
     'master-private' : 'https://rpc.private.production.k8s.2key.net',
