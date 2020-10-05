@@ -761,8 +761,6 @@ async function main() {
                 process.exit(0);
             }
 
-
-
             await deploy();
             process.exit(0);
     }
