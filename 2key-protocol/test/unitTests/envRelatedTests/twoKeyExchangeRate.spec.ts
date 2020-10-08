@@ -14,8 +14,11 @@ const {env} = process;
 
 const timeout = 60000;
 const usdSymbol = 'USD';
-const usdDaiSymbol = 'USD/DAI';
-const usd2KeySymbol = '2KEY-USD'
+const usdDaiSymbol = 'USD-DAI';
+const usd2KeySymbol = '2KEY-USD';
+const tusdSymbol = 'TUSD-USD';
+const daiSymbol = 'DAI-USD';
+
 
 describe(
   'TwoKeyExchangeRateContract',
@@ -65,10 +68,13 @@ describe(
       const usdRate = exchangeRates.usd;
       const usdDaiRate = exchangeRates.usdDai;
       const usd2KeyRate = exchangeRates.usd2Key;
+      const daiUsdRate = exchangeRates.dai;
+      const tusdUsdRate = exchangeRates.tusd;
+
 
       const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValues(
-        [usdSymbol, usdDaiSymbol, usd2KeySymbol],
-        [usdRate, usdDaiRate, usd2KeyRate],
+        [usdSymbol, usdDaiSymbol, usd2KeySymbol, daiSymbol, tusdSymbol],
+        [usdRate, usdDaiRate, usd2KeyRate, daiUsdRate, tusdUsdRate],
         from);
       await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
       let usdValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdSymbol);
@@ -96,5 +102,22 @@ describe(
 
       expect(exchangedValue).to.be.eq(usdRate * weiAmount);
     }).timeout(timeout);
+
+    it('should get fiat to stable coin quotes', async () => {
+
+        let amountFiatWei = parseFloat(twoKeyProtocol.Utils.toWei(15,'ether').toString());
+        let pairs = await twoKeyProtocol.TwoKeyExchangeContract.getFiatToStableQuotes(amountFiatWei, 'USD', ['DAI','TUSD']);
+        console.log(pairs);
+
+    }).timeout(timeout);
+
+    it('should get stable coin quota by address', async () => {
+      let daiAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('DAI');
+      console.log(daiAddress);
+      let quota = await twoKeyProtocol.TwoKeyExchangeContract.getStableCoinToUSDQuota(
+        daiAddress
+      );
+      console.log(quota);
+    })
   }
 );

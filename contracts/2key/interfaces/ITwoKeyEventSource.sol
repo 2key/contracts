@@ -79,4 +79,31 @@ contract ITwoKeyEventSource {
         uint _amountOfDAI
     )
     public;
+
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public;
+
+    function emitParticipationMiningEpochRegistered(
+        uint epochId,
+        uint totalAmount
+    )
+    public;
+
+    function emitParticipationEpochDistributed(
+        uint epochId,
+        uint numberOfInfluencers,
+        uint amount2KEYDistributed
+    )
+    public;
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public;
 }

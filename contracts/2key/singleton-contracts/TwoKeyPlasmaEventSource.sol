@@ -28,7 +28,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
      */
     string constant _twoKeyPlasmaRegistry = "TwoKeyPlasmaRegistry";
     string constant _twoKeyPlasmaFactory = "TwoKeyPlasmaFactory";
-
+    string constant _twoKeyPlasmaBudgetCampaignsPaymentsHandler = "TwoKeyPlasmaBudgetCampaignsPaymentsHandler";
 
 
     /**
@@ -127,6 +127,22 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         address proxyPublicAddress
     );
 
+    /**
+     * @notice          Event emitted every time we submit rewards
+     */
+    event AddedPendingRewards(
+        address contractAddress,
+        address influencer,
+        uint rewards
+    );
+
+    event PaidPendingRewards(
+        address influencer,
+        uint nonRebalancedRewards,
+        uint rewards,
+        address [] campaignsPaid,
+        uint [] earningsPerCampaign
+    );
 
     /**
      * @notice          Event emitted when user changes his handle
@@ -134,6 +150,12 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     event HandleChanged(
         address userPlasmaAddress,
         string newHandle
+    );
+
+    event RewardsAssignedToUserInParticipationMiningEpoch(
+        uint epochId,
+        address user,
+        uint reward2KeyWei
     );
 
 
@@ -165,6 +187,11 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         _;
     }
 
+    modifier onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler {
+        address twoKeyPlasmaBudgetCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaBudgetCampaignsPaymentsHandler);
+        require(msg.sender == twoKeyPlasmaBudgetCampaignsPaymentsHandler);
+        _;
+    }
 
     /**
      * @notice          Function to return proxy address of the contract registered
@@ -352,6 +379,56 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         emit HandleChanged(
             _userPlasmaAddress,
             _newHandle
+        );
+    }
+
+    function emitAddedPendingRewards(
+        address campaignPlasma,
+        address influencer,
+        uint amountOfTokens
+    )
+    public
+    onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler
+    {
+        emit AddedPendingRewards(
+            campaignPlasma,
+            influencer,
+            amountOfTokens
+        );
+    }
+
+    function emitPaidPendingRewards(
+        address influencer,
+        uint amountNonRebalancedEarned,
+        uint amountPaid,
+        address [] campaignsPaid,
+        uint [] earningsPerCampaign
+    )
+    public
+    onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler
+    {
+        emit PaidPendingRewards(
+            influencer,
+            amountNonRebalancedEarned,
+            amountPaid,
+            campaignsPaid,
+            earningsPerCampaign
+        );
+    }
+
+    function emitRewardsAssignedToUserInParticipationMiningEpoch(
+        uint epochId,
+        address user,
+        uint reward2KeyWei
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaParticipationRewards"));
+
+        emit RewardsAssignedToUserInParticipationMiningEpoch(
+            epochId,
+            user,
+            reward2KeyWei
         );
     }
 

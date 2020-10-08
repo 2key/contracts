@@ -1,4 +1,5 @@
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
+const DAI = artifacts.require('DAI');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
@@ -119,7 +120,8 @@ module.exports = function deploy(deployer) {
     let nonUpgradableContractArtifactsMainchain = {
         TwoKeyEconomy,
         TwoKeyCongress,
-        TwoKeyCongressMembersRegistry
+        TwoKeyCongressMembersRegistry,
+        DAI
     };
 
     let nonUpgradableContractArtifactsPlasma = {
@@ -221,6 +223,8 @@ module.exports = function deploy(deployer) {
             })
             .then(() => deployer.deploy(TwoKeyEconomy, TwoKeySingletonesRegistry.address))
             .then(() => TwoKeyEconomy.deployed())
+            .then(() => deployer.deploy(DAI))
+            .then(() => DAI.deployed())
             .then(async () => {
 
                 let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);

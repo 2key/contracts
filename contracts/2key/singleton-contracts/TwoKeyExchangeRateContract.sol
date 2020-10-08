@@ -7,6 +7,7 @@ import "../interfaces/ITwoKeyEventSourceEvents.sol";
 import "../upgradability/Upgradeable.sol";
 import "../libraries/SafeMath.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+import "../interfaces/IERC20.sol";
 
 
 /**
@@ -112,9 +113,20 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        bytes32 key = stringToBytes32(base_target);
-        bytes32 hashKey = keccak256(_currencyName2rate, key);
-        return PROXY_STORAGE_CONTRACT.getUint(hashKey);
+        bytes32 hexedBaseTarget = stringToBytes32(base_target);
+        return getBaseToTargetRateInternal(hexedBaseTarget);
+    }
+
+
+    function getBaseToTargetRateInternal(
+        bytes32 baseTarget
+    )
+    internal
+    view
+    returns (uint)
+    {
+        bytes32 keyHash = keccak256(_currencyName2rate, baseTarget);
+        return PROXY_STORAGE_CONTRACT.getUint(keyHash);
     }
 
 
@@ -130,6 +142,59 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     returns (uint)
     {
         return getBaseToTargetRate(base_target).mul(base_amount);
+    }
+
+
+
+    function getFiatToStableQuotes(
+        uint amountInFiatWei,
+        string fiatCurrency,
+        bytes32 [] stableCoinPairs
+    )
+    public
+    view
+    returns (uint[])
+    {
+        uint len = stableCoinPairs.length;
+
+        uint [] memory pairs = new uint[](len);
+
+        uint i;
+
+        // We have rate 1 DAI = X USD => 1 USD = 1/X DAI
+        // We need to compute N dai = Y usd
+        for(i = 0; i < len; i++) {
+            // This represents us how much USD is 1 stable coin unit worth
+            // Example: 1 DAI = rate = 0.99 $
+            // 1 * DAI = 0.99 * USD
+            // 1 USD = 1 * DAI / 0.99
+            // 15 USD = 15 / 0.99
+            uint rate = getBaseToTargetRateInternal(stableCoinPairs[i]);
+            pairs[i] = amountInFiatWei.mul(10**18).div(rate);
+        }
+
+        return pairs;
+    }
+
+    function getStableCoinToUSDQuota(
+        address stableCoinAddress
+    )
+    public
+    view
+    returns (uint)
+    {
+        // Take the symbol of the token
+        string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
+
+        // Check that this symbol is matching address stored in our codebase so we are sure that it's real asset
+        if(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress) {
+            // Generate pair against usd (Example: Symbol = DAI ==> result = 'DAI-USD'
+            string memory tokenSymbolToCurrency = concatenateStrings(tokenSymbol, "-USD");
+            // get rate against USD (1 STABLE  = rate USD)
+            return getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
+        }
+        // If stable coin is not matched, return 0 as quota
+        return 0;
     }
 
 
@@ -153,4 +218,15 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         }
     }
 
+
+    function concatenateStrings(
+        string a,
+        string b
+    )
+    internal
+    pure
+    returns (string)
+    {
+        return string(abi.encodePacked(a,b));
+    }
 }

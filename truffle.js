@@ -11,15 +11,14 @@ const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 
 
 const rpcs = {
-    'test-public' : 'https://rpc-dev.public.test.k8s.2key.net',
-    'test-private' : 'https://rpc-dev.private.test.k8s.2key.net',
-    'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
-    'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
-    'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
-    'dev-ganache': 'https://localhost:7545',
-    'dev-local': 'http://localhost:8545',
-    'plasma-test-local': 'http://localhost:18545'
+    'test-public' : config["test-public"],
+    'test-private' : config["test-private"],
+    'staging-public' : config["staging-public"],
+    'staging-private' : config["staging-private"],
+    'prod-public' : config["prod-public"],
+    'prod-private' : config["prod-private"],
+    'dev-local': config["dev-local"],
+    'plasma-test-local': config["plasma-test-local"]
 };
 
 const ids = {
@@ -109,8 +108,8 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
           skipDryRun: true,
           network_id: ids["staging-public"],
-          gas: 8000000,
-          gasPrice: 40000000000,
+          gas: 7800000,
+          gasPrice: 150000000000,
       },
 
       'private.staging-hdwallet': {
@@ -177,11 +176,12 @@ module.exports = {
               build: "commit.e67f0147",
               settings: {
                   optimizer: {
-                      enabled: true,
+                      enabled: false,
                       runs: 200,
                       evmVersion: "byzantium"
                   }
               }
           }
     }
+
 };

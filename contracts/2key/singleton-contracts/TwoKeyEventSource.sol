@@ -220,6 +220,29 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         string actionPerformedWithUpgradableExchange
     );
 
+    event EndedBudgetCampaign (
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    );
+
+    event ParticipationMiningEpochRegistered(
+        uint epochId,
+        uint amountOf2KEYTotal
+    );
+
+    event ParticipationEpochDistributed(
+        uint epochId,
+        uint numberOfInfluencers,
+        uint amount2KEYPaid
+    );
+
+    event RebalancedRewards(
+        uint cycleId,
+        uint amountOfTokens,
+        string action
+    );
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -648,6 +671,80 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
             _amountOfDAI
         );
     }
+
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
+        emit EndedBudgetCampaign(
+            campaignPlasmaAddress,
+            contractorLeftover,
+            moderatorEarningsDistributed
+        );
+    }
+
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
+        emit RebalancedRewards(
+            cycleId,
+            difference,
+            action
+        );
+    }
+
+    /**
+     * @notice          Function emit an event that participation mining epoch is registered
+     * @param           epochId is the ID of the epoch being registered
+     * @param           totalAmount is the total amount of tokens which will be paid
+     */
+    function emitParticipationMiningEpochRegistered(
+        uint epochId,
+        uint totalAmount
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationMiningPool"));
+        emit ParticipationMiningEpochRegistered(
+            epochId,
+            totalAmount
+        );
+    }
+
+    /**
+     * @notice          Function emit an event whenever there's distribution within epoch
+     * @param           epochId is the ID of the epoch being distributed
+     * @param           numberOfInfluencers is the number of influencers being paid
+     * @param           amount2KEYDistributed is the amount of tokens being distributed
+     */
+    function emitParticipationEpochDistributed(
+        uint epochId,
+        uint numberOfInfluencers,
+        uint amount2KEYDistributed
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationMiningPool"));
+
+        emit ParticipationEpochDistributed(
+            epochId,
+            numberOfInfluencers,
+            amount2KEYDistributed
+        );
+    }
+
 
     /**
      * @notice Function to check adequate plasma address for submitted eth address

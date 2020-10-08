@@ -48,13 +48,15 @@ export default function executeConversionTest(
         return;
       }
 
+      const bounty = await protocol.CPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
+
       const lastConversion = await converterProtocol.CPCCampaign.getConversion(
         campaignAddress,
         conversionForCheck.id
       );
 
       expect(lastConversion.conversionState).to.be.eq(conversionStatuses.executed);
-      expect(lastConversion.bountyPaid).to.be.eq(campaignData.bountyPerConversionWei * (1 - feePercent));
+      expect(lastConversion.bountyPaid.toFixed(6)).to.be.eq((bounty.bountyPerConversion * (1 - feePercent)).toFixed(6));
 
       user.status = userStatuses.approved;
       conversionForCheck.data = lastConversion;

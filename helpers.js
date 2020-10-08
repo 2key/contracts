@@ -113,6 +113,18 @@ const runDeployCPCNoRewardsMigration = (network) => new Promise(async(resolve, r
 });
 
 
+const runDeployPaymentHandlersMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '15', '--to', '15', '--network', network, 'update_cpc']);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+
+
 
 /**
  * This is function to run when we want to update our campaigns
@@ -465,5 +477,6 @@ module.exports = {
     runTruffleCompile,
     runDeployPlasmaReputation,
     runDeployPPCNoRewards,
-    runDeployCPCNoRewardsMigration
+    runDeployCPCNoRewardsMigration,
+    runDeployPaymentHandlersMigration
 };

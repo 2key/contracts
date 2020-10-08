@@ -9,7 +9,7 @@ contract TwoKeyCPCCampaignPlasmaNoReward is UpgradeableCampaign, TwoKeyPlasmaCam
 
     string public targetUrl;            // Url being tracked
 
-    enum ConversionPaymentState {PAID, UNPAID}
+    enum ConversionPaymentState {UNPAID,PAID}
 
     /**
      * This is the conversion object

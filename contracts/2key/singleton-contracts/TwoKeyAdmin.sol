@@ -74,6 +74,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	    _;
 	}
 
+	modifier onlyTwoKeyBudgetCampaignsPaymentsHandler {
+		address twoKeyBudgetCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler");
+		require(msg.sender == twoKeyBudgetCampaignsPaymentsHandler);
+		_;
+	}
 
 	/**
 	 * @notice 			Modifier which throws if the campaign contract sending request is not validated
@@ -493,6 +498,17 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange), totalDAIWithdrawnFromPool.add(amountToBeWithdrawn));
 	}
 
+
+	function updateReceivedTokensAsModeratorPPC(
+		uint amountOfTokens,
+		address campaignPlasma
+	)
+	public
+	onlyTwoKeyBudgetCampaignsPaymentsHandler
+	{
+		updateTokensReceivedAsModeratorInternal(amountOfTokens, campaignPlasma);
+	}
+
 	/**
 	 * @notice 			Function which will be used take the tokens from the campaign and distribute
 	 * 					them between itself and TwoKeyDeepFreezeTokenPool
@@ -505,18 +521,28 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	public
 	onlyAllowedContracts
 	{
+		uint moderatorTokens = updateTokensReceivedAsModeratorInternal(amountOfTokens, msg.sender);
+		//Update moderator earnings to campaign
+		ITwoKeyCampaign(msg.sender).updateModeratorRewards(moderatorTokens);
+	}
+
+	function updateTokensReceivedAsModeratorInternal(
+		uint amountOfTokens,
+		address campaignAddress
+	)
+	internal
+	returns (uint)
+	{
 		// Network fee which will be taken from moderator
 		uint networkFee = getDefaultNetworkTaxPercent();
 
 		uint moderatorTokens = amountOfTokens.mul(100 - networkFee).div(100);
+
 		bytes32 keyHashTotalRewards = keccak256(_rewardsReceivedAsModeratorTotal);
 		PROXY_STORAGE_CONTRACT.setUint(keyHashTotalRewards, moderatorTokens.add((PROXY_STORAGE_CONTRACT.getUint(keyHashTotalRewards))));
 
 		//Emit event through TwoKeyEventSource for the campaign
-		ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource)).emitReceivedTokensAsModerator(msg.sender, moderatorTokens);
-
-		//Update moderator earnings to campaign
-		ITwoKeyCampaign(msg.sender).updateModeratorRewards(moderatorTokens);
+		ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource)).emitReceivedTokensAsModerator(campaignAddress, moderatorTokens);
 
 		//Now update twoKeyDeepFreezeTokenPool
 		address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
@@ -528,14 +554,16 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		transferTokens(_twoKeyEconomy, deepFreezeTokenPool, tokensForDeepFreezeTokenPool);
 
 		//Update contract on receiving tokens
-		ITwoKeyDeepFreezeTokenPool(deepFreezeTokenPool).updateReceivedTokensForSuccessfulConversions(tokensForDeepFreezeTokenPool, msg.sender);
+		ITwoKeyDeepFreezeTokenPool(deepFreezeTokenPool).updateReceivedTokensForSuccessfulConversions(tokensForDeepFreezeTokenPool, campaignAddress);
 
 		// Compute the hash for the storage for moderator earnings per campaign
-		bytes32 keyHashEarningsPerCampaign = keccak256(_moderatorEarningsPerCampaign, msg.sender);
+		bytes32 keyHashEarningsPerCampaign = keccak256(_moderatorEarningsPerCampaign, campaignAddress);
 		// Take the current earnings
 		uint currentEarningsForThisCampaign = PROXY_STORAGE_CONTRACT.getUint(keyHashEarningsPerCampaign);
 		// Increase them by earnings added now and store
 		PROXY_STORAGE_CONTRACT.setUint(keyHashEarningsPerCampaign, currentEarningsForThisCampaign.add(moderatorTokens));
+
+		return moderatorTokens;
 	}
 
 

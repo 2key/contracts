@@ -14,7 +14,8 @@ const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
 const TwoKeyFeeManager = artifacts.require('TwoKeyFeeManager');
 const TwoKeyNetworkGrowthFund = artifacts.require('TwoKeyNetworkGrowthFund');
-
+const TwoKeyParticipationMiningPool = artifacts.require('TwoKeyParticipationMiningPool');
+const TwoKeyPlasmaBudgetCampaignsPaymentsHandler = artifacts.require('TwoKeyPlasmaBudgetCampaignsPaymentsHandler');
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
@@ -35,7 +36,7 @@ const TwoKeySignatureValidatorStorage = artifacts.require('TwoKeySignatureValida
 const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParticipationPaymentsManagerStorage');
 const TwoKeyFeeManagerStorage = artifacts.require('TwoKeyFeeManagerStorage');
 const TwoKeyNetworkGrowthFundStorage = artifacts.require('TwoKeyNetworkGrowthFundStorage');
-
+const TwoKeyBudgetCampaignsPaymentsHandler = artifacts.require('TwoKeyBudgetCampaignsPaymentsHandler');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
@@ -98,6 +99,7 @@ const updateContract = (async (registryAddress, contractName, newImplementationA
 
 
 let contractsArtifacts = {
+    TwoKeyPlasmaBudgetCampaignsPaymentsHandler,
     TwoKeyUpgradableExchange,
     TwoKeyAdmin,
     TwoKeyEventSource,
@@ -112,6 +114,7 @@ let contractsArtifacts = {
     TwoKeyParticipationPaymentsManager,
     TwoKeyFeeManager,
     TwoKeyNetworkGrowthFund,
+    TwoKeyParticipationMiningPool,
     TwoKeyUpgradableExchangeStorage,
     TwoKeyAdminStorage,
     TwoKeyEventSourceStorage,
@@ -126,6 +129,7 @@ let contractsArtifacts = {
     TwoKeyParticipationPaymentsManagerStorage,
     TwoKeyFeeManagerStorage,
     TwoKeyNetworkGrowthFundStorage,
+    TwoKeyBudgetCampaignsPaymentsHandler,
     TwoKeyPlasmaEvents,
     TwoKeyPlasmaMaintainersRegistry,
     TwoKeyPlasmaRegistry,
@@ -173,7 +177,7 @@ module.exports = async function deploy(deployer) {
     let registryAddress;
 
 
-    console.log(contractName);
+    console.log('Contract updating: ',contractName);
 
     deployer.deploy(contract)
         .then(() => contract.deployed()

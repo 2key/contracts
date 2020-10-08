@@ -180,6 +180,29 @@ def generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_c
     values = [beneficiary,amount]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_adding_participation_mining_epoch(epoch_id, amount_2key):
+    epoch_id = int(epoch_id)
+    amount_2key = int(amount_2key)
+    method_name_and_params = "registerParticipationMiningEpoch(uint256,uint256)"
+    types = ["uint256","uint256"]
+    values = [epoch_id,amount_2key]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_declaring_epochs(epoch_ids,rewards):
+    list_of_ids = epoch_ids.split(',')
+    list_of_rewards = rewards.split(',')
+    ## Convert list of ids and rewards into integers
+    for i in range(0, len(list_of_ids)):
+        list_of_ids[i] = int(list_of_ids[i])
+        list_of_rewards[i] =  int(list_of_rewards[i])
+
+    method_name_and_params = "declareEpochs(uint256[],uint256[])"
+    types = ["uint256[]","uint256[]"]
+    values = [list_of_ids, list_of_rewards]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+    sys.stdout.flush()
+
+
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
         _rInFp,
@@ -294,4 +317,6 @@ if __name__ == "__main__":
         generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(sys.argv[2])
     if(arg1 == "withdrawUpgradableExchangeDAICollectedFromAdminContract"):
         generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_contract(sys.argv[2],sys.argv[3])
+    if(arg1 == "declareEpochs"):
+        generate_bytecode_for_declaring_epochs(sys.argv[2],sys.argv[3])
     print_line()

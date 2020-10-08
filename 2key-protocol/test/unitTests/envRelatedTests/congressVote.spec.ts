@@ -3,6 +3,7 @@ import {TwoKeyProtocol} from "../../../src";
 import {expect} from "chai";
 import web3Switcher from "../../helpers/web3Switcher";
 import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "../../helpers/twoKeyProtocol";
+import {promisify} from "../../../src/utils/promisify";
 const { env } = process;
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -18,9 +19,6 @@ let from: string;
 
 let transactionBytecode =
     "0x9ffe94d9000000000000000000000000bae10c2bdfd4e0e67313d1ebaddaa0adc3eea5d7000000000000000000000000000000000000000000084595161401484a000000";
-
-let transactionBytecodeForChangingReleaseDate =
-    "0xef33a226000000000000000000000000000000000000000000000000000000000012d687";
 
 describe('TwoKeyCongress contract basic proposal creation, voting, and proposal execution counter.' , () => {
 
@@ -54,7 +52,6 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         from = address;
         twoKeyProtocol.setWeb3(getTwoKeyProtocolValues(web3, env.MNEMONIC_DEPLOYER));
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
-
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support sending tokens", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
@@ -100,7 +97,6 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const status = receipt && receipt.status;
         expect(status).to.be.equal('0x1');
     }).timeout(60000);
-
 });
 
 

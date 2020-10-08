@@ -2,6 +2,7 @@ import availableUsers, {userIds} from "../../constants/availableUsers";
 import {expect} from "chai";
 import ICreateCPCTest from "../../typings/ICreateCPCTest";
 import {expectEqualNumbers} from "../../helpers/numberHelpers";
+import {promisify} from "../../../src/utils/promisify";
 
 const TIMEOUT_LENGTH = 60000;
 
@@ -11,7 +12,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
   if (
     !campaignParams.etherForRewards
     && !campaignParams.targetClicks
-    && campaignParams.bountyPerConversionWei
+    && campaignParams.bountyPerConversionUSD
   ) {
     throw new Error('Required CPC campaign params missing');
   }
@@ -20,34 +21,16 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
-    const addresses = await protocol.CPCCampaign.getContractorAddresses(campaignAddress);
-    expect(addresses.contractorPlasma).to.be.equal(protocol.plasmaAddress);
-    expect(addresses.contractorPublic).to.be.equal(address);
+    const contractorAddress = await protocol.CPCCampaign.getContractorAddresses(campaignAddress);
+    expect(contractorAddress).to.be.equal(protocol.plasmaAddress);
   }).timeout(TIMEOUT_LENGTH);
 
   it('should check if address is contractor', async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
+    const {campaignAddress} = storage;
 
-    const isContractor = await protocol.CPCCampaign.isAddressContractor(storage.campaign.campaignAddressPublic, address);
+    const isContractor = await protocol.CPCCampaign.isAddressContractor(campaignAddress, protocol.plasmaAddress);
     expect(isContractor).to.be.equal(true);
-  }).timeout(TIMEOUT_LENGTH);
-
-  it('should validate that mirroring is done well on plasma', async () => {
-    const {protocol} = availableUsers[userKey];
-    const {campaignAddress} = storage;
-
-    const publicMirrorOnPlasma = await protocol.CPCCampaign.getMirrorContractPlasma(campaignAddress);
-    expect(publicMirrorOnPlasma).to.be.equal(storage.campaign.campaignAddressPublic);
-  }).timeout(TIMEOUT_LENGTH);
-
-  it('should validate that mirroring is done well on public', async () => {
-    const {protocol} = availableUsers[userKey];
-    const {campaignAddress} = storage;
-
-    const plasmaMirrorOnPublic = await protocol.CPCCampaign.getMirrorContractPublic(
-      storage.campaign.campaignAddressPublic,
-    );
-    expect(plasmaMirrorOnPublic).to.be.equal(campaignAddress);
   }).timeout(TIMEOUT_LENGTH);
 
   it('should get private meta hash', async () => {
@@ -59,119 +42,115 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     expect(privateMeta.campaignPublicLinkKey).to.be.equal(user.link.link);
   }).timeout(TIMEOUT_LENGTH);
 
-  if (campaignParams.bountyPerConversionWei) {
-    if (Math.round(Math.random())) {
-      it('should directly transfer tokens to campaign', async () => {
-        const {protocol, web3: {address}} = availableUsers[userKey];
-        const {protocol: withBalanceProtocol, web3: {address: addressWithBalance}} = availableUsers[userIds.aydnep]; //user with 2keys
-        const {campaignAddress, campaign} = storage;
-        const inventoryBefore = await protocol.CPCCampaign.getInitialBountyAmount(campaign.campaignAddressPublic);
-        let reward;
 
-        if (campaignParams.etherForRewards) {
-          const eth2usd = await withBalanceProtocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
-          const boughtRate = await withBalanceProtocol.UpgradableExchange.get2keySellRate(address);
+  it('should directly transfer tokens to campaign', async () => {
+    const {protocol, web3: {address}, web3} = availableUsers[userKey];
+    const {protocol: withBalanceProtocol, web3: {address: addressWithBalance}} = availableUsers[userIds.aydnep]; //user with 2keys
+    const {campaignAddress, campaign} = storage;
 
-          reward = campaignParams.etherForRewards * eth2usd / boughtRate;
-        } else if (campaignParams.targetClicks) {
-          reward = campaignParams.bountyPerConversionWei * campaignParams.targetClicks;
-        }
+    const inventoryBefore = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
+    let usdTotalAmount = campaignParams.bountyPerConversionUSD * campaignParams.targetClicks + 0.1;
 
-        const campaignPublicAddress = await protocol.CPCCampaign.getMirrorContractPlasma(campaignAddress);
+    if(Math.random() > 0.5) {
+      // Random case budgeting with 2KEY
+
+      let amountOfTokens = await protocol.CPCCampaign.getRequiredBudget2KEY('USD', protocol.Utils.toWei(usdTotalAmount,'ether').toString());
+
+      let amountOfTokensWei = protocol.Utils.toWei(amountOfTokens,'ether').toString();
+
+
+      await withBalanceProtocol.Utils.getTransactionReceiptMined(
+          await withBalanceProtocol.transfer2KEYTokens(address, amountOfTokensWei, addressWithBalance)
+      );
+
+      await protocol.Utils.getTransactionReceiptMined(
+        await protocol.ERC20.erc20ApproveAddress(
+          protocol.twoKeyEconomy.address,
+          protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
+          amountOfTokensWei,
+          address
+        )
+      );
+
+      await protocol.Utils.getTransactionReceiptMined(
+        await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
+      );
+
+
+      const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
+
+      expectEqualNumbers(
+        (inventoryAfter - inventoryBefore),
+          amountOfTokens,
+      );
+    } else {
+        // Ranadom case budgeting with DAI/TUSD/BUSD/...
+        let amountOfTokensRequired = await protocol.TwoKeyExchangeContract.getFiatToStableQuotes(
+            parseFloat(protocol.Utils.toWei(usdTotalAmount,'ether').toString()),
+            'USD',
+            ['DAI']
+          );
+
+        let amountOfTokensWei = await protocol.Utils.toWei(amountOfTokensRequired.DAI,'ether').toString();
+        let daiAddress = await protocol.SingletonRegistry.getNonUpgradableContractAddress('DAI');
+
         await protocol.Utils.getTransactionReceiptMined(
-          await withBalanceProtocol.transfer2KEYTokens(
-            campaignPublicAddress,
-            withBalanceProtocol.Utils.toWei(reward*1.001, 'ether'),
-            addressWithBalance,
+          await protocol.ERC20.erc20ApproveAddress(
+            daiAddress,
+            protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
+            amountOfTokensWei,
+            address
           )
         );
-        await protocol.Utils.getTransactionReceiptMined(
-          await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, address)
-        );
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaign.campaignAddressPublic);
-
-        expectEqualNumbers(
-          (inventoryAfter - inventoryBefore),
-            reward*1.001,
-        );
-      });
-    } else {
-      it('should buy referral rewards on public contract by sending ether', async () => {
-        const {protocol, web3: {address}} = availableUsers[userKey];
-        const {campaignAddress, campaign} = storage;
-        const inventoryBefore = await protocol.CPCCampaign.getInitialBountyAmount(campaign.campaignAddressPublic);
-        const eth2usd = await protocol.TwoKeyExchangeContract.getBaseToTargetRate("USD");
-        const boughtRate = await protocol.UpgradableExchange.get2keySellRate(address);
-
-        let reward;
-        if (campaignParams.etherForRewards) {
-          reward = campaignParams.etherForRewards;
-        } else if (campaignParams.targetClicks) {
-          reward = campaignParams.bountyPerConversionWei * campaignParams.targetClicks
-            / eth2usd * boughtRate;
-        }
+        let txHash;
 
         await protocol.Utils.getTransactionReceiptMined(
-          await protocol.CPCCampaign
-            .buyTokensForReferralRewards(
+          txHash = await protocol.CPCCampaign.addInventoryWithStableCoin(
               campaignAddress,
-              protocol.Utils.toWei(reward*1.001, 'ether'),
+              amountOfTokensWei,
+              protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(),
+              daiAddress,
               address
             )
         );
-        const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaign.campaignAddressPublic);
 
-        expectEqualNumbers(
-          (inventoryAfter - inventoryBefore),
-          reward*1.001 * eth2usd / boughtRate,
-        );
-      }).timeout(TIMEOUT_LENGTH);
+        const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
+
     }
-  }
+  });
+
   it('should set that plasma contract is valid from maintainer', async () => {
     const {protocol} = availableUsers[maintainerKey];
     const {campaignAddress} = storage;
 
-    await protocol.CPCCampaign.validatePlasmaContract(campaignAddress, protocol.plasmaAddress);
+    let c = await protocol.CPCCampaign._getPlasmaCampaignInstance(campaignAddress);
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
 
-    const isPlasmaValid = await protocol.CPCCampaign.checkIsPlasmaContractValid(campaignAddress);
+    let initialParams = await protocol.CPCCampaign.getInitialParamsForCampaign(campaignAddress);
+    console.log(initialParams);
 
-    expect(isPlasmaValid).to.be.eq(true);
-  }).timeout(TIMEOUT_LENGTH);
-
-  it('should set on plasma contract inventory amount from maintainer', async () => {
-    const {protocol} = availableUsers[maintainerKey];
-    const {campaignAddress, campaign} = storage;
-
-    const amountOfTokensAvailable = await protocol.CPCCampaign.getInitialBountyAmount(campaign.campaignAddressPublic);
-
-    await protocol.CPCCampaign.setTotalBountyPlasma(
-      campaignAddress,
-      protocol.Utils.toWei(amountOfTokensAvailable, 'ether'),
-      protocol.plasmaAddress
-    );
+    // This should set total bounty, initial rate and validate campaign
+    await promisify(c.setInitialParamsAndValidateCampaign,[
+        protocol.Utils.toWei(initialParams.initialBountyForCampaign,'ether'),
+        protocol.Utils.toWei(initialParams.initialRate2KEYUSD,'ether'),
+        protocol.Utils.toWei(initialParams.bountyPerConversion2KEY,'ether'),
+        initialParams.isBudgetedDirectlyWith2KEY,
+        {from: protocol.plasmaAddress}
+    ])
 
     await new Promise(resolve => setTimeout(resolve, 4000));
 
+    // Check is plasma contract valid
+    const isPlasmaValid = await protocol.CPCCampaign.checkIsPlasmaContractValid(campaignAddress);
+    expect(isPlasmaValid).to.be.eq(true);
+
+    // Check if bounty is set properly
     const bounty = await protocol.CPCCampaign.getTotalBountyAndBountyPerConversion(campaignAddress);
-    expect(bounty.totalBounty).to.be.equal(amountOfTokensAvailable);
+    expect(bounty.totalBounty).to.be.equal(initialParams.initialBountyForCampaign);
+    expect(bounty.bountyPerConversion).to.be.equal(initialParams.bountyPerConversion2KEY);
   }).timeout(TIMEOUT_LENGTH);
 
-  it('should set that public contract is valid from maintainer', async () => {
-    const {protocol, web3: {address}} = availableUsers[userKey];
-    const {campaignAddress} = storage;
-
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.validatePublicContract(campaignAddress, address)
-    );
-    const isPublicValid = await protocol.CPCCampaign.checkIsPublicContractValid(campaignAddress);
-
-    expect(isPublicValid).to.be.eq(true);
-  }).timeout(TIMEOUT_LENGTH);
 
   it('should get campaign from IPFS', async () => {
     const {protocol} = availableUsers[userKey];

@@ -1,4 +1,3 @@
-const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
@@ -20,7 +19,6 @@ const TwoKeyMaintainersRegistry = artifacts.require('TwoKeyMaintainersRegistry')
 const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
 const TwoKeyTeamGrowthFund = artifacts.require('TwoKeyTeamGrowthFund');
-
 const TwoKeyPlasmaEvents = artifacts.require('TwoKeyPlasmaEvents');
 const TwoKeyPlasmaRegistry = artifacts.require('TwoKeyPlasmaRegistry');
 const TwoKeyPlasmaMaintainersRegistry = artifacts.require('TwoKeyPlasmaMaintainersRegistry');
@@ -125,6 +123,7 @@ module.exports = function deploy(deployer) {
             .then(() => deployer.link(PriceDiscovery, TwoKeyUpgradableExchange))
             .then(() => deployer.deploy(TwoKeyUpgradableExchange))
             .then(() => TwoKeyUpgradableExchange.deployed())
+            .then(() => deployer.link(Call, TwoKeyParticipationMiningPool))
             .then(() => deployer.deploy(TwoKeyParticipationMiningPool))
             .then(() => TwoKeyParticipationMiningPool.deployed())
             .then(() => deployer.deploy(TwoKeyParticipationPaymentsManager))

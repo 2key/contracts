@@ -4,13 +4,18 @@ import "./TokenPool.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyParticipationMiningPoolStorage.sol";
 import "../interfaces/ITwoKeyParticipationPaymentsManager.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 import "../libraries/SafeMath.sol";
+import "../libraries/Call.sol";
 
 /**
  * @author Nikola Madjarevic
  * Created at 2/5/19
  */
 contract TwoKeyParticipationMiningPool is TokenPool {
+
+    using SafeMath for *;
+    using Call for *;
 
     /**
      * Constant keys for storage contract
@@ -22,10 +27,15 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _yearToTransferedThisYear = "yearToTransferedThisYear";
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
     string constant _epochInsideYear = "epochInsideYear";
+    string constant _isExistingSignature = "isExistingSignature";
+    string constant _userToSignatureToAmountWithdrawn = "userToSignatureToAmountWithdrawn";
+
+
+    string constant _monthlyTransferAllowance = "monthlyTransferAllowance";
+    string constant _dateStartingCountingMonths = "dateStartingCountingMonths";
+    string constant _totalTokensTransferedByNow = "totalTokensTransferedByNow";
 
     string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
-
-    using SafeMath for *;
 
     /**
      * Pointer to it's proxy storage contract
@@ -42,6 +52,12 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         _;
     }
 
+    modifier onlyTwoKeyCongress {
+        address twoKeyCongress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        require(msg.sender == twoKeyCongress);
+        _;
+    }
+
     function setInitialParams(
         address twoKeySingletonesRegistry,
         address _proxyStorage
@@ -53,21 +69,114 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         TWO_KEY_SINGLETON_REGISTRY = twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
 
-        uint totalAmountOfTokens = getContractBalance(); //120M WEI's
+        uint totalAmountOfTokens = getContractBalance(); //120M 2KEY's
 
-        setUint(_totalAmount2keys, totalAmountOfTokens);
-        setUint(_annualTransferAmountLimit, totalAmountOfTokens.div(10));
-        setUint(_startingDate, block.timestamp);
+        setUint(keccak256(_totalAmount2keys), totalAmountOfTokens);
+        setUint(keccak256(_annualTransferAmountLimit), totalAmountOfTokens.div(10));
+        setUint(keccak256(_startingDate), block.timestamp);
 
         for(uint i=1; i<=10; i++) {
             bytes32 key1 = keccak256(_yearToStartingDate, i);
             bytes32 key2 = keccak256(_yearToTransferedThisYear, i);
 
-            PROXY_STORAGE_CONTRACT.setUint(key1, block.timestamp + i*(1 years));
-            PROXY_STORAGE_CONTRACT.setUint(key2, 0);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(key1), block.timestamp + i*(1 years));
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(key2), 0);
         }
 
         initialized = true;
+    }
+
+    function setBool(
+        bytes32 key,
+        bool value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setBool(key,value);
+    }
+
+    function getBool(
+        bytes32 key
+    )
+    internal
+    view
+    returns (bool)
+    {
+        return PROXY_STORAGE_CONTRACT.getBool(key);
+    }
+
+
+    // Internal wrapper method to manipulate storage contract
+    function setUint(
+        bytes32 key,
+        uint value
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(key, value);
+    }
+
+    // Internal wrapper method to manipulate storage contract
+    function getUint(
+        bytes32 key
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(key);
+    }
+
+    function setSignatureIsExisting(
+        bytes signature
+    )
+    internal
+    {
+        setBool(keccak256(_isExistingSignature,signature), true);
+    }
+
+    function isMaintainer(
+        address _address
+    )
+    internal
+    view
+    returns (bool)
+    {
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_address);
+    }
+
+    /**
+     * @notice          Internal function to set the amount user has withdrawn
+                        using specific signature
+     * @param           user is the address of user
+     * @param           signature is the signature created by user
+     * @param           amountWithdrawn is the amount user withdrawn using that signature
+     */
+    function setAmountWithdrawnWithSignature(
+        address user,
+        bytes signature,
+        uint amountWithdrawn
+    )
+    internal
+    {
+        setUint(
+            keccak256(_userToSignatureToAmountWithdrawn, user, signature),
+            amountWithdrawn
+        );
+    }
+
+    function increaseTransferedAmountFromContract(
+        uint amountTransfered
+    )
+    internal
+    {
+        uint currentlyTransfered = getTotalAmountOfTokensTransfered();
+
+        setUint(
+            keccak256(_totalTokensTransferedByNow),
+            currentlyTransfered.add(amountTransfered)
+        );
     }
 
 
@@ -90,19 +199,19 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         bytes32 keyHashEpochThisYear = keccak256(_epochInsideYear, year);
 
         //Take the amount transfered this year
-        uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keyTransferedThisYear);
+        uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyTransferedThisYear));
 
         //In case there are <= than 10 years, than we have limits for transfer
         if(year <= 10) {
             //Take the annual transfer amount limit
-            uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keyAnnualTransferAmountLimit);
+            uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyAnnualTransferAmountLimit));
 
             //Check that this transfer will not overflow the annual limit
             require(transferedThisYear.add(_amount) <= annualTransferAmountLimit);
         }
 
         //Take the epoch for this year ==> which time this year we're calling this function
-        uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keyHashEpochThisYear);
+        uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyHashEpochThisYear));
 
         //We're always sending tokens to ParticipationPaymentsManager
         address receiver = getAddressFromTwoKeySingletonRegistry(_twoKeyParticipationsManager);
@@ -117,10 +226,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         );
 
         // Increase annual epoch
-        PROXY_STORAGE_CONTRACT.setUint(keyHashEpochThisYear, epochThisYear.add(1));
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(keyHashEpochThisYear), epochThisYear.add(1));
 
         // Increase the amount transfered this year
-        PROXY_STORAGE_CONTRACT.setUint(keyTransferedThisYear, transferedThisYear.add(_amount));
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(keyTransferedThisYear), transferedThisYear.add(_amount));
     }
 
     /**
@@ -154,6 +263,30 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
     }
 
+    function setWithdrawalParameters(
+        uint dateStartingCountingMonths
+    )
+    public
+    onlyMaintainer
+    {
+        // Require that this function can be called only once
+        require(getUint(keccak256(_dateStartingCountingMonths)) == 0);
+
+        // Get annual transfer limit
+        uint annualTransferLimit = getUint(keccak256(_annualTransferAmountLimit));
+
+        // Set date when counting months starts
+        setUint(
+            keccak256(_dateStartingCountingMonths),
+            dateStartingCountingMonths
+        );
+
+        // Set monthly transfer allowance
+        setUint(
+            keccak256(_monthlyTransferAllowance),
+            annualTransferLimit.div(12)
+        );
+    }
     /**
      * @notice Function to check if the selected address is whitelisted
      * @param _address is the address we want to get this information
@@ -179,7 +312,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     view
     returns (uint)
     {
-        uint startingDate = getUint(_startingDate);
+        uint startingDate = getUint(keccak256(_startingDate));
 
         if(block.timestamp > startingDate && block.timestamp < startingDate + 1 years) {
             return 1;
@@ -195,24 +328,164 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     }
 
 
-    // Internal wrapper method to manipulate storage contract
-    function setUint(
-        string key,
-        uint value
+    /**
+     * @notice          Function where user can come with signature taken on plasma and
+     *                  withdraw tokens he has earned
+     */
+    function withdrawTokensWithSignature(
+        bytes signature,
+        uint amountOfTokens
     )
-    internal
+    public
     {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
+        // Assert that amount of tokens to be withdrawn is less than amount of tokens unlocked
+        require(amountOfTokens < getAmountOfTokensUnlockedForWithdrawal(block.timestamp));
+
+        // recover signer of signature
+        address messageSigner = recoverSignature(
+            msg.sender,
+            amountOfTokens,
+            signature
+        );
+
+        //TODO: Later change this that messageSigner is official mining validator
+        // Assert that this signature is signed by maintainer
+        require(isMaintainer(messageSigner) == true);
+
+        // First check if this signature is used
+        require(isExistingSignature(signature) == false);
+
+        // Increase total tokens transfered from contract
+        increaseTransferedAmountFromContract(amountOfTokens);
+
+        // Set that signature is existing and can't be used anymore
+        setSignatureIsExisting(signature);
+
+        // Set the amount of tokens withdrawn by user using this signature
+        setAmountWithdrawnWithSignature(msg.sender, signature, amountOfTokens);
+
+        // Transfer ERC20 tokens from pool to user
+        super.transferTokens(msg.sender, amountOfTokens);
     }
 
-    // Internal wrapper method to manipulate storage contract
-    function getUint(
-        string key
+
+    /**
+     * @notice          Function to calculate amount of tokens available to be withdrawn
+     *                  at current moment which will take care about monthly allowances
+     * @param           timestamp is the timestamp of withdrawal
+     */
+    function getAmountOfTokensUnlockedForWithdrawal(
+        uint timestamp
     )
-    internal
+    public
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(key));
+        uint dateStartedCountingMonths = getDateStartingCountingMonths();
+
+        // We do sub here mostly because of underflow
+        uint totalTimePassedFromUnlockingDay = block.timestamp.sub(dateStartedCountingMonths);
+
+        // Get amount of tokens unlocked monthly
+        uint monthlyTransferAllowance = getMonthlyTransferAllowance();
+
+        // Calculate total amount of tokens being unlocked by now
+        uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / 30 + 1) * monthlyTransferAllowance;
+
+        // Get total amount already transfered
+        uint totalTokensTransferedByNow = getTotalAmountOfTokensTransfered();
+
+        // Return tokens available at this moment
+        return (totalUnlockedByNow.sub(totalTokensTransferedByNow));
     }
+
+    /**
+     * @notice          Function where maintainer can check who signed the message
+     * @param           userAddress is the address of user for who we signed message
+     * @param           amountOfTokens is the amount of pending rewards user wants to claim
+     * @param           signature is the signature created by maintainer
+     */
+    function recoverSignature(
+        address userAddress,
+        uint amountOfTokens,
+        bytes signature
+    )
+    public
+    view
+    returns (address)
+    {
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked('bytes binding user rewards')),
+                keccak256(abi.encodePacked(userAddress,amountOfTokens))
+            )
+        );
+
+        // Recover signer message from signature
+        return Call.recoverHash(hash,signature,0);
+    }
+
+    /**
+     * @notice          Function to check if signature is already existing,
+                        means that is has been used, and can't be used anymore
+     * @param           signature is the signature created by maintainer
+     */
+    function isExistingSignature(
+        bytes signature
+    )
+    public
+    view
+    returns (bool)
+    {
+        return getBool(keccak256(_isExistingSignature,signature));
+    }
+
+    /**
+     * @notice          Function to check amount user has withdrawn using specific signature
+     * @param           user is the address of the user
+     * @param           signature is the signature signed by maintainer
+     */
+    function getAmountUserWithdrawnUsingSignature(
+        address user,
+        bytes signature
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(
+            keccak256(_userToSignatureToAmountWithdrawn, user, signature)
+        );
+    }
+
+    /**
+     * @notice          Function to get total amount of tokens transfered by now
+     */
+    function getTotalAmountOfTokensTransfered()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_totalTokensTransferedByNow));
+    }
+
+    function getDateStartingCountingMonths()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_dateStartingCountingMonths));
+    }
+
+    function getMonthlyTransferAllowance()
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_monthlyTransferAllowance));
+    }
+
+
+
 }

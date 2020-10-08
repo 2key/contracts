@@ -32,7 +32,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     function setInitialParamsCPCCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
-        address _moderator,
         string _url,
         uint [] numberValues
     )
@@ -43,20 +42,15 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;    // Assigning address of _twoKeyPlasmaSingletonRegistry
         contractor = _contractor;                                       // Assigning address of contractor
-        moderator = _moderator;                                         // Assigning address of moderator
         targetUrl = _url;                                               // Set the URL being tracked for the campaign
-        contractorPublicAddress = ethereumOf(_contractor);              // Set contractor contractorPublicAddress
         campaignStartTime = numberValues[0];                            // Set when campaign starts
         campaignEndTime = numberValues[1];                              // Set when campaign ends
         conversionQuota = numberValues[2];                              // Set conversion quota
         totalSupply_ = numberValues[3];                                 // Set total supply
         incentiveModel = IncentiveModel(numberValues[4]);               // Set the incentiveModel selected for the campaign
-        bountyPerConversionWei = numberValues[5];                       // Set the bountyPerConversionWei amount
         received_from[_contractor] = _contractor;                       // Set that contractor has joined from himself
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
-        // Calculate moderator fee per every conversion
-        moderatorFeePerConversion = bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
-        rebalancingRatio = 10**18;
+
         counters = new uint[](7);                                       // Initialize array of counters
 
     }
@@ -71,7 +65,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     function convert(
         bytes signature
     )
-    isCampaignValidated
+    isBountyAdded
     public
     {
         // Require that this is his first conversion
@@ -97,7 +91,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         //Emit conversion event through TwoKeyPlasmaEvents
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitConversionCreatedEvent(
-            mirrorCampaignOnPublic,
+            address(0),
             conversionId,
             contractor,
             msg.sender
@@ -115,7 +109,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     )
     public
     onlyMaintainer
-    isCampaignValidated
+    isBountyAdded
     {
         //Check if converter don't have any executed conversions before and approve him
         oneTimeApproveConverter(converter);
@@ -140,19 +134,16 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
             if(
                 getNumberOfUsersToContractor(converter) > 0 &&
-                counters[6].add(bountyPerConversionWei) <= totalBountyForCampaign &&
-                bountyPerConversionWei > 0
+                counters[6].add(bountyPerConversionWei+moderatorFeePerConversion) <= totalBountyForCampaign
             ) {
                 //Add earnings to moderator total earnings
                 moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFeePerConversion);
-                //Left to be distributed between influencers
-                bountyToBeDistributed = bountyPerConversionWei.sub(moderatorFeePerConversion);
                 //Update paid bounty for influencers
-                c.bountyPaid = bountyToBeDistributed;
+                c.bountyPaid = bountyPerConversionWei;
                 // Update that conversion is being paid
                 c.paymentState = ConversionPaymentState.PAID;
                 //Increment how much bounty is paid
-                counters[6] = counters[6] + bountyPerConversionWei; // Total bounty paid including moderator fee
+                counters[6] = counters[6] + bountyPerConversionWei + moderatorFeePerConversion; // Total bounty paid including moderator fee
                 // Increment number of paid clicks by 1
                 numberOfPaidClicksAchieved++;
                 // emit event that conversion is being paid
@@ -161,7 +152,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 );
             }
             //Distribute rewards between referrers
-            updateRewardsBetweenInfluencers(converter, conversionId, bountyToBeDistributed);
+            updateRewardsBetweenInfluencers(converter, conversionId, bountyPerConversionWei);
         }
 
         updateReputationPointsOnConversionExecutedEvent(converter);
@@ -190,7 +181,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     )
     public
     onlyMaintainer
-    isCampaignValidated
+    isBountyAdded
     {
         require(isApprovedConverter[converter] == false);
 

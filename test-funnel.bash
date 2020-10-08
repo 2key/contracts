@@ -10,11 +10,6 @@ while test $# -gt 0; do
     testsPath='2key-protocol/test/campaignsTests/variations/cpc/*.spec.ts'
     shift
     ;;
-  --cpcNoRewards)
-    shift
-    testsPath='2key-protocol/test/campaignsTests/variations/cpcNoRewards/*.spec.ts'
-    shift
-    ;;
   --mvp)
     shift
     testsPath='2key-protocol/test/campaignsTests/variations/mvp/*.spec.ts'
@@ -46,5 +41,6 @@ yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/sendETH.spec.
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/congressVote.spec.ts
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/runUserRegistration.spec.ts
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/twoKeyExchangeRate.spec.ts
-
+yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/transferDAI.spec.ts
+yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/participationMiningRewards.spec.ts
 yarn run test:command "$testsPath"

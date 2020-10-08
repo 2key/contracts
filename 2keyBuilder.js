@@ -7,7 +7,7 @@ const { networks: truffleNetworks } = require('./truffle');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
 const whitelist = require('./ContractDeploymentWhiteList.json');
-
+const readline = require('readline');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build');
 const contractsBuildPath = path.join(__dirname, 'build', 'contracts');
@@ -41,8 +41,10 @@ const {
     runTruffleCompile,
     runDeployPlasmaReputation,
     runDeployPPCNoRewards,
-    runDeployCPCNoRewardsMigration
+    runDeployCPCNoRewardsMigration,
+    runDeployPaymentHandlersMigration
 } = require('./helpers');
+
 
 
 const branch_to_env = {
@@ -96,17 +98,34 @@ const getDiffBetweenLatestTags = async () => {
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
+        if(!checkIfContractDeployedEver(singletonsChanged[i])) {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
-    return [singletonsChanged, tokenSellCampaignChanged, donationCampaignChanged, cpcChanged, cpcNoRewardsChanged];
+    return [
+        singletonsChanged,
+        tokenSellCampaignChanged.length > 0,
+        donationCampaignChanged.length > 0,
+        cpcChanged.length > 0,
+        cpcNoRewardsChanged.length > 0
+    ];
 };
 
-const checkIfFileExistsInDir = (contractName) => {
+const checkIfContractDeployedEver = (contractName) => {
     let artifactPath = `./build/contracts/${contractName}.json`
-    return fs.existsSync(artifactPath);
+    let build = {};
+    if (fs.existsSync(artifactPath)) {
+        build = JSON.parse(fs.readFileSync(artifactPath, { encoding: 'utf-8' }));
+        if(Object.keys(build.networks).length > 0) {
+            // this means contract is deployed
+            return true;
+        }
+        return false;
+    } else {
+        return false;
+    }
+
 }
 
 const generateChangelog = async () => {
@@ -374,61 +393,96 @@ const checkIfContractIsPlasma = (contractName) => {
 
 };
 
+const getContractsFromFile = () => {
+    let file = JSON.parse(fs.readFileSync('./scripts/deployments/manualDeploy.json', 'utf8'));
+    return file;
+};
+
+/**
+ *  TODO: Improve and change this script to handle following by hierarchy:
+ *  - if deployment is protocol only or there're contracts to be deployed.
+ *  - if protocol deployment, skip whole contracts process, and proceed to submodule generation
+ *  - if contracts deployment, check if we're deploying contracts by getting diff between latest tags,
+ *  - or we're deplpoying them by specifying in file which contracts we want to deploy
+ *
+ *  TODO: Improvement for fetching contracts to be deployed:
+ *  - if singletons, we need list of contracts
+ *  - if campaign contracts, we only need flag with campaign type and if it has to be deployed
+ *
+ */
+
+
 async function deployUpgrade(networks) {
     console.log(networks);
     const l = networks.length;
 
     await runTruffleCompile();
-    let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged, cpcNoRewardsChanged] = await getDiffBetweenLatestTags();
+
+    let deployment = {};
+
+
+    if(process.argv.includes('deploy-from-file')) {
+        let contracts = getContractsFromFile();
+        deployment.singletons = contracts.singletons;
+        deployment.tokenSell = contracts.tokenSell;
+        deployment.donation = contracts.donation;
+        deployment.ppc = contracts.cpc;
+        deployment.cpcNoRewards = contracts.cpcNoRewards;
+    } else {
+        [
+            deployment.singletons,
+            deployment.tokenSell,
+            deployment.donation,
+            deployment.ppc,
+            deployment.cpcNoRewards
+        ] = await getDiffBetweenLatestTags();
+    }
+
+    console.log(deployment);
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
-        console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
-        console.log('TOKEN_SELL to be upgraded: ', tokenSellToBePatched);
-        console.log('DONATION to be upgraded: ', donationToBePatched);
-        console.log('CPC contracts changed: ', cpcChanged);
-        console.log('CPC NO REWARDS contracts changed: ', cpcNoRewardsChanged);
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-no-rewards-deploy')) {
-            console.log("Deploying CPC No Rewards campaign type for the first time to the network");
-            await runDeployPPCNoRewards(networks[i]);
+        if(process.argv.includes('cpc-no-fees-deploy')) {
+            console.log("Deploying 2 new singleton contracts for budget campaigns payments handlers");
+            await runDeployPaymentHandlersMigration(networks[i]);
         }
 
-        if(singletonsToBeUpgraded.length > 0) {
-            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+        if(deployment.singletons.length > 0) {
+            for(let j=0; j<deployment.singletons.length; j++) {
                 /* eslint-disable no-await-in-loop */
-                console.log(networks[i], singletonsToBeUpgraded[j]);
-                if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
-                    console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
+                console.log(networks[i], deployment.singletons[j]);
+                if(checkIfContractIsPlasma(deployment.singletons[j])) {
+                    console.log('Contract is plasma: ' + deployment.singletons[j]);
                     if(networks[i].includes('private') || networks[i].includes('plasma')) {
-                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                        await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 } else {
                     if(networks[i].includes('public')) {
-                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                        await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 }
             }
         }
 
-        if(tokenSellToBePatched.length > 0) {
+        if(deployment.tokenSell) {
             if(networks[i].includes('public')) {
                 await runDeployTokenSellCampaignMigration(networks[i]);
             }
         }
 
-        if(donationToBePatched.length > 0) {
+        if(deployment.donation) {
             if(networks[i].includes('public')) {
                 await runDeployDonationCampaignMigration(networks[i]);
             }
         }
 
-        if(cpcChanged.length > 0) {
+        if(deployment.ppc) {
             await runDeployCPCCampaignMigration(networks[i]);
         }
 
-        if(cpcNoRewardsChanged.length > 0) {
+        if(deployment.cpcNoRewards) {
             await runDeployCPCNoRewardsMigration(networks[i]);
         }
 
@@ -651,6 +705,7 @@ const deployContracts = async (networks, updateArchive) => {
     }
 };
 
+
 async function main() {
     contractsStatus = await contractsGit.status(); // Fetching branch
     const mode = process.argv[2];
@@ -689,12 +744,29 @@ async function main() {
         case '--tenderly':
             await pullTenderlyConfiguration();
             process.exit(0);
-
+        case '--readFile':
+            console.log(getContractsFromFile());
+            process.exit(0);
         default:
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+
+            const answer = await new Promise(resolve => {
+                rl.question("This will start deployment process. Proceed? [Y/N] ", answer => resolve(answer))
+            })
+            rl.close();
+            if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+                process.exit(0);
+            }
+
             await deploy();
             process.exit(0);
     }
 }
+
+
 
 main().catch((e) => {
     console.log(e);

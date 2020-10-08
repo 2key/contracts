@@ -10,4 +10,7 @@ contract ITwoKeyPlasmaEventSource {
     function emitCPCCampaignMirrored(address proxyAddressPlasma, address proxyAddressPublic) public;
     function emitHandleChangedEvent(address _userPlasmaAddress, string _newHandle) public;
     function emitConversionPaidEvent(uint conversionID) public;
+    function emitAddedPendingRewards(address campaignPlasma, address influencer, uint amountOfTokens) public;
+    function emitPaidPendingRewards(address influencer, uint amountNonRebalancedReferrerEarned, uint amountPaid, address[] campaignsPaid, uint [] earningsPerCampaign) public;
+    function emitRewardsAssignedToUserInParticipationMiningEpoch(uint epochId, address user, uint reward2KeyWei) public;
 }
