@@ -179,6 +179,9 @@ module.exports = async function deploy(deployer) {
 
     console.log('Contract updating: ',contractName);
 
+    if(contractName === 'TwoKeyParticipationMiningPool') {
+        deployer.link(Call, contract);
+    }
     deployer.deploy(contract)
         .then(() => contract.deployed()
             .then(async (contractInstance) => {
