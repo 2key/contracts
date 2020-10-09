@@ -86,30 +86,19 @@ export const generateWalletFromMnemonic = (mnemonic) => {
 };
 
 export default function createWeb3(mnemonicInput: string, rpcUrls: string[], pk?: string): EthereumWeb3 {
-    let wallet;
     const mnemonic = mnemonicInput || bip39.generateMnemonic();
+    const privateKey = pk || generateWalletFromMnemonic(mnemonic).privateKey;
 
-    if (pk) {
-        const private_key = Buffer.from(pk, 'hex');
-        wallet = eth_wallet.fromPrivateKey(private_key);
-    } else{
-        const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
-        wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
-    }
-
-    const engine = new ProviderEngine();
-    engine.addProvider(new WalletSubprovider(wallet, {}));
-    engine.addProvider(new NonceSubprovider());
+    const web3 = new Web3();
+    const account = web3.eth.accounts.privateKeyToAccount(privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`);
+    web3.eth.accounts.wallet.add(account);
+    web3.eth.defaultAccount = account.address;
     rpcUrls.forEach(rpcUrl => {
-        const mainProvider = rpcUrl.startsWith('http')
-            ? new RpcSubprovider({ rpcUrl })
-            : new WSSubprovider({ rpcUrl });
-        engine.addProvider(mainProvider);
+        if (rpcUrl.startsWith('http')) {
+            web3.setProvider(new Web3.providers.HttpProvider(rpcUrl));
+        } else {
+            web3.setProvider(new Web3.providers.WebsocketProvider(rpcUrl));
+        }
     });
-    engine.start();
-    const web3 = new Web3(engine);
-    const address = `0x${wallet.getAddress().toString('hex')}`;
-    const privateKey = wallet.getPrivateKey().toString('hex');
-    // console.log('new Web3', address, privateKey);
-    return {web3, address, privateKey, mnemonic};
+    return {web3, address: account.address, privateKey, mnemonic};
 }

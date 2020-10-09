@@ -27,6 +27,7 @@
     "test:acquisition": "./test-funnel.bash --acquisition",
     "test:mvp": "./test-funnel.bash --mvp",
     "test:command": "node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register $NODE_DEBUG_OPTION",
+    "test:web3": "node -r dotenv/config ./node_modules/.bin/mocha --exit -r ts-node/register ./2key-protocol/test/web3.test.ts $NODE_DEBUG_OPTION",
     "ts-node": "ts-node -r dotenv/config",
     "register": "ts-node -r dotenv/config 2key-protocol/test/helpers/_registerUserFromBackend.ts",
     "compile": "./node_modules/.bin/truffle compile"
@@ -134,7 +135,7 @@
     "truffle-ledger-provider": "^1.0.1",
     "truffle-privatekey-provider": "0.1.0",
     "truffle-security": "^1.5.5",
-    "web3": "0.20.7",
+    "web3": "1.3.0",
     "web3-provider-engine": "^15.0.3",
     "window-or-global": "1.0.1"
   },
