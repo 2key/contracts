@@ -89,7 +89,7 @@ const verifyCampaigns = async(campaigns, networkId, rpc) => {
                 console.log('|  Verification Status : ✅      |      Contract name: ', contracts[i]);
             } else {
                 console.log('|  Verification Status : ❌      |      Contract name: ', contracts[i]);
-                issuesFound[campaigns[i]] = {
+                issuesFound[contracts[i]] = {
                     'Contract latest added version': latestAddedVersion,
                     'Campaign latest approved version': latestApprovedVersion
                 };
