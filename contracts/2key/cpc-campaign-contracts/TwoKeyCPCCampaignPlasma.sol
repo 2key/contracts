@@ -129,8 +129,6 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         // The rewards are being distributed only if campaign is not ended by contractor and in timecap allowed
         if(!isCampaignEndedByContractor() && isCampaignActiveInTermsOfTime()) {
-            uint bountyToBeDistributed = 0;
-
             // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
             if(
                 getNumberOfUsersToContractor(converter) > 0 &&
@@ -152,7 +150,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 );
             }
             //Distribute rewards between referrers
-            updateRewardsBetweenInfluencers(converter, conversionId, bountyPerConversionWei);
+            updateRewardsBetweenInfluencers(converter, conversionId, c.bountyPaid);
         }
 
         updateReputationPointsOnConversionExecutedEvent(converter);
