@@ -880,19 +880,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return availableAmounts;
     }
 
-    /**
-     * @notice          Function to get amount of tokens available to fill reserve
-     * @param           tokenAddress is the address of token being requested to check available amount of same
-     */
-    function getAmountOfTokensAvailableToFillReserve(
-        address tokenAddress
-    )
-    public
-    view
-    returns (uint)
-    {
-        return getUint(keccak256("stableCoinToAmountAvailableToFillReserve", tokenAddress));
-    }
 
     function releaseAllDAIFromContractToReserve()
     public
