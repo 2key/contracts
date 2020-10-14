@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime';
 import 'babel-register';
 import Web3 from 'web3';
-import bip39 from 'bip39';
+import { mnemonicToSeed, generateMnemonic } from 'bip39';
 import * as eth_wallet from 'ethereumjs-wallet';
 import hdkey from 'ethereumjs-wallet/hdkey';
 import ProviderEngine from 'web3-provider-engine';
@@ -17,13 +17,20 @@ import createLedgerSubprovider from '@ledgerhq/web3-subprovider';
 
 interface EthereumWeb3 {
     web3: any;
+    plasmaWeb3: any;
     address: string;
+    plasmaAddress: string;
     mnemonic?: string;
     privateKey?: string;
 }
 
-export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): Promise<EthereumWeb3> {
-    return new Promise<EthereumWeb3>(async (resolve, reject) => {
+interface LedgerWeb3 {
+    web3: any;
+    address: string;
+}
+
+export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): Promise<LedgerWeb3> {
+    return new Promise<LedgerWeb3>(async (resolve, reject) => {
         try {
             const options: any = {};
             if (networkId) {
@@ -41,8 +48,6 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
             engine.addProvider(new NonceSubprovider());
             const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
             engine.addProvider(mainProvider);
-            // engine.addProvider(new ProviderSubprovider(new Web3.providers.HttpProvider(rpcUrl)));
-            // engine.addProvider(new ProviderSubprovider(rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl})));
             engine.start();
 
             const web3 = new Web3(engine);
@@ -50,7 +55,7 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
                 if (err) {
                     reject(err);
                 } else {
-                    resolve({web3, address: res[0] });
+                    resolve({ web3, address: res[0] });
                 }
             })
         } catch (e) {
@@ -66,7 +71,7 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
  */
 export const generatePlasmaFromMnemonic = (mnemonic) => {
     // const plasmaMnemonic = mnemonic.split(' ').reverse().join(' ');
-    const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
+    const hdwallet = hdkey.fromMasterSeed(mnemonicToSeed(mnemonic));
     const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
     const address = `0x${wallet.getAddress().toString('hex')}`;
     const privateKey = wallet.getPrivateKey().toString('hex');
@@ -76,7 +81,7 @@ export const generatePlasmaFromMnemonic = (mnemonic) => {
 };
 
 export const generateWalletFromMnemonic = (mnemonic) => {
-    const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
+    const hdwallet = hdkey.fromMasterSeed(mnemonicToSeed(mnemonic));
     const wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
     const address = `0x${wallet.getAddress().toString('hex')}`;
     const privateKey = wallet.getPrivateKey().toString('hex');
@@ -85,15 +90,15 @@ export const generateWalletFromMnemonic = (mnemonic) => {
     };
 };
 
-export default function createWeb3(mnemonicInput: string, rpcUrls: string[], pk?: string): EthereumWeb3 {
+export default function createWeb3(mnemonicInput: string, rpcUrls: string[], eventsUrls: string[], pk?: string): EthereumWeb3 {
     let wallet;
-    const mnemonic = mnemonicInput || bip39.generateMnemonic();
+    const mnemonic = mnemonicInput || generateMnemonic();
 
     if (pk) {
         const private_key = Buffer.from(pk, 'hex');
         wallet = eth_wallet.fromPrivateKey(private_key);
-    } else{
-        const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(mnemonic));
+    } else {
+        const hdwallet = hdkey.fromMasterSeed(mnemonicToSeed(mnemonic));
         wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
     }
 
@@ -110,6 +115,22 @@ export default function createWeb3(mnemonicInput: string, rpcUrls: string[], pk?
     const web3 = new Web3(engine);
     const address = `0x${wallet.getAddress().toString('hex')}`;
     const privateKey = wallet.getPrivateKey().toString('hex');
+
+    const { address: plasmaAddress, privateKey: plasmaPK } = generatePlasmaFromMnemonic(mnemonic);
+    const plasmaWallet = eth_wallet.fromPrivateKey(Buffer.from(plasmaPK, 'hex'));
+    const plasmaEngine = new ProviderEngine();
+    plasmaEngine.addProvider(new WalletSubprovider(plasmaWallet, {}));
+    plasmaEngine.addProvider(new NonceSubprovider());
+    eventsUrls.forEach(rpcUrl => {
+        const mainProvider = rpcUrl.startsWith('http')
+            ? new RpcSubprovider({ rpcUrl })
+            : new WSSubprovider({ rpcUrl });
+        plasmaEngine.addProvider(mainProvider);
+    });
+    plasmaEngine.start();
+    const plasmaWeb3 = new Web3(plasmaEngine);
+
+
     // console.log('new Web3', address, privateKey);
-    return {web3, address, privateKey, mnemonic};
+    return { web3, address, privateKey, mnemonic, plasmaWeb3, plasmaAddress };
 }
