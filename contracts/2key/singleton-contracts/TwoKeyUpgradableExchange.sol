@@ -874,7 +874,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         uint i;
         for(i=0; i<numberOfTokens; i++) {
-            availableAmounts[i] = getAmountOfTokensAvailableToFillReserve(stableCoinAddresses[i]);
+            availableAmounts[i] = getUint(keccak256("stableCoinToAmountAvailableToFillReserve", stableCoinAddresses[i]));
         }
 
         return availableAmounts;
