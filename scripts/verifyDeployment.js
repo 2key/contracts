@@ -68,12 +68,11 @@ const verifyCampaigns = async(campaigns, networkId, rpc) => {
     // Load singleton registry contract
     let SingletonRegistry = loadSingletonRegistry(web3,networkId);
 
-    let issuesFound = {};
-
     console.log('\n Starting campaigns verification');
     logLine();
 
     for(let campaignType in campaigns) {
+
         console.log('Campaign type being verified: ', campaignType);
         let contracts = campaigns[campaignType];
 
@@ -90,7 +89,7 @@ const verifyCampaigns = async(campaigns, networkId, rpc) => {
                 console.log('|  Verification Status : ✅      |      Contract name: ', contracts[i]);
             } else {
                 console.log('|  Verification Status : ❌      |      Contract name: ', contracts[i]);
-                issuesFound[campaigns[i]] = {
+                issuesFound[contracts[i]] = {
                     'Contract latest added version': latestAddedVersion,
                     'Campaign latest approved version': latestApprovedVersion
                 };

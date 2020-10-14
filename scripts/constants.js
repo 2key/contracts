@@ -36,7 +36,8 @@ module.exports.campaigns = {
         "DONATION" : ["TwoKeyDonationCampaign", "TwoKeyDonationConversionHandler","TwoKeyDonationLogicHandler"]
     },
     "private": {
-        "CPC" :  ["CPC_PLASMA", "CPC_NO_REWARDS_PLASMA"]
+        "CPC_PLASMA" :  ["TwoKeyCPCCampaignPlasma"],
+        "CPC_NO_REWARDS_PLASMA" : ["TwoKeyCPCCampaignPlasmaNoReward"]
     }
 };
 
