@@ -728,10 +728,6 @@ async function main() {
             await pullTenderlyConfiguration();
             process.exit(0);
             break;
-        case '--readFile':
-            console.log(getContractsFromFile());
-            process.exit(0);
-            break;
         default:
             const rl = readline.createInterface({
                 input: process.stdin,
