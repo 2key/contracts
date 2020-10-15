@@ -17,5 +17,5 @@ echo "Burn 2KEY tokens on either TwoKeyEconomy contract or https://etherscan.io/
 echo "TwoKeyAdmin contract proxy address on production: 0x31cf9c7847c979313fe27eadfcc847a8a0252d86"
 cd ../..
 
-python3 generate_bytecode.py transfer2KeyTokens 0x0000000000000000000000000000000000000001 800000
+python3 generate_bytecode.py transfer2KeyTokens 0x0000000000000000000000000000000000000001 803495
 
