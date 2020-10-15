@@ -748,6 +748,7 @@ async function main() {
             console.log(getContractsFromFile());
             process.exit(0);
         default:
+
             const rl = readline.createInterface({
                 input: process.stdin,
                 output: process.stdout
@@ -757,11 +758,15 @@ async function main() {
                 rl.question("This will start deployment process. Proceed? [Y/N] ", answer => resolve(answer))
             })
             rl.close();
-            if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+            if(answer.toUpperCase() === 'Y' || answer.toUpperCase() === 'YES') {
+                await deploy();
                 process.exit(0);
+            } else if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+                console.log('Bye bye 👋👋')
+            } else {
+                console.log('Wrong answer! Bye bye 👋👋');
             }
 
-            await deploy();
             process.exit(0);
     }
 }
