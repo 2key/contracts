@@ -1,15 +1,5 @@
-import bip39 from "bip39";
-import * as eth_wallet from 'ethereumjs-wallet';
-import hdkey from 'ethereumjs-wallet/hdkey';
-import ProviderEngine from 'web3-provider-engine';
-import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
-import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
-import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
-import Web3 from 'web3';
 import { TwoKeyProtocol } from '../../src';
-import { ISignedPlasma, ISignedWalletData } from '../../src/registry/interfaces';
-import { ISignedEthereum, ISignedUsername } from '../../src/plasma/interfaces';
-
+import createWeb3 from './_web3';
 
 
 export interface IRegistryData {
@@ -22,33 +12,15 @@ export interface IRegistryData {
 async function registerUserFromBackend({ signature, plasmaAddress, ethereumAddress, username }: IRegistryData) {
     const deployerMnemonic = process.env.MNEMONIC_AYDNEP;
     const eventsNetUrls = [process.env.PLASMA_RPC_URL];
-    const deployerPK = process.env.MNEMONIC_AYDNEP ? null : '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec';
     const networkId = parseInt(process.env.MAIN_NET_ID, 10);
     const privateNetworkId = parseInt(process.env.SYNC_NET_ID, 10);
 
-    const rpcUrl = process.env.RPC_URL;
-    let wallet;
-    if (deployerPK) {
-        const private_key = Buffer.from(deployerPK, 'hex');
-        wallet = eth_wallet.fromPrivateKey(private_key);
-    } else {
-        const hdwallet = hdkey.fromMasterSeed(bip39.mnemonicToSeed(deployerMnemonic));
-        wallet = hdwallet.derivePath('m/44\'/60\'/0\'/0/' + 0).getWallet();
-    }
-
-    const engine = new ProviderEngine();
-    const mainProvider = rpcUrl.startsWith('http') ? new RpcSubprovider({rpcUrl}) : new WSSubprovider({rpcUrl});
-    engine.addProvider(new WalletSubprovider(wallet, {}));
-    engine.addProvider(mainProvider);
-    engine.start();
-    const web3 = new Web3(engine);
-    const address = `0x${wallet.getAddress().toString('hex')}`;
-    const privateKey = wallet.getPrivateKey().toString('hex');
-    console.log('new Web3', address, privateKey);
+    const rpcUrl = [process.env.RPC_URL];
+    const { web3, plasmaWeb3, plasmaAddress: maintainerPlasmaAddress, address } = createWeb3(deployerMnemonic, rpcUrl, eventsNetUrls)
     const twoKeyProtocol = new TwoKeyProtocol({
         web3,
-        eventsNetUrls,
-        plasmaPK: '9125720a89c9297cde4a3cfc92f233da5b22f868b44f78171354d4e0f7fe74ec',
+        plasmaWeb3,
+        plasmaAddress: maintainerPlasmaAddress,
         networkId,
         privateNetworkId,
     });
