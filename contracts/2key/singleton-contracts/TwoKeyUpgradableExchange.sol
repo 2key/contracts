@@ -9,7 +9,6 @@ import "../interfaces/IKyberNetworkProxy.sol";
 import "../interfaces/IKyberReserveInterface.sol";
 import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
 import "../interfaces/IERC20.sol";
-import "../interfaces/IBancorContract.sol";
 import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
