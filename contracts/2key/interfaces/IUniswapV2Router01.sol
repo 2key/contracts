@@ -1,6 +1,8 @@
 pragma solidity ^0.4.24;
 
 interface IUniswapV2Router01 {
+    //Mainnet address: 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
+    //Ropsten address: 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D
     function factory() external pure returns (address);
 
     function WETH() external pure returns (address);
