@@ -13,6 +13,7 @@ import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyFactory.sol";
+import "../interfaces/IUniswapV2Router01.sol";
 import "../upgradability/Upgradeable.sol";
 
 
@@ -1048,7 +1049,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         if(amountToBeHedged > address(this).balance) {
             amountToBeHedged = address(this).balance;
         }
-        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
+
+    address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
         // Get minimal conversion rate for the swap of ETH->DAI token
@@ -1418,35 +1420,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
         return ERC20(tokenAddress).balanceOf(address(this));
-    }
-
-    /**
-     * @notice          Function to get amount of destination tokens to be received if bought
-     *                  by srcAmountWei of srcToken
-     *
-     * @param           srcAmountWei is the amount of tokens in wei we're putting in
-     * @param           srcToken is the address of src token
-     * @param           destToken is the address of destination token
-     *
-     * @return          The amount of tokens which would've been received in case this conversion happen with this rate
-     */
-    function getEstimatedAmountOfTokensForSwapFromKyber(
-        uint srcAmountWei,
-        address srcToken,
-        address destToken
-    )
-    public
-    view
-    returns (uint)
-    {
-        uint expectedRate = getKyberExpectedRate(srcAmountWei, srcToken, destToken);
-        IKyberReserveInterface kyberReserveInterface = IKyberReserveInterface(getAddress(keccak256(_kyberReserveContract)));
-        return kyberReserveInterface.getDestQty(
-            ERC20(srcToken),
-            ERC20(destToken),
-            srcAmountWei,
-            expectedRate
-        );
     }
 
 
