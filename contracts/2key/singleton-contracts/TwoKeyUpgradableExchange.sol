@@ -86,8 +86,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         TWO_KEY_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
         setUint(keccak256("spreadWei"), 3**16); // 3% wei
-        // 0.06$ Wei
-        setUint(keccak256("sellRate2key"),6 * (10**16));// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
+
+    setUint(keccak256("sellRate2key"),6 * (10**16));// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("numberOfContracts"), 0); //Number of contracts which have interacted with this contract through buyTokens function
 
         setAddress(keccak256(_dai), _daiAddress);
@@ -649,43 +649,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         return amountOfDAIs;
     }
-
-
-//    function getMore2KeyTokensForRebalancing(
-//        uint amountOf2KeyRequested
-//    )
-//    public
-//    onlyValidatedContracts
-//    returns (uint)
-//    {
-//        uint campaignID = getContractId(msg.sender);
-//        //TODO: Check there's enough 2key and DAI to complete tx
-//        // Get key for how much DAI is available for this contract to withdraw
-//        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw", campaignID);
-//        // Get key for total available to fill reserve
-//        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
-//
-//        // Get DAI available
-//        uint _daiWeiAvailableToWithdrawAndFillReserve = daiWeiAvailableToWithdraw(campaignID);
-//
-//        uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
-//
-//        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailableToWithdrawAndFillReserve));
-//
-//        // Set DAI available for this campaign to 0 since we will release everything to reserve
-//        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
-//
-//        // Send the tokens to the campaign
-//        _processPurchase(msg.sender, amountOf2KeyRequested);
-//
-//        // Emit the event that DAI is released
-//        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDAIReleasedAsIncome(
-//            msg.sender,
-//            _daiWeiAvailableToWithdrawAndFillReserve
-//        );
-//        // Return the amount of 2KEY tokens necessary for rebalancing
-//        return amountOf2KeyRequested;
-//    }
 
 
     function getMore2KeyTokensForRebalancingV1(
