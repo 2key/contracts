@@ -11,7 +11,6 @@ const readline = require('readline');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build');
 const contractsBuildPath = path.join(__dirname, 'build', 'contracts');
-const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
 const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
@@ -37,10 +36,8 @@ const {
     ipfsAdd,
     ipfsGet,
     runDeployCPCCampaignMigration,
-    runDeployCPCFirstTime,
     runTruffleCompile,
     runDeployPlasmaReputation,
-    runDeployPPCNoRewards,
     runDeployCPCNoRewardsMigration,
     runDeployPaymentHandlersMigration
 } = require('./helpers');
@@ -76,11 +73,11 @@ const getDiffBetweenLatestTags = async () => {
     let status = await contractsGit.status();
     let diffParams;
 
-    if(status.current == 'staging') {
+    if (status.current === 'staging') {
         diffParams = latestTagStaging;
-    } else if(status.current == 'develop') {
+    } else if (status.current === 'develop') {
         diffParams = latestTagDev;
-    } else if(status.current == 'master') {
+    } else if (status.current === 'master') {
         diffParams = latestTagMaster;
     }
 
@@ -117,11 +114,7 @@ const checkIfContractDeployedEver = (contractName) => {
     let build = {};
     if (fs.existsSync(artifactPath)) {
         build = JSON.parse(fs.readFileSync(artifactPath, { encoding: 'utf-8' }));
-        if(Object.keys(build.networks).length > 0) {
-            // this means contract is deployed
-            return true;
-        }
-        return false;
+        return Object.keys(build.networks).length > 0;
     } else {
         return false;
     }
@@ -394,8 +387,7 @@ const checkIfContractIsPlasma = (contractName) => {
 };
 
 const getContractsFromFile = () => {
-    let file = JSON.parse(fs.readFileSync('./scripts/deployments/manualDeploy.json', 'utf8'));
-    return file;
+    return JSON.parse(fs.readFileSync('./scripts/deployments/manualDeploy.json', 'utf8'));
 };
 
 /**
@@ -643,15 +635,6 @@ async function deploy() {
     }
 }
 
-const test = () => new Promise(async (resolve, reject) => {
-    try {
-        await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/test/index.spec.ts']);
-        resolve();
-    } catch (err) {
-        reject(err);
-    }
-
-});
 
 const buildSubmodules = async(contracts) => {
     await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'), ['--config', './webpack.config.submodules.js', '--mode production', '--colors']);
@@ -740,13 +723,11 @@ async function main() {
         case '--diff':
             console.log(await getDiffBetweenLatestTags());
             process.exit(0);
-
+            break;
         case '--tenderly':
             await pullTenderlyConfiguration();
             process.exit(0);
-        case '--readFile':
-            console.log(getContractsFromFile());
-            process.exit(0);
+            break;
         default:
             const rl = readline.createInterface({
                 input: process.stdin,
@@ -757,12 +738,16 @@ async function main() {
                 rl.question("This will start deployment process. Proceed? [Y/N] ", answer => resolve(answer))
             })
             rl.close();
-            if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+            if(answer.toUpperCase() === 'Y' || answer.toUpperCase() === 'YES') {
+                await deploy();
                 process.exit(0);
+            } else if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+                console.log('Bye bye 👋👋')
+            } else {
+                console.log('Wrong answer! Bye bye 👋👋');
             }
-
-            await deploy();
             process.exit(0);
+            break;
     }
 }
 

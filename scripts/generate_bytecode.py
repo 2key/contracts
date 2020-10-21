@@ -40,6 +40,7 @@ def generate_bytecode_for_changing_rewards_release_date(new_date):
 
 def generate_bytecode_for_adding_new_member(target_member, member_name, voting_power):
     voting_power = int(voting_power)
+    member_name = Web3.toBytes(text=member_name)
     method_name_and_params = "addMember(address,bytes32,uint256)"
     types=["address","bytes32","uint256"]
     values = [target_member, member_name, voting_power]
@@ -254,6 +255,9 @@ if __name__ == "__main__":
     if(arg1 == "setNewTwoKeyRewardsReleaseDate"):
         generate_bytecode_for_changing_rewards_release_date(int(sys.argv[2]))
     if(arg1 == "addMember"):
+        print(sys.argv[2])
+        print(sys.argv[3])
+        print(sys.argv[4])
         generate_bytecode_for_adding_new_member(sys.argv[2],sys.argv[3],sys.argv[4])
     if(arg1 == "removeMember"):
         generate_bytecode_for_removing_member(sys.argv[2])

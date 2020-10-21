@@ -12,20 +12,20 @@ const ipfs = {
     apiUrl: env.IPFS_URL || 'https://ipfs.2key.net/api/v0'
 };
 
-export const getTwoKeyProtocolValues = (web3, plasmaMnemonic: string): ITwoKeyInit => (
+export const getTwoKeyProtocolValues = (web3: any, plasmaWeb3: any, plasmaAddress: string): ITwoKeyInit => (
     {
         web3,
+        plasmaWeb3,
+        plasmaAddress,
         ipfs,
-        eventsNetUrls,
-        plasmaPK: generatePlasmaFromMnemonic(plasmaMnemonic).privateKey,
         networkId,
         privateNetworkId,
     }
 );
 
 
-const getTwoKeyProtocol = (web3, plasmaMnemonic: string): TwoKeyProtocol =>  {
-  return new TwoKeyProtocol(getTwoKeyProtocolValues(web3, plasmaMnemonic))
+const getTwoKeyProtocol = (web3: any, plasmaWeb3: any, plasmaAddress: string): TwoKeyProtocol =>  {
+  return new TwoKeyProtocol(getTwoKeyProtocolValues(web3, plasmaWeb3, plasmaAddress))
 };
 
 export default getTwoKeyProtocol;
