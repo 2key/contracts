@@ -1283,7 +1283,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapRouterV2");
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router01");
         uint[] memory amountsOut = new uint[](2);
 
         amountsOut = IUniswapV2Router01(uniswapRouter).getAmountsOut(
