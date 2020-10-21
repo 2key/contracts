@@ -1275,6 +1275,24 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return getUint(keccak256("spreadWei"));
     }
 
+    function uniswapPriceDiscover(
+        uint amountToSwap,
+        address [] path
+    )
+    public
+    view
+    returns (uint)
+    {
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapRouterV2");
+        uint[] memory amountsOut = new uint[](2);
+
+        amountsOut = IUniswapV2Router01(uniswapRouter).getAmountsOut(
+            amountToSwap,
+            path
+        );
+
+        return amountsOut[1];
+    }
 
     /**
      * @notice          Getter for 2key sell rate
@@ -1286,10 +1304,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
+        address [] memory path = new address[](2);
+        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
+
+        uint rateFromUniswap = uniswapPriceDiscover(10 ** 18, path);
         uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
-        return (rateFromCoinGecko + rateFromContract)/2;
+        return (rateFromUniswap.add(rateFromCoinGecko).add(rateFromContract)).div(3);
     }
 
 
