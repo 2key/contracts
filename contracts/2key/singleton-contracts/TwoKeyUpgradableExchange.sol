@@ -711,14 +711,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
-    function exchangeDaiFor2Key(
-        uint amountDAI
-    )
-    public
-    {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
-
-    }
 
     /**
      * @notice          Function to buyTokens from TwoKeyUpgradableExchange
@@ -922,43 +914,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-//    /**
-//     * @notice          After the rebalancing on budget campaigns is done, we're releasing all the DAI tokens
-//     *
-//     * @param           amountOf2key is the amount of 2key which we're receiving back to liquidity pool
-//     */
-//    function returnLeftoverAfterRebalancing(
-//        uint amountOf2key
-//    )
-//    public
-//    onlyValidatedContracts
-//    {
-//        uint contractID = getContractId(msg.sender);
-//
-//        bytes32 _daiWeiAvailableToWithdrawKeyHash = keccak256("daiWeiAvailableToWithdraw",contractID);
-//        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
-//
-//        uint _daiWeiAvailableToWithdrawAndFillReserve = daiWeiAvailableToWithdraw(contractID);
-//        uint _daiWeiAvailableToFill2keyReserveCurrently = daiWeiAvailableToFill2KEYReserve();
-//
-//        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, _daiWeiAvailableToFill2keyReserveCurrently.add(_daiWeiAvailableToWithdrawAndFillReserve));
-//        setUint(_daiWeiAvailableToWithdrawKeyHash, 0);
-//
-//        //Take 2key tokens to the liquidity pool
-//        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).transferFrom(
-//            msg.sender,
-//            address(this),
-//            amountOf2key
-//        );
-//
-//        // Emit the event that DAI is released
-//        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitDAIReleasedAsIncome(
-//            msg.sender,
-//            _daiWeiAvailableToWithdrawAndFillReserve
-//        );
-//    }
-
-
     /**
      * @notice          Function to get expected rate from Kyber contract
      * @param           amountSrcWei is the amount we'd like to exchange
@@ -985,6 +940,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         (minConversionRate,) = proxyContract.getExpectedRate(src, dest, amountSrcWei);
 
         return minConversionRate;
+    }
+
+    function swapStableCoinsAvailableToFillReserveFor2KEY(
+        address [] stableCoinsAddresses
+    )
+    public
+    onlyMaintainer
+    {
+
     }
 
     /**
@@ -1050,7 +1014,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             amountToBeHedged = address(this).balance;
         }
 
-    address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
+        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
         IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
 
         // Get minimal conversion rate for the swap of ETH->DAI token
