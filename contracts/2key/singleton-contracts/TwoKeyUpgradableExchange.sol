@@ -813,6 +813,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    function getAvailableAmountToFillReserveInternal(
+        address tokenAddress
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return getUint(keccak256("stableCoinToAmountAvailableToFillReserve", tokenAddress));
+    }
+
     /**
      * @notice          Function to get array containing how much of the tokens are available to fill reserve
      * @param           stableCoinAddresses is array of stable coin
@@ -829,7 +839,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         uint i;
         for(i=0; i<numberOfTokens; i++) {
-            availableAmounts[i] = getUint(keccak256("stableCoinToAmountAvailableToFillReserve", stableCoinAddresses[i]));
+            availableAmounts[i] = getAvailableAmountToFillReserveInternal(stableCoinAddresses[i]);
         }
 
         return availableAmounts;
@@ -911,7 +921,38 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyMaintainer
     {
+        uint numberOfTokens = stableCoinsAddresses.length;
+        uint i;
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router01");
 
+        for (i = 0; i < numberOfTokens; i++) {
+            address tokenAddress = stableCoinsAddresses[i];
+            uint availableForReserve = getAvailableAmountToFillReserveInternal(tokenAddress);
+
+            // Approve uniswap router to take tokens from the contract
+            IERC20(tokenAddress).approve(
+                uniswapRouter,
+                availableForReserve
+            );
+
+            address [] memory path = new address[](2);
+            path[0] = tokenAddress;
+            path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+            uint minimumAllowed = uniswapPriceDiscover(
+                availableForReserve,
+                path
+            );
+
+            IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
+            availableForReserve,
+            minimumAllowed.mul(97).div(100),
+            path,
+            address(this),
+
+            );
+
+        }
     }
 
     /**
@@ -1275,6 +1316,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return getUint(keccak256("spreadWei"));
     }
 
+    /**
+     * @notice          Function to be used to fetch 2KEY-DAI rate from uniswap
+     * @notice          amountToSwap is in wei value
+     * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
+     */
     function uniswapPriceDiscover(
         uint amountToSwap,
         address [] path
