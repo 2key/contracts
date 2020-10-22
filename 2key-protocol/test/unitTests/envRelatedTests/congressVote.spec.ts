@@ -25,19 +25,19 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
 
     it('should get member info from congress', async() => {
         let memberInfo = await twoKeyProtocol.CongressMembersRegistry.getMemberInfo(from);
+        console.log('memberInfo', memberInfo);
         expect(memberInfo.memberName).to.be.equal('Eitan');
     }).timeout(30000);
 
     it('should create a proposal', async() => {
-        const admin = twoKeyProtocol.twoKeyAdmin;
         let txHash: string = await twoKeyProtocol.Congress.newProposal(
-            twoKeyProtocol.twoKeyAdmin.address,
+            twoKeyProtocol.twoKeyAdmin._address,
             "Send some tokens to contractor",
             transactionBytecode,
             from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('1. member vote to support proposal', async() => {
@@ -48,7 +48,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I support sending tokens", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('2. member vote to support proposal', async() => {
@@ -60,7 +60,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I also support sending tokens", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('3. member vote to support proposal', async() => {
@@ -72,13 +72,14 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals-1,true, "I also support sending tokens", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should get proposal data', async() => {
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
         numberOfProposals = parseFloat(numberOfProposals.toString());
         let data = await twoKeyProtocol.Congress.getProposalInformations(numberOfProposals-1,from);
+        console.log('DATA', data);
         expect(data.proposalIsExecuted).to.be.equal(false);
         expect(data.proposalNumberOfVotes).to.be.equal(3);
     }).timeout(60000);
@@ -88,7 +89,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals-1, transactionBytecode, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 });
 

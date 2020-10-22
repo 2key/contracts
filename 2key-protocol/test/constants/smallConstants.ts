@@ -60,4 +60,4 @@ export const feePercent = 0.02;
 
 export const rpcUrls = [env.RPC_URL];
 
-export const eventsUrls = ['https://rpc-staging.private.test.k8s.2key.net'];
+export const eventsUrls = ['http://localhost:18545'];

@@ -17,16 +17,16 @@ export default function contractorWithdrawTest(
       // @ts-ignore
       const {campaign: {campaignAddressPublic}} = storage;
 
-      let campaignBalanceBefore = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy.address, campaignAddressPublic);
-      let contractorBalanceBefore = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy.address, address);
+      let campaignBalanceBefore = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy._address, campaignAddressPublic);
+      let contractorBalanceBefore = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy._address, address);
 
       await protocol.CPCCampaign.contractorWithdraw(campaignAddressPublic, address);
 
       await new Promise(resolve => setTimeout(resolve, 5000));
 
-      let contractorBalanceAfter = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy.address, address);
+      let contractorBalanceAfter = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy._address, address);
 
-      const campaignBalanceAfter = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy.address, campaignAddressPublic);
+      const campaignBalanceAfter = await protocol.ERC20.getERC20Balance(protocol.twoKeyEconomy._address, campaignAddressPublic);
 
       expectEqualNumbers(contractorBalanceAfter, contractorBalanceBefore + campaignBalanceBefore);
       expect(campaignBalanceAfter).to.be.eq(0);

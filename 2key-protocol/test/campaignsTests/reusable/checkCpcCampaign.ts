@@ -65,8 +65,8 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.ERC20.erc20ApproveAddress(
-          protocol.twoKeyEconomy.address,
-          protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
+          protocol.twoKeyEconomy._address,
+          protocol.twoKeyBudgetCampaignsPaymentsHandler._address,
           amountOfTokensWei,
           address
         )
@@ -97,7 +97,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.ERC20.erc20ApproveAddress(
             daiAddress,
-            protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
+            protocol.twoKeyBudgetCampaignsPaymentsHandler._address,
             amountOfTokensWei,
             address
           )

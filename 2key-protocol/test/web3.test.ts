@@ -5,7 +5,7 @@ require('isomorphic-fetch');
 require('isomorphic-form-data');
 import chai from 'chai';
 import promisedChai from 'chai-as-promised';
-import { rpcUrls } from './constants/smallConstants';
+import { rpcUrls, eventsUrls } from './constants/smallConstants';
 import createWeb3 from './helpers/_web3'
 import { promisify } from '../src/utils/promisify';
 import Contracts from '../src/contracts/singletons';
@@ -15,7 +15,7 @@ const expect = chai.expect;
 chai.use(promisedChai);
 
 describe('Web3 v1.3.0', () => {
-    const { web3, address } = createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls);
+    const { web3, address } = createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls, eventsUrls);
     let estimate;
     let tx;
 

@@ -9,10 +9,10 @@ import RpcSubprovider from 'web3-provider-engine/subproviders/rpc';
 import WSSubprovider from 'web3-provider-engine/subproviders/websocket';
 import NonceSubprovider from 'web3-provider-engine/subproviders/nonce-tracker';
 import WalletSubprovider from 'ethereumjs-wallet/provider-engine';
-import TransportNodeJs from '@ledgerhq/hw-transport-node-hid';
 import ProviderSubprovider from 'web3-provider-engine/subproviders/provider.js';
 import FiltersSubprovider from 'web3-provider-engine/subproviders/filters.js';
-import createLedgerSubprovider from '@ledgerhq/web3-subprovider';
+// import TransportNodeJs from '@ledgerhq/hw-transport-node-hid';
+// import createLedgerSubprovider from '@ledgerhq/web3-subprovider';
 
 
 interface EthereumWeb3 {
@@ -24,6 +24,7 @@ interface EthereumWeb3 {
     privateKey?: string;
 }
 
+/*
 interface LedgerWeb3 {
     web3: any;
     address: string;
@@ -63,7 +64,7 @@ export function ledgerWeb3(rpcUrl: string, networkId?: number, path?: string): P
         }
     });
 }
-
+*/
 /**
  *
  * @param mnemonic

@@ -12,6 +12,7 @@ import {promisify} from "../../../src/utils/promisify";
 const { env } = process;
 
 const rpcUrls = [env.RPC_URL];
+const plasmaUrls = [env.PLASMA_RPC_URL];
 
 let web3: any;
 let from: string;
@@ -57,13 +58,12 @@ const getReceipt = (txHash: string, { web3, timeout = 60000, interval = 500}) =>
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         if (!web3) {
-            const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls);
+            const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls, plasmaUrls);
             from = address;
             web3 = web3Instance;
         }
 
-        const txHash = await promisify(web3.eth.sendTransaction, [{ to: recipient, value: web3.toWei(100, 'ether'), from }]);
-
+        const txHash = await promisify(web3.eth.sendTransaction, [{ to: recipient, value: web3.utils.toWei('100', 'ether'), from, gas: 21000 }]);
         const receipt = await getReceipt(txHash, { web3 });
         resolve(receipt);
     } catch (err) {
@@ -85,7 +85,7 @@ describe('TwoKeyProtocol LOCAL', () => {
         await sendETH('0x11e9Ce4382fF83BD1222D1EB519D5663C2DC1374'); //Ledger address
         for (let i = 0; i < l; i++) {
             const receipt = await sendETH(addresses[i]);
-            if (!receipt || receipt.status !== '0x1') {
+            if (!receipt || !receipt.status) {
                 error = true;
             }
         }
