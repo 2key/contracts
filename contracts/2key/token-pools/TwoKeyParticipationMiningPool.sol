@@ -35,6 +35,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _dateStartingCountingMonths = "dateStartingCountingMonths";
     string constant _totalTokensTransferedByNow = "totalTokensTransferedByNow";
 
+    string constant _signatoryAddress = "signatoryAddress";
+
     string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
 
     /**
@@ -348,9 +350,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             signature
         );
 
-        //TODO: Later change this that messageSigner is official mining validator
-        // Assert that this signature is signed by maintainer
-        require(isMaintainer(messageSigner) == true);
+        // Assert that this signature is created by signatory address
+        require(getSignatoryAddress() == messageSigner);
 
         // First check if this signature is used
         require(isExistingSignature(signature) == false);
@@ -366,6 +367,23 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         // Transfer ERC20 tokens from pool to user
         super.transferTokens(msg.sender, amountOfTokens);
+    }
+
+    /**
+     * @notice          Function where congress can set signatory address
+     *                  and that's the only address eligible to sign the rewards messages
+     * @param           signatoryAddress is the address which will be used to sign rewards
+     */
+    function setSignatoryAddress(
+        address signatoryAddress
+    )
+    public
+    onlyTwoKeyCongress
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_signatoryAddress),
+            signatoryAddress
+        );
     }
 
 
@@ -486,6 +504,16 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         return getUint(keccak256(_monthlyTransferAllowance));
     }
 
+    /**
+     * @notice          Function to fetch signatory address
+     */
+    function getSignatoryAddress()
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
+    }
 
 
 }
