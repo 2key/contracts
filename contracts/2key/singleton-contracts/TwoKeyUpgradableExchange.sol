@@ -948,8 +948,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             availableForReserve,
             minimumAllowed.mul(97).div(100),
             path,
-            address(this),
-
+            address(this)
             );
 
         }
