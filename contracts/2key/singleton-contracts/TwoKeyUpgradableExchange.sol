@@ -915,44 +915,44 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return minConversionRate;
     }
 
-    function swapStableCoinsAvailableToFillReserveFor2KEY(
-        address [] stableCoinsAddresses
-    )
-    public
-    onlyMaintainer
-    {
-        uint numberOfTokens = stableCoinsAddresses.length;
-        uint i;
-        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router01");
-
-        for (i = 0; i < numberOfTokens; i++) {
-            address tokenAddress = stableCoinsAddresses[i];
-            uint availableForReserve = getAvailableAmountToFillReserveInternal(tokenAddress);
-
-            // Approve uniswap router to take tokens from the contract
-            IERC20(tokenAddress).approve(
-                uniswapRouter,
-                availableForReserve
-            );
-
-            address [] memory path = new address[](2);
-            path[0] = tokenAddress;
-            path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-
-            uint minimumAllowed = uniswapPriceDiscover(
-                availableForReserve,
-                path
-            );
-
-            IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
-            availableForReserve,
-            minimumAllowed.mul(97).div(100),
-            path,
-            address(this)
-            );
-
-        }
-    }
+    //    function swapStableCoinsAvailableToFillReserveFor2KEY(
+    //        address [] stableCoinsAddresses
+    //    )
+    //    public
+    //    onlyMaintainer
+    //    {
+    //        uint numberOfTokens = stableCoinsAddresses.length;
+    //        uint i;
+    //        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router01");
+    //
+    //        for (i = 0; i < numberOfTokens; i++) {
+    //            address tokenAddress = stableCoinsAddresses[i];
+    //            uint availableForReserve = getAvailableAmountToFillReserveInternal(tokenAddress);
+    //
+    //            // Approve uniswap router to take tokens from the contract
+    //            IERC20(tokenAddress).approve(
+    //                uniswapRouter,
+    //                availableForReserve
+    //            );
+    //
+    //            address [] memory path = new address[](2);
+    //            path[0] = tokenAddress;
+    //            path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+    //
+    //            uint minimumAllowed = uniswapPriceDiscover(
+    //                availableForReserve,
+    //                path
+    //            );
+    //
+    //            IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
+    //            availableForReserve,
+    //            minimumAllowed.mul(97).div(100),
+    //            path,
+    //            address(this)
+    //            );
+    //
+    //        }
+    //    }
 
     /**
      * @notice          Function to send available DAI to Kyber and get 2KEY tokens
