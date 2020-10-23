@@ -329,6 +329,6 @@ if __name__ == "__main__":
         generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_contract(sys.argv[2],sys.argv[3])
     if(arg1 == "declareEpochs"):
         generate_bytecode_for_declaring_epochs(sys.argv[2],sys.argv[3])
-    if(arg1 == "setSignatoryAddress")
+    if(arg1 == "setSignatoryAddress"):
         generate_bytecode_for_adding_signatory_address(sys.argv[2])
     print_line()
