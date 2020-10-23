@@ -2,6 +2,7 @@ import {TwoKeyProtocol} from "../../../src";
 import {expect} from "chai";
 import web3Switcher from "../../helpers/web3Switcher";
 import getTwoKeyProtocol, {getTwoKeyProtocolValues} from "../../helpers/twoKeyProtocol";
+import {promisify} from "../../../src/utils/promisify";
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
@@ -159,6 +160,85 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
     it('should check that signatory address is properly set on the contracts', async () => {
         let signatoryAddressPublic = await twoKeyProtocol.TwoKeyParticipationMiningPool.getSignatoryAddressPublic();
         expect(signatoryAddressPublic.toLowerCase()).to.be.equal(process.env.NIKOLA_ADDRESS.toLowerCase());
+    }).timeout(60000);
+
+    it('should create a proposal on plasma congress to add signatory address', async () => {
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.newProposal, [
+            twoKeyProtocol.twoKeyPlasmaParticipationRewards.address,
+            0,
+            "Add signatory address",
+            transactionBytecodeForSignatoryAddress,
+            {
+                from: twoKeyProtocol.plasmaAddress
+            }
+        ]);
+
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should member 1. vote for supporting proposal', async () => {
+        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.numProposals, []);
+        numberOfProposals = parseInt(numberOfProposals, 10) - 1;
+
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote, [
+            numberOfProposals,
+            true,
+            "I support to add signatory address",
+            {
+                from: twoKeyProtocol.plasmaAddress,
+            }
+        ]);
+
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should member 2. vote for supporting proposal', async () => {
+        const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.aydnep();
+
+        from = address;
+        twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
+
+        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.numProposals, []);
+        numberOfProposals = parseInt(numberOfProposals, 10) - 1;
+
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote, [
+            numberOfProposals,
+            true,
+            "I support to add signatory address",
+            {
+                from: twoKeyProtocol.plasmaAddress
+            }
+        ]);
+
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should execute proposal for adding signatory address on plasma', async () => {
+        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.numProposals, []);
+        numberOfProposals = parseInt(numberOfProposals, 10) - 1;
+
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.executeProposal, [
+            numberOfProposals,
+            transactionBytecodeForSignatoryAddress,
+            {
+                from: twoKeyProtocol.plasmaAddress,
+                gas: 7000000
+            }
+        ]);
+        const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
+        const status = receipt && receipt.status;
+        expect(status).to.be.equal('0x1');
+    }).timeout(60000);
+
+    it('should check that signatory address is properly set on the contracts', async () => {
+        let signatoryAddressPlasma = await twoKeyProtocol.TwoKeyParticipationMiningPool.getSignatoryAddressPlasma();
+        expect(signatoryAddressPlasma.toLowerCase()).to.be.equal(process.env.NIKOLA_ADDRESS.toLowerCase());
     }).timeout(60000);
 });
 
