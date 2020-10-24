@@ -386,6 +386,19 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+
+    /**
+     * ------------------------------------------------
+     *        Internal functions performing logic operations
+     * ------------------------------------------------
+     */
+
+    /**
+     * @notice          Function to transfer fees taken from referrer rewards to admin contract
+     * @param           feePerReferrer is fee taken per referrer equaling 0.5$ in 2KEY at the moment
+     * @param           numberOfReferrers is number of referrers being rewarded in this cycle
+     * @param           twoKeyEconomy is 2KEY token contract
+     */
     function transferFeesToAdmin(
         uint feePerReferrer,
         uint numberOfReferrers,
@@ -404,13 +417,9 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
     }
 
-
     /**
-     * ------------------------------------------------
-     *        Internal functions performing logic operations
-     * ------------------------------------------------
+     * @notice          Function to calculate how much 2KEY is worth 0.5$ at the moment
      */
-
     function calculateFeeForDistributionPerReferrer()
     internal
     view
