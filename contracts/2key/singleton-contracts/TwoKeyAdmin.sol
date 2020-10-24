@@ -28,28 +28,29 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
 
-	/**
-	 * Accounting necessary stuff
-	 */
+    /**
+     * Accounting necessary stuff
+     */
 
-	//Income to ADMIN
-	string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
-	string constant _moderatorEarningsPerCampaign = "moderatorEarningsPerCampaign";
-	string constant _feesFromFeeManagerCollectedInCurrency = "feesFromFeeManagerCollectedInCurrency";
-	string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
-	string constant _daiCollectedFromUpgradableExchange = "daiCollectedFromUpgradableExchange";
-
-
-	// Withdrawals from ADMIN
-	string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
-	string constant _amountWithdrawnFromFeeManagerPoolInCurrency = "amountWithdrawnFromFeeManagerPoolInCurrency";
-	string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
-	string constant _amountWithdrawnFromCollectedDaiFromUpgradableExchange = "amountWithdrawnFromCollectedDaiFromUpgradableExchange";
+    //Income to ADMIN
+    string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
+    string constant _moderatorEarningsPerCampaign = "moderatorEarningsPerCampaign";
+    string constant _feesFromFeeManagerCollectedInCurrency = "feesFromFeeManagerCollectedInCurrency";
+    string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
+    string constant _daiCollectedFromUpgradableExchange = "daiCollectedFromUpgradableExchange";
+    string constant _feesCollectedFromDistributionRewards = "feesCollectedFromDistributionRewards";
 
 
-	/**
-	 * Keys for the addresses we're accessing
-	 */
+    // Withdrawals from ADMIN
+    string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
+    string constant _amountWithdrawnFromFeeManagerPoolInCurrency = "amountWithdrawnFromFeeManagerPoolInCurrency";
+    string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
+    string constant _amountWithdrawnFromCollectedDaiFromUpgradableExchange = "amountWithdrawnFromCollectedDaiFromUpgradableExchange";
+
+
+    /**
+     * Keys for the addresses we're accessing
+     */
 	string constant _twoKeyCongress = "TwoKeyCongress";
 	string constant _twoKeyUpgradableExchange = "TwoKeyUpgradableExchange";
 	string constant _twoKeyRegistry = "TwoKeyRegistry";
@@ -499,25 +500,45 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-	function updateReceivedTokensAsModeratorPPC(
-		uint amountOfTokens,
-		address campaignPlasma
-	)
-	public
-	onlyTwoKeyBudgetCampaignsPaymentsHandler
-	{
-		updateTokensReceivedAsModeratorInternal(amountOfTokens, campaignPlasma);
-	}
+    function updateReceivedTokensAsModeratorPPC(
+        uint amountOfTokens,
+        address campaignPlasma
+    )
+    public
+    onlyTwoKeyBudgetCampaignsPaymentsHandler
+    {
+        updateTokensReceivedAsModeratorInternal(amountOfTokens, campaignPlasma);
+    }
 
-	/**
-	 * @notice 			Function which will be used take the tokens from the campaign and distribute
-	 * 					them between itself and TwoKeyDeepFreezeTokenPool
-	 *
-	 * @param			amountOfTokens is the amount of the tokens which are for moderator rewards
- 	 */
-	function updateReceivedTokensAsModerator(
-		uint amountOfTokens
-	)
+    function updateTokensReceivedFromDistributionFees(
+        uint amountOfTokens
+    )
+    public
+    onlyTwoKeyBudgetCampaignsPaymentsHandler
+    {
+        uint amountCollected = getAmountOfTokensReceivedFromDistributionFees();
+
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
+            msg.sender,
+            address(this),
+            amountOfTokens
+        );
+
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_feesCollectedFromDistributionRewards),
+            amountCollected.add(amountOfTokens)
+        );
+    }
+
+    /**
+     * @notice 			Function which will be used take the tokens from the campaign and distribute
+     * 					them between itself and TwoKeyDeepFreezeTokenPool
+     *
+     * @param			amountOfTokens is the amount of the tokens which are for moderator rewards
+      */
+    function updateReceivedTokensAsModerator(
+        uint amountOfTokens
+    )
 	public
 	onlyAllowedContracts
 	{
@@ -869,23 +890,31 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	 * @notice 			Getter to check how many total tokens TwoKeyAdmin received as a moderator from
 	 *					various campaign contracts running on 2key.network
 	 */
-	function getAmountOfTokensReceivedAsModerator()
-	public
-	view
-	returns (uint)
-	{
-		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
-	}
+    function getAmountOfTokensReceivedAsModerator()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
+    }
 
-	function getAmountCollectedFromFeeManagerInCurrency(
-		string currency
-	)
-	internal
-	view
-	returns (uint)
-	{
-		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesFromFeeManagerCollectedInCurrency,currency));
-	}
+    function getAmountOfTokensReceivedFromDistributionFees()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesCollectedFromDistributionRewards));
+    }
+
+    function getAmountCollectedFromFeeManagerInCurrency(
+        string currency
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesFromFeeManagerCollectedInCurrency, currency));
+    }
 
 	function getAmountCollectedFromKyber()
 	internal

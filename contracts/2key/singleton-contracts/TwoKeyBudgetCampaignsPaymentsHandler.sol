@@ -35,6 +35,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasmaToModeratorEarnings = "campaignPlasmaToModeratorEarnings";
     string constant _campaignPlasmaToLeftOverForContractor = "campaignPlasmaToLeftOverForContractor";
     string constant _campaignPlasmaToLeftoverWithdrawnByContractor = "campaignPlasmaToLeftoverWithdrawnByContractor";
+    string constant _feePerCycleIdPerReferrer = "feePerCycleIdPerReferrer";
 
     ITwoKeyBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -356,15 +357,27 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             );
         }
 
+        uint feePerReferrer = calculateFeeForDistributionPerReferrer();
+
+        // Set 0.5$ in 2KEY fee taken in this cycle id per referrer
+        setAmountIn2KEYTakenFromReferrersInCycle(cycleId, feePerReferrer);
+
+        uint numberOfReferrers = influencers.length;
+
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
-        for(i = 0; i < influencers.length; i++) {
-            // Take the influencer balance
-            uint balance = balances[i];
+        for (i = 0; i < numberOfReferrers; i++) {
+            // Require that referrer earned more than fees
+            require(balances[i] > feePerReferrer);
+            // Sub fee per referrer from balance to pay
+            uint balance = balances[i].sub(feePerReferrer);
             // Transfer required tokens to influencer
             IERC20(twoKeyEconomy).transfer(influencers[i], balance);
             // Sum up to totalDistributed
             totalDistributed = totalDistributed.add(balance);
         }
+
+        transferFeesToAdmin(feePerReferrer, numberOfReferrers, twoKeyEconomy);
+
 
         // Set how much is total distributed per distribution cycle
         setUint(
@@ -373,11 +386,45 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+    function transferFeesToAdmin(
+        uint feePerReferrer,
+        uint numberOfReferrers,
+        address twoKeyEconomy
+    )
+    internal
+    {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+        IERC20(twoKeyEconomy).approve(
+            twoKeyAdmin,
+            feePerReferrer.mul(numberOfReferrers)
+        );
+
+        // Update in admin tokens receiving from fees
+        ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
+    }
+
+
     /**
      * ------------------------------------------------
      *        Internal functions performing logic operations
      * ------------------------------------------------
      */
+
+    function calculateFeeForDistributionPerReferrer()
+    internal
+    view
+    returns (uint)
+    {
+        // Will take coingecko price because of gas usage
+        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(
+            getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")
+        ).getBaseToTargetRate("2KEY-USD");
+
+        uint fiftyCentUSDWei = (10 ** 18).div(2);
+        // To keep value in wei since we divide with wei we multiply by WEI
+        return fiftyCentUSDWei.mul(10 ** 18).div(rateFromCoinGecko);
+    }
 
     /**
      * @notice          Function to set how many tokens are being distributed to moderator
@@ -601,6 +648,18 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         setUint(
             keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma),
             rebalancingRatio
+        );
+    }
+
+    function setAmountIn2KEYTakenFromReferrersInCycle(
+        uint cycleId,
+        uint feePerReferrer
+    )
+    internal
+    {
+        setUint(
+            keccak256(_feePerCycleIdPerReferrer, cycleId),
+            feePerReferrer
         );
     }
 
@@ -894,7 +953,17 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
 
         // For now ignore fiat currency assuming it's USD always
-        return fiatBudgetAmount.mul(10**18).div(rate);
+        return fiatBudgetAmount.mul(10 ** 18).div(rate);
+    }
+
+    function getFeePerCycleIdPerReferrer(
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_feePerCycleIdPerReferrer, cycleId));
     }
 
 }
