@@ -500,26 +500,30 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-    function updateReceivedTokensAsModeratorPPC(
-        uint amountOfTokens,
-        address campaignPlasma
-    )
-    public
-    onlyTwoKeyBudgetCampaignsPaymentsHandler
-    {
-        updateTokensReceivedAsModeratorInternal(amountOfTokens, campaignPlasma);
-    }
+	function updateReceivedTokensAsModeratorPPC(
+		uint amountOfTokens,
+		address campaignPlasma
+	)
+	public
+	onlyTwoKeyBudgetCampaignsPaymentsHandler
+	{
+		updateTokensReceivedAsModeratorInternal(amountOfTokens, campaignPlasma);
+	}
 
-    function updateTokensReceivedFromDistributionFees(
-        uint amountOfTokens
-    )
-    public
-    onlyTwoKeyBudgetCampaignsPaymentsHandler
-    {
-        uint amountCollected = getAmountOfTokensReceivedFromDistributionFees();
+	/**
+	 * @notice			Function to update tokens received from distribution fees
+	 * @param			amountOfTokens is the amount of tokens to be sent to admin
+	 */
+	function updateTokensReceivedFromDistributionFees(
+		uint amountOfTokens
+	)
+	public
+	onlyTwoKeyBudgetCampaignsPaymentsHandler
+	{
+		uint amountCollected = getAmountOfTokensReceivedFromDistributionFees();
 
-        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
-            msg.sender,
+		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
+			msg.sender,
             address(this),
             amountOfTokens
         );
