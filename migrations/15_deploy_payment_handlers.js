@@ -109,51 +109,51 @@ module.exports = function deploy(deployer) {
         //     .then(() => deployer.deploy(TwoKeyBudgetCampaignsPaymentsHandlerStorage))
         //     .then(() => TwoKeyBudgetCampaignsPaymentsHandlerStorage.deployed())
         deployer.deploy(EmptyContract)
-            .then(async () => {
-            await new Promise(async (resolve, reject) => {
-                try {
-                    let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
-
-                    console.log('-----------------------------------------------------------------------------------');
-                    console.log('... Adding TwoKeyBudgetCampaignsPaymentsHandler to Proxy registry as valid implementation');
-                    let contractName = "TwoKeyBudgetCampaignsPaymentsHandler";
-                    let contractStorageName = "TwoKeyBudgetCampaignsPaymentsHandlerStorage";
-
-                    // let txHash = await registry.addVersionDuringCreation(
-                    //     contractName,
-                    //     contractStorageName,
-                    //     TwoKeyBudgetCampaignsPaymentsHandler.address,
-                    //     TwoKeyBudgetCampaignsPaymentsHandlerStorage.address,
-                    //     INITIAL_VERSION_OF_ALL_SINGLETONS
-                    // );
-
-                    let {logs} = await registry.createProxy(
-                        contractName,
-                        contractStorageName,
-                        INITIAL_VERSION_OF_ALL_SINGLETONS
-                    );
-
-                    let {logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
-
-                    proxyLogic = logicProxy;
-                        proxyStorage = storageProxy;
-
-                        const jsonObject = fileObject[contractName] || {};
-                        jsonObject[network_id] = {
-                            'implementationAddressLogic': TwoKeyBudgetCampaignsPaymentsHandler.address,
-                            'Proxy': logicProxy,
-                            'implementationAddressStorage': TwoKeyBudgetCampaignsPaymentsHandlerStorage.address,
-                            'StorageProxy': storageProxy,
-                        };
-
-                        fileObject[contractName] = jsonObject;
-                        resolve(logicProxy);
-                    } catch (e) {
-                        reject(e);
-                    }
-                });
-                fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
-            })
+            // .then(async () => {
+            // await new Promise(async (resolve, reject) => {
+            //     try {
+            //         let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
+            //
+            //         console.log('-----------------------------------------------------------------------------------');
+            //         console.log('... Adding TwoKeyBudgetCampaignsPaymentsHandler to Proxy registry as valid implementation');
+            //         let contractName = "TwoKeyBudgetCampaignsPaymentsHandler";
+            //         let contractStorageName = "TwoKeyBudgetCampaignsPaymentsHandlerStorage";
+            //
+            //         let txHash = await registry.addVersionDuringCreation(
+            //             contractName,
+            //             contractStorageName,
+            //             TwoKeyBudgetCampaignsPaymentsHandler.address,
+            //             TwoKeyBudgetCampaignsPaymentsHandlerStorage.address,
+            //             INITIAL_VERSION_OF_ALL_SINGLETONS
+            //         );
+            //
+            //         let {logs} = await registry.createProxy(
+            //             contractName,
+            //             contractStorageName,
+            //             INITIAL_VERSION_OF_ALL_SINGLETONS
+            //         );
+            //
+            //         let {logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+            //
+            //         proxyLogic = logicProxy;
+            //             proxyStorage = storageProxy;
+            //
+            //             const jsonObject = fileObject[contractName] || {};
+            //             jsonObject[network_id] = {
+            //                 'implementationAddressLogic': TwoKeyBudgetCampaignsPaymentsHandler.address,
+            //                 'Proxy': logicProxy,
+            //                 'implementationAddressStorage': TwoKeyBudgetCampaignsPaymentsHandlerStorage.address,
+            //                 'StorageProxy': storageProxy,
+            //             };
+            //
+            //             fileObject[contractName] = jsonObject;
+            //             resolve(logicProxy);
+            //         } catch (e) {
+            //             reject(e);
+            //         }
+            //     });
+            //     fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+            // })
             .then(async () => {
                 await new Promise(async (resolve,reject) => {
                     try {
