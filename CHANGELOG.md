@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="v1.4.22-master"></a>
+## [v1.4.22-master] - 2020-10-25
+
 <a name="v1.4.21-master"></a>
 ## [v1.4.21-master] - 2020-10-25
 
@@ -2303,7 +2306,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.21-master...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.22-master...HEAD
+[v1.4.22-master]: https://github.com/2key/contracts/compare/v1.4.21-master...v1.4.22-master
 [v1.4.21-master]: https://github.com/2key/contracts/compare/v1.4.164-develop...v1.4.21-master
 [v1.4.164-develop]: https://github.com/2key/contracts/compare/v1.4.163-develop...v1.4.164-develop
 [v1.4.163-develop]: https://github.com/2key/contracts/compare/v1.2.61-staging...v1.4.163-develop
