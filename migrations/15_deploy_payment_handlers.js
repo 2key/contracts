@@ -7,8 +7,10 @@ const TwoKeyBudgetCampaignsPaymentsHandlerStorage = artifacts.require('TwoKeyBud
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 
+const EmptyContract = artifacts.require('EmptyContract');
 const fs = require('fs');
 const path = require('path');
+
 
 const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
 
@@ -106,18 +108,18 @@ module.exports = function deploy(deployer) {
         //     .then(() => TwoKeyBudgetCampaignsPaymentsHandler.deployed())
         //     .then(() => deployer.deploy(TwoKeyBudgetCampaignsPaymentsHandlerStorage))
         //     .then(() => TwoKeyBudgetCampaignsPaymentsHandlerStorage.deployed())
-        deployer.deploy()
+        deployer.deploy(EmptyContract)
             .then(async () => {
-                await new Promise(async (resolve, reject) => {
-                    try {
-                        let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
+            await new Promise(async (resolve, reject) => {
+                try {
+                    let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
 
-                        console.log('-----------------------------------------------------------------------------------');
-                        console.log('... Adding TwoKeyBudgetCampaignsPaymentsHandler to Proxy registry as valid implementation');
-                        let contractName = "TwoKeyBudgetCampaignsPaymentsHandler";
-                        let contractStorageName = "TwoKeyBudgetCampaignsPaymentsHandlerStorage";
+                    console.log('-----------------------------------------------------------------------------------');
+                    console.log('... Adding TwoKeyBudgetCampaignsPaymentsHandler to Proxy registry as valid implementation');
+                    let contractName = "TwoKeyBudgetCampaignsPaymentsHandler";
+                    let contractStorageName = "TwoKeyBudgetCampaignsPaymentsHandlerStorage";
 
-                        // let txHash = await registry.addVersionDuringCreation(
+                    // let txHash = await registry.addVersionDuringCreation(
                     //     contractName,
                     //     contractStorageName,
                     //     TwoKeyBudgetCampaignsPaymentsHandler.address,
