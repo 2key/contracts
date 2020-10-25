@@ -33,11 +33,11 @@ module.exports = function deploy(deployer) {
 
     if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         console.log('Deploying private (plasma)  version of TwoKeyPlasmaBudgetCampaignsPaymentsHandler contract');
-        deployer.deploy(TwoKeyPlasmaBudgetCampaignsPaymentsHandler)
-            .then(() => TwoKeyPlasmaBudgetCampaignsPaymentsHandler.deployed())
-            .then(() => deployer.deploy(TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage))
-            .then(() => TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage.deployed())
-            .then(async () => {
+        // deployer.deploy(TwoKeyPlasmaBudgetCampaignsPaymentsHandler)
+        //     .then(() => TwoKeyPlasmaBudgetCampaignsPaymentsHandler.deployed())
+        //     .then(() => deployer.deploy(TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage))
+        //     .then(() => TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage.deployed())
+            deployer.then(async () => {
                 await new Promise(async (resolve, reject) => {
                     try {
                         let registry = await TwoKeyPlasmaSingletoneRegistry.at(TwoKeyPlasmaSingletoneRegistry.address);
@@ -47,13 +47,13 @@ module.exports = function deploy(deployer) {
                         let contractName = "TwoKeyPlasmaBudgetCampaignsPaymentsHandler";
                         let contractStorageName = "TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage";
 
-                        let txHash = await registry.addVersionDuringCreation(
-                            contractName,
-                            contractStorageName,
-                            TwoKeyPlasmaBudgetCampaignsPaymentsHandler.address,
-                            TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage.address,
-                            INITIAL_VERSION_OF_ALL_SINGLETONS
-                        );
+                        // let txHash = await registry.addVersionDuringCreation(
+                        //     contractName,
+                        //     contractStorageName,
+                        //     TwoKeyPlasmaBudgetCampaignsPaymentsHandler.address,
+                        //     TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage.address,
+                        //     INITIAL_VERSION_OF_ALL_SINGLETONS
+                        // );
 
                         let { logs } = await registry.createProxy(
                             contractName,
