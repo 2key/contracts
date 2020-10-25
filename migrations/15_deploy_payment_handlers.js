@@ -106,17 +106,18 @@ module.exports = function deploy(deployer) {
         //     .then(() => TwoKeyBudgetCampaignsPaymentsHandler.deployed())
         //     .then(() => deployer.deploy(TwoKeyBudgetCampaignsPaymentsHandlerStorage))
         //     .then(() => TwoKeyBudgetCampaignsPaymentsHandlerStorage.deployed())
-        deployer.then(async () => {
-            await new Promise(async (resolve, reject) => {
-                try {
-                    let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
+        deployer.deploy()
+            .then(async () => {
+                await new Promise(async (resolve, reject) => {
+                    try {
+                        let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
 
-                    console.log('-----------------------------------------------------------------------------------');
-                    console.log('... Adding TwoKeyBudgetCampaignsPaymentsHandler to Proxy registry as valid implementation');
-                    let contractName = "TwoKeyBudgetCampaignsPaymentsHandler";
-                    let contractStorageName = "TwoKeyBudgetCampaignsPaymentsHandlerStorage";
+                        console.log('-----------------------------------------------------------------------------------');
+                        console.log('... Adding TwoKeyBudgetCampaignsPaymentsHandler to Proxy registry as valid implementation');
+                        let contractName = "TwoKeyBudgetCampaignsPaymentsHandler";
+                        let contractStorageName = "TwoKeyBudgetCampaignsPaymentsHandlerStorage";
 
-                    // let txHash = await registry.addVersionDuringCreation(
+                        // let txHash = await registry.addVersionDuringCreation(
                     //     contractName,
                     //     contractStorageName,
                     //     TwoKeyBudgetCampaignsPaymentsHandler.address,
