@@ -13,7 +13,7 @@ import "../interfaces/ITwoKeyFeeManager.sol";
 import "../interfaces/ITwoKeyReg.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeyFactory.sol";
-import "../interfaces/IUniswapV2Router01.sol";
+import "../interfaces/IUniswapV2Router02.sol";
 import "../upgradability/Upgradeable.sol";
 
 
@@ -1328,10 +1328,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router01");
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
         uint[] memory amountsOut = new uint[](2);
 
-        amountsOut = IUniswapV2Router01(uniswapRouter).getAmountsOut(
+        amountsOut = IUniswapV2Router02(uniswapRouter).getAmountsOut(
             amountToSwap,
             path
         );
