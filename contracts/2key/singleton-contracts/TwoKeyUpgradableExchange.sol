@@ -1450,11 +1450,30 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
+    function migrateDaiAvailableStatus()
+    public
+    onlyMaintainer
+    {
+        // Delete dai wei available to fill reserve
+        setUint(
+            keccak256("daiWeiAvailableToFill2KEYReserve"),
+            0
+        );
+
+        address dai = getAddress(keccak256(_dai));
+
+        setStableCoinsAvailableToFillReserve(
+            IERC20(dai).balanceOf(address(this)),
+            dai
+        );
+    }
+
+
 
     /**
      * @notice          Fallback function to handle incoming ether
      */
-    function ()
+    function()
     public
     payable
     {
