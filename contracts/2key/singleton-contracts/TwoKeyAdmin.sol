@@ -269,35 +269,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	 *                                                                               *
 	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-//	/**
-//	 * @notice 			Function to migrate current Fee manager state and funds to admin and update
-//	 * 					state variables
-//	 * @param			_dai is the address on DAI token (argument due to blockchain env)
-//	 */
-//	function migrateCurrentFeeManagerStateToAdminAndWithdrawFunds()
-//	external
-//	onlyTwoKeyCongress
-//	{
-//		address twoKeyFeeManager = getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager");
-//		uint collectedETH = ITwoKeyFeeManager(twoKeyFeeManager).withdrawEtherCollected();
-//		uint collected2KEY = ITwoKeyFeeManager(twoKeyFeeManager).withdraw2KEYCollected();
-//		uint collectedDAI = ITwoKeyFeeManager(twoKeyFeeManager).withdrawDAICollected(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"));
-//
-//		bytes32 key1 = keccak256(_feesFromFeeManagerCollectedInCurrency, "ETH");
-//		uint feesCollectedFromFeeManagerInCurrencyETH = PROXY_STORAGE_CONTRACT.getUint(key1);
-//		PROXY_STORAGE_CONTRACT.setUint(key1, feesCollectedFromFeeManagerInCurrencyETH.add(collectedETH));
-//
-//
-//		bytes32 key2 = keccak256(_feesFromFeeManagerCollectedInCurrency, "2KEY");
-//		uint feesCollectedFromFeeManagerInCurrency2KEY = PROXY_STORAGE_CONTRACT.getUint(key2);
-//		PROXY_STORAGE_CONTRACT.setUint(key2, feesCollectedFromFeeManagerInCurrency2KEY.add(collected2KEY));
-//
-//		bytes32 key3 = keccak256(_feesFromFeeManagerCollectedInCurrency, "DAI");
-//		uint feesCollectedFromFeeManagerInCurrencyDAI = PROXY_STORAGE_CONTRACT.getUint(key3);
-//		PROXY_STORAGE_CONTRACT.setUint(key3, feesCollectedFromFeeManagerInCurrencyDAI.add(collectedDAI));
-//	}
-
-
 	/**
 	 * @notice			Function to update whenever some funds are arriving to TwoKeyAdmin
 	 *					from TwoKeyFeeManager contract
@@ -319,47 +290,47 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
-	/**
-	 * @notice			Function to handle and update state every time there's an
-	 *					income from Kyber network fees
-	 *
-	 * @param			amount is the amount contract have received from there
-	 */
-	function addFeesCollectedFromKyber(
-		uint amount
-	)
-	internal
-	{
-		bytes32 key = keccak256(_feesCollectedFromKyber);
-		uint feesCollectedFromKyber = PROXY_STORAGE_CONTRACT.getUint(key);
-		PROXY_STORAGE_CONTRACT.setUint(key, feesCollectedFromKyber.add(amount));
-	}
+	//	/**
+	//	 * @notice			Function to handle and update state every time there's an
+	//	 *					income from Kyber network fees
+	//	 *
+	//	 * @param			amount is the amount contract have received from there
+	//	 */
+	//	function addFeesCollectedFromKyber(
+	//		uint amount
+	//	)
+	//	internal
+	//	{
+	//		bytes32 key = keccak256(_feesCollectedFromKyber);
+	//		uint feesCollectedFromKyber = PROXY_STORAGE_CONTRACT.getUint(key);
+	//		PROXY_STORAGE_CONTRACT.setUint(key, feesCollectedFromKyber.add(amount));
+	//	}
 
-	/**
-	 * @notice			Function to withdraw fees collected on Kyber contract to Admin contract
-	 *
-	 * @param			reserveContract	is the address of kyber reserve contract for 2KEY token
-	 * @param			pricingContract is the address of kyber pricing contract for 2KEY token
-	 */
-	function withdrawFeesFromKyber(
-		address reserveContract,
-		address pricingContract
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		disableTradeInKyberInternal(reserveContract);
-		uint availableFees = getKyberAvailableFeesOnReserve(pricingContract);
-		withdrawTokensFromKyberReserveInternal(
-			reserveContract,
-			ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)),
-			availableFees,
-			address(this)
-		);
-		resetFeesCounterOnKyberContract(pricingContract);
-		enableTradeInKyberInternal(reserveContract);
-		addFeesCollectedFromKyber(availableFees);
-	}
+	//	/**
+	//	 * @notice			Function to withdraw fees collected on Kyber contract to Admin contract
+	//	 *
+	//	 * @param			reserveContract	is the address of kyber reserve contract for 2KEY token
+	//	 * @param			pricingContract is the address of kyber pricing contract for 2KEY token
+	//	 */
+	//	function withdrawFeesFromKyber(
+	//		address reserveContract,
+	//		address pricingContract
+	//	)
+	//	external
+	//	onlyTwoKeyCongress
+	//	{
+	//		disableTradeInKyberInternal(reserveContract);
+	//		uint availableFees = getKyberAvailableFeesOnReserve(pricingContract);
+	//		withdrawTokensFromKyberReserveInternal(
+	//			reserveContract,
+	//			ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)),
+	//			availableFees,
+	//			address(this)
+	//		);
+	//		resetFeesCounterOnKyberContract(pricingContract);
+	//		enableTradeInKyberInternal(reserveContract);
+	//		addFeesCollectedFromKyber(availableFees);
+	//	}
 
 
 	/**
@@ -499,7 +470,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange), totalDAIWithdrawnFromPool.add(amountToBeWithdrawn));
 	}
 
-
+	/**
+	 * @notice			Function for PPC campaigns to update received tokens
+	 */
 	function updateReceivedTokensAsModeratorPPC(
 		uint amountOfTokens,
 		address campaignPlasma
@@ -533,6 +506,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
             amountCollected.add(amountOfTokens)
         );
     }
+
 
     /**
      * @notice 			Function which will be used take the tokens from the campaign and distribute
@@ -592,190 +566,172 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	}
 
 
+	//    /**
+	//     * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
+	//     *                  contract, it can be called only by TwoKeyAdmin.sol contract
+	//     *
+	//     * @param           liquidityConversionRatesContractAddress is the address of liquidity conversion rates contract
+	//                        the right address depending on environment can be found in configurationFiles/kyberAddresses.json
+	//                        It's named "pricing" in the json object
+	//     */
+	//	function setLiquidityParametersInKyber(
+	//        address liquidityConversionRatesContractAddress,
+	//        uint _rInFp,
+	//        uint _pMinInFp,
+	//        uint _numFpBits,
+	//        uint _maxCapBuyInWei,
+	//        uint _maxCapSellInWei,
+	//        uint _feeInBps,
+	//        uint _maxTokenToEthRateInPrecision,
+	//        uint _minTokenToEthRateInPrecision
+	//	)
+	//	public
+	//	onlyTwoKeyCongress
+	//	{
+	//        // Call on the contract set liquidity params
+	//        IKyberReserveInterface(liquidityConversionRatesContractAddress).setLiquidityParams(
+	//            _rInFp,
+	//            _pMinInFp,
+	//            _numFpBits,
+	//            _maxCapBuyInWei,
+	//            _maxCapSellInWei,
+	//            _feeInBps,
+	//            _maxTokenToEthRateInPrecision,
+	//            _minTokenToEthRateInPrecision
+	//        );
+	//	}
+	//
+	//
+	//	/**
+	//	 * @notice			Contract to disable trade through Kyber
+	//	 *
+	//	 * @param			reserveContract is the address of reserve contract
+	//	 */
+	//	function disableTradeInKyber(
+	//		address reserveContract
+	//	)
+	//	external
+	//	onlyTwoKeyCongress
+	//	{
+	//		disableTradeInKyberInternal(reserveContract);
+	//	}
+	//
+	//	function disableTradeInKyberInternal(
+	//		address reserveContract
+	//	)
+	//	internal
+	//	{
+	//		IKyberReserveInterface(reserveContract).disableTrade();
+	//	}
+	//
+	//
+	//	/**
+	//	 * @notice			Contract to enable trade through Kyber
+	//	 *
+	//	 * @param			reserveContract is the address of reserve contract
+	//	 */
+	//	function enableTradeInKyber(
+	//		address reserveContract
+	//	)
+	//	external
+	//	onlyTwoKeyCongress
+	//	{
+	//		enableTradeInKyberInternal(reserveContract);
+	//	}
+	//
+	//	function enableTradeInKyberInternal(
+	//		address reserveContract
+	//	)
+	//	internal
+	//	{
+	//		IKyberReserveInterface(reserveContract).enableTrade();
+	//	}
+	//
+	//	function getKyberAvailableFeesOnReserve(
+	//		address pricingContract
+	//	)
+	//	internal
+	//	view
+	//	returns (uint)
+	//	{
+	//		return IKyberReserveInterface(pricingContract).collectedFeesInTwei();
+	//	}
+	//
+	//
+	//	function resetFeesCounterOnKyberContract(
+	//		address pricingContract
+	//	)
+	//	internal
+	//	{
+	//		IKyberReserveInterface(pricingContract).resetCollectedFees();
+	//	}
+	//
+	//
+	//    /**
+	//     * @notice          Function to call withdraw on KyberReserve.sol contract
+	//     *                  It can be only called by TwoKeyAdmin.sol contract
+	//     *
+	//     * @param           kyberReserveContractAddress is the address of kyber reserve contract
+	//     *                  right address depending on environment can be found in configurationFiles/kyberAddresses.json
+	//                        It's named "reserve" in the json object.
+	//     */
+	//    function withdrawTokensFromKyberReserve(
+	//        address kyberReserveContractAddress,
+	//        ERC20 tokenToWithdraw,
+	//        uint amountToBeWithdrawn,
+	//        address receiverAddress
+	//    )
+	//    external
+	//    onlyTwoKeyCongress
+	//    {
+	//		withdrawTokensFromKyberReserveInternal(
+	//			kyberReserveContractAddress,
+	//			tokenToWithdraw,
+	//			amountToBeWithdrawn,
+	//			receiverAddress
+	//		);
+	//    }
 
-    /**
-     * @notice          Function to call setLiquidityParams on LiquidityConversionRates.sol
-     *                  contract, it can be called only by TwoKeyAdmin.sol contract
-     *
-     * @param           liquidityConversionRatesContractAddress is the address of liquidity conversion rates contract
-                        the right address depending on environment can be found in configurationFiles/kyberAddresses.json
-                        It's named "pricing" in the json object
-     */
-	function setLiquidityParametersInKyber(
-        address liquidityConversionRatesContractAddress,
-        uint _rInFp,
-        uint _pMinInFp,
-        uint _numFpBits,
-        uint _maxCapBuyInWei,
-        uint _maxCapSellInWei,
-        uint _feeInBps,
-        uint _maxTokenToEthRateInPrecision,
-        uint _minTokenToEthRateInPrecision
-	)
-	public
-	onlyTwoKeyCongress
-	{
-        // Call on the contract set liquidity params
-        IKyberReserveInterface(liquidityConversionRatesContractAddress).setLiquidityParams(
-            _rInFp,
-            _pMinInFp,
-            _numFpBits,
-            _maxCapBuyInWei,
-            _maxCapSellInWei,
-            _feeInBps,
-            _maxTokenToEthRateInPrecision,
-            _minTokenToEthRateInPrecision
-        );
-	}
+	//	/**
+	//	 * @notice			Function to set contracts on Kyber, mostly used to swap from their
+	//	 *					staging and production environments
+	//	 *
+	//	 * @param			kyberReserveContractAddress is our reserve contract address
+	//	 * @param			kyberNetworkAddress is the address of kyber network
+	//	 * @param			conversionRatesContractAddress is the address of conversion rates contract
+	//	 * @param			sanityRatesContractAddress is the address of sanity rates contract
+	//	 */
+	//	function setContractsKyber(
+	//		address kyberReserveContractAddress,
+	//		address kyberNetworkAddress,
+	//		address conversionRatesContractAddress,
+	//		address sanityRatesContractAddress
+	//	)
+	//	external
+	//	onlyTwoKeyCongress
+	//	{
+	//		IKyberReserveInterface(kyberReserveContractAddress).setContracts(
+	//			kyberNetworkAddress,
+	//			conversionRatesContractAddress,
+	//			sanityRatesContractAddress
+	//		);
+	//	}
 
-
-	/**
-	 * @notice			Contract to disable trade through Kyber
-	 *
-	 * @param			reserveContract is the address of reserve contract
-	 */
-	function disableTradeInKyber(
-		address reserveContract
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		disableTradeInKyberInternal(reserveContract);
-	}
-
-	function disableTradeInKyberInternal(
-		address reserveContract
-	)
-	internal
-	{
-		IKyberReserveInterface(reserveContract).disableTrade();
-	}
-
-
-	/**
-	 * @notice			Contract to enable trade through Kyber
-	 *
-	 * @param			reserveContract is the address of reserve contract
-	 */
-	function enableTradeInKyber(
-		address reserveContract
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		enableTradeInKyberInternal(reserveContract);
-	}
-
-	function enableTradeInKyberInternal(
-		address reserveContract
-	)
-	internal
-	{
-		IKyberReserveInterface(reserveContract).enableTrade();
-	}
-
-	function getKyberAvailableFeesOnReserve(
-		address pricingContract
-	)
-	internal
-	view
-	returns (uint) {
-		return IKyberReserveInterface(pricingContract).collectedFeesInTwei();
-	}
-
-	function resetFeesCounterOnKyberContract(
-		address pricingContract
-	)
-	internal
-	{
-		IKyberReserveInterface(pricingContract).resetCollectedFees();
-	}
-
-
-    /**
-     * @notice          Function to call withdraw on KyberReserve.sol contract
-     *                  It can be only called by TwoKeyAdmin.sol contract
-     *
-     * @param           kyberReserveContractAddress is the address of kyber reserve contract
-     *                  right address depending on environment can be found in configurationFiles/kyberAddresses.json
-                        It's named "reserve" in the json object.
-     */
-    function withdrawTokensFromKyberReserve(
-        address kyberReserveContractAddress,
-        ERC20 tokenToWithdraw,
-        uint amountToBeWithdrawn,
-        address receiverAddress
-    )
-    external
-    onlyTwoKeyCongress
-    {
-		withdrawTokensFromKyberReserveInternal(
-			kyberReserveContractAddress,
-			tokenToWithdraw,
-			amountToBeWithdrawn,
-			receiverAddress
-		);
-    }
-
-	/**
-	 * @notice			Function to set contracts on Kyber, mostly used to swap from their
-	 *					staging and production environments
-	 *
-	 * @param			kyberReserveContractAddress is our reserve contract address
-	 * @param			kyberNetworkAddress is the address of kyber network
-	 * @param			conversionRatesContractAddress is the address of conversion rates contract
-	 * @param			sanityRatesContractAddress is the address of sanity rates contract
-	 */
-	function setContractsKyber(
-		address kyberReserveContractAddress,
-		address kyberNetworkAddress,
-		address conversionRatesContractAddress,
-		address sanityRatesContractAddress
-	)
-	external
-	onlyTwoKeyCongress
-	{
-		IKyberReserveInterface(kyberReserveContractAddress).setContracts(
-			kyberNetworkAddress,
-			conversionRatesContractAddress,
-			sanityRatesContractAddress
-		);
-	}
-
-
-	function withdrawTokensFromKyberReserveInternal(
-		address kyberReserveContractAddress,
-		ERC20 tokenToWithdraw,
-		uint amountToBeWithdrawn,
-		address receiverAddress
-	)
-	internal
-	{
-		IKyberReserveInterface(kyberReserveContractAddress).withdrawToken(
-			tokenToWithdraw,
-			amountToBeWithdrawn,
-			receiverAddress
-		);
-	}
-
-//	/**
-//	 * @notice			Function to withdraw ether from Kyber reserve
-//	 *
-//	 * @param			kyberReserveContractAddress is the address of reserve
-//	 * @param			amountOfEth is the amount of Ether to be withdrawn, in WEI
-//	 */
-//	function withdrawEtherFromKyberReserve(
-//		address kyberReserveContractAddress,
-//		uint amountOfEth
-//	)
-//	external
-//	onlyTwoKeyCongress
-//	{
-//		IKyberReserveInterface(kyberReserveContractAddress).withdrawEther(
-//			amountOfEth,
-//			address(this)
-//		);
-//	}
+	//
+	//	function withdrawTokensFromKyberReserveInternal(
+	//		address kyberReserveContractAddress,
+	//		ERC20 tokenToWithdraw,
+	//		uint amountToBeWithdrawn,
+	//		address receiverAddress
+	//	)
+	//	internal
+	//	{
+	//		IKyberReserveInterface(kyberReserveContractAddress).withdrawToken(
+	//			tokenToWithdraw,
+	//			amountToBeWithdrawn,
+	//			receiverAddress
+	//		);
+	//	}
 
 
 	/**
@@ -863,18 +819,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		return getUint(_twoKeyNetworkTaxPercent);
 	}
 
-
-//	/**
-//	 * @notice			Setter in case TwoKeyCongress decides to change the release date
-//	 */
-//	function setNewTwoKeyRewardsReleaseDate(
-//		uint256 newDate
-//	)
-//	external
-//	onlyTwoKeyCongress
-//	{
-//		PROXY_STORAGE_CONTRACT.setUint(keccak256(_rewardReleaseAfter),newDate);
-//	}
 
 
 	/**
