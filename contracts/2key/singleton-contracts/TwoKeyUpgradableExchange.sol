@@ -1295,15 +1295,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice          Getter to check how much is pool worth in USD
      */
-    function poolWorthUSD()
+    function poolWorthUSD(
+        uint averagePriceFrom3MainSources
+    )
     internal
     view
     returns (uint)
     {
-        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
-            .getBaseToTargetRate("2KEY-USD");
         uint currentAmountOfTokens = getPoolBalanceOf2KeyTokens();
-        return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
+        return (averagePriceFrom3MainSources.mul(currentAmountOfTokens).div(10 ** 18));
     }
 
 
@@ -1406,7 +1406,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             purchaseAmountUSDWei,
             currentPrice,
             balanceOfTokens,
-            poolWorthUSD()
+                poolWorthUSD(currentPrice)
         );
     }
 
