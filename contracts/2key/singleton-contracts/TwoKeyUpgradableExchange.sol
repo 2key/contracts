@@ -784,7 +784,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Get token decimals
         uint tokenDecimals = IERC20(tokenAddress).decimals();
 
-        // Convert that amount to USD value
         uint amountInUSDOfPurchase = amountOfTokens.mul((10 ** 18).div(10 ** tokenDecimals)).mul(tokenToUsd).div(10 ** 18);
 
         // Take the tokens

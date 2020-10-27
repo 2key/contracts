@@ -25,6 +25,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2contractor = "campaignPlasma2contractor";
 
     string constant _campaignPlasma2isBudgetedWith2KeyDirectly = "campaignPlasma2isBudgetedWith2KeyDirectly";
+    string constant _campaignPlasma2StableCoinAddress = "campaignPlasma2StableCoinAddress";
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
     string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
@@ -168,6 +169,12 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         setUint(
             keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma),
             amountOfStableCoins
+        );
+
+        // Set stable coin which is used to budget campaign
+        setAddress(
+            keccak256(_campaignPlasma2StableCoinAddress, campaignPlasma),
+            tokenAddress
         );
 
         // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
