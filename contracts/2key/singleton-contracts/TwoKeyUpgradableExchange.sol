@@ -733,22 +733,13 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint averageTokenPriceForPurchase;
         uint newTokenPrice;
 
-        // Get the address of twoKeyExchangeRateContract
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-
-        // Get stable coin to dollar rate
-        uint tokenToUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinToUSDQuota(tokenAddress);
-
-        // Get token decimals
-        uint tokenDecimals = IERC20(tokenAddress).decimals();
-
-        uint amountInUSDOfPurchase = amountOfTokens.mul((10 ** 18).div(10 ** tokenDecimals)).mul(tokenToUsd).div(10 ** 18);
-
         // Take the tokens
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), amountOfTokens);
 
         // Increment amount of this stable tokens to fill reserve
         setStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
+
+        uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
 
         // Process price discovery, buy tokens, and get new price
         (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = get2KEYTokenPriceAndAmountOfTokensReceiving(amountInUSDOfPurchase);
@@ -761,6 +752,28 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         // Return amount of tokens received and average token price for purchase
         return (totalTokensBought, averageTokenPriceForPurchase);
+    }
+
+    function computeAmountInUsd(
+        uint amountInTokenDecimals,
+        address tokenAddress
+    )
+    internal
+    view
+    returns (uint)
+    {
+        // Get the address of twoKeyExchangeRateContract
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+
+        // Get stable coin to dollar rate
+        uint tokenToUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinToUSDQuota(tokenAddress);
+
+        // Get token decimals
+        uint tokenDecimals = IERC20(tokenAddress).decimals();
+
+        uint oneEth = 10 ** 18;
+
+        return amountInTokenDecimals.mul(oneEth.div(10 ** tokenDecimals)).mul(tokenToUsd).div(oneEth);
     }
 
 
