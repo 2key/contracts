@@ -1,9 +1,3 @@
-import {exchangeRates} from "../../constants/smallConstants";
-const spawn = require("child_process").spawn;
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
-require('isomorphic-form-data');
-
 import {expect} from 'chai';
 import 'mocha';
 import web3Switcher from "../../helpers/web3Switcher";
@@ -12,8 +6,13 @@ import getTwoKeyProtocol from "../../helpers/twoKeyProtocol";
 import {promisify} from "../../../src/utils/promisify";
 
 
-
 import Sign from "../../../src/sign";
+
+const spawn = require("child_process").spawn;
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 const {env} = process;
 const path = require('path');
 
@@ -35,10 +34,9 @@ describe(
             function () {
                 this.timeout(timeout);
 
-                const {web3, address} = web3Switcher.deployer();
-
+                const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.deployer();
                 from = address;
-                twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
+                twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
             }
         );
 
@@ -82,10 +80,9 @@ describe(
         }).timeout(timeout);
 
         it('should member 2. vote for supporting proposal', async() => {
-            const {web3, address} = web3Switcher.aydnep();
-
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.aydnep();
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_AYDNEP);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote,[
                 numberOfProposals,
@@ -103,10 +100,9 @@ describe(
 
         it('should member 3 vote for supporting proposal', async() => {
 
-            const {web3, address} = web3Switcher.gmail();
-
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.gmail();
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_GMAIL);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote,[
                 numberOfProposals,
@@ -160,9 +156,9 @@ describe(
 
         it('should register participation mining epoch', async () => {
 
-            const {web3, address} = web3Switcher.buyer();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             // Get latest epoch id
             epochId = parseInt(await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getLatestFinalizedEpochId,[]),10) + 1;
@@ -292,11 +288,9 @@ describe(
 
         it('should submit signature for specific user and check state changes', async() => {
 
-            // Change maintainer because the one signed can't send this message
-            const {web3, address} = web3Switcher.buyer();
-
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let user = usersInEpoch[2];
             let pending = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAmount,[user]);
@@ -356,10 +350,9 @@ describe(
 
         it('maintainer should set monthly allowance and date from which is counting starting', async() => {
             // Change maintainer because the one signed can't send this message
-            const {web3, address} = web3Switcher.buyer();
-
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
 
             let monthlyTransferAllowance = await promisify(
@@ -398,10 +391,9 @@ describe(
         }).timeout(timeout);
 
         it('should withdraw tokens from mainchain', async() => {
-            const {web3, address} = web3Switcher.renata();
-
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.renata();
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_RENATA);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(from);
             console.log(amountInProgressOfWithdrawal);
@@ -437,10 +429,9 @@ describe(
 
         it('should mark that user finished withdrawal on mainchain, and clear his sig, called by maintainer', async() => {
 
-            const {web3, address} = web3Switcher.buyer();
-
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let user = usersInEpoch[2];
 

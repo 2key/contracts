@@ -1421,10 +1421,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+
     /**
      * @notice          Fallback function to handle incoming ether
      */
-    function ()
+    function()
     public
     payable
     {

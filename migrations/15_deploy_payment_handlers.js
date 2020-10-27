@@ -10,6 +10,7 @@ const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry')
 const fs = require('fs');
 const path = require('path');
 
+
 const proxyFile = path.join(__dirname, '../build/proxyAddresses.json');
 
 const INITIAL_VERSION_OF_ALL_SINGLETONS = "1.0.0";
@@ -55,13 +56,13 @@ module.exports = function deploy(deployer) {
                             INITIAL_VERSION_OF_ALL_SINGLETONS
                         );
 
-                        let { logs } = await registry.createProxy(
+                        let {logs} = await registry.createProxy(
                             contractName,
                             contractStorageName,
                             INITIAL_VERSION_OF_ALL_SINGLETONS
                         );
 
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        let {logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
 
                         proxyLogic = logicProxy;
                         proxyStorage = storageProxy;
@@ -124,13 +125,13 @@ module.exports = function deploy(deployer) {
                             INITIAL_VERSION_OF_ALL_SINGLETONS
                         );
 
-                        let { logs } = await registry.createProxy(
+                        let {logs} = await registry.createProxy(
                             contractName,
                             contractStorageName,
                             INITIAL_VERSION_OF_ALL_SINGLETONS
                         );
 
-                        let { logicProxy, storageProxy } = logs.find(l => l.event === 'ProxiesDeployed').args;
+                        let {logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
 
                         proxyLogic = logicProxy;
                         proxyStorage = storageProxy;
@@ -152,7 +153,7 @@ module.exports = function deploy(deployer) {
                 fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
             })
             .then(async () => {
-                await new Promise(async (resolve,reject) => {
+                await new Promise(async (resolve, reject) => {
                     try {
                         console.log('Setting initial params in TwoKeyBudgetCampaignsPaymentsHandler contract on plasma network');
                         let instance = await TwoKeyBudgetCampaignsPaymentsHandler.at(proxyLogic);

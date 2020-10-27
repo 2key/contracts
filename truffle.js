@@ -54,7 +54,7 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["dev-local"]),
           network_id: ids["dev-local"], // Match any network id
           gas: 8000000,
-          gasPrice: 15500000000
+          gasPrice: 5000000000
       },
 
       'plasma-test-local': {
@@ -133,7 +133,7 @@ module.exports = {
           skipDryRun: true,
           network_id: ids["prod-public"],
           gas: 8000000,
-          gasPrice: 85000000000,
+          gasPrice: 40000000000,
       },
 
       'public.prod-hdwallet': {
