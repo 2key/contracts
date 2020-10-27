@@ -20,6 +20,7 @@ cd ../..
 
 
 python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.22
+python3 generate_bytecode.py upgradeContract TwoKeyBudgetCampaignsPaymentsHandler 1.0.1
 
 
 
