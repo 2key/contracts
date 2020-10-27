@@ -1309,14 +1309,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @notice          Getter to check how much is pool worth in USD
      */
     function poolWorthUSD(
+        uint amountOfTokensInThePool,
         uint averagePriceFrom3MainSources
     )
     internal
     view
     returns (uint)
     {
-        uint currentAmountOfTokens = getPoolBalanceOf2KeyTokens();
-        return (averagePriceFrom3MainSources.mul(currentAmountOfTokens).div(10 ** 18));
+        return (averagePriceFrom3MainSources.mul(amountOfTokensInThePool).div(10 ** 18));
     }
 
 
@@ -1367,7 +1367,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         address [] memory path = new address[](2);
 
-    path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
         path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
 
         uint rateFromUniswap = uniswapPriceDiscover(10 ** 18, path);
@@ -1416,11 +1416,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint currentPrice = sellRate2key();
         uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
+
         return PriceDiscovery.buyTokensFromExchangeRealignPrice(
             purchaseAmountUSDWei,
             currentPrice,
             balanceOfTokens,
-                poolWorthUSD(currentPrice)
+                poolWorthUSD(balanceOfTokens, currentPrice)
         );
     }
 
