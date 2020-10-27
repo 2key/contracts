@@ -831,7 +831,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     }
 
     function getStableCoinAddressUsedToFundCampaign(
-        address campaignAddress
+        address campaignPlasma
     )
     public
     view
