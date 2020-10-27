@@ -781,8 +781,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Get stable coin to dollar rate
         uint tokenToUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinToUSDQuota(tokenAddress);
 
+        // Get token decimals
+        uint tokenDecimals = IERC20(tokenAddress).decimals();
+
         // Convert that amount to USD value
-        uint amountInUSDOfPurchase = amountOfTokens.mul(tokenToUsd).div(10**18);
+        uint amountInUSDOfPurchase = amountOfTokens.mul((10 ** 18).div(10 ** tokenDecimals)).mul(tokenToUsd).div(10 ** 18);
 
         // Take the tokens
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), amountOfTokens);
