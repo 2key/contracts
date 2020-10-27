@@ -38,7 +38,7 @@ module.exports = function deploy(deployer) {
         }
     });
 
-    if(flag == false) {
+    if (flag === false) {
         console.log('No update will be performed');
         return;
     }
