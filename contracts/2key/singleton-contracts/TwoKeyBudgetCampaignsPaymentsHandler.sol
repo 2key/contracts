@@ -139,18 +139,14 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // Set that contractor is the msg.sender of this method for the campaign passed
         setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
 
-
         address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
-        // Take stable coins from the contractor
+        // Take stable coins from the contractor and directly transfer them to upgradable exchange
         IERC20(tokenAddress).transferFrom(
             msg.sender,
-            address(this),
+            twoKeyUpgradableExchange,
             amountOfStableCoins
         );
-
-        // Approve twoKeyUpgradableExchange to take this tokens
-        IERC20(tokenAddress).approve(twoKeyUpgradableExchange, amountOfStableCoins);
 
         uint totalTokensBought;
         uint tokenPrice;
@@ -159,7 +155,11 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         (totalTokensBought, tokenPrice) = IUpgradableExchange(twoKeyUpgradableExchange).buyTokensWithERC20(amountOfStableCoins, tokenAddress);
 
         // Calculate and set bounty per conversion in 2KEY units
-        uint bountyPerConversion2KEY = bountyPerConversionFiat.mul(10**18).div(tokenPrice);
+        uint bountyPerConversion2KEY = bountyPerConversionFiat.mul(10 ** 18).div(tokenPrice);
+
+        // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
+        requireBudgetNotSetAndSetBudget(campaignPlasma, totalTokensBought);
+
 
         setUint(
             keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma),
@@ -176,9 +176,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             keccak256(_campaignPlasma2StableCoinAddress, campaignPlasma),
             tokenAddress
         );
-
-        // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
-        requireBudgetNotSetAndSetBudget(campaignPlasma, totalTokensBought);
 
         // Set the rate at which we have bought 2KEY tokens
         setUint(

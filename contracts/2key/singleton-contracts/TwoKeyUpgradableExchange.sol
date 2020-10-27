@@ -729,12 +729,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint,uint)
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
-        uint totalTokensBought;
+
+    uint totalTokensBought;
         uint averageTokenPriceForPurchase;
         uint newTokenPrice;
-
-        // Take the tokens
-        IERC20(tokenAddress).transferFrom(msg.sender, address(this), amountOfTokens);
 
         // Increment amount of this stable tokens to fill reserve
         setStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
@@ -1368,7 +1366,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
         address [] memory path = new address[](2);
-        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+    path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
         path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
 
         uint rateFromUniswap = uniswapPriceDiscover(10 ** 18, path);
