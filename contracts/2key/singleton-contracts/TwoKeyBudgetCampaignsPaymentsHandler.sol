@@ -830,6 +830,16 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma));
     }
 
+    function getStableCoinAddressUsedToFundCampaign(
+        address campaignAddress
+    )
+    public
+    view
+    returns (address)
+    {
+        return getAddress(keccak256(_campaignPlasma2StableCoinAddress, campaignPlasma));
+    }
+
     /**
      * @notice          Function to return summary related to specific campaign
      * @param           campaignPlasma is plasma campaign of address
