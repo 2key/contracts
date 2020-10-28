@@ -160,6 +160,9 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
         requireBudgetNotSetAndSetBudget(campaignPlasma, totalTokensBought);
 
+        // SSTORE 20k gas * 3 = 60k 3x uint ==> 256 bytes * 3 * 8 =  6144 gas
+        // 375 gas + 5 gas for each byte
+        // 10%   60000 - 6144 = 53856 saving
 
         setUint(
             keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma),

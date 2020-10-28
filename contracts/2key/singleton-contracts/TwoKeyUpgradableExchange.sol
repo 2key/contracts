@@ -730,7 +730,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
 
-    uint totalTokensBought;
+        uint totalTokensBought;
         uint averageTokenPriceForPurchase;
         uint newTokenPrice;
 
