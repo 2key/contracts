@@ -113,7 +113,7 @@ const runDeployCPCNoRewardsMigration = (network) => new Promise(async(resolve, r
 });
 
 
-const runDeployPaymentHandlersMigration = (network) => new Promise(async(resolve, reject) => {
+const runDeployPaymentHandlersMigration = (network) => new Promise(async (resolve, reject) => {
     try {
         await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '15', '--to', '15', '--network', network, 'update_cpc']);
         resolve(true);
@@ -123,7 +123,14 @@ const runDeployPaymentHandlersMigration = (network) => new Promise(async(resolve
 });
 
 
-
+const runDeployPlasmaParticipationsMining = (network) => new Promise(async (resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '16', '--to', '16', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
 
 
 /**
@@ -478,5 +485,6 @@ module.exports = {
     runDeployPlasmaReputation,
     runDeployPPCNoRewards,
     runDeployCPCNoRewardsMigration,
-    runDeployPaymentHandlersMigration
+    runDeployPaymentHandlersMigration,
+    runDeployPlasmaParticipationsMining
 };

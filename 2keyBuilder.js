@@ -39,7 +39,8 @@ const {
     runTruffleCompile,
     runDeployPlasmaReputation,
     runDeployCPCNoRewardsMigration,
-    runDeployPaymentHandlersMigration
+    runDeployPaymentHandlersMigration,
+    runDeployPlasmaParticipationsMining
 } = require('./helpers');
 
 
@@ -436,18 +437,17 @@ async function deployUpgrade(networks) {
         /* eslint-disable no-await-in-loop */
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-no-fees-deploy')) {
-            console.log("Deploying 2 new singleton contracts for budget campaigns payments handlers");
-            await runDeployPaymentHandlersMigration(networks[i]);
+        if (process.argv.includes('plasma-participation')) {
+            await runDeployPlasmaParticipationsMining(networks[i]);
         }
 
-        if(deployment.singletons.length > 0) {
-            for(let j=0; j<deployment.singletons.length; j++) {
+        if (deployment.singletons.length > 0) {
+            for (let j = 0; j < deployment.singletons.length; j++) {
                 /* eslint-disable no-await-in-loop */
                 console.log(networks[i], deployment.singletons[j]);
-                if(checkIfContractIsPlasma(deployment.singletons[j])) {
+                if (checkIfContractIsPlasma(deployment.singletons[j])) {
                     console.log('Contract is plasma: ' + deployment.singletons[j]);
-                    if(networks[i].includes('private') || networks[i].includes('plasma')) {
+                    if (networks[i].includes('private') || networks[i].includes('plasma')) {
                         await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 } else {
