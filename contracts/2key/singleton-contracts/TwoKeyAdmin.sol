@@ -36,19 +36,19 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     string constant _rewardsReceivedAsModeratorTotal = "rewardsReceivedAsModeratorTotal";
     string constant _moderatorEarningsPerCampaign = "moderatorEarningsPerCampaign";
     string constant _feesFromFeeManagerCollectedInCurrency = "feesFromFeeManagerCollectedInCurrency";
-    string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
-    string constant _daiCollectedFromUpgradableExchange = "daiCollectedFromUpgradableExchange";
-    string constant _feesCollectedFromDistributionRewards = "feesCollectedFromDistributionRewards";
+	string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
+	string constant _daiCollectedFromUpgradableExchange = "daiCollectedFromUpgradableExchange";
+	string constant _feesCollectedFromDistributionRewards = "feesCollectedFromDistributionRewards";
 
 
-    // Withdrawals from ADMIN
-    string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
-    string constant _amountWithdrawnFromFeeManagerPoolInCurrency = "amountWithdrawnFromFeeManagerPoolInCurrency";
-    string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
-    string constant _amountWithdrawnFromCollectedDaiFromUpgradableExchange = "amountWithdrawnFromCollectedDaiFromUpgradableExchange";
+	// Withdrawals from ADMIN
+	string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
+	string constant _amountWithdrawnFromFeeManagerPoolInCurrency = "amountWithdrawnFromFeeManagerPoolInCurrency";
+	string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
+	string constant _amountWithdrawnFromCollectedDaiFromUpgradableExchange = "amountWithdrawnFromCollectedDaiFromUpgradableExchange";
+	string constant _amountWithdrawnFromCollectedDistributionRewards = "amountWithdrawnFromCollectedDistributionRewards";
 
-
-    /**
+	/**
      * Keys for the addresses we're accessing
      */
 	string constant _twoKeyCongress = "TwoKeyCongress";
@@ -459,7 +459,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		uint totalDAICollectedFromPool = getAmountCollectedInDAIFromUpgradableExchange();
 		uint totalDAIWithdrawnFromPool = getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings();
 
-		if(amountToBeWithdrawn == 0) {
+		if (amountToBeWithdrawn == 0) {
 			amountToBeWithdrawn = totalDAICollectedFromPool.sub(totalDAIWithdrawnFromPool);
 		} else {
 			require(totalDAIWithdrawnFromPool.add(amountToBeWithdrawn) <= totalDAICollectedFromPool);
@@ -468,6 +468,26 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		transferTokens(_DAI_TOKEN, beneficiary, amountToBeWithdrawn);
 
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange), totalDAIWithdrawnFromPool.add(amountToBeWithdrawn));
+	}
+
+	function withdrawFeesCollectedFromDistributionRewards(
+		address beneficiary,
+		uint amountToWithdraw
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		uint totalFeesCollected = getAmountOfTokensReceivedFromDistributionFees();
+		uint totalFeesWithdrawn = getAmountOfTokensWithdrawnFromDistributionFees();
+
+		if (amountToWithdraw == 0) {
+			amountToWithdraw = totalFeesCollected.sub(totalFeesWithdrawn);
+		} else {
+			require(totalFeesWithdrawn.add(amountToWithdraw) <= totalFeesCollected);
+		}
+
+		transferTokens(_twoKeyEconomy, beneficiary, amountToWithdraw);
+		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDistributionRewards), totalFeesWithdrawn.add(amountToWithdraw));
 	}
 
 	/**
@@ -494,12 +514,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	onlyTwoKeyBudgetCampaignsPaymentsHandler
 	{
 		uint amountCollected = getAmountOfTokensReceivedFromDistributionFees();
-
-		IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
-			msg.sender,
-            address(this),
-            amountOfTokens
-        );
 
         PROXY_STORAGE_CONTRACT.setUint(
             keccak256(_feesCollectedFromDistributionRewards),
@@ -843,26 +857,34 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
-    }
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_rewardsReceivedAsModeratorTotal));
+	}
 
-    function getAmountOfTokensReceivedFromDistributionFees()
-    public
-    view
-    returns (uint)
-    {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesCollectedFromDistributionRewards));
-    }
+	function getAmountOfTokensReceivedFromDistributionFees()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesCollectedFromDistributionRewards));
+	}
 
-    function getAmountCollectedFromFeeManagerInCurrency(
-        string currency
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesFromFeeManagerCollectedInCurrency, currency));
-    }
+	function getAmountOfTokensWithdrawnFromDistributionFees()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromCollectedDistributionRewards));
+	}
+
+	function getAmountCollectedFromFeeManagerInCurrency(
+		string currency
+	)
+	internal
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesFromFeeManagerCollectedInCurrency, currency));
+	}
 
 	function getAmountCollectedFromKyber()
 	internal
