@@ -940,11 +940,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         for (i = 0; i < numberOfTokens; i++) {
             // Load the token address
             address tokenAddress = stableCoinsAddresses[i];
+
             // Get how much is available to fill reserve
             uint availableForReserve = getAvailableAmountToFillReserveInternal(tokenAddress);
 
-            // If amount is greater than available, swap all available
-            uint amountToSwap = amounts[i] > availableForReserve ? availableForReserve : amounts[i];
+            // Require that amount wanted to swap is less or equal to amount present in reserve
+            require(amounts[i] <= availableForReserve);
+
+            uint amountToSwap = amounts[i];
 
             // Reduce amount used to swap from available in reserve
             setStableCoinsAvailableToFillReserve(
@@ -963,8 +966,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             path[1] = IUniswapV2Router02(uniswapRouter).WETH();
             path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
-            // Get minimum allowance
-            uint minimumAllowed = uniswapPriceDiscover(
+            // Get minimum received
+            uint minimumToReceive = uniswapPriceDiscover(
                 amountToSwap,
                 path
             );
@@ -972,7 +975,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             // Execute swap
             IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
                 amountToSwap,
-                minimumAllowed.mul(97).div(100), // Allow 3 percent to drop
+                minimumToReceive.mul(97).div(100), // Allow 3 percent to drop
                 path,
                 address(this),
                 block.timestamp + (10 minutes)
