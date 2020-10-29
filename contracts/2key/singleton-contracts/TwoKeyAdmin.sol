@@ -964,12 +964,14 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 				getAmountCollectedFromFeeManagerInCurrency("2KEY"),
 				getAmountCollectedFromKyber(),
 				getAmountCollectedInDAIFromUpgradableExchange(),
+				getAmountOfTokensReceivedFromDistributionFees(),
 				getAmountOfTokensWithdrawnFromModeratorEarnings(),
 				getAmountWithdrawnFromKyberEarnings(),
 				getAmountWithdrawnFromCollectedDAIUpgradableExchangeEarnings(),
 				getAmountWithdrawnFromFeeManagerEarningsInCurrency("DAI"),
 				getAmountWithdrawnFromFeeManagerEarningsInCurrency("ETH"),
-				getAmountWithdrawnFromFeeManagerEarningsInCurrency("2KEY")
+				getAmountWithdrawnFromFeeManagerEarningsInCurrency("2KEY"),
+				getAmountOfTokensWithdrawnFromDistributionFees()
 			)
 		);
 	}
