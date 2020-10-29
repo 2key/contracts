@@ -72,10 +72,11 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
         )
       );
 
-      await protocol.Utils.getTransactionReceiptMined(
-        await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
+      let receipt = await protocol.Utils.getTransactionReceiptMined(
+          await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
       );
 
+      console.log('Add directly 2KEY gas used: ', receipt.gasUsed);
 
       const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
 
@@ -105,18 +106,17 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
         let txHash;
 
-        await protocol.Utils.getTransactionReceiptMined(
-          txHash = await protocol.CPCCampaign.addInventoryWithStableCoin(
-              campaignAddress,
-              amountOfTokensWei,
-              protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(),
-              daiAddress,
-              address
+        let receipt = await protocol.Utils.getTransactionReceiptMined(
+            txHash = await protocol.CPCCampaign.addInventoryWithStableCoin(
+                campaignAddress,
+                amountOfTokensWei,
+                protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(),
+                daiAddress,
+                address
             )
         );
-
+      console.log('Gas used: ', receipt.gasUsed);
         const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
-
     }
   });
 

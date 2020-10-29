@@ -726,24 +726,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint,uint)
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
         uint totalTokensBought;
         uint averageTokenPriceForPurchase;
         uint newTokenPrice;
 
-        // Get the address of twoKeyExchangeRateContract
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-
-        // Get stable coin to dollar rate
-        uint tokenToUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinToUSDQuota(tokenAddress);
-
-        // Convert that amount to USD value
-        uint amountInUSDOfPurchase = amountOfTokens.mul(tokenToUsd).div(10**18);
-
-        // Take the tokens
-        IERC20(tokenAddress).transferFrom(msg.sender, address(this), amountOfTokens);
-
         // Increment amount of this stable tokens to fill reserve
         setStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
+
+        uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
 
         // Process price discovery, buy tokens, and get new price
         (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = get2KEYTokenPriceAndAmountOfTokensReceiving(amountInUSDOfPurchase);
@@ -756,6 +747,28 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         // Return amount of tokens received and average token price for purchase
         return (totalTokensBought, averageTokenPriceForPurchase);
+    }
+
+    function computeAmountInUsd(
+        uint amountInTokenDecimals,
+        address tokenAddress
+    )
+    internal
+    view
+    returns (uint)
+    {
+        // Get the address of twoKeyExchangeRateContract
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+
+        // Get stable coin to dollar rate
+        uint tokenToUsd = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getStableCoinToUSDQuota(tokenAddress);
+
+        // Get token decimals
+        uint tokenDecimals = IERC20(tokenAddress).decimals();
+
+        uint oneEth = 10 ** 18;
+
+        return amountInTokenDecimals.mul(oneEth.div(10 ** tokenDecimals)).mul(tokenToUsd).div(oneEth);
     }
 
 
@@ -1276,15 +1289,15 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     /**
      * @notice          Getter to check how much is pool worth in USD
      */
-    function poolWorthUSD()
+    function poolWorthUSD(
+        uint amountOfTokensInThePool,
+        uint averagePriceFrom3MainSources
+    )
     internal
     view
     returns (uint)
     {
-        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract))
-            .getBaseToTargetRate("2KEY-USD");
-        uint currentAmountOfTokens = getPoolBalanceOf2KeyTokens();
-        return (rateFromCoinGecko.mul(currentAmountOfTokens).div(10**18));
+        return (averagePriceFrom3MainSources.mul(amountOfTokensInThePool).div(10 ** 18));
     }
 
 
@@ -1334,6 +1347,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
         address [] memory path = new address[](2);
+
         path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
         path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
 
@@ -1383,11 +1397,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         uint currentPrice = sellRate2key();
         uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
+
         return PriceDiscovery.buyTokensFromExchangeRealignPrice(
             purchaseAmountUSDWei,
             currentPrice,
             balanceOfTokens,
-            poolWorthUSD()
+                poolWorthUSD(balanceOfTokens, currentPrice)
         );
     }
 
