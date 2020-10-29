@@ -915,90 +915,71 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return minConversionRate;
     }
 
-    //    function swapStableCoinsAvailableToFillReserveFor2KEY(
-    //        address [] stableCoinsAddresses
-    //    )
-    //    public
-    //    onlyMaintainer
-    //    {
-    //        uint numberOfTokens = stableCoinsAddresses.length;
-    //        uint i;
-    //        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router01");
-    //
-    //        for (i = 0; i < numberOfTokens; i++) {
-    //            address tokenAddress = stableCoinsAddresses[i];
-    //            uint availableForReserve = getAvailableAmountToFillReserveInternal(tokenAddress);
-    //
-    //            // Approve uniswap router to take tokens from the contract
-    //            IERC20(tokenAddress).approve(
-    //                uniswapRouter,
-    //                availableForReserve
-    //            );
-    //
-    //            address [] memory path = new address[](2);
-    //            path[0] = tokenAddress;
-    //            path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-    //
-    //            uint minimumAllowed = uniswapPriceDiscover(
-    //                availableForReserve,
-    //                path
-    //            );
-    //
-    //            IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
-    //            availableForReserve,
-    //            minimumAllowed.mul(97).div(100),
-    //            path,
-    //            address(this)
-    //            );
-    //
-    //        }
-    //    }
 
     /**
-     * @notice          Function to send available DAI to Kyber and get 2KEY tokens
-     *
-     * @param           amountOfDAIToSwap is the amount of DAI tokens we want to swap
-     * @param           approvedMinConversionRate is the approved minimal conversion rate we can get
+     * @notice          Function to relay demand of stable coins we have in exchange to
+     *                  uniswap exchange.
+     * @param           stableCoinsAddresses is array of addresses of stable coins we're going to swap
+     * @param           amounts are corresponding amounts of tokens that are going to be swapped.
      */
-    function swapDaiAvailableToFillReserveFor2KEY(
-        uint amountOfDAIToSwap,
-        uint approvedMinConversionRate
+    function swapStableCoinsAvailableToFillReserveFor2KEY(
+        address [] stableCoinsAddresses,
+        uint [] amounts
     )
     public
     onlyMaintainer
     {
-        // Generate the key hash for dai available to fill 2KEY reserve
-        bytes32 _daiWeiAvailableToFill2KEYReserveKeyHash = keccak256("daiWeiAvailableToFill2KEYReserve");
+        uint numberOfTokens = stableCoinsAddresses.length;
+        uint i;
 
-        // Get amount of DAI available for this operation
-        uint daiWeiAvailableToFill2KEYReserve = getUint(_daiWeiAvailableToFill2KEYReserveKeyHash);
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
 
-        // Require that we have more than enough dai's to perform this swap
-        require(daiWeiAvailableToFill2KEYReserve >= amountOfDAIToSwap);
+        // Create a path array
+        address [] memory path = new address[](3);
 
-        // Get and instantiate kyber proxy contract
-        address kyberProxyContract = getAddress(keccak256(_kyberNetworkProxy));
-        IKyberNetworkProxy proxyContract = IKyberNetworkProxy(kyberProxyContract);
+        for (i = 0; i < numberOfTokens; i++) {
+            // Load the token address
+            address tokenAddress = stableCoinsAddresses[i];
+            // Get how much is available to fill reserve
+            uint availableForReserve = getAvailableAmountToFillReserveInternal(tokenAddress);
 
-        // Instantiate dai and 2KEY token
-        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
-        ERC20 twoKeyToken = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy));
+            // If amount is greater than available, swap all available
+            uint amountToSwap = amounts[i] > availableForReserve ? availableForReserve : amounts[i];
 
-        // Get minConversionRate from Kyber
-        uint minConversionRate = getKyberExpectedRate(amountOfDAIToSwap, dai, twoKeyToken);
+            // Reduce amount used to swap from available in reserve
+            setStableCoinsAvailableToFillReserve(
+                availableForReserve.sub(amountToSwap),
+                tokenAddress
+            );
 
-        // Allow at most 5% spread
-        require(minConversionRate >= approvedMinConversionRate.mul(95).div(100));
+            // Approve uniswap router to take tokens from the contract
+            IERC20(tokenAddress).approve(
+                uniswapRouter,
+                amountToSwap
+            );
 
-        // Approve kyberProxyContract to take DAIs
-        dai.approve(kyberProxyContract, amountOfDAIToSwap);
+            // Override always the path array
+            path[0] = tokenAddress;
+            path[1] = IUniswapV2Router02(uniswapRouter).WETH();
+            path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
-        // Perform swap and account how many 2KEY tokens received
-        uint received2KEYTokens = proxyContract.swapTokenToToken(dai, amountOfDAIToSwap, twoKeyToken, minConversionRate);
+            // Get minimum allowance
+            uint minimumAllowed = uniswapPriceDiscover(
+                amountToSwap,
+                path
+            );
 
-        // Update DAI tokens available to fill reserve
-        setUint(_daiWeiAvailableToFill2KEYReserveKeyHash, daiWeiAvailableToFill2KEYReserve.sub(amountOfDAIToSwap));
+            // Execute swap
+            IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
+                amountToSwap,
+                minimumAllowed.mul(97).div(100), // Allow 3 percent to drop
+                path,
+                address(this),
+                block.timestamp + (10 minutes)
+            );
+        }
     }
+
 
     /**
      * @notice          Function to start hedging some ether amount
