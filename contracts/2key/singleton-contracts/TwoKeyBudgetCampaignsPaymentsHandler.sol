@@ -143,7 +143,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
         // Handle case for Tether due to different ERC20 interface it has
-        if (tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TUSD")) {
+        if (tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
             // Take stable coins from the contractor and directly transfer them to upgradable exchange
             ITether(tokenAddress).transferFrom(
                 msg.sender,
