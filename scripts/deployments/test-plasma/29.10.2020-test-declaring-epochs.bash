@@ -14,6 +14,7 @@ spinner() {
 
 spinner 2
 
+cd ../..
 
 echo "Destination for execution on plasma is TwoKeyPlasmaParticipationRewards contract: 0xc8f19c88c9335880d8c4a165acdb7499f444dc6d"
 
