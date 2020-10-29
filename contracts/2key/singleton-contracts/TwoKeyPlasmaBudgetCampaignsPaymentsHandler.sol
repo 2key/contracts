@@ -493,7 +493,8 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
 
 
     function finishDistributionCycle(
-        uint cycleId
+        uint cycleId,
+        uint feePerReferrerIn2KEY
     )
     public
     onlyMaintainer
@@ -520,22 +521,18 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
                 // Get referrer earnings for this campaign
                 referrerEarningsPerCampaign[j] = ITwoKeyPlasmaCampaign(campaignAddress).getReferrerPlasmaBalance(referrer);
 
-                // Mark that referrer got paid for trebalanceInfluencerRatesAndPrepareForRewardsDistributionhis campaign
+                // Mark that referrer got paid his campaign
                 ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
             }
 
-            // Total amount paid to referrer
-            uint amountPaidToReferrer = getReferrerToTotalRebalancedAmountForCycleId(referrer,cycleId);
-
-            // Total amount non rebalanced
-            uint amountNonRebalancedReferrerEarned = getReferrerEarningsNonRebalancedPerCycle(referrer,cycleId);
 
             ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(
                 referrer,
-                amountNonRebalancedReferrerEarned,
-                amountPaidToReferrer,
+                getReferrerEarningsNonRebalancedPerCycle(referrer, cycleId), //amount non rebalanced referrer earned
+                getReferrerToTotalRebalancedAmountForCycleId(referrer, cycleId), // amount paid to referrer
                 referrerInProgressCampaigns,
-                referrerEarningsPerCampaign
+                referrerEarningsPerCampaign,
+                feePerReferrerIn2KEY
             );
 
             // Move from inProgress to finished campagins

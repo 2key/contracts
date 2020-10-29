@@ -141,7 +141,8 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         uint nonRebalancedRewards,
         uint rewards,
         address [] campaignsPaid,
-        uint [] earningsPerCampaign
+        uint [] earningsPerCampaign,
+        uint feePerReferrer2KEY
     );
 
     /**
@@ -402,7 +403,8 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         uint amountNonRebalancedEarned,
         uint amountPaid,
         address [] campaignsPaid,
-        uint [] earningsPerCampaign
+        uint [] earningsPerCampaign,
+        uint feePerReferrer2KEY
     )
     public
     onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler
@@ -412,7 +414,8 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
             amountNonRebalancedEarned,
             amountPaid,
             campaignsPaid,
-            earningsPerCampaign
+            earningsPerCampaign,
+            feePerReferrer2KEY
         );
     }
 
