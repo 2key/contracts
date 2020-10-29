@@ -362,6 +362,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Set that signature is existing and can't be used anymore
         setSignatureIsExisting(signature);
 
+        //TODO: Add event UserWithdrawnNetworkEarnings(user_address,amount_of_tokens)
+
         // Set the amount of tokens withdrawn by user using this signature
         setAmountWithdrawnWithSignature(msg.sender, signature, amountOfTokens);
 
@@ -408,7 +410,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         uint monthlyTransferAllowance = getMonthlyTransferAllowance();
 
         // Calculate total amount of tokens being unlocked by now
-        uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / 30 + 1) * monthlyTransferAllowance;
+        uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / (30 days) + 1) * monthlyTransferAllowance;
 
         // Get total amount already transfered
         uint totalTokensTransferedByNow = getTotalAmountOfTokensTransfered();

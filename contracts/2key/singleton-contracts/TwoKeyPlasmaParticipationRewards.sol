@@ -417,7 +417,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         // Require that the epoch being finalized is the one in progress
         require(epochId == getEpochIdInProgress());
 
-        //TODO:  Require that total rewards didn't pass allowance
         require(getTotalRewardsPerEpoch(epochId) <= getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId)));
 
         setEpochRegistrationFinalized(epochId);
