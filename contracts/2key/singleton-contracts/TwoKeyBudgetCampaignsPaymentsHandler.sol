@@ -4,6 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITether.sol";
 import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
@@ -141,12 +142,23 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
 
         address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
-        // Take stable coins from the contractor and directly transfer them to upgradable exchange
-        IERC20(tokenAddress).transferFrom(
-            msg.sender,
-            twoKeyUpgradableExchange,
-            amountOfStableCoins
-        );
+        // Handle case for Tether due to different ERC20 interface it has
+        if (tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TUSD")) {
+            // Take stable coins from the contractor and directly transfer them to upgradable exchange
+            ITether(tokenAddress).transferFrom(
+                msg.sender,
+                twoKeyUpgradableExchange,
+                amountOfStableCoins
+            );
+        } else {
+            // Take stable coins from the contractor and directly transfer them to upgradable exchange
+            IERC20(tokenAddress).transferFrom(
+                msg.sender,
+                twoKeyUpgradableExchange,
+                amountOfStableCoins
+            );
+        }
+
 
         uint totalTokensBought;
         uint tokenPrice;
