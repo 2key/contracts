@@ -321,7 +321,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint [] balances,
         uint nonRebalancedTotalPayout,
         uint rebalancedTotalPayout,
-        uint cycleId
+        uint cycleId,
+        uint feePerReferrerIn2KEY
     )
     public
     onlyMaintainer
@@ -357,26 +358,22 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             );
         }
 
-        uint feePerReferrer = calculateFeeForDistributionPerReferrer();
-
-        // Set 0.5$ in 2KEY fee taken in this cycle id per referrer
-        setAmountIn2KEYTakenFromReferrersInCycle(cycleId, feePerReferrer);
-
         uint numberOfReferrers = influencers.length;
 
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
         for (i = 0; i < numberOfReferrers; i++) {
             // Require that referrer earned more than fees
-            require(balances[i] > feePerReferrer);
+            require(balances[i] > feePerReferrerIn2KEY);
             // Sub fee per referrer from balance to pay
-            uint balance = balances[i].sub(feePerReferrer);
+            uint balance = balances[i].sub(feePerReferrerIn2KEY);
             // Transfer required tokens to influencer
             IERC20(twoKeyEconomy).transfer(influencers[i], balance);
-            // Sum up to totalDistributed
+            // Sum up to totalDistributed to referrers
             totalDistributed = totalDistributed.add(balance);
         }
 
-        transferFeesToAdmin(feePerReferrer, numberOfReferrers, twoKeyEconomy);
+
+        transferFeesToAdmin(feePerReferrerIn2KEY, numberOfReferrers, twoKeyEconomy);
 
 
         // Set how much is total distributed per distribution cycle
@@ -408,7 +405,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     {
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
-        IERC20(twoKeyEconomy).approve(
+        IERC20(twoKeyEconomy).transfer(
             twoKeyAdmin,
             feePerReferrer.mul(numberOfReferrers)
         );
@@ -417,23 +414,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
     }
 
-    /**
-     * @notice          Function to calculate how much 2KEY is worth 0.5$ at the moment
-     */
-    function calculateFeeForDistributionPerReferrer()
-    internal
-    view
-    returns (uint)
-    {
-        // Will take coingecko price because of gas usage
-        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(
-            getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract")
-        ).getBaseToTargetRate("2KEY-USD");
-
-        uint fiftyCentUSDWei = (10 ** 18).div(2);
-        // To keep value in wei since we divide with wei we multiply by WEI
-        return fiftyCentUSDWei.mul(10 ** 18).div(rateFromCoinGecko);
-    }
 
     /**
      * @notice          Function to set how many tokens are being distributed to moderator
@@ -657,18 +637,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         setUint(
             keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma),
             rebalancingRatio
-        );
-    }
-
-    function setAmountIn2KEYTakenFromReferrersInCycle(
-        uint cycleId,
-        uint feePerReferrer
-    )
-    internal
-    {
-        setUint(
-            keccak256(_feePerCycleIdPerReferrer, cycleId),
-            feePerReferrer
         );
     }
 
