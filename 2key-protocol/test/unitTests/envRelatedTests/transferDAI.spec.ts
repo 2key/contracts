@@ -23,6 +23,7 @@ describe(
                 this.timeout(timeout);
 
                 const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.deployer();
+
                 from = address;
                 twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
             }

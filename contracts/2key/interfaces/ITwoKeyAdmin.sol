@@ -7,5 +7,7 @@ contract ITwoKeyAdmin {
     function updateReceivedTokensAsModerator(uint amountOfTokens) public;
     function updateReceivedTokensAsModeratorPPC(uint amountOfTokens, address campaignPlasma) public;
     function addFeesCollectedInCurrency(string currency, uint amount) public payable;
+
+    function updateTokensReceivedFromDistributionFees(uint amountOfTokens) public;
 }
 

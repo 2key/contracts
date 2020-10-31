@@ -39,7 +39,8 @@ const {
     runTruffleCompile,
     runDeployPlasmaReputation,
     runDeployCPCNoRewardsMigration,
-    runDeployPaymentHandlersMigration
+    runDeployPaymentHandlersMigration,
+    runDeployPlasmaParticipationsMining
 } = require('./helpers');
 
 
@@ -436,18 +437,17 @@ async function deployUpgrade(networks) {
         /* eslint-disable no-await-in-loop */
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-no-fees-deploy')) {
-            console.log("Deploying 2 new singleton contracts for budget campaigns payments handlers");
-            await runDeployPaymentHandlersMigration(networks[i]);
+        if (process.argv.includes('plasma-participation')) {
+            await runDeployPlasmaParticipationsMining(networks[i]);
         }
 
-        if(deployment.singletons.length > 0) {
-            for(let j=0; j<deployment.singletons.length; j++) {
+        if (deployment.singletons.length > 0) {
+            for (let j = 0; j < deployment.singletons.length; j++) {
                 /* eslint-disable no-await-in-loop */
                 console.log(networks[i], deployment.singletons[j]);
-                if(checkIfContractIsPlasma(deployment.singletons[j])) {
+                if (checkIfContractIsPlasma(deployment.singletons[j])) {
                     console.log('Contract is plasma: ' + deployment.singletons[j]);
-                    if(networks[i].includes('private') || networks[i].includes('plasma')) {
+                    if (networks[i].includes('private') || networks[i].includes('plasma')) {
                         await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 } else {
@@ -738,10 +738,10 @@ async function main() {
                 rl.question("This will start deployment process. Proceed? [Y/N] ", answer => resolve(answer))
             })
             rl.close();
-            if (answer.toUpperCase() === 'Y' || answer.toUpperCase() === 'YES') {
+            if(answer.toUpperCase() === 'Y' || answer.toUpperCase() === 'YES') {
                 await deploy();
                 process.exit(0);
-            } else if (answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+            } else if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
                 console.log('Bye bye 👋👋')
             } else {
                 console.log('Wrong answer! Bye bye 👋👋');

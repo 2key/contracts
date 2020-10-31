@@ -35,6 +35,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _dateStartingCountingMonths = "dateStartingCountingMonths";
     string constant _totalTokensTransferedByNow = "totalTokensTransferedByNow";
 
+    string constant _signatoryAddress = "signatoryAddress";
+
     string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
 
     /**
@@ -348,9 +350,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             signature
         );
 
-        //TODO: Later change this that messageSigner is official mining validator
-        // Assert that this signature is signed by maintainer
-        require(isMaintainer(messageSigner) == true);
+        // Assert that this signature is created by signatory address
+        require(getSignatoryAddress() == messageSigner);
 
         // First check if this signature is used
         require(isExistingSignature(signature) == false);
@@ -361,11 +362,30 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Set that signature is existing and can't be used anymore
         setSignatureIsExisting(signature);
 
+        //TODO: Add event UserWithdrawnNetworkEarnings(user_address,amount_of_tokens)
+
         // Set the amount of tokens withdrawn by user using this signature
         setAmountWithdrawnWithSignature(msg.sender, signature, amountOfTokens);
 
         // Transfer ERC20 tokens from pool to user
         super.transferTokens(msg.sender, amountOfTokens);
+    }
+
+    /**
+     * @notice          Function where congress can set signatory address
+     *                  and that's the only address eligible to sign the rewards messages
+     * @param           signatoryAddress is the address which will be used to sign rewards
+     */
+    function setSignatoryAddress(
+        address signatoryAddress
+    )
+    public
+    onlyTwoKeyCongress
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_signatoryAddress),
+            signatoryAddress
+        );
     }
 
 
@@ -390,7 +410,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         uint monthlyTransferAllowance = getMonthlyTransferAllowance();
 
         // Calculate total amount of tokens being unlocked by now
-        uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / 30 + 1) * monthlyTransferAllowance;
+        uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / (30 days) + 1) * monthlyTransferAllowance;
 
         // Get total amount already transfered
         uint totalTokensTransferedByNow = getTotalAmountOfTokensTransfered();
@@ -486,6 +506,16 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         return getUint(keccak256(_monthlyTransferAllowance));
     }
 
+    /**
+     * @notice          Function to fetch signatory address
+     */
+    function getSignatoryAddress()
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
+    }
 
 
 }

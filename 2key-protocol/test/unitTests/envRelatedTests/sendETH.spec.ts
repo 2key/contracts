@@ -1,15 +1,13 @@
-import {BigNumber} from "bignumber.js";
+import {expect} from 'chai';
+import 'mocha';
+import {promisify} from "../../../src/utils/promisify";
+import web3Switcher from "../../helpers/web3Switcher";
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
 
-import {expect} from 'chai';
-import 'mocha';
-import createWeb3 from '../../helpers/_web3';
-import {promisify} from "../../../src/utils/promisify";
-
-const { env } = process;
+const {env} = process;
 
 const rpcUrls = [env.RPC_URL];
 
@@ -57,9 +55,9 @@ const getReceipt = (txHash: string, { web3, timeout = 60000, interval = 500}) =>
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         if (!web3) {
-            const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls);
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.deployer();
+
             from = address;
-            web3 = web3Instance;
         }
 
         const txHash = await promisify(web3.eth.sendTransaction, [{ to: recipient, value: web3.toWei(100, 'ether'), from }]);

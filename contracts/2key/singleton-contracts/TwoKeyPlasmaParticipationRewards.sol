@@ -31,9 +31,10 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToSignatureToMainchainWithdrawalConfirmed = "userToSignatureToMainchainWithdrawalConfirmed";
     string constant _epochInProgressOfRegistration = "epochInProgressOfRegistration";
     string constant _declaredEpochIds = "declaredEpochIds";
+    string constant _signatoryAddress = "signatoryAddress";
+
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
-
 
 
     function setInitialParams(
@@ -57,6 +58,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         require(isMaintainer(msg.sender));
         _;
     }
+
 
     modifier onlyTwoKeyPlasmaCongress {
         address congress = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getNonUpgradableContractAddress("TwoKeyPlasmaCongress");
@@ -415,7 +417,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         // Require that the epoch being finalized is the one in progress
         require(epochId == getEpochIdInProgress());
 
-        //TODO:  Require that total rewards didn't pass allowance
         require(getTotalRewardsPerEpoch(epochId) <= getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId)));
 
         setEpochRegistrationFinalized(epochId);
@@ -462,7 +463,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
 
         // For security we require that message is signed by different maintainer than one sending this tx
-        require(messageSigner == msg.sender);
+        require(messageSigner == getSignatoryAddress());
 
 
         // get pending epoch ids user has
@@ -554,8 +555,25 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
         // Set that user has 0 in progress of withdrawal
         setUint(
-            keccak256(_userToTotalAmountInProgressOfWithdrawal,user),
+            keccak256(_userToTotalAmountInProgressOfWithdrawal, user),
             0
+        );
+    }
+
+    /**
+     * @notice          Function where congress can set signatory address
+     *                  and that's the only address eligible to sign the rewards messages
+     * @param           signatoryAddress is the address which will be used to sign rewards
+     */
+    function setSignatoryAddress(
+        address signatoryAddress
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_signatoryAddress),
+            signatoryAddress
         );
     }
 
@@ -819,7 +837,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     view
     returns (uint)
     {
-        return getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId));
+        return getUint(keccak256(_totalRewardsToBeAssignedInEpoch, epochId));
     }
 
     function getDeclaredEpochIds()
@@ -830,6 +848,17 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getUintArray(keccak256(_declaredEpochIds));
     }
 
+    /**
+     * @notice          Function to fetch signatory address
+     */
+    function getSignatoryAddress()
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
+    }
+
     function isEpochIdDeclared(
         uint epochId
     )
@@ -838,7 +867,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     returns (bool)
     {
         uint [] memory declaredEpochIds = getDeclaredEpochIds();
-        if(declaredEpochIds.length == 0) return false;
+        if (declaredEpochIds.length == 0) return false;
         return declaredEpochIds[epochId-1] == epochId;
     }
 }

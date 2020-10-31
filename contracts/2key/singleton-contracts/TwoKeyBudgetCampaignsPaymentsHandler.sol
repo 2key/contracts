@@ -37,6 +37,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasmaToModeratorEarnings = "campaignPlasmaToModeratorEarnings";
     string constant _campaignPlasmaToLeftOverForContractor = "campaignPlasmaToLeftOverForContractor";
     string constant _campaignPlasmaToLeftoverWithdrawnByContractor = "campaignPlasmaToLeftoverWithdrawnByContractor";
+    string constant _feePerCycleIdPerReferrer = "feePerCycleIdPerReferrer";
 
     ITwoKeyBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -339,7 +340,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint [] balances,
         uint nonRebalancedTotalPayout,
         uint rebalancedTotalPayout,
-        uint cycleId
+        uint cycleId,
+        uint feePerReferrerIn2KEY
     )
     public
     onlyMaintainer
@@ -375,15 +377,23 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             );
         }
 
+        uint numberOfReferrers = influencers.length;
+
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
-        for(i = 0; i < influencers.length; i++) {
-            // Take the influencer balance
-            uint balance = balances[i];
+        for (i = 0; i < numberOfReferrers; i++) {
+            // Require that referrer earned more than fees
+            require(balances[i] > feePerReferrerIn2KEY);
+            // Sub fee per referrer from balance to pay
+            uint balance = balances[i].sub(feePerReferrerIn2KEY);
             // Transfer required tokens to influencer
             IERC20(twoKeyEconomy).transfer(influencers[i], balance);
-            // Sum up to totalDistributed
+            // Sum up to totalDistributed to referrers
             totalDistributed = totalDistributed.add(balance);
         }
+
+
+        transferFeesToAdmin(feePerReferrerIn2KEY, numberOfReferrers, twoKeyEconomy);
+
 
         // Set how much is total distributed per distribution cycle
         setUint(
@@ -392,11 +402,37 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+
     /**
      * ------------------------------------------------
      *        Internal functions performing logic operations
      * ------------------------------------------------
      */
+
+    /**
+     * @notice          Function to transfer fees taken from referrer rewards to admin contract
+     * @param           feePerReferrer is fee taken per referrer equaling 0.5$ in 2KEY at the moment
+     * @param           numberOfReferrers is number of referrers being rewarded in this cycle
+     * @param           twoKeyEconomy is 2KEY token contract
+     */
+    function transferFeesToAdmin(
+        uint feePerReferrer,
+        uint numberOfReferrers,
+        address twoKeyEconomy
+    )
+    internal
+    {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+        IERC20(twoKeyEconomy).transfer(
+            twoKeyAdmin,
+            feePerReferrer.mul(numberOfReferrers)
+        );
+
+        // Update in admin tokens receiving from fees
+        ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
+    }
+
 
     /**
      * @notice          Function to set how many tokens are being distributed to moderator
@@ -923,7 +959,17 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
 
         // For now ignore fiat currency assuming it's USD always
-        return fiatBudgetAmount.mul(10**18).div(rate);
+        return fiatBudgetAmount.mul(10 ** 18).div(rate);
+    }
+
+    function getFeePerCycleIdPerReferrer(
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_feePerCycleIdPerReferrer, cycleId));
     }
 
 }

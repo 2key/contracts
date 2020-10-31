@@ -203,6 +203,12 @@ def generate_bytecode_for_declaring_epochs(epoch_ids,rewards):
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
     sys.stdout.flush()
 
+def generate_bytecode_for_adding_signatory_address(signatory_address):
+    method_name_and_params = "setSignatoryAddress(address)"
+    types = ["address"]
+    values = [signatory_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
@@ -323,4 +329,6 @@ if __name__ == "__main__":
         generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_contract(sys.argv[2],sys.argv[3])
     if(arg1 == "declareEpochs"):
         generate_bytecode_for_declaring_epochs(sys.argv[2],sys.argv[3])
+    if(arg1 == "setSignatoryAddress"):
+        generate_bytecode_for_adding_signatory_address(sys.argv[2])
     print_line()
