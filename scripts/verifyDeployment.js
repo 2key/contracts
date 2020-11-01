@@ -182,7 +182,7 @@ const verify = async() => {
     );
 
     if(Object.keys(issuesFound).length > 0) {
-        for(key in issuesFound) {
+        for (let key in issuesFound) {
             console.log('❌ Contract with problem: ', key);
             console.log('Details:\n', JSON.stringify(issuesFound[key], 0, 3));
             console.log('Solution: Upgrade contract to latest added version: ', issuesFound[key]["latestAddedVersion"]);
