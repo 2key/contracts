@@ -265,6 +265,11 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
     }
 
+    /**
+     * @notice          Function where maintainer can set withdrawal parameters
+     * @param           dateStartingCountingMonths is the date (unix timestamp) from which
+     *                  the tokens are getting unlocked
+     */
     function setWithdrawalParameters(
         uint dateStartingCountingMonths
     )
@@ -289,6 +294,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             annualTransferLimit.div(12)
         );
     }
+
+
     /**
      * @notice Function to check if the selected address is whitelisted
      * @param _address is the address we want to get this information
@@ -304,6 +311,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         bytes32 keyHash = keccak256(_isAddressWhitelisted, _address);
         return PROXY_STORAGE_CONTRACT.getBool(keyHash);
     }
+
 
     /**
      * @notice Function to check in which year is transfer happening
@@ -371,6 +379,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         super.transferTokens(msg.sender, amountOfTokens);
     }
 
+
     /**
      * @notice          Function where congress can set signatory address
      *                  and that's the only address eligible to sign the rewards messages
@@ -404,7 +413,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         uint dateStartedCountingMonths = getDateStartingCountingMonths();
 
         // We do sub here mostly because of underflow
-        uint totalTimePassedFromUnlockingDay = block.timestamp.sub(dateStartedCountingMonths);
+        uint totalTimePassedFromUnlockingDay = timestamp.sub(dateStartedCountingMonths);
 
         // Get amount of tokens unlocked monthly
         uint monthlyTransferAllowance = getMonthlyTransferAllowance();
@@ -418,6 +427,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Return tokens available at this moment
         return (totalUnlockedByNow.sub(totalTokensTransferedByNow));
     }
+
 
     /**
      * @notice          Function where maintainer can check who signed the message
