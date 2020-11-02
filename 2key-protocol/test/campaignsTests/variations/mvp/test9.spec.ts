@@ -74,8 +74,7 @@ describe(
         secondaryUserKey: userIds.gmail,
         actions: [
           campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-          campaignUserActions.checkConverterSpent,
+          campaignUserActions.joinAndConvert
         ],
         campaignData,
         storage,
@@ -90,7 +89,6 @@ describe(
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
-          campaignUserActions.checkConverterSpent,
         ],
         campaignData,
         storage,
@@ -105,7 +103,6 @@ describe(
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
-          campaignUserActions.checkConverterSpent,
           campaignUserActions.cancelConvert,
         ],
         campaignData,
