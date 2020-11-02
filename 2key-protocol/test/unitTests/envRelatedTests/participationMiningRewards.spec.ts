@@ -14,7 +14,7 @@ require('isomorphic-form-data');
 
 
 const timeout = 60000;
-const ONE_MONTH_UNIX = 30 * 24 * 60 * 60; // 30 days = 30 * 24 hrs = 30 * 24 * 60 minutes = 30 * 24 * 60 * 60 seconds
+const ONE_MONTH_UNIX = 30 * 24 * 60 * 60 + 60; // 30 days = 30 * 24 hrs = 30 * 24 * 60 minutes = 30 * 24 * 60 * 60 seconds + 1 minute
 
 describe(
     'TwoKeyParticipationMiningRewards test',
@@ -402,6 +402,15 @@ describe(
         it('should check that monthly allowances are properly calculating on mainchain', async() => {
             let dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths, []);
             dateStartingCountingMonths = parseFloat(dateStartingCountingMonths.toString());
+
+            let monthlyTransferAllowance = await promisify(
+                twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance, []
+            );
+
+            monthlyTransferAllowance = parseFloat(
+                twoKeyProtocol.Utils.fromWei(monthlyTransferAllowance, 'ether').toString()
+            );
+
             let allowance = await twoKeyProtocol.TwoKeyParticipationMiningPool.getCurrentUnlockedAmountOfTokensForWithdrawal(dateStartingCountingMonths + ONE_MONTH_UNIX);
         }).timeout(timeout);
 
