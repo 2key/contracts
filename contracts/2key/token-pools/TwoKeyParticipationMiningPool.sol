@@ -370,10 +370,14 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Set that signature is existing and can't be used anymore
         setSignatureIsExisting(signature);
 
-        //TODO: Add event UserWithdrawnNetworkEarnings(user_address,amount_of_tokens)
-
         // Set the amount of tokens withdrawn by user using this signature
         setAmountWithdrawnWithSignature(msg.sender, signature, amountOfTokens);
+
+        // Emit event that user have withdrawn his network earnings
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitUserWithdrawnNetworkEarnings(
+            msg.sender,
+            amountOfTokens
+        );
 
         // Transfer ERC20 tokens from pool to user
         super.transferTokens(msg.sender, amountOfTokens);
