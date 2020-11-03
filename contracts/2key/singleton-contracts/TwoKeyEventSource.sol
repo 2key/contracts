@@ -243,6 +243,11 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         string action
     );
 
+    event UserWithdrawnNetworkEarnings(
+        address user,
+        uint amountOfTokens
+    );
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -705,43 +710,23 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
-    /**
-     * @notice          Function emit an event that participation mining epoch is registered
-     * @param           epochId is the ID of the epoch being registered
-     * @param           totalAmount is the total amount of tokens which will be paid
-     */
-    function emitParticipationMiningEpochRegistered(
-        uint epochId,
-        uint totalAmount
-    )
-    public
-    {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationMiningPool"));
-        emit ParticipationMiningEpochRegistered(
-            epochId,
-            totalAmount
-        );
-    }
 
     /**
-     * @notice          Function emit an event whenever there's distribution within epoch
-     * @param           epochId is the ID of the epoch being distributed
-     * @param           numberOfInfluencers is the number of influencers being paid
-     * @param           amount2KEYDistributed is the amount of tokens being distributed
+     * @notice          Function which will emit event that user have withdrawn network earnings
+     * @param           user is the address of the user
+     * @param           amountOfTokens is the amount of tokens user withdrawn as network earnings
      */
-    function emitParticipationEpochDistributed(
-        uint epochId,
-        uint numberOfInfluencers,
-        uint amount2KEYDistributed
+    function emitUserWithdrawnNetworkEarnings(
+        address user,
+        uint amountOfTokens
     )
     public
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationMiningPool"));
 
-        emit ParticipationEpochDistributed(
-            epochId,
-            numberOfInfluencers,
-            amount2KEYDistributed
+        emit UserWithdrawnNetworkEarnings(
+            user,
+            amountOfTokens
         );
     }
 
