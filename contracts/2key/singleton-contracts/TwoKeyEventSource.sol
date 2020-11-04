@@ -226,17 +226,6 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint moderatorEarningsDistributed
     );
 
-    event ParticipationMiningEpochRegistered(
-        uint epochId,
-        uint amountOf2KEYTotal
-    );
-
-    event ParticipationEpochDistributed(
-        uint epochId,
-        uint numberOfInfluencers,
-        uint amount2KEYPaid
-    );
-
     event RebalancedRewards(
         uint cycleId,
         uint amountOfTokens,
