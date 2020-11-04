@@ -279,19 +279,27 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         uint newArrayLen = declaredEpochIds.length + epochIds.length;
         uint [] memory newDeclaredEpochIds = new uint[](newArrayLen);
 
-        for(i = 0; i<declaredEpochIds.length; i++) {
+        for (i = 0; i < declaredEpochIds.length; i++) {
             newDeclaredEpochIds[i] = declaredEpochIds[i];
         }
 
-        for(i = declaredEpochIds.length; i < newArrayLen; i++) {
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+
+        for (i = declaredEpochIds.length; i < newArrayLen; i++) {
             // Double check if epoch id is not already declared
             require(isEpochIdDeclared(epochIds[j]) == false);
 
             newDeclaredEpochIds[i] = epochIds[j];
 
+            // Emit event that epoch is declared
+            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitEpochDeclared(
+                epochIds[j],
+                totalRewardsPerEpoch[j]
+            );
+
             // Set in advance total rewards which can be distributed per epoch
             setUint(
-                keccak256(_totalRewardsToBeAssignedInEpoch,epochIds[j]),
+                keccak256(_totalRewardsToBeAssignedInEpoch, epochIds[j]),
                 totalRewardsPerEpoch[j]
             );
 
@@ -323,6 +331,12 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         require(epochInProgress == 0);
         // Require that epoch id is equal to latest epoch submitted + 1
         require(epochId == getLatestFinalizedEpochId() + 1);
+
+        // Emit event that epoch is registered
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitEpochRegistered(
+            epochId,
+            numberOfUsers
+        );
 
         // Start registration process of this epoch
         setUint(
@@ -417,9 +431,14 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         // Require that the epoch being finalized is the one in progress
         require(epochId == getEpochIdInProgress());
 
-        require(getTotalRewardsPerEpoch(epochId) <= getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId)));
+        require(getTotalRewardsPerEpoch(epochId) <= getUint(keccak256(_totalRewardsToBeAssignedInEpoch, epochId)));
 
         setEpochRegistrationFinalized(epochId);
+
+        // Emit event that epoch is finalized
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitEpochFinalized(
+            epochId
+        );
 
         // Set latest epoch id to be the one submitted
         setUint(
