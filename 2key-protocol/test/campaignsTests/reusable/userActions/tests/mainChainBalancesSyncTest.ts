@@ -19,7 +19,6 @@ export default function mainChainBalancesSyncTest(
 
       let earnings = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
-      console.log(earnings);
 
       let txHash = await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.endCampaignReserveTokensAndRebalanceRates, [
           campaignAddress,
@@ -33,12 +32,10 @@ export default function mainChainBalancesSyncTest(
       let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
 
       let contractorLeftover: number = info.initialBounty / info.rebalancingRatio - info.moderatorEarnings - earnings.totalAmountForReferrerRewards;
-      console.log(info);
 
-
-      expect(earnings.totalModeratorEarnings).to.be.equal((info.moderatorEarnings / info.rebalancingRatio));
+      expect(earnings.totalModeratorEarnings.toFixed(5)).to.be.equal((info.moderatorEarnings / info.rebalancingRatio).toFixed(5));
       expect(info.isLeftoverWithdrawn).to.be.equal(false);
-      expect(info.contractorLeftover).to.be.equal(contractorLeftover);
+      expect(info.contractorLeftover.toFixed(5)).to.be.equal(contractorLeftover.toFixed(5));
   }).timeout(60000);
 
   it('should mark campaign as done and assign to active influencers', async() => {
