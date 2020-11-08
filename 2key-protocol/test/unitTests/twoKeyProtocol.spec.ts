@@ -14,16 +14,16 @@ describe('TwoKeyProtocol root methods test', () => {
     expect(gas).to.exist.to.be.greaterThan(0);
   }).timeout(60000);
 
-  it('should return a balance', async () => {
-    const balance = aydnepProtocol.Utils.balanceFromWeiString(
-      await aydnepProtocol.getBalance(aydnepAddress),
-      {inWei: true},
-    );
-
-    return expect(balance).to.exist
-      .to.haveOwnProperty('gasPrice')
-    // .to.be.equal(twoKeyProtocol.getGasPrice());
-  }).timeout(60000);
+  // it('should return a balance', async () => {
+  //   const balance = aydnepProtocol.Utils.balanceFromWeiString(
+  //     await aydnepProtocol.getBalance(aydnepAddress),
+  //     {inWei: true},
+  //   );
+  //
+  //   return expect(balance).to.exist
+  //     .to.haveOwnProperty('gasPrice')
+  //   // .to.be.equal(twoKeyProtocol.getGasPrice());
+  // }).timeout(60000);
 
   // TODO: Not working: initial and result balances have incorrect diff
   it(`should transfer ether to ${aydnepAddress}`, async () => {
