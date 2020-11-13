@@ -15,9 +15,7 @@ import "../libraries/MerkleProof.sol";
 
 contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAbstract {
 
-    uint constant N = 2048;  //constant number
     IncentiveModel incentiveModel;  //Incentive model for rewards
-
 
     struct Payment {
         uint rebalancingRatio;
