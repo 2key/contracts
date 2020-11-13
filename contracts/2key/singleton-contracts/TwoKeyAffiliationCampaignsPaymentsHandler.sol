@@ -67,7 +67,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
 
 
     function addMonthlySubscriptionForCampaign(address campaignPlasma, address token, uint amount) public;
-    function getSubscriptionExpireDate(address campaignPlasma) public view returns (uint);
+    function getLatestSubscriptionStartAndEndDate(address campaignPlasma) public view returns (uint,uint);
 
 
 
