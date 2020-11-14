@@ -13,9 +13,9 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     string constant _campaignPlasma2Contractor = "campaignPlasma2Contractor";
     string constant _campaignPlasma2TotalBudgetAdded = "campaignPlasma2TotalBudgetAdded";
     string constant _campaignPlasma2TokenAddress = "campaignPlasma2TokenAddress";
-    string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
     string constant _campaignPlasma2SubscriptionTimestamp = "campaignPlasma2SubscriptionDate";
     string constant _campaignPlasma2SubscriptionAmount2KEY = "campaignPlasma2SubscriptionAmount2KEY";
+    string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
 
     /**
      * We need:
@@ -41,7 +41,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         initialized = true;
     }
 
-    function addBudgetForCampaign(
+    function addRewardsBudgetForCampaign(
         address campaignPlasma,
         address token,
         uint amountOfTokens
@@ -51,8 +51,16 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         if(getCampaignContractor(campaignPlasma) == address(0)) {
             setCampaignContractor(campaignPlasma, msg.sender);
         }
+
+        if(getTokenUsedForRewardingCampaign(campaignPlasma) == address(0)) {
+            setTokenUsedForRewardingCampaign(campaignPlasma, token);
+        }
+
+        // Require same token is used always
+        require(token == getTokenUsedForRewardingCampaign(campaignPlasma));
+
         // Require msg.sender is contractor
-        require(msg.sender == getCampaignContractor());
+        require(msg.sender == getCampaignContractor(campaignPlasma));
 
         // Take tokens from contractor
         IERC20(token).transferFrom(msg.sender, address(this), amountOfTokens);
@@ -60,12 +68,16 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         // 90% of added goes to campaign budget, 10% moderator fee
         uint campaignBudget = amountOfTokens.mul(90).div(100);
 
-        // Compute leftover for moderator
-        uint moderatorLeftover = amountOfTokens.sub(campaignBudget);
+        // Compute moderator earnings for the campaign
+        uint moderatorEarnings = amountOfTokens.sub(campaignBudget);
 
         // Increase campaign budget for this campaign
         increaseCampaignBudget(campaignPlasma,campaignBudget);
 
+        // Increase moderator earnings for this campaign
+        increaseModeratorEarnings(campaignPlasma, moderatorEarnings);
+
+        // Emit event that budget is added to campaign
     }
 
 
@@ -95,6 +107,81 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     }
 
     /**
+     * @notice          Function to increase moderator earnings
+     * @param           campaignPlasma is plasma address of campaign
+     * @param           amountOfTokens is the amount of tokens used for campaign
+     */
+    function increaseModeratorEarnings(
+        address campaignPlasma,
+        uint amountOfTokens
+    )
+    internal
+    {
+        uint totalModeratorEarnings = getModeratorEarningsPerCampaign(campaignPlasma);
+
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma),
+            totalModeratorEarnings.add(amountOfTokens)
+        );
+    }
+
+
+    /**
+     * @notice          Function to set campaign contractor address
+     * @param           campaignPlasma is campaign plasma address
+     * @param           contractor is contractor address
+     */
+    function setCampaignContractor(
+        address campaignPlasma,
+        address contractor
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_campaignPlasma2Contractor,campaignPlasma),
+            contractor
+        );
+    }
+
+
+    /**
+     * @notice          Function to set token address which is used as rewards currency
+     *                  for selected campaign
+     * @param           campaignPlasma is campaign plasma address
+     * @param           tokenAddress is the address of token used as rewards budget
+     */
+    function setTokenUsedForRewardingCampaign(
+        address campaignPlasma,
+        address tokenAddress
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_campaignPlasma2TokenAddress, campaignPlasma),
+            tokenAddress
+        );
+    }
+
+
+    /**
+     * @notice          Function to get address of token used as rewards currency in campaign
+     * @param           campaignPlasma is campaign plasma address
+     * @return          rewards token address
+     */
+    function getTokenUsedForRewardingCampaign(
+        address campaignPlasma
+    )
+    internal
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(
+            keccak256(_campaignPlasma2TokenAddress, campaignPlasma)
+        );
+    }
+
+
+    /**
      * @notice          Function to get total budget added for the campaign
      * @param           campaignPlasma is the plasma address of campaign
      * @return          total budget added for campaign in WEI
@@ -108,6 +195,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     {
         return PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2TotalBudgetAdded, campaignPlasma));
     }
+
 
     /**
      * @notice          Function to get campaign contractor address
@@ -124,20 +212,21 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor,campaignPlasma));
     }
 
+
     /**
-     * @notice          Function to set campaign contractor address
-     * @param           campaignPlasma is the address of campaign deployed to sidechain
-     * @param           contractor is contractor address
+     * @notice          Function to get moderator earnings per campaign, in campaign rewards currency
+     * @param           campaignPlasma is plasma address of campaign
+     * @return          moderator earnings in campaign rewards token per campaign
      */
-    function setCampaignContractor(
-        address campaignPlasma,
-        address contractor
+    function getModeratorEarningsPerCampaign(
+        address campaignPlasma
     )
     internal
+    view
+    returns (uint)
     {
-        PROXY_STORAGE_CONTRACT.setAddress(
-            keccak256(_campaignPlasma2Contractor,campaignPlasma),
-            contractor
+        return PROXY_STORAGE_CONTRACT.getUint(
+            keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma)
         );
     }
 
