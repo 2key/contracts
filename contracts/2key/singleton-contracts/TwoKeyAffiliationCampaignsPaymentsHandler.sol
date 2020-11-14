@@ -6,27 +6,23 @@ import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyAffiliationCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/IERC20.sol";
 
-contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils{
+contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
 
     using SafeMath for *;
 
     string constant _campaignPlasma2Contractor = "campaignPlasma2Contractor";
     string constant _campaignPlasma2TotalBudgetAdded = "campaignPlasma2TotalBudgetAdded";
     string constant _campaignPlasma2TokenAddress = "campaignPlasma2TokenAddress";
-    string constant _campaignPlasma2SubscriptionTimestamp = "campaignPlasma2SubscriptionDate";
-    string constant _campaignPlasma2SubscriptionAmount2KEY = "campaignPlasma2SubscriptionAmount2KEY";
+    string constant _campaignPlasma2SubscriptionEnding = "campaignPlasma2SubscriptionDate";
+    string constant _campaignPlasma2SubscriptionAmount2KEYs = "campaignPlasma2SubscriptionAmount2KEY";
     string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
 
-    /**
-     * We need:
-     - campaign creation -->
-     - --> add budget
-     - --> and pay membership
-     */
     ITwoKeyAffiliationCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
     bool initialized;
 
+    /**
+     */
     function setInitialParams(
         address _twoKeySingletonRegistry,
         address _proxyStorageContract
@@ -89,7 +85,6 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     }
 
 
-
     function addSubscription2KEY(
         address campaignPlasma,
         uint amountOfTokens
@@ -97,6 +92,12 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     public
     {
         require(msg.sender == getCampaignContractor(campaignPlasma));
+        uint subscriptionEnding = getSubscriptionEndDate(campaignPlasma);
+        // Means that subscription already ended
+        if(block.timestamp >= subscriptionEnding) {
+
+        }
+
     }
 
     function addSubscriptionStableCoin(
@@ -108,8 +109,6 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     {
         require(msg.sender == getCampaignContractor(campaignPlasma));
     }
-    function getLatestSubscriptionStartAndEndDate(address campaignPlasma) public view returns (uint,uint);
-
 
 
     /**
@@ -254,5 +253,23 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma)
         );
     }
+
+
+    /**
+     * @notice          Function to get ending date of monthly subscription
+     * @param           campaignPlasma is plasma address of campaign
+     */
+    function getSubscriptionEndDate(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(
+            keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma)
+        );
+    }
+
 
 }
