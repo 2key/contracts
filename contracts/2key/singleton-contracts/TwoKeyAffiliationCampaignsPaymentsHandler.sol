@@ -41,6 +41,13 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         initialized = true;
     }
 
+
+    /**
+     * @notice          Function where user can add referral budget to the campaign
+     * @param           campaignPlasma is campaign plasma address
+     * @param           token is the address of token used for rewards for this campaign
+     * @param           amountOfTokens is amount of tokens adding to rewards budget
+     */
     function addRewardsBudgetForCampaign(
         address campaignPlasma,
         address token,
@@ -77,12 +84,30 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         // Increase moderator earnings for this campaign
         increaseModeratorEarnings(campaignPlasma, moderatorEarnings);
 
-        // Emit event that budget is added to campaign
+        // Emit event that rewards budget is added to campaign
+
     }
 
 
-    function addSubscription2KEY(address campaignPlasma, uint amountOfTokens) public;
-    function addSubscriptionStableCoin(address campaignPlasma, address token, uint amountOfTokens) public;
+
+    function addSubscription2KEY(
+        address campaignPlasma,
+        uint amountOfTokens
+    )
+    public
+    {
+        require(msg.sender == getCampaignContractor(campaignPlasma));
+    }
+
+    function addSubscriptionStableCoin(
+        address campaignPlasma,
+        address token,
+        uint amountOfTokens
+    )
+    public
+    {
+        require(msg.sender == getCampaignContractor(campaignPlasma));
+    }
     function getLatestSubscriptionStartAndEndDate(address campaignPlasma) public view returns (uint,uint);
 
 
