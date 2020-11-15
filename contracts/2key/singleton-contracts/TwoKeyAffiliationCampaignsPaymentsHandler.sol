@@ -2,9 +2,11 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
-import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyAffiliationCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/IUpgradableExchange.sol";
+
+import "../libraries/SafeMath.sol";
 
 contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
 
@@ -16,6 +18,8 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     string constant _campaignPlasma2SubscriptionEnding = "campaignPlasma2SubscriptionDate";
     string constant _campaignPlasma2SubscriptionAmount2KEYs = "campaignPlasma2SubscriptionAmount2KEY";
     string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
+    string constant _campaignPlasma2NumberOfSubscriptions = "campaingPlasma2NumberOfSubscriptions";
+    string constant _total2KEYTokensEarnedFromSubscriptions = "total2KEYTokensEarnedFromSubscriptions";
 
     ITwoKeyAffiliationCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -93,11 +97,38 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     {
         require(msg.sender == getCampaignContractor(campaignPlasma));
         uint subscriptionEnding = getSubscriptionEndDate(campaignPlasma);
-        // Means that subscription already ended
-        if(block.timestamp >= subscriptionEnding) {
 
+        if(subscriptionEnding == 0) {
+            subscriptionEnding = block.timestamp;
         }
 
+        // Extend subscription for 30 days
+        uint newEndDate = subscriptionEnding + 30 * (1 days);
+
+        // Set new subscription ending date
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma),
+            newEndDate
+        );
+
+        // Current 2KEY sell rate
+        uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
+
+        uint amountInUSDWei = amountOfTokens.mul(rate).div(10**18);
+        // Require that amount user sent is corresponding at least 99$
+        require(amountInUSDWei >= 99 * 10**18);
+
+        // Take 2KEY tokens from the contractor
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
+            msg.sender,
+            address(this),
+            amountOfTokens
+        );
+
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_total2KEYTokensEarnedFromSubscriptions),
+            amountOfTokens.add(getTotal2KEYTokensEarnedFromSubscriptions())
+        );
     }
 
     function addSubscriptionStableCoin(
@@ -271,5 +302,19 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         );
     }
 
+
+    /**
+     * @notice          Function to fetch total amount of tokens earned from subscriptions
+     * @return          amount of 2KEY tokens earned in WEI units
+     */
+    function getTotal2KEYTokensEarnedFromSubscriptions()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(
+            keccak256(_total2KEYTokensEarnedFromSubscriptions)
+        );
+    }
 
 }
