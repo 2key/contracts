@@ -18,8 +18,10 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     string constant _campaignPlasma2SubscriptionEnding = "campaignPlasma2SubscriptionDate";
     string constant _campaignPlasma2SubscriptionAmount2KEYs = "campaignPlasma2SubscriptionAmount2KEY";
     string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
-    string constant _campaignPlasma2NumberOfSubscriptions = "campaingPlasma2NumberOfSubscriptions";
+    string constant _campaignPlasma2NumberOfSubscriptions = "campaignPlasma2NumberOfSubscriptions";
     string constant _total2KEYTokensEarnedFromSubscriptions = "total2KEYTokensEarnedFromSubscriptions";
+
+    // TODO: We can use events to index subscriptions etc
 
     ITwoKeyAffiliationCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -164,6 +166,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             totalAdded.add(amountOfTokens)
         );
     }
+
 
     /**
      * @notice          Function to increase moderator earnings
