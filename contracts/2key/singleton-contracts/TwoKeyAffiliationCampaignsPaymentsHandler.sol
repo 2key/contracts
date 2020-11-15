@@ -102,6 +102,15 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             subscriptionEnding = block.timestamp;
         }
 
+        // Current 2KEY sell rate
+        uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
+
+        // Compute amount in USD worth of subscription
+        uint amountInUSDWei = amountOfTokens.mul(rate).div(10**18);
+
+        // Require that amount user sent is corresponding at least 99$ (100$ is subscription)
+        require(amountInUSDWei >= 99 * 10**18);
+
         // Extend subscription for 30 days
         uint newEndDate = subscriptionEnding + 30 * (1 days);
 
@@ -110,13 +119,6 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma),
             newEndDate
         );
-
-        // Current 2KEY sell rate
-        uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
-
-        uint amountInUSDWei = amountOfTokens.mul(rate).div(10**18);
-        // Require that amount user sent is corresponding at least 99$
-        require(amountInUSDWei >= 99 * 10**18);
 
         // Take 2KEY tokens from the contractor
         IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
@@ -129,6 +131,8 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             keccak256(_total2KEYTokensEarnedFromSubscriptions),
             amountOfTokens.add(getTotal2KEYTokensEarnedFromSubscriptions())
         );
+
+        // Emit event that subscription extended
     }
 
     function addSubscriptionStableCoin(
