@@ -31,7 +31,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         address _twoKeySingletonRegistry,
         address _proxyStorageContract
     )
-    public
+    external
     {
         require(initialized == false);
 
@@ -53,7 +53,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         address token,
         uint amountOfTokens
     )
-    public
+    external
     {
         if(getCampaignContractor(campaignPlasma) == address(0)) {
             setCampaignContractor(campaignPlasma, msg.sender);
@@ -93,7 +93,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         address campaignPlasma,
         uint amountOfTokens
     )
-    public
+    external
     {
         require(msg.sender == getCampaignContractor(campaignPlasma));
         uint subscriptionEnding = getSubscriptionEndDate(campaignPlasma);
@@ -140,7 +140,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         address token,
         uint amountOfTokens
     )
-    public
+    external
     {
         require(msg.sender == getCampaignContractor(campaignPlasma));
     }
