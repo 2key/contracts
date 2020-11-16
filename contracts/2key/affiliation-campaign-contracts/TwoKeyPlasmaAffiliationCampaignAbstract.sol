@@ -71,11 +71,6 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         _;
     }
 
-    modifier isThereEnoughBounty {
-        require(totalBountyAddedForCampaign.sub(totalBountyDistributedForCampaign) > 0);
-        _;
-    }
-
     modifier isSubscriptionActive {
         require(block.timestamp <= subscriptionEndDate);
         _;
@@ -108,6 +103,22 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         .getContractProxyAddress(contractName);
     }
 
+
+    /**
+     * @notice          Function to check if there's enough bounty to distribute for conversion
+     * @param           bountyToPay is rewards for which is being checked if contract has enough
+     *                  bounty available to support it
+     */
+    function isThereEnoughBounty(
+        uint bountyToPay
+    )
+    internal
+    view
+    returns (bool)
+    {
+        return (totalBountyAddedForCampaign.sub(totalBountyDistributedForCampaign) >= bountyToPay);
+    }
+
     /**
      * @notice          Function to check if the user is maintainer or not
      * @param           _address is the address of the user
@@ -137,8 +148,6 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         }
         return false;
     }
-
-
 
     /**
      * @dev             Transfer tokens from one address to another
