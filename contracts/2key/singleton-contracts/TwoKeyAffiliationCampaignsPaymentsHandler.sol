@@ -134,6 +134,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             amountOfTokens.add(getTotal2KEYTokensEarnedFromSubscriptions())
         );
 
+        //TODO: Tokenomics wise it's the best to keep those subscription tokens here for some time, then transfer them to admin
         // Emit event that subscription extended
     }
 
