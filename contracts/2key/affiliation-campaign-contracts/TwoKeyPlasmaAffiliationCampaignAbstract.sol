@@ -443,6 +443,20 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         setPublicLinkKeyOf(msg.sender, _publicKey);
     }
 
+
+    /**
+     * @notice  Function where contractor can update incentive model of campaign
+     * @param   _model is new model contractor wants to use for the campaign
+     */
+    function updateIncentiveModel(
+        IncentiveModel _model
+    )
+    public
+    onlyContractor
+    {
+        incentiveModel = _model;
+    }
+
     /**
      * @notice Function to allow updating public meta hash
      * @param _newPublicMetaHash is the new meta hash
