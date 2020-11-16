@@ -39,4 +39,49 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
     }
 
+
+    /**
+     */
+    function registerConversion(
+        address converter,
+        bytes signature,
+        uint amountOfTokensToDistribute
+    )
+    public
+    onlyMaintainer
+    isSubscriptionActive
+    {
+
+        // Check if there's enough bounty on the contract
+        require(isThereEnoughBounty(amountOfTokensToDistribute));
+
+        // Mark user that he's converter
+        isConverter[converter] = true;
+
+        // Create conversion
+        Conversion memory c = Conversion(
+            msg.sender,
+            amountOfTokensToDistribute,
+            block.timestamp
+        );
+
+        // Get the ID and update mappings
+        uint conversionId = conversions.length;
+
+        // Push conversion to array of successful conversions
+        conversions.push(c);
+
+        // Distribute arcs if necessary
+        distributeArcsIfNecessary(converter,signature);
+
+
+        // Bounty is getting distributed only if conversion is not directly from contractor
+        if(getNumberOfUsersToContractor(converter) > 0) {
+
+        } else {
+
+        }
+
+    }
+
 }
