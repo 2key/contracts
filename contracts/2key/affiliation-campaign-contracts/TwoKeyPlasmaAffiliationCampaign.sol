@@ -39,6 +39,33 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
     }
 
+    /**
+     * @notice          Function to extend campaign budget. Maintainer calls it
+     *                  when contractor adds more budget on public chain contract
+     * @param           bountyAdded is bounty contractor added more to the campaign
+     */
+    function extendCampaignBudget(
+        uint bountyAdded
+    )
+    public
+    onlyMaintainer
+    {
+        totalBountyAddedForCampaign = totalBountyAddedForCampaign.add(bountyAdded);
+    }
+
+    /**
+     * @notice          Function to extend subscription. Once subscription is ended and paid
+     *                  again, maintainer will submit new subscription end date to public chain
+     * @param           newEndDate is the new ending date of subscription
+     */
+    function extendSubscription(
+        uint newEndDate
+    )
+    public
+    onlyMaintainer
+    {
+        subscriptionEndDate = newEndDate;
+    }
 
     /**
      */
