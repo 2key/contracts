@@ -413,7 +413,7 @@ async function deployUpgrade(networks) {
 
     let deployment = {};
 
-
+    // Deploy from file
     if(process.argv.includes('deploy-from-file')) {
         let contracts = getContractsFromFile();
         deployment.singletons = contracts.singletons;
