@@ -341,6 +341,8 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     /**
      * @notice          Function where user can come with signature taken on plasma and
      *                  withdraw tokens he has earned
+     * @param           signature is the signature created by signatory address for withdrawal
+     * @param           amountOfTokens is the exact amount of tokens signed inside this signature
      */
     function withdrawTokensWithSignature(
         bytes signature,
