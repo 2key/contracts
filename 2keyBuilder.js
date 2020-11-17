@@ -419,7 +419,7 @@ async function deployUpgrade(networks) {
         deployment.singletons = contracts.singletons;
         deployment.tokenSell = contracts.tokenSell;
         deployment.donation = contracts.donation;
-        deployment.ppc = contracts.cpc;
+        deployment.ppc = contracts.ppc;
         deployment.cpcNoRewards = contracts.cpcNoRewards;
     } else {
         [
