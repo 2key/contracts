@@ -1,4 +1,4 @@
 #!/bin/bash
 git add .
-git commit -m 'ssm'
+git commit -m 'Sync submodules.'
 git push -u
