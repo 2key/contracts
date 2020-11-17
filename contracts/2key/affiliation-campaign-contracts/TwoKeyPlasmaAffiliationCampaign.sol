@@ -18,6 +18,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
 
     Conversion [] conversions;          // Array of all conversions
 
+
     function setInitialParamsAffiliationCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
@@ -39,6 +40,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         balances[_contractor] = totalSupply_;                           // Set balance of arcs for contractor to totalSupply
     }
 
+
     /**
      * @notice          Function to extend campaign budget. Maintainer calls it
      *                  when contractor adds more budget on public chain contract
@@ -52,6 +54,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     {
         totalBountyAddedForCampaign = totalBountyAddedForCampaign.add(bountyAdded);
     }
+
 
     /**
      * @notice          Function to extend subscription. Once subscription is ended and paid
@@ -67,48 +70,68 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         subscriptionEndDate = newEndDate;
     }
 
+
     /**
+     * @notice          Function where maintainer will register conversion
+     * @param           converter is converter plasma address
+     * @param           signature is referral hash for this conversion
+     * @param           amountOfTokensToDistribute is amount of tokens to distribute
+     *                  between influencers in case there's at least one referrer
+     *                  between contractor and converter.
      */
     function registerConversion(
         address converter,
         bytes signature,
         uint amountOfTokensToDistribute
     )
-    public
+    external
     onlyMaintainer
     isSubscriptionActive
+    isCampaignNotEnded
+    isCampaignValidated
     {
-
         // Check if there's enough bounty on the contract
         require(isThereEnoughBounty(amountOfTokensToDistribute));
-
         // Mark user that he's converter
         isConverter[converter] = true;
-
         // Create conversion
         Conversion memory c = Conversion(
             msg.sender,
-            amountOfTokensToDistribute,
+            0,
             block.timestamp
         );
-
         // Get the ID and update mappings
         uint conversionId = conversions.length;
-
-        // Push conversion to array of successful conversions
-        conversions.push(c);
-
         // Distribute arcs if necessary
         distributeArcsIfNecessary(converter,signature);
-
-
         // Bounty is getting distributed only if conversion is not directly from contractor
         if(getNumberOfUsersToContractor(converter) > 0) {
-
+            // Add bounty only if there's at least 1 influencer in this referral chain
+            c.bountyPaid = amountOfTokensToDistribute;
+            // Add bounty paid
+            totalBountyDistributedForCampaign = totalBountyDistributedForCampaign.add(amountOfTokensToDistribute);
         } else {
-
+            // In other case there's no bounty to be paid for this conversion
+            c.bountyPaid = 0;
         }
+        // Update reputation points on conversion executed event
+        updateReputationPointsOnConversionExecutedEvent(converter);
+        //Distribute rewards between referrers
+        updateRewardsBetweenInfluencers(converter, conversionId, c.bountyPaid);
+        // Push conversion to array of successful conversions
+        conversions.push(c);
+    }
 
+
+    /**
+     * @notice          Function to return number of conversions
+     */
+    function getNumberOfConversions()
+    public
+    view
+    returns (uint)
+    {
+        return conversions.length;
     }
 
 }

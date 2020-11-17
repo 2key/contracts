@@ -34,9 +34,8 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 
     uint public subscriptionEndDate;
-    uint public moderatorTotalEarnings;             // Total rewards which are going to moderator
 
-    bool public isCampaignValidated;
+    bool public isValidated;
     bool public isCampaignEndedByContractor;
     bool isCampaignInitialized; // Representing if campaign "constructor" was called
 
@@ -78,6 +77,11 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
 
     modifier isCampaignNotEnded {
         require(isCampaignEndedByContractor == false);
+        _;
+    }
+
+    modifier isCampaignValidated {
+        require(isValidated == true);
         _;
     }
 
@@ -479,7 +483,6 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         publicMetaHash = _newPublicMetaHash;
     }
 
-
     /**
      * ------------------------------------------------------------------------------------
      *                          Public getters
@@ -593,12 +596,12 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     public
     onlyMaintainer
     {
-        require(isCampaignValidated == false);
+        require(isValidated == false);
 
         totalBountyAddedForCampaign = _totalBounty;
         subscriptionEndDate = _subscriptionEndDate;
 
-        isCampaignValidated = true;
+        isValidated = true;
     }
 
 
@@ -751,19 +754,6 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         bool isJoined = getAddressJoinedStatus(_address);
 
         return (isReferrer, isAddressConverter, isJoined, ethereumOf(_address));
-    }
-
-
-    /**
-     * @notice          Function to get total rewards to be distributed to referrer
-     *                  as well as total moderator earnings for this campaign
-     */
-    function getTotalReferrerRewardsAndTotalModeratorEarnings()
-    public
-    view
-    returns (uint,uint)
-    {
-        return (totalBountyDistributedForCampaign, moderatorTotalEarnings);
     }
 
 
