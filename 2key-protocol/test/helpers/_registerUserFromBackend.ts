@@ -1,5 +1,6 @@
 import { TwoKeyProtocol } from '../../src';
 import createWeb3 from './_web3';
+import {expectEqualNumbers} from "./numberHelpers";
 
 
 export interface IRegistryData {
@@ -48,6 +49,9 @@ async function registerUserFromBackend({ signature, plasmaAddress, ethereumAddre
     try {
         const txHash = await twoKeyProtocol.PlasmaEvents.setUsernameToPlasmaOnPlasma(plasmaAddress, username);
         receipts.push(await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3}));
+        let signupReputationScore = await twoKeyProtocol.BaseReputation.getUserSignupScore(plasmaAddress);
+        console.log('Signup score', signupReputationScore);
+        expectEqualNumbers(5, signupReputationScore,'Signup reputation score is not good');
     } catch (e) {
         console.log('Error in setting username to plasma on plasma registry', e);
         return Promise.reject(e);

@@ -3,9 +3,12 @@ pragma solidity ^0.4.24;
 import "../upgradability/Upgradeable.sol";
 
 import "../interfaces/storage-contracts/ITwoKeyPlasmaRegistryStorage.sol";
+
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
+
 import "../libraries/Call.sol";
 
 
@@ -124,6 +127,10 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         // Store _addressToUsername and  _usernameToAddress
         PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), username);
         PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasmaAddress);
+
+        // Give user registration bonus points
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+            .updateUserReputationScoreOnSignup(plasmaAddress);
 
         // Emit event that plasma and username are linked
         emitPlasma2Handle(plasmaAddress, username);
