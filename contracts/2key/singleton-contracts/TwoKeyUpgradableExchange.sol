@@ -732,7 +732,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint newTokenPrice;
 
         // Increment amount of this stable tokens to fill reserve
-        setStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
+        addStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
 
         uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
 
@@ -810,8 +810,22 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         );
     }
 
-
     function setStableCoinsAvailableToFillReserve(
+        uint amountOfStableCoins,
+        address stableCoinAddress
+    )
+    internal
+    {
+        bytes32 key = keccak256("stableCoinToAmountAvailableToFillReserve", stableCoinAddress);
+
+        setUint(
+            key,
+            amountOfStableCoins
+        );
+    }
+
+
+    function addStableCoinsAvailableToFillReserve(
         uint amountOfStableCoins,
         address stableCoinAddress
     )
