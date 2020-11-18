@@ -12,6 +12,7 @@ spinner() {
 }
 
 spinner 2
+cd ../..
 echo "Destination for execution on public is TwoKeyAdmin contract: 0x8430db5eba7745eab1904d173129b7965190055a"
 python3 generate_bytecode.py setModeratorFeePublic 10
 
