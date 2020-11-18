@@ -82,6 +82,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             ConversionPaymentState.UNPAID
         );
 
+
         // Get the ID and update mappings
         uint conversionId = conversions.length;
         conversions.push(c);
