@@ -54,8 +54,9 @@ def finalize_signature(signature):
 
 
 if __name__ == '__main__':
-    RPC = ""
-    SIGNATORY_PK = ""
+    RPC = "https://oow3shai4e-rpc-staging.private.test.k8s.2key.net"
+
+    SIGNATORY_PK = "56bc91356aa96e48cacde069be2e905574df8d20dd4d362b582176338f9ee0fd"
     w3 = Web3(Web3.HTTPProvider(RPC))
-    build_signature('ADDRESS', 'AMOUNT',
+    build_signature('0xec8b6aaee825e0bbc812ca13e1b4f4b038154688', 50000000000000000000,
                     SIGNATORY_PK, w3)
