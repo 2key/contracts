@@ -12,9 +12,13 @@ spinner() {
 }
 
 spinner 2
+
+
+echo "Destination for execution: 0x60ece4a5be3fd7594e9f24c2948cce5ce3c6dde7"
+
 cd ../..
-echo "Destination for execution on public is TwoKeyAdmin contract: 0x8430db5eba7745eab1904d173129b7965190055a"
-python3 generate_bytecode.py setModeratorFeePublic 10
+
+python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.20
 
 
 

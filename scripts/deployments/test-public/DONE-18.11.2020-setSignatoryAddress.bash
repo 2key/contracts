@@ -12,11 +12,10 @@ spinner() {
 }
 
 spinner 2
+
 cd ../..
-echo "Destination for execution on public is TwoKeyAdmin contract: 0x8430db5eba7745eab1904d173129b7965190055a"
-python3 generate_bytecode.py setModeratorFeePublic 10
 
+echo "Destination for execution is TwoKeyParticipationMiningPool address: 0xa6b9ee17f7281f2a6d327ddea2ae812c7439ef36"
 
-
-
+python3 generate_bytecode.py setSignatoryAddress 0xd43f37e636a5b434827ea315b72642e5f00d7bdb
 
