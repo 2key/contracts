@@ -90,6 +90,12 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     );
 
 
+    event AffiliationCampaignCreated(
+        address proxyAffiliationCampaign,
+        address contractorPlasma
+    );
+
+
     event PlasmaMirrorCampaigns(
         address proxyPlasmaAddress,
         address proxyPublicAddress
@@ -101,6 +107,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         address influencer,
         uint rewards
     );
+
 
     event PaidPendingRewards(
         address influencer,
@@ -285,21 +292,21 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
 
 
     /**
-     * @notice          Function to emit an event when CPC campaign is validated
+     * @notice          Function to emit an event when Affiliation campaign is being created
      *
-     * @param           proxyAddressPlasma is the plasma address of the campaign
-     * @param           proxyAddressPublic is the public address of the campaign
+     * @param           proxyAffiliationCampaign is the proxy address for Affiliation campaign on plasma network
+     * @param           contractorPlasma is contractor plasma address
      */
-    function emitCPCCampaignMirrored(
-        address proxyAddressPlasma,
-        address proxyAddressPublic
+    function emitAffiliationCampaignCreated(
+        address proxyAffiliationCampaign,
+        address contractorPlasma
     )
     public
-    onlyWhitelistedCampaigns
+    onlyTwoKeyPlasmaFactory
     {
-        emit PlasmaMirrorCampaigns(
-            proxyAddressPlasma,
-            proxyAddressPublic
+        emit AffiliationCampaignCreated(
+            proxyAffiliationCampaign,
+            contractorPlasma
         );
     }
 
