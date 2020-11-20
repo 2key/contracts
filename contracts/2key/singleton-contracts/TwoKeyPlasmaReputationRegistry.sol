@@ -112,6 +112,11 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             .getContractProxyAddress(contractName);
     }
 
+
+    /**
+     * @notice          Function to check if role exists.
+     * @param           _role is the role in feedback submitted from maintainer
+     */
     function isRoleExisting(
         string _role
     )
@@ -127,6 +132,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         }
         return false;
     }
+
 
     /**
      * @notice          Internal wrapper function to fetch referrers for specific converter
@@ -145,6 +151,161 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         return ITwoKeyCPCCampaignPlasma(campaign).getReferrers(converter);
     }
 
+
+    /**
+     * @notice          Function to update converter score
+     * @param           converter is converter plasma address
+     * @param           reward is amount of points converter earned or lost
+     * @param           campaignType is the campaign type for which converter earned/lost points
+     */
+    function updateConverterScore(
+        address converter,
+        int reward,
+        string campaignType
+    )
+    internal
+    {
+        bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, converter);
+        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + reward);
+
+        emit ReputationUpdated(
+            converter,
+            "CONVERTER",
+            campaignType,
+            reward,
+            msg.sender
+        );
+    }
+
+
+    /**
+     * @notice          Function to handle logic operation of updating reputation score between users
+     * @param           converter is campaign converter, and in this case he's getting rewarded with
+     *                  initialRewardWei points
+     * @param           initialRewardWei is number of points for successful action, distributed
+     *                  in a way so every next user gets 1/n *initialRewardWei
+     * @param           campaignType is type of the campaign. Used mostly because of events.
+     */
+    function updateReputationPointsForExecutedConversionInternal(
+        address converter,
+        address contractor,
+        int initialRewardWei,
+        string campaignType
+    )
+    internal
+    {
+        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, contractor);
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + initialRewardWei);
+
+        emit ReputationUpdated(
+            contractor,
+            "CONTRACTOR",
+            campaignType,
+            initialRewardWei,
+            msg.sender
+        );
+
+        updateConverterScore(converter, initialRewardWei, campaignType);
+
+        address[] memory referrers = getReferrers(msg.sender, converter);
+
+        int j;
+
+        for(int i=int(referrers.length)-1; i>=0; i--) {
+            bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
+            int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+            int reward = initialRewardWei/(j+1);
+
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + reward);
+
+            emit ReputationUpdated(
+                referrers[uint(i)],
+                "REFERRER",
+                campaignType,
+                reward,
+                msg.sender
+            );
+
+            j++;
+        }
+    }
+
+
+    /**
+     * @notice          Function to handle logic operation of updating reputation score between users
+     * @param           converter is campaign converter, and in this case he's getting punished as like
+     *                  he's the first influencer in the referral chain
+     * @param           initialPunishmentWei is number of points for reduction after unsuccessful action
+     * @param           campaignType is type of the campaign. Used mostly because of events.
+     */
+    function updateReputationPointsForRejectedConversionsInternal(
+        address converter,
+        address contractor,
+        int initialPunishmentWei,
+        string campaignType
+    )
+    internal
+    {
+        // Here we punish converter so he gets negative points
+        updateConverterScore(
+            converter,
+            initialPunishmentWei * (-1),
+            campaignType
+        );
+
+        address[] memory referrers = getReferrers(msg.sender, converter);
+
+        int length = int(referrers.length);
+
+        int j=0;
+
+        for(int i=length-1; i>=0; i--) {
+            bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
+            int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
+            int reward = initialPunishmentWei/(j+1);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - reward);
+
+            emit ReputationUpdated(
+                referrers[uint(i)],
+                "REFERRER",
+                "BUDGET",
+                reward*(-1),
+                msg.sender
+            );
+            j++;
+        }
+
+        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, contractor);
+
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        int contractorPunishment = initialPunishmentWei/(length+1);
+
+        PROXY_STORAGE_CONTRACT.setInt(
+            keyHashContractorScore,
+            contractorScore - contractorPunishment
+        );
+
+        emit ReputationUpdated(
+            contractor,
+            "CONTRACTOR",
+            "BUDGET",
+            contractorPunishment*(-1),
+            msg.sender
+        );
+    }
+
+
+    /**
+     * @notice          Function to add positive feedback for user from maintainer
+     * @param           _plasmaAddress is user plasma address
+     * @param           _role is representing as which role user received this feedback
+     * @param           _type is representing mostly if the feedback was for monetary/budget campaigns
+     * @param           _pointsGained is amount of points earned for this feedback
+     * @param           _reporterPlasma is address of user who submitted this feedback
+     * @param           _campaignAddress is address of campaign for which user submitted feedback
+     */
     function addPositiveFeedbackByMaintainer(
         address _plasmaAddress,
         string _role,
@@ -174,6 +335,16 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         );
     }
 
+
+    /**
+     * @notice          Function to add negative feedback for user from maintainer
+     * @param           _plasmaAddress is user plasma address
+     * @param           _role is representing as which role user received this feedback
+     * @param           _type is representing mostly if the feedback was for monetary/budget campaigns
+     * @param           _pointsLost is amount of points lost because of this feedback
+     * @param           _reporterPlasma is address of user who submitted this feedback
+     * @param           _campaignAddress is address of campaign for which user submitted feedback
+     */
     function addNegativeFeedbackByMaintainer(
         address _plasmaAddress,
         string _role,
@@ -203,8 +374,10 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         );
     }
 
+
     /**
      * @notice          Function to update reputation points for executed conversions
+     *                  in Budget campaigns.
      *
      * @param           converter is the address who converted
      * @param           contractor is the address who created campaign
@@ -217,40 +390,12 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     onlyBudgetCampaigns
     {
         int initialRewardWei = (10**18);
-
-        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, contractor);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + initialRewardWei);
-
-        emit ReputationUpdated(
+        updateReputationPointsForExecutedConversionInternal(
+            converter,
             contractor,
-            "CONTRACTOR",
-            "BUDGET",
             initialRewardWei,
-            msg.sender
+            "BUDGET"
         );
-
-        updateConverterScore(converter, initialRewardWei);
-
-        address[] memory referrers = getReferrers(msg.sender, converter);
-
-        int j;
-
-        for(int i=int(referrers.length)-1; i>=0; i--) {
-            bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
-            int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            int reward = initialRewardWei/(j+1);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + reward);
-            emit ReputationUpdated(
-                referrers[uint(i)],
-                "REFERRER",
-                "BUDGET",
-                reward,
-                msg.sender
-            );
-            j++;
-        }
-
     }
 
 
@@ -268,76 +413,14 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
     onlyBudgetCampaigns
     {
         int initialPunishmentWei = (10**18) / 2;
-
-        updateConverterScoreOnRejectedConversion(converter, initialPunishmentWei);
-
-        address[] memory referrers = getReferrers(msg.sender, converter);
-
-        int length = int(referrers.length);
-
-        int j=0;
-        for(int i=length-1; i>=0; i--) {
-            bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
-            int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            int reward = initialPunishmentWei/(j+1);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - reward);
-
-            emit ReputationUpdated(
-                referrers[uint(i)],
-                "REFERRER",
-                "BUDGET",
-                reward*(-1),
-                msg.sender
-            );
-            j++;
-        }
-
-        bytes32 keyHashContractorScore = keccak256(_plasmaAddress2contractorGlobalReputationScoreWei, contractor);
-
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        int contractorPunishment = initialPunishmentWei/(length+1);
-
-        PROXY_STORAGE_CONTRACT.setInt(
-            keyHashContractorScore,
-                contractorScore - contractorPunishment
-        );
-
-        emit ReputationUpdated(
-            contractor,
-            "CONTRACTOR",
-            "BUDGET",
-            contractorPunishment*(-1),
-            msg.sender
-        );
-    }
-
-    function updateConverterScoreOnRejectedConversion(
-        address converter,
-        int reward
-    )
-    internal
-    {
-        updateConverterScore(converter, reward*(-1));
-    }
-
-    function updateConverterScore(
-        address converter,
-        int reward
-    )
-    internal
-    {
-        bytes32 keyHashConverterScore = keccak256(_plasmaAddress2converterGlobalReputationScoreWei, converter);
-        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + reward);
-
-        emit ReputationUpdated(
+        updateReputationPointsForRejectedConversionsInternal(
             converter,
-            "CONVERTER",
-            "BUDGET",
-            reward,
-            msg.sender
+            contractor,
+            initialPunishmentWei,
+            "BUDGET"
         );
     }
+
 
     /**
      * @notice          Function to update user reputations score on signup action
@@ -372,6 +455,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             address(0)
         );
     }
+
 
     /**
      * @notice          Function to get reputation and feedback score in case he's an influencer & converter
@@ -408,6 +492,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             getUserSignupScore(_plasmaAddress)
         );
     }
+
 
     /**
      * @notice          Function to get global reputation for specific user
@@ -466,6 +551,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         );
     }
 
+
     /**
      * @notice          Function to get global reputation for contractor (business)
      */
@@ -510,6 +596,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         return (reputations);
     }
 
+
     /**
      * @notice          Function to get global reputations for contractors
      * @param           addresses is an array of plasma addresses of contractors (businesses)
@@ -532,6 +619,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
 
         return (reputations);
     }
+
 
     /**
      * @notice          Function to check user signup score
