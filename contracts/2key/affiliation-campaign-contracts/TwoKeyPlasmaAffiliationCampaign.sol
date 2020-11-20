@@ -5,6 +5,8 @@ import "./TwoKeyPlasmaAffiliationCampaignAbstract.sol";
 
 contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAffiliationCampaignAbstract {
 
+    string public url;
+
     /**
      * This is the conversion object
      * converterPlasma is the address of converter
@@ -22,6 +24,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     function setInitialParamsAffiliationCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
+        address _url,
         uint [] numberValues
     )
     public
@@ -31,6 +34,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;    // Assigning address of _twoKeyPlasmaSingletonRegistry
         contractor = _contractor;                                       // Assigning address of contractor
+        url = _url;                                                     // URL for the affiliation action
         campaignStartTime = numberValues[0];                            // Set when campaign starts
         campaignEndTime = numberValues[1];                              // Set when campaign ends
         conversionQuota = numberValues[2];                              // Set conversion quota
