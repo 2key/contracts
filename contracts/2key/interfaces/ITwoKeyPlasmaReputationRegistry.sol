@@ -18,4 +18,11 @@ contract ITwoKeyPlasmaReputationRegistry {
         address _plasmaAddress
     )
     public;
+
+    function updateReputationPointsForExecutedConversionAffiliation(
+        address converter,
+        address contractor
+    )
+    public;
+
 }

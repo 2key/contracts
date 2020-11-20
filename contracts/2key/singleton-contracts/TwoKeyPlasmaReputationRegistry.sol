@@ -78,7 +78,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
      * @notice          Modifier restricting access to the function only to campaigns
      *                  created using TwoKeyPlasmaFactory contract
      */
-    modifier onlyBudgetCampaigns {
+    modifier onlyVerifiedCampaignsCreatedThroughFactory {
         require(
             ITwoKeyPlasmaFactory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaFactory"))
             .isCampaignCreatedThroughFactory(msg.sender)
@@ -387,7 +387,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         address contractor
     )
     public
-    onlyBudgetCampaigns
+    onlyVerifiedCampaignsCreatedThroughFactory
     {
         int initialRewardWei = (10**18);
         updateReputationPointsForExecutedConversionInternal(
@@ -397,6 +397,33 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
             "BUDGET"
         );
     }
+
+
+    /**
+     * @notice          Function to update reputation points for executed conversions
+     *                  in Affiliation campaigns.
+     *
+     * @param           converter is the address who converted
+     * @param           contractor is the address who created campaign
+     */
+    function updateReputationPointsForExecutedConversionAffiliation(
+        address converter,
+        address contractor
+    )
+    public
+    onlyVerifiedCampaignsCreatedThroughFactory
+    {
+        // Initial reward is 10 points, since this action is much more valuable
+        int initialRewardWei = 10 * (10**18);
+
+        updateReputationPointsForExecutedConversionInternal(
+            converter,
+            contractor,
+            initialRewardWei,
+            "AFFILIATION"
+        );
+    }
+
 
 
     /**
@@ -410,7 +437,7 @@ contract TwoKeyPlasmaReputationRegistry is Upgradeable {
         address contractor
     )
     public
-    onlyBudgetCampaigns
+    onlyVerifiedCampaignsCreatedThroughFactory
     {
         int initialPunishmentWei = (10**18) / 2;
         updateReputationPointsForRejectedConversionsInternal(

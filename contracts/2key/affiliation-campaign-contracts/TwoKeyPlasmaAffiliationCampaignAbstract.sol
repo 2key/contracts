@@ -310,9 +310,8 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     )
     internal
     {
-        //TODO: Implement logic for reputation points
-//        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
-//        .updateReputationPointsForExecutedConversion(converter, contractor);
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+            .updateReputationPointsForExecutedConversionAffiliation(converter, contractor);
     }
 
 
