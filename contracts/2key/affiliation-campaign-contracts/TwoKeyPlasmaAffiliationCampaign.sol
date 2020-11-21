@@ -18,7 +18,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         uint conversionTimestamp;
     }
 
-    Conversion [] conversions;          // Array of all conversions
+    Conversion [] public conversions;          // Array of all conversions
 
 
     function setInitialParamsAffiliationCampaignPlasma(
