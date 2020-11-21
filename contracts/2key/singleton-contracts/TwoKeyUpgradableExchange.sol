@@ -35,7 +35,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     string constant _twoKeyEconomy = "TwoKeyEconomy";
     string constant _twoKeyExchangeRateContract = "TwoKeyExchangeRateContract";
     string constant _twoKeyAdmin = "TwoKeyAdmin";
-    string constant _dai = "DAI";
     string constant _kyberNetworkProxy = "KYBER_NETWORK_PROXY";
     string constant _kyberReserveContract = "KYBER_RESERVE_CONTRACT";
 
@@ -87,10 +86,9 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT = ITwoKeyUpgradableExchangeStorage(_proxyStorageContract);
         setUint(keccak256("spreadWei"), 3**16); // 3% wei
 
-    setUint(keccak256("sellRate2key"),6 * (10**16));// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
+        setUint(keccak256("sellRate2key"),6 * (10**16));// When anyone send Ether to contract, 2key in exchange will be calculated on it's sell rate
         setUint(keccak256("numberOfContracts"), 0); //Number of contracts which have interacted with this contract through buyTokens function
 
-        setAddress(keccak256(_dai), _daiAddress);
         setAddress(keccak256(_kyberNetworkProxy), _kyberNetworkProxyAddress);
 
         initialized = true;
@@ -1023,7 +1021,8 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyMaintainer
     {
-        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
+        ERC20 dai = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"));
+
         if(amountToBeHedged > address(this).balance) {
             amountToBeHedged = address(this).balance;
         }
@@ -1109,7 +1108,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     public
     onlyValidatedContracts
     {
-        ERC20 dai = ERC20(getAddress(keccak256(_dai)));
+        ERC20 dai = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"));
         ERC20 token = ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy));
 
         uint contractId = getContractId(msg.sender); // Get the contract ID
@@ -1387,7 +1386,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             require(amountOfDAI <= daiWeiAvailableToFill2keyReserve);
         }
 
-        ERC20(getAddress(keccak256(_dai))).transfer(msg.sender, amountOfDAI);
+        ERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI")).transfer(msg.sender, amountOfDAI);
         bytes32 key = keccak256("daiWeiAvailableToFill2KEYReserve");
 
         // Set that there's not DAI to fill reserve anymore
@@ -1416,7 +1415,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             purchaseAmountUSDWei,
             currentPrice,
             balanceOfTokens,
-                poolWorthUSD(balanceOfTokens, currentPrice)
+            poolWorthUSD(balanceOfTokens, currentPrice)
         );
     }
 
@@ -1441,7 +1440,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             IERC20(DAI).balanceOf(address(this)),
             DAI
         );
-
     }
 
 
