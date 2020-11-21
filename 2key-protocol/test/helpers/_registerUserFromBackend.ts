@@ -1,6 +1,7 @@
 import { TwoKeyProtocol } from '../../src';
 import createWeb3 from './_web3';
 import {expectEqualNumbers} from "./numberHelpers";
+import {promisify} from "../../src/utils/promisify";
 
 
 export interface IRegistryData {
@@ -29,7 +30,15 @@ async function registerUserFromBackend({ signature, plasmaAddress, ethereumAddre
     const receipts = [];
 
     try {
-        const txHash = await twoKeyProtocol.Registry.batchRegistrationByMaintainer(signature, username, ethereumAddress, plasmaAddress,address);
+        const txHash = await promisify(twoKeyProtocol.twoKeyReg.registerUserByMaintainer,[
+           signature,
+           username,
+           ethereumAddress,
+           plasmaAddress,
+            {
+                from: address
+            }
+        ]);
         let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         console.log('Gas used for batched registration (addName + addPlasma2Ethereum) : ', receipt.gasUsed);
         receipts.push(receipt);
