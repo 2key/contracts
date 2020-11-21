@@ -1416,7 +1416,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             purchaseAmountUSDWei,
             currentPrice,
             balanceOfTokens,
-                poolWorthUSD(balanceOfTokens, currentPrice)
+            poolWorthUSD(balanceOfTokens, currentPrice)
         );
     }
 
