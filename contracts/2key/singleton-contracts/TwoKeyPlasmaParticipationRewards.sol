@@ -18,7 +18,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _userToEarningsPerEpoch = "userToEarningsPerEpoch";
-    string constant _userToTotalAmountPending = "userToTotalAmountPending";
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
     string constant _userToTotalAmountInProgressOfWithdrawal = "userToTotalAmountInProgressOfWithdrawal";
     string constant _userToPendingEpochs = "userToPendingEpochs";
@@ -29,10 +28,10 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToSignature = "userToSignature";
     string constant _latestFinalizedEpochId = "latestEpochId";
     string constant _isEpochRegistrationFinalized = "isEpochRegistrationFinalized";
-    string constant _userToSignatureToMainchainWithdrawalConfirmed = "userToSignatureToMainchainWithdrawalConfirmed";
     string constant _epochInProgressOfRegistration = "epochInProgressOfRegistration";
     string constant _declaredEpochIds = "declaredEpochIds";
     string constant _signatoryAddress = "signatoryAddress";
+    string constant _userToSignatureToAmountWithdrawn = "userToSignatureToAmountWithdrawn";
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
@@ -560,12 +559,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
             keccak256(_userToSignature, userPlasma)
         );
 
-        // Mark that this signature is used on mainchain and withdrawn funds
-        setBool(
-            keccak256(_userToSignatureToMainchainWithdrawalConfirmed, userPlasma, signature),
-            true
-        );
-
         bytes32 totalUserWithdrawalsKeyHash = keccak256(_userToTotalAmountWithdrawn, userPlasma);
 
         uint totalWithdrawn = getUint(totalUserWithdrawalsKeyHash);
@@ -574,6 +567,16 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         setUint(
             totalUserWithdrawalsKeyHash,
             totalWithdrawn.add(getUint(keccak256(_userToTotalAmountInProgressOfWithdrawal, userPlasma)))
+        );
+
+        // Get how much user had pending in withdrawal
+        uint pendingOfWithdrawal = getHowMuchUserHaveInProgressOfWithdrawal(userPlasma);
+
+        // Set that pending was withdrawn with signature
+        setAmountWithdrawnWithSignature(
+            userPlasma,
+            signature,
+            pendingOfWithdrawal
         );
 
         // Set that user has 0 in progress of withdrawal
@@ -626,6 +629,26 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
         // Recover signer message from signature
         return Call.recoverHash(hash,signature,0);
+    }
+
+    /**
+     * @notice          Internal function to set the amount user has withdrawn
+                        using specific signature
+     * @param           userPlasma is the address of user
+     * @param           signature is the signature created by user
+     * @param           amountWithdrawn is the amount user withdrawn using that signature
+     */
+    function setAmountWithdrawnWithSignature(
+        address userPlasma,
+        bytes signature,
+        uint amountWithdrawn
+    )
+    internal
+    {
+        setUint(
+            keccak256(_userToSignatureToAmountWithdrawn, userPlasma, signature),
+            amountWithdrawn
+        );
     }
 
 
@@ -794,20 +817,24 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getBytes(keccak256(_userToSignature, user));
     }
 
+
+
     /**
-     * @notice          Function to check if user used the signature to withdraw from mainchain
-     * @param           user is the user address
-     * @param           signature is the signature user used to withdraw
+     * @notice          Function to check amount user has withdrawn using specific signature
+     * @param           user is the address of the user
+     * @param           signature is the signature signed by maintainer
      */
-    function getIfSignatureUsedOnMainchainForWithdrawal(
+    function getAmountUserWithdrawnUsingSignature(
         address user,
         bytes signature
     )
     public
     view
-    returns (bool)
+    returns (uint)
     {
-        return getBool(keccak256(_userToSignatureToMainchainWithdrawalConfirmed, user, signature));
+        return getUint(
+            keccak256(_userToSignatureToAmountWithdrawn, user, signature)
+        );
     }
 
     /**
@@ -881,6 +908,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
     }
+
 
     function isEpochIdDeclared(
         uint epochId
