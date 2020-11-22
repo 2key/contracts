@@ -305,6 +305,6 @@ contract TwoKeyPlasmaFactory is Upgradeable {
     view
     returns (string)
     {
-        return PROXY_STORAGE_CONTRACT.getString(keccak256(_addressToCampaignType, _key));
+        return PROXY_STORAGE_CONTRACT.getString(keccak256(_addressToCampaignType, _campaignAddress));
     }
 }
