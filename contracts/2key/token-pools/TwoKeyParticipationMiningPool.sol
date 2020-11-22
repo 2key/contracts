@@ -28,7 +28,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
     string constant _epochInsideYear = "epochInsideYear";
     string constant _isExistingSignature = "isExistingSignature";
-    string constant _userToSignatureToAmountWithdrawn = "userToSignatureToAmountWithdrawn";
 
 
     string constant _monthlyTransferAllowance = "monthlyTransferAllowance";
@@ -148,25 +147,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_address);
     }
 
-    /**
-     * @notice          Internal function to set the amount user has withdrawn
-                        using specific signature
-     * @param           user is the address of user
-     * @param           signature is the signature created by user
-     * @param           amountWithdrawn is the amount user withdrawn using that signature
-     */
-    function setAmountWithdrawnWithSignature(
-        address user,
-        bytes signature,
-        uint amountWithdrawn
-    )
-    internal
-    {
-        setUint(
-            keccak256(_userToSignatureToAmountWithdrawn, user, signature),
-            amountWithdrawn
-        );
-    }
+
 
     function increaseTransferedAmountFromContract(
         uint amountTransfered
@@ -373,10 +354,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Set that signature is existing and can't be used anymore
         setSignatureIsExisting(signature);
 
-        //TODO: Move this to plasma contract along with getter
-        // Set the amount of tokens withdrawn by user using this signature
-        setAmountWithdrawnWithSignature(msg.sender, signature, amountOfTokens);
-
         // Emit event that user have withdrawn his network earnings
         ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitUserWithdrawnNetworkEarnings(
             msg.sender,
@@ -479,23 +456,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         return getBool(keccak256(_isExistingSignature,signature));
     }
 
-    /**
-     * @notice          Function to check amount user has withdrawn using specific signature
-     * @param           user is the address of the user
-     * @param           signature is the signature signed by maintainer
-     */
-    function getAmountUserWithdrawnUsingSignature(
-        address user,
-        bytes signature
-    )
-    public
-    view
-    returns (uint)
-    {
-        return getUint(
-            keccak256(_userToSignatureToAmountWithdrawn, user, signature)
-        );
-    }
 
     /**
      * @notice          Function to get total amount of tokens transfered by now
