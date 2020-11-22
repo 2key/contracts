@@ -28,14 +28,15 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
     string constant _epochInsideYear = "epochInsideYear";
     string constant _isExistingSignature = "isExistingSignature";
-
-
-    string constant _monthlyTransferAllowance = "monthlyTransferAllowance";
     string constant _dateStartingCountingMonths = "dateStartingCountingMonths";
     string constant _totalTokensTransferedByNow = "totalTokensTransferedByNow";
 
-    string constant _signatoryAddress = "signatoryAddress";
+    // Initial amount of tokens is 120M
+    uint constant public initialAmountOfTokens = 120 * (1e6) * (1e18);
+    // 1M tokens monthly allowance
+    uint constant public monthlyTransferAllowance = 1 * (1e6) * (1e18);
 
+    string constant _signatoryAddress = "signatoryAddress";
     string constant _twoKeyParticipationsManager = "TwoKeyParticipationPaymentsManager";
 
     /**
@@ -148,21 +149,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     }
 
 
-
-    function increaseTransferedAmountFromContract(
-        uint amountTransfered
-    )
-    internal
-    {
-        uint currentlyTransfered = getTotalAmountOfTokensTransfered();
-
-        setUint(
-            keccak256(_totalTokensTransferedByNow),
-            currentlyTransfered.add(amountTransfered)
-        );
-    }
-
-
     /**
      * @notice Function which does transfer with special requirements with annual limit
      * @param _amount is the amount of tokens sent
@@ -260,21 +246,12 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Require that this function can be called only once
         require(getUint(keccak256(_dateStartingCountingMonths)) == 0);
 
-        // TODO: Set inital amount of ERC20(_twoKeyEconomy).balanceOf(this)
-        // Get annual transfer limit
-        uint annualTransferLimit = getUint(keccak256(_annualTransferAmountLimit));
-
         // Set date when counting months starts
         setUint(
             keccak256(_dateStartingCountingMonths),
             dateStartingCountingMonths
         );
 
-        // Set monthly transfer allowance
-        setUint(
-            keccak256(_monthlyTransferAllowance),
-            annualTransferLimit.div(12)
-        );
     }
 
 
@@ -348,9 +325,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // First check if this signature is used
         require(isExistingSignature(signature) == false);
 
-        // Increase total tokens transfered from contract
-        increaseTransferedAmountFromContract(amountOfTokens);
-
         // Set that signature is existing and can't be used anymore
         setSignatureIsExisting(signature);
 
@@ -399,9 +373,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         // We do sub here mostly because of underflow
         uint totalTimePassedFromUnlockingDay = timestamp.sub(dateStartedCountingMonths);
-
-        // Get amount of tokens unlocked monthly
-        uint monthlyTransferAllowance = getMonthlyTransferAllowance();
 
         // Calculate total amount of tokens being unlocked by now
         uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / (30 days) + 1) * monthlyTransferAllowance;
@@ -465,7 +436,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     view
     returns (uint)
     {
-        return getUint(keccak256(_totalTokensTransferedByNow));
+        // Sub from initial amount of tokens current balance
+        return initialAmountOfTokens.sub(
+            IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy)).balanceOf(address(this))
+        );
     }
 
     function getDateStartingCountingMonths()
@@ -481,7 +455,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     view
     returns (uint)
     {
-        return getUint(keccak256(_monthlyTransferAllowance));
+        return monthlyTransferAllowance;
     }
 
     /**
