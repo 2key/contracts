@@ -24,7 +24,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     function setInitialParamsAffiliationCampaignPlasma(
         address _twoKeyPlasmaSingletonRegistry,
         address _contractor,
-        address _url,
+        string _url,
         uint [] numberValues
     )
     public
