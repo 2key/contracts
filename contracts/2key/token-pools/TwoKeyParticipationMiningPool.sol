@@ -279,6 +279,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Require that this function can be called only once
         require(getUint(keccak256(_dateStartingCountingMonths)) == 0);
 
+        // TODO: Set inital amount of ERC20(_twoKeyEconomy).balanceOf(this)
         // Get annual transfer limit
         uint annualTransferLimit = getUint(keccak256(_annualTransferAmountLimit));
 
@@ -372,6 +373,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Set that signature is existing and can't be used anymore
         setSignatureIsExisting(signature);
 
+        //TODO: Move this to plasma contract along with getter
         // Set the amount of tokens withdrawn by user using this signature
         setAmountWithdrawnWithSignature(msg.sender, signature, amountOfTokens);
 
