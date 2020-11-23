@@ -917,8 +917,8 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     view
     returns (bool)
     {
+        // Get declared epochs
         uint [] memory declaredEpochIds = getDeclaredEpochIds();
-        if (declaredEpochIds.length == 0) return false;
-        return declaredEpochIds[epochId-1] == epochId;
+        return declaredEpochIds.length >= epochId;
     }
 }
