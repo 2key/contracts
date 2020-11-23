@@ -17,4 +17,7 @@ spinner 2
 
 echo "Destination for execution on public is TwoKeyPlasmaRegistry contract: 0x27bb4f1ec6b8e12afc382003d5e7f94f89ab52e4"
 
+
+cd ../..
+
 python3 generate_bytecode.py setModeratorFeePlasma 10
