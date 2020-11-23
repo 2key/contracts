@@ -20,16 +20,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     /**
      * Constant keys for storage contract
      */
-    string constant _totalAmount2keys = "totalAmount2keys";
-    string constant _annualTransferAmountLimit = "annualTransferAmountLimit";
-    string constant _startingDate = "startingDate";
-    string constant _yearToStartingDate = "yearToStartingDate";
-    string constant _yearToTransferedThisYear = "yearToTransferedThisYear";
     string constant _isAddressWhitelisted = "isAddressWhitelisted";
     string constant _epochInsideYear = "epochInsideYear";
     string constant _isExistingSignature = "isExistingSignature";
     string constant _dateStartingCountingMonths = "dateStartingCountingMonths";
-    string constant _totalTokensTransferedByNow = "totalTokensTransferedByNow";
 
     // Initial amount of tokens is 120M
     uint constant public initialAmountOfTokens = 120 * (1e6) * (1e18);
@@ -70,20 +64,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
         TWO_KEY_SINGLETON_REGISTRY = twoKeySingletonesRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyParticipationMiningPoolStorage(_proxyStorage);
-
-        uint totalAmountOfTokens = getContractBalance(); //120M 2KEY's
-
-        setUint(keccak256(_totalAmount2keys), totalAmountOfTokens);
-        setUint(keccak256(_annualTransferAmountLimit), totalAmountOfTokens.div(10));
-        setUint(keccak256(_startingDate), block.timestamp);
-
-        for(uint i=1; i<=10; i++) {
-            bytes32 key1 = keccak256(_yearToStartingDate, i);
-            bytes32 key2 = keccak256(_yearToTransferedThisYear, i);
-
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(key1), block.timestamp + i*(1 years));
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(key2), 0);
-        }
 
         initialized = true;
     }
@@ -150,56 +130,22 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
 
     /**
-     * @notice Function which does transfer with special requirements with annual limit
-     * @param _amount is the amount of tokens sent
-     * @dev Only TwoKeyAdmin or Whitelisted address contract can issue this call
+     * @notice          Function where congress can set signatory address
+     *                  and that's the only address eligible to sign the rewards messages
+     * @param           signatoryAddress is the address which will be used to sign rewards
      */
-    function transferTokensToAddress(
-        uint _amount
+    function setSignatoryAddress(
+        address signatoryAddress
     )
     public
-    onlyTwoKeyAdminOrWhitelistedAddress
+    onlyTwoKeyCongress
     {
-        require(_amount > 0);
-        uint year = checkInWhichYearIsTheTransfer();
-
-        bytes32 keyTransferedThisYear = keccak256(_yearToTransferedThisYear,year);
-        bytes32 keyAnnualTransferAmountLimit = keccak256(_annualTransferAmountLimit);
-        bytes32 keyHashEpochThisYear = keccak256(_epochInsideYear, year);
-
-        //Take the amount transfered this year
-        uint transferedThisYear = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyTransferedThisYear));
-
-        //In case there are <= than 10 years, than we have limits for transfer
-        if(year <= 10) {
-            //Take the annual transfer amount limit
-            uint annualTransferAmountLimit = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyAnnualTransferAmountLimit));
-
-            //Check that this transfer will not overflow the annual limit
-            require(transferedThisYear.add(_amount) <= annualTransferAmountLimit);
-        }
-
-        //Take the epoch for this year ==> which time this year we're calling this function
-        uint epochThisYear = PROXY_STORAGE_CONTRACT.getUint(keccak256(keyHashEpochThisYear));
-
-        //We're always sending tokens to ParticipationPaymentsManager
-        address receiver = getAddressFromTwoKeySingletonRegistry(_twoKeyParticipationsManager);
-
-        // Transfer the tokens
-        super.transferTokens(receiver,_amount);
-        //Alert that tokens have been transfered
-        ITwoKeyParticipationPaymentsManager(receiver).transferTokensFromParticipationMiningPool(
-            _amount,
-            year,
-            epochThisYear
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_signatoryAddress),
+            signatoryAddress
         );
-
-        // Increase annual epoch
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(keyHashEpochThisYear), epochThisYear.add(1));
-
-        // Increase the amount transfered this year
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(keyTransferedThisYear), transferedThisYear.add(_amount));
     }
+
 
     /**
      * @notice Function which can only be called by TwoKeyAdmin contract
@@ -217,6 +163,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         PROXY_STORAGE_CONTRACT.setBool(keyHash, true);
     }
 
+
     /**
      * @notice Function which can only be called by TwoKeyAdmin contract
      * to remove any whitelisted address from the contract.
@@ -231,6 +178,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         bytes32 keyHash = keccak256(_isAddressWhitelisted, _addressToBeRemovedFromWhitelist);
         PROXY_STORAGE_CONTRACT.setBool(keyHash, false);
     }
+
 
     /**
      * @notice          Function where maintainer can set withdrawal parameters
@@ -251,49 +199,34 @@ contract TwoKeyParticipationMiningPool is TokenPool {
             keccak256(_dateStartingCountingMonths),
             dateStartingCountingMonths
         );
-
     }
 
 
     /**
-     * @notice Function to check if the selected address is whitelisted
-     * @param _address is the address we want to get this information
-     * @return result of address being whitelisted
+     * @notice Function which does transfer with special requirements with annual limit
+     * @param amountOfTokens is the amount of tokens sent
+     * @dev Only TwoKeyAdmin or Whitelisted address contract can issue this call
      */
-    function isAddressWhitelisted(
-        address _address
+    function transferTokensToAddress(
+        uint amountOfTokens
     )
     public
-    view
-    returns (bool)
+    onlyTwoKeyAdminOrWhitelistedAddress
     {
-        bytes32 keyHash = keccak256(_isAddressWhitelisted, _address);
-        return PROXY_STORAGE_CONTRACT.getBool(keyHash);
-    }
+        // Assert that amount of tokens to be withdrawn is less than amount of tokens unlocked
+        require(amountOfTokens < getAmountOfTokensUnlockedForWithdrawal(block.timestamp));
 
+        //We're always sending tokens to ParticipationPaymentsManager
+        address receiver = getAddressFromTwoKeySingletonRegistry(_twoKeyParticipationsManager);
 
-    /**
-     * @notice Function to check in which year is transfer happening
-     * returns year
-     */
-    function checkInWhichYearIsTheTransfer()
-    public
-    view
-    returns (uint)
-    {
-        uint startingDate = getUint(keccak256(_startingDate));
+        // Transfer the tokens
+        super.transferTokens(receiver,amountOfTokens);
 
-        if(block.timestamp > startingDate && block.timestamp < startingDate + 1 years) {
-            return 1;
-        } else {
-            uint counter = 1;
-            uint start = startingDate.add(1 years); //means we're checking for the second year
-            while(block.timestamp > start) {
-                start = start.add(1 years);
-                counter ++;
-            }
-            return counter;
-        }
+        //Alert that tokens have been transferred
+        ITwoKeyParticipationPaymentsManager(receiver).transferTokensFromParticipationMiningPool(
+            amountOfTokens
+        );
+
     }
 
 
@@ -340,20 +273,19 @@ contract TwoKeyParticipationMiningPool is TokenPool {
 
 
     /**
-     * @notice          Function where congress can set signatory address
-     *                  and that's the only address eligible to sign the rewards messages
-     * @param           signatoryAddress is the address which will be used to sign rewards
+     * @notice Function to check if the selected address is whitelisted
+     * @param _address is the address we want to get this information
+     * @return result of address being whitelisted
      */
-    function setSignatoryAddress(
-        address signatoryAddress
+    function isAddressWhitelisted(
+        address _address
     )
     public
-    onlyTwoKeyCongress
+    view
+    returns (bool)
     {
-        PROXY_STORAGE_CONTRACT.setAddress(
-            keccak256(_signatoryAddress),
-            signatoryAddress
-        );
+        bytes32 keyHash = keccak256(_isAddressWhitelisted, _address);
+        return PROXY_STORAGE_CONTRACT.getBool(keyHash);
     }
 
 
@@ -377,7 +309,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         // Calculate total amount of tokens being unlocked by now
         uint totalUnlockedByNow = ((totalTimePassedFromUnlockingDay) / (30 days) + 1) * monthlyTransferAllowance;
 
-        // Get total amount already transfered
+        // Get total amount already transferred
         uint totalTokensTransferedByNow = getTotalAmountOfTokensTransfered();
 
         // Return tokens available at this moment
@@ -412,6 +344,7 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         return Call.recoverHash(hash,signature,0);
     }
 
+
     /**
      * @notice          Function to check if signature is already existing,
                         means that is has been used, and can't be used anymore
@@ -442,6 +375,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         );
     }
 
+
+    /**
+     * @notice          Function to get the first date from which the time started to unlock
+     */
     function getDateStartingCountingMonths()
     public
     view
@@ -450,6 +387,10 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         return getUint(keccak256(_dateStartingCountingMonths));
     }
 
+
+    /**
+     * @notice          Function to get how many tokens are getting unlocked every month
+     */
     function getMonthlyTransferAllowance()
     public
     view
@@ -468,6 +409,4 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
     }
-
-
 }

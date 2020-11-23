@@ -291,7 +291,6 @@ describe(
                 signature
             ]);
 
-
             // Assert that the message is signed by proper address
             expect(messageSigner).to.be.equal(twoKeyProtocol.plasmaAddress);
         }).timeout(timeout);
@@ -367,11 +366,10 @@ describe(
             twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
 
-            let monthlyTransferAllowance = await promisify(
-                twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance,[]
-            );
+            let dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths,[]);
 
-            if(monthlyTransferAllowance.toString() === '0') {
+            if(dateStartingCountingMonths.toString() === '0') {
+                // Get timestamp of latest block
                 let blockNumber = await twoKeyProtocol.Utils.getLatestBlock();
                 let blockTimestamp = await twoKeyProtocol.Utils.getBlockTimestamp(blockNumber);
 
@@ -383,12 +381,13 @@ describe(
                       }
                   ])
                 );
-                let dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths,[]);
+
+                dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths,[]);
                 expect(dateStartingCountingMonths.toString()).to.be.equal(blockTimestamp.toString());
             }
 
             // We need to assert that monthly transfer allowance is 1M
-            monthlyTransferAllowance = await promisify(
+            let monthlyTransferAllowance = await promisify(
                 twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance,[]
             );
 
@@ -419,6 +418,7 @@ describe(
 
             from = address;
             twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
+
             let totalAmountOfTokensTransfered = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getTotalAmountOfTokensTransfered, []);
             totalAmountOfTokensTransfered = parseFloat(twoKeyProtocol.Utils.fromWei(totalAmountOfTokensTransfered, 'ether').toString());
 
@@ -430,6 +430,8 @@ describe(
                 from
             );
 
+            console.log(txHash);
+
             // Wait until receipt is taken
             let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
             console.log('Gas required for withdrawal on mainchain is: ', receipt.gasUsed);
@@ -440,33 +442,24 @@ describe(
             expect(totalAmountOfTokensTransfered + amountInProgressOfWithdrawal).to.be.equal(totalAmountOfTokensTransferedAfterWithdrawal);
         }).timeout(timeout);
 
-        it('should check accounting on mainchain after withdrawal is finished', async() => {
-            let user = usersInEpoch[2];
+        it('should check if signature is marked as it exists on mainchain', async() => {
             // Check if signature is existing
             let isSignatureExistingOnMainchain = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.isExistingSignature,[signature]);
 
-            // Amount in progress of withdrawal on sidechain
-            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
-
-
-            let amountUserWithdrawnUsingSignature = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getAmountUserWithdrawnUsingSignature,[
-                user,
-                signature
-            ]);
-
             expect(isSignatureExistingOnMainchain).to.be.equal(true);
-            expect(parseFloat(twoKeyProtocol.Utils.fromWei(amountUserWithdrawnUsingSignature,'ether').toString()))
-                .to.be.equal(amountInProgressOfWithdrawal);
         }).timeout(timeout);
 
         it('should mark that user finished withdrawal on mainchain, and clear his sig, called by maintainer', async() => {
-
             const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
 
             from = address;
             twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let user = usersInEpoch[2];
+
+
+            // Amount in progress of withdrawal on sidechain
+            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
 
             let txHash = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.markUserFinishedWithdrawalFromMainchainWithSignature,[
                 user,
@@ -478,16 +471,21 @@ describe(
 
             await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
 
+            let amountUserWithdrawnUsingSignature = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getAmountUserWithdrawnUsingSignature,[
+                user,
+                signature
+            ]);
+
+            // Amount in progress of withdrawal on sidechain
+            let amountAfterWithdrawalInProgress = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
+
             let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
+
+            expect(amountAfterWithdrawalInProgress.toString()).to.be.equal('0');
+            expect(amountInProgressOfWithdrawal).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(amountUserWithdrawnUsingSignature,'ether').toString()))
             expect(signatureOnContract).to.be.equal('0x');
         }).timeout(timeout);
 
-        it('should check that signature for this user is marked as used and withdrawn', async() => {
-            let user = usersInEpoch[2];
-
-            let isSignatureUsed = await twoKeyProtocol.TwoKeyParticipationMiningPool.getIfSignatureUsedOnMainchainForWithdrawal(user,signature);
-            expect(isSignatureUsed).to.be.equal(true);
-        }).timeout(timeout);
 
         it('should check that amount pending withdrawal is 0', async() => {
             let user = usersInEpoch[2];
