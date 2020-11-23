@@ -604,7 +604,7 @@ async function deploy() {
             process.chdir('../../');
             //Run slack message
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
-            if(!process.argv.includes('protocol-only')) {
+            if(!process.argv.includes('protocol-only') && !process.argv.includes('skip-tenderly')) {
                 // Add tenderly to CI/CD only in case there have been contracts updated.
                 await runProcess('tenderly', ['push', '--tag', npmVersionTag]);
             }
