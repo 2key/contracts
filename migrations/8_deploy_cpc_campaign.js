@@ -1,8 +1,6 @@
 const MerkleProof = artifacts.require('MerkleProof');
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeyCPCCampaignPlasma = artifacts.require('TwoKeyCPCCampaignPlasma');
-const TwoKeyCPCCampaign = artifacts.require('TwoKeyCPCCampaign');
-const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
 const IncentiveModels = artifacts.require('IncentiveModels');
 const Call = artifacts.require('Call');
 
@@ -38,23 +36,12 @@ module.exports = function deploy(deployer) {
         }
     });
 
-    if(flag == false) {
+    if (flag === false) {
         console.log('No update will be performed');
         return;
     }
 
-    if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        deployer.link(Call, TwoKeyCPCCampaign);
-        deployer.link(MerkleProof, TwoKeyCPCCampaign);
-        deployer.deploy(TwoKeyCPCCampaign)
-            .then(() => TwoKeyCPCCampaign.deployed())
-            .then(async () => {
-                await addNewContractVersion("TwoKeyCPCCampaign", TwoKeyCPCCampaign.address, TwoKeySingletonesRegistry.address);
-            })
-
-            .then(() => true);
-    }
-    else if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
+    if(deployer.network.startsWith('plasma') || deployer.network.startsWith('private')) {
         deployer.link(Call, TwoKeyCPCCampaignPlasma);
         deployer.link(MerkleProof, TwoKeyCPCCampaignPlasma);
         deployer.link(IncentiveModels, TwoKeyCPCCampaignPlasma);

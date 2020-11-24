@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+
 spinner() {
     chars="/-\|"
 
@@ -12,10 +13,10 @@ spinner() {
 }
 
 spinner 2
-echo "Destination for execution on public is TwoKeyAdmin contract: 0x8430db5eba7745eab1904d173129b7965190055a"
-python3 generate_bytecode.py setModeratorFeePublic 10
 
+echo "Destination for execution: 0xc96a16b5064797a883f12780400a5e8e5d5d4d20"
 
+cd ../..
 
-
+python3 generate_bytecode.py upgradeContract TwoKeyPlasmaParticipationRewards 1.0.4
 

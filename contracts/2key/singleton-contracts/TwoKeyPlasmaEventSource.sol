@@ -13,19 +13,10 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
  */
 contract TwoKeyPlasmaEventSource is Upgradeable {
 
-
-    // Determinator if campaign is initialized
     bool initialized;
 
-
-    // Pointer to storage contract
     ITwoKeyPlasmaEventSourceStorage public PROXY_STORAGE_CONTRACT;
-    // Address of plasma singleton registry contract
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
-
-    /**
-     * Constants
-     */
     string constant _twoKeyPlasmaRegistry = "TwoKeyPlasmaRegistry";
     string constant _twoKeyPlasmaFactory = "TwoKeyPlasmaFactory";
     string constant _twoKeyPlasmaBudgetCampaignsPaymentsHandler = "TwoKeyPlasmaBudgetCampaignsPaymentsHandler";
@@ -53,27 +44,18 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     }
 
 
-    /**
-     * @notice          Event emitted when assigning plasma to ethereum address
-     */
     event Plasma2Ethereum(
         address plasma,
         address eth
     );
 
 
-    /**
-     * @notice          Event emitted when assigning plasma to handle
-     */
     event Plasma2Handle(
         address plasma,
         string handle
     );
 
 
-    /**
-     * @notice          Event emitted when conversion on budget campaigns is created
-     */
     event ConversionCreated(
         address campaignAddressPlasma,
         address campaignAddressPublic,
@@ -83,26 +65,18 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     );
 
 
-    /**
-     * @notice          Event emitted when conversion on budget campaigns is executed
-     */
     event ConversionExecuted(
         address campaignAddressPlasma,
         uint conversionID
     );
 
 
-    /**
-     * @notice          Event emitted whenever conversion which is executed is being paid
-     */
     event ConversionPaid(
         address campaignAddressPlasma,
         uint conversionID
     );
 
-    /**
-     * @notice          Event emitted when conversion on budget campaigns is rejected
-     */
+
     event ConversionRejected(
         address campaignAddressPlasma,
         uint conversionID,
@@ -110,26 +84,18 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     );
 
 
-    /**
-     * @notice          Event emitted when CPC campaign is created
-     */
     event CPCCampaignCreated(
         address proxyCPCCampaignPlasma,
         address contractorPlasma
     );
 
 
-    /**
-     * @notice          Event emitted when CPC campaign is validated
-     */
     event PlasmaMirrorCampaigns(
         address proxyPlasmaAddress,
         address proxyPublicAddress
     );
 
-    /**
-     * @notice          Event emitted every time we submit rewards
-     */
+
     event AddedPendingRewards(
         address contractAddress,
         address influencer,
@@ -141,16 +107,16 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         uint nonRebalancedRewards,
         uint rewards,
         address [] campaignsPaid,
-        uint [] earningsPerCampaign
+        uint [] earningsPerCampaign,
+        uint feePerReferrer2KEY
     );
 
-    /**
-     * @notice          Event emitted when user changes his handle
-     */
+
     event HandleChanged(
         address userPlasmaAddress,
         string newHandle
     );
+
 
     event RewardsAssignedToUserInParticipationMiningEpoch(
         uint epochId,
@@ -159,9 +125,23 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     );
 
 
-    /**
-     * @notice          Modifier restricting calls only to TwoKeyPlasmaFactory contract
-     */
+    event EpochDeclared(
+        uint epochId,
+        uint totalRewardsInEpoch
+    );
+
+
+    event EpochRegistered(
+        uint epochId,
+        uint numberOfUsers
+    );
+
+
+    event EpochFinalized(
+        uint epochId
+    );
+
+
     modifier onlyTwoKeyPlasmaFactory {
         address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaFactory);
         require(msg.sender == twoKeyPlasmaFactory);
@@ -169,29 +149,26 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     }
 
 
-    /**
-     * @notice          Modifier restricting calls only to whitelisted campaigns
-     */
     modifier onlyWhitelistedCampaigns {
         address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaFactory);
         require(ITwoKeyPlasmaFactory(twoKeyPlasmaFactory).isCampaignCreatedThroughFactory(msg.sender) == true);
         _;
     }
 
-    /**
-     * @notice          Modifier restricting calls only to TwoKeyPlasmaRegistry contract
-     */
+
     modifier onlyTwoKeyPlasmaRegistry {
         address twoKeyPlasmaRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaRegistry);
         require(msg.sender == twoKeyPlasmaRegistry);
         _;
     }
 
+
     modifier onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler {
         address twoKeyPlasmaBudgetCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaBudgetCampaignsPaymentsHandler);
         require(msg.sender == twoKeyPlasmaBudgetCampaignsPaymentsHandler);
         _;
     }
+
 
     /**
      * @notice          Function to return proxy address of the contract registered
@@ -345,7 +322,6 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     }
 
 
-
     /**
      * @notice          Function to emit event when plasma is linked to user handle
      *
@@ -382,6 +358,13 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         );
     }
 
+
+    /**
+     * @notice          Function to emit ane vent when rewards are added but not paid
+     * @param           campaignPlasma is campaign address for which user received rewards
+     * @param           influencer address of user
+     * @param           amountOfTokens is the amount of tokens for user.
+     */
     function emitAddedPendingRewards(
         address campaignPlasma,
         address influencer,
@@ -397,12 +380,24 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         );
     }
 
+
+    /**
+     * @notice          Function to emit an event when pending rewards accumulated from budget campaigns
+     *                  are being paid to the user
+     * @param           influencer is the user address
+     * @param           amountNonRebalancedEarned is amount of tokens user earned, but prior to rebalancing
+     * @param           amountPaid is actual amount user received, after rebalancing is done
+     * @param           campaignsPaid is an array of campaigns for which user received rewards
+     * @param           earningsPerCampaign is how much user earned per each campaign
+     * @param           feePerReferrer2KEY is withdrawal fee for which user is charged
+     */
     function emitPaidPendingRewards(
         address influencer,
         uint amountNonRebalancedEarned,
         uint amountPaid,
         address [] campaignsPaid,
-        uint [] earningsPerCampaign
+        uint [] earningsPerCampaign,
+        uint feePerReferrer2KEY
     )
     public
     onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler
@@ -412,10 +407,19 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
             amountNonRebalancedEarned,
             amountPaid,
             campaignsPaid,
-            earningsPerCampaign
+            earningsPerCampaign,
+            feePerReferrer2KEY
         );
     }
 
+
+    /**
+     * @notice          Function to emit an event whenever there are rewards assigned to user in
+     *                  participation mining epoch
+     * @param           epochId is the ID of the epoch
+     * @param           user is the address of user being rewarded
+     * @param           reward2KeyWei is reward in 2KEY tokens
+     */
     function emitRewardsAssignedToUserInParticipationMiningEpoch(
         uint epochId,
         address user,
@@ -432,4 +436,60 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         );
     }
 
+
+    /**
+     * @notice          Function to emit event whenever there's new epoch declared
+     * @param           epochId is the ID of that epoch
+     * @param           totalRewardsInEpoch is the amount of tokens to be distributed in that epoch
+     */
+    function emitEpochDeclared(
+        uint epochId,
+        uint totalRewardsInEpoch
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaParticipationRewards"));
+
+        emit EpochDeclared(
+            epochId,
+            totalRewardsInEpoch
+        );
+    }
+
+
+    /**
+     * @notice          Function to emit event whenever there's new epoch registered
+     * @param           epochId is the ID of that epoch
+     * @param           numberOfUsers is number of users to be rewarded in that epoch
+     */
+    function emitEpochRegistered(
+        uint epochId,
+        uint numberOfUsers
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaParticipationRewards"));
+
+        emit EpochRegistered(
+            epochId,
+            numberOfUsers
+        );
+    }
+
+
+    /**
+     * @notice          Function to emit event when there's epoch finalized
+     * @param           epochId is the ID of that epoch
+     */
+    function emitEpochFinalized(
+        uint epochId
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaParticipationRewards"));
+
+        emit EpochFinalized(
+            epochId
+        );
+    }
 }

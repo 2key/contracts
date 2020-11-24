@@ -13,4 +13,9 @@ contract ITwoKeyPlasmaReputationRegistry {
         address contractor
     )
     public;
+
+    function updateUserReputationScoreOnSignup(
+        address _plasmaAddress
+    )
+    public;
 }

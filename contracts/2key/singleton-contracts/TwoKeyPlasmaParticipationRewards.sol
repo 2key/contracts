@@ -5,6 +5,7 @@ import "../interfaces/storage-contracts/ITwoKeyPlasmaParticipationRewardsStorage
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 
@@ -17,7 +18,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _userToEarningsPerEpoch = "userToEarningsPerEpoch";
-    string constant _userToTotalAmountPending = "userToTotalAmountPending";
     string constant _userToTotalAmountWithdrawn = "userToTotalAmountWithdrawn";
     string constant _userToTotalAmountInProgressOfWithdrawal = "userToTotalAmountInProgressOfWithdrawal";
     string constant _userToPendingEpochs = "userToPendingEpochs";
@@ -28,12 +28,13 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     string constant _userToSignature = "userToSignature";
     string constant _latestFinalizedEpochId = "latestEpochId";
     string constant _isEpochRegistrationFinalized = "isEpochRegistrationFinalized";
-    string constant _userToSignatureToMainchainWithdrawalConfirmed = "userToSignatureToMainchainWithdrawalConfirmed";
     string constant _epochInProgressOfRegistration = "epochInProgressOfRegistration";
     string constant _declaredEpochIds = "declaredEpochIds";
+    string constant _signatoryAddress = "signatoryAddress";
+    string constant _userToSignatureToAmountWithdrawn = "userToSignatureToAmountWithdrawn";
+
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaParticipationRewardsStorage PROXY_STORAGE_CONTRACT;
-
 
 
     function setInitialParams(
@@ -57,6 +58,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         require(isMaintainer(msg.sender));
         _;
     }
+
 
     modifier onlyTwoKeyPlasmaCongress {
         address congress = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getNonUpgradableContractAddress("TwoKeyPlasmaCongress");
@@ -277,19 +279,27 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         uint newArrayLen = declaredEpochIds.length + epochIds.length;
         uint [] memory newDeclaredEpochIds = new uint[](newArrayLen);
 
-        for(i = 0; i<declaredEpochIds.length; i++) {
+        for (i = 0; i < declaredEpochIds.length; i++) {
             newDeclaredEpochIds[i] = declaredEpochIds[i];
         }
 
-        for(i = declaredEpochIds.length; i < newArrayLen; i++) {
+        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+
+        for (i = declaredEpochIds.length; i < newArrayLen; i++) {
             // Double check if epoch id is not already declared
             require(isEpochIdDeclared(epochIds[j]) == false);
 
             newDeclaredEpochIds[i] = epochIds[j];
 
+            // Emit event that epoch is declared
+            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitEpochDeclared(
+                epochIds[j],
+                totalRewardsPerEpoch[j]
+            );
+
             // Set in advance total rewards which can be distributed per epoch
             setUint(
-                keccak256(_totalRewardsToBeAssignedInEpoch,epochIds[j]),
+                keccak256(_totalRewardsToBeAssignedInEpoch, epochIds[j]),
                 totalRewardsPerEpoch[j]
             );
 
@@ -298,7 +308,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
         // Set new declared epoch ids
         setUintArray(keccak256(_declaredEpochIds), newDeclaredEpochIds);
-}
+    }
 
     /**
      * @notice          Function to start epoch registration, this will in advance store
@@ -321,6 +331,12 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         require(epochInProgress == 0);
         // Require that epoch id is equal to latest epoch submitted + 1
         require(epochId == getLatestFinalizedEpochId() + 1);
+
+        // Emit event that epoch is registered
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitEpochRegistered(
+            epochId,
+            numberOfUsers
+        );
 
         // Start registration process of this epoch
         setUint(
@@ -415,10 +431,14 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         // Require that the epoch being finalized is the one in progress
         require(epochId == getEpochIdInProgress());
 
-        //TODO:  Require that total rewards didn't pass allowance
-        require(getTotalRewardsPerEpoch(epochId) <= getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId)));
+        require(getTotalRewardsPerEpoch(epochId) <= getTotalRewardsToBeAssignedInEpoch(epochId));
 
         setEpochRegistrationFinalized(epochId);
+
+        // Emit event that epoch is finalized
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource")).emitEpochFinalized(
+            epochId
+        );
 
         // Set latest epoch id to be the one submitted
         setUint(
@@ -435,38 +455,63 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
 
     /**
+     * @notice          Function to redeclare total rewards amount for epoch currently in progress
+     * @param           rewardsAmount is new amount total for that epoch
+     */
+    function redeclareRewardsAmountForEpoch(
+        uint epochId,
+        uint rewardsAmount
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        // Require that epoch exists
+        require(epochId > 0);
+        // Get current epoch in progress
+        require(epochId == getEpochIdInProgress());
+        // Redeclare total amount to be assigned in epoch
+        setUint(
+            keccak256(_totalRewardsToBeAssignedInEpoch, epochId),
+            rewardsAmount
+        );
+    }
+
+    /**
      * @notice          Function to submit signature for user withdrawal
      */
     function submitSignatureForUserWithdrawal(
-        address user,
+        address userPublicAddress,
         uint totalRewardsPending,
         bytes signature
     )
     public
     onlyMaintainer
     {
+        address userPlasma = ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry"))
+            .ethereum2plasma(userPublicAddress);
+
         // Require that there's no epoch in progress of submitting
         require(getEpochIdInProgress() == 0);
-        // Require that user doesn't have any pending signatures
-        bytes memory pendingSignature = getBytes(keccak256(_userToSignature,user));
-        require(pendingSignature.length == 0);
-        // Require that user withdrawn his previous rewards if he started withdraw process
-        require(getHowMuchUserHaveInProgressOfWithdrawal(user) == 0);
 
-        // Recover signer of the message
+        // Require that user doesn't have any pending signatures
+        bytes memory pendingSignature = getBytes(keccak256(_userToSignature,userPlasma));
+        require(pendingSignature.length == 0);
+
+        // Require that user withdrawn his previous rewards if he started withdraw process
+        require(getHowMuchUserHaveInProgressOfWithdrawal(userPlasma) == 0);
+
+        // Recover signer of the message with user PUBLIC address
         address messageSigner = recoverSignature(
-            user,
+            userPublicAddress,
             totalRewardsPending,
             signature
         );
 
-
         // For security we require that message is signed by different maintainer than one sending this tx
-        require(messageSigner == msg.sender);
-
+        require(messageSigner == getSignatoryAddress());
 
         // get pending epoch ids user has
-        uint [] memory userPendingEpochIds = getPendingEpochsForUser(user);
+        uint [] memory userPendingEpochIds = getPendingEpochsForUser(userPlasma);
 
         uint i;
         uint len = userPendingEpochIds.length;
@@ -478,7 +523,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         for(i=0 ; i < len ; i++) {
             sumOfRewards = sumOfRewards.add(
                 getUserEarningsPerEpoch(
-                    user,
+                    userPlasma,
                     userPendingEpochIds[i]
                 )
             );
@@ -489,7 +534,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
         // Append pending epochs to withdrawn epochs
         appendArrayToArray(
-            keccak256(_userToWithdrawnEpochs, user),
+            keccak256(_userToWithdrawnEpochs, userPlasma),
             userPendingEpochIds
         );
 
@@ -497,19 +542,19 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         deleteUintArray(
             keccak256(
                 _userToPendingEpochs,
-                user
+                userPlasma
             )
         );
 
         // Set user signature ready for withdrawal
         setBytes(
-            keccak256(_userToSignature,user),
+            keccak256(_userToSignature,userPlasma),
             signature
         );
 
         // Set user pending rewards are now in progress of withdrawal
         setUint(
-            keccak256(_userToTotalAmountInProgressOfWithdrawal,user),
+            keccak256(_userToTotalAmountInProgressOfWithdrawal,userPlasma),
             totalRewardsPending
         );
 
@@ -517,45 +562,66 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
     /**
      * @notice          Function which will mark that user finished withdrawal on mainchain
-     * @param           user is the address of user
+     * @param           userPlasma is the address of user
      * @param           signature is the signature user used to withdraw on mainchain
      */
     function markUserFinishedWithdrawalFromMainchainWithSignature(
-        address user,
+        address userPlasma,
         bytes signature
     )
     public
     onlyMaintainer
     {
-        bytes memory pendingSignature = getUserPendingSignature(user);
+        bytes memory pendingSignature = getUserPendingSignature(userPlasma);
         // Require that user signature is matching the one stored on the contract
         require(keccak256(pendingSignature) == keccak256(signature));
 
         // Remove signature so user can withdraw again once he earns some rewards
         PROXY_STORAGE_CONTRACT.deleteBytes(
-            keccak256(_userToSignature, user)
+            keccak256(_userToSignature, userPlasma)
         );
 
-        // Mark that this signature is used on mainchain and withdrawn funds
-        setBool(
-            keccak256(_userToSignatureToMainchainWithdrawalConfirmed, user, signature),
-            true
-        );
-
-        bytes32 totalUserWithdrawalsKeyHash = keccak256(_userToTotalAmountWithdrawn, user);
+        bytes32 totalUserWithdrawalsKeyHash = keccak256(_userToTotalAmountWithdrawn, userPlasma);
 
         uint totalWithdrawn = getUint(totalUserWithdrawalsKeyHash);
 
         // Add to total withdrawn by user
         setUint(
             totalUserWithdrawalsKeyHash,
-            totalWithdrawn.add(getUint(keccak256(_userToTotalAmountInProgressOfWithdrawal, user)))
+            totalWithdrawn.add(getUint(keccak256(_userToTotalAmountInProgressOfWithdrawal, userPlasma)))
+        );
+
+        // Get how much user had pending in withdrawal
+        uint pendingOfWithdrawal = getHowMuchUserHaveInProgressOfWithdrawal(userPlasma);
+
+        // Set that pending was withdrawn with signature
+        setAmountWithdrawnWithSignature(
+            userPlasma,
+            signature,
+            pendingOfWithdrawal
         );
 
         // Set that user has 0 in progress of withdrawal
         setUint(
-            keccak256(_userToTotalAmountInProgressOfWithdrawal,user),
+            keccak256(_userToTotalAmountInProgressOfWithdrawal, userPlasma),
             0
+        );
+    }
+
+    /**
+     * @notice          Function where congress can set signatory address
+     *                  and that's the only address eligible to sign the rewards messages
+     * @param           signatoryAddress is the address which will be used to sign rewards
+     */
+    function setSignatoryAddress(
+        address signatoryAddress
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_signatoryAddress),
+            signatoryAddress
         );
     }
 
@@ -585,6 +651,26 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
         // Recover signer message from signature
         return Call.recoverHash(hash,signature,0);
+    }
+
+    /**
+     * @notice          Internal function to set the amount user has withdrawn
+                        using specific signature
+     * @param           userPlasma is the address of user
+     * @param           signature is the signature created by user
+     * @param           amountWithdrawn is the amount user withdrawn using that signature
+     */
+    function setAmountWithdrawnWithSignature(
+        address userPlasma,
+        bytes signature,
+        uint amountWithdrawn
+    )
+    internal
+    {
+        setUint(
+            keccak256(_userToSignatureToAmountWithdrawn, userPlasma, signature),
+            amountWithdrawn
+        );
     }
 
 
@@ -753,20 +839,24 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getBytes(keccak256(_userToSignature, user));
     }
 
+
+
     /**
-     * @notice          Function to check if user used the signature to withdraw from mainchain
-     * @param           user is the user address
-     * @param           signature is the signature user used to withdraw
+     * @notice          Function to check amount user has withdrawn using specific signature
+     * @param           user is the address of the user
+     * @param           signature is the signature signed by maintainer
      */
-    function getIfSignatureUsedOnMainchainForWithdrawal(
+    function getAmountUserWithdrawnUsingSignature(
         address user,
         bytes signature
     )
     public
     view
-    returns (bool)
+    returns (uint)
     {
-        return getBool(keccak256(_userToSignatureToMainchainWithdrawalConfirmed, user, signature));
+        return getUint(
+            keccak256(_userToSignatureToAmountWithdrawn, user, signature)
+        );
     }
 
     /**
@@ -819,7 +909,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     view
     returns (uint)
     {
-        return getUint(keccak256(_totalRewardsToBeAssignedInEpoch,epochId));
+        return getUint(keccak256(_totalRewardsToBeAssignedInEpoch, epochId));
     }
 
     function getDeclaredEpochIds()
@@ -830,6 +920,18 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         return getUintArray(keccak256(_declaredEpochIds));
     }
 
+    /**
+     * @notice          Function to fetch signatory address
+     */
+    function getSignatoryAddress()
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
+    }
+
+
     function isEpochIdDeclared(
         uint epochId
     )
@@ -837,8 +939,8 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     view
     returns (bool)
     {
+        // Get declared epochs
         uint [] memory declaredEpochIds = getDeclaredEpochIds();
-        if(declaredEpochIds.length == 0) return false;
-        return declaredEpochIds[epochId-1] == epochId;
+        return declaredEpochIds.length >= epochId;
     }
 }

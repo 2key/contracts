@@ -4,6 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITether.sol";
 import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
@@ -25,6 +26,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2contractor = "campaignPlasma2contractor";
 
     string constant _campaignPlasma2isBudgetedWith2KeyDirectly = "campaignPlasma2isBudgetedWith2KeyDirectly";
+    string constant _campaignPlasma2StableCoinAddress = "campaignPlasma2StableCoinAddress";
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
     string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
@@ -35,6 +37,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasmaToModeratorEarnings = "campaignPlasmaToModeratorEarnings";
     string constant _campaignPlasmaToLeftOverForContractor = "campaignPlasmaToLeftOverForContractor";
     string constant _campaignPlasmaToLeftoverWithdrawnByContractor = "campaignPlasmaToLeftoverWithdrawnByContractor";
+    string constant _feePerCycleIdPerReferrer = "feePerCycleIdPerReferrer";
 
     ITwoKeyBudgetCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -138,18 +141,25 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         // Set that contractor is the msg.sender of this method for the campaign passed
         setAddress(keccak256(_campaignPlasma2contractor, campaignPlasma), msg.sender);
 
-
         address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
 
-        // Take stable coins from the contractor
-        IERC20(tokenAddress).transferFrom(
-            msg.sender,
-            address(this),
-            amountOfStableCoins
-        );
+        // Handle case for Tether due to different ERC20 interface it has
+        if (tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
+            // Take stable coins from the contractor and directly transfer them to upgradable exchange
+            ITether(tokenAddress).transferFrom(
+                msg.sender,
+                twoKeyUpgradableExchange,
+                amountOfStableCoins
+            );
+        } else {
+            // Take stable coins from the contractor and directly transfer them to upgradable exchange
+            IERC20(tokenAddress).transferFrom(
+                msg.sender,
+                twoKeyUpgradableExchange,
+                amountOfStableCoins
+            );
+        }
 
-        // Approve twoKeyUpgradableExchange to take this tokens
-        IERC20(tokenAddress).approve(twoKeyUpgradableExchange, amountOfStableCoins);
 
         uint totalTokensBought;
         uint tokenPrice;
@@ -158,7 +168,14 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         (totalTokensBought, tokenPrice) = IUpgradableExchange(twoKeyUpgradableExchange).buyTokensWithERC20(amountOfStableCoins, tokenAddress);
 
         // Calculate and set bounty per conversion in 2KEY units
-        uint bountyPerConversion2KEY = bountyPerConversionFiat.mul(10**18).div(tokenPrice);
+        uint bountyPerConversion2KEY = bountyPerConversionFiat.mul(10 ** 18).div(tokenPrice);
+
+        // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
+        requireBudgetNotSetAndSetBudget(campaignPlasma, totalTokensBought);
+
+        // SSTORE 20k gas * 3 = 60k 3x uint ==> 256 bytes * 3 * 8 =  6144 gas
+        // 375 gas + 5 gas for each byte
+        // 10%   60000 - 6144 = 53856 saving
 
         setUint(
             keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma),
@@ -170,8 +187,11 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             amountOfStableCoins
         );
 
-        // Require that budget is not previously set and set initial budget to amount of 2KEY tokens
-        requireBudgetNotSetAndSetBudget(campaignPlasma, totalTokensBought);
+        // Set stable coin which is used to budget campaign
+        setAddress(
+            keccak256(_campaignPlasma2StableCoinAddress, campaignPlasma),
+            tokenAddress
+        );
 
         // Set the rate at which we have bought 2KEY tokens
         setUint(
@@ -320,7 +340,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint [] balances,
         uint nonRebalancedTotalPayout,
         uint rebalancedTotalPayout,
-        uint cycleId
+        uint cycleId,
+        uint feePerReferrerIn2KEY
     )
     public
     onlyMaintainer
@@ -356,15 +377,23 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             );
         }
 
+        uint numberOfReferrers = influencers.length;
+
         // Iterate through all influencers, distribute them rewards, and account amount received per cycle id
-        for(i = 0; i < influencers.length; i++) {
-            // Take the influencer balance
-            uint balance = balances[i];
+        for (i = 0; i < numberOfReferrers; i++) {
+            // Require that referrer earned more than fees
+            require(balances[i] > feePerReferrerIn2KEY);
+            // Sub fee per referrer from balance to pay
+            uint balance = balances[i].sub(feePerReferrerIn2KEY);
             // Transfer required tokens to influencer
             IERC20(twoKeyEconomy).transfer(influencers[i], balance);
-            // Sum up to totalDistributed
+            // Sum up to totalDistributed to referrers
             totalDistributed = totalDistributed.add(balance);
         }
+
+
+        transferFeesToAdmin(feePerReferrerIn2KEY, numberOfReferrers, twoKeyEconomy);
+
 
         // Set how much is total distributed per distribution cycle
         setUint(
@@ -373,11 +402,37 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
     }
 
+
     /**
      * ------------------------------------------------
      *        Internal functions performing logic operations
      * ------------------------------------------------
      */
+
+    /**
+     * @notice          Function to transfer fees taken from referrer rewards to admin contract
+     * @param           feePerReferrer is fee taken per referrer equaling 0.5$ in 2KEY at the moment
+     * @param           numberOfReferrers is number of referrers being rewarded in this cycle
+     * @param           twoKeyEconomy is 2KEY token contract
+     */
+    function transferFeesToAdmin(
+        uint feePerReferrer,
+        uint numberOfReferrers,
+        address twoKeyEconomy
+    )
+    internal
+    {
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+        IERC20(twoKeyEconomy).transfer(
+            twoKeyAdmin,
+            feePerReferrer.mul(numberOfReferrers)
+        );
+
+        // Update in admin tokens receiving from fees
+        ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
+    }
+
 
     /**
      * @notice          Function to set how many tokens are being distributed to moderator
@@ -823,6 +878,16 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         return getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma));
     }
 
+    function getStableCoinAddressUsedToFundCampaign(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (address)
+    {
+        return getAddress(keccak256(_campaignPlasma2StableCoinAddress, campaignPlasma));
+    }
+
     /**
      * @notice          Function to return summary related to specific campaign
      * @param           campaignPlasma is plasma campaign of address
@@ -894,7 +959,17 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
 
         // For now ignore fiat currency assuming it's USD always
-        return fiatBudgetAmount.mul(10**18).div(rate);
+        return fiatBudgetAmount.mul(10 ** 18).div(rate);
+    }
+
+    function getFeePerCycleIdPerReferrer(
+        uint cycleId
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(keccak256(_feePerCycleIdPerReferrer, cycleId));
     }
 
 }

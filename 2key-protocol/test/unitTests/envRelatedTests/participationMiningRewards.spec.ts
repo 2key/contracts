@@ -1,9 +1,3 @@
-import {exchangeRates} from "../../constants/smallConstants";
-const spawn = require("child_process").spawn;
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
-require('isomorphic-form-data');
-
 import {expect} from 'chai';
 import 'mocha';
 import web3Switcher from "../../helpers/web3Switcher";
@@ -12,13 +6,15 @@ import getTwoKeyProtocol from "../../helpers/twoKeyProtocol";
 import {promisify} from "../../../src/utils/promisify";
 
 
-
 import Sign from "../../../src/sign";
-const {env} = process;
-const path = require('path');
+
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
+
 
 const timeout = 60000;
-const pathToBytecodeFile = path.resolve('./scripts/generate_bytecode.py');
+const ONE_MONTH_UNIX = 30 * 24 * 60 * 60 + 60; // 30 days = 30 * 24 hrs = 30 * 24 * 60 minutes = 30 * 24 * 60 * 60 seconds + 1 minute
 
 describe(
     'TwoKeyParticipationMiningRewards test',
@@ -35,10 +31,10 @@ describe(
             function () {
                 this.timeout(timeout);
 
-                const {web3, address} = web3Switcher.deployer();
+                const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.deployer();
 
                 from = address;
-                twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
+                twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
             }
         );
 
@@ -82,10 +78,10 @@ describe(
         }).timeout(timeout);
 
         it('should member 2. vote for supporting proposal', async() => {
-            const {web3, address} = web3Switcher.aydnep();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.aydnep();
 
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_AYDNEP);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote,[
                 numberOfProposals,
@@ -103,10 +99,10 @@ describe(
 
         it('should member 3 vote for supporting proposal', async() => {
 
-            const {web3, address} = web3Switcher.gmail();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.gmail();
 
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_GMAIL);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote,[
                 numberOfProposals,
@@ -131,7 +127,7 @@ describe(
                     gas: 7000000
                 }
             ]);
-            console.log(txHash);
+
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
             const status = receipt && receipt.status;
             expect(status).to.be.equal('0x1');
@@ -160,12 +156,13 @@ describe(
 
         it('should register participation mining epoch', async () => {
 
-            const {web3, address} = web3Switcher.buyer();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
+
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             // Get latest epoch id
-            epochId = parseInt(await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getLatestFinalizedEpochId,[]),10) + 1;
+            epochId = parseInt(await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getLatestFinalizedEpochId, []), 10) + 1;
 
             let numberOfUsers = usersInEpoch.length;
 
@@ -247,24 +244,33 @@ describe(
                 let userRewardsPerEpochFromContract = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserEarningsPerEpoch,[usersInEpoch[i],epochId]);
                 // Expect to be same as the submitted value
                 expect(parseFloat(userRewardsPerEpochFromContract)).to.be.equal(userRewards[i]);
-                let userPendingEpochIds = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getPendingEpochsForUser,[usersInEpoch[i]]);
+                let userPendingEpochIds = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getPendingEpochsForUser, [usersInEpoch[i]]);
                 // Convert big numbers to uint
-                userPendingEpochIds = userPendingEpochIds.map((element) => {return parseInt(element,10)});
+                userPendingEpochIds = userPendingEpochIds.map((element) => {
+                    return parseInt(element, 10)
+                });
                 // Expect that the last pending epoch id is the on submitted now.
-                expect(userPendingEpochIds[userPendingEpochIds.length-1]).to.be.equal(epochId);
+                expect(userPendingEpochIds[userPendingEpochIds.length - 1]).to.be.equal(epochId);
             }
         }).timeout(timeout);
 
-        it('should sign user rewards and user address by maintainer', async() => {
+        it('should sign user rewards and user address by signatory address', async () => {
+
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.nikola();
+
+            from = address;
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
+
+
             let user = usersInEpoch[2];
-            let pending = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAmount,[user]);
+            let pending = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAmount, [user]);
 
             // Convert to 64 places hex
             let pendingHex = twoKeyProtocol.Utils.toHex(pending);
             pendingHex = pendingHex.slice(2);
 
             // hex(64)
-            while(pendingHex.length < 64) {
+            while (pendingHex.length < 64) {
                 pendingHex = '0' + pendingHex;
             }
 
@@ -285,7 +291,6 @@ describe(
                 signature
             ]);
 
-
             // Assert that the message is signed by proper address
             expect(messageSigner).to.be.equal(twoKeyProtocol.plasmaAddress);
         }).timeout(timeout);
@@ -293,10 +298,10 @@ describe(
         it('should submit signature for specific user and check state changes', async() => {
 
             // Change maintainer because the one signed can't send this message
-            const {web3, address} = web3Switcher.buyer();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
 
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let user = usersInEpoch[2];
             let pending = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getUserTotalPendingAmount,[user]);
@@ -322,7 +327,6 @@ describe(
                 }
             ]);
 
-            console.log(txHash);
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             let userPendingEpochsAfter = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getPendingEpochsForUser,[user]);
@@ -356,17 +360,16 @@ describe(
 
         it('maintainer should set monthly allowance and date from which is counting starting', async() => {
             // Change maintainer because the one signed can't send this message
-            const {web3, address} = web3Switcher.buyer();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
 
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
 
-            let monthlyTransferAllowance = await promisify(
-                twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance,[]
-            );
+            let dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths,[]);
 
-            if(monthlyTransferAllowance.toString() === '0') {
+            if(dateStartingCountingMonths.toString() === '0') {
+                // Get timestamp of latest block
                 let blockNumber = await twoKeyProtocol.Utils.getLatestBlock();
                 let blockTimestamp = await twoKeyProtocol.Utils.getBlockTimestamp(blockNumber);
 
@@ -378,71 +381,85 @@ describe(
                       }
                   ])
                 );
-                let dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths,[]);
+
+                dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths,[]);
                 expect(dateStartingCountingMonths.toString()).to.be.equal(blockTimestamp.toString());
             }
 
             // We need to assert that monthly transfer allowance is 1M
-            monthlyTransferAllowance = await promisify(
+            let monthlyTransferAllowance = await promisify(
                 twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance,[]
             );
 
             monthlyTransferAllowance = parseFloat(
               twoKeyProtocol.Utils.fromWei(monthlyTransferAllowance,'ether').toString()
             );
+
             expect(monthlyTransferAllowance).to.be.equal(1000000);
         }).timeout(timeout);
 
         it('should check that monthly allowances are properly calculating on mainchain', async() => {
+            let dateStartingCountingMonths = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getDateStartingCountingMonths, []);
+            dateStartingCountingMonths = parseFloat(dateStartingCountingMonths.toString());
 
+            let monthlyTransferAllowance = await promisify(
+                twoKeyProtocol.twoKeyParticipationMiningPool.getMonthlyTransferAllowance, []
+            );
+
+            monthlyTransferAllowance = parseFloat(
+                twoKeyProtocol.Utils.fromWei(monthlyTransferAllowance, 'ether').toString()
+            );
+
+            let allowance = await twoKeyProtocol.TwoKeyParticipationMiningPool.getCurrentUnlockedAmountOfTokensForWithdrawal(dateStartingCountingMonths + ONE_MONTH_UNIX);
         }).timeout(timeout);
 
         it('should withdraw tokens from mainchain', async() => {
-            const {web3, address} = web3Switcher.renata();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.renata();
 
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_RENATA);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
+
+            let totalAmountOfTokensTransfered = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getTotalAmountOfTokensTransfered, []);
+            totalAmountOfTokensTransfered = parseFloat(twoKeyProtocol.Utils.fromWei(totalAmountOfTokensTransfered, 'ether').toString());
 
             let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(from);
-            console.log(amountInProgressOfWithdrawal);
+
             let txHash = await twoKeyProtocol.TwoKeyParticipationMiningPool.withdrawTokensWithSignature(
                 signature,
-                parseFloat(twoKeyProtocol.Utils.toWei(amountInProgressOfWithdrawal,'ether').toString()),
+                parseFloat(twoKeyProtocol.Utils.toWei(amountInProgressOfWithdrawal, 'ether').toString()),
                 from
             );
+
+            console.log(txHash);
 
             // Wait until receipt is taken
             let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
             console.log('Gas required for withdrawal on mainchain is: ', receipt.gasUsed);
+
+            let totalAmountOfTokensTransferedAfterWithdrawal = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getTotalAmountOfTokensTransfered, []);
+            totalAmountOfTokensTransferedAfterWithdrawal = parseFloat(twoKeyProtocol.Utils.fromWei(totalAmountOfTokensTransferedAfterWithdrawal, 'ether').toString());
+
+            expect(totalAmountOfTokensTransfered + amountInProgressOfWithdrawal).to.be.equal(totalAmountOfTokensTransferedAfterWithdrawal);
         }).timeout(timeout);
 
-        it('should check accounting on mainchain after withdrawal is finished', async() => {
-            let user = usersInEpoch[2];
+        it('should check if signature is marked as it exists on mainchain', async() => {
             // Check if signature is existing
             let isSignatureExistingOnMainchain = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.isExistingSignature,[signature]);
 
-            // Amount in progress of withdrawal on sidechain
-            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
-
-
-            let amountUserWithdrawnUsingSignature = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.getAmountUserWithdrawnUsingSignature,[
-                user,
-                signature
-            ]);
-
             expect(isSignatureExistingOnMainchain).to.be.equal(true);
-            expect(parseFloat(twoKeyProtocol.Utils.fromWei(amountUserWithdrawnUsingSignature,'ether').toString()))
-                .to.be.equal(amountInProgressOfWithdrawal);
         }).timeout(timeout);
 
         it('should mark that user finished withdrawal on mainchain, and clear his sig, called by maintainer', async() => {
-
-            const {web3, address} = web3Switcher.buyer();
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.buyer();
 
             from = address;
-            twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_BUYER);
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
             let user = usersInEpoch[2];
+
+
+            // Amount in progress of withdrawal on sidechain
+            let amountInProgressOfWithdrawal = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
 
             let txHash = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.markUserFinishedWithdrawalFromMainchainWithSignature,[
                 user,
@@ -454,16 +471,21 @@ describe(
 
             await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
 
+            let amountUserWithdrawnUsingSignature = await promisify(twoKeyProtocol.twoKeyPlasmaParticipationRewards.getAmountUserWithdrawnUsingSignature,[
+                user,
+                signature
+            ]);
+
+            // Amount in progress of withdrawal on sidechain
+            let amountAfterWithdrawalInProgress = await twoKeyProtocol.TwoKeyParticipationMiningPool.getHowMuchUserHaveInProgressOfWithdrawal(user);
+
             let signatureOnContract = await twoKeyProtocol.TwoKeyParticipationMiningPool.getUserPendingSignature(user);
+
+            expect(amountAfterWithdrawalInProgress.toString()).to.be.equal('0');
+            expect(amountInProgressOfWithdrawal).to.be.equal(parseFloat(twoKeyProtocol.Utils.fromWei(amountUserWithdrawnUsingSignature,'ether').toString()))
             expect(signatureOnContract).to.be.equal('0x');
         }).timeout(timeout);
 
-        it('should check that signature for this user is marked as used and withdrawn', async() => {
-            let user = usersInEpoch[2];
-
-            let isSignatureUsed = await twoKeyProtocol.TwoKeyParticipationMiningPool.getIfSignatureUsedOnMainchainForWithdrawal(user,signature);
-            expect(isSignatureUsed).to.be.equal(true);
-        }).timeout(timeout);
 
         it('should check that amount pending withdrawal is 0', async() => {
             let user = usersInEpoch[2];

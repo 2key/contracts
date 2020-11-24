@@ -20,7 +20,7 @@ const TwoKeySignatureValidator = artifacts.require('TwoKeySignatureValidator');
 const TwoKeyParticipationPaymentsManager = artifacts.require('TwoKeyParticipationPaymentsManager');
 const TwoKeyMPSNMiningPool = artifacts.require('TwoKeyMPSNMiningPool');
 const TwoKeyTeamGrowthFund = artifacts.require('TwoKeyTeamGrowthFund');
-
+const TestUniswapRouter = artifacts.require('TestUniswapRouter');
 /**
  * Upgradable singleton storage contracts
  */
@@ -121,7 +121,8 @@ module.exports = function deploy(deployer) {
         TwoKeyEconomy,
         TwoKeyCongress,
         TwoKeyCongressMembersRegistry,
-        DAI
+        DAI,
+        TestUniswapRouter
     };
 
     let nonUpgradableContractArtifactsPlasma = {
@@ -221,10 +222,12 @@ module.exports = function deploy(deployer) {
                 fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
                 fs.writeFileSync(addressesFile, JSON.stringify(contractNameToProxyAddress, null, 4));
             })
-            .then(() => deployer.deploy(TwoKeyEconomy, TwoKeySingletonesRegistry.address))
-            .then(() => TwoKeyEconomy.deployed())
-            .then(() => deployer.deploy(DAI))
-            .then(() => DAI.deployed())
+                .then(() => deployer.deploy(TwoKeyEconomy, TwoKeySingletonesRegistry.address))
+                .then(() => TwoKeyEconomy.deployed())
+                .then(() => deployer.deploy(DAI))
+                .then(() => DAI.deployed())
+                .then(() => deployer.deploy(TestUniswapRouter))
+                .then(() => TestUniswapRouter.deployed())
             .then(async () => {
 
                 let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
@@ -238,8 +241,12 @@ module.exports = function deploy(deployer) {
                         try {
                             let contractName = nonUpgradableSingletones[i];
                             let contract = getContractPerName(contractName);
+
+                            if (contractName === 'TestUniswapRouter') {
+                                contractName = 'UniswapV2Router02'
+                            }
                             console.log('Adding ' + contractName + 'to the registry as non-upgradable contract');
-                            let txHash = registry.addNonUpgradableContractToAddress(nonUpgradableSingletones[i], contract.address);
+                            let txHash = registry.addNonUpgradableContractToAddress(contractName, contract.address);
                             resolve(txHash);
                         } catch (e) {
                             reject(e);

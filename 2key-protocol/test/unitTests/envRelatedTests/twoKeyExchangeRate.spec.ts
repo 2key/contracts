@@ -1,14 +1,13 @@
 import {exchangeRates} from "../../constants/smallConstants";
-
-require('es6-promise').polyfill();
-require('isomorphic-fetch');
-require('isomorphic-form-data');
-
 import {expect} from 'chai';
 import 'mocha';
 import web3Switcher from "../../helpers/web3Switcher";
 import {TwoKeyProtocol} from "../../../src";
 import getTwoKeyProtocol from "../../helpers/twoKeyProtocol";
+
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+require('isomorphic-form-data');
 
 const {env} = process;
 
@@ -28,12 +27,12 @@ describe(
 
     before(
       function () {
-        this.timeout(timeout);
+          this.timeout(timeout);
 
-        const {web3, address} = web3Switcher.deployer();
+          const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.deployer();
 
-        from = address;
-        twoKeyProtocol = getTwoKeyProtocol(web3, env.MNEMONIC_DEPLOYER);
+          from = address;
+          twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
       }
     );
 

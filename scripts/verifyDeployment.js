@@ -90,8 +90,8 @@ const verifyCampaigns = async(campaigns, networkId, rpc) => {
             } else {
                 console.log('|  Verification Status : ❌      |      Contract name: ', contracts[i]);
                 issuesFound[contracts[i]] = {
-                    'Contract latest added version': latestAddedVersion,
-                    'Campaign latest approved version': latestApprovedVersion
+                    latestAddedVersion,
+                    'latestApprovedVersion': latestApprovedVersion
                 };
             }
         }
@@ -140,6 +140,7 @@ const verifyDeployment = async(contracts, networkId, rpc) => {
             issuesFound[contract] = {
                 implementationOnContract,
                 latestAddedImplementation,
+                latestAddedVersion,
                 addressInBuild
             };
         }
@@ -181,13 +182,12 @@ const verify = async() => {
     );
 
     if(Object.keys(issuesFound).length > 0) {
-        logLine();
-        for(key in issuesFound) {
-            console.log('\n');
+        for (let key in issuesFound) {
             console.log('❌ Contract with problem: ', key);
             console.log('Details:\n', JSON.stringify(issuesFound[key], 0, 3));
+            console.log('Solution: Upgrade contract to latest added version: ', issuesFound[key]["latestAddedVersion"]);
+            logLine();
         }
-        logLine();
     }
 }
 

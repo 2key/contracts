@@ -59,5 +59,4 @@ export const campaignTypeToInstance = {
 export const feePercent = 0.02;
 
 export const rpcUrls = [env.RPC_URL];
-
-export const eventsUrls = ['http://localhost:18545'];
+export const eventsUrls = [env.PLASMA_RPC_URL];
