@@ -468,7 +468,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         // Require that epoch exists
         require(epochId > 0);
         // Get current epoch in progress
-        require(epochId = getEpochIdInProgress());
+        require(epochId == getEpochIdInProgress());
         // Redeclare total amount to be assigned in epoch
         setUint(
             keccak256(_totalRewardsToBeAssignedInEpoch, epochId),
