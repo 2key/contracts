@@ -21,6 +21,7 @@ cd ../..
 python3 generate_bytecode.py upgradeContract TwoKeyPlasmaRegistry 1.0.5
 python3 generate_bytecode.py upgradeContract TwoKeyPlasmaEventSource 1.0.6
 python3 generate_bytecode.py upgradeContract TwoKeyPlasmaReputationRegistry 1.0.5
+python3 generate_bytecode.py upgradeContract TwoKeyPlasmaParticipationRewards 1.0.1
 
 python3 generate_bytecode.py approveNewCampaign CPC_PLASMA 1.0.19
 
