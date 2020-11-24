@@ -93,18 +93,18 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals - 1, transactionBytecode, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should create a proposal for setting signatory address', async () => {
         let txHash: string = await twoKeyProtocol.Congress.newProposal(
-            twoKeyProtocol.twoKeyParticipationMiningPool.address,
+            twoKeyProtocol.twoKeyParticipationMiningPool._address,
             "Set signatory address to be : 0xa916227584A55CfE94733F03397cE37c0a0f7A74",
             transactionBytecodeForSignatoryAddress,
             from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('1. member vote to support proposal for setting signatory address', async () => {
@@ -115,7 +115,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals - 1, true, "I support setting signatory address", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('2. member vote to support proposal', async () => {
@@ -139,7 +139,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.vote(numberOfProposals - 1, true, "I support setting signatory address", from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should get proposal data for setting signatory address', async () => {
@@ -155,7 +155,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let txHash: string = await twoKeyProtocol.Congress.executeProposal(numberOfProposals - 1, transactionBytecodeForSignatoryAddress, from);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should check that signatory address is properly set on the contracts', async () => {
@@ -164,8 +164,8 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
     }).timeout(60000);
 
     it('should create a proposal on plasma congress to add signatory address', async () => {
-        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.newProposal, [
-            twoKeyProtocol.twoKeyPlasmaParticipationRewards.address,
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.newProposal, [
+            twoKeyProtocol.twoKeyPlasmaParticipationRewards._address,
             0,
             "Add signatory address",
             transactionBytecodeForSignatoryAddress,
@@ -176,14 +176,14 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should member 1. vote for supporting proposal', async () => {
-        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.numProposals, []);
+        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals, []);
         numberOfProposals = parseInt(numberOfProposals, 10) - 1;
 
-        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote, [
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote, [
             numberOfProposals,
             true,
             "I support to add signatory address",
@@ -194,7 +194,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should member 2. vote for supporting proposal', async () => {
@@ -203,10 +203,10 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         from = address;
         twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
 
-        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.numProposals, []);
+        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals, []);
         numberOfProposals = parseInt(numberOfProposals, 10) - 1;
 
-        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.vote, [
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote, [
             numberOfProposals,
             true,
             "I support to add signatory address",
@@ -217,14 +217,14 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should execute proposal for adding signatory address on plasma', async () => {
-        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.numProposals, []);
+        let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals, []);
         numberOfProposals = parseInt(numberOfProposals, 10) - 1;
 
-        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.executeProposal, [
+        let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.executeProposal, [
             numberOfProposals,
             transactionBytecodeForSignatoryAddress,
             {
@@ -234,7 +234,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         ]);
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
         const status = receipt && receipt.status;
-        expect(status).to.be.equal('0x1');
+        expect(status).to.be.true;
     }).timeout(60000);
 
     it('should check that signatory address is properly set on the contracts', async () => {
