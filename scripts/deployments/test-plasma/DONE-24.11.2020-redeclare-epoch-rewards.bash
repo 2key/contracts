@@ -21,5 +21,5 @@ python3 generate_bytecode.py upgradeContract TwoKeyPlasmaParticipationRewards 1.
 
 
 echo "Destination for execution is TwoKeyPlasmaParticipationRewards address: 0xc8f19c88c9335880d8c4a165acdb7499f444dc6d"
-python3 generate_bytecode.py redeclareEpochRewards 3 2720000000000001285884
+python3 generate_bytecode.py redeclareEpochRewards 3 2721000000000001285884
 
