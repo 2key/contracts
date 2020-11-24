@@ -459,16 +459,16 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
      * @param           rewardsAmount is new amount total for that epoch
      */
     function redeclareRewardsAmountForEpoch(
+        uint epochId,
         uint rewardsAmount
     )
     public
     onlyTwoKeyPlasmaCongress
     {
-        // Get current epoch in progress
-        uint epochId = getEpochIdInProgress();
         // Require that epoch exists
         require(epochId > 0);
-
+        // Get current epoch in progress
+        require(epochId = getEpochIdInProgress());
         // Redeclare total amount to be assigned in epoch
         setUint(
             keccak256(_totalRewardsToBeAssignedInEpoch, epochId),
