@@ -308,7 +308,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
 
         // Set new declared epoch ids
         setUintArray(keccak256(_declaredEpochIds), newDeclaredEpochIds);
-}
+    }
 
     /**
      * @notice          Function to start epoch registration, this will in advance store
@@ -431,7 +431,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         // Require that the epoch being finalized is the one in progress
         require(epochId == getEpochIdInProgress());
 
-        require(getTotalRewardsPerEpoch(epochId) <= getUint(keccak256(_totalRewardsToBeAssignedInEpoch, epochId)));
+        require(getTotalRewardsPerEpoch(epochId) <= getTotalRewardsToBeAssignedInEpoch(epochId));
 
         setEpochRegistrationFinalized(epochId);
 
@@ -453,6 +453,28 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         );
     }
 
+
+    /**
+     * @notice          Function to redeclare total rewards amount for epoch currently in progress
+     * @param           rewardsAmount is new amount total for that epoch
+     */
+    function redeclareRewardsAmountForEpoch(
+        uint rewardsAmount
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        // Get current epoch in progress
+        uint epochId = getEpochIdInProgress();
+        // Require that epoch exists
+        require(epochId > 0);
+
+        // Redeclare total amount to be assigned in epoch
+        setUint(
+            keccak256(_totalRewardsToBeAssignedInEpoch, epochId),
+            rewardsAmount
+        );
+    }
 
     /**
      * @notice          Function to submit signature for user withdrawal
