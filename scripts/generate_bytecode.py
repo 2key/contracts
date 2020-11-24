@@ -209,11 +209,12 @@ def generate_bytecode_for_adding_signatory_address(signatory_address):
     values = [signatory_address]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
-def generate_bytecode_for_redeclare_epoch_rewards(new_rewards_amount):
+def generate_bytecode_for_redeclare_epoch_rewards(epoch_id, new_rewards_amount):
+    epoch_id = int(epoch_id)
     new_rewards_amount = int(new_rewards_amount)
-    method_name_and_params = "redeclareRewardsAmountForEpoch(uint256)"
-    types = ["uint256"]
-    values = [new_rewards_amount]
+    method_name_and_params = "redeclareRewardsAmountForEpoch(uint256,uint256)"
+    types = ["uint256","uint256"]
+    values = [epoch_id, new_rewards_amount]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 
@@ -339,5 +340,5 @@ if __name__ == "__main__":
     if(arg1 == "setSignatoryAddress"):
         generate_bytecode_for_adding_signatory_address(sys.argv[2])
     if(arg1 == "redeclareEpochRewards"):
-        generate_bytecode_for_redeclare_epoch_rewards(sys.argv[2])
+        generate_bytecode_for_redeclare_epoch_rewards(sys.argv[2],sys.argv[3])
     print_line()
