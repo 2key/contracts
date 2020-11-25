@@ -1429,19 +1429,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return ERC20(tokenAddress).balanceOf(address(this));
     }
 
-    function fixStateOfDAIOnContract()
-    public
-    onlyMaintainer
-    {
-        address DAI = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
-
-        // Set all DAI are available to fill reserve
-        setStableCoinsAvailableToFillReserve(
-            IERC20(DAI).balanceOf(address(this)),
-            DAI
-        );
-    }
-
 
     /**
      * @notice          Fallback function to handle incoming ether
