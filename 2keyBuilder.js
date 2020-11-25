@@ -145,6 +145,14 @@ const pullTenderlyConfiguration = async () => {
     });
 };
 
+const tenderlyPush = async (npmVersionTag) => {
+    try {
+        await runProcess('tenderly', ['push', '--tag', npmVersionTag]);
+    } catch (e) {
+        console.log('Error caught during tenderly push.');
+    }
+}
+
 const getContractsDeployedPath = () => {
     const result = path.join(twoKeyProtocolDir,'contracts_deployed{branch}.json');
     if(contractsStatus && contractsStatus.current) {
@@ -606,7 +614,7 @@ async function deploy() {
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
             if(!process.argv.includes('protocol-only')) {
                 // Add tenderly to CI/CD only in case there have been contracts updated.
-                await runProcess('tenderly', ['push', '--tag', npmVersionTag]);
+                await tenderlyPush(npmVersionTag);
             }
             // Generate the latest changelog for contracts repo
             await generateChangelog();
@@ -726,6 +734,11 @@ async function main() {
             break;
         case '--tenderly':
             await pullTenderlyConfiguration();
+            process.exit(0);
+            break;
+        case '--tenderlyPush':
+            let tag = process.argv[3].toString();
+            await tenderlyPush(tag);
             process.exit(0);
             break;
         default:

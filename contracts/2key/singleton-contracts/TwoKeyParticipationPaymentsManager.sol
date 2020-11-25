@@ -122,16 +122,18 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
     }
 
     function transferTokensFromParticipationMiningPool(
-        uint amountOfTokens,
-        uint year,
-        uint epoch
+        uint amountOfTokens
     )
     public
     onlyTwoKeyParticipationMiningPool
     {
-        // Store that this contract received this tokens from Mining Pool
-        bytes32 keyHashForTransfer = keccak256(_receivedTokens,year,epoch);
-        PROXY_STORAGE_CONTRACT.setUint(keyHashForTransfer, amountOfTokens);
+
+        bytes32 keyHash = keccak256(_receivedTokens);
+
+        PROXY_STORAGE_CONTRACT.setUint(
+            keyHash,
+            amountOfTokens + PROXY_STORAGE_CONTRACT.getUint(keyHash)
+        );
     }
 
     /**
@@ -150,5 +152,16 @@ contract TwoKeyParticipationPaymentsManager is Upgradeable, ITwoKeySingletonUtil
         address twoKeyEconomy = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
             .getNonUpgradableContractAddress(_twoKeyEconomy);
         IERC20(twoKeyEconomy).transfer(_beneficiary, _amount);
+    }
+
+    /**
+     * @notice          Function to get amount of tokens received from participation mining pool
+     */
+    function getAmountOfTokensReceivedFromParticipationMiningPool()
+    public
+    view
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_receivedTokens));
     }
 }
