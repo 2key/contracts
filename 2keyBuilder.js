@@ -184,7 +184,6 @@ const getVersionsPath = (branch = true) => {
 const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath(), cwd: __dirname }, ['build']);
 
 const restoreFromArchive = () => {
-    console.log("restore",__dirname);
     // Restore file only if exists
     if(fs.existsSync(getBuildArchPath())) {
         return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
@@ -192,7 +191,6 @@ const restoreFromArchive = () => {
 };
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
-    console.log('Generating abi', deployedTo);
     if (fs.existsSync(buildPath)) {
         let contracts = {
             'contracts': {},
@@ -254,8 +252,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
                 const nonSingletonsBytecodes = [];
                 Object.keys(contracts.contracts).forEach(submodule => {
                     if (submodule !== 'singletons') {
-                        console.log('-------------------------');
-                        console.log('SUBMODULE IS: ', submodule)
                         Object.values(contracts.contracts[submodule]).forEach(({ bytecode, abi }) => {
                             nonSingletonsBytecodes.push(bytecode || JSON.stringify(abi));
                         });
@@ -275,7 +271,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 
                 contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
-                console.log('Writing contracts for submodules...');
                 if(!fs.existsSync(path.join(twoKeyProtocolDir, 'contracts'))) {
                     fs.mkdirSync(path.join(twoKeyProtocolDir, 'contracts'));
                 }
@@ -298,9 +293,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 const updateIPFSHashes = async(contracts) => {
     const nonSingletonHash = contracts.contracts.singletons.NonSingletonsHash;
-    console.log(nonSingletonHash);
-
-
     let versionsList = {};
 
     let existingVersionHandlerFile = {};
@@ -308,7 +300,6 @@ const updateIPFSHashes = async(contracts) => {
     // if(!process.argv.includes('--reset')) {
     try {
         existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
-        console.log('EXISTING VERSIONS', existingVersionHandlerFile);
     } catch (e) {
         console.log('VERSIONS ERROR', e);
     }
@@ -317,7 +308,6 @@ const updateIPFSHashes = async(contracts) => {
 
     if (currentVersionHandler) {
         versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
-        console.log('VERSION LIST', versionsList);
     }
     // }
 
@@ -325,18 +315,14 @@ const updateIPFSHashes = async(contracts) => {
     const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
     for (let i = 0, l = files.length; i < l; i++) {
         const js = fs.readFileSync(path.join(twoKeyProtocolSubmodulesDir, files[i]), { encoding: 'utf-8' });
-        console.log(files[i], (js.length / 1024).toFixed(3));
         console.time('Upload');
         const [{ hash }] = await ipfsAdd(js, deployment);
         console.timeEnd('Upload');
-        console.log('ipfs hashes',files[i], hash);
         versionsList[nonSingletonHash][files[i].replace('.js', '')] = hash;
     }
-    console.log(versionsList);
     const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionsList), deployment);
     fs.writeFileSync(getVersionsPath(), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
     fs.writeFileSync(getVersionsPath(false), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
-    console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
 };
 
 /**
@@ -414,7 +400,6 @@ const getContractsFromFile = () => {
 
 
 async function deployUpgrade(networks) {
-    console.log(networks);
     const l = networks.length;
 
     await runTruffleCompile();
@@ -452,9 +437,7 @@ async function deployUpgrade(networks) {
         if (deployment.singletons.length > 0) {
             for (let j = 0; j < deployment.singletons.length; j++) {
                 /* eslint-disable no-await-in-loop */
-                console.log(networks[i], deployment.singletons[j]);
                 if (checkIfContractIsPlasma(deployment.singletons[j])) {
-                    console.log('Contract is plasma: ' + deployment.singletons[j]);
                     if (networks[i].includes('private') || networks[i].includes('plasma')) {
                         await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
@@ -494,8 +477,9 @@ async function deployUpgrade(networks) {
 async function deploy() {
     try {
         deployment = true;
-        console.log("Removing truffle build, the whole folder will be deleted: ", buildPath);
+        //Removing truffle build, the whole folder will be deleted
         await rmDir(buildPath);
+        // Load tenderly configuration
         await pullTenderlyConfiguration();
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
@@ -516,7 +500,6 @@ async function deploy() {
             console.log('You have unsynced changes!', localChanges);
             process.exit(1);
         }
-        console.log(process.argv);
 
         const local = process.argv[2].includes('local'); //If we're deploying to local network
 
@@ -550,7 +533,6 @@ async function deploy() {
 
         await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
         await commitAndPush2KeyProtocolSrc(`Contracts deployed to ${network} ${now.format('lll')}`);
-        console.log('Changes commited');
         await buildSubmodules(contracts);
         if (!local) {
             await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
@@ -597,7 +579,6 @@ async function deploy() {
             }
             const json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
             let npmVersionTag = json.version;
-            console.log(npmVersionTag);
             process.chdir('../../');
             // Push tags
             await pushTagsToGithub(npmVersionTag);
