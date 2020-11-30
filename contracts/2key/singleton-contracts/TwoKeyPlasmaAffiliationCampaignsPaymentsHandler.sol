@@ -202,6 +202,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         address referrer
     )
     public
+    onlyAffiliationCampaign
     {
         address campaign = msg.sender;
         if(!isCampaignAddedToReferrerList(referrer, campaign)) {
