@@ -3,6 +3,8 @@ pragma solidity ^0.4.24;
 import "../upgradability/Upgradeable.sol";
 import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaAffiliationCampaignsPaymentsHandlerStorage.sol";
+import "../interfaces/ITwoKeyPlasmaFactory.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 /**
  * TwoKeyPlasmaAffiliationCampaignsPaymentsHandler contract.
@@ -37,6 +39,15 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         initialized = true;
     }
 
+
+    modifier onlyAffiliationCampaign {
+        string memory campaignType = ITwoKeyPlasmaFactory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaFactory"))
+            .addressToCampaignType(msg.sender);
+        require(
+            keccak256(campaignType) == keccak256("AFFILIATION_PLASMA")
+        );
+        _;
+    }
     /*
      ************************************************************************************
      *                      INTERNAL FUNCTIONS
@@ -126,12 +137,27 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         newReferrerCampaigns[i] = campaign;
     }
 
+    /**
+     * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
+     *
+     * @param           contractName is the name of the contract
+     */
+    function getAddressFromTwoKeySingletonRegistry(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
+    }
+
     /*
      ************************************************************************************
      *                      PUBLIC GETTERS
      ************************************************************************************
     */
-
 
 
     /**
@@ -151,6 +177,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
             keccak256(_referrerToIsCampaignAlreadyAddedToArray, referrer, campaign)
         );
     }
+
 
     /**
      * @notice          Function to get campaigns for referrer
