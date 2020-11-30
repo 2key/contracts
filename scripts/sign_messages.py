@@ -31,10 +31,33 @@ def add_leading_0(message):
     return message
 
 
+def encode_array_of_addresses(addresses):
+    result = ""
+    for address in addresses:
+        address = remove_0x(address) # Remove 0x from the beginning
+        address = add_leading_0(address) # Add leading 0's to address
+        result = result + address
+    return '0x' + result
+
+
+def encode_array_of_uints(uints):
+    result = ""
+    for uint in uints:
+        result = result + add_leading_0(remove_0x(str(w3.toHex(uint))))
+
+    return result
+
+
 def build_messages(user_address, total_rewards_pending_wei, w3):
     message_1 = 'bytes binding user rewards'
     hexed_rewards = str(w3.toHex(total_rewards_pending_wei))
     message_2 = user_address + add_leading_0(remove_0x(hexed_rewards))
+    return message_1, message_2
+
+
+def build_messages_v2(campaign_addresses_array, pending_rewards_array, w3):
+    message_1 = 'bytes binding user rewards'
+    message_2 = str(encode_array_of_addresses(campaign_addresses_array)) + encode_array_of_uints(pending_rewards_array)
     return message_1, message_2
 
 
@@ -50,12 +73,12 @@ def hash_messages(message1, message2, w3):
     return remove_0x(str(w3.toHex(final_hash)))
 
 
-def build_signature(user_address, total_rewards_pending_wei, private_key_signatory, w3):
-    message1, message2 = build_messages(user_address, total_rewards_pending_wei, w3)
+def sign_messages(message1, message2, private_key_signatory, w3):
     final_hash = hash_messages(message1, message2, w3)
     message_to_sign = messages.encode_defunct(hexstr=final_hash)
     signed_message = Account.sign_message(message_to_sign, private_key=private_key_signatory)
     finalize_signature(signed_message.signature.hex())
+
 
 def finalize_signature(signature):
     n = len(signature)
@@ -65,11 +88,24 @@ def finalize_signature(signature):
     print("signature =", signature)
 
 
+def build_signature(user_address, total_rewards_pending_wei, private_key_signatory, w3):
+    message1, message2 = build_messages(user_address, total_rewards_pending_wei, w3)
+    sign_messages(message1, message2, private_key_signatory, w3)
+
+
+def build_signature_v2(campaign_addresses_array, pending_rewards_array, private_key_signatory, w3):
+    message1, message2 = build_messages_v2(campaign_addresses_array, pending_rewards_array, w3)
+    sign_messages(message1, message2, private_key_signatory, w3)
+
+
 if __name__ == '__main__':
     env = Env()
     env.read_env('.env-sign')
     RPC = env('RPC')
     SIGNATORY_PK = env('PK')
     w3 = Web3(Web3.HTTPProvider(RPC))
-    build_signature('0x98a206fedc0e0ab0a45cb82a315c94087a79aed7', 24136582388247820000,
-                    SIGNATORY_PK, w3)
+#     campaign_addresses_array = ["0x5B38Da6a701c568545dCfcB03FcB875f56beddC4","0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db"]
+#     pending_rewards_array = [48000000000000000000,39000000000000000000]
+#     build_signature_v2(campaign_addresses_array, pending_rewards_array, SIGNATORY_PK, w3)
+#     build_signature('0x98a206fedc0e0ab0a45cb82a315c94087a79aed7', 24136582388247820000,
+#                     SIGNATORY_PK, w3)
