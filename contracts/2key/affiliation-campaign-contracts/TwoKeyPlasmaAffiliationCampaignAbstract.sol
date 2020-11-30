@@ -43,7 +43,7 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     address[] public activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
     mapping(address => bool) isActiveInfluencer;           // Mapping which will say if influencer is active or not
     mapping(address => bool) public isConverter;
-    mapping(address => uint256) internal referrerPlasma2Balances; // balance of EthWei for each influencer that he can withdraw
+    mapping(address => uint256) internal referrerPlasma2TotalWithdrawn;
     mapping(address => uint256) internal referrerPlasma2TotalEarnings;                              // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
@@ -380,7 +380,6 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     internal
     {
         checkIsActiveInfluencerAndAddToQueue(referrerPlasma);
-        referrerPlasma2Balances[referrerPlasma] = referrerPlasma2Balances[referrerPlasma].add(reward);
         referrerPlasma2TotalEarnings[referrerPlasma] = referrerPlasma2TotalEarnings[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
@@ -548,7 +547,7 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     view
     returns (uint)
     {
-        return referrerPlasma2Balances[_referrer];
+        return referrerPlasma2TotalEarnings[_referrer].sub(referrerPlasma2TotalWithdrawn[_referrer]);
     }
 
 
@@ -571,7 +570,7 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         for (uint i=0; i<numberOfAddresses; i++) {
             address referrer = _referrerPlasmaList[i];
 
-            referrersPendingPlasmaBalance[i] = referrerPlasma2Balances[referrer];
+            referrersPendingPlasmaBalance[i] = referrerPlasma2TotalEarnings[referrer].sub(referrerPlasma2TotalWithdrawn[referrer]);
             referrersTotalEarningsPlasmaBalance[i] = referrerPlasma2TotalEarnings[referrer];
         }
 
@@ -664,7 +663,7 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
         }
 
         return (
-            referrerPlasma2Balances[_referrerAddress],
+            referrerPlasma2TotalEarnings[_referrerAddress].sub(referrerPlasma2TotalWithdrawn[_referrerAddress]),
             referrerPlasma2TotalEarnings[_referrerAddress],
             referrerPlasmaAddressToCounterOfConversions[_referrerAddress],
             earningsPerConversion
