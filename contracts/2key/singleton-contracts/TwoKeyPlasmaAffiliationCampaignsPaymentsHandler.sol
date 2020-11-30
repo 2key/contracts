@@ -188,7 +188,4 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         }
     }
 
-
-
-
 }
