@@ -64,9 +64,10 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
      *                  created using TwoKeyPlasmaFactory contract
      */
     modifier onlyBudgetCampaigns {
+        string memory campaignType = ITwoKeyPlasmaFactory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaFactory"))
+            .addressToCampaignType(msg.sender);
         require(
-            ITwoKeyPlasmaFactory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaFactory"))
-            .isCampaignCreatedThroughFactory(msg.sender)
+            keccak256(campaignType) == keccak256("CPC_PLASMA")
         );
         _;
     }
