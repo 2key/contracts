@@ -37,9 +37,7 @@ const {
     ipfsGet,
     runDeployCPCCampaignMigration,
     runTruffleCompile,
-    runDeployPlasmaReputation,
     runDeployCPCNoRewardsMigration,
-    runDeployPaymentHandlersMigration,
     runDeployPlasmaParticipationsMining
 } = require('./helpers');
 
@@ -602,7 +600,6 @@ async function deploy() {
             process.chdir(twoKeyProtocolDir);
             // Generate the changelog for this repository
             await generateChangelog();
-
             // Push final commit for the deployment
             await commitAndPush2KeyProtocolSrc(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
             await commitAndPushContractsFolder(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
