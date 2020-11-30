@@ -6,6 +6,7 @@ import "../interfaces/storage-contracts/ITwoKeyPlasmaAffiliationCampaignsPayment
 import "../interfaces/ITwoKeyPlasmaFactory.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaAffiliationCampaign.sol";
+import "../libraries/Call.sol";
 
 /**
  * TwoKeyPlasmaAffiliationCampaignsPaymentsHandler contract.
@@ -23,6 +24,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
     // Mapping referrer to all campaigns he ever had rewards in
     string constant _referrerToCampaigns = "referrerToCampaigns";
     string constant _referrerToIsCampaignAlreadyAddedToArray = "referrerToIsCampaignAlreadyAddedToArray";
+    string constant _isSignatureExisting = "isSignatureExisting";
 
     ITwoKeyPlasmaAffiliationCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -236,6 +238,42 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
             rewards[i] = ITwoKeyPlasmaAffiliationCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer);
         }
         return rewards;
+    }
+
+    /**
+     * @notice          Function to check if signature is existing
+     * @param           signature is the signature being checked
+     */
+    function getIfSignatureIsExisting(
+        bytes signature
+    )
+    public
+    view
+    returns (bool)
+    {
+        return getBool(keccak256(_isSignatureExisting, signature));
+    }
+
+
+    function recoverSignature(
+        bytes signature,
+        address [] campaigns,
+        uint [] rewards
+    )
+    public
+    view
+    returns (address)
+    {
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked('bytes binding user rewards')),
+                keccak256(abi.encodePacked(campaigns,rewards))
+            )
+        );
+
+        // Recover signer message from signature
+        return Call.recoverHash(hash,signature,0);
     }
 
 }
