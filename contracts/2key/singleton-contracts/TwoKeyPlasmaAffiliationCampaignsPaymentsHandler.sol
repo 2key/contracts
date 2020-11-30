@@ -261,7 +261,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         uint [] rewards
     )
     public
-    view
+    pure
     returns (address)
     {
         // Generate hash
