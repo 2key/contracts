@@ -424,7 +424,6 @@ async function deployUpgrade(networks) {
         ] = await getDiffBetweenLatestTags();
     }
 
-    console.log(deployment);
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
