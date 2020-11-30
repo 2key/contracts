@@ -638,7 +638,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         bytes signature
     )
     public
-    view
+    pure
     returns (address)
     {
         // Generate hash
