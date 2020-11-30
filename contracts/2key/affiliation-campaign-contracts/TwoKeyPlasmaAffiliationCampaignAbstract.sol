@@ -12,6 +12,7 @@ import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
 import "../libraries/MerkleProof.sol";
+import "../interfaces/ITwoKeyPlasmaAffiliationCampaignsPaymentsHandler.sol";
 
 contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModels, ArcToken {
 
@@ -396,8 +397,14 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     internal
     {
         if(!isActiveInfluencer[_influencer]) {
+            // Add influencer to array of influencers
             activeInfluencers.push(_influencer);
+            // Mark that influencer is added
             isActiveInfluencer[_influencer] = true;
+            // Add campaign to list of campaigns for this referrer
+            ITwoKeyPlasmaAffiliationCampaignsPaymentsHandler(
+                getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAffiliationCampaignsPaymentsHandler")
+            ).addCampaignToListOfReferrerCampaigns(_influencer);
         }
     }
 
