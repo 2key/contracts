@@ -1,11 +1,13 @@
 pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
-import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaAffiliationCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/ITwoKeyPlasmaFactory.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaAffiliationCampaign.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+
+import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 
 /**
@@ -43,6 +45,14 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
     }
 
 
+    modifier onlyMaintainer {
+        require(
+            ITwoKeyMaintainersRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaMaintainersRegistry"))
+                .checkIsAddressMaintainer(msg.sender) == true
+        );
+        _;
+    }
+
     modifier onlyAffiliationCampaign {
         string memory campaignType = ITwoKeyPlasmaFactory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaFactory"))
             .addressToCampaignType(msg.sender);
@@ -56,6 +66,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
      *                      INTERNAL FUNCTIONS
      ************************************************************************************
      */
+
 
     function getUint(
         bytes32 key
@@ -198,28 +209,6 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
 
 
     /**
-     * @notice          Function to add campaign to list of referrers campaigns
-     * @param           referrer is the address of referrer
-     */
-    function addCampaignToListOfReferrerCampaigns(
-        address referrer
-    )
-    public
-    onlyAffiliationCampaign
-    {
-        address campaign = msg.sender;
-        if(!isCampaignAddedToReferrerList(referrer, campaign)) {
-            // Mark that campaign is added to the list
-            setBool(
-                keccak256(_referrerToIsCampaignAlreadyAddedToArray, referrer, campaign),
-                true
-            );
-            // Add this campaign to list of referrer campaigns
-            addCampaignForReferrer(referrer,campaign);
-        }
-    }
-
-    /**
      * @notice          Function to get pending rewards on all affiliation campaigns for referrer
      * @param           referrer is the address of referrer
      * @param           campaigns is the array of supported campaigns
@@ -239,6 +228,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         }
         return rewards;
     }
+
 
     /**
      * @notice          Function to check if signature is existing
@@ -276,4 +266,39 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         return Call.recoverHash(hash,signature,0);
     }
 
+
+    /**
+     * @notice          Function to add campaign to list of referrers campaigns
+     * @param           referrer is the address of referrer
+     */
+    function addCampaignToListOfReferrerCampaigns(
+        address referrer
+    )
+    public
+    onlyAffiliationCampaign
+    {
+        address campaign = msg.sender;
+        if(!isCampaignAddedToReferrerList(referrer, campaign)) {
+            // Mark that campaign is added to the list
+            setBool(
+                keccak256(_referrerToIsCampaignAlreadyAddedToArray, referrer, campaign),
+                true
+            );
+            // Add this campaign to list of referrer campaigns
+            addCampaignForReferrer(referrer,campaign);
+        }
+    }
+
+
+    function submitSignatureForUserWithdrawal(
+        address referrer,
+        address [] campaigns,
+        uint [] rewardsPerCampaign,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+
+    }
 }
