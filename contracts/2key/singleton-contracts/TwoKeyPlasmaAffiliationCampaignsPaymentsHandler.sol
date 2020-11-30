@@ -43,7 +43,6 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
      ************************************************************************************
      */
 
-
     function getUint(
         bytes32 key
     )
@@ -101,7 +100,11 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         PROXY_STORAGE_CONTRACT.setAddressArray(key, addresses);
     }
 
-
+    /**
+     * @notice          Function to add campaign address to list of referrer campaigns
+     * @param           referrer is the referrer address
+     * @param           campaign is the address of campaign
+     */
     function addCampaignForReferrer(
         address referrer,
         address campaign
@@ -129,6 +132,13 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
      ************************************************************************************
     */
 
+
+
+    /**
+     * @notice          Function to check if campaign is added to list of referrer campaigns
+     * @param           campaign is the address of the campaign
+     * @param           referrer is the address of referrer
+     */
     function isCampaignAddedToReferrerList(
         address campaign,
         address referrer
@@ -142,6 +152,10 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function to get campaigns for referrer
+     * @param           referrer is the referrer address
+     */
     function getCampaignsForReferrer(
         address referrer
     )
@@ -153,6 +167,10 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
     }
 
 
+    /**
+     * @notice          Function to add campaign to list of referrers campaigns
+     * @param           referrer is the address of referrer
+     */
     function addCampaignToListOfReferrerCampaigns(
         address referrer
     )
