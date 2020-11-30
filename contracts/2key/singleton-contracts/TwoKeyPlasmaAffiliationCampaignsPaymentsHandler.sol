@@ -5,6 +5,7 @@ import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaAffiliationCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/ITwoKeyPlasmaFactory.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyPlasmaAffiliationCampaign.sol";
 
 /**
  * TwoKeyPlasmaAffiliationCampaignsPaymentsHandler contract.
@@ -214,6 +215,27 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
             // Add this campaign to list of referrer campaigns
             addCampaignForReferrer(referrer,campaign);
         }
+    }
+
+    /**
+     * @notice          Function to get pending rewards on all affiliation campaigns for referrer
+     * @param           referrer is the address of referrer
+     * @param           campaigns is the array of supported campaigns
+     */
+    function getPendingRewardsOnCampaignsForReferrer(
+        address referrer,
+        address [] campaigns
+    )
+    public
+    view
+    returns (uint[])
+    {
+        uint [] memory rewards = new uint[](campaigns.length);
+        uint i = 0;
+        for(i = 0; i < campaigns.length; i++) {
+            rewards[i] = ITwoKeyPlasmaAffiliationCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer);
+        }
+        return rewards;
     }
 
 }
