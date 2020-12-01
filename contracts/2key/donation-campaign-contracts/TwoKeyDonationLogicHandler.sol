@@ -86,8 +86,8 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         } else {
             uint rate = getRateFromExchange();
             uint conversionAmountCampaignCurrency = (conversionAmountEthWEI.mul(rate)).div(10**18);
-            if(leftToSpendInCampaignCurrency.mul(100 * (10**18) + ALLOWED_GAP).div(10**18) >= conversionAmountCampaignCurrency &&
-                minContributionAmountWei <= conversionAmountCampaignCurrency.mul(100 * (10**18) + ALLOWED_GAP).div(10**18)
+            if(leftToSpendInCampaignCurrency.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18)) >= conversionAmountCampaignCurrency &&
+                minContributionAmountWei <= conversionAmountCampaignCurrency.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18))
             ) {
                 return true;
             }

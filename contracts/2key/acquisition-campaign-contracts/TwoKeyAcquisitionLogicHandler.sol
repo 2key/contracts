@@ -214,8 +214,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei.mul(rate)).div(10**18);
             // Adding gap 1%
-            if(leftToSpend.mul(100 * (10**18) + ALLOWED_GAP).div(10**18) >= amountToBeSpentInFiat &&
-                minContributionAmountWei <= amountToBeSpentInFiat.mul(100 * (10**18) + ALLOWED_GAP).div(10**18)
+            if(leftToSpend.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18)) >= amountToBeSpentInFiat &&
+                minContributionAmountWei <= amountToBeSpentInFiat.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18))
             ) {
                 return (true,leftToSpend);
             } else {
