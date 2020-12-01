@@ -85,14 +85,10 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
 
         twoKeyCampaign = _acquisitionCampaignAddress;
         twoKeySingletonRegistry = _twoKeySingletoneRegistry;
-
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
-        twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
-        twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
+
         ownerPlasma = plasmaOf(contractor);
         conversionHandler = _twoKeyConversionHandler;
-
-        ALLOWED_GAP = 1000000000000000000; //1 USD allowed GAP for ETH conversions in case FIAT is campaign currency
 
         initialized = true;
     }
@@ -217,8 +213,10 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
         } else {
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei.mul(rate)).div(10**18);
-            //Adding gap of 100 weis
-            if(leftToSpend.add(ALLOWED_GAP) >= amountToBeSpentInFiat && minContributionAmountWei <= amountToBeSpentInFiat.add(ALLOWED_GAP)) {
+            // Adding gap 1%
+            if(leftToSpend.mul(100 * (10**18) + ALLOWED_GAP).div(10**18) >= amountToBeSpentInFiat &&
+                minContributionAmountWei <= amountToBeSpentInFiat.mul(100 * (10**18) + ALLOWED_GAP).div(10**18)
+            ) {
                 return (true,leftToSpend);
             } else {
                 return (false,leftToSpend);
