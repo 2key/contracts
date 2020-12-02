@@ -55,14 +55,14 @@ def build_messages(user_address, total_rewards_pending_wei, w3):
     return message_1, message_2
 
 
-def build_messages_v2(campaign_addresses_array, pending_rewards_array, w3):
-    message_1 = 'bytes binding user rewards'
+def build_messages_v2(referrer, campaign_addresses_array, pending_rewards_array, w3):
+    message_1 = referrer
     message_2 = str(encode_array_of_addresses(campaign_addresses_array)) + encode_array_of_uints(pending_rewards_array)
     return message_1, message_2
 
 
 def hash_messages(message1, message2, w3):
-    hash1 = w3.solidityKeccak(['string'], [message1])
+    hash1 = w3.solidityKeccak(['bytes'], [message1])
     hash2 = w3.solidityKeccak(['bytes'], [message2])
 
     final_hash = w3.solidityKeccak(
@@ -93,8 +93,8 @@ def build_signature(user_address, total_rewards_pending_wei, private_key_signato
     sign_messages(message1, message2, private_key_signatory, w3)
 
 
-def build_signature_v2(campaign_addresses_array, pending_rewards_array, private_key_signatory, w3):
-    message1, message2 = build_messages_v2(campaign_addresses_array, pending_rewards_array, w3)
+def build_signature_v2(referrer, campaign_addresses_array, pending_rewards_array, private_key_signatory, w3):
+    message1, message2 = build_messages_v2(referrer, campaign_addresses_array, pending_rewards_array, w3)
     sign_messages(message1, message2, private_key_signatory, w3)
 
 
@@ -104,8 +104,9 @@ if __name__ == '__main__':
     RPC = env('RPC')
     SIGNATORY_PK = env('PK')
     w3 = Web3(Web3.HTTPProvider(RPC))
-#     campaign_addresses_array = ["0x5B38Da6a701c568545dCfcB03FcB875f56beddC4","0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db"]
-#     pending_rewards_array = [48000000000000000000,39000000000000000000]
-#     build_signature_v2(campaign_addresses_array, pending_rewards_array, SIGNATORY_PK, w3)
+    referrer = "0x6567D655953f38d29f57B1ebd55CA6Cae4dAa12B"
+    campaign_addresses_array = ["0x5B38Da6a701c568545dCfcB03FcB875f56beddC4","0x4B20993Bc481177ec7E8f571ceCaE8A9e22C02db"]
+    pending_rewards_array = [48000000000000000000,39000000000000000000]
+    build_signature_v2(referrer, campaign_addresses_array, pending_rewards_array, SIGNATORY_PK, w3)
 #     build_signature('0x98a206fedc0e0ab0a45cb82a315c94087a79aed7', 24136582388247820000,
 #                     SIGNATORY_PK, w3)
