@@ -27,6 +27,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _twoKeyNetworkTaxPercent = "twoKeyNetworkTaxPercent";
 	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
+	string constant _signatoryAddress = "signatoryAddress";
 
     /**
      * Accounting necessary stuff
@@ -75,11 +76,13 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	    _;
 	}
 
+
 	modifier onlyTwoKeyBudgetCampaignsPaymentsHandler {
 		address twoKeyBudgetCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler");
 		require(msg.sender == twoKeyBudgetCampaignsPaymentsHandler);
 		_;
 	}
+
 
 	/**
 	 * @notice 			Modifier which throws if the campaign contract sending request is not validated
@@ -214,6 +217,23 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).removeMaintainers(_maintainers);
 	}
 
+
+	/**
+	 * @notice          Function where congress can set signatory address
+	 *                  and that's the only address eligible to sign the rewards messages
+	 * @param           signatoryAddress is the address which will be used to sign rewards
+	 */
+	function setSignatoryAddress(
+		address signatoryAddress
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		PROXY_STORAGE_CONTRACT.setAddress(
+			keccak256(_signatoryAddress),
+			signatoryAddress
+		);
+	}
 
 
 	/**
@@ -793,6 +813,17 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	returns (uint)
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorEarningsPerCampaign, _campaignAddress));
+	}
+
+	/**
+     * @notice          Function to fetch signatory address
+     */
+	function getSignatoryAddress()
+	public
+	view
+	returns (address)
+	{
+		return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
 	}
 
 

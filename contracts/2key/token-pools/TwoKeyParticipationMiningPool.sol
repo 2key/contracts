@@ -5,6 +5,7 @@ import "../interfaces/ITwoKeyRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyParticipationMiningPoolStorage.sol";
 import "../interfaces/ITwoKeyParticipationPaymentsManager.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
 
@@ -48,11 +49,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
         _;
     }
 
-    modifier onlyTwoKeyCongress {
-        address twoKeyCongress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
-        require(msg.sender == twoKeyCongress);
-        _;
-    }
 
     function setInitialParams(
         address twoKeySingletonesRegistry,
@@ -126,24 +122,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     {
         address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
         return ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(_address);
-    }
-
-
-    /**
-     * @notice          Function where congress can set signatory address
-     *                  and that's the only address eligible to sign the rewards messages
-     * @param           signatoryAddress is the address which will be used to sign rewards
-     */
-    function setSignatoryAddress(
-        address signatoryAddress
-    )
-    public
-    onlyTwoKeyCongress
-    {
-        PROXY_STORAGE_CONTRACT.setAddress(
-            keccak256(_signatoryAddress),
-            signatoryAddress
-        );
     }
 
 
@@ -407,6 +385,6 @@ contract TwoKeyParticipationMiningPool is TokenPool {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
+        return ITwoKeyAdmin(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin")).getSignatoryAddress();
     }
 }
