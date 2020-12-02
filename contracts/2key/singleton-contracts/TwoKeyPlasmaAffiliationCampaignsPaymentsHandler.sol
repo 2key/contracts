@@ -247,6 +247,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
 
     function recoverSignature(
         bytes signature,
+        address referrer,
         address [] campaigns,
         uint [] rewards
     )
@@ -257,7 +258,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         // Generate hash
         bytes32 hash = keccak256(
             abi.encodePacked(
-                keccak256(abi.encodePacked('bytes binding user rewards')),
+                keccak256(abi.encodePacked(referrer)),
                 keccak256(abi.encodePacked(campaigns,rewards))
             )
         );
@@ -299,6 +300,20 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
     public
     onlyMaintainer
     {
+        // Require this function to be called only once with same signature
+        require(getIfSignatureIsExisting(signature) == false);
 
+        address messageSigner = recoverSignature()
+    }
+
+    /**
+     * @notice          Function to fetch signatory address
+     */
+    function getSignatoryAddress()
+    public
+    view
+    returns (address)
+    {
+        return ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry")).getSignatoryAddress();
     }
 }
