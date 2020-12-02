@@ -25,7 +25,6 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	 */
 	string constant _twoKeyIntegratorDefaultFeePercent = "twoKeyIntegratorDefaultFeePercent";
 	string constant _twoKeyNetworkTaxPercent = "twoKeyNetworkTaxPercent";
-	string constant _twoKeyTokenRate = "twoKeyTokenRate";
 	string constant _rewardReleaseAfter = "rewardReleaseAfter";
 	string constant _signatoryAddress = "signatoryAddress";
 

@@ -331,6 +331,11 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
 
         // Set that signature exists
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_isSignatureExisting, signature), true);
+        // Withdrawal attepmts per user
+        // [1,2,3,4]
+        // 1 attempt --> signature 1
+        //TODO: Account pending withdrawal
+        // Store signature for withdrawal
     }
 
     /**

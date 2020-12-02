@@ -138,9 +138,23 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             amountOfTokens.add(getTotal2KEYTokensEarnedFromSubscriptions())
         );
 
+        //TODO: In this case it goes to admin immediately and accounts more tokens received
         //TODO: Tokenomics wise it's the best to keep those subscription tokens here for some time, then transfer them to admin
         // Emit event that subscription extended
     }
+
+    function addSubscriptionStableCoin(
+        address campaignPlasma,
+        address token,
+        uint amountOfTokens
+    )
+    external
+    {
+        require(msg.sender == getCampaignContractor(campaignPlasma));
+        //TODO: Send stable coins to upgradable exchange for organic demand
+
+    }
+
 
     function withdrawTokensWithSignature(
         bytes signature,
@@ -149,7 +163,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     )
     public
     {
-        require(getIfSignatureIsExisting(signature) == true);
+        require(getIfSignatureIsExisting(signature) == false);
 
         // Fetch who signed the message
         address messageSigner = recoverSignature(
@@ -170,16 +184,9 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             // Transfer earnings for this campaign
             IERC20(rewardsTokenAddress).transfer(msg.sender, rewardsPending[i]);
         }
-    }
 
-    function addSubscriptionStableCoin(
-        address campaignPlasma,
-        address token,
-        uint amountOfTokens
-    )
-    external
-    {
-        require(msg.sender == getCampaignContractor(campaignPlasma));
+        // Mark that sig is used.
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isSignatureExisting, signature), true);
     }
 
 
@@ -268,7 +275,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     function getTokenUsedForRewardingCampaign(
         address campaignPlasma
     )
-    internal
+    public
     view
     returns (address)
     {

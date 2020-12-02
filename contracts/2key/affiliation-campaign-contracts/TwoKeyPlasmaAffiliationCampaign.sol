@@ -7,6 +7,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
 
     string public url;
 
+
     /**
      * This is the conversion object
      * converterPlasma is the address of converter
@@ -51,13 +52,15 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
      * @param           bountyAdded is bounty contractor added more to the campaign
      */
     function extendCampaignBudget(
-        uint bountyAdded
+        uint newTotalBounty
     )
     public
     onlyMaintainer
     {
-        totalBountyAddedForCampaign = totalBountyAddedForCampaign.add(bountyAdded);
+        require(newTotalBounty >= totalBountyAddedForCampaign);
+        totalBountyAddedForCampaign = newTotalBounty;
     }
+
 
 
     /**
@@ -86,7 +89,8 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     function registerConversion(
         address converter,
         bytes signature,
-        uint amountOfTokensToDistribute
+        uint amountOfTokensToDistribute,
+        string conversionType
     )
     external
     onlyMaintainer
@@ -94,8 +98,6 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     isCampaignNotEnded
     isCampaignValidated
     {
-        // Check if there's enough bounty on the contract
-        require(isThereEnoughBounty(amountOfTokensToDistribute));
         // Mark user that he's converter
         isConverter[converter] = true;
         // Create conversion
@@ -110,6 +112,8 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         distributeArcsIfNecessary(converter,signature);
         // Bounty is getting distributed only if conversion is not directly from contractor
         if(getNumberOfUsersToContractor(converter) > 0) {
+            // Check if there's enough bounty on the contract
+            require(isThereEnoughBounty(amountOfTokensToDistribute));
             // Add bounty only if there's at least 1 influencer in this referral chain
             c.bountyPaid = amountOfTokensToDistribute;
             // Add bounty paid
