@@ -211,11 +211,11 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
 
     /**
      * @notice          Function to get pending rewards on all affiliation campaigns for referrer
-     * @param           referrer is the address of referrer
+     * @param           referrerPlasma is the address of referrer
      * @param           campaigns is the array of supported campaigns
      */
     function getPendingRewardsOnCampaignsForReferrer(
-        address referrer,
+        address referrerPlasma,
         address [] campaigns
     )
     public
@@ -225,7 +225,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         uint [] memory rewards = new uint[](campaigns.length);
         uint i = 0;
         for(i = 0; i < campaigns.length; i++) {
-            rewards[i] = ITwoKeyPlasmaAffiliationCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer);
+            rewards[i] = ITwoKeyPlasmaAffiliationCampaign(campaigns[i]).getReferrerPlasmaBalance(referrerPlasma);
         }
         return rewards;
     }
@@ -248,7 +248,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
 
     function recoverSignature(
         bytes signature,
-        address referrer,
+        address referrerPublic,
         address [] campaigns,
         uint [] rewards
     )
@@ -259,7 +259,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         // Generate hash
         bytes32 hash = keccak256(
             abi.encodePacked(
-                keccak256(abi.encodePacked(referrer)),
+                keccak256(abi.encodePacked(referrerPublic)),
                 keccak256(abi.encodePacked(campaigns,rewards))
             )
         );
@@ -271,29 +271,29 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
 
     /**
      * @notice          Function to add campaign to list of referrers campaigns
-     * @param           referrer is the address of referrer
+     * @param           referrerPlasma is the address of referrer
      */
     function addCampaignToListOfReferrerCampaigns(
-        address referrer
+        address referrerPlasma
     )
     public
     onlyAffiliationCampaign
     {
         address campaign = msg.sender;
-        if(!isCampaignAddedToReferrerList(referrer, campaign)) {
+        if(!isCampaignAddedToReferrerList(referrerPlasma, campaign)) {
             // Mark that campaign is added to the list
             setBool(
-                keccak256(_referrerToIsCampaignAlreadyAddedToArray, referrer, campaign),
+                keccak256(_referrerToIsCampaignAlreadyAddedToArray, referrerPlasma, campaign),
                 true
             );
             // Add this campaign to list of referrer campaigns
-            addCampaignForReferrer(referrer,campaign);
+            addCampaignForReferrer(referrerPlasma,campaign);
         }
     }
 
 
     function submitSignatureForUserWithdrawal(
-        address referrer,
+        address referrerPublicAddress,
         address [] campaigns,
         uint [] rewardsPerCampaign,
         bytes signature
@@ -304,9 +304,14 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         // Require this function to be called only once with same signature
         require(getIfSignatureIsExisting(signature) == false);
 
+        address referrerPlasma = ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry")).ethereum2plasma(referrerPublicAddress);
+        // Require that user is registered
+        require(referrerPlasma != address(0));
+
+        // Recover signature with public address
         address messageSigner = recoverSignature(
             signature,
-            referrer,
+            referrerPublicAddress,
             campaigns,
             rewardsPerCampaign
         );
@@ -319,7 +324,7 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         for(i = 0; i < campaigns.length; i++) {
             // Increase amount withdrawn from campaign
             ITwoKeyPlasmaAffiliationCampaign(campaigns[i]).increaseAmountWithdrawnFromContract(
-                referrer,
+                referrerPlasma,
                 rewardsPerCampaign[i]
             );
         }
