@@ -17,6 +17,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         address converterPlasma;
         uint bountyPaid;
         uint conversionTimestamp;
+        string conversionType;
     }
 
     Conversion [] public conversions;          // Array of all conversions
@@ -104,7 +105,8 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         Conversion memory c = Conversion(
             msg.sender,
             0,
-            block.timestamp
+            block.timestamp,
+            conversionType
         );
         // Get the ID and update mappings
         uint conversionId = conversions.length;
