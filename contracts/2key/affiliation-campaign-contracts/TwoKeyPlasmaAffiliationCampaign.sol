@@ -50,7 +50,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     /**
      * @notice          Function to extend campaign budget. Maintainer calls it
      *                  when contractor adds more budget on public chain contract
-     * @param           bountyAdded is bounty contractor added more to the campaign
+     * @param           newTotalBounty is bounty contractor added more to the campaign
      */
     function extendCampaignBudget(
         uint newTotalBounty
