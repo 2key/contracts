@@ -5,8 +5,10 @@ import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyAffiliationCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
 
 import "../libraries/SafeMath.sol";
+import "../libraries/Call.sol";
 
 contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
 
@@ -20,6 +22,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
     string constant _campaignPlasma2NumberOfSubscriptions = "campaignPlasma2NumberOfSubscriptions";
     string constant _total2KEYTokensEarnedFromSubscriptions = "total2KEYTokensEarnedFromSubscriptions";
+    string constant _isSignatureExisting = "isSignatureExisting";
 
     // TODO: We can use events to index subscriptions etc
 
@@ -57,10 +60,12 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     )
     external
     {
+        // Check if the user is contractor, once contractor set, can't be changeds
         if(getCampaignContractor(campaignPlasma) == address(0)) {
             setCampaignContractor(campaignPlasma, msg.sender);
         }
 
+        // Check because user is not allowed to change the token address
         if(getTokenUsedForRewardingCampaign(campaignPlasma) == address(0)) {
             setTokenUsedForRewardingCampaign(campaignPlasma, token);
         }
@@ -87,7 +92,6 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         increaseModeratorEarnings(campaignPlasma, moderatorEarnings);
 
         // Emit event that rewards budget is added to campaign
-
     }
 
 
@@ -136,6 +140,36 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
 
         //TODO: Tokenomics wise it's the best to keep those subscription tokens here for some time, then transfer them to admin
         // Emit event that subscription extended
+    }
+
+    function withdrawTokensWithSignature(
+        bytes signature,
+        address [] campaignAddresses,
+        uint [] rewardsPending
+    )
+    public
+    {
+        require(getIfSignatureIsExisting(signature) == true);
+
+        // Fetch who signed the message
+        address messageSigner = recoverSignature(
+            signature,
+            msg.sender,
+            campaignAddresses,
+            rewardsPending
+        );
+
+        // Require that message signer is signatory address
+        require(messageSigner == getSignatoryAddress());
+
+        uint i;
+
+        for(i = 0; i < campaignAddresses.length; i++) {
+            // Get address of rewards token
+            address rewardsTokenAddress = getTokenUsedForRewardingCampaign(campaignAddresses[i]);
+            // Transfer earnings for this campaign
+            IERC20(rewardsTokenAddress).transfer(msg.sender, rewardsPending[i]);
+        }
     }
 
     function addSubscriptionStableCoin(
@@ -245,6 +279,18 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
 
 
     /**
+     * @notice          Function to get signatory address from TwoKeyAdmin contract
+     */
+    function getSignatoryAddress()
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeyAdmin(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin")).getSignatoryAddress();
+    }
+
+
+    /**
      * @notice          Function to get total budget added for the campaign
      * @param           campaignPlasma is the plasma address of campaign
      * @return          total budget added for campaign in WEI
@@ -325,4 +371,48 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         );
     }
 
+
+    /**
+     * @notice          Function to get if signature is existing
+     * @param           signature is the signature we're checking if exists
+     */
+    function getIfSignatureIsExisting(
+        bytes signature
+    )
+    public
+    view
+    returns (bool)
+    {
+        return PROXY_STORAGE_CONTRACT.getBool(keccak256(_isSignatureExisting, signature));
+    }
+
+
+    /**
+     * @notice          Function to recover the signature
+     * @param           signature is the signature of user
+     * @param           referrerPublic is referrer public address
+     * @param           campaigns is the array of campaigns for signed rewards
+     * @param           rewards is array of rewards in campaigns correspondingly
+     */
+    function recoverSignature(
+        bytes signature,
+        address referrerPublic,
+        address [] campaigns,
+        uint [] rewards
+    )
+    public
+    pure
+    returns (address)
+    {
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked(referrerPublic)),
+                keccak256(abi.encodePacked(campaigns,rewards))
+            )
+        );
+
+        // Recover signer message from signature
+        return Call.recoverHash(hash,signature,0);
+    }
 }
