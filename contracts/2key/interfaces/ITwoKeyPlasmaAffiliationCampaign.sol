@@ -7,4 +7,5 @@ pragma solidity ^0.4.24;
  */
 contract ITwoKeyPlasmaAffiliationCampaign {
     function getReferrerPlasmaBalance(address _referrer) public view returns (uint);
+    function increaseAmountWithdrawnFromContract(address referrer, uint amount) public;
 }

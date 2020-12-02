@@ -443,6 +443,21 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
      * ------------------------------------------------------------------------------------
      */
 
+    function increaseAmountWithdrawnFromContract(
+        address referrer,
+        uint amount
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAffiliationCampaignsPaymentsHandler"));
+
+        // Require that referrer has enough rewards
+        require(referrerPlasma2TotalWithdrawn[referrer].add(amount) <= referrerPlasma2TotalEarnings[referrer]);
+
+        // Increase amount referrer withdrawn
+        referrerPlasma2TotalWithdrawn[referrer] = referrerPlasma2TotalWithdrawn[referrer].add(amount);
+    }
+
     /**
      * @notice Function to set or update public meta hash
      * @param _publicMetaHash is the hash of the campaign

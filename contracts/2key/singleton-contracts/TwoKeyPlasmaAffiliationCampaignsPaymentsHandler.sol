@@ -6,6 +6,7 @@ import "../interfaces/ITwoKeyPlasmaFactory.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaAffiliationCampaign.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
@@ -303,7 +304,28 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
         // Require this function to be called only once with same signature
         require(getIfSignatureIsExisting(signature) == false);
 
-        address messageSigner = recoverSignature()
+        address messageSigner = recoverSignature(
+            signature,
+            referrer,
+            campaigns,
+            rewardsPerCampaign
+        );
+
+        // Require that message is signed by signatory address
+        require(messageSigner == getSignatoryAddress());
+
+        uint i;
+
+        for(i = 0; i < campaigns.length; i++) {
+            // Increase amount withdrawn from campaign
+            ITwoKeyPlasmaAffiliationCampaign(campaigns[i]).increaseAmountWithdrawnFromContract(
+                referrer,
+                rewardsPerCampaign[i]
+            );
+        }
+
+        // Set that signature exists
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_isSignatureExisting, signature), true);
     }
 
     /**
