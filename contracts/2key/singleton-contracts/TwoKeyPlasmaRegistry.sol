@@ -28,6 +28,7 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     string constant _moderatorFeePercentage = "moderatorFeePercentage";
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _twoKeyPlasmaEventSource = "TwoKeyPlasmaEventSource";
+    string constant _signatoryAddress = "signatoryAddress";
 
     ITwoKeyPlasmaRegistryStorage public PROXY_STORAGE_CONTRACT;
 
@@ -250,6 +251,34 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     onlyTwoKeyPlasmaCongress
     {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), feePercentage);
+    }
+
+    /**
+     * @notice          Function where congress can set signatory address
+     *                  and that's the only address eligible to sign the rewards messages
+     * @param           signatoryAddress is the address which will be used to sign rewards
+     */
+    function setSignatoryAddress(
+        address signatoryAddress
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_signatoryAddress),
+            signatoryAddress
+        );
+    }
+
+    /**
+     * @notice          Function to fetch signatory address
+     */
+    function getSignatoryAddress()
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
     }
 
     function plasma2ethereum(

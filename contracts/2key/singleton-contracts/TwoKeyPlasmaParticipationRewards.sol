@@ -608,23 +608,6 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
         );
     }
 
-    /**
-     * @notice          Function where congress can set signatory address
-     *                  and that's the only address eligible to sign the rewards messages
-     * @param           signatoryAddress is the address which will be used to sign rewards
-     */
-    function setSignatoryAddress(
-        address signatoryAddress
-    )
-    public
-    onlyTwoKeyPlasmaCongress
-    {
-        PROXY_STORAGE_CONTRACT.setAddress(
-            keccak256(_signatoryAddress),
-            signatoryAddress
-        );
-    }
-
 
     /**
      * @notice          Function where maintainer can check who signed the message
@@ -928,7 +911,7 @@ contract TwoKeyPlasmaParticipationRewards is Upgradeable {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
+        return ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry")).getSignatoryAddress();
     }
 
 
