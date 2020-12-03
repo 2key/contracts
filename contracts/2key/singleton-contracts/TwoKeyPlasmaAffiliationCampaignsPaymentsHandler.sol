@@ -421,6 +421,28 @@ contract TwoKeyPlasmaAffiliationCampaignsPaymentsHandler is Upgradeable {
 
 
     /**
+     * @notice          Function to mark on plasma that user has successfully withdrawn
+     *                  tokens from Ethereum
+     */
+    function markUserFinishedWithdrawalWithSignature(
+        address referrerPlasma,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        // Get referrer pending signature
+        bytes memory referrerPendingSignature = getReferrerPendingSignature(referrerPlasma);
+
+        // Double check that it's the same signature which is pending
+        require(keccak256(referrerPendingSignature) == keccak256(signature));
+
+        // Remove pending signatures for user
+        removeReferrerPendingSignature(referrerPlasma);
+    }
+
+
+    /**
      * @notice          Function to fetch signatory address
      */
     function getSignatoryAddress()
