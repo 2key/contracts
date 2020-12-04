@@ -39,7 +39,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
 	string constant _daiCollectedFromUpgradableExchange = "daiCollectedFromUpgradableExchange";
 	string constant _feesCollectedFromDistributionRewards = "feesCollectedFromDistributionRewards";
-
+	string constant _earningsCollectedFromAffiliationSubscription = "earningsCollectedFromAffiliationSubscription";
 
 	// Withdrawals from ADMIN
 	string constant _amountWithdrawnFromModeratorEarningsPool = "amountWithdrawnFromModeratorEarningsPool";
@@ -47,6 +47,8 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _amountWithdrawnFromKyberFeesPool = "amountWithdrawnFromKyberFeesPool";
 	string constant _amountWithdrawnFromCollectedDaiFromUpgradableExchange = "amountWithdrawnFromCollectedDaiFromUpgradableExchange";
 	string constant _amountWithdrawnFromCollectedDistributionRewards = "amountWithdrawnFromCollectedDistributionRewards";
+	string constant _amountWithdrawnFromAffiliationSubscriptionPool = "amountWithdrawnFromAffiliationSubscriptionPool";
+
 
 	/**
      * Keys for the addresses we're accessing
@@ -82,6 +84,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		_;
 	}
 
+	modifier onlyTwoKeyAffiliationCampaignsPaymentsHandler {
+		address twoKeyAffiliationCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry("TwoKeyAffiliationCampaignsPaymentsHandler");
+		require(msg.sender == twoKeyAffiliationCampaignsPaymentsHandler);
+		_;
+	}
 
 	/**
 	 * @notice 			Modifier which throws if the campaign contract sending request is not validated
@@ -541,6 +548,24 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+	/**
+	 * @notice
+	 */
+	function updateTokensReceivedFromCampaignSubscriptions(
+		uint amountOfTokens
+	)
+	public
+	onlyTwoKeyAffiliationCampaignsPaymentsHandler
+	{
+		uint amountAlreadyReceived = getAmountOfTokensReceivedFromSubscriptions();
+
+		PROXY_STORAGE_CONTRACT.setUint(
+			keccak256(_earningsCollectedFromAffiliationSubscription),
+			amountAlreadyReceived.add(amountOfTokens)
+		);
+	}
+
+
     /**
      * @notice 			Function which will be used take the tokens from the campaign and distribute
      * 					them between itself and TwoKeyDeepFreezeTokenPool
@@ -896,6 +921,14 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	returns (uint)
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_feesCollectedFromDistributionRewards));
+	}
+
+	function getAmountOfTokensReceivedFromSubscriptions()
+	public
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_earningsCollectedFromAffiliationSubscription));
 	}
 
 	function getAmountOfTokensWithdrawnFromDistributionFees()

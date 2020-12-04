@@ -62,7 +62,19 @@ def build_messages_v2(referrer, campaign_addresses_array, pending_rewards_array,
 
 
 def hash_messages(message1, message2, w3):
-    hash1 = w3.solidityKeccak(['bytes'], [message1])
+    hash1 = w3.solidityKeccak(['string'], [message1])
+    hash2 = w3.solidityKeccak(['bytes'], [message2])
+
+    final_hash = w3.solidityKeccak(
+        ['bytes32', 'bytes32'],
+        [w3.toHex(hash1), w3.toHex(hash2)]
+    )
+
+    return remove_0x(str(w3.toHex(final_hash)))
+
+
+def hash_messages_v2(message1, message2, w3):
+    hash1 = w3.solidityKeccak(['address'], [message1])
     hash2 = w3.solidityKeccak(['bytes'], [message2])
 
     final_hash = w3.solidityKeccak(
@@ -78,6 +90,13 @@ def sign_messages(message1, message2, private_key_signatory, w3):
     message_to_sign = messages.encode_defunct(hexstr=final_hash)
     signed_message = Account.sign_message(message_to_sign, private_key=private_key_signatory)
     finalize_signature(signed_message.signature.hex())
+
+def sign_messages_v2(message1, message2, private_key_signatory, w3):
+    final_hash = hash_messages_v2(message1, message2, w3)
+    message_to_sign = messages.encode_defunct(hexstr=final_hash)
+    signed_message = Account.sign_message(message_to_sign, private_key=private_key_signatory)
+    finalize_signature(signed_message.signature.hex())
+
 
 
 def finalize_signature(signature):
@@ -95,7 +114,7 @@ def build_signature(user_address, total_rewards_pending_wei, private_key_signato
 
 def build_signature_v2(referrer, campaign_addresses_array, pending_rewards_array, private_key_signatory, w3):
     message1, message2 = build_messages_v2(referrer, campaign_addresses_array, pending_rewards_array, w3)
-    sign_messages(message1, message2, private_key_signatory, w3)
+    sign_messages_v2(message1, message2, private_key_signatory, w3)
 
 
 if __name__ == '__main__':
