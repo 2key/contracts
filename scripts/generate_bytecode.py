@@ -26,6 +26,8 @@ def generate_bytecode_for_transfering_tokens(deployer_address, token_amount):
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 def generate_bytecode_for_upgrading_contracts(contract_name, contract_version):
+
+    print(f"Upgrading contract {contract_name} to version: {contract_version} \n")
     method_name_and_params = "upgradeContract(string,string)"
     types = ["string","string"]
     values = [contract_name, contract_version]

@@ -1409,6 +1409,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint,uint,uint)
     {
         uint currentPrice = sellRate2key();
+
+        // In case 0 USD is inputted, return 0 as bought, and current price as average and new.
+        if(purchaseAmountUSDWei == 0) {
+            return (0, currentPrice, currentPrice);
+        }
+
         uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
 
         return PriceDiscovery.buyTokensFromExchangeRealignPrice(
