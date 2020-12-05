@@ -16,16 +16,15 @@ module.exports = function deploy(deployer) {
     let version;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        deployer.link(Call, TwoKeyAcquisitionLogicHandler);
-        deployer.deploy(TwoKeyAcquisitionLogicHandler)
-            .then(() => TwoKeyAcquisitionLogicHandler.deployed())
-            // .then(() => deployer.deploy(TwoKeyPurchasesHandler))
-            // .then(() => TwoKeyPurchasesHandler.deployed())
-            // .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
-            // .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
-            // .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
-            // .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
-            // .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
+        deployer.deploy(TwoKeyConversionHandler)
+            .then(() => TwoKeyConversionHandler.deployed())
+            .then(() => deployer.deploy(TwoKeyPurchasesHandler))
+            .then(() => TwoKeyPurchasesHandler.deployed())
+            .then(() => deployer.link(Call, TwoKeyAcquisitionLogicHandler))
+            .then(() => deployer.link(Call, TwoKeyAcquisitionCampaignERC20))
+            .then(() => deployer.deploy(TwoKeyAcquisitionLogicHandler))
+            .then(() => deployer.deploy(TwoKeyAcquisitionCampaignERC20))
+            .then(() => TwoKeyAcquisitionCampaignERC20.deployed())
             .then(() => true)
             .then(async () => {
 
