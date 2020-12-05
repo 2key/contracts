@@ -16,13 +16,13 @@ module.exports = function deploy(deployer) {
     let version;
 
     if(deployer.network.startsWith('dev') || deployer.network.startsWith('public')) {
-        deployer.link(Call, TwoKeyDonationCampaign)
-            .then(() => deployer.deploy(TwoKeyDonationCampaign))
-            .then(() => TwoKeyDonationCampaign.deployed())
-            .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
-            .then(() => TwoKeyDonationConversionHandler.deployed())
+        deployer.link(Call, TwoKeyDonationLogicHandler)
+            // .then(() => deployer.deploy(TwoKeyDonationCampaign))
+            // .then(() => TwoKeyDonationCampaign.deployed())
+            // .then(() => deployer.deploy(TwoKeyDonationConversionHandler))
+            // .then(() => TwoKeyDonationConversionHandler.deployed())
             .then(() => deployer.link(IncentiveModels, TwoKeyDonationLogicHandler))
-            .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
+            // .then(() => deployer.link(Call, TwoKeyDonationLogicHandler))
             .then(() => deployer.deploy(TwoKeyDonationLogicHandler))
             .then(() => TwoKeyDonationLogicHandler.deployed())
             .then(async () => {
