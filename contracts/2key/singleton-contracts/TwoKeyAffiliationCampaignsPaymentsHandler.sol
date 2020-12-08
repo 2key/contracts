@@ -30,8 +30,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
 
     bool initialized;
 
-    /**
-     */
+
     function setInitialParams(
         address _twoKeySingletonRegistry,
         address _proxyStorageContract
@@ -44,6 +43,33 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         PROXY_STORAGE_CONTRACT = ITwoKeyAffiliationCampaignsPaymentsHandlerStorage(_proxyStorageContract);
 
         initialized = true;
+    }
+
+
+    /**
+     * @notice          Function to calculate new subscription ending date
+     *                  and set it
+     * @param           campaignPlasma is address of campaign on plasma network
+     */
+    function extendSubscriptionInternal(
+        address campaignPlasma
+    )
+    internal
+    {
+        uint subscriptionEnding = getSubscriptionEndDate(campaignPlasma);
+
+        if(subscriptionEnding == 0) {
+            subscriptionEnding = block.timestamp;
+        }
+
+        // Extend subscription for 30 days
+        uint newEndDate = subscriptionEnding + 30 * (1 days);
+
+        // Set new subscription ending date
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma),
+            newEndDate
+        );
     }
 
 
@@ -95,6 +121,11 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     }
 
 
+    /**
+     * @notice          Function to add subscription in 2KEY tokens
+     * @param           campaignAddress is the address of campaign
+     * @param           amountOfTokens is the amount of tokens spent for adding subscription
+     */
     function addSubscription2KEY(
         address campaignPlasma,
         uint amountOfTokens
@@ -128,6 +159,12 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         // Emit event that subscription extended
     }
 
+
+    /**
+     * @notice          Function to add subscription in Stable coins
+     * @param           campaignAddress is the address of campaign
+     * @param           amountOfTokens is the amount of tokens spent for adding subscription
+     */
     function addSubscriptionStableCoin(
         address campaignPlasma,
         address tokenAddress,
@@ -175,27 +212,12 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     }
 
 
-    function extendSubscriptionInternal(
-        address campaignPlasma
-    )
-    internal
-    {
-        uint subscriptionEnding = getSubscriptionEndDate(campaignPlasma);
-
-        if(subscriptionEnding == 0) {
-            subscriptionEnding = block.timestamp;
-        }
-
-        // Extend subscription for 30 days
-        uint newEndDate = subscriptionEnding + 30 * (1 days);
-
-        // Set new subscription ending date
-        PROXY_STORAGE_CONTRACT.setUint(
-            keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma),
-            newEndDate
-        );
-    }
-
+    /**
+     * @notice          Function to withdraw tokens earned with signature
+     * @param           signature is signature produced by signatory address
+     * @param           campaignAddresses is array of campaign addresses from which user is withdrawing
+     * @param           rewardsPending is array of rewards per campaign user is doing withdraw
+     */
     function withdrawTokensWithSignature(
         bytes signature,
         address [] campaignAddresses,
@@ -203,6 +225,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     )
     public
     {
+        // Same signature can't be used twice
         require(getIfSignatureIsExisting(signature) == false);
 
         // Fetch who signed the message
