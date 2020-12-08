@@ -4,6 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/storage-contracts/ITwoKeyAffiliationCampaignsPaymentsHandlerStorage.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITether.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 
@@ -101,11 +102,6 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     external
     {
         require(msg.sender == getCampaignContractor(campaignPlasma));
-        uint subscriptionEnding = getSubscriptionEndDate(campaignPlasma);
-
-        if(subscriptionEnding == 0) {
-            subscriptionEnding = block.timestamp;
-        }
 
         // Current 2KEY sell rate
         uint rate = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key();
@@ -116,14 +112,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         // Require that amount user sent is corresponding at least 99$ (100$ is subscription)
         require(amountInUSDWei >= 99 * 10**18);
 
-        // Extend subscription for 30 days
-        uint newEndDate = subscriptionEnding + 30 * (1 days);
-
-        // Set new subscription ending date
-        PROXY_STORAGE_CONTRACT.setUint(
-            keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma),
-            newEndDate
-        );
+        extendSubscriptionInternal(campaignPlasma);
 
         // Take 2KEY tokens from the contractor
         IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
@@ -141,16 +130,71 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
 
     function addSubscriptionStableCoin(
         address campaignPlasma,
-        address token,
+        address tokenAddress,
         uint amountOfTokens
     )
     external
     {
         require(msg.sender == getCampaignContractor(campaignPlasma));
-        //TODO: Send stable coins to upgradable exchange for organic demand
 
+        address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+
+        // Compute how much USD is this amount in tokens worth
+        uint amountInUSDWei = IUpgradableExchange(twoKeyUpgradableExchange).computeAmountInUsd(
+            amountOfTokens,
+            tokenAddress
+        );
+
+        // Require that amount user sent is corresponding at least 99$ (100$ is subscription)
+        require(amountInUSDWei >= 99 * 10**18);
+
+        // Extend subscription
+        extendSubscriptionInternal(campaignPlasma);
+
+        // Handle case for Tether due to different ERC20 interface it has
+        if (tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
+            // Take stable coins from the contractor and directly transfer them to upgradable exchange
+            ITether(tokenAddress).transferFrom(
+                msg.sender,
+                twoKeyUpgradableExchange,
+                amountOfTokens
+            );
+        } else {
+            // Take stable coins from the contractor and directly transfer them to upgradable exchange
+            IERC20(tokenAddress).transferFrom(
+                msg.sender,
+                twoKeyUpgradableExchange,
+                amountOfTokens
+            );
+        }
+
+        // Update upgradable exchange on received tokens
+        IUpgradableExchange(twoKeyUpgradableExchange).addStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
+
+        // Emit event that subscription extended
     }
 
+
+    function extendSubscriptionInternal(
+        address campaignPlasma
+    )
+    internal
+    {
+        uint subscriptionEnding = getSubscriptionEndDate(campaignPlasma);
+
+        if(subscriptionEnding == 0) {
+            subscriptionEnding = block.timestamp;
+        }
+
+        // Extend subscription for 30 days
+        uint newEndDate = subscriptionEnding + 30 * (1 days);
+
+        // Set new subscription ending date
+        PROXY_STORAGE_CONTRACT.setUint(
+            keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma),
+            newEndDate
+        );
+    }
 
     function withdrawTokensWithSignature(
         bytes signature,
