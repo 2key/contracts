@@ -37,9 +37,7 @@ const {
     ipfsGet,
     runDeployCPCCampaignMigration,
     runTruffleCompile,
-    runDeployPlasmaReputation,
     runDeployCPCNoRewardsMigration,
-    runDeployPaymentHandlersMigration,
     runDeployPlasmaParticipationsMining
 } = require('./helpers');
 
@@ -424,7 +422,6 @@ async function deployUpgrade(networks) {
         ] = await getDiffBetweenLatestTags();
     }
 
-    console.log(deployment);
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
@@ -593,7 +590,7 @@ async function deploy() {
             process.chdir('../../');
             //Run slack message
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
-            if(!process.argv.includes('protocol-only')) {
+            if(!process.argv.includes('skip-tenderly')) {
                 // Add tenderly to CI/CD only in case there have been contracts updated.
                 await tenderlyPush(npmVersionTag);
             }
@@ -603,7 +600,6 @@ async function deploy() {
             process.chdir(twoKeyProtocolDir);
             // Generate the changelog for this repository
             await generateChangelog();
-
             // Push final commit for the deployment
             await commitAndPush2KeyProtocolSrc(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
             await commitAndPushContractsFolder(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
