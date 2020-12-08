@@ -95,4 +95,18 @@ contract IUpgradableExchange {
         uint amountOfTokensRequested
     )
     public;
+
+    function computeAmountInUsd(
+        uint amountInTokenDecimals,
+        address tokenAddress
+    )
+    public
+    view
+    returns (uint);
+
+    function addStableCoinsAvailableToFillReserve(
+        uint amountOfStableCoins,
+        address stableCoinAddress
+    )
+    public;
 }

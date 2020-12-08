@@ -730,7 +730,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint newTokenPrice;
 
         // Increment amount of this stable tokens to fill reserve
-        addStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
+        addStableCoinsAvailableToFillReserveInternal(amountOfTokens, tokenAddress);
 
         uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
 
@@ -751,7 +751,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint amountInTokenDecimals,
         address tokenAddress
     )
-    internal
+    public
     view
     returns (uint)
     {
@@ -823,7 +823,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-    function addStableCoinsAvailableToFillReserve(
+    function addStableCoinsAvailableToFillReserveInternal(
         uint amountOfStableCoins,
         address stableCoinAddress
     )
@@ -1006,6 +1006,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
                 block.timestamp + (10 minutes)
             );
         }
+    }
+
+
+    /**
+     * @notice          Function to add amount of stable coins to fill reserve when
+     */
+    function addStableCoinsAvailableToFillReserve(
+        uint amountOfStableCoins,
+        address stableCoinAddress
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyAffiliationCampaignsPaymentsHandler"));
+        addStableCoinsAvailableToFillReserve(amountOfStableCoins, stableCoinAddress);
     }
 
 
