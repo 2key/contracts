@@ -237,6 +237,11 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         uint amountOfTokens
     );
 
+    event AffiliationSubscriptionExtended(
+        address campaignPlasma,
+        uint newSubscriptionEndingDate
+    );
+
     /**
      * @notice Function to emit created event every time campaign is created
      * @param _campaign is the address of the deployed campaign
@@ -716,6 +721,26 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit UserWithdrawnNetworkEarnings(
             user,
             amountOfTokens
+        );
+    }
+
+
+    /**
+     * @notice          Function to emit event everytime there's subscription extended for campaign
+     * @param           campaignPlasma is plasma address of campaign
+     * @param           newSubscriptionEndDate is new ending date for subscription
+     */
+    function emitAffiliationSubscriptionExtended(
+        address campaignPlasma,
+        uint newSubscriptionEndDate
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyAffiliationCampaignsPaymentsHandler"));
+
+        emit AffiliationSubscriptionExtended(
+            campaignPlasma,
+            newSubscriptionEndDate
         );
     }
 

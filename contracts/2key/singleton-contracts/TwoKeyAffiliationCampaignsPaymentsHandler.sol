@@ -7,6 +7,7 @@ import "../interfaces/IERC20.sol";
 import "../interfaces/ITether.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 
 import "../libraries/SafeMath.sol";
 import "../libraries/Call.sol";
@@ -70,6 +71,12 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             keccak256(_campaignPlasma2SubscriptionEnding, campaignPlasma),
             newEndDate
         );
+
+        // Emit event that subscription extended
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource")).emitAffiliationSubscriptionExtended(
+            campaignPlasma,
+            newEndDate
+        );
     }
 
 
@@ -123,7 +130,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
 
     /**
      * @notice          Function to add subscription in 2KEY tokens
-     * @param           campaignAddress is the address of campaign
+     * @param           campaignPlasma is the address of campaign
      * @param           amountOfTokens is the amount of tokens spent for adding subscription
      */
     function addSubscription2KEY(
@@ -156,13 +163,12 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         ITwoKeyAdmin(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"))
             .updateReceivedTokensFromCampaignSubscriptions(amountOfTokens);
 
-        // Emit event that subscription extended
     }
 
 
     /**
      * @notice          Function to add subscription in Stable coins
-     * @param           campaignAddress is the address of campaign
+     * @param           campaignPlasma is the address of campaign
      * @param           amountOfTokens is the amount of tokens spent for adding subscription
      */
     function addSubscriptionStableCoin(

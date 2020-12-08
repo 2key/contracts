@@ -95,4 +95,10 @@ contract ITwoKeyEventSource {
         string action
     )
     public;
+
+    function emitAffiliationSubscriptionExtended(
+        address campaignPlasma,
+        uint newSubscriptionEndDate
+    )
+    public;
 }
