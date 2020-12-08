@@ -6,6 +6,7 @@ contract ITwoKeyAdmin {
     function getTwoKeyRewardsReleaseDate() external view returns(uint);
     function updateReceivedTokensAsModerator(uint amountOfTokens) public;
     function updateReceivedTokensAsModeratorPPC(uint amountOfTokens, address campaignPlasma) public;
+    function updateReceivedTokensFromCampaignSubscriptions(uint amountOfTokens) public;
     function addFeesCollectedInCurrency(string currency, uint amount) public payable;
     function updateTokensReceivedFromDistributionFees(uint amountOfTokens) public;
     function getSignatoryAddress() public view returns (address);

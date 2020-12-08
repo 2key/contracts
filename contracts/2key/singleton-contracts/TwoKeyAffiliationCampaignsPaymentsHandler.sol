@@ -24,7 +24,6 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     string constant _total2KEYTokensEarnedFromSubscriptions = "total2KEYTokensEarnedFromSubscriptions";
     string constant _isSignatureExisting = "isSignatureExisting";
 
-    // TODO: We can use events to index subscriptions etc
 
     ITwoKeyAffiliationCampaignsPaymentsHandlerStorage public PROXY_STORAGE_CONTRACT;
 
@@ -133,13 +132,10 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             amountOfTokens
         );
 
-        PROXY_STORAGE_CONTRACT.setUint(
-            keccak256(_total2KEYTokensEarnedFromSubscriptions),
-            amountOfTokens.add(getTotal2KEYTokensEarnedFromSubscriptions())
-        );
+        // Update collected tokens from subscriptions in 2KEY admin
+        ITwoKeyAdmin(getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"))
+            .updateReceivedTokensFromCampaignSubscriptions(amountOfTokens);
 
-        //TODO: In this case it goes to admin immediately and accounts more tokens received
-        //TODO: Tokenomics wise it's the best to keep those subscription tokens here for some time, then transfer them to admin
         // Emit event that subscription extended
     }
 

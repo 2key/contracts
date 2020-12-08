@@ -496,6 +496,30 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange), totalDAIWithdrawnFromPool.add(amountToBeWithdrawn));
 	}
 
+	function withdrawEarningsFromAffiliationSubscriptions(
+		address beneficiary,
+		uint amount2KEYToWithdraw
+	)
+	public
+	onlyTwoKeyCongress
+	{
+		uint totalEarningsCollected = getAmountOfTokensReceivedFromSubscriptions();
+		uint totalEarningsWithdrawn = getAmountWithdrawnFromSubscriptionEarnings();
+
+		if(amount2KEYToWithdraw == 0) {
+			amount2KEYToWithdraw = totalEarningsCollected.sub(totalEarningsWithdrawn);
+		} else {
+			require(totalEarningsWithdrawn.add(amount2KEYToWithdraw) <= totalEarningsCollected);
+		}
+
+		transferTokens(_twoKeyEconomy, beneficiary, amount2KEYToWithdraw);
+
+		PROXY_STORAGE_CONTRACT.setUint(
+			keccak256(_amountWithdrawnFromAffiliationSubscriptionPool),
+			totalEarningsWithdrawn.add(amount2KEYToWithdraw)
+		);
+	}
+
 	function withdrawFeesCollectedFromDistributionRewards(
 		address beneficiary,
 		uint amountToWithdraw
@@ -549,9 +573,11 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 
 
 	/**
-	 * @notice
+	 * @notice			Function to update that tokens are received as subscription for
+	 *					affiliation campaign
+	 * @param			amountOfTokens is amount of 2KEY tokens user took to pay subscription
 	 */
-	function updateTokensReceivedFromCampaignSubscriptions(
+	function updateReceivedTokensFromCampaignSubscriptions(
 		uint amountOfTokens
 	)
 	public
@@ -1000,6 +1026,15 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	{
 		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromCollectedDaiFromUpgradableExchange));
 	}
+
+	function getAmountWithdrawnFromSubscriptionEarnings()
+	internal
+	view
+	returns (uint)
+	{
+		return PROXY_STORAGE_CONTRACT.getUint(keccak256(_amountWithdrawnFromAffiliationSubscriptionPool));
+	}
+
 
 	function transferTokens(
 		string token,
