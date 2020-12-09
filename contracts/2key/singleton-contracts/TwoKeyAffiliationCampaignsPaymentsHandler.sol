@@ -148,7 +148,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         uint amountInUSDWei = amountOfTokens.mul(rate).div(10**18);
 
         // Require that amount user sent is corresponding at least 99$ (100$ is subscription)
-        require(amountInUSDWei >= 99 * 10**18);
+        require(amountInUSDWei >= 499 * 10**18);
 
         extendSubscriptionInternal(campaignPlasma);
 
@@ -189,7 +189,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         );
 
         // Require that amount user sent is corresponding at least 99$ (100$ is subscription)
-        require(amountInUSDWei >= 99 * 10**18);
+        require(amountInUSDWei >= 499 * 10**18);
 
         // Extend subscription
         extendSubscriptionInternal(campaignPlasma);
