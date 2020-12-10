@@ -80,6 +80,21 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
 
 
     /**
+     * @notice          Function to set rewards token address for the campaign
+     * @param           _rewardsTokenAddress is the address of rewards token
+     */
+    function setRewardsTokenAddress(
+        address _rewardsTokenAddress
+    )
+    public
+    onlyMaintainer
+    {
+        require(rewardsTokenAddress == address(0));
+        rewardsTokenAddress = _rewardsTokenAddress;
+    }
+
+
+    /**
      * @notice          Function where maintainer will register conversion
      * @param           converter is converter plasma address
      * @param           signature is referral hash for this conversion
