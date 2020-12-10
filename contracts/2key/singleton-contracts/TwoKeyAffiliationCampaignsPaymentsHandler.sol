@@ -53,7 +53,8 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
      * @param           campaignPlasma is address of campaign on plasma network
      */
     function extendSubscriptionInternal(
-        address campaignPlasma
+        address campaignPlasma,
+        uint numberOfMonths
     )
     internal
     {
@@ -64,7 +65,7 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         }
 
         // Extend subscription for 30 days
-        uint newEndDate = subscriptionEnding + 30 * (1 days);
+        uint newEndDate = subscriptionEnding + numberOfMonths.mul(30 * (1 days));
 
         // Set new subscription ending date
         PROXY_STORAGE_CONTRACT.setUint(
@@ -135,7 +136,8 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
      */
     function addSubscription2KEY(
         address campaignPlasma,
-        uint amountOfTokens
+        uint amountOfTokens,
+        uint numberOfMonthsExtendingSubscription
     )
     external
     {
@@ -147,10 +149,13 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
         // Compute amount in USD worth of subscription
         uint amountInUSDWei = amountOfTokens.mul(rate).div(10**18);
 
-        // Require that amount user sent is corresponding at least 99$ (100$ is subscription)
-        require(amountInUSDWei >= 499 * 10**18);
+        // Compute subscription monthly cost
+        uint subscriptionMonthlyCostUSDWei = 499 * 10**18;
 
-        extendSubscriptionInternal(campaignPlasma);
+        // Require that user sent enough tokens for number of months he want's to extend subscription
+        require(amountInUSDWei.div(subscriptionMonthlyCostUSDWei) == numberOfMonthsExtendingSubscription);
+
+        extendSubscriptionInternal(campaignPlasma, numberOfMonthsExtendingSubscription);
 
         // Take 2KEY tokens from the contractor
         IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transferFrom(
@@ -174,7 +179,8 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
     function addSubscriptionStableCoin(
         address campaignPlasma,
         address tokenAddress,
-        uint amountOfTokens
+        uint amountOfTokens,
+        uint numberOfMonthsExtendingSubscription
     )
     external
     {
@@ -188,11 +194,13 @@ contract TwoKeyAffiliationCampaignsPaymentsHandler is Upgradeable, ITwoKeySingle
             tokenAddress
         );
 
-        // Require that amount user sent is corresponding at least 99$ (100$ is subscription)
-        require(amountInUSDWei >= 499 * 10**18);
+        uint subscriptionMonthlyCostUSDWei = 499 * 10**18;
+
+        // Require that user sent enough tokens for number of months he want's to extend subscription
+        require(amountInUSDWei.div(subscriptionMonthlyCostUSDWei) == numberOfMonthsExtendingSubscription);
 
         // Extend subscription
-        extendSubscriptionInternal(campaignPlasma);
+        extendSubscriptionInternal(campaignPlasma, numberOfMonthsExtendingSubscription);
 
         // Handle case for Tether due to different ERC20 interface it has
         if (tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
