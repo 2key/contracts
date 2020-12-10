@@ -20,12 +20,6 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         string conversionType;
     }
 
-    event ConversionRegistered(
-        uint totalRewardsPaid,
-        uint amountOfReferrersInTheChain,
-        address rewardsTokenAddress
-    );
-
     Conversion [] public conversions;          // Array of all conversions
 
 
@@ -128,11 +122,12 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
             totalBountyDistributedForCampaign = totalBountyDistributedForCampaign.add(amountOfTokensToDistribute);
 
             // Emit event everytime there's paid conversion
-            emit ConversionRegistered(
-                c.bountyPaid,
-                numberOfUsersInReferralChain,
-                rewardsTokenAddress
-            );
+            ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+                .emitConversionRegistered(
+                    c.bountyPaid,
+                    numberOfUsersInReferralChain,
+                    rewardsTokenAddress
+                );
         } else {
             // In other case there's no bounty to be paid for this conversion
             c.bountyPaid = 0;

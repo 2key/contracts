@@ -20,7 +20,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     string constant _twoKeyPlasmaRegistry = "TwoKeyPlasmaRegistry";
     string constant _twoKeyPlasmaFactory = "TwoKeyPlasmaFactory";
     string constant _twoKeyPlasmaBudgetCampaignsPaymentsHandler = "TwoKeyPlasmaBudgetCampaignsPaymentsHandler";
-
+    string constant _twoKeyPlasmaAffiliationCampaignsPaymentsHandler = "TwoKeyPlasmaAffiliationCampaignsPaymentsHandler";
 
     /**
      * @notice          Function which is replication for constructor
@@ -149,6 +149,13 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     );
 
 
+    event ConversionRegistered(
+        uint totalRewardsPaid,
+        uint numberOfReferrersInChain,
+        address rewardsTokenAddress
+    );
+
+
     modifier onlyTwoKeyPlasmaFactory {
         address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaFactory);
         require(msg.sender == twoKeyPlasmaFactory);
@@ -173,6 +180,13 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     modifier onlyTwoKeyPlasmaBudgetCampaignsPaymentsHandler {
         address twoKeyPlasmaBudgetCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaBudgetCampaignsPaymentsHandler);
         require(msg.sender == twoKeyPlasmaBudgetCampaignsPaymentsHandler);
+        _;
+    }
+
+
+    modifier onlyTwoKeyPlasmaAffiliationCampaignsPaymentsHandler {
+        address twoKeyPlasmaAffiliationCampaignsPaymentsHandler = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAffiliationCampaignsPaymentsHandler);
+        require(msg.sender == twoKeyPlasmaAffiliationCampaignsPaymentsHandler);
         _;
     }
 
@@ -497,6 +511,28 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
 
         emit EpochFinalized(
             epochId
+        );
+    }
+
+
+    /**
+     * @notice          Function to emit event whenever there's conversion being registered with paid bounty
+     * @param           totalRewardsPaid is the amount of tokens paid in token currency
+     * @param           numberOfReferrersInChain is the number of referrers being rewarded
+     * @param           rewardsTokenAddress is the address of rewards token
+     */
+    function emitConversionRegistered(
+        uint totalRewardsPaid,
+        uint numberOfReferrersInChain,
+        address rewardsTokenAddress
+    )
+    public
+    onlyTwoKeyPlasmaAffiliationCampaignsPaymentsHandler
+    {
+        emit ConversionRegistered(
+            totalRewardsPaid,
+            numberOfReferrersInChain,
+            rewardsTokenAddress
         );
     }
 }

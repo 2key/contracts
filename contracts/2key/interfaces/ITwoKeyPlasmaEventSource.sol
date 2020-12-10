@@ -15,6 +15,7 @@ contract ITwoKeyPlasmaEventSource {
     function emitEpochDeclared(uint epochId, uint totalRewardsInEpoch) public;
     function emitEpochRegistered(uint epochId, uint numberOfUsers) public;
     function emitEpochFinalized(uint epochId) public;
+    function emitConversionRegistered(uint totalRewardsPaid, uint numberOfReferrersInChain, address rewardsTokenAddress) public;
     function emitPaidPendingRewards(
         address influencer,
         uint amountNonRebalancedReferrerEarned,
