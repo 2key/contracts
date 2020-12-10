@@ -6,7 +6,7 @@ import "./TwoKeyPlasmaAffiliationCampaignAbstract.sol";
 contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAffiliationCampaignAbstract {
 
     string public url;
-
+    address public rewardsTokenAddress;
 
     /**
      * This is the conversion object
@@ -19,6 +19,12 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         uint conversionTimestamp;
         string conversionType;
     }
+
+    event ConversionRegistered(
+        uint totalRewardsPaid,
+        uint amountOfReferrersInTheChain,
+        address rewardsTokenAddress
+    );
 
     Conversion [] public conversions;          // Array of all conversions
 
@@ -111,7 +117,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         // Get the ID and update mappings
         uint conversionId = conversions.length;
         // Distribute arcs if necessary
-        distributeArcsIfNecessary(converter,signature);
+        uint numberOfUsersInReferralChain = distributeArcsIfNecessary(converter,signature);
         // Bounty is getting distributed only if conversion is not directly from contractor
         if(getNumberOfUsersToContractor(converter) > 0) {
             // Check if there's enough bounty on the contract
@@ -120,6 +126,13 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
             c.bountyPaid = amountOfTokensToDistribute;
             // Add bounty paid
             totalBountyDistributedForCampaign = totalBountyDistributedForCampaign.add(amountOfTokensToDistribute);
+
+            // Emit event everytime there's paid conversion
+            emit ConversionRegistered(
+                c.bountyPaid,
+                numberOfUsersInReferralChain,
+                rewardsTokenAddress
+            );
         } else {
             // In other case there's no bounty to be paid for this conversion
             c.bountyPaid = 0;
