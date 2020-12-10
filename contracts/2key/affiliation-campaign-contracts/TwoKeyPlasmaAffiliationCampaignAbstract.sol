@@ -700,6 +700,18 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
 
 
     /**
+     * @notice          Function to return total added budget for the campaign
+     */
+    function getTotalAddedBudgetForCampaign()
+    public
+    view
+    returns (uint)
+    {
+        return totalBountyAddedForCampaign;
+    }
+
+
+    /**
      * @notice          Function to get if address is joined on-chain or not
      * @param           _plasmaAddress is the plasma address of the user
      *                  It can be converter, contractor, or simply an influencer
