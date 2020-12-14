@@ -157,6 +157,17 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
 
 
     /**
+     * @notice          Function to return ending date of currently active subscription
+     */
+    function getSubscriptionEndDate()
+    public
+    view
+    returns (uint)
+    {
+        return subscriptionEndDate;
+    }
+
+    /**
      * @notice          Function to return number of conversions
      */
     function getNumberOfConversions()

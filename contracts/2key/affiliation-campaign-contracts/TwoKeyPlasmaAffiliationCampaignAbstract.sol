@@ -34,7 +34,7 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     uint totalBountyDistributedForCampaign;         // Total bounty paid for rewards
     uint256 conversionQuota;  // maximal ARC tokens that can be passed in transferFrom
 
-    uint public subscriptionEndDate;
+    uint subscriptionEndDate;
 
     bool public isValidated;
     bool public isCampaignEndedByContractor;
