@@ -197,10 +197,10 @@ def generate_bytecode_for_declaring_epochs(epoch_ids,rewards):
     ## Convert list of ids and rewards into integers
     for i in range(0, len(list_of_ids)):
         list_of_ids[i] = int(list_of_ids[i])
-        list_of_rewards[i] =  int(list_of_rewards[i])
+        list_of_rewards[i] = int(list_of_rewards[i])
 
     method_name_and_params = "declareEpochs(uint256[],uint256[])"
-    types = ["uint256[]","uint256[]"]
+    types = ["uint256[]", "uint256[]"]
     values = [list_of_ids, list_of_rewards]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
     sys.stdout.flush()
