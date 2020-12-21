@@ -99,7 +99,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
      * @param           converterPlasma is converter plasma address
      * @param           converterPublic is converter public address
      * @param           signature is referral hash for this conversion
-     * @param           amountOfTokensToDistribute is amount of tokens to distribute
+     * @param           referrersAmountOfTokensToDistribute is amount of tokens to distribute
      *                  between influencers in case there's at least one referrer
      *                  between contractor and converter.
      */
@@ -107,7 +107,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         address converterPlasma,
         address converterPublic,
         bytes signature,
-        uint256 amountOfTokensToDistribute,
+        uint256 referrersAmountOfTokensToDistribute,
         uint256 converterAmountOfTokensToDistribute,
         string conversionType
     )
@@ -133,11 +133,11 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         // Bounty is getting distributed only if conversion is not directly from contractor
         if(getNumberOfUsersToContractor(converterPlasma) > 0) {
             // Check if there's enough bounty on the contract
-            require(isThereEnoughBounty(amountOfTokensToDistribute));
+            require(isThereEnoughBounty(referrersAmountOfTokensToDistribute));
             // Add bounty only if there's at least 1 influencer in this referral chain
-            c.bountyPaid = amountOfTokensToDistribute;
+            c.bountyPaid = referrersAmountOfTokensToDistribute;
             // Add bounty paid
-            totalBountyDistributedForCampaign = totalBountyDistributedForCampaign.add(amountOfTokensToDistribute);
+            totalBountyDistributedForCampaign = totalBountyDistributedForCampaign.add(referrersAmountOfTokensToDistribute);
 
             // Emit event everytime there's paid conversion
             ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
