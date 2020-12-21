@@ -96,16 +96,19 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
 
     /**
      * @notice          Function where maintainer will register conversion
-     * @param           converter is converter plasma address
+     * @param           converterPlasma is converter plasma address
+     * @param           converterPublic is converter public address
      * @param           signature is referral hash for this conversion
      * @param           amountOfTokensToDistribute is amount of tokens to distribute
      *                  between influencers in case there's at least one referrer
      *                  between contractor and converter.
      */
     function registerConversion(
-        address converter,
+        address converterPlasma,
+        address converterPublic,
         bytes signature,
-        uint amountOfTokensToDistribute,
+        uint256 amountOfTokensToDistribute,
+        uint256 converterAmountOfTokensToDistribute,
         string conversionType
     )
     external
@@ -115,7 +118,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     isCampaignValidated
     {
         // Mark user that he's converter
-        isConverter[converter] = true;
+        isConverter[converterPlasma] = true;
         // Create conversion
         Conversion memory c = Conversion(
             msg.sender,
@@ -126,9 +129,9 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         // Get the ID and update mappings
         uint conversionId = conversions.length;
         // Distribute arcs if necessary
-        uint numberOfUsersInReferralChain = distributeArcsIfNecessary(converter,signature);
+        uint numberOfUsersInReferralChain = distributeArcsIfNecessary(converterPlasma,signature);
         // Bounty is getting distributed only if conversion is not directly from contractor
-        if(getNumberOfUsersToContractor(converter) > 0) {
+        if(getNumberOfUsersToContractor(converterPlasma) > 0) {
             // Check if there's enough bounty on the contract
             require(isThereEnoughBounty(amountOfTokensToDistribute));
             // Add bounty only if there's at least 1 influencer in this referral chain
@@ -147,10 +150,18 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
             // In other case there's no bounty to be paid for this conversion
             c.bountyPaid = 0;
         }
+
+        // In case converter address is 0, then skip
+        if(converterPublic != address(0)) {
+            // Assign conversion rewards to converter public address
+            converterPublicAddress2AmountEarnedFromConverting[converterPublic] =
+            converterPublicAddress2AmountEarnedFromConverting[converterPublic].add(converterAmountOfTokensToDistribute);
+        }
+
         // Update reputation points on conversion executed event
-        updateReputationPointsOnConversionExecutedEvent(converter);
+        updateReputationPointsOnConversionExecutedEvent(converterPlasma);
         //Distribute rewards between referrers
-        updateRewardsBetweenInfluencers(converter, conversionId, c.bountyPaid);
+        updateRewardsBetweenInfluencers(converterPlasma, conversionId, c.bountyPaid);
         // Push conversion to array of successful conversions
         conversions.push(c);
     }
