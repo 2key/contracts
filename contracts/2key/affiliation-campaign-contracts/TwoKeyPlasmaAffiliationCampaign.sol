@@ -5,19 +5,23 @@ import "./TwoKeyPlasmaAffiliationCampaignAbstract.sol";
 
 contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAffiliationCampaignAbstract {
 
+    enum ConversionState {NOT_EXISTING, EXECUTED, REJECTED}
+
     string public url;
     address public rewardsTokenAddress;
 
     /**
      * This is the conversion object
      * converterPlasma is the address of converter
-     * bountyPaid is the bounty paid for that conversion
+     * bountyPaidReferrers is the bounty paid for that conversion
      */
     struct Conversion {
         address converterPlasma;
-        uint bountyPaid;
+        uint bountyPaidReferrers;
+        uint bountyPaidConverter;
         uint conversionTimestamp;
         string conversionType;
+        ConversionState conversionState;
     }
 
     Conversion [] public conversions;          // Array of all conversions
@@ -131,8 +135,10 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         Conversion memory c = Conversion(
             msg.sender,
             0,
+            converterAmountOfTokensToDistribute,
             block.timestamp,
-            conversionType
+            conversionType,
+            ConversionState.EXECUTED
         );
         // Get the ID and update mappings
         uint conversionId = conversions.length;
@@ -143,20 +149,20 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
             // Check if there's enough bounty on the contract
             require(isThereEnoughBounty(referrersAmountOfTokensToDistribute));
             // Add bounty only if there's at least 1 influencer in this referral chain
-            c.bountyPaid = referrersAmountOfTokensToDistribute;
+            c.bountyPaidReferrers = referrersAmountOfTokensToDistribute;
             // Add bounty paid
             totalBountyDistributedForCampaign = totalBountyDistributedForCampaign.add(referrersAmountOfTokensToDistribute);
 
             // Emit event everytime there's paid conversion
             ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
                 .emitConversionRegistered(
-                    c.bountyPaid,
+                    c.bountyPaidReferrers,
                     numberOfUsersInReferralChain,
                     rewardsTokenAddress
                 );
         } else {
             // In other case there's no bounty to be paid for this conversion
-            c.bountyPaid = 0;
+            c.bountyPaidReferrers = 0;
         }
 
         // In case converter address is 0, then skip
@@ -166,13 +172,28 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
             converterPublicAddress2AmountEarnedFromConverting[converterPublic].add(converterAmountOfTokensToDistribute);
         }
 
+        // Emit event that conversion is executed
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitConversionExecutedEvent(conversionId);
+
         // Update reputation points on conversion executed event
         updateReputationPointsOnConversionExecutedEvent(converterPlasma);
         //Distribute rewards between referrers
-        updateRewardsBetweenInfluencers(converterPlasma, conversionId, c.bountyPaid);
+        updateRewardsBetweenInfluencers(converterPlasma, conversionId, c.bountyPaidReferrers);
         // Push conversion to array of successful conversions
         conversions.push(c);
     }
+
+
+    function rejectConversion(
+        address converterPlasma,
+        address converterPublic,
+        bytes signature,
+        uint256 referrersAmountOfTokensToDistribute,
+        uint256 converterAmountOfTokensToDistribute,
+        uint256 campaignConverterNonce,
+        string conversionType
+    );
 
 
     /**
