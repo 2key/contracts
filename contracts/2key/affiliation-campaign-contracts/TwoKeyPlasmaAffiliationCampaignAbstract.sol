@@ -43,7 +43,7 @@ contract TwoKeyPlasmaAffiliationCampaignAbstract is TwoKeyCampaignIncentiveModel
     address[] public activeInfluencers;                    // Active influencer means that he has at least on participation in successful conversion
     mapping(address => bool) isActiveInfluencer;           // Mapping which will say if influencer is active or not
     mapping(address => bool) public isConverter;
-
+    mapping(address => uint256) public converterToConversionNonce;
     mapping(address => uint256) internal converterPublicAddress2AmountEarnedFromConverting;
     mapping(address => uint256) internal referrerPlasma2AmountInProcessOfWithdrawal;
     mapping(address => uint256) internal referrerPlasma2TotalWithdrawn;

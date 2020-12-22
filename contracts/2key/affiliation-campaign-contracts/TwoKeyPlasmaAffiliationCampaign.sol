@@ -109,6 +109,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         bytes signature,
         uint256 referrersAmountOfTokensToDistribute,
         uint256 converterAmountOfTokensToDistribute,
+        uint256 campaignConverterNonce,
         string conversionType
     )
     external
@@ -117,6 +118,13 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     isCampaignNotEnded
     isCampaignValidated
     {
+
+        // Assuming it's arithmetic progression with step 1
+        require(converterToConversionNonce[converterPlasma] + 1 == campaignConverterNonce);
+
+        // Set to the new one
+        converterToConversionNonce[converterPlasma] = campaignConverterNonce;
+
         // Mark user that he's converter
         isConverter[converterPlasma] = true;
         // Create conversion
