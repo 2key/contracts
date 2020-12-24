@@ -24,7 +24,7 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
         ConversionState conversionState;
     }
 
-    Conversion [] public conversions;          // Array of all conversions
+    Conversion [] conversions;          // Array of all conversions
 
 
     function setInitialParamsAffiliationCampaignPlasma(
@@ -216,6 +216,32 @@ contract TwoKeyPlasmaAffiliationCampaign is UpgradeableCampaign, TwoKeyPlasmaAff
     returns (uint)
     {
         return conversions.length;
+    }
+
+    function getConversion(
+        uint _conversionId
+    )
+    public
+    view
+    returns (address, uint, uint, uint, string, ConversionState)
+    {
+        Conversion memory c = conversions[_conversionId];
+
+        address converterPlasma;
+        uint bountyPaidReferrers;
+        uint bountyPaidConverter;
+        uint conversionTimestamp;
+        string conversionType;
+        ConversionState conversionState;
+
+        return (
+            c.converterPlasma,
+            c.bountyPaidReferrers,
+            c.bountyPaidConverter,
+            c.conversionTimestamp,
+            c.conversionType,
+            c.conversionState
+        );
     }
 
 }
