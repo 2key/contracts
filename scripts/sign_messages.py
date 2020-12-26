@@ -2,9 +2,22 @@
 
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+"""
+ In order to test this script, in the same directory create ".env-sign" named file, and
+ make sure it is following structure:
+ ------
+ RPC = <RPC>
+ PK = <SIGNATORY_PK>
+ ------
+
+ Also, make sure to have installed "environs"
+ (pip3 install environs)
+"""
 
 from web3 import Web3
 from eth_account import messages, Account
+from environs import Env
+
 import os
 
 
@@ -42,7 +55,6 @@ def build_signature(user_address, total_rewards_pending_wei, private_key_signato
     final_hash = hash_messages(message1, message2, w3)
     message_to_sign = messages.encode_defunct(hexstr=final_hash)
     signed_message = Account.sign_message(message_to_sign, private_key=private_key_signatory)
-    print("signature =", signed_message.signature.hex())
     finalize_signature(signed_message.signature.hex())
 
 def finalize_signature(signature):
@@ -54,9 +66,10 @@ def finalize_signature(signature):
 
 
 if __name__ == '__main__':
-    RPC = "https://oow3shai4e-rpc-staging.private.test.k8s.2key.net"
-
-    SIGNATORY_PK = "56bc91356aa96e48cacde069be2e905574df8d20dd4d362b582176338f9ee0fd"
+    env = Env()
+    env.read_env('.env-sign')
+    RPC = env('RPC')
+    SIGNATORY_PK = env('PK')
     w3 = Web3(Web3.HTTPProvider(RPC))
-    build_signature('0xec8b6aaee825e0bbc812ca13e1b4f4b038154688', 50000000000000000000,
+    build_signature('0x98a206fedc0e0ab0a45cb82a315c94087a79aed7', 24136582388247820000,
                     SIGNATORY_PK, w3)

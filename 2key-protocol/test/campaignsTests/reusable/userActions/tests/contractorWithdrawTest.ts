@@ -37,21 +37,13 @@ export default function contractorWithdrawTest(
       const {campaignAddress} = storage;
       const userDeptsBefore = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
 
-
-      const balanceBefore = (await protocol.getBalance(address)).balance;
-
       const contractorBalanceBefore = await protocol[campaignContract].getContractorBalance(campaignAddress, address);
-
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol[campaignContract].contractorWithdraw(campaignAddress, address)
       );
 
       const contractorBalance = await protocol[campaignContract].getContractorBalance(campaignAddress, address);
-
-
-      const balanceAfter = (await protocol.getBalance(address)).balance;
-
 
       if (userDeptsBefore > 0) {
         const userDeptsAfter = await protocol.TwoKeyFeeManager.getDebtForUser(protocol.plasmaAddress);
@@ -60,13 +52,9 @@ export default function contractorWithdrawTest(
 
       expectEqualNumbers(
         Number.parseFloat(
-          protocol.Utils.fromWei(
-            Number.parseFloat(balanceAfter.ETH.toString())
-            - Number.parseFloat(balanceBefore.ETH.toString()),
-            'ether'
-          ).toString()
+          contractorBalanceBefore.available
         ),
-        contractorBalanceBefore.available - userDeptsBefore
+        contractorBalance.available +  contractorBalanceBefore.available
       );
 
       expect(contractorBalance.available).to.be.eq(0);

@@ -1409,6 +1409,12 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     returns (uint,uint,uint)
     {
         uint currentPrice = sellRate2key();
+
+        // In case 0 USD is inputted, return 0 as bought, and current price as average and new.
+        if(purchaseAmountUSDWei == 0) {
+            return (0, currentPrice, currentPrice);
+        }
+
         uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
 
         return PriceDiscovery.buyTokensFromExchangeRealignPrice(
@@ -1427,19 +1433,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
         return ERC20(tokenAddress).balanceOf(address(this));
-    }
-
-    function fixStateOfDAIOnContract()
-    public
-    onlyMaintainer
-    {
-        address DAI = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
-
-        // Set all DAI are available to fill reserve
-        setStableCoinsAvailableToFillReserve(
-            IERC20(DAI).balanceOf(address(this)),
-            DAI
-        );
     }
 
 
