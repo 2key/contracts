@@ -40,9 +40,10 @@ describe(
             let value = 1000;
             let daiAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress("DAI");
             for (let i = 0; i < len; i++) {
-                if(addresses[i] != from) {
+                if(addresses[i].toLowerCase() != from.toLowerCase()) {
                     // Take balance before transfer
                     let balanceBefore = await twoKeyProtocol.ERC20.getERC20Balance(daiAddress, addresses[i]);
+
                     // Transfer tokens and wait until tx gets mined.
                     await twoKeyProtocol.Utils.getTransactionReceiptMined(
                         await twoKeyProtocol.ERC20.transfer(
