@@ -37,7 +37,7 @@ while test $# -gt 0; do
   esac
 done
 
-#yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/sendETH.spec.ts
+yarn run test:sendEth
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/congressVote.spec.ts
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/runUserRegistration.spec.ts
 yarn run test:command 2key-protocol/test/unitTests/envRelatedTests/twoKeyExchangeRate.spec.ts
