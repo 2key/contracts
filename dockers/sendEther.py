@@ -1,6 +1,8 @@
 import requests
 import json
 
+base_path = './dockers/sendEther.py'
+
 def getAddress():
     headers = {
         'Content-Type': 'application/json',
@@ -28,8 +30,17 @@ def sendEther(to):
 def sendEtherToAllTestAddresses():
 
     # Load deployer address as well.
-    with open('../configurationFiles/accountsConfig.json') as f:
-      data = json.load(f)
+    try:
+        with open('../configurationFiles/accountsConfig.json') as f:
+          data = json.load(f)
+    except Exception:
+         print('')
+
+    try:
+        with open('./configurationFiles/accountsConfig.json') as f:
+          data = json.load(f)
+    except Exception:
+         print('accountsConfig.json file not found. Try running the script from root of the project.')
 
 
     addresses = [
