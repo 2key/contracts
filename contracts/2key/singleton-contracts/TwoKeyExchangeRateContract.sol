@@ -8,6 +8,8 @@ import "../upgradability/Upgradeable.sol";
 import "../libraries/SafeMath.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/IChainlinkOracle.sol";
+import "../interfaces/AggregatorV3Interface.sol";
 
 
 /**
@@ -19,7 +21,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
      * Storage keys are stored on the top. Here they are in order to avoid any typos
      */
     string constant _currencyName2rate = "currencyName2rate";
-
+    string constant _pairToOracleAddress = "pairToOracleAddress";
     string constant _twoKeyEventSource = "TwoKeyEventSource";
 
     using SafeMath for uint;
@@ -103,6 +105,29 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
+     * @notice Function to set ChainLink oracle addresses
+     * @param  priceFeeds is the array of price feeds ChainLink contract addresses
+     * @param  hexedPairs is the array of pairs hexed
+     */
+    function storeChainLinkOracleAddresses(
+        address [] priceFeeds,
+        bytes32 [] hexedPairs
+    )
+    public
+    onlyMaintainer
+    {
+        uint i;
+
+        for(i = 0; i < priceFeeds.length; i++) {
+            PROXY_STORAGE_CONTRACT.setAddress(
+                keccak256(_pairToOracleAddress, hexedPairs[i]),
+                priceFeeds[i]
+            );
+        }
+    }
+
+
+    /**
      * @notice Function getter for base to target rate
      * @param base_target is the name of the currency
      */
@@ -125,8 +150,10 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        bytes32 keyHash = keccak256(_currencyName2rate, baseTarget);
-        return PROXY_STORAGE_CONTRACT.getUint(keyHash);
+        int latestPrice = getLatestPrice(PROXY_STORAGE_CONTRACT.getAddress(keccak256(baseTarget)));
+        return uint(latestPrice);
+//        bytes32 keyHash = keccak256(_currencyName2rate, baseTarget);
+//        return PROXY_STORAGE_CONTRACT.getUint(keyHash);
     }
 
 
@@ -195,6 +222,22 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         }
         // If stable coin is not matched, return 0 as quota
         return 0;
+    }
+
+    /**
+     * Returns the latest price
+     */
+    function getLatestPrice(
+        address oracleAddress
+    ) public view returns (int) {
+        (
+            uint80 roundID,
+            int price,
+            uint startedAt,
+            uint timeStamp,
+            uint80 answeredInRound
+        ) = AggregatorV3Interface(oracleAddress).latestRoundData();
+        return price;
     }
 
 
