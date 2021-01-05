@@ -8,7 +8,6 @@ import "../upgradability/Upgradeable.sol";
 import "../libraries/SafeMath.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/IERC20.sol";
-import "../interfaces/IChainlinkOracle.sol";
 import "../interfaces/AggregatorV3Interface.sol";
 
 
@@ -150,10 +149,10 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        int latestPrice = getLatestPrice(PROXY_STORAGE_CONTRACT.getAddress(keccak256(baseTarget)));
-        return uint(latestPrice);
-//        bytes32 keyHash = keccak256(_currencyName2rate, baseTarget);
-//        return PROXY_STORAGE_CONTRACT.getUint(keyHash);
+        address oracleAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256(baseTarget));
+        int latestPrice = getLatestPrice(oracleAddress);
+        uint8 decimalsPrecision = getDecimalsReturnPrecision(oracleAddress);
+        return uint(latestPrice) * (10**(18 - decimalsPrecision));
     }
 
 
@@ -225,7 +224,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * Returns the latest price
+     * @notice          Function to fetch the latest token price from ChainLink oracle
+     * @param           oracleAddress is the address of oracle we fetch price from
      */
     function getLatestPrice(
         address oracleAddress
@@ -238,6 +238,20 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
             uint80 answeredInRound
         ) = AggregatorV3Interface(oracleAddress).latestRoundData();
         return price;
+    }
+
+    /**
+     * @notice          Function to fetch on how many decimals is the response
+     * @param           oracleAddress is the address of the oracle from which we take price
+     */
+    function getDecimalsReturnPrecision(
+        address oracleAddress
+    )
+    public
+    view
+    returns (uint8)
+    {
+        return AggregatorV3Interface(oracleAddress).decimals();
     }
 
 
