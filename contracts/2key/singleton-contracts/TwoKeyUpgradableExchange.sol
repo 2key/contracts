@@ -1365,10 +1365,10 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
 
         uint rateFromUniswap = uniswapPriceDiscover(10 ** 18, path);
-        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
+//        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
-        return (rateFromUniswap.add(rateFromCoinGecko).add(rateFromContract)).div(3);
+        return (rateFromUniswap.add(rateFromContract)).div(2);
     }
 
 

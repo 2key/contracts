@@ -9,6 +9,7 @@ import "../libraries/SafeMath.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/IERC20.sol";
 import "../interfaces/AggregatorV3Interface.sol";
+import "../interfaces/IUniswapV2Router02.sol";
 
 
 /**
@@ -202,6 +203,31 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         return pairs;
     }
 
+    /**
+     * @notice          Function to fetch 2KEY against DAI rate from uniswap
+     */
+    function get2KeyDaiRate()
+    public
+    view
+    returns (uint)
+    {
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
+
+        address [] memory path = new address[](2);
+
+        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
+
+        uint[] memory amountsOut = new uint[](2);
+
+        amountsOut = IUniswapV2Router02(uniswapRouter).getAmountsOut(
+            10**18,
+            path
+        );
+
+        return amountsOut[1];
+    }
+
     function getStableCoinToUSDQuota(
         address stableCoinAddress
     )
@@ -211,7 +237,6 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     {
         // Take the symbol of the token
         string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
-
         // Check that this symbol is matching address stored in our codebase so we are sure that it's real asset
         if(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress) {
             // Generate pair against usd (Example: Symbol = DAI ==> result = 'DAI-USD'
@@ -240,6 +265,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         return price;
     }
 
+
     /**
      * @notice          Function to fetch on how many decimals is the response
      * @param           oracleAddress is the address of the oracle from which we take price
@@ -252,6 +278,21 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     returns (uint8)
     {
         return AggregatorV3Interface(oracleAddress).decimals();
+    }
+
+    /**
+     * @notice          Function to fetch address of the oracle for the specific pair
+     * @param           pair is the name of the pair for which we store oracles
+     */
+    function getChainLinkOracleAddress(
+        string memory pair
+    )
+    public
+    view
+    returns (address)
+    {
+        bytes32 hexedPair = stringToBytes32(pair);
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_pairToOracleAddress, hexedPair));
     }
 
 

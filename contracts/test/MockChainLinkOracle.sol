@@ -7,7 +7,7 @@ pragma solidity ^0.4.24;
  */
 contract MockChainLinkOracle {
 
-    int256 answer;
+    int256 _answer;
     uint8 _decimals;
     string _description;
     uint256 _version;
@@ -70,7 +70,7 @@ contract MockChainLinkOracle {
     {
         return (
             0,
-            answer,
+            _answer,
             0,
             0,
             0
@@ -82,7 +82,7 @@ contract MockChainLinkOracle {
     )
     public
     {
-        answer = newRateInDecimals;
+        _answer = newRateInDecimals;
     }
 
 
