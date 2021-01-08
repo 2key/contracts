@@ -150,7 +150,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address oracleAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256(baseTarget));
+        address oracleAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_pairToOracleAddress, baseTarget));
         int latestPrice = getLatestPrice(oracleAddress);
         uint8 decimalsPrecision = getDecimalsReturnPrecision(oracleAddress);
         return uint(latestPrice) * (10**(18 - decimalsPrecision));
