@@ -57,6 +57,7 @@ describe(
 
     it('should check if oracle exists and if not, deploy one', async() => {
 
+        let managerAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('MockOraclesManager');
 
         for (const oracle of oracles) {
             let oracleAddress = await promisify(
@@ -72,34 +73,88 @@ describe(
                     bytecode: singletons.MockChainLinkOracle.bytecode,
                 }
                 // Here we should deploy new oracle contract
-                let txHash = await twoKeyProtocol.createContract(iContract,from, {params: [18,oracle.toString(),1]});
+                let txHash = await twoKeyProtocol.createContract(iContract,from, {params: [
+                    18,
+                    oracle.toString(),
+                    1,
+                    managerAddress
+                    ]
+                });
+
                 let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
                 let txHash1 = await twoKeyProtocol.TwoKeyExchangeContract.setOracles(
                     [receipt.contractAddress],
                     [oracle],
                     from
                 );
-            }
 
+            }
             oraclesObjects.push({
                 oracleName: oracle,
                 oracleAddress: oracleAddress
             });
         }
-
-        console.log(oraclesObjects)
     }).timeout(timeout);
 
-    it('should set rates on oracles', async() => {
-        for(const oracle of oraclesObjects) {
-            let oracleInstance = twoKeyProtocol.web3.eth.contract(singletons.MockChainLinkOracle.abi).at(oracle.oracleAddress);
-            const transformedBaseToTargetRate = parseFloat(twoKeyProtocol.Utils.toWei(exchangeRates[oracle.oracleName],'ether').toString());
 
-            let txHash = await promisify(oracleInstance.updatePrice,[
-                transformedBaseToTargetRate,
-                {from}
-            ]);
+    it('should set deployed oracles on OraclesManager contract', async() => {
+        let managerAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('MockOraclesManager');
+
+
+        let oracleAddresses = [];
+        let oracleNamesHex = [];
+
+        for(const oracle of oraclesObjects) {
+            oracleAddresses.push(oracle.oracleAddress);
+            oracleNamesHex.push(twoKeyProtocol.Utils.toHex(oracle.oracleName));
         }
+
+        // Create manager instance
+        let managerInstance = twoKeyProtocol.web3.eth.contract(singletons.MockOraclesManager.abi).at(managerAddress);
+
+        let txHash = await promisify(managerInstance.storeOracles,[
+            oracleNamesHex,
+            oracleAddresses,
+            {from}
+        ]);
+
+        let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+
+        for(let i=0; i<oracleNamesHex.length; i++) {
+            let oracleName = oracleNamesHex[i];
+
+            let oracleAddressFromContract = await promisify(managerInstance.pairToOracleAddress,[oracleName]);
+            // Assert that oracles are properly set
+            expect(oracleAddressFromContract.toString().toLowerCase() == oracleAddresses[i].toString().toLowerCase());
+        }
+    }).timeout(timeout);
+
+
+    it('should set rates on oracles', async() => {
+        let rates = [];
+        let oracleNamesHex = [];
+
+        let managerAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('MockOraclesManager');
+
+        // Create manager instance
+        let managerInstance = twoKeyProtocol.web3.eth.contract(singletons.MockOraclesManager.abi).at(managerAddress);
+
+        for(const oracle of oraclesObjects) {
+            rates.push(parseFloat(twoKeyProtocol.Utils.toWei(exchangeRates[oracle.oracleName],'ether').toString()));
+            oracleNamesHex.push(twoKeyProtocol.Utils.toHex(oracle.oracleName));
+        }
+
+
+        let txHash = await promisify(managerInstance.updateRates,[
+            oracleNamesHex,
+            rates,
+            {
+                from
+            }
+        ]);
+
+
+        let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
     }).timeout(timeout);
 
 

@@ -7,6 +7,7 @@ pragma solidity ^0.4.24;
  */
 contract MockChainLinkOracle {
 
+    address _oraclesManager;
     int256 _answer;
     uint8 _decimals;
     string _description;
@@ -18,7 +19,8 @@ contract MockChainLinkOracle {
     constructor(
         uint8 decimals_,
         string description_,
-        uint256 version_
+        uint256 version_,
+        address oraclesManager_
     )
     public
     {
@@ -28,7 +30,18 @@ contract MockChainLinkOracle {
         _decimals = decimals_;
         _description = description_;
         _version = version_;
+        _oraclesManager = oraclesManager_;
     }
+
+
+    function oraclesManager()
+    external
+    view
+    returns (address)
+    {
+        return _oraclesManager;
+    }
+
 
     function decimals()
     external
@@ -82,6 +95,8 @@ contract MockChainLinkOracle {
     )
     public
     {
+        // Only oracles manager can update price
+        require(msg.sender == _oraclesManager);
         _answer = newRateInDecimals;
     }
 

@@ -1,5 +1,6 @@
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 const DAI = artifacts.require('DAI');
+const MockOraclesManager = artifacts.require('MockOraclesManager');
 const TwoKeyUpgradableExchange = artifacts.require('TwoKeyUpgradableExchange');
 const TwoKeyAdmin = artifacts.require('TwoKeyAdmin');
 const TwoKeyEventSource = artifacts.require('TwoKeyEventSource');
@@ -122,7 +123,8 @@ module.exports = function deploy(deployer) {
         TwoKeyCongress,
         TwoKeyCongressMembersRegistry,
         DAI,
-        TestUniswapRouter
+        TestUniswapRouter,
+        MockOraclesManager
     };
 
     let nonUpgradableContractArtifactsPlasma = {
@@ -222,12 +224,14 @@ module.exports = function deploy(deployer) {
                 fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
                 fs.writeFileSync(addressesFile, JSON.stringify(contractNameToProxyAddress, null, 4));
             })
-                .then(() => deployer.deploy(TwoKeyEconomy, TwoKeySingletonesRegistry.address))
-                .then(() => TwoKeyEconomy.deployed())
-                .then(() => deployer.deploy(DAI))
-                .then(() => DAI.deployed())
-                .then(() => deployer.deploy(TestUniswapRouter))
-                .then(() => TestUniswapRouter.deployed())
+            .then(() => deployer.deploy(TwoKeyEconomy, TwoKeySingletonesRegistry.address))
+            .then(() => TwoKeyEconomy.deployed())
+            .then(() => deployer.deploy(DAI))
+            .then(() => DAI.deployed())
+            .then(() => deployer.deploy(TestUniswapRouter))
+            .then(() => TestUniswapRouter.deployed())
+            .then(() => deployer.deploy(MockOraclesManager, TwoKeySingletonesRegistry.address))
+            .then(() => MockOraclesManager.deployed())
             .then(async () => {
 
                 let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
