@@ -66,8 +66,8 @@ contract MockOraclesManager is ITwoKeySingletonUtils {
     }
 
     function storeOracles(
-        bytes32 [] pairsRepresentingOracle,
-        address [] oracles
+        bytes32 [] hexedPairs,
+        address [] priceFeeds
     )
     public
     onlyMaintainer
@@ -76,11 +76,11 @@ contract MockOraclesManager is ITwoKeySingletonUtils {
 
         for(i = 0; i < oracles.length; i++) {
             Oracle memory o = Oracle(
-                pairsRepresentingOracle[i],
-                oracles[i]
+                hexedPairs[i],
+                priceFeeds[i]
             );
             oracles.push(o);
-            pairToOracleAddress[pairsRepresentingOracle[i]] = oracles[i];
+            pairToOracleAddress[hexedPairs[i]] = priceFeeds[i];
         }
     }
 

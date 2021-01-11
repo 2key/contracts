@@ -110,8 +110,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
      * @param  hexedPairs is the array of pairs hexed
      */
     function storeChainLinkOracleAddresses(
-        address [] priceFeeds,
-        bytes32 [] hexedPairs
+        bytes32 [] hexedPairs,
+        address [] priceFeeds
     )
     public
     onlyMaintainer
