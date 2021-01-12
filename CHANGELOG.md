@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="v1.4.186-develop"></a>
+## [v1.4.186-develop] - 2021-01-12
+
 <a name="v1.4.185-develop"></a>
 ## [v1.4.185-develop] - 2021-01-12
 
@@ -2441,7 +2444,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.185-develop...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.186-develop...HEAD
+[v1.4.186-develop]: https://github.com/2key/contracts/compare/v1.4.185-develop...v1.4.186-develop
 [v1.4.185-develop]: https://github.com/2key/contracts/compare/v1.4.184-develop...v1.4.185-develop
 [v1.4.184-develop]: https://github.com/2key/contracts/compare/v1.2.73-staging...v1.4.184-develop
 [v1.2.73-staging]: https://github.com/2key/contracts/compare/v1.4.33-master...v1.2.73-staging
