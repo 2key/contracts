@@ -993,6 +993,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
             // Get minimum received
             uint minimumToReceive = uniswapPriceDiscover(
+                uniswapRouter,
                 amountToSwap,
                 path
             );
@@ -1331,6 +1332,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
      */
     function uniswapPriceDiscover(
+        address uniswapRouter,
         uint amountToSwap,
         address [] path
     )
@@ -1338,7 +1340,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (uint)
     {
-        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
         uint[] memory amountsOut = new uint[](2);
 
         amountsOut = IUniswapV2Router02(uniswapRouter).getAmountsOut(
@@ -1360,15 +1361,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
 
         address [] memory path = new address[](2);
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
 
         path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
+        path[1] = IUniswapV2Router02(uniswapRouter).WETH();
 
-        uint rateFromUniswap = uniswapPriceDiscover(10 ** 18, path);
-        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
+        // Represents how much 1 2KEY is worth ETH
+        uint rateFromUniswap = uniswapPriceDiscover(uniswapRouter, 10 ** 18, path);
+
+        // Rate from ETH-USD oracle
+        uint eth_usdRate = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"))
+            .getBaseToTargetRate("ETH-USD");
+
+        // Rate computed by combination of ChainLink oracle (ETH-USD) and Uniswap (2KEY-ETH)
+        // Which will represent final 2KEY-USD rate
+        uint finalRate = rateFromUniswap.mul(10**18).div(eth_usdRate);
+
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
-        return (rateFromUniswap.add(rateFromCoinGecko).add(rateFromContract)).div(3);
+        return (finalRate.add(rateFromContract)).div(2);
     }
 
 

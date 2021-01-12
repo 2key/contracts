@@ -9,7 +9,6 @@ import "../interfaces/storage-contracts/ITwoKeyBudgetCampaignsPaymentsHandlerSto
 import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/IUpgradableExchange.sol";
-import "../interfaces/ITwoKeyExchangeRateContract.sol";
 import "../libraries/SafeMath.sol";
 
 contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUtils {
