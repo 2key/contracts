@@ -18,7 +18,7 @@ echo "Destination for execution of contracts patches: 0xf4797416e6b6835114390591
 cd ../..
 
 python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.38
-python3 generate_bytecode.py upgradeContract TwoKeyExchangeRateContract 1.0.38
+python3 generate_bytecode.py upgradeContract TwoKeyExchangeRateContract 1.0.3
 python3 generate_bytecode.py approveNewCampaign DONATION 1.0.41
 python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.44
 
