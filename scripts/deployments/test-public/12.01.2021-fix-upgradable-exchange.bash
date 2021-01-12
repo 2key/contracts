@@ -17,6 +17,6 @@ echo "Destination for execution of contracts patches: 0xf4797416e6b6835114390591
 
 cd ../..
 
-python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.37
+python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.39
 
 
