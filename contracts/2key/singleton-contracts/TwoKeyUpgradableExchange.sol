@@ -1365,6 +1365,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
 
         uint rateFromUniswap = uniswapPriceDiscover(10 ** 18, path);
+        // Take from ETH pool and take from ChainLink oracle ETH -> USD, and compute the USD rate
 //        uint rateFromCoinGecko = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("2KEY-USD");
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 
