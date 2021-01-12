@@ -13,12 +13,13 @@ contract MockOraclesManager is ITwoKeySingletonUtils {
 
     mapping (bytes32 => address) public pairToOracleAddress;
 
-    struct Oracle {
-        bytes32 pair;
-        address oracleAddress;
-    }
+    event OracleDeployed(
+        address oracleAddress,
+        string oracleDescription
+    );
 
-    Oracle [] public oracles;
+    address [] deployedOracles;
+    bytes32 [] deployedOraclesDescriptions;
 
     event PriceUpdated(
         address oracleAddress,
@@ -65,23 +66,61 @@ contract MockOraclesManager is ITwoKeySingletonUtils {
         }
     }
 
-    function storeOracles(
-        bytes32 [] hexedPairs,
-        address [] priceFeeds
+    function deployAndStoreOracles(
+        uint8 decimals,
+        bytes32 [] oraclesDescription,
+        uint256 version
     )
     public
-    onlyMaintainer
     {
-        uint i;
+        uint i = 0;
 
-        for(i = 0; i < oracles.length; i++) {
-            Oracle memory o = Oracle(
-                hexedPairs[i],
-                priceFeeds[i]
+        for(i = 0; i < oraclesDescription.length; i++) {
+            string memory description = bytes32ToStr(oraclesDescription[i]);
+
+            address deployedOracle = new MockChainLinkOracle(
+                decimals,
+                description,
+                version,
+                address(this)
             );
-            oracles.push(o);
-            pairToOracleAddress[hexedPairs[i]] = priceFeeds[i];
+
+            emit OracleDeployed(
+                deployedOracle,
+                description
+            );
+
+            deployedOracles.push(deployedOracle);
+            deployedOraclesDescriptions.push(oraclesDescription[i]);
+
+            pairToOracleAddress[oraclesDescription[i]] = deployedOracle;
         }
+
     }
+
+    function bytes32ToStr(bytes32 _bytes32) public pure returns (string) {
+
+        // string memory str = string(_bytes32);
+        // TypeError: Explicit type conversion not allowed from "bytes32" to "string storage pointer"
+        // thus we should fist convert bytes32 to bytes (to dynamically-sized byte array)
+
+        bytes memory bytesArray = new bytes(32);
+        for (uint256 i; i < 32; i++) {
+            bytesArray[i] = _bytes32[i];
+        }
+        return string(bytesArray);
+    }
+
+
+    function getDeployedOraclesAndDescriptions()
+    public
+    view
+    returns (address[], bytes32[]) {
+        return (
+        deployedOracles,
+        deployedOraclesDescriptions
+        );
+    }
+
 
 }
