@@ -2,6 +2,36 @@
 ## [Unreleased]
 
 
+<a name="v1.4.184-develop"></a>
+## [v1.4.184-develop] - 2021-01-12
+### Pull Requests
+- Merge pull request [#60](https://github.com/2key/contracts/issues/60) from 2key/oracles
+
+
+<a name="v1.2.73-staging"></a>
+## [v1.2.73-staging] - 2020-12-08
+
+<a name="v1.4.33-master"></a>
+## [v1.4.33-master] - 2020-12-06
+
+<a name="v1.2.72-staging"></a>
+## [v1.2.72-staging] - 2020-12-06
+
+<a name="v1.4.32-master"></a>
+## [v1.4.32-master] - 2020-12-05
+
+<a name="v1.4.31-master"></a>
+## [v1.4.31-master] - 2020-12-05
+
+<a name="v1.4.30-master"></a>
+## [v1.4.30-master] - 2020-12-05
+
+<a name="v1.2.71-staging"></a>
+## [v1.2.71-staging] - 2020-12-02
+
+<a name="v1.2.70-staging"></a>
+## [v1.2.70-staging] - 2020-12-01
+
 <a name="v1.4.183-develop"></a>
 ## [v1.4.183-develop] - 2020-11-30
 
@@ -2408,7 +2438,16 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.183-develop...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.184-develop...HEAD
+[v1.4.184-develop]: https://github.com/2key/contracts/compare/v1.2.73-staging...v1.4.184-develop
+[v1.2.73-staging]: https://github.com/2key/contracts/compare/v1.4.33-master...v1.2.73-staging
+[v1.4.33-master]: https://github.com/2key/contracts/compare/v1.2.72-staging...v1.4.33-master
+[v1.2.72-staging]: https://github.com/2key/contracts/compare/v1.4.32-master...v1.2.72-staging
+[v1.4.32-master]: https://github.com/2key/contracts/compare/v1.4.31-master...v1.4.32-master
+[v1.4.31-master]: https://github.com/2key/contracts/compare/v1.4.30-master...v1.4.31-master
+[v1.4.30-master]: https://github.com/2key/contracts/compare/v1.2.71-staging...v1.4.30-master
+[v1.2.71-staging]: https://github.com/2key/contracts/compare/v1.2.70-staging...v1.2.71-staging
+[v1.2.70-staging]: https://github.com/2key/contracts/compare/v1.4.183-develop...v1.2.70-staging
 [v1.4.183-develop]: https://github.com/2key/contracts/compare/v1.2.69-staging...v1.4.183-develop
 [v1.2.69-staging]: https://github.com/2key/contracts/compare/v1.2.68-staging...v1.2.69-staging
 [v1.2.68-staging]: https://github.com/2key/contracts/compare/v1.4.182-develop...v1.2.68-staging
