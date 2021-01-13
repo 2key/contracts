@@ -1,6 +1,11 @@
 pragma solidity ^0.4.24;
 
 contract TestUniswapRouter {
+
+    function WETH() external pure returns (address) {
+        return address(0);
+    }
+
     function getAmountsOut(
         uint amountIn,
         address[] path
