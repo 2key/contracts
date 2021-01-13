@@ -1373,9 +1373,11 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint eth_usdRate = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"))
             .getBaseToTargetRate("USD");
 
+
         // Rate computed by combination of ChainLink oracle (ETH-USD) and Uniswap (2KEY-ETH)
+
         // Which will represent final 2KEY-USD rate
-        uint finalRate = rateFromUniswap.mul(10**18).div(eth_usdRate);
+        uint finalRate = rateFromUniswap.mul(eth_usdRate).div(10**18);
 
         uint rateFromContract = getUint(keccak256("sellRate2key"));
 

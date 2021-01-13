@@ -177,7 +177,7 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
     function getFiatToStableQuotes(
         uint amountInFiatWei,
         string fiatCurrency,
-        bytes32 [] stableCoinPairs
+        bytes32 [] stableCoinPairs //Pairs stable coin - ETh
     )
     public
     view
@@ -197,7 +197,15 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
             // 1 * DAI = 0.99 * USD
             // 1 USD = 1 * DAI / 0.99
             // 15 USD = 15 / 0.99
-            uint rate = getBaseToTargetRateInternal(stableCoinPairs[i]);
+
+            // get rate against ETH (1 STABLE  = rate ETH)
+            uint stableEthRate = getBaseToTargetRateInternal(stableCoinPairs[i]);
+
+            // This is the ETH/USD rate
+            uint eth_usd = getBaseToTargetRateInternal(stringToBytes32("USD"));
+
+            uint rate =  stableEthRate.mul(eth_usd).div(10**18);
+
             pairs[i] = amountInFiatWei.mul(10**18).div(rate);
         }
 
@@ -240,10 +248,18 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
         // Check that this symbol is matching address stored in our codebase so we are sure that it's real asset
         if(getNonUpgradableContractAddressFromTwoKeySingletonRegistry(tokenSymbol) == stableCoinAddress) {
-            // Generate pair against usd (Example: Symbol = DAI ==> result = 'DAI-USD'
-            string memory tokenSymbolToCurrency = concatenateStrings(tokenSymbol, "-USD");
-            // get rate against USD (1 STABLE  = rate USD)
-            return getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
+            // Chainlink provides us with the rates from StableCoin -> ETH, and along with that we have ETH -> USD quota
+
+            // Generate pair against ETH (Example: Symbol = DAI ==> result = 'DAI-ETH'
+            string memory tokenSymbolToCurrency = concatenateStrings(tokenSymbol, "-ETH");
+
+            // get rate against ETH (1 STABLE  = rate ETH)
+            uint stableEthRate = getBaseToTargetRateInternal(stringToBytes32(tokenSymbolToCurrency));
+
+            // This is the ETH/USD rate
+            uint eth_usd = getBaseToTargetRateInternal(stringToBytes32("USD"));
+
+            return stableEthRate.mul(eth_usd).div(10**18);
         }
         // If stable coin is not matched, return 0 as quota
         return 0;
@@ -295,6 +311,8 @@ contract TwoKeyExchangeRateContract is Upgradeable, ITwoKeySingletonUtils {
         bytes32 hexedPair = stringToBytes32(pair);
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_pairToOracleAddress, hexedPair));
     }
+
+
 
 
     /**
