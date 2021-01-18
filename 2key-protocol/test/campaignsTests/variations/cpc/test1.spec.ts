@@ -34,6 +34,7 @@ describe(
 
     checkCpcCampaign(campaignData, storage, userIds.buyer);
 
+
     usersActions(
       {
         userKey: userIds.test,

@@ -4,7 +4,7 @@ import ICreateCPCTest from "../../typings/ICreateCPCTest";
 import {expectEqualNumbers} from "../../helpers/numberHelpers";
 import {promisify} from "../../../src/utils/promisify";
 
-const TIMEOUT_LENGTH = 60000;
+const TIMEOUT_LENGTH = 10000;
 
 export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage, maintainerKey: string) {
   const userKey = storage.contractorKey;
@@ -22,7 +22,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     const {campaignAddress} = storage;
 
     const contractorAddress = await protocol.CPCCampaign.getContractorAddresses(campaignAddress);
-    expect(contractorAddress).to.be.equal(protocol.plasmaAddress);
+    expect(contractorAddress.toLowerCase()).to.be.equal(protocol.plasmaAddress.toLowerCase());
   }).timeout(TIMEOUT_LENGTH);
 
   it('should check if address is contractor', async () => {
@@ -51,7 +51,8 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     const inventoryBefore = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
     let usdTotalAmount = campaignParams.bountyPerConversionUSD * campaignParams.targetClicks + 0.1;
 
-    if(Math.random() > 0.5) {
+    //Math.random() > 0.5
+    if(false) {
       // Random case budgeting with 2KEY
 
       let amountOfTokens = await protocol.CPCCampaign.getRequiredBudget2KEY('USD', protocol.Utils.toWei(usdTotalAmount,'ether').toString());
@@ -72,6 +73,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
         )
       );
 
+
       let receipt = await protocol.Utils.getTransactionReceiptMined(
           await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
       );
@@ -86,14 +88,17 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
       );
     } else {
         // Ranadom case budgeting with DAI/TUSD/BUSD/...
+
         let amountOfTokensRequired = await protocol.TwoKeyExchangeContract.getFiatToStableQuotes(
-            parseFloat(protocol.Utils.toWei(usdTotalAmount,'ether').toString()),
+            protocol.Utils.toWei(usdTotalAmount,'ether').toString(),
             'USD',
             ['DAI']
           );
 
         let amountOfTokensWei = await protocol.Utils.toWei(amountOfTokensRequired.DAI,'ether').toString();
+
         let daiAddress = await protocol.SingletonRegistry.getNonUpgradableContractAddress('DAI');
+
 
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.ERC20.erc20ApproveAddress(
@@ -131,10 +136,10 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     console.log(initialParams);
 
     // This should set total bounty, initial rate and validate campaign
-    await promisify(c.setInitialParamsAndValidateCampaign,[
-        protocol.Utils.toWei(initialParams.initialBountyForCampaign,'ether'),
-        protocol.Utils.toWei(initialParams.initialRate2KEYUSD,'ether'),
-        protocol.Utils.toWei(initialParams.bountyPerConversion2KEY,'ether'),
+    await promisify(c.methods.setInitialParamsAndValidateCampaign,[
+        protocol.Utils.toWei(initialParams.initialBountyForCampaign,'ether').toString(),
+        protocol.Utils.toWei(initialParams.initialRate2KEYUSD,'ether').toString(),
+        protocol.Utils.toWei(initialParams.bountyPerConversion2KEY,'ether').toString(),
         initialParams.isBudgetedDirectlyWith2KEY,
         {from: protocol.plasmaAddress}
     ])
