@@ -266,24 +266,31 @@ contract TwoKeyPurchasesHandler is UpgradeableCampaign {
         Purchase memory p = conversionIdToPurchase[_conversionId];
         uint[] memory unlockingDates = getPortionsUnlockingDates();
 
-        uint availableTokens;
-        uint lockedTokens;
-        uint withdrawnTokens;
+        uint availableTokens = 0;
+        uint lockedTokens = 0;
+        uint withdrawnTokens = 0;
+
         /**
          If unlocking date is after block.timestamp, then this portion amount and all after it are locked
          Otherwise, if the date is before block.timestamp, it's either withdrawn or available to withdraw
          */
-        for(uint j=0; j<unlockingDates.length; j++) {
-            if(block.timestamp < unlockingDates[j]) {
-                lockedTokens = lockedTokens.add(p.portionAmounts[j]);
-            } else {
-                if(p.isPortionWithdrawn[j] == true) {
-                    withdrawnTokens = withdrawnTokens.add(p.portionAmounts[j]);
+
+        // This logic will be performed only if the conversion is executed
+        // Added to avoid revert
+        if(p.converter != address(0)) {
+            for(uint j=0; j<unlockingDates.length; j++) {
+                if(block.timestamp < unlockingDates[j]) {
+                    lockedTokens = lockedTokens.add(p.portionAmounts[j]);
                 } else {
-                    availableTokens = availableTokens.add(p.portionAmounts[j]);
+                    if(p.isPortionWithdrawn[j] == true) {
+                        withdrawnTokens = withdrawnTokens.add(p.portionAmounts[j]);
+                    } else {
+                        availableTokens = availableTokens.add(p.portionAmounts[j]);
+                    }
                 }
             }
         }
+
 
         return (availableTokens, lockedTokens, withdrawnTokens);
     }
