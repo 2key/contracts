@@ -41,114 +41,112 @@ describe(
         it('should load number of proposals', async() => {
             numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals,[]);
             numberOfProposals = parseInt(numberOfProposals,10) - 1;
+            console.log(numberOfProposals);
         }).timeout(timeout);
 
-        if(numberOfProposals > 0) {
-            it('should create a proposal on plasma congress to declare epochs', async() => {
-                transactionBytecode =
-                    "0xbc21c011000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000001a0000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000009000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e00000";
-                const destination = twoKeyProtocol.twoKeyPlasmaParticipationRewards._address;
+        it('should create a proposal on plasma congress to declare epochs', async() => {
+            transactionBytecode =
+                "0xbc21c011000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000001a0000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000009000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e000000000000000000000000000000000000000000000000000068155a43676e00000";
+            const destination = twoKeyProtocol.twoKeyPlasmaParticipationRewards._address;
 
-                console.log('Destination: ', destination);
+            console.log('Destination: ', destination);
 
-                let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.newProposal, [
-                    destination,
-                    0,
-                    "Declare epochs",
+            let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.newProposal, [
+                destination,
+                0,
+                "Declare epochs",
+                transactionBytecode,
+                {
+                    from: twoKeyProtocol.plasmaAddress
+                }
+            ]);
+
+            console.log(txHash);
+
+            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
+            const status = receipt && receipt.status;
+            expect(status).to.be.equal(true);
+        }).timeout(timeout);
+
+        it('should member 1. vote for supporting proposal', async() => {
+            numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals,[]);
+            numberOfProposals = parseInt(numberOfProposals,10) - 1;
+
+            let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote,[
+                numberOfProposals,
+                true,
+                "I support declaring this epochs",
+                {
+                    from: twoKeyProtocol.plasmaAddress,
+                }
+            ]);
+
+            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
+            const status = receipt && receipt.status;
+            expect(status).to.be.equal(true);
+        }).timeout(timeout);
+
+        it('should member 2. vote for supporting proposal', async() => {
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.aydnep();
+
+            from = address;
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
+
+            let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote,[
+                numberOfProposals,
+                true,
+                "I support declaring this epochs",
+                {
+                    from: twoKeyProtocol.plasmaAddress
+                }
+            ]);
+
+            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
+            const status = receipt && receipt.status;
+            expect(status).to.be.equal(true);
+        }).timeout(timeout);
+
+        it('should member 3 vote for supporting proposal', async() => {
+
+            const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.gmail();
+
+            from = address;
+            twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
+
+            let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote,[
+                numberOfProposals,
+                true,
+                "I support declaring this epochs",
+                {
+                    from: twoKeyProtocol.plasmaAddress
+                }
+            ]);
+
+            const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
+            const status = receipt && receipt.status;
+            expect(status).to.be.equal(true);
+        }).timeout(timeout);
+
+        it('should execute proposal', async() => {
+            let txHash;
+            try {
+                txHash = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.executeProposal,[
+                    numberOfProposals,
                     transactionBytecode,
                     {
                         from: twoKeyProtocol.plasmaAddress
                     }
                 ]);
+            } catch (e) {
+                console.log('Error: ', e);
+            }
 
-                console.log(txHash);
-
+            if(txHash) {
                 const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
                 const status = receipt && receipt.status;
                 expect(status).to.be.equal(true);
-            }).timeout(timeout);
-
-            it('should member 1. vote for supporting proposal', async() => {
-                numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals,[]);
-                numberOfProposals = parseInt(numberOfProposals,10) - 1;
-
-                let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote,[
-                    numberOfProposals,
-                    true,
-                    "I support declaring this epochs",
-                    {
-                        from: twoKeyProtocol.plasmaAddress,
-                    }
-                ]);
-
-                const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
-                const status = receipt && receipt.status;
-                expect(status).to.be.equal(true);
-            }).timeout(timeout);
-
-            it('should member 2. vote for supporting proposal', async() => {
-                const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.aydnep();
-
-                from = address;
-                twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
-
-                let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote,[
-                    numberOfProposals,
-                    true,
-                    "I support declaring this epochs",
-                    {
-                        from: twoKeyProtocol.plasmaAddress
-                    }
-                ]);
-
-                const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
-                const status = receipt && receipt.status;
-                expect(status).to.be.equal(true);
-            }).timeout(timeout);
-
-            it('should member 3 vote for supporting proposal', async() => {
-
-                const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.gmail();
-
-                from = address;
-                twoKeyProtocol = getTwoKeyProtocol(web3, plasmaWeb3, plasmaAddress);
-
-                let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.vote,[
-                    numberOfProposals,
-                    true,
-                    "I support declaring this epochs",
-                    {
-                        from: twoKeyProtocol.plasmaAddress
-                    }
-                ]);
-
-                const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
-                const status = receipt && receipt.status;
-                expect(status).to.be.equal(true);
-            }).timeout(timeout);
-
-            it('should execute proposal', async() => {
-                let txHash;
-                try {
-                    txHash = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.executeProposal,[
-                        numberOfProposals,
-                        transactionBytecode,
-                        {
-                            from: twoKeyProtocol.plasmaAddress
-                        }
-                    ]);
-                } catch (e) {
-                    console.log('Error: ', e);
-                }
-
-                if(txHash) {
-                    const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
-                    const status = receipt && receipt.status;
-                    expect(status).to.be.equal(true);
-                }
-            }).timeout(timeout);
-        }
-
+            }
+        }).timeout(timeout);
 
 
         it('should set users and rewards', async() => {
@@ -449,8 +447,6 @@ describe(
                 from
             );
 
-            console.log(txHash);
-
             // Wait until receipt is taken
             let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
             console.log('Gas required for withdrawal on mainchain is: ', receipt.gasUsed);
@@ -458,7 +454,7 @@ describe(
             let totalAmountOfTokensTransferedAfterWithdrawal = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.methods.getTotalAmountOfTokensTransfered, []);
             totalAmountOfTokensTransferedAfterWithdrawal = parseFloat(twoKeyProtocol.Utils.fromWei(totalAmountOfTokensTransferedAfterWithdrawal, 'ether').toString());
 
-            expect(totalAmountOfTokensTransfered + amountInProgressOfWithdrawal).to.be.equal(totalAmountOfTokensTransferedAfterWithdrawal);
+            expect(totalAmountOfTokensTransfered + amountInProgressOfWithdrawal).to.be.equal(parseFloat(totalAmountOfTokensTransferedAfterWithdrawal.toString()));
         }).timeout(timeout);
 
         it('should check if signature is marked as it exists on mainchain', async() => {
