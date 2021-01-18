@@ -12,7 +12,7 @@ require('isomorphic-form-data');
 
 const {env} = process;
 
-const timeout = 60000;
+const timeout = 10000;
 const usdSymbol = 'USD';
 const usdDaiSymbol = 'USD-DAI';
 const usd2KeySymbol = '2KEY-USD';
@@ -61,18 +61,8 @@ describe(
       }
     );
 
-    it('should set dollar rate', async () => {
-      const usdRate = 30;
-      const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
-        usdSymbol,
-        usdRate,
-        from
-      );
-      await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
-      const value = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdSymbol);
-      expect(value).to.be.eq(usdRate);
-    it('should deploy oracles using manager contract', async() => {
 
+    it('should deploy oracles using manager contract', async() => {
         let managerAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('MockOraclesManager');
         let descriptions = [];
 
@@ -81,40 +71,48 @@ describe(
         }
 
         // Create manager instance
-        let managerInstance = twoKeyProtocol.web3.eth.contract(singletons.MockOraclesManager.abi).at(managerAddress);
+        let managerInstance = new twoKeyProtocol.web3.eth.Contract(singletons.MockOraclesManager.abi, managerAddress);
 
-        let txHash = await promisify(managerInstance.deployAndStoreOracles,[
-            18,
-            descriptions,
-            1,
-            {from: from}
-        ]);
+        let deployedOracle = await promisify(managerInstance.methods.pairToOracleAddress,[descriptions[0]]);
+        if(deployedOracle.toString().toLowerCase() == '0x0000000000000000000000000000000000000000') {
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(
+                await promisify(managerInstance.methods.deployAndStoreOracles,[
+                    18,
+                    descriptions,
+                    1,
+                    {from: from}
+                ])
+            );
 
-        // At this certain point we can assume that all oracles are freshly deployed
-        await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
 
-        let [oracleAddresses,deployedDescriptions] = await promisify(managerInstance.getDeployedOraclesAndDescriptions,[]);
 
-        console.log(oracleAddresses, deployedDescriptions);
-        let counter = 0;
+            let resp = await promisify(managerInstance.methods.getDeployedOraclesAndDescriptions,[]);
 
-        for (const description of deployedDescriptions) {
-            let oracleAddressFromContract = await promisify(managerInstance.pairToOracleAddress,[description]);
-            expect(oracleAddressFromContract.toString().toLowerCase())
-                .to.be.equal(oracleAddresses[counter].toString().toLowerCase());
+            let oracleAddresses = resp['0'];
+            let deployedDescriptions = resp['1'];
 
-            counter++;
+
+            let counter = 0;
+
+            for (const description of deployedDescriptions) {
+                let oracleAddressFromContract = await promisify(managerInstance.methods.pairToOracleAddress,[description]);
+                expect(oracleAddressFromContract.toString().toLowerCase())
+                    .to.be.equal(oracleAddresses[counter].toString().toLowerCase());
+
+                counter++;
+            }
+
+            await twoKeyProtocol.Utils.getTransactionReceiptMined(
+                await promisify(twoKeyProtocol.twoKeyExchangeContract.methods.storeChainLinkOracleAddresses,[
+                    descriptions,
+                    oracleAddresses,
+                    {
+                        from: from
+                    }
+                ])
+            );
         }
-
-        // Now it's time to store this oracles inside TwoKeyExchangeRateContract
-        let txHash1 = await promisify(twoKeyProtocol.twoKeyExchangeContract.storeChainLinkOracleAddresses,[
-            descriptions,
-            oracleAddresses,
-            {from: from}
-        ]);
-
     }).timeout(timeout);
-
 
     it('should set rates on oracles', async() => {
         let rates = [];
@@ -123,26 +121,26 @@ describe(
         let managerAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('MockOraclesManager');
 
         // Create manager instance
-        let managerInstance = twoKeyProtocol.web3.eth.contract(singletons.MockOraclesManager.abi).at(managerAddress);
+        let managerInstance = new twoKeyProtocol.web3.eth.Contract(singletons.MockOraclesManager.abi, managerAddress);
 
         for (const [key, value] of Object.entries(exchangeRates)) {
-            rates.push(twoKeyProtocol.Utils.toWei(value));
+            let val = twoKeyProtocol.Utils.toWei(value).toString();
+            rates.push(val);
         }
 
         for(const oracle of oracles) {
             oracleNamesHex.push(twoKeyProtocol.Utils.toHex(oracle));
         }
 
-
-        let txHash = await promisify(managerInstance.updateRates,[
-            oracleNamesHex,
-            rates,
-            {
-                from
-            }
-        ]);
-
-        let receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
+        await twoKeyProtocol.Utils.getTransactionReceiptMined(
+            await promisify(managerInstance.methods.updateRates,[
+                oracleNamesHex,
+                rates,
+                {
+                    from
+                }
+            ])
+        );
     }).timeout(timeout);
 
 
@@ -153,15 +151,11 @@ describe(
       const daiUsdRate = exchangeRates["DAI-USD"];
       const tusdUsdRate = exchangeRates["TUSD-USD"];
 
-      const txHash = await twoKeyProtocol.TwoKeyExchangeContract.setValues(
-        [usdSymbol, usdDaiSymbol, usd2KeySymbol, daiSymbol, tusdSymbol],
-        [usdRate, usdDaiRate, usd2KeyRate, daiUsdRate, tusdUsdRate],
-        from);
 
-      await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
       let usdValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdSymbol);
       let usdDaiValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usdDaiSymbol);
       let usd2KeyValue = await twoKeyProtocol.TwoKeyExchangeContract.getBaseToTargetRate(usd2KeySymbol);
+
       expect(usdValue).to.be.eq(usdRate);
       expect(usdDaiValue).to.be.eq(usdDaiRate);
       expect(usd2KeyValue).to.be.eq(usd2KeyRate);
@@ -171,12 +165,6 @@ describe(
       const usdRate = exchangeRates.USD;
       const weiAmount = 100;
 
-      const setRateTxHash = await twoKeyProtocol.TwoKeyExchangeContract.setValue(
-        usdSymbol,
-        usdRate,
-        from
-      );
-      await twoKeyProtocol.Utils.getTransactionReceiptMined(setRateTxHash);
       const exchangedValue = await twoKeyProtocol.TwoKeyExchangeContract.exchangeCurrencies(
         usdSymbol,
         weiAmount,
@@ -186,10 +174,11 @@ describe(
     }).timeout(timeout);
 
     it('should get fiat to stable coin quotes', async () => {
-        let amountFiatWei = parseFloat(twoKeyProtocol.Utils.toWei(15,'ether').toString());
+        let amountFiatWei = twoKeyProtocol.Utils.toWei(15,'ether').toString();
         let pairs = await twoKeyProtocol.TwoKeyExchangeContract.getFiatToStableQuotes(amountFiatWei, 'USD', ['DAI','TUSD']);
         console.log(pairs);
     }).timeout(timeout);
+
 
     it('should get stable coin quota by address', async () => {
       let daiAddress = await twoKeyProtocol.SingletonRegistry.getNonUpgradableContractAddress('DAI');
