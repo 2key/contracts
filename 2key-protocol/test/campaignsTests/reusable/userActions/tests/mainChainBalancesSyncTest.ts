@@ -20,19 +20,21 @@ export default function mainChainBalancesSyncTest(
       let earnings = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
 
-      let txHash = await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.endCampaignReserveTokensAndRebalanceRates, [
+      let txHash = await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.methods.endCampaignReserveTokensAndRebalanceRates, [
           campaignAddress,
           protocol.Utils.toWei(earnings.totalAmountForReferrerRewards, 'ether').toString(),
           protocol.Utils.toWei(earnings.totalModeratorEarnings, 'ether').toString(),
-          {from: address, gas: 7900000}
+          {from: address}
       ]);
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
 
+      console.log('Here222');
       let contractorLeftover: number = info.initialBounty / info.rebalancingRatio - info.moderatorEarnings - earnings.totalAmountForReferrerRewards;
 
+      console.log('Here333');
       expect(earnings.totalModeratorEarnings.toFixed(5)).to.be.equal((info.moderatorEarnings / info.rebalancingRatio).toFixed(5));
       expect(info.isLeftoverWithdrawn).to.be.equal(false);
       expect(info.contractorLeftover.toFixed(5)).to.be.equal(contractorLeftover.toFixed(5));
@@ -46,9 +48,9 @@ export default function mainChainBalancesSyncTest(
       let campaignInstance = await protocol.CPCCampaign._getPlasmaCampaignInstance(campaignAddress);
       let influencers = await promisify(campaignInstance.getActiveInfluencers,[0,numberOfActiveInfluencers]);
 
-      let referrerPendingCampaigns = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
+      let referrerPendingCampaigns = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.methods.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
 
-        let txHash = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.markCampaignAsDoneAndAssignToActiveInfluencers,[
+        let txHash = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.methods.markCampaignAsDoneAndAssignToActiveInfluencers,[
           campaignAddress,
           0,
           numberOfActiveInfluencers,
@@ -60,7 +62,7 @@ export default function mainChainBalancesSyncTest(
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      let referrerPendingCampaignsAfter = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
+      let referrerPendingCampaignsAfter = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.methods.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
       expect(referrerPendingCampaigns.length).to.be.equal(referrerPendingCampaignsAfter.length - 1);
       expect(referrerPendingCampaignsAfter[referrerPendingCampaignsAfter.length-1]).to.be.equal(campaignAddress);
 
