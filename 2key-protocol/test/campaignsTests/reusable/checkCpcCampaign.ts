@@ -51,8 +51,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     const inventoryBefore = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
     let usdTotalAmount = campaignParams.bountyPerConversionUSD * campaignParams.targetClicks + 0.1;
 
-    //Math.random() > 0.5
-    if(false) {
+    if(Math.random() > 0.5) {
       // Random case budgeting with 2KEY
 
       let amountOfTokens = await protocol.CPCCampaign.getRequiredBudget2KEY('USD', protocol.Utils.toWei(usdTotalAmount,'ether').toString());
@@ -78,7 +77,6 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
           await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
       );
 
-      console.log('Add directly 2KEY gas used: ', receipt.gasUsed);
 
       const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
 
@@ -120,7 +118,6 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
                 address
             )
         );
-      console.log('Gas used: ', receipt.gasUsed);
         const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
     }
   });
@@ -133,7 +130,6 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
 
 
     let initialParams = await protocol.CPCCampaign.getInitialParamsForCampaign(campaignAddress);
-    console.log(initialParams);
 
     // This should set total bounty, initial rate and validate campaign
     await promisify(c.methods.setInitialParamsAndValidateCampaign,[
