@@ -8,6 +8,7 @@ import {expectEqualNumbers} from "../../helpers/numberHelpers";
 import getTwoKeyEconomyAddress from "../../helpers/getTwoKeyEconomyAddress";
 
 
+const timeout = 10000;
 export default function checkAcquisitionCampaign(campaignParams, storage: TestStorage) {
   const userKey = storage.contractorKey;
 
@@ -16,7 +17,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
     const {campaignAddress} = storage;
     const campaignType = await protocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
     expect(campaignType).to.be.equal(campaignTypes.acquisition);
-  }).timeout(60000);
+  }).timeout(timeout);
 
   it('validate non singleton hash', async () => {
     const {protocol} = availableUsers[userKey];
@@ -42,15 +43,15 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
     const moderatorAddress: string = await protocol.AcquisitionCampaign.getModeratorAddress(campaignAddress, address);
 
     expect(moderatorAddress).to.be.equal(campaignParams.moderator);
-  }).timeout(60000);
+  }).timeout(timeout);
 
   it('should check currency', async () => {
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
-    const currency = await protocol.AcquisitionCampaign.getAcquisitionCampaignCurrency(campaignAddress, address);
+    const currency = await protocol.AcquisitionCampaign.getAcquisitionCampaignCurrency(campaignAddress);
     expect(currency).to.be.equal(campaignParams.currency);
-  }).timeout(60000);
+  }).timeout(timeout);
 
   if (campaignParams.isFiatOnly) {
     it('should reserve amount for fiat conversion rewards', async () => {
@@ -71,7 +72,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
           campaignAddress,
-          parseFloat(protocol.Utils.toWei(ethWorth2keys, 'ether').toString()),
+          protocol.Utils.toWei(ethWorth2keys, 'ether').toString(),
           campaignParams.amount,
           from,
         )
@@ -79,7 +80,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
 
       const areRewardsBoughtWithEther = await protocol.AcquisitionCampaign.checkIfRewardsAreBoughtWithEther(campaignAddress);
       expect(areRewardsBoughtWithEther).to.be.equal(true);
-    }).timeout(60000);
+    }).timeout(timeout);
   }
 
   it('check is campaign validated', async () => {
@@ -89,7 +90,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
     const isValidated = await protocol.CampaignValidator.isCampaignValidated(campaignAddress);
 
     expect(isValidated).to.be.equal(true);
-  }).timeout(60000);
+  }).timeout(timeout);
 
   it('should get campaign public meta from IPFS', async () => {
     const {protocol, web3: {address: from}} = availableUsers[userKey];
@@ -124,7 +125,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
       balance,
       campaignParams.campaignInventory + balanceBefore
     );
-  }).timeout(600000);
+  }).timeout(timeout);
 
 
   it('should make campaign active', async () => {
@@ -138,7 +139,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
     const isActivated = await protocol.AcquisitionCampaign.isCampaignActivated(campaignAddress);
 
     expect(isActivated).to.be.equal(true);
-  }).timeout(600000);
+  }).timeout(timeout);
 
   it('should get campaign public link', async () => {
     const {protocol, web3: {address: from}} = availableUsers[userKey];
@@ -185,5 +186,5 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
       expect(availableAmountOfTokens).to.be
         .equal(campaignParams.campaignInventory);
     }
-  }).timeout(60000);
+  }).timeout(timeout);
 }
