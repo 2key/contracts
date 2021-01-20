@@ -2,6 +2,12 @@
 ## [Unreleased]
 
 
+<a name="v1.4.189-develop"></a>
+## [v1.4.189-develop] - 2021-01-20
+### Reverts
+- Contracts deployed to public.staging-hdwallet Jan 20, 2021 2:48 PM
+
+
 <a name="v1.4.36-master"></a>
 ## [v1.4.36-master] - 2021-01-19
 
@@ -2471,7 +2477,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.36-master...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.189-develop...HEAD
+[v1.4.189-develop]: https://github.com/2key/contracts/compare/v1.4.36-master...v1.4.189-develop
 [v1.4.36-master]: https://github.com/2key/contracts/compare/v1.2.77-staging...v1.4.36-master
 [v1.2.77-staging]: https://github.com/2key/contracts/compare/v1.4.35-master...v1.2.77-staging
 [v1.4.35-master]: https://github.com/2key/contracts/compare/v1.4.34-master...v1.4.35-master
