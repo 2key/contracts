@@ -5,6 +5,7 @@ export default async function createDonationCampaign(campaignData: ICreateCampai
   const {web3: {address}, protocol} = availableUsers[storage.contractorKey];
   const storageUser = storage.getUser(storage.contractorKey);
 
+  console.log(campaignData);
   const campaign = await protocol.DonationCampaign.create(
     campaignData,
     campaignData,
