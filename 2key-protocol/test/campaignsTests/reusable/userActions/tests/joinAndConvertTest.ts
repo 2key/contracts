@@ -132,7 +132,7 @@ export default function joinAndConvertTest(
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.DonationCampaign.joinAndConvert(
           campaignAddress,
-          protocol.Utils.toWei(contribution, 'ether'),
+          protocol.Utils.toWei(contribution, 'ether').toString(),
           refUser.link.link,
           address,
           {fSecret: refUser.link.fSecret},
@@ -157,6 +157,7 @@ export default function joinAndConvertTest(
           campaignAddress, conversionId, address,
         ),
       );
+
       currentUser.addConversion(conversion);
       storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
 
@@ -175,7 +176,7 @@ export default function joinAndConvertTest(
           contribution,
         );
       }
-    }).timeout(60000);
+    }).timeout(10000);
   }
 
   if (storage.campaignType === campaignTypes.cpc) {
@@ -215,6 +216,6 @@ export default function joinAndConvertTest(
       );
       currentUser.addConversion(conversionObj);
       storage.processConversion(currentUser, conversionObj, campaignData.incentiveModel);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 }

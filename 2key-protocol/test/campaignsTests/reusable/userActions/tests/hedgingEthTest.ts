@@ -13,8 +13,12 @@ export default function hedgingEthTest(
     const {protocol, web3: {address}} = availableUsers[userKey];
 
     const {balance: {ETH}} = await protocol.getBalance(protocol.twoKeyUpgradableExchange._address);
+
+    console.log(protocol.twoKeyUpgradableExchange._address)
+    console.log(ETH);
     const amountForHedge = parseFloat(ETH.toString());
 
+    console.log('AMount for hedge', amountForHedge);
     let txHash = await protocol.UpgradableExchange.startHedgingEth(
         amountForHedge,
         hedgeRate,

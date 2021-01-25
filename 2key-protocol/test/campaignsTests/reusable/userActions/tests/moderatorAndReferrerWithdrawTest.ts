@@ -47,5 +47,5 @@ export default function moderatorAndReferrerWithdrawTest(
         protocol.Utils.fromWei(balance2keyAfter - balance2keyBefore - userDeptsBefore * eth2KeyRate, 'ether').toString()
       )
     );
-  }).timeout(60000);
+  }).timeout(5000);
 }

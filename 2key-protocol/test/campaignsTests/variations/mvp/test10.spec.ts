@@ -98,16 +98,6 @@ describe(
       }
     );
 
-    usersActions(
-      {
-        userKey: storage.contractorKey,
-        actions: [
-          campaignUserActions.hedgingEth,
-        ],
-        campaignData,
-        storage,
-      }
-    );
 
     usersActions(
       {

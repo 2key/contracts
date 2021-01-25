@@ -28,10 +28,11 @@ export default function checkContractorBalanceAndProceedsTest(
         0,
       );
 
-    const {contractorBalance, contractorTotalProceeds} = await protocol[campaignContract]
+
+    const resp = await protocol[campaignContract]
       .getContractorBalanceAndTotalProceeds(campaignAddress, address);
 
-    expectEqualNumbers(contractorTotalProceeds, totalProceedsStorage);
-    expectEqualNumbers(contractorBalance, totalProceedsStorage);
-  }).timeout(60000);
+    expectEqualNumbers(resp.contractorTotalProceeds, totalProceedsStorage);
+    expectEqualNumbers(resp.contractorBalance, totalProceedsStorage);
+  }).timeout(5000);
 }

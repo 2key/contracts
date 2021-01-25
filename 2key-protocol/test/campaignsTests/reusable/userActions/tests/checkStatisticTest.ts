@@ -30,5 +30,5 @@ export default function checkStatisticTest(
       );
     expect(isJoined).to.be.eq(Boolean(user.link || user.allConversions.length));
     expect(tokensBought).to.be.eq(user.executedConversionsTotal);
-  }).timeout(60000);
+  }).timeout(5000);
 }
