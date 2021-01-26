@@ -38,5 +38,5 @@ export default function checkRestrictedConversionTest(
     }
 
     expect(error).to.be.eq(true);
-  }).timeout(60000);
+  }).timeout(10000);
 }

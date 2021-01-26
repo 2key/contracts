@@ -19,7 +19,7 @@ export default async function createCpcCampaign(campaignData: ICreateCPC, storag
     {
       gasPrice: 150000000000,
       interval: 500,
-      timeout: 600000,
+      timeout: 100000,
     });
   const {
     campaignPublicLinkKey, fSecret,

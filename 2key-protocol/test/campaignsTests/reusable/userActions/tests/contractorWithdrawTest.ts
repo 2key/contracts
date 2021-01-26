@@ -30,7 +30,7 @@ export default function contractorWithdrawTest(
 
       expectEqualNumbers(contractorBalanceAfter, contractorBalanceBefore + campaignBalanceBefore);
       expect(campaignBalanceAfter).to.be.eq(0);
-    }).timeout(60000)
+    }).timeout(10000)
   } else {
     it('should contractor withdraw his earnings', async () => {
       const {protocol, web3: {address}} = availableUsers[userKey];
@@ -58,6 +58,6 @@ export default function contractorWithdrawTest(
       );
 
       expect(contractorBalance.available).to.be.eq(0);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 }

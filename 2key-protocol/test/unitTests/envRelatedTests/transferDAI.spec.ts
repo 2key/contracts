@@ -10,7 +10,7 @@ import getTwoKeyProtocol from "../../helpers/twoKeyProtocol";
 
 const {env} = process;
 
-const timeout = 60000;
+const timeout = 10000;
 
 describe(
     'Transfer DAI tokens to users',

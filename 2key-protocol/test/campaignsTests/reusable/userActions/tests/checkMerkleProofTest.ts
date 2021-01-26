@@ -20,5 +20,5 @@ export default function checkMerkleProofTest(
     //
     // expect(proofs.length).to.be.greaterThan(0);
     // expect(isProofValid).to.be.equal(true);
-  }).timeout(60000);
+  }).timeout(10000);
 }

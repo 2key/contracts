@@ -27,5 +27,5 @@ export default function merkleCopyTest(
     // await new Promise(resolve => setTimeout(resolve, 4000));
     // const isLocked = await protocol.CPCCampaign.isContractLocked(campaignAddress, "PUBLIC");
     // expect(isLocked).to.be.equal(true);
-  }).timeout(60000);
+  }).timeout(10000);
 }

@@ -38,7 +38,7 @@ describe(
     const storage = new TestStorage(userIds.aydnep, campaignTypes.donation, campaignData.isKYCRequired);
 
     before(function () {
-      this.timeout(60000);
+      this.timeout(10000);
       return createDonationCampaign(campaignData, storage);
     });
 

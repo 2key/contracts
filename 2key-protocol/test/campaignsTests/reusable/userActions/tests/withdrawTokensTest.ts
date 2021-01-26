@@ -73,6 +73,6 @@ export default function withdrawTokensTest(
     if (conversion instanceof TestAcquisitionConversion) {
       conversion.purchase = purchase;
     }
-  }).timeout(60000);
+  }).timeout(10000);
 
 }

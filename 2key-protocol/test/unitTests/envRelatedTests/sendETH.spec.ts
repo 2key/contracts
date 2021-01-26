@@ -16,7 +16,7 @@ let web3: any;
 let from: string;
 let config = require('../../../../configurationFiles/accountsConfig.json');
 
-const getReceipt = (txHash: string, { web3, timeout = 60000, interval = 500}) => new Promise(async (resolve, reject) => {
+const getReceipt = (txHash: string, { web3, timeout = 10000, interval = 500}) => new Promise(async (resolve, reject) => {
     let txInterval;
     let fallbackTimeout = setTimeout(() => {
         if (txInterval) {
@@ -87,7 +87,7 @@ describe('TwoKeyProtocol LOCAL', () => {
             }
         }
         expect(error).to.be.false;
-    }).timeout(600000);
+    }).timeout(100000);
 
     // it('should print referrers per layer', async() => {
     //     let arcsForContractor = 1000;

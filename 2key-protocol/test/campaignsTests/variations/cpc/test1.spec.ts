@@ -26,7 +26,7 @@ describe(
   '2 clicks target, growing incentive model, end campaign when goal reached, 4 tokens pay per click',
   function() {
     const storage = new TestStorage(userIds.deployer, campaignTypes.cpc, true);
-    this.timeout(60000);
+    this.timeout(10000);
 
     before(function () {
       return createCpcCampaign(campaignData, storage);

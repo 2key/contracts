@@ -110,7 +110,7 @@ export default function joinAndConvertTest(
       } else {
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
       }
-    }).timeout(60000);
+    }).timeout(10000);
   }
 
   if (storage.campaignType === campaignTypes.donation) {

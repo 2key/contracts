@@ -40,5 +40,5 @@ export default function referrersListTest(
       expect(referrers.length).to.be.eq(storageReferrers.length);
       expect(referrers).to.have.members(storageReferrers);
     }
-  ).timeout(60000);
+  ).timeout(10000);
 }

@@ -23,5 +23,5 @@ export default function lockContractTest(
     const isContractLocked = await protocol.CPCCampaign.isContractLocked(campaignAddress,"PLASMA");
 
     expect(isContractLocked).to.be.eq(true);
-  }).timeout(60000);
+  }).timeout(10000);
 }

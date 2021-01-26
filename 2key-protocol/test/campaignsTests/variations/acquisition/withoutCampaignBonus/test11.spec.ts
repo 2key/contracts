@@ -43,7 +43,7 @@ describe(
     const storage = new TestStorage(userIds.aydnep, campaignTypes.acquisition, campaignData.isKYCRequired);
 
     before(function () {
-      this.timeout(60000);
+      this.timeout(10000);
       return createAcquisitionCampaign(campaignData, storage);
     });
 

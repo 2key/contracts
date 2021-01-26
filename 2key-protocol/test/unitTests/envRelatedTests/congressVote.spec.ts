@@ -42,7 +42,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('1. member vote to support proposal', async() => {
         const {web3, address, plasmaWeb3, plasmaAddress } = web3Switcher.deployer();
@@ -53,7 +53,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('2. member vote to support proposal', async() => {
         const {web3, address, plasmaWeb3, plasmaAddress } = web3Switcher.aydnep();
@@ -65,7 +65,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('3. member vote to support proposal', async() => {
         const {web3, address, plasmaWeb3, plasmaAddress} = web3Switcher.gmail();
@@ -77,7 +77,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should get proposal data', async() => {
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
@@ -86,7 +86,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         console.log('DATA', data);
         expect(data.proposalIsExecuted).to.be.equal(false);
         expect(data.proposalNumberOfVotes).to.be.equal(3);
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should advance time and execute proposal', async () => {
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
@@ -94,7 +94,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should create a proposal for setting signatory address', async () => {
         let txHash: string = await twoKeyProtocol.Congress.newProposal(
@@ -105,7 +105,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('1. member vote to support proposal for setting signatory address', async () => {
         const {web3, address, plasmaWeb3, plasmaAddress} = web3Switcher.deployer();
@@ -116,7 +116,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('2. member vote to support proposal', async () => {
         const {web3, address, plasmaWeb3, plasmaAddress} = web3Switcher.aydnep();
@@ -128,7 +128,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('3. member vote to support proposal', async () => {
         const {web3, address, plasmaWeb3, plasmaAddress} = web3Switcher.gmail();
@@ -140,7 +140,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should get proposal data for setting signatory address', async () => {
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
@@ -148,7 +148,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let data = await twoKeyProtocol.Congress.getProposalInformations(numberOfProposals - 1, from);
         expect(data.proposalIsExecuted).to.be.equal(false);
         expect(data.proposalNumberOfVotes).to.be.equal(3);
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should advance time and execute proposal for setting signatory address', async () => {
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
@@ -156,12 +156,12 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash);
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should check that signatory address is properly set on the contracts', async () => {
         let signatoryAddressPublic = await twoKeyProtocol.TwoKeyParticipationMiningPool.getSignatoryAddressPublic();
         expect(signatoryAddressPublic.toLowerCase()).to.be.equal(process.env.NIKOLA_ADDRESS.toLowerCase());
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should create a proposal on plasma congress to add signatory address', async () => {
         let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.newProposal, [
@@ -177,7 +177,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should member 1. vote for supporting proposal', async () => {
         let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals, []);
@@ -195,7 +195,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should member 2. vote for supporting proposal', async () => {
         const {web3, address, plasmaAddress, plasmaWeb3} = web3Switcher.aydnep();
@@ -218,7 +218,7 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash, {web3: twoKeyProtocol.plasmaWeb3});
         const status = receipt && receipt.status;
         expect(status).to.be.true;
-    }).timeout(60000);
+    }).timeout(10000);
 
     it('should execute proposal for adding signatory address on plasma', async () => {
         let numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals, []);

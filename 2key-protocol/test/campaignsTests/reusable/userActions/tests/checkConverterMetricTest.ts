@@ -29,5 +29,5 @@ export default function checkConverterMetricTest(
     expectEqualNumbers(metrics.totalBought, storageMetric.totalBought);
     expectEqualNumbers(metrics.totalAvailable, storageMetric.totalAvailable);
     expectEqualNumbers(metrics.totalWithdrawn, storageMetric.totalWithdrawn)
-  }).timeout(60000);
+  }).timeout(10000);
 }

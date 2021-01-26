@@ -92,7 +92,7 @@ export default function cancelConversionTest(
       storedConversion.data = conversionObj;
 
       storage.processConversion(user, storedConversion, campaignData.incentiveModel);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 
   if (storage.campaignType === campaignTypes.donation) {
@@ -127,6 +127,6 @@ export default function cancelConversionTest(
       storedConversion.data = conversionObj;
 
       storage.processConversion(user, storedConversion, campaignData.incentiveModel);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 }

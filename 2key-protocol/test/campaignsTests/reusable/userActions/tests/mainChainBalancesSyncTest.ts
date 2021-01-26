@@ -33,7 +33,7 @@ export default function mainChainBalancesSyncTest(
 
       expect(earnings.totalModeratorEarnings.toFixed(5)).to.be.equal((info.moderatorEarnings / info.rebalancingRatio).toFixed(5));
       expect(info.isLeftoverWithdrawn).to.be.equal(false);
-  }).timeout(60000);
+  }).timeout(10000);
 
   it('should mark campaign as done and assign to active influencers', async() => {
       const {protocol, web3:{address}} = availableUsers[userKey];
@@ -61,5 +61,5 @@ export default function mainChainBalancesSyncTest(
       expect(referrerPendingCampaigns.length).to.be.equal(referrerPendingCampaignsAfter.length - 1);
       expect(referrerPendingCampaignsAfter[referrerPendingCampaignsAfter.length-1].toLowerCase()).to.be.equal(campaignAddress.toLowerCase());
 
-  }).timeout(60000);
+  }).timeout(10000);
 }

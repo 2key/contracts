@@ -39,6 +39,6 @@ export default function checkERC20BalanceTest(
         userSpent *= exchangeRates.usd;
       }
       expect(balance).to.be.equal(userSpent);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 }

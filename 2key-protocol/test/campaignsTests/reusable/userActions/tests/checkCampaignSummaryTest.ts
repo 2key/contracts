@@ -126,6 +126,6 @@ export default function checkCampaignSummaryTest(
       );
 
     }
-  }).timeout(60000);
+  }).timeout(10000);
 
 }

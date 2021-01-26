@@ -16,7 +16,7 @@ export default function checkDonationCampaign(campaignParams: ICreateCampaign, s
     const campaignType = await protocol.TwoKeyFactory.getCampaignTypeByAddress(campaignAddress);
 
     expect(campaignType).to.be.equal(campaignTypes.donation);
-  }).timeout(60000);
+  }).timeout(10000);
 
   it('check is campaign validated', async () => {
     const {protocol} = availableUsers[userKey];
@@ -25,7 +25,7 @@ export default function checkDonationCampaign(campaignParams: ICreateCampaign, s
     const isValidated = await protocol.CampaignValidator.isCampaignValidated(campaignAddress);
 
     expect(isValidated).to.be.equal(true);
-  }).timeout(60000);
+  }).timeout(10000);
 
   it('validate non singleton hash', async () => {
     const {protocol} = availableUsers[userKey];
@@ -50,7 +50,7 @@ export default function checkDonationCampaign(campaignParams: ICreateCampaign, s
 
     const model = await protocol.DonationCampaign.getIncentiveModel(campaignAddress);
     expect(model).to.be.equal(campaignParams.incentiveModel);
-  }).timeout(60000);
+  }).timeout(10000);
 
   it('should get campaign public meta from IPFS', async () => {
     const {protocol, web3: {address: from}} = availableUsers[userKey];
