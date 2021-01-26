@@ -56,7 +56,6 @@ describe('Web3 v1.3.0', () => {
         const contractDeployedAddress = Contracts.TwoKeyEconomy.networks[env.MAIN_NET_ID].Proxy || Contracts.TwoKeyEconomy.networks[env.MAIN_NET_ID].address;
         const economy = new web3.eth.Contract(Contracts.TwoKeyEconomy.abi, contractDeployedAddress);
         const balance = await promisify(economy.methods.balanceOf, [address]);
-        console.log('BALANCE', balance);
         expect(balance).to.be.equals('0');
     }).timeout(30000);
 

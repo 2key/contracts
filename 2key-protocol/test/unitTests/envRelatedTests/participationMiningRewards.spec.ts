@@ -41,7 +41,6 @@ describe(
         it('should load number of proposals', async() => {
             numberOfProposals = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.numProposals,[]);
             numberOfProposals = parseInt(numberOfProposals,10) - 1;
-            console.log(numberOfProposals);
         }).timeout(timeout);
 
         it('should create a proposal on plasma congress to declare epochs', async() => {

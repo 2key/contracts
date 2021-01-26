@@ -21,7 +21,7 @@ const campaignData: ICreateCampaign = {
   campaignEndTime: 9884748832,
   minDonationAmount: 1,
   maxDonationAmount: 10,
-  campaignGoal: 10000000000000000000000000000000,
+  campaignGoal: 10000000000000,
   referrerQuota: 5,
   isKYCRequired: true,
   shouldConvertToRefer: false,
