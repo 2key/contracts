@@ -17,6 +17,10 @@ const contractToLibrary = {
 let API;
 let EXPLORER;
 
+/**
+ * Function to build the endpoints
+ * @param networkId
+ */
 const buildEndpoint = (networkId) => {
   if(networkId.toString() === '3') {
     API = 'api-ropsten.etherscan.io';
@@ -29,6 +33,12 @@ const buildEndpoint = (networkId) => {
   }
 }
 
+
+/**
+ * Function to build etherscan url depending on the network
+ * @param contractAddress
+ * @returns {string}
+ */
 const buildEtherscanUrl = (contractAddress) => {
   return `https://${EXPLORER}/address/${contractAddress}#code`;
 }
