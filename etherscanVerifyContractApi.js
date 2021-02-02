@@ -96,6 +96,7 @@ const apiCall = async (form) => {
   ).then((r) => {
     return r.json();
   })
+
   console.log('Response is: ', resp);
 }
 
@@ -123,8 +124,12 @@ async function main() {
       let contractName = process.argv[3].toString();
       let networkId = process.argv[4].toString();
       let contractAddress = contracts[contractName][networkId].implementationAddressLogic;
+      let etherscanUrl = `https://etherscan.io/address/${contractAddress}#code`;
+
       let form = buildVerificationForm(contractName, contractAddress, [], []);
       await apiCall(form);
+
+      console.log('Etherscan url: ', etherscanUrl);
     }
   }
 }
