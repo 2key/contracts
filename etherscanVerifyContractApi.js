@@ -101,7 +101,27 @@ const flattenContracts = (async (directoryName) => {
   }
 })
 
+const checkLoadedFile = (contracts, contractName, networkId) => {
+  if(!contracts[contractName]) {
+    return {
+      'status' : 1,
+      'message': 'Contract does not have any address. Probably it is abstract.'
+    }
+  } else if(!contracts[contractName][networkId]) {
+    return {
+      'status' : 1,
+      'message': 'Contract is not deployed to selected network.'
+    }
+  }
 
+  return {
+    'status' : 0
+  }
+}
+
+const buildEtherscanUrl = (contractAddress) => {
+  return `https://etherscan.io/address/${contractAddress}#code`;
+}
 /**
  * Function to run contract verification
  * @param contractName
@@ -111,16 +131,10 @@ const flattenContracts = (async (directoryName) => {
 const verifyContract = async(contractName, networkId) => {
   let contracts = loadAddressesAndNetworks();
 
-  if(!contracts[contractName]) {
-    return 'Contract does not have any address. Probably it is abstract.'
-  } else if(!contracts[contractName][networkId]) {
-    return 'Contract is not deployed to selected network.'
-  }
+  checkLoadedFile(contracts, contractName, networkId);
 
   let contractAddress = contracts[contractName][networkId].implementationAddressLogic;
-  let etherscanUrl = `https://etherscan.io/address/${contractAddress}#code`;
   let contract = fs.readFileSync(__dirname + `/flattenedContracts/${contractName}Flattened.sol`,'utf8');
-
 
   // Build a new form
   let form = new FormData();
@@ -150,7 +164,8 @@ const verifyContract = async(contractName, networkId) => {
   }
 
   await etherscanApiCall(form);
-  console.log('Etherscan url: ', etherscanUrl);
+
+  console.log('Etherscan url: ', buildEtherscanUrl(contractAddress));
 }
 
 
@@ -243,6 +258,39 @@ async function main() {
       for(const contract of contracts) {
         await verifyContract(contract, networkId);
       }
+      process.exit(0);
+      break;
+    }
+
+    case '--logVerifiedSingletons' : {
+      let contracts = fs.readdirSync(`contracts/2key/singleton-contracts`);
+      contracts = contracts.map(contractName => contractName.substring(0, contractName.indexOf('.sol')));
+
+      const networkId = process.argv[3].toString();
+      let contractAddresses = loadAddressesAndNetworks();
+
+      for(const contractName of contracts) {
+        let resp = checkLoadedFile(contractAddresses, contractName, networkId);
+
+        if(resp.status === 1) {
+          continue;
+        }
+
+        let contractImplementation = contractAddresses[contractName][networkId].implementationAddressLogic;
+        let contractProxy = contractAddresses[contractName][networkId].Proxy;
+
+        console.log(JSON.stringify({
+            'Contract name' : contractName,
+            'Contract verified implementation' : buildEtherscanUrl(contractImplementation),
+            'Contract verified proxy' : buildEtherscanUrl(contractProxy)
+          }
+          ,
+          0,
+          3
+          )
+        );
+      }
+
       process.exit(0);
       break;
     }
