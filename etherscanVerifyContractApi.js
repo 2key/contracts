@@ -14,6 +14,26 @@ const contractToLibrary = {
   'TwoKeyParticipationMiningPool' : ['Call']
 }
 
+let API;
+let EXPLORER;
+
+const buildEndpoint = (networkId) => {
+  if(networkId.toString() === '3') {
+    API = 'api-ropsten.etherscan.io';
+    EXPLORER = 'ropsten.etherscan.io';
+  }
+
+  if(networkId.toString() === '1') {
+    API = 'api.etherscan.io';
+    EXPLORER = 'etherscan.io';
+  }
+}
+
+const buildEtherscanUrl = (contractAddress) => {
+  return `https://${EXPLORER}/address/${contractAddress}#code`;
+}
+
+
 /**
  * Mock method to simulate async call
  *
@@ -113,15 +133,11 @@ const checkLoadedFile = (contracts, contractName, networkId) => {
       'message': 'Contract is not deployed to selected network.'
     }
   }
-
   return {
     'status' : 0
   }
 }
 
-const buildEtherscanUrl = (contractAddress) => {
-  return `https://etherscan.io/address/${contractAddress}#code`;
-}
 /**
  * Function to run contract verification
  * @param contractName
@@ -131,41 +147,42 @@ const buildEtherscanUrl = (contractAddress) => {
 const verifyContract = async(contractName, networkId) => {
   let contracts = loadAddressesAndNetworks();
 
-  checkLoadedFile(contracts, contractName, networkId);
+  let resp = checkLoadedFile(contracts, contractName, networkId);
+  if(resp.status === 0) {
+    let contractAddress = contracts[contractName][networkId].implementationAddressLogic;
+    let contract = fs.readFileSync(__dirname + `/flattenedContracts/${contractName}Flattened.sol`,'utf8');
 
-  let contractAddress = contracts[contractName][networkId].implementationAddressLogic;
-  let contract = fs.readFileSync(__dirname + `/flattenedContracts/${contractName}Flattened.sol`,'utf8');
+    // Build a new form
+    let form = new FormData();
+    form.append( 'apikey' , process.env.ETHERSCAN_API_KEY)
+    form.append( 'module' , 'contract')
+    form.append( 'action' , 'verifysourcecode')
+    form.append( 'contractaddress' , contractAddress)
+    form.append( 'sourceCode' , contract)
+    form.append( 'codeformat', 'solidity-single-file' )
+    form.append( 'contractname',contractName)
+    form.append( 'compilerversion','v0.4.24+commit.e67f0147')
+    form.append( 'optimizationUsed' , '0')
+    form.append( 'runs',200)
+    form.append( 'constructorArguements' , "")
+    form.append('evmversion',"")
 
-  // Build a new form
-  let form = new FormData();
-  form.append( 'apikey' , process.env.ETHERSCAN_API_KEY)
-  form.append( 'module' , 'contract')
-  form.append( 'action' , 'verifysourcecode')
-  form.append( 'contractaddress' , contractAddress)
-  form.append( 'sourceCode' , contract)
-  form.append( 'codeformat', 'solidity-single-file' )
-  form.append( 'contractname',contractName)
-  form.append( 'compilerversion','v0.4.24+commit.e67f0147')
-  form.append( 'optimizationUsed' , '0')
-  form.append( 'runs',200)
-  form.append( 'constructorArguements' , "")
-  form.append('evmversion',"")
+    // In case contract has libraries
+    if(contractToLibrary[contractName]) {
+      let libraries = contractToLibrary[contractName];
+      for(let i=0; i<libraries.length; i++) {
+        let libraryName = libraries[i];
+        let libraryAddress = loadLibraryAddress(libraryName, networkId);
 
-  // In case contract has libraries
-  if(contractToLibrary[contractName]) {
-    let libraries = contractToLibrary[contractName];
-    for(let i=0; i<libraries.length; i++) {
-      let libraryName = libraries[i];
-      let libraryAddress = loadLibraryAddress(libraryName, networkId);
-
-      form.append(`libraryname${i+1}`, libraryName);
-      form.append(`libraryaddress${i+1}`, libraryAddress);
+        form.append(`libraryname${i+1}`, libraryName);
+        form.append(`libraryaddress${i+1}`, libraryAddress);
+      }
     }
+
+    await etherscanApiCall(form);
+
+    console.log('Etherscan url: ', buildEtherscanUrl(contractAddress));
   }
-
-  await etherscanApiCall(form);
-
-  console.log('Etherscan url: ', buildEtherscanUrl(contractAddress));
 }
 
 
@@ -175,7 +192,7 @@ const verifyContract = async(contractName, networkId) => {
  * @returns {Promise<any>}
  */
 const retryVerify = async (guid) => {
-  let url = `https://api.etherscan.io/api?apikey=${process.env.ETHERSCAN_API_KEY}&guid=${guid}&module=contract&action=checkverifystatus`
+  let url = `https://${API}/api?apikey=${process.env.ETHERSCAN_API_KEY}&guid=${guid}&module=contract&action=checkverifystatus`
   const resp = await fetch(
     url,
     {
@@ -198,7 +215,7 @@ const retryVerify = async (guid) => {
  */
 const etherscanApiCall = async (form) => {
   const resp = await fetch(
-    'http://api.etherscan.io/api',
+    `http://${API}/api`,
     {
       method: 'POST',
       body: form
@@ -247,6 +264,7 @@ async function main() {
     case '--verifyContract': {
       let contractName = process.argv[3].toString();
       let networkId = process.argv[4].toString();
+      buildEndpoint(networkId);
       await verifyContract(contractName, networkId);
       process.exit(0);
       break;
@@ -255,7 +273,9 @@ async function main() {
       let contracts = fs.readdirSync(`contracts/2key/singleton-contracts`);
       contracts = contracts.map(contractName => contractName.substring(0, contractName.indexOf('.sol')));
       const networkId = process.argv[3].toString();
+      buildEndpoint(networkId);
       for(const contract of contracts) {
+        console.log(contract,networkId);
         await verifyContract(contract, networkId);
       }
       process.exit(0);
