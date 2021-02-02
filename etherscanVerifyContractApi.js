@@ -1,5 +1,6 @@
 const fetch = require('isomorphic-fetch');
 const fs = require('fs');
+const path = require('path');
 const { runProcess } = require('./helpers');
 const proxyFile = path.join(__dirname, './build/proxyAddresses.json');
 const FormData = require('form-data');
@@ -99,9 +100,9 @@ const apiCall = async (form) => {
 }
 
 async function main() {
+  console.log(process.argv);
   const mode = process.argv[2];
   switch (mode) {
-
     case '--flattenAll': {
       const dirName = process.argv[3];
       await flattenContracts(dirName);
@@ -129,4 +130,9 @@ async function main() {
 }
 
 
+
+main().catch((e) => {
+  console.log(e);
+  process.exit(1);
+});
 
