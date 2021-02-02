@@ -19,5 +19,6 @@ cd ../..
 
 python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.40
 python3 generate_bytecode.py upgradeContract TwoKeyExchangeRateContract 1.0.4
+python3 generate_bytecode.py approveNewCampaign TOKEN_SELL 1.0.46
 
 
