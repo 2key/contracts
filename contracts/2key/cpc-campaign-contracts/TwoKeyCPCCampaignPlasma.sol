@@ -38,6 +38,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
     public
     {
         require(isCampaignInitialized == false);                        // Requiring that method can be called only once
+        require(campaignStartTime >= block.timestamp);                  // Enforce start date to be in future
         isCampaignInitialized = true;                                   // Marking campaign as initialized
 
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;    // Assigning address of _twoKeyPlasmaSingletonRegistry
