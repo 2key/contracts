@@ -143,9 +143,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Function to check if contractor decided to end campaign
+     * @notice          Function to check if campaign is ended
      */
-    function isCampaignEndedByContractor()
+    function isCampaignEnded()
     internal
     view
     returns (bool)
@@ -630,6 +630,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     public
     onlyMaintainer
     {
+        require(block.timestamp >= campaignStartTime.add(172800));
         isContractLocked = true;
     }
 
