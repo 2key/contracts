@@ -79,7 +79,7 @@ export default function joinAndConvertTest(
         campaignAddress,
         address
       );
-      
+
       const conversionIds = await protocol[campaignContract].getConverterConversionIds(
         campaignAddress, address, address,
       );
@@ -104,7 +104,6 @@ export default function joinAndConvertTest(
       if (campaignData.isFiatOnly && !campaignData.isKYCRequired) {
         const rate = await protocol.UpgradableExchange.get2keySellRate(address);
         const reward = contribution * campaignData.maxReferralRewardPercentWei / 100 / rate;
-
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase - reward);
       } else {
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);

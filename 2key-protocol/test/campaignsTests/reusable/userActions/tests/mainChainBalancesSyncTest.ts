@@ -19,6 +19,7 @@ export default function mainChainBalancesSyncTest(
 
       let earnings = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
+      console.log(earnings);
 
       let txHash = await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.endCampaignReserveTokensAndRebalanceRates, [
           campaignAddress,
@@ -27,12 +28,18 @@ export default function mainChainBalancesSyncTest(
           {from: address, gas: 7900000}
       ]);
 
+      console.log(txHash);
+
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
 
-      let contractorLeftover: number = info.initialBounty / info.rebalancingRatio - info.moderatorEarnings - earnings.totalAmountForReferrerRewards;
+      console.log(info);
 
+      let rebalancedContractorAndModerator = (info.initialBounty - earnings.totalAmountForReferrerRewards) * (info.rebalancingRatio);
+      let contractorLeftover: number = rebalancedContractorAndModerator - info.moderatorEarnings;
+
+      console.log(contractorLeftover);
       expect(earnings.totalModeratorEarnings.toFixed(5)).to.be.equal((info.moderatorEarnings / info.rebalancingRatio).toFixed(5));
       expect(info.isLeftoverWithdrawn).to.be.equal(false);
       expect(info.contractorLeftover.toFixed(5)).to.be.equal(contractorLeftover.toFixed(5));
