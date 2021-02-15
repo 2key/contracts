@@ -632,7 +632,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     public
     onlyMaintainer
     {
-        require(block.timestamp >= activationTimestamp.add(172800));
+        require(block.timestamp >= activationTimestamp.add(86400));
         isContractLocked = true;
     }
 
