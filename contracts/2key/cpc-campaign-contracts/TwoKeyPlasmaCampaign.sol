@@ -60,6 +60,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     bool isBudgetedDirectlyWith2KEY;
 
+    uint public activationTimestamp;
+
     // public available integers
     bool public isContractLocked;
     uint public moderatorTotalEarnings;             // Total rewards which are going to moderator
@@ -143,9 +145,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Function to check if contractor decided to end campaign
+     * @notice          Function to check if campaign is ended
      */
-    function isCampaignEndedByContractor()
+    function isCampaignEnded()
     internal
     view
     returns (bool)
@@ -630,6 +632,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     public
     onlyMaintainer
     {
+        require(block.timestamp >= activationTimestamp.add(86400));
         isContractLocked = true;
     }
 
@@ -649,7 +652,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     public
     onlyMaintainer
     {
+        // Require that campaign is not previously validated
         require(isValidated == false);
+        // Set the activation timestamp
+        activationTimestamp = block.timestamp;
         // Set total bounty for campaign
         totalBountyForCampaign = _totalBounty;
         // Calculate moderator fee per every conversion

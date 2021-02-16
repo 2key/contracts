@@ -129,7 +129,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
 
         // The rewards are being distributed only if campaign is not ended by contractor and in timecap allowed
-        if(!isCampaignEndedByContractor() && isCampaignActiveInTermsOfTime()) {
+        if(!isCampaignEnded() && isCampaignActiveInTermsOfTime()) {
             // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
             if(
                 getNumberOfUsersToContractor(converter) > 0 &&

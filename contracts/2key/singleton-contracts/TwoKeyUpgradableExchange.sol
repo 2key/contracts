@@ -601,29 +601,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice          Function to get amount of the tokens user will receive
-     *
-     * @param           _weiAmount Value in wei to be converted into tokens
-     *
-     * @return          Number of tokens that can be purchased with the specified _weiAmount
-     */
-    function getTokenAmountToBeSold(
-        uint256 _weiAmount
-    )
-    public
-    view
-    returns (uint256,uint256,uint256)
-    {
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-
-        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
-        uint dollarAmountWei = _weiAmount.mul(rate).div(10**18);
-
-        return get2KEYTokenPriceAndAmountOfTokensReceiving(dollarAmountWei);
-    }
-
-
-    /**
      * @notice          Function to calculate how many stable coins we can get for specific amount of 2keys
      *
      * @dev             This is happening in case we're receiving (buying) 2key
@@ -686,16 +663,37 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyValidatedContracts
     returns (uint,uint)
     {
-        _preValidatePurchase(_beneficiary, msg.value);
+        uint value = msg.value;
 
-        uint totalTokensBought;
-        uint averageTokenPriceForPurchase;
-        uint newTokenPrice;
+        _preValidatePurchase(_beneficiary, value);
 
-        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = getTokenAmountToBeSold(msg.value);
+        address [] memory path = new address[](2);
+
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
+
+        // The path is WETH -> 2KEY
+        path[0] = IUniswapV2Router02(uniswapRouter).WETH();
+        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
 
-        set2KEYSellRateInternal(newTokenPrice);
+        // Get amount of tokens receiving
+        uint totalTokensBought = buyRate2Key(
+            uniswapRouter,
+            value,
+            path
+        );
+
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+
+        // Get the rate for eth-usd
+        uint eth_usdRate = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"))
+            .getBaseToTargetRate("USD");
+
+        // Compute input in USD
+        uint inputUSD = value.mul(eth_usdRate).div(10**18);
+
+        // Compute token price for purchase in USD
+        uint averageTokenPriceForPurchase = inputUSD.mul(10**18).div(totalTokensBought);
 
         // check if contract is first time interacting with this one
         uint contractId = getContractId(msg.sender);
@@ -708,7 +706,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setHedgingInformationAndContractStats(
             contractId,
             totalTokensBought,
-            msg.value
+            value
         );
 
         _processPurchase(_beneficiary, totalTokensBought);
@@ -725,20 +723,32 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
 
-        uint totalTokensBought;
-        uint averageTokenPriceForPurchase;
-        uint newTokenPrice;
-
         // Increment amount of this stable tokens to fill reserve
         addStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
 
+        // Compute the exact amount in $
         uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
 
-        // Process price discovery, buy tokens, and get new price
-        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = get2KEYTokenPriceAndAmountOfTokensReceiving(amountInUSDOfPurchase);
+        // Create path to go through WETH
+        address [] memory path = new address[](3);
 
-        // Set new token price
-        set2KEYSellRateInternal(newTokenPrice);
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
+
+        // The path is WETH -> 2KEY
+        path[0] = tokenAddress;
+        path[1] = IUniswapV2Router02(uniswapRouter).WETH();
+        path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+
+        // Get amount of tokens receiving
+        uint totalTokensBought = buyRate2Key(
+            uniswapRouter,
+            amountOfTokens,
+            path
+        );
+
+        // Compute what is the average price for the purchase
+        uint averageTokenPriceForPurchase = amountInUSDOfPurchase.mul(10**18).div(totalTokensBought);
 
         // Transfer tokens
         _processPurchase(msg.sender, totalTokensBought);
@@ -746,6 +756,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Return amount of tokens received and average token price for purchase
         return (totalTokensBought, averageTokenPriceForPurchase);
     }
+
 
     function computeAmountInUsd(
         uint amountInTokenDecimals,
@@ -797,16 +808,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     }
 
-    function set2KEYSellRateInternal(
-        uint newRate
-    )
-    internal
-    {
-        setUint(
-            keccak256("sellRate2key"),
-            newRate
-        );
-    }
 
     function setStableCoinsAvailableToFillReserve(
         uint amountOfStableCoins,
@@ -992,7 +993,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
             // Get minimum received
-            uint minimumToReceive = uniswapPriceDiscover(
+            uint minimumToReceive = uniswapPriceDiscoverForBuyingFromUniswap(
                 uniswapRouter,
                 amountToSwap,
                 path
@@ -1301,21 +1302,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice          Getter to check how much is pool worth in USD
-     */
-    function poolWorthUSD(
-        uint amountOfTokensInThePool,
-        uint averagePriceFrom3MainSources
-    )
-    internal
-    view
-    returns (uint)
-    {
-        return (averagePriceFrom3MainSources.mul(amountOfTokensInThePool).div(10 ** 18));
-    }
-
-
-    /**
      * @notice          Getter to get spreadWei value
      */
     function spreadWei()
@@ -1327,34 +1313,24 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice          Function to be used to fetch 2KEY-DAI rate from uniswap
-     * @notice          amountToSwap is in wei value
-     * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
+     * @notice          Represents current 2KEY sell rate, and is used only for informative purpose
+     *                  This function shouldn't be included into any buy/sell orders, since it's
+     *                  just checking what is current average rate, not including price discovery for
+     *                  bigger amounts
      */
-    function uniswapPriceDiscover(
-        address uniswapRouter,
-        uint amountToSwap,
-        address [] path
-    )
+    function sellRate2key()
     public
     view
     returns (uint)
     {
-        uint[] memory amountsOut = new uint[](2);
-
-        amountsOut = IUniswapV2Router02(uniswapRouter).getAmountsOut(
-            amountToSwap,
-            path
-        );
-
-        return amountsOut[1];
+        // Fetch rate for 1 2KEY token
+        return sellRate2KeyInternal(10 ** 18);
     }
 
-    /**
-     * @notice          Getter for 2key sell rate
-     */
-    function sellRate2key()
-    public
+    function sellRate2KeyInternal(
+        uint amountToReceive
+    )
+    internal
     view
     returns (uint)
     {
@@ -1363,25 +1339,33 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address [] memory path = new address[](2);
         address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
 
-        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-        path[1] = IUniswapV2Router02(uniswapRouter).WETH();
+        // The path is WETH -> 2KEY
+        path[0] = IUniswapV2Router02(uniswapRouter).WETH();
+        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
-        // Represents how much 1 2KEY is worth ETH
-        uint rateFromUniswap = uniswapPriceDiscover(uniswapRouter, 10 ** 18, path);
+        // Represents how much ETH user has to put in order to get amountToReceive 2KEY token
+        uint rateFromUniswap = uniswapPriceDiscover(uniswapRouter, amountToReceive, path);
 
         // Rate from ETH-USD oracle
         uint eth_usdRate = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"))
-            .getBaseToTargetRate("USD");
+        .getBaseToTargetRate("USD");
+
+        // Return rate which will represent how many USD has to be put in for amountToReceive 2KEY tokens
+        return rateFromUniswap.mul(eth_usdRate).div(10**18);
+    }
 
 
-        // Rate computed by combination of ChainLink oracle (ETH-USD) and Uniswap (2KEY-ETH)
-
-        // Which will represent final 2KEY-USD rate
-        uint finalRate = rateFromUniswap.mul(eth_usdRate).div(10**18);
-
-        uint rateFromContract = getUint(keccak256("sellRate2key"));
-
-        return (finalRate.add(rateFromContract)).div(2);
+    function buyRate2Key(
+        address uniswapRouter,
+        uint input,
+        address [] path
+    )
+    public
+    view
+    returns (uint)
+    {
+        // Represents how much 2KEY's user gets for input in ETH
+        return uniswapPriceDiscoverForBuyingFromUniswap(uniswapRouter, input, path);
     }
 
 
@@ -1409,35 +1393,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return amountOfDAI;
     }
 
-    /**
-     * @notice          Function to get amount of 2KEY receiving, new token price, and average price per token
-     *i
-     * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
-     */
-    function get2KEYTokenPriceAndAmountOfTokensReceiving(
-        uint purchaseAmountUSDWei
-    )
-    public
-    view
-    returns (uint,uint,uint)
-    {
-        uint currentPrice = sellRate2key();
-
-        // In case 0 USD is inputted, return 0 as bought, and current price as average and new.
-        if(purchaseAmountUSDWei == 0) {
-            return (0, currentPrice, currentPrice);
-        }
-
-        uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
-
-        return PriceDiscovery.buyTokensFromExchangeRealignPrice(
-            purchaseAmountUSDWei,
-            currentPrice,
-            balanceOfTokens,
-            poolWorthUSD(balanceOfTokens, currentPrice)
-        );
-    }
-
 
     function getPoolBalanceOf2KeyTokens()
     internal
@@ -1446,6 +1401,55 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
         return ERC20(tokenAddress).balanceOf(address(this));
+    }
+
+
+    /**
+     * @notice          Function to be used to fetch rates for SELL orders
+     * @notice          amountToReceive is desired amount of 2KEY tokens to be received
+     * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
+     */
+    function uniswapPriceDiscover(
+        address uniswapRouter,
+        uint amountToReceive,
+        address [] path
+    )
+    public
+    view
+    returns (uint)
+    {
+        uint[] memory amountsIn = new uint[](2);
+
+        amountsIn = IUniswapV2Router02(uniswapRouter).getAmountsIn(
+            amountToReceive,
+            path
+        );
+
+        return amountsIn[0];
+    }
+
+    /**
+     * @notice          Function to be used to fetch rates from uniswap assuming there's a buy order
+     * @notice          amountToSwap is in wei value
+     * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
+     */
+    function uniswapPriceDiscoverForBuyingFromUniswap(
+        address uniswapRouter,
+        uint amountToSwap,
+        address [] path
+    )
+    public
+    view
+    returns (uint)
+    {
+        uint[] memory amountsOut = new uint[](2);
+
+        amountsOut = IUniswapV2Router02(uniswapRouter).getAmountsOut(
+            amountToSwap,
+            path
+        );
+
+        return amountsOut[1];
     }
 
 
