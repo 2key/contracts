@@ -42,8 +42,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
 
-    function addBalanceUSDT(address beneficiary, uint amount) public onlyMaintainer;
-    function addBalance2KEY(address beneficiary, uint amount) public onlyMaintainer;
+    function addBalanceUSDT(address beneficiary, uint amount, bytes signature) public onlyMaintainer;
+    function addBalance2KEY(address beneficiary, uint amount, bytes signature) public onlyMaintainer;
 
     function get2KEYBalance(address user)
     public
