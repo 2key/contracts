@@ -32,8 +32,18 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         initialized = true;
     }
 
-    function addBalanceUSDT(address beneficiary, uint amount) public;
-    function addBalance2KEY(address beneficiary, uint amount) public;
+    /**
+     * @notice          Modifier which will be used to restrict calls to only maintainers
+     */
+    modifier onlyMaintainer {
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
+        require(ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender) == true);
+        _;
+    }
+
+
+    function addBalanceUSDT(address beneficiary, uint amount) public onlyMaintainer;
+    function addBalance2KEY(address beneficiary, uint amount) public onlyMaintainer;
 
     function get2KEYBalance(address user)
     public
