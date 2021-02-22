@@ -2,6 +2,10 @@ pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaAccountManagerStorage.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../libraries/Call.sol";
+import "../libraries/SafeMath.sol";
 
 /**
  * TwoKeyPlasmaAccountManager contract.
@@ -9,8 +13,13 @@ import "../interfaces/storage-contracts/ITwoKeyPlasmaAccountManagerStorage.sol";
  * Github: madjarevicn
  */
 contract TwoKeyPlasmaAccountManager is Upgradeable {
+
+    using Call for *;
+    using SafeMath for uint;
+
     bool initialized;
 
+    string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _userToUSDTBalance = "userToUSDTBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
 
@@ -40,6 +49,23 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         require(ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender) == true);
         _;
     }
+
+    /**
+     * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
+     *
+     * @param           contractName is the name of the contract
+     */
+    function getAddressFromTwoKeySingletonRegistry(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
+    }
+
 
 
     function addBalanceUSDT(address beneficiary, uint amount, bytes signature) public onlyMaintainer;
