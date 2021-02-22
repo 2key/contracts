@@ -20,6 +20,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     bool initialized;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
+    string constant _messageNotes = "signUserDepositTokens";
     string constant _userToUSDTBalance = "userToUSDTBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
 
@@ -66,21 +67,134 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         .getContractProxyAddress(contractName);
     }
 
+    /**
+     * @notice          Function to return who signed msg
+     * @param           userAddress is the address of user for who we signed message
+     * @param           tokenAddress is the token in which user is doing deposit
+     * @param           amountOfTokens is the amount of tokens being deposited
+     * @param           signature is the signature created by maintainer
+     */
+    function recoverSignature(
+        address userAddress,
+        address tokenAddress,
+        uint amountOfTokens,
+        bytes signature
+    )
+    internal
+    view
+    returns (address)
+    {
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked(_messageNotes)),
+                keccak256(abi.encodePacked(userAddress, amountOfTokens, tokenAddress))
+            )
+        );
 
+        // Recover signer message from signature
+        return Call.recoverHash(hash,signature,0);
+    }
 
-    function addBalanceUSDT(address beneficiary, uint amount, bytes signature) public onlyMaintainer;
-    function addBalance2KEY(address beneficiary, uint amount, bytes signature) public onlyMaintainer;
+    /**
+     * @notice          Internal function to set user balances in 2KEY
+     * @param           user is the address of the user for whom we're allocating the funds
+     * @param           amount is the amount of the tokens user has
+     */
+    function setUserBalance2KEY(
+        address user,
+        uint amount
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userTo2KEYBalance, user), amount);
+    }
 
+    /**
+     * @notice          Internal function to set user balances in USDT
+     * @param           user is the address of the user for whom we're allocating the funds
+     * @param           amount is the amount of the tokens user has
+     */
+    function setUserBalanceUSDT(
+        address user,
+        uint amount
+    )
+    internal
+    {
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToUSDTBalance, user), amount);
+    }
+
+    /**
+     * @notice          Function to add balance in USDT for a user
+     * @param           beneficiary is user address
+     * @param           amount is the amount of the tokens user deposited
+     * @param           signature is message signed by signatory address proofing the deposit was verified
+     */
+    function addBalanceUSDT(
+        address beneficiary,
+        uint amount,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        //TODO: Verify signature
+        uint userBalance = getUSDTBalance(beneficiary);
+
+        // Allocate more funds for user
+        setUserBalanceUSDT(
+            beneficiary,
+            userBalance.add(amount)
+        );
+    }
+
+    /**
+     * @notice          Function to add balance in 2KEY for a user
+     * @param           beneficiary is user address
+     * @param           amount is the amount of the tokens user deposited
+     * @param           signature is message signed by signatory address proofing the deposit was verified
+     */
+    function addBalance2KEY(
+        address beneficiary,
+        uint amount,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        uint userBalance = get2KEYBalance(beneficiary);
+
+        setUserBalance2KEY(
+            beneficiary,
+            userBalance.add(amount)
+        );
+    }
+
+    /**
+     * @notice          Function to get balances of user in 2KEY
+     */
     function get2KEYBalance(address user)
     public
     view
-    returns (uint);
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userTo2KEYBalance, user));
+    }
 
+    /**
+     * @notice          Function to get balances of user in USDT
+     */
     function getUSDTBalance(address user)
     public
     view
-    returns (uint);
+    returns (uint)
+    {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userToUSDTBalance, user));
+    }
 
+    /**
+     * @notice          Function to get denomination of USDT
+     */
     function getUSDTDecimals()
     public
     view
@@ -89,6 +203,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         return 6;
     }
 
+    /**
+     * @notice          Function to get denomination of 2KEY
+     */
     function get2KEYDecimals()
     public
     view
