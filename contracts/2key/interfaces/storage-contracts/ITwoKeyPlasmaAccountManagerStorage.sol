@@ -7,6 +7,6 @@ import "../IStructuredStorage.sol";
  * @author Nikola Madjarevic
  * Github: madjarevicn
  */
-contract ITwoKeyPlasmaAccountManagerStorage is IStructuredStorage{
+contract ITwoKeyPlasmaAccountManagerStorage is IStructuredStorage {
 
 }
