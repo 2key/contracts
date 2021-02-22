@@ -6,6 +6,7 @@ import "../interfaces/IERC20.sol";
 import "../libraries/Call.sol";
 import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyTreasuryL1Storage.sol";
+import "../interfaces/IUniswapV2Router02.sol";
 
 /**
  * TwoKeyTreasuryL1 contract receiving all deposits from contractors.
@@ -78,7 +79,28 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
-        //TODO: Implement Uniswap swap funnel for 2KEY
+        IUniswapV2Router02 router = IUniswapV2Router02(
+            getNonUpgradableContractAddressFromTwoKeySingletonRegistry(("UniswapV2Router02"))
+        );
+
+        address [] memory path = new address [](2);
+        path[0] = tokenAddress;
+        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+        uint [] memory amountsOut = new uint[](2);
+
+        amountsOut = router.getAmountsOut(
+            amountOfTokens,
+            path
+        );
+
+        router.swapExactTokensForTokens(
+            amountOfTokens,
+            amountsOut[1].mul(97).div(100), // Allow 3 percent to drop
+            path,
+            address(this),
+            block.timestamp + (10 minutes)
+        );
     }
 
     /**
