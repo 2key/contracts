@@ -7,6 +7,6 @@ import "../upgradability/Upgradeable.sol";
  * @author Nikola Madjarevic
  * Github: madjarevicn
  */
-contract TwoKeyPlasmaAccountManager is Upgradeable{
+contract TwoKeyPlasmaAccountManager is Upgradeable {
 
 }
