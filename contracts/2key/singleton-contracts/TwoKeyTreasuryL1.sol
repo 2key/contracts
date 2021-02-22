@@ -7,6 +7,7 @@ import "../libraries/Call.sol";
 import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyTreasuryL1Storage.sol";
 import "../interfaces/IUniswapV2Router02.sol";
+import "../interfaces/ITwoKeyRegistry.sol";
 
 /**
  * TwoKeyTreasuryL1 contract receiving all deposits from contractors.
@@ -20,6 +21,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     string constant _isExistingSignature = "isExistingSignature";
     string constant _messageNotes = "binding rewards for user";
+
 
     bool initialized;
 
@@ -116,19 +118,23 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
+        //TODO: Add security safeguards
+
         bytes32 key = keccak256(_isExistingSignature, signature);
         // Require that signature doesn't exist
         require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
-
         // Check who signed the message
         address messageSigner = recoverSignature(msg.sender, amount, signature);
-
+        // Get the instance of TwoKeyRegistry
+        ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
-//        require(getSignatoryAddress() == messageSigner);
-
-
+        require(messageSigner == registry.getSignatoryAddress());
+        // Get the instance of 2KEY token contract
+        IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
+        // Transfer tokens to the user
+        twoKeyEconomy.transfer(beneficiary, amount);
     }
 
     /**
@@ -155,6 +161,5 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     {
         return IERC20(token).balanceOf(address(this));
     }
-
 
 }

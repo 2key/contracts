@@ -21,11 +21,18 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     bool initialized;
 
     string constant _twoKeyMaintainersRegistry = "TwoKeyMaintainersRegistry";
+    string constant _signatoryAddress = "signatoryAddress";
 
     ITwoKeyRegistryStorage public PROXY_STORAGE_CONTRACT;
 
-
-
+    /**
+     * @notice          Modifier to restrict access only to 2KEY Congress.
+     */
+    modifier onlyTwoKeyCongress {
+        address twoKeyCongress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        require(msg.sender == twoKeyCongress);
+        _;
+    }
 
     /**
      * @notice          Function which can be called only once
@@ -47,7 +54,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
 
         initialized = true;
     }
-
 
     /**
      * @notice          Function which is called either during the registration or when user
@@ -81,7 +87,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setAddress(keyHashUserNameToAddress, _userAddress);
     }
 
-
     /**
      * @notice          Function where maintainer can register user
      *
@@ -101,7 +106,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         // Here also the validation for uniqueness for this username will be done
         addOrChangeUsernameInternal(_username, _userEthereumAddress);
     }
-
 
     /**
      * @notice          Function to map plasma and ethereum addresses for the user
@@ -141,8 +145,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT.setAddress(keyHashEthereumToPlasma, plasmaAddress);
     }
 
-
-
     /**
      * @notice          Function to register user and set his username by maintainer
      */
@@ -158,8 +160,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         addName(username, ethereumAddress);
         addPlasma2Ethereum(signature,plasmaAddress,ethereumAddress);
     }
-
-
 
     /**
      * @notice          Function where username can be changed
@@ -190,6 +190,24 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
             );
     }
 
+    /**
+     * @notice          Function to set signatory address which is used in various places
+     *                  to sign messages
+     * @param           signatoryAddress is the signatory address
+     */
+    function setSignatoryAddress(
+        address signatoryAddress
+    )
+    public
+    onlyTwoKeyCongress
+    {
+        require(signatoryAddress != address(0), "Signatory address = 0");
+        // Store new signatory address
+        PROXY_STORAGE_CONTRACT.setAddress(
+            keccak256(_signatoryAddress),
+            signatoryAddress
+        );
+    }
 
     /**
      * @notice          Function to read from mapping username => address
@@ -245,7 +263,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return plasmaAddress != address(0) ? plasmaAddress : ethereumAddress;
     }
 
-
     /**
      * @notice          Function to check if the user exists
      *
@@ -270,7 +287,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return true;
     }
 
-
     /**
      * @notice          Function to get user data
      *
@@ -287,7 +303,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return (abi.encodePacked(stringToBytes32(username), bytes32(0), bytes32(0)));
     }
 
-
     /**
      * @notice          Function to read from the mapping userAddress => username
      *
@@ -302,7 +317,6 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
     {
         return PROXY_STORAGE_CONTRACT.getString(keccak256("address2username", keyAddress));
     }
-
 
     /**
      * @notice          Function to read from the mapping username => currentAddress
@@ -319,4 +333,14 @@ contract TwoKeyRegistry is Upgradeable, Utils, ITwoKeySingletonUtils {
         return PROXY_STORAGE_CONTRACT.getAddress(keccak256("username2currentAddress", _username));
     }
 
+    /**
+     * @notice          Function to return signatory address
+     */
+    function getSignatoryAddress()
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_signatoryAddress));
+    }
 }
