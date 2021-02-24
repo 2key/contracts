@@ -24,6 +24,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     string constant _userToUSDTBalance = "userToUSDTBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
 
+
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
     ITwoKeyPlasmaAccountManagerStorage PROXY_STORAGE_CONTRACT;
@@ -169,6 +170,29 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
     }
+
+    function transfer2KEY(
+        address beneficiary,
+        uint amount
+    )
+    public
+    {
+        uint userBalance = get2KEYBalance(msg.sender);
+        uint beneficiaryBalance = get2KEYBalance(beneficiary);
+
+        require(userBalance >= amount, "no enough tokens");
+
+        setUserBalance2KEY(
+            msg.sender,
+            userBalance.sub(amount)
+        );
+
+        setUserBalance2KEY(
+            beneficiary,
+            beneficiaryBalance.add(amount)
+        );
+    }
+
 
     /**
      * @notice          Function to get balances of user in 2KEY
