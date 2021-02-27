@@ -1394,16 +1394,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-    function getPoolBalanceOf2KeyTokens()
-    internal
-    view
-    returns (uint)
-    {
-        address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
-        return ERC20(tokenAddress).balanceOf(address(this));
-    }
-
-
     /**
      * @notice          Function to be used to fetch rates for SELL orders
      * @notice          amountToReceive is desired amount of 2KEY tokens to be received
