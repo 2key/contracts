@@ -2,6 +2,9 @@
 ## [Unreleased]
 
 
+<a name="v1.4.38-master"></a>
+## [v1.4.38-master] - 2021-03-03
+
 <a name="v1.4.37-master"></a>
 ## [v1.4.37-master] - 2021-02-27
 
@@ -2492,7 +2495,8 @@
 <a name="v0.1"></a>
 ## v0.1 - 2018-04-09
 
-[Unreleased]: https://github.com/2key/contracts/compare/v1.4.37-master...HEAD
+[Unreleased]: https://github.com/2key/contracts/compare/v1.4.38-master...HEAD
+[v1.4.38-master]: https://github.com/2key/contracts/compare/v1.4.37-master...v1.4.38-master
 [v1.4.37-master]: https://github.com/2key/contracts/compare/v1.4.191-develop...v1.4.37-master
 [v1.4.191-develop]: https://github.com/2key/contracts/compare/v1.2.79-staging...v1.4.191-develop
 [v1.2.79-staging]: https://github.com/2key/contracts/compare/v1.2.78-staging...v1.2.79-staging
