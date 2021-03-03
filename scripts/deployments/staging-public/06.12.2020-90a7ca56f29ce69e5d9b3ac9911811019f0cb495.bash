@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 
 spinner() {
-    chars="/-\|"
+    chars="/-\|"s
 
     for (( j=0; j< $1; j++ )); do
       for (( i=0; i<${#chars}; i++ )); do
