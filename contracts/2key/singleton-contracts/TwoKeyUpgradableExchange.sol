@@ -988,7 +988,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
             // Override always the path array
             path[0] = tokenAddress;
-            path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+            path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
             // Get minimum received
             uint minimumToReceive = uniswapPriceDiscoverForBuyingFromUniswap(
