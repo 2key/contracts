@@ -81,7 +81,7 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     }
 
     /**
-     * @notice      Function that retruns value for the given pair name
+     * @notice      Function that returns value for the given pair name
      */
     function getPairValue(string name) external view returns (uint) {
         bytes32 hexedName = stringToBytes32(name);
