@@ -1,7 +1,10 @@
 pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
-import "../interfaces/storage-contracts/ITwoKeyExchangeRateStorage.sol";
+import "../interfaces/storage-contracts/ITwoKeyPlasmaExchangeRateStorage.sol";
+//import "../singleton-storage-contracts/TwoKeyPlasmaExchangeRateStorage.sol";
+import "../interfaces/ITwoKeyMaintainersRegistry.sol";
+import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 
 /**
   * @author Marko Lazic
@@ -11,23 +14,29 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     //TODO: Integrate MAINTAINER PATTERN
     //TODO: Setters can be called only by maintainers
     bool initialized;
-    address owner;
+    string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
+    //address owner;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
-    ITwoKeyExchangeRateStorage PROXY_STORAGE_CONTRACT;
+    ITwoKeyPlasmaExchangeRateStorage PROXY_STORAGE_CONTRACT;
 
     string constant _bytesToRate = "bytesToRate";
 
-    modifier onlyOwner{
-        require(owner == msg.sender);
+    modifier onlyMaintainer {
+        address twoKeyPlasmaMaintainersRegistry = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaMaintainersRegistry);
+        require(ITwoKeyMaintainersRegistry(twoKeyPlasmaMaintainersRegistry).checkIsAddressMaintainer(msg.sender) == true);
         _;
     }
-
+     /*
     constructor (address _owner) public {
         owner = _owner;
     }
+      */
+    function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getContractProxyAddress(contractName);
+    }
 
-    function setInitialParams(address _twoKeyPlasmaSingletonRegistry, address _proxyStorage) public {
+    function setInitialParams(address _twoKeyPlasmaSingletonRegistry, address _proxyStorage) public onlyMaintainer{
         require(initialized == false);
 
         TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
@@ -46,12 +55,12 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
         }
     }
 
-    function setPairValue(bytes32 name, uint value) external onlyOwner {
+    function setPairValue(bytes32 name, uint value) external onlyMaintainer {
         bytes32 key = keccak256(_bytesToRate, name);
         PROXY_STORAGE_CONTRACT.setUint(key, value);
     }
 
-    function setPairValues(bytes32 [] names, uint [] values) external onlyOwner {
+    function setPairValues(bytes32 [] names, uint [] values) external onlyMaintainer {
         uint length = names.length;
         for(uint i = 0; i < length; i++){
             bytes32 key = keccak256(_bytesToRate, names[i]);
