@@ -1,20 +1,20 @@
 pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
-import "../singleton-storage-contracts/TwoKeyPlasmaExchangeRateStorage.sol";
 import "../interfaces/storage-contracts/ITwoKeyExchangeRateStorage.sol";
 
 /**
   * @author Marko Lazic
-  */
-
+ */
 contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
 
+    //TODO: Integrate MAINTAINER PATTERN
+    //TODO: Setters can be called only by maintainers
     bool initialized;
     address owner;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
-    ITwoKeyPlasmaExchangeRateStorage PROXY_STORAGE_CONTRACT;
+    ITwoKeyExchangeRateStorage PROXY_STORAGE_CONTRACT;
 
     string constant _bytesToRate = "bytesToRate";
 
@@ -47,25 +47,31 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     }
 
     function setPairValue(bytes32 name, uint value) external onlyOwner {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), name)), value);
+        bytes32 key = keccak256(_bytesToRate, name);
+        PROXY_STORAGE_CONTRACT.setUint(key, value);
     }
 
     function setPairValues(bytes32 [] names, uint [] values) external onlyOwner {
         uint length = names.length;
         for(uint i = 0; i < length; i++){
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), names[i])), values[i]);
+            bytes32 key = keccak256(_bytesToRate, names[i]);
+            PROXY_STORAGE_CONTRACT.setUint(key, values[i]);
         }
     }
 
-    function getPairValue(bytes32 name) external view returns (uint) {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), name)));
+    function getPairValue(string name) external view returns (uint) {
+        bytes32 hexedName = stringToBytes32(name);
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_bytesToRate, hexedName));
     }
 
     function getPairValues(bytes32 [] names) external view returns (uint[]) {
         uint [] memory values = new uint[](names.length);
+
         for(uint i = 0; i < names.length; i++){
-            values[i] = PROXY_STORAGE_CONTRACT.getUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), names[i])));
+            bytes32 key = keccak256(_bytesToRate, names[i]);
+            values[i] = PROXY_STORAGE_CONTRACT.getUint(key);
         }
+
         return values;
     }
 }
