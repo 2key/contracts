@@ -62,7 +62,7 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
 
     /**
     * @notice       Function that sets value for pair of currencies
-    * @param        Name is a name of the pair of currencies you want to set value for
+    * @param        name is a name of the pair of currencies you want to set value for
     */
     function setPairValue(bytes32 name, uint value) external onlyMaintainer {
         bytes32 key = keccak256(_bytesToRate, name);
