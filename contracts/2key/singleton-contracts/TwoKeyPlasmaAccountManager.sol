@@ -21,6 +21,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _messageNotes = "signUserDepositTokens";
+    string constant _deposits = "deposits"; // Array of all deposits
+    string constant _depositIdToTimestamp = "depositIdToTimestamp"; // Deposit ID to timestamp when deposited
+    string constant _userToDepositIds = "userToDepositIds"; // Mapping user to his deposit IDS
     string constant _userToUSDTBalance = "userToUSDTBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
 
@@ -163,6 +166,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     public
     onlyMaintainer
     {
+        //TODO: Verify signature
         uint userBalance = get2KEYBalance(beneficiary);
 
         setUserBalance2KEY(
@@ -193,6 +197,15 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         );
     }
 
+    //TODO: @marko implement this function
+    function transferUSD(
+        address beneficiary,
+        uint amount
+    )
+    public
+    {
+
+    }
 
     /**
      * @notice          Function to get balances of user in 2KEY
@@ -237,5 +250,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     {
         return 18;
     }
+
+    //TODO: Add following getters:
 
 }
