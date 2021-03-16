@@ -16,21 +16,14 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaExchangeRateStorage PROXY_STORAGE_CONTRACT;
 
-    bytes32 key = stringToBytes32("bytesToRate"); //TODO: This is not how the things work, neither following the pattern we use
-
     string constant _bytesToRate = "bytesToRate";
-
 
     modifier onlyOwner{
         require(owner == msg.sender);
         _;
     }
 
-    // TODO: we Use upgradable contracts, where have you seen that we use mappings like this?
-    mapping(bytes32 => uint) public baseToTargetRate;
-
-    //TODO: what is the point of this _balance argument?
-    constructor (address _owner, uint _balance) public {
+    constructor (address _owner) public {
         owner = _owner;
     }
 
@@ -38,7 +31,7 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
         require(initialized == false);
 
         TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
-        PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaFactoryStorage(_proxyStorage); //TODO: Why are you using PlasmaFactory Storage?
+        PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaExchangeRateStorage(_proxyStorage);
 
         initialized = true;
     }
@@ -54,22 +47,24 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     }
 
     function setPairValue(bytes32 name, uint value) external onlyOwner {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(key, name), value);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), name)), value);
     }
 
     function setPairValues(bytes32 [] names, uint [] values) external onlyOwner {
         uint length = names.length;
         for(uint i = 0; i < length; i++){
-            PROXY_STORAGE_CONTRACT.setUintArray(keccak256(key, names[i]), values[i]);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), names[i])), values[i]);
         }
     }
 
-    //TODO: missing function to get single pair value?
+    function getPairValue(bytes32 name) external view returns (uint) {
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), name)));
+    }
 
     function getPairValues(bytes32 [] names) external view returns (uint[]) {
         uint [] memory values = new uint[](names.length);
         for(uint i = 0; i < names.length; i++){
-            values[i] = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(key, names[i]));
+            values[i] = PROXY_STORAGE_CONTRACT.getUint(keccak256(abi.encodePacked(stringToBytes32(_bytesToRate), names[i])));
         }
         return values;
     }
