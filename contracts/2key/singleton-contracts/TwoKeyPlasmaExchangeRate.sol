@@ -48,8 +48,8 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     }
 
     /**
-    * @notice       Function that converts string to bytes32
-    */
+     * @notice       Function that converts string to bytes32
+     */
     function stringToBytes32(string memory source) internal pure returns (bytes32 result){
         bytes memory tempEmptyStringTest = bytes(source);
         if(tempEmptyStringTest.length == 0) {
@@ -60,9 +60,10 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
         }
     }
 
+
     /**
-    * @notice       Function that sets value for pair of currencies
-    * @param        name is a name of the pair of currencies you want to set value for
+     * @notice       Function that sets value for pair of currencies
+     * @param        name is a name of the pair of currencies you want to set value for
     */
     function setPairValue(bytes32 name, uint value) external onlyMaintainer {
         bytes32 key = keccak256(_bytesToRate, name);
@@ -70,8 +71,8 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     }
 
     /**
-    * @notice       Function that sets values for multiple pairs of values
-    */
+     * @notice       Function that sets values for multiple pairs of values
+     */
     function setPairValues(bytes32 [] names, uint [] values) external onlyMaintainer {
         uint length = names.length;
         for(uint i = 0; i < length; i++){
@@ -89,8 +90,8 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     }
 
     /**
-    * @notice       Function tht returns multiple values for multiple given pair names
-    */
+     * @notice       Function tht returns multiple values for multiple given pair names
+     */
     function getPairValues(bytes32 [] names) external view returns (uint[]) {
         uint [] memory values = new uint[](names.length);
 
