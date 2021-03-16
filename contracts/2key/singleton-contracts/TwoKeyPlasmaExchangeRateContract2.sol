@@ -13,18 +13,20 @@ import "../interfaces/IERC20.sol";
  * @author Marko Lazic
  */
 
+// TODO: General practice is to name file same as contract.
 contract TwoKeyPlasmaExchangeRateContract{
 
-    //using SafeMath for uint;
+    // TODO: Where did we spec that contract will have owner?
+    // TODO: Since this is contract receiving calls from proxy, nothing but constants should be explictly declared
     address owner = msg.sender;
     string constant _currencyName2rate = "currencyName2rate";
     string constant _twoKeyEventSource = "TwoKeyEventSource";
     bool initialized;
 
     address TWO_KEY_SINGLETON_REGISTRY;
-    address PROXY_STORAGE_CONTRACT;
+    address PROXY_STORAGE_CONTRACT; // TODO: This should be instantiated as ITwoKeyPlasmaExchangeRateStorage
 
-    modifier onlyMaintainer(){
+    modifier onlyMaintainer() { //TODO: How come owner is maintainer?
         require(owner == msg.sender);
         _;
     }
@@ -41,7 +43,7 @@ contract TwoKeyPlasmaExchangeRateContract{
 
     function setFiatCurrencyDetails(bytes32 _currency, uint _baseToTargetRate) public onlyMaintainer {
         storeFiatCurrencyDetails(_currency, _baseToTargetRate);
-        address twoKeyEventSource = getAddressFromKeySingletonRegistry(_twoKeyEventSource);
+        address twoKeyEventSource = getAddressFromKeySingletonRegistry(_twoKeyEventSource); //TODO: What is this line doing?
     }
 
     function setMultipleFiatCurrencyDetails(bytes32[] _currencies, uint[] _baseToTargetRates) public onlyMaintainer {
@@ -49,8 +51,8 @@ contract TwoKeyPlasmaExchangeRateContract{
         for(uint i = 0; i < numberOfFiats; i++) {
             storeFiatCurrencyDetails(_currencies[i], _baseToTargetRates[i]);
             address twoKeyEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyEventSource);
-            ITwoKeyEventSourceEvents(twoKeyEventSource);
-            ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currencies[i], _baseToTargetRates[i], block.timestamp, msg.sender);
+            ITwoKeyEventSourceEvents(twoKeyEventSource); //TODO: What is this line doing?
+            ITwoKeyEventSourceEvents(twoKeyEventSource).priceUpdated(_currencies[i], _baseToTargetRates[i], block.timestamp, msg.sender); //TODO: What is this line doing?
         }
     }
 
@@ -69,10 +71,11 @@ contract TwoKeyPlasmaExchangeRateContract{
         return PROXY_STORAGE_CONTRACT.getUint(keyHash);
     }
 
-    function exchangeCurrencies( string base_target, uint base_amount) public view returns (uint) {
+    function exchangeCurrencies(string base_target, uint base_amount) public view returns (uint) {
         return getBaseToTargetRate(base_target).mul(base_amount);
     }
 
+    //TODO: Where did we spec this function
     function getFiatToStableQuotes(uint amountInFiatWei, string fiatCurrency, bytes32 [] stableCoinPairs) public view returns (uint[]) {
         uint len = stableCoinPairs.length;
         uint [] memory pairs = new uint[](len);
@@ -84,6 +87,7 @@ contract TwoKeyPlasmaExchangeRateContract{
         return pairs;
     }
 
+    //TODO: Where did we spec this function
     function getStableCoinToUSDQuota(address stableCoinAddress) public view returns (uint){
         string memory tokenSymbol = IERC20(stableCoinAddress).symbol();
         if(getNonUpgradableContractAddressFromTwoKetSingletonRegistry(tokenSymbol) == stableCoinAddress) {
@@ -91,6 +95,7 @@ contract TwoKeyPlasmaExchangeRateContract{
         }
         return 0;
     }
+
 
     function stringToBytes32(string memory source) internal returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
@@ -102,6 +107,7 @@ contract TwoKeyPlasmaExchangeRateContract{
         }
     }
 
+    //TODO: Do you use this function anywhere?
     function concatenateStrings(string a, string b) internal pure returns (string) {
         return string(abi.encodePacked(a,b));
     }
