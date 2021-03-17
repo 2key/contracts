@@ -25,6 +25,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     string constant _userToDepositTimestamp = "userToDepositTimestamp"; // deposit timestamps
     string constant _userToDepositAmount = "userToDepositAmount"; // deposit amounts
     string constant _userToDepositCurrency = "userToDepositCurrency"; // deposit currency
+    string constant _userDepositIds = "userDepositIds";
 
     /**
      * Example:
@@ -246,9 +247,11 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             //userBalance = get2KEYBalance(msg.sender);
         }
 
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender), block.timestamp);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender), amount);
-        PROXY_STORAGE_CONTRACT.setString(keccak256(_userToDepositCurrency, msg.sender), currency);
+        uint id = PROXY_STORAGE_CONTRACT.getUint(keccak256(_userDepositIds, msg.sender)) + 1;
+
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender, id), block.timestamp);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender, id), amount);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_userToDepositCurrency, msg.sender, id), currency);
     }
 
     /**
