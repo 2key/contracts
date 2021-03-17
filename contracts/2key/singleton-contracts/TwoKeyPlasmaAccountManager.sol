@@ -184,7 +184,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint userBalance = get2KEYBalance(msg.sender);
         uint beneficiaryBalance = get2KEYBalance(beneficiary);
 
-        require(userBalance >= amount, "no enough tokens");
+        require(userBalance >= amount, "no/*t*/ enough tokens");
 
         setUserBalance2KEY(
             msg.sender,
@@ -197,14 +197,27 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         );
     }
 
-    //TODO: @marko implement this function
+    //TODO: @marko implement this function - Done
     function transferUSD(
         address beneficiary,
         uint amount
     )
     public
     {
+        uint userBalance = getUSDTBalance(msg.sender);
+        uint beneficiaryBalance = getUSDTBalance(beneficiary);
 
+        require(userBalance >= amount, "not enough money");
+
+        setUserBalanceUSDT(
+            msg.sender,
+            userBalance.sub(amount)
+        );
+
+        setUserBalanceUSDT(
+            beneficiary,
+            beneficiaryBalance.add(amount)
+        );
     }
 
     /**
@@ -252,5 +265,13 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     //TODO: Add following getters:
-
+    /*
+    function getDeposits(address user)
+    public
+    view
+    returns (uint[])
+    {
+        return PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_deposits, user));
+    }
+    */
 }
