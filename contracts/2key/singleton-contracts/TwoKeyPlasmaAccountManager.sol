@@ -66,6 +66,19 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
+     * @notice          Function that converts string to bytes32
+     */
+    function stringToBytes32(string memory source) internal pure returns (bytes32 result){
+        bytes memory tempEmptyStringTest = bytes(source);
+        if(tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+        assembly {
+            result := mload(add(source, 32))
+        }
+    }
+
+    /**
      * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
      *
      * @param           contractName is the name of the contract
@@ -160,6 +173,10 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             userBalance.add(amount)
         );
+
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender), block.timestamp);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender), amount);
+        PROXY_STORAGE_CONTRACT.setBytes32(keccak256(_userToDepositCurrency, msg.sender), stringToBytes32("USDT"));
     }
 
     /**
@@ -184,12 +201,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        //TODO: Populate missing accounting things
-        /**
-         _userToDepositTimestamp
-        _userToDepositAmount
-        _userToDepositCurrency
-         */
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender), block.timestamp);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender), amount);
+        PROXY_STORAGE_CONTRACT.setBytes32(keccak256(_userToDepositCurrency, msg.sender), stringToBytes32("2KEY"));
     }
 
     function transfer2KEY(
@@ -212,13 +226,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             beneficiaryBalance.add(amount)
         );
-
-        //TODO: Populate missing accounting things
-        /**
-         _userToDepositTimestamp
-        _userToDepositAmount
-        _userToDepositCurrency
-         */
     }
 
     function transferUSD(
@@ -241,25 +248,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             beneficiaryBalance.add(amount)
         );
-    }
-
-    /**
-     * @notice          Function for storing a deposit
-     */
-    function storeDeposit(
-        address beneficiary,
-        uint amount,
-        string currency
-    )
-    public
-    onlyMaintainer
-    {
-        uint id = PROXY_STORAGE_CONTRACT.getUint(keccak256(_userDepositId, msg.sender)) + 1;
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userDepositId, msg.sender), id);
-
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender, id), block.timestamp);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender, id), amount);
-        PROXY_STORAGE_CONTRACT.setString(keccak256(_userToDepositCurrency, msg.sender, id), currency);
     }
 
     /**
@@ -309,6 +297,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     //TODO: Add following getters:
     //TODO: Get method to get info about user deposits based on input currency
 
+    /**
+     * @notice          Function that returns users deposit history details
+     */
     function getUserDepositsHistory(
         address user
     )
@@ -321,5 +312,10 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     )
     {
         //TODO Use existing fucntion stringToBytes32 when converting from currency string to bytes32
+        return (
+            PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, user)),
+            PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, user)),
+            PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, user))
+        );
     }
 }
