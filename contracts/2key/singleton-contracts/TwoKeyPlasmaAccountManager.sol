@@ -206,7 +206,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         );
     }
 
-
     function transferUSD(
         address beneficiary,
         uint amount
@@ -227,6 +226,29 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             beneficiaryBalance.add(amount)
         );
+    }
+
+    /**
+     * @notice function for storing a deposit
+     */
+    function makeDeposit(
+        address beneficiary,
+        uint amount,
+        string currency
+    )
+    public
+    {
+        if(currency == "2KEY"){
+            transfer2KEY(beneficiary, amount);
+            //userBalance = getUSDTBalance(msg.sender);
+        } else if(currency == "USD"){
+            transferUSD(beneficiary, amount);
+            //userBalance = get2KEYBalance(msg.sender);
+        }
+
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, block.timestamp), msg.sender);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, amount), msg.sender);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_userToDepositCurrency, currency), msg.sender);
     }
 
     /**
