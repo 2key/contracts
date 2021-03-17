@@ -184,7 +184,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint userBalance = get2KEYBalance(msg.sender);
         uint beneficiaryBalance = get2KEYBalance(beneficiary);
 
-        require(userBalance >= amount, "no/*t*/ enough tokens");
+        require(userBalance >= amount, "no enough tokens");
 
         setUserBalance2KEY(
             msg.sender,
@@ -197,7 +197,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         );
     }
 
-    //TODO: @marko implement this function - Done
+
     function transferUSD(
         address beneficiary,
         uint amount
@@ -207,7 +207,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint userBalance = getUSDTBalance(msg.sender);
         uint beneficiaryBalance = getUSDTBalance(beneficiary);
 
-        require(userBalance >= amount, "not enough money");
+        require(userBalance >= amount, "no enough tokens");
 
         setUserBalanceUSDT(
             msg.sender,
