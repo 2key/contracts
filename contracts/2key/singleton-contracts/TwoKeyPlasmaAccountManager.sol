@@ -232,19 +232,14 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     /**
      * @notice          Function for storing a deposit
      */
-    function makeDeposit(
+    function storeDeposit(
         address beneficiary,
         uint amount,
         string currency
     )
     public
+    onlyMaintainer
     {
-        if(keccak256(abi.encodePacked(currency)) == keccak256(abi.encodePacked("2KEY"))){
-            transfer2KEY(beneficiary, amount);
-        } else if(keccak256(abi.encodePacked(currency)) == keccak256(abi.encodePacked("USD"))){
-            transferUSD(beneficiary, amount);
-        }
-
         uint id = PROXY_STORAGE_CONTRACT.getUint(keccak256(_userDepositId, msg.sender)) + 1;
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_userDepositId, msg.sender), id);
 
@@ -298,13 +293,4 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     //TODO: Add following getters:
-    /*
-    function getDeposits(address user)
-    public
-    view
-    returns (uint[])
-    {
-        return PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_deposits, user));
-    }
-    */
 }
