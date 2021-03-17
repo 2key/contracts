@@ -21,9 +21,18 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _messageNotes = "signUserDepositTokens";
-    string constant _deposits = "deposits"; // Array of all deposits
-    string constant _depositIdToTimestamp = "depositIdToTimestamp"; // Deposit ID to timestamp when deposited
-    string constant _userToDepositIds = "userToDepositIds"; // Mapping user to his deposit IDS
+
+    string constant _userToDepositTimestamp = "userToDepositTimestamp"; // deposit timestamps
+    string constant _userToDepositAmount = "userToDepositAmount"; // deposit amounts
+    string constant _userToDepositCurrency = "userToDepositCurrency"; // deposit currency
+
+    /**
+     * Example:
+        depositsTimestamps = [12319391931,12319391931,12319391931]
+        deposits = [500000000000000000000,1500000000000000000000,34500000000000000000000]
+        Always length of those 2 arrays has to be same
+     */
+
     string constant _userToUSDTBalance = "userToUSDTBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
 
