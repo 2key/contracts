@@ -22,10 +22,10 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _messageNotes = "signUserDepositTokens";
 
+    // Accounting
     string constant _userToDepositTimestamp = "userToDepositTimestamp"; // deposit timestamps
     string constant _userToDepositAmount = "userToDepositAmount"; // deposit amounts
     string constant _userToDepositCurrency = "userToDepositCurrency"; // deposit currency
-    string constant _userDepositId = "userDepositId";
 
     /**
      * Example:
@@ -183,6 +183,13 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             userBalance.add(amount)
         );
+
+        //TODO: Populate missing accounting things
+        /**
+         _userToDepositTimestamp
+        _userToDepositAmount
+        _userToDepositCurrency
+         */
     }
 
     function transfer2KEY(
@@ -205,6 +212,13 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             beneficiaryBalance.add(amount)
         );
+
+        //TODO: Populate missing accounting things
+        /**
+         _userToDepositTimestamp
+        _userToDepositAmount
+        _userToDepositCurrency
+         */
     }
 
     function transferUSD(
@@ -293,4 +307,19 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     //TODO: Add following getters:
+    //TODO: Get method to get info about user deposits based on input currency
+
+    function getUserDepositsHistory(
+        address user
+    )
+    public
+    view
+    returns (
+        uint [],
+        uint [],
+        bytes32 []
+    )
+    {
+        //TODO Use existing fucntion stringToBytes32 when converting from currency string to bytes32
+    }
 }
