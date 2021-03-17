@@ -241,10 +241,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     {
         if(keccak256(abi.encodePacked(currency)) == keccak256(abi.encodePacked("2KEY"))){
             transfer2KEY(beneficiary, amount);
-            //userBalance = getUSDTBalance(msg.sender);
         } else if(keccak256(abi.encodePacked(currency)) == keccak256(abi.encodePacked("USD"))){
             transferUSD(beneficiary, amount);
-            //userBalance = get2KEYBalance(msg.sender);
         }
 
         uint id = PROXY_STORAGE_CONTRACT.getUint(keccak256(_userDepositId, msg.sender)) + 1;
