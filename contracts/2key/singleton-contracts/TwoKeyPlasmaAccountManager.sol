@@ -229,7 +229,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice function for storing a deposit
+     * @notice          Function for storing a deposit
      */
     function makeDeposit(
         address beneficiary,
@@ -238,17 +238,17 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     )
     public
     {
-        if(currency == "2KEY"){
+        if(keccak256(abi.encodePacked(currency)) == keccak256(abi.encodePacked("2KEY"))){
             transfer2KEY(beneficiary, amount);
             //userBalance = getUSDTBalance(msg.sender);
-        } else if(currency == "USD"){
+        } else if(keccak256(abi.encodePacked(currency)) == keccak256(abi.encodePacked("USD"))){
             transferUSD(beneficiary, amount);
             //userBalance = get2KEYBalance(msg.sender);
         }
 
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, block.timestamp), msg.sender);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, amount), msg.sender);
-        PROXY_STORAGE_CONTRACT.setString(keccak256(_userToDepositCurrency, currency), msg.sender);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender), block.timestamp);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender), amount);
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_userToDepositCurrency, msg.sender), currency);
     }
 
     /**
