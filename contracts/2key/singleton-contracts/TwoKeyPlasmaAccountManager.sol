@@ -174,9 +174,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender), block.timestamp);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender), amount);
-        PROXY_STORAGE_CONTRACT.setBytes32(keccak256(_userToDepositCurrency, msg.sender), stringToBytes32("USDT"));
+        saveDepositHistory(amount ,"USDT");
     }
 
     /**
@@ -201,9 +199,39 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositTimestamp, msg.sender), block.timestamp);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToDepositAmount, msg.sender), amount);
-        PROXY_STORAGE_CONTRACT.setBytes32(keccak256(_userToDepositCurrency, msg.sender), stringToBytes32("2KEY"));
+        saveDepositHistory(amount, "2KEY");
+    }
+
+    function saveDepositHistory(
+        uint amount,
+        string currency
+    )
+    public
+    onlyMaintainer
+    {
+        uint[] memory userTimestamps = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, msg.sender));
+        uint[] memory newUserTimestamps = new uint[](userTimestamps.length + 1);
+        for(uint i = 0; i < userTimestamps.length; i++){
+            newUserTimestamps[i] = userTimestamps[i];
+        }
+        newUserTimestamps[i] = block.timestamp;
+        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositTimestamp, msg.sender), newUserTimestamps);
+
+        uint[] memory userAmounts = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, msg.sender));
+        uint[] memory newUserAmounts = new uint[](userAmounts.length + 1);
+        for(i = 0; i < userAmounts.length; i++){
+            newUserAmounts[i] = userAmounts[i];
+        }
+        newUserAmounts[i] = amount;
+        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositAmount, msg.sender), newUserAmounts);
+
+        bytes32[] memory userCurrencies = PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, msg.sender));
+        bytes32[] memory newUserCurrencies = new bytes32[](userCurrencies.length + 1);
+        for(i = 0; i < userCurrencies.length; i++){
+            newUserCurrencies[i] = userCurrencies[i];
+        }
+        newUserCurrencies[i] = stringToBytes32(currency);
+        PROXY_STORAGE_CONTRACT.setBytes32Array(keccak256(_userToDepositCurrency, msg.sender), userCurrencies);
     }
 
     function transfer2KEY(
