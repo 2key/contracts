@@ -57,6 +57,9 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getContractProxyAddress(contractName);
     }
 
+    /**
+     * @notice      Function that allocates specified amount of 2KEY from users account to address of this contract
+     */
     function allocate2KEY(
         address user,
         uint amount
@@ -72,6 +75,9 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_2KEYBalance, this), contractBalance);
     }
 
+    /**
+     * @notice      Function that allocates specified amount of USD from users account to address of this contract
+     */
     function allocateUSD(
         address user,
         uint amount
