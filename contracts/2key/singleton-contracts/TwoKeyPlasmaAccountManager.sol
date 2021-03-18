@@ -27,13 +27,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     string constant _userToDepositAmount = "userToDepositAmount"; // deposit amounts
     string constant _userToDepositCurrency = "userToDepositCurrency"; // deposit currency
 
-    /**
-     * Example:
-        depositsTimestamps = [12319391931,12319391931,12319391931]
-        deposits = [500000000000000000000,1500000000000000000000,34500000000000000000000]
-        Always length of those 2 arrays has to be same
-     */
-
     string constant _userToUSDTBalance = "userToUSDTBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
 
@@ -322,9 +315,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         return 18;
     }
 
-    //TODO: Add following getters:
-    //TODO: Get method to get info about user deposits based on input currency
-
     /**
      * @notice          Function that returns users deposit history details
      */
@@ -339,7 +329,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         bytes32 []
     )
     {
-        //TODO Use existing fucntion stringToBytes32 when converting from currency string to bytes32
         return (
             PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, user)),
             PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, user)),
