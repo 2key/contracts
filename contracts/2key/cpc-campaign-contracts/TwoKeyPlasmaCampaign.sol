@@ -105,6 +105,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     // Restricting calls only to plasma campaigns inventory contract
     modifier onlyTwoKeyPlasmaCampaignsInventory {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+        _;
     }
 
     // Event which will be fired every time conversion is created
