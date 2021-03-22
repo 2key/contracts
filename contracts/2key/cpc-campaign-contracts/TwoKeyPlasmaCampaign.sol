@@ -102,6 +102,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         _;
     }
 
+    // Restricting calls only to plasma campaigns inventory contract
+    modifier onlyTwoKeyPlasmaCampaignsInventory {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+    }
+
     // Event which will be fired every time conversion is created
     event ConversionCreated(
         uint conversionId
@@ -651,6 +656,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     )
     public
     onlyMaintainer
+    onlyTwoKeyPlasmaCampaignsInventory
     {
         // Require that campaign is not previously validated
         require(isValidated == false);

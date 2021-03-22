@@ -4,6 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaCampaignsInventoryStorage.sol";
+import "./TwoKeyPlasmaAccountManager.sol";
 
  /**
   * @title TwoKeyPlasmaCampaignsInventory contract
@@ -16,6 +17,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaCampaignsInventoryStorage PROXY_STORAGE_CONTRACT;
+
+    TwoKeyPlasmaAccountManager ACCOUNT_MANAGER;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
 
@@ -57,41 +60,22 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getContractProxyAddress(contractName);
     }
 
-    /**
-     * @notice      Function that allocates specified amount of 2KEY from users account to address of this contract
-     */
-    function allocate2KEY(
-        address user,
-        uint amount
+    function addInventory2KEY(
+        uint amount,
+        uint bountyPerConversionUSD
     )
     public
-    onlyMaintainer
     {
-        uint userBalance = PROXY_STORAGE_CONTRACT.getUint(keccak256(_2KEYBalance, user));
-        uint contractBalance = PROXY_STORAGE_CONTRACT.getUint(keccak256(_2KEYBalance, this));
-        userBalance -= amount;
-        contractBalance += amount;
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_2KEYBalance, user), userBalance);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_2KEYBalance, this), contractBalance);
+        ACCOUNT_MANAGER.transfer2KEY(this, amount + bountyPerConversionUSD);
     }
 
-    /**
-     * @notice      Function that allocates specified amount of USD from users account to address of this contract
-     */
-    function allocateUSD(
-        address user,
-        uint amount
+    function addInventoryUSDT(
+        uint amount,
+        uint bountyPerConversionUSD
     )
     public
-    onlyMaintainer
     {
-        uint userBalance = PROXY_STORAGE_CONTRACT.getUint(keccak256(_USDBalance, user));
-        uint contractBalance = PROXY_STORAGE_CONTRACT.getUint(keccak256(_USDBalance, this));
-        userBalance -= amount;
-        contractBalance += amount;
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_USDBalance, user), userBalance);
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_USDBalance, this), contractBalance);
+        ACCOUNT_MANAGER.transferUSD(this, amount + bountyPerConversionUSD);
     }
-
 
 }
