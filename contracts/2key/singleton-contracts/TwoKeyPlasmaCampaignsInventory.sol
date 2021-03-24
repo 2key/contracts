@@ -18,6 +18,9 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaCampaignsInventoryStorage PROXY_STORAGE_CONTRACT;
 
+    // TODO: contract is not initialized
+    // TODO: We create dedicated contract interface with required actions in order to avoid gas
+    // TODO: And then initialize it only when you need it by using getAddressFromTwoKeySingletonRegistry function
     TwoKeyPlasmaAccountManager ACCOUNT_MANAGER;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
@@ -66,6 +69,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     )
     public
     {
+        //TODO: Check description in plasma campaigns addInventory
+        //TODO: bountyPercOnversion is the value which will be used later, currently value is the budget amount
         ACCOUNT_MANAGER.transfer2KEY(this, amount + bountyPerConversionUSD);
     }
 
