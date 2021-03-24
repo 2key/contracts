@@ -4,7 +4,7 @@ import "../upgradability/Upgradeable.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaCampaignsInventoryStorage.sol";
-import "./TwoKeyPlasmaAccountManager.sol";
+import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 
  /**
   * @title TwoKeyPlasmaCampaignsInventory contract
@@ -21,9 +21,10 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     // TODO: contract is not initialized
     // TODO: We create dedicated contract interface with required actions in order to avoid gas
     // TODO: And then initialize it only when you need it by using getAddressFromTwoKeySingletonRegistry function
-    TwoKeyPlasmaAccountManager ACCOUNT_MANAGER;
+    ITwoKeyPlasmaAccountManager ACCOUNT_MANAGER;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
+    string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
 
     string constant _2KEYBalance = "2KEYBalance";
     string constant _USDBalance = "USDBalance";
@@ -63,6 +64,9 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getContractProxyAddress(contractName);
     }
 
+    /**
+     * @notice          Function that allocates specified amount of 2KEY from users balance to this contract's balance
+     */
     function addInventory2KEY(
         uint amount,
         uint bountyPerConversionUSD
@@ -70,17 +74,22 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     public
     {
         //TODO: Check description in plasma campaigns addInventory
-        //TODO: bountyPercOnversion is the value which will be used later, currently value is the budget amount
-        ACCOUNT_MANAGER.transfer2KEY(this, amount + bountyPerConversionUSD);
+        //TODO: bountyPerConversion is the value which will be used later, currently value is the budget amount
+        ACCOUNT_MANAGER = ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager));
+        ACCOUNT_MANAGER.transfer2KEYFrom(msg.sender, amount);
     }
 
+    /**
+     * @notice          Function that allocates specified amount of USDT from users balance to this contract's balance
+     */
     function addInventoryUSDT(
         uint amount,
         uint bountyPerConversionUSD
     )
     public
     {
-        ACCOUNT_MANAGER.transferUSD(this, amount + bountyPerConversionUSD);
+        ACCOUNT_MANAGER = ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager));
+        ACCOUNT_MANAGER.transferUSDTFrom(msg.sender, amount);
     }
 
 }

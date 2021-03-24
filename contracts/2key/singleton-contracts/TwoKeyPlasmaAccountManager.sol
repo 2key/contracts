@@ -60,6 +60,15 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
+     * @notice          Modifier which will be used to restrict calls to only PlasmaCampaignsInventory contract
+     */
+    modifier onlyPlasmaCampaignsInventory {
+        address twoKeyPlasmaCampaignsInventory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventory);
+        require(msg.sender == twoKeyPlasmaCampaignsInventory);
+        _;
+    }
+
+    /**
      * @notice          Function that converts string to bytes32
      */
     function stringToBytes32(string memory source) internal pure returns (bytes32 result){
@@ -272,28 +281,48 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function that allocates specified amount of 2KEY from users balance to PlasmaCampaignsInventory contract's balance
+     */
     function transfer2KEYFrom(
         address user,
         uint amount
     )
     public
-    // add requirement onlyPlasmaCampaignsInventory
+    onlyPlasmaCampaignsInventory
     {
         //TODO: implement logic that will
         // 1: Check if user has balance greater than amount
         // 2: If no -> throw using require statement
-        // 3: If yes -> reduce user balance for the amount and increase the balance of plasmacampaignsinventory (msg.sender) in this case
+        // 3: If yes -> reduce user balance for the amount and increase the balance of plasmaCampaignsInventory (msg.sender) in this case
+
+        uint userBalance = get2KEYBalance(user);
+        uint plasmaCampaignsInventoryBalance = get2KEYBalance(msg.sender);
+
+        require(userBalance > amount);
+
+        setUserBalance2KEY(user, userBalance.sub(amount));
+        setUserBalance2KEY(msg.sender, plasmaCampaignsInventoryBalance.add(amount));
     }
 
-//    function transferUSDTFrom(
-//        address user,
-//        uint amount
-//    )
-//    public
-//    // add requirement onlyPlasmaCampaignsInventory
-//    {
-//
-//    }
+    /**
+     * @notice          Function that allocates specified amount of USDT from users balance to PlasmaCampaignsInventory contract's balance
+     */
+    function transferUSDTFrom(
+     address user,
+     uint amount
+    )
+    public
+    onlyPlasmaCampaignsInventory
+    {
+        uint userBalance = getUSDTBalance(user);
+        uint plasmaCampaignsInventoryBalance = getUSDTBalance(msg.sender);
+
+        require(userBalance > amount);
+
+        setUserBalanceUSDT(user, userBalance.sub(amount));
+        setUserBalanceUSDT(msg.sender, plasmaCampaignsInventoryBalance.add(amount));
+    }
 
     /**
      * @notice          Function to get balances of user in 2KEY
