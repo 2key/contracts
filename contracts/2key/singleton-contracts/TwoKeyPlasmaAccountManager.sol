@@ -20,6 +20,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     bool initialized;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
+    string constant _twoKeyPlasmaCampaignsInventory = "TwoKeyPlasmaCampaignsInventory";
     string constant _messageNotes = "signUserDepositTokens";
 
     // Accounting
@@ -270,6 +271,29 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiaryBalance.add(amount)
         );
     }
+
+    function transfer2KEYFrom(
+        address user,
+        uint amount
+    )
+    public
+    // add requirement onlyPlasmaCampaignsInventory
+    {
+        //TODO: implement logic that will
+        // 1: Check if user has balance greater than amount
+        // 2: If no -> throw using require statement
+        // 3: If yes -> reduce user balance for the amount and increase the balance of plasmacampaignsinventory (msg.sender) in this case
+    }
+
+//    function transferUSDTFrom(
+//        address user,
+//        uint amount
+//    )
+//    public
+//    // add requirement onlyPlasmaCampaignsInventory
+//    {
+//
+//    }
 
     /**
      * @notice          Function to get balances of user in 2KEY
