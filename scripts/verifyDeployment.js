@@ -30,8 +30,8 @@ const loadContracts = () => {
     let plasmaContracts = [];
     let publicContracts = [];
 
-    for(let contract in proxyAddresses) {
-        if(contract.toString().includes('Plasma')) {
+    for (let contract in proxyAddresses) {
+        if (contract.toString().includes('Plasma')) {
             plasmaContracts.push(contract.toString());
         } else {
             publicContracts.push(contract.toString());
