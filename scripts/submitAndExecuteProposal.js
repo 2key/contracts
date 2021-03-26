@@ -26,7 +26,8 @@ web3.eth.defaultAccount = address1;
 
 const congressContract = web3.eth.contract(congressPrivate.abi).at(congressPrivateAddress);
 
-let nonce = web3.eth.getTransactionCount(address1);
+let nonce1 = web3.eth.getTransactionCount(address1);
+let nonce2 = web3.eth.getTransactionCount(address2);
 
 const gasPrice = 0;
 
@@ -36,14 +37,14 @@ const gasPrice = 0;
  * @param weiAmount
  * @param jobDescription
  * @param transactionBytecode
+ * @param address
+ * @param pk
  * @returns {Promise<void>}
  */
-const submitProposal = async (beneficiary, weiAmount, jobDescription, transactionBytecode) => {
+const submitProposal = async (beneficiary, weiAmount, jobDescription, transactionBytecode, address, pk) => {
   try {
-    await sendTransaction(web3, congressContract.newProposal, address1,
-      [beneficiary, weiAmount, jobDescription, transactionBytecode], gasPrice, web3.toHex(nonce));
-
-    nonce++;
+    await sendTransaction(web3, congressContract.newProposal, address, pk,
+      [beneficiary, weiAmount, jobDescription, transactionBytecode], gasPrice, web3.toHex(nonce1));
   } catch (err) {
     console.log(err);
   }
@@ -54,13 +55,13 @@ const submitProposal = async (beneficiary, weiAmount, jobDescription, transactio
  * @param proposalNumber
  * @param supportsProposal
  * @param justificationText
+ * @param address
  * @returns {Promise<void>}
  */
-const voteForProposal = async (proposalNumber, supportsProposal, justificationText) => {
+const voteForProposal = async (proposalNumber, supportsProposal, justificationText, address, pk) => {
   try {
-    await sendTransaction(web3, congressContract.vote, address1,
-      [proposalNumber, supportsProposal, justificationText], gasPrice, web3.toHex(nonce));
-    nonce++;
+    await sendTransaction(web3, congressContract.vote, address, pk,
+      [proposalNumber, supportsProposal, justificationText], gasPrice, web3.toHex(nonce1));
   } catch (err) {
     console.log(err);
   }
@@ -70,13 +71,14 @@ const voteForProposal = async (proposalNumber, supportsProposal, justificationTe
  *
  * @param proposalNumber
  * @param transactionBytecode
+ * @param address
+ * @param pk
  * @returns {Promise<void>}
  */
-const executeProposal = async (proposalNumber, transactionBytecode) => {
+const executeProposal = async (proposalNumber, transactionBytecode, address, pk) => {
   try {
-    await sendTransaction(web3, congressContract.executeProposal, address1,
-      [proposalNumber, transactionBytecode], gasPrice, web3.toHex(nonce));
-    nonce++;
+    await sendTransaction(web3, congressContract.executeProposal, address, pk
+      [proposalNumber, transactionBytecode], gasPrice, web3.toHex(nonce1));
   } catch (err) {
     console.log(err);
   }
@@ -108,7 +110,7 @@ const getEncodedParams = (contractMethod, params = null) => {
  * @param nonce
  * @returns {Promise<unknown>}
  */
-const sendTransaction = async (web3, contractMethod, from, params, _gasPrice, nonce) =>
+const sendTransaction = async (web3, contractMethod, from, pk, params, _gasPrice, nonce) =>
   new Promise(async (resolve, reject) => {
     try {
       const privateKey = new Buffer(privateKey1, 'hex');
@@ -156,4 +158,32 @@ const sendRawTransaction = (web3, transactionParams, privateKey) =>
 
 (async () => {
 
+  if (process.argv.length < 3) {
+    console.log('Need more arguments');
+  }
+
+  const beneficiary = process.argv[1].toString();
+  const weiAmount = 0;
+  const jobDescription = process.argv[2].toString();
+  const transactionBytecode = process.argv[3].toString();
+
+  await submitProposal(beneficiary, weiAmount, jobDescription, transactionBytecode, address1, privateKey1);
+  console.log(`Proposal submitted from ${address1} with nonce: ${nonce1}`);
+
+  nonce1++;
+
+  let proposalId = await congressContract.numProposals();
+
+  await voteForProposal(proposalId.toString(), true, 'I support', address1, privateKey1);
+  console.log(`Support vote submitted from ${address1} with nonce: ${nonce1}`);
+  nonce1++;
+
+  web3.eth.defaultAccount = address2;
+
+  await voteForProposal(proposalId.toString(), true, 'I support', address2, privateKey2);
+  console.log(`Support vote submitted from ${address2} with nonce: ${nonce2}`);
+  nonce2++;
+
+  await executeProposal(proposalId, transactionBytecode, address2, privateKey2);
+  console.log(`Execute proposal submitted from ${address2} with nonce: ${nonce2}`);
 })();
