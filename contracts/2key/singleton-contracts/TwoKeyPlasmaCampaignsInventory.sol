@@ -23,6 +23,16 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
     string constant _twoKeyPlasmaExchangeRate = "TwoKeyPlasmaExchangeRate";
 
+
+    string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
+    string constant _campaignPlasma2isBudgetedWith2KeyDirectly = "campaignPlasma2isBudgetedWith2KeyDirectly";
+    //bytes32 key = keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)
+    //setBool(key, true/false)
+    string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
+    string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
+    string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
+    string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
+
     string constant _2KEYBalance = "2KEYBalance";
     string constant _USDBalance = "USDBalance";
 
@@ -66,13 +76,11 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
      */
     function addInventory2KEY(
         uint amount,
-        uint bountyPerConversionUSD // given value in usd - convert to 2key using exchange rate contract
+        uint bountyPerConversionUSD, // given value in usd - convert to 2key using exchange rate contract
+        address campaignAddressPlasma
     )
     public
     {
-        // 1 2key = 0.03$
-        // 10 $
-        // 10 /0.03
         uint rate = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaExchangeRate)).getPairValue("2KEY-USD");
         uint bountyPerConversion2KEY = bountyPerConversionUSD.mul(10**18).div(rate);
 
@@ -86,10 +94,12 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
      */
     function addInventoryUSDT(
         uint amount,
-        uint bountyPerConversionUSD
+        uint bountyPerConversionUSD,
+        address campaignAddressPlasma
     )
     public
     {
+        //TODO: Compute bounty per conversion in 2key
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
         .transferUSDTFrom(msg.sender, amount);
     }
