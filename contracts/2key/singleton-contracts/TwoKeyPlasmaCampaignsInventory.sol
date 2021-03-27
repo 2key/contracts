@@ -5,6 +5,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaCampaignsInventoryStorage.sol";
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
+import "../interfaces/ITwoKeyPlasmaExchangeRate.sol";
 
  /**
   * @title TwoKeyPlasmaCampaignsInventory contract
@@ -21,10 +22,10 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     // TODO: contract is not initialized
     // TODO: We create dedicated contract interface with required actions in order to avoid gas
     // TODO: And then initialize it only when you need it by using getAddressFromTwoKeySingletonRegistry function
-    ITwoKeyPlasmaAccountManager ACCOUNT_MANAGER;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
+    string constant _twoKeyPlasmaExchangeRate = "TwoKeyPlasmaExchangeRate";
 
     string constant _2KEYBalance = "2KEYBalance";
     string constant _USDBalance = "USDBalance";
@@ -69,14 +70,18 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
      */
     function addInventory2KEY(
         uint amount,
-        uint bountyPerConversionUSD
+        uint bountyPerConversionUSD // given value in usd - convert to 2key using exchange rate contract
     )
     public
     {
+        //TODO: bountyPerConversionUSD from usd to 2key value
+        uint pairValue = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaExchangeRate)).getPairValue("USD/2KEY");
+        uint bountyPerConversion2KEY = bountyPerConversionUSD / pairValue;
+
         //TODO: Check description in plasma campaigns addInventory
         //TODO: bountyPerConversion is the value which will be used later, currently value is the budget amount
-        ACCOUNT_MANAGER = ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager));
-        ACCOUNT_MANAGER.transfer2KEYFrom(msg.sender, amount);
+        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+        .transfer2KEYFrom(msg.sender, amount);
     }
 
     /**
@@ -88,8 +93,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     )
     public
     {
-        ACCOUNT_MANAGER = ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager));
-        ACCOUNT_MANAGER.transferUSDTFrom(msg.sender, amount);
+        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+        .transferUSDTFrom(msg.sender, amount);
     }
 
 }
