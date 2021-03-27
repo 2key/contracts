@@ -656,7 +656,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         bool _isBudgetedDirectlyWith2KEY
     )
     public
-    onlyMaintainer
     onlyTwoKeyPlasmaCampaignsInventory
     {
         // Require that campaign is not previously validated

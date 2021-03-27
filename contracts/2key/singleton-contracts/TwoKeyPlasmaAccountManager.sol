@@ -205,6 +205,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         saveDepositHistory(amount, "2KEY");
     }
 
+    /**
+     * @notice          Function that adds new deposit data to arrays
+     */
     function saveDepositHistory(
         uint amount,
         string currency
@@ -212,15 +215,15 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     public
     onlyMaintainer
     {
-        uint[] memory userTimestamps = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, msg.sender));
+        uint[] memory userTimestamps = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, msg.sender));         // Adds a new timestamp to deposit timestamps array
         uint[] memory newUserTimestamps = new uint[](userTimestamps.length + 1);
-        for(uint i = 0; i < userTimestamps.length; i++){
+        for(uint i = 0; i < userTimestamps.length; i++){                                                                            // For loop for getting array from storage
             newUserTimestamps[i] = userTimestamps[i];
         }
-        newUserTimestamps[i] = block.timestamp;
-        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositTimestamp, msg.sender), newUserTimestamps);
+        newUserTimestamps[i] = block.timestamp;                                                                                     // Add new element to an array
+        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositTimestamp, msg.sender), newUserTimestamps);                     // Set new array with one more element
 
-        uint[] memory userAmounts = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, msg.sender));
+        uint[] memory userAmounts = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, msg.sender));               // Adds a new amount to deposit amounts array
         uint[] memory newUserAmounts = new uint[](userAmounts.length + 1);
         for(i = 0; i < userAmounts.length; i++){
             newUserAmounts[i] = userAmounts[i];
@@ -228,7 +231,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         newUserAmounts[i] = amount;
         PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositAmount, msg.sender), newUserAmounts);
 
-        bytes32[] memory userCurrencies = PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, msg.sender));
+        bytes32[] memory userCurrencies = PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, msg.sender));    // Adds a new currency to deposit currencies array
         bytes32[] memory newUserCurrencies = new bytes32[](userCurrencies.length + 1);
         for(i = 0; i < userCurrencies.length; i++){
             newUserCurrencies[i] = userCurrencies[i];
@@ -291,18 +294,13 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     public
     onlyPlasmaCampaignsInventory
     {
-        //TODO: implement logic that will
-        // 1: Check if user has balance greater than amount
-        // 2: If no -> throw using require statement
-        // 3: If yes -> reduce user balance for the amount and increase the balance of plasmaCampaignsInventory (msg.sender) in this case
-
-        uint userBalance = get2KEYBalance(user);
-        uint plasmaCampaignsInventoryBalance = get2KEYBalance(msg.sender);
+        uint userBalance = get2KEYBalance(user);                                                                    // Get users balance
+        uint plasmaCampaignsInventoryBalance = get2KEYBalance(msg.sender);                                          // Get contract balance
 
         require(userBalance > amount);
 
         setUserBalance2KEY(user, userBalance.sub(amount));
-        setUserBalance2KEY(msg.sender, plasmaCampaignsInventoryBalance.add(amount));
+        setUserBalance2KEY(msg.sender, plasmaCampaignsInventoryBalance.add(amount));                                // msg.sender is always the address of plasma campaigns inventory contract
     }
 
     /**
@@ -315,13 +313,13 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     public
     onlyPlasmaCampaignsInventory
     {
-        uint userBalance = getUSDTBalance(user);
-        uint plasmaCampaignsInventoryBalance = getUSDTBalance(msg.sender);
+        uint userBalance = getUSDTBalance(user);                                                                    // Get users balance
+        uint plasmaCampaignsInventoryBalance = getUSDTBalance(msg.sender);                                          // Get contract balance
 
         require(userBalance > amount);
 
         setUserBalanceUSDT(user, userBalance.sub(amount));
-        setUserBalanceUSDT(msg.sender, plasmaCampaignsInventoryBalance.add(amount));
+        setUserBalanceUSDT(msg.sender, plasmaCampaignsInventoryBalance.add(amount));                                // msg.sender is always the address of plasma campaigns inventory contract
     }
 
     /**
@@ -383,9 +381,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     )
     {
         return (
-            PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, user)),
-            PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, user)),
-            PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, user))
+            PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, user)),      // Gets array of users timestamps
+            PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, user)),         // Gets array of users deposit amounts
+            PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, user))     // Gets array of deposit currencies
         );
     }
 }
