@@ -19,10 +19,6 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
     ITwoKeyPlasmaCampaignsInventoryStorage PROXY_STORAGE_CONTRACT;
 
-    // TODO: contract is not initialized
-    // TODO: We create dedicated contract interface with required actions in order to avoid gas
-    // TODO: And then initialize it only when you need it by using getAddressFromTwoKeySingletonRegistry function
-
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
     string constant _twoKeyPlasmaExchangeRate = "TwoKeyPlasmaExchangeRate";
@@ -74,14 +70,15 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     )
     public
     {
-        //TODO: bountyPerConversionUSD from usd to 2key value
-        uint pairValue = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaExchangeRate)).getPairValue("USD/2KEY");
-        uint bountyPerConversion2KEY = bountyPerConversionUSD / pairValue;
+        // 1 2key = 0.03$
+        // 10 $
+        // 10 /0.03
+        uint rate = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaExchangeRate)).getPairValue("2KEY-USD");
+        uint bountyPerConversion2KEY = bountyPerConversionUSD.mul(10**18).div(rate);
 
-        //TODO: Check description in plasma campaigns addInventory
-        //TODO: bountyPerConversion is the value which will be used later, currently value is the budget amount
+
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-        .transfer2KEYFrom(msg.sender, amount);
+            .transfer2KEYFrom(msg.sender, amount);
     }
 
     /**
