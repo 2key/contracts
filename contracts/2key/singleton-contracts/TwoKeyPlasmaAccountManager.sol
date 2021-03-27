@@ -259,7 +259,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         );
     }
 
-    function transferUSD(
+    function transferUSDT(
         address beneficiary,
         uint amount
     )
