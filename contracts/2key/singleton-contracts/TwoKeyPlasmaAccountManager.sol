@@ -241,9 +241,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice Function that transfers 2KEY from users balance to beneficiary
-     * @params beneficiary is address to which user is sending funds
-     * @params amount is amount of 2KEY tokens
+     * @notice          Function that transfers 2KEY from users balance to beneficiary
+     * @param           beneficiary is address to which user is sending funds
+     * @param           amount is amount of 2KEY tokens
      */
     function transfer2KEY(
         address beneficiary,
@@ -268,9 +268,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice Function that transfers USDT from users balance to beneficiary
-     * @params beneficiary is address to which user is sending funds
-     * @params amount is amount of USDT tokens
+     * @notice          Function that transfers USDT from users balance to beneficiary
+     * @param           beneficiary is address to which user is sending funds
+     * @param           amount is amount of USDT tokens
      */
     function transferUSDT(
         address beneficiary,
