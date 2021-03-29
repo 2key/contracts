@@ -143,4 +143,38 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         .setInitialParamsAndValidateCampaign(amount, rate, bountyPerConversion2KEY, false);
     }
 
+    /**
+     * @notice      Function that returns all information about given campaign
+     * @param       campaignAddressPlasma is address of the campaign
+     */
+    function getCampaignInventory(
+        address campaignAddressPlasma
+    )
+    public
+    view
+    returns(
+        uint,
+        uint,
+        uint,
+        uint,
+        uint,
+        bool
+    )
+    {
+        return(
+            // Gets campaigns initial 2KEY budget
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialBudget2Key)),
+            // Gets campaigns amount of Stable coins
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2amountOfStableCoins)),
+            // Gets the initial rate
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialRate)),
+            // Gets bounty per conversion in 2KEY
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2bountyPerConversion2KEY)),
+            // Gets rebalancing ratio (default value is 1)
+            PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2rebalancingRatio)),
+            // Gets boolean value if campaign is budgeted directly with 2Key currency
+            PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignAddressPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly))
+        );
+    }
+
 }
