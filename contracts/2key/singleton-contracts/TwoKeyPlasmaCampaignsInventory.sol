@@ -1,12 +1,19 @@
 pragma solidity ^0.4.24;
 
 import "../upgradability/Upgradeable.sol";
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+
+import "../interfaces/IERC20.sol";
+import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
+import "../interfaces/ITwoKeyEventSource.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaCampaignsInventoryStorage.sol";
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 import "../interfaces/ITwoKeyPlasmaExchangeRate.sol";
 import "../interfaces/ITwoKeyCPCCampaignPlasma.sol";
+
 import "../libraries/SafeMath.sol";
 
  /**
@@ -14,7 +21,7 @@ import "../libraries/SafeMath.sol";
   * @author Marko Lazic
   * Github: markolazic01
   */
-contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
+contract TwoKeyPlasmaCampaignsInventory is Upgradeable, ITwoKeySingletonUtils {
 
     using SafeMath for uint;
 
@@ -27,6 +34,11 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
     string constant _twoKeyPlasmaExchangeRate = "TwoKeyPlasmaExchangeRate";
     string constant _twoKeyCPCCampaignPlasma = "TwoKeyCPCCampaignPlasma";
+
+    string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
+    string constant _campaignPlasma2LeftOverForContractor = "campaignPlasma2LeftOvrForContractor";
+    string constant _campaignPlasma2ReferrerRewardsTotal = "campaignPlasma2ReferrerRewardsTotal";
+    string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
 
     string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
     string constant _campaignPlasma2isBudgetedWith2KeyDirectly = "campaignPlasma2isBudgetedWith2KeyDirectly";
@@ -162,8 +174,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
      * @notice      Function that returns all information about given campaign
      * @param       campaignAddressPlasma is address of the campaign
      */
-    function getCampaignInventory(
-    //TODO: Rename to getCamapignInformation
+    function getCampaignInformation(
         address campaignAddressPlasma
     )
     public
@@ -196,14 +207,164 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function to end selected budget campaign by maintainer, and perform
+     *                  actions regarding rebalancing, reserving tokens, and distributing
+     *                  moderator earnings, as well as calculating leftover for contractor
+     *
+     * @param           campaignPlasma is the plasma address of the campaign
+     * @param           totalAmountForReferrerRewards is the total amount before rebalancing referrers earned
+     * @param           totalAmountForModeratorRewards is the total amount moderator earned before rebalancing
+     */
     function endCampaignReserveTokensAndRebalanceRates(
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
         uint totalAmountForModeratorRewards
     )
     public
+    onlyMaintainer
     {
+        // Check if campaign has not ended yet
+        require(PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasma, _campaignPlasma2isCampaignEnded)) == false);
+        // Setting bool that campaign is over now
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(campaignPlasma, _campaignPlasma2isCampaignEnded), true);
+
+        // Get how many tokens were inserted at the beginning
+        uint initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasma, _campaignPlasma2initialBudget2Key));
+        // Rebalancing everything except referrer rewards
+        uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
+        // Amount after rebalancing is initially amount to rebalance
+        uint amountAfterRebalancing = amountToRebalance;
+        // Initially rebalanced moderator rewards are total moderator rewards
+        uint rebalancedModeratorRewards = totalAmountForModeratorRewards;
+        // Initial ratio is 1
+        uint rebalancingRatio = 10**18;
+
+        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly)) == false) {
+            // If budget added as stable coin we do rebalancing
+            (amountAfterRebalancing, rebalancingRatio)
+            = rebalanceRates(
+                PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasma, _campaignPlasma2initialRate)),
+                amountToRebalance
+            );
+
+            rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
+        }
+
+        uint leftoverForContractor = amountAfterRebalancing.sub(rebalancedModeratorRewards);
+
+        // Set moderator earnings for this campaign and immediately distribute them
+        setAndDistributeModeratorEarnings(campaignPlasma, rebalancedModeratorRewards);
+
+        // Set total amount to use for referrers
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2ReferrerRewardsTotal), totalAmountForReferrerRewards);
+        // Leftover for contractor
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2LeftOverForContractor), leftoverForContractor);
+        // Set rebalancing ratio for campaign
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2rebalancingRatio), rebalancingRatio);
+
+        // Emit an event to checksum all the balances per campaign
+        ITwoKeyEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyEventSource"))
+            .emitEndedBudgetCampaign(
+                campaignPlasma,
+                leftoverForContractor,
+                rebalancedModeratorRewards
+            );
 
     }
 
+
+    /**
+     * @notice      Function to rebalance the rates
+     *
+     * @param       initial2KEYRate is 2KEY rate at the moment of campaign starting
+     * @param       amountOfTokensToRebalance is number of tokens left
+     */
+    function rebalanceRates(
+        uint initial2KEYRate,
+        uint amountOfTokensToRebalance
+    )
+    internal
+    returns
+    (uint, uint)
+    {
+        // Load twoKeyEconomy address
+        address twoKeyEconomy = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        // Load twoKeyUpgradableExchange address
+        address twoKeyUpgradableExchange = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        // Take the current usd to 2KEY rate against we're rebalancing contractor leftover and moderator rewards
+        uint usd2KEYRateWeiNow = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
+
+        // Ratio is initial rate divided by new rate, so if rate went up, this will be less than 1
+        uint rebalancingRatio = initial2KEYRate.mul(10**18).div(usd2KEYRateWeiNow);
+
+        // Calculate new rebalanced amount of tokens
+        uint rebalancedAmount = amountOfTokensToRebalance.mul(rebalancingRatio).div(10**18);
+
+        // If price went up, leads to ratio is going to be less than 10**18
+        if(rebalancingRatio < 10**18) {
+            // Calculate how much tokens should be given back to exchange
+            uint tokensToGiveBackToExchange = amountOfTokensToRebalance.sub(rebalancedAmount);
+            // Approve upgradable exchange to take leftover back
+            IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchange, tokensToGiveBackToExchange);
+            // Call the function to release all DAI for this contract to reserve and to take approved amount of 2key back to liquidity pool
+            IUpgradableExchange(twoKeyUpgradableExchange).returnTokensBackToExchangeV1(tokensToGiveBackToExchange);
+        }
+        // Otherwise we assume that price went down, which leads that ratio will be greater than 10**18
+        else  {
+            uint tokensToTakeFromExchange = rebalancedAmount.sub(amountOfTokensToRebalance);
+            // Get more tokens we need
+            IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancingV1(tokensToTakeFromExchange);
+        }
+        // Return new rebalanced amount as well as ratio against which rebalancing was done.
+        return (rebalancedAmount, rebalancingRatio);
+    }
+
+
+    /**
+     * @notice          Function to set how many tokens are being distributed to moderator
+     *                  as well as distribute them.
+     * @param           campaignPlasma is the plasma address of selected campaign
+     * @param           rebalancedModeratorRewards is the amount for moderator after rebalancing
+     */
+    function setAndDistributeModeratorEarnings(
+        address campaignPlasma,
+        uint rebalancedModeratorRewards
+    )
+    internal
+    {
+        // Account amount moderator earned on this campaign
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2ModeratorEarnings), rebalancedModeratorRewards);
+
+        // Get twoKeyAdmin address
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+        // Transfer 2KEY tokens to moderator
+        transfer2KEY(
+            twoKeyAdmin,
+            rebalancedModeratorRewards
+        );
+
+        // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(rebalancedModeratorRewards, campaignPlasma);
+    }
+
+
+    /**
+     * @notice 			Function to transfer 2KEY tokens
+     *
+     * @param			receiver is the address of tokens receiver
+     * @param			amount is the amount of tokens to be transfered
+     */
+    function transfer2KEY(
+        address receiver,
+        uint amount
+    )
+    internal
+    {
+        IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).transfer(
+            receiver,
+            amount
+        );
+    }
 }
