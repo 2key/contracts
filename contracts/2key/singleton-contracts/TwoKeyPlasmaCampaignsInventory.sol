@@ -195,4 +195,14 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         );
     }
 
+    function endCampaignReserveTokensAndRebalanceRates(
+        address campaignPlasma,
+        uint totalAmountForReferrerRewards,
+        uint totalAmountForModeratorRewards
+    )
+    public
+    {
+
+    }
+
 }
