@@ -163,6 +163,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
      * @param       campaignAddressPlasma is address of the campaign
      */
     function getCampaignInventory(
+    //TODO: Rename to getCamapignInformation
         address campaignAddressPlasma
     )
     public
