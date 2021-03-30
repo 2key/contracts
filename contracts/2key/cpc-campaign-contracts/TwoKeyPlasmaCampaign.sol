@@ -8,6 +8,7 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
+import "../interfaces/ITwoKeyPlasmaCampaignsInventory.sol";
 
 import "../libraries/Call.sol";
 import "../libraries/IncentiveModels.sol";
@@ -640,6 +641,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         require(block.timestamp >= activationTimestamp.add(86400));
         isContractLocked = true;
+
+        ITwoKeyPlasmaCampaignsInventory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"))
+        .endCampaignReserveTokensAndRebalanceRates(
+            msg.sender,
+            referrerPlasma2TotalEarnings2key[msg.sender],
+            moderatorTotalEarnings
+        );
     }
 
 
