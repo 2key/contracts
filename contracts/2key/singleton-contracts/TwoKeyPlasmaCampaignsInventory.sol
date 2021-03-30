@@ -34,6 +34,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
     string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
+    string constant _campaignPlasma2Contractor = "campaignPlasma2Contractor";   // msg.sender
 
     string constant _2KEYBalance = "2KEYBalance";
     string constant _USDBalance = "USDBalance";
@@ -75,6 +76,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
     /**
      * @notice          Function that allocates specified amount of 2KEY from users balance to this contract's balance
+     * @notice          Function can be called only once
      */
     function addInventory2KEY(
         uint amount,
@@ -83,12 +85,18 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     )
     public
     {
+        // Check if user has already called this function before, if so he can not call it second time
+        require(
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor)) == address(0)
+        );
         // Get pair rate from ITwoKeyPlasmaExchangeRate contract
         uint rate = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaExchangeRate))
         .getPairValue("2KEY-USD");
         // Calculate the bountyPerConversion2KEY value
         uint bountyPerConversion2KEY = bountyPerConversionUSD.mul(10**18).div(rate);
 
+        // Set contractor user
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor), msg.sender);
         // Set initial 2Key budget
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialBudget2Key), amount);
         // Set current value pair rate for 2KEY-USD
@@ -111,6 +119,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
     /**
      * @notice          Function that allocates specified amount of USDT from users balance to this contract's balance
+     * @notice          Function can be called only once
      */
     function addInventoryUSDT(
         uint amount,
@@ -119,12 +128,18 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     )
     public
     {
+        // Check if user has already called this function before, if so he can not call it second time
+        require(
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor)) == address(0)
+        );
         // Get pair rate from ITwoKeyPlasmaExchangeRate contract
         uint rate = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaExchangeRate))
         .getPairValue("2KEY-USD");
         // Calculate the bountyPerConversion2KEY value
         uint bountyPerConversion2KEY = bountyPerConversionUSD.mul(10**18).div(rate);
 
+        // Set contractor user
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor), msg.sender);
         // Set amount of Stable coins
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2amountOfStableCoins), amount);
         // Set current rate for 2KEY-USD value pair
@@ -153,6 +168,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     public
     view
     returns(
+        address,
         uint,
         uint,
         uint,
@@ -162,6 +178,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     )
     {
         return(
+            // Gets campaigns contractor
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor)),
             // Gets campaigns initial 2KEY budget
             PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialBudget2Key)),
             // Gets campaigns amount of Stable coins
