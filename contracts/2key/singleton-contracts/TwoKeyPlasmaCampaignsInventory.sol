@@ -116,6 +116,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable, ITwoKeySingletonUtils {
         // Set 2Key bounty per conversion value
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2bountyPerConversion2KEY), bountyPerConversion2KEY);
         // Set starting rebalancing ratio
+        //TODO: 1 = 10**18, since it's decimal number afterwards --> change 1 -> 10**18
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2rebalancingRatio), 1);
         // Set true value for 2Key directly budgeting
         PROXY_STORAGE_CONTRACT.setBool(keccak256(campaignAddressPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly), true);
@@ -159,6 +160,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable, ITwoKeySingletonUtils {
         // Set current bountyPerConversion2KEY
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2bountyPerConversion2KEY), bountyPerConversion2KEY);
         // Set starting rebalancing ratio
+        //TODO: 1 = 10**18, since it's decimal number afterwards --> change 1 -> 10**18
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2rebalancingRatio), 1);
 
         // Perform a transfer
