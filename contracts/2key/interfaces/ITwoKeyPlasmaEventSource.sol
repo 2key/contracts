@@ -38,4 +38,9 @@ contract ITwoKeyPlasmaEventSource {
         uint feePerReferrer2KEY
     ) public;
 
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    ) external;
 }
