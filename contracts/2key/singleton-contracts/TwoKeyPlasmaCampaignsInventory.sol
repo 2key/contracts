@@ -9,6 +9,7 @@ import "../interfaces/storage-contracts/ITwoKeyPlasmaCampaignsInventoryStorage.s
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 import "../interfaces/ITwoKeyPlasmaExchangeRate.sol";
 import "../interfaces/ITwoKeyCPCCampaignPlasma.sol";
+import "../interfaces/ITwoKeyPlasmaUpgradableExchange.sol";
 
 import "../libraries/SafeMath.sol";
 
@@ -30,6 +31,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
     string constant _twoKeyPlasmaExchangeRate = "TwoKeyPlasmaExchangeRate";
     string constant _twoKeyCPCCampaignPlasma = "TwoKeyCPCCampaignPlasma";
+    string constant _twoKeyPlasmaUpgradableExchange = "TwoKeyPlasmaUpgradableExchange";
 
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
     string constant _campaignPlasma2LeftOverForContractor = "campaignPlasma2LeftOvrForContractor";
@@ -205,6 +207,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         );
     }
 
+
     /**
      * @notice          Function to end selected budget campaign by maintainer, and perform
      *                  actions regarding rebalancing, reserving tokens, and distributing
@@ -238,8 +241,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         // Initial ratio is 10**18
         uint rebalancingRatio = 10**18;
 
+        // We do rebalancing if campaign was not directly budgeted with 2KEY
         if(PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly)) == false) {
-            // If budget added as stable coin we do rebalancing
             (amountAfterRebalancing, rebalancingRatio)
             = rebalanceRates(
                 PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasma, _campaignPlasma2initialRate)),
@@ -286,33 +289,29 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     returns
     (uint, uint)
     {
-        // Load twoKeyEconomy address
-        address twoKeyEconomy;// = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-        // Load twoKeyUpgradableExchange address
-        address twoKeyUpgradableExchange;// = getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange");
+        address twoKeyPlasmaUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaUpgradableExchange);
+
         // Take the current usd to 2KEY rate against we're rebalancing contractor leftover and moderator rewards
-        uint usd2KEYRateWeiNow;// = IUpgradableExchange(twoKeyUpgradableExchange).sellRate2key();
+        uint usd2KEYRateWeiNow = ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).sellRate2Key();
 
         // Ratio is initial rate divided by new rate, so if rate went up, this will be less than 1
-        uint rebalancingRatio;// = initial2KEYRate.mul(10**18).div(usd2KEYRateWeiNow);
+        uint rebalancingRatio = initial2KEYRate.mul(10**18).div(usd2KEYRateWeiNow);
 
         // Calculate new rebalanced amount of tokens
-        uint rebalancedAmount;// = amountOfTokensToRebalance.mul(rebalancingRatio).div(10**18);
+        uint rebalancedAmount = amountOfTokensToRebalance.mul(rebalancingRatio).div(10**18);
 
         // If price went up, leads to ratio is going to be less than 10**18
         if(rebalancingRatio < 10**18) {
             // Calculate how much tokens should be given back to exchange
             uint tokensToGiveBackToExchange = amountOfTokensToRebalance.sub(rebalancedAmount);
-            // Approve upgradable exchange to take leftover back
-            //IERC20(twoKeyEconomy).approve(twoKeyUpgradableExchange, tokensToGiveBackToExchange);
-            // Call the function to release all DAI for this contract to reserve and to take approved amount of 2key back to liquidity pool
-            //IUpgradableExchange(twoKeyUpgradableExchange).returnTokensBackToExchangeV1(tokensToGiveBackToExchange);
+            // Release tokens to liquidity pool
+            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).returnTokensBackToExchange(tokensToGiveBackToExchange);
         }
         // Otherwise we assume that price went down, which leads that ratio will be greater than 10**18
         else  {
             uint tokensToTakeFromExchange = rebalancedAmount.sub(amountOfTokensToRebalance);
-            // Get more tokens we need
-            //IUpgradableExchange(twoKeyUpgradableExchange).getMore2KeyTokensForRebalancingV1(tokensToTakeFromExchange);
+            // Get more 2Key tokens for rebalancing
+            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).getMore2KeyTokensForRebalancing(tokensToTakeFromExchange);
         }
         // Return new rebalanced amount as well as ratio against which rebalancing was done.
         return (rebalancedAmount, rebalancingRatio);
@@ -334,17 +333,14 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         // Account amount moderator earned on this campaign
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2ModeratorEarnings), rebalancedModeratorRewards);
 
-        // Get twoKeyAdmin address
-        address twoKeyAdmin;// = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        // Address to transfer moderator earnings to
+        address moderatorAddress;
 
         // Transfer 2KEY tokens to moderator
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEY(
-            twoKeyAdmin,
+            moderatorAddress,
             rebalancedModeratorRewards
         );
-
-        // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-        //ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(rebalancedModeratorRewards, campaignPlasma);
     }
 
 }
