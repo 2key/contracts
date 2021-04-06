@@ -4,6 +4,7 @@ import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaExchangeRate.sol";
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
+import "../interfaces/storage-contracts/ITwoKeyPlasmaUpgradableExchangeStorage.sol";
 
 import "../libraries/SafeMath.sol";
 
@@ -20,6 +21,7 @@ contract TwoKeyPlasmaUpgradableExchange is Upgradeable{
     using SafeMath for uint;
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
+    ITwoKeyPlasmaUpgradableExchangeStorage PROXY_STORAGE_CONTRACT;
 
     bool initialized;
 
@@ -30,13 +32,15 @@ contract TwoKeyPlasmaUpgradableExchange is Upgradeable{
      * @notice      Function for contract initialization
      */
     function setInitialParams(
-        address _twoKeySingletonesRegistry
+        address _twoKeySingletonesRegistry,
+        address _proxyStorage
     )
     external
     {
         require(initialized == false);
 
         TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeySingletonesRegistry;
+        PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaUpgradableExchangeStorage(_proxyStorage);
 
         initialized = true;
     }
@@ -91,7 +95,7 @@ contract TwoKeyPlasmaUpgradableExchange is Upgradeable{
     public
     onlyPlasmaCampaignsInventory
     {
-
+        //ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager")).transfer2KEY();
     }
 
     function getMore2KeyTokensForRebalancing(
