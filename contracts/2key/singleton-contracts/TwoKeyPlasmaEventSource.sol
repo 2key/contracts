@@ -147,6 +147,12 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         uint moderatorEarningsDistributed
     );
 
+    event RebalancedRewards (
+        uint cycleId,
+        uint difference,
+        string action
+    );
+
     modifier onlyTwoKeyPlasmaFactory {
         address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaFactory);
         require(msg.sender == twoKeyPlasmaFactory);
@@ -514,6 +520,22 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
             campaignPlasmaAddress,
             contractorLeftover,
             moderatorEarningsDistributed
+        );
+    }
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+
+        emit RebalancedRewards(
+            cycleId,
+            difference,
+            action
         );
     }
 }
