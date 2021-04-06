@@ -43,4 +43,10 @@ contract ITwoKeyPlasmaEventSource {
         uint contractorLeftover,
         uint moderatorEarningsDistributed
     ) external;
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    ) external;
 }

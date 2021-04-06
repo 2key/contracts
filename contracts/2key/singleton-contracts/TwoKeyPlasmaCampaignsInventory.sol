@@ -37,7 +37,6 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _campaignPlasma2LeftOverForContractor = "campaignPlasma2LeftOvrForContractor";
     string constant _campaignPlasma2ReferrerRewardsTotal = "campaignPlasma2ReferrerRewardsTotal";
     string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
-
     string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
     string constant _campaignPlasma2isBudgetedWith2KeyDirectly = "campaignPlasma2isBudgetedWith2KeyDirectly";
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
@@ -45,6 +44,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
     string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
     string constant _campaignPlasma2Contractor = "campaignPlasma2Contractor";   // msg.sender
+    string constant _campaignPlasma2LeftoverWithdrawnByContractor = "campaignPlasma2LeftoverWithdrawnByContractor";
+    string constant _distributionCycle2TotalDistributed = "distributionCycle2TotalDistributed";
 
     string constant _2KEYBalance = "2KEYBalance";
     string constant _USDBalance = "USDBalance";
@@ -343,4 +344,102 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function where contractor can withdraw if there's any leftover on his campaign
+     * @param           campaignPlasmaAddress is plasma address of campaign
+     */
+    function withdrawLeftoverForContractor(
+        address campaignPlasmaAddress
+    )
+    public
+    {
+        require(
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignPlasmaAddress, _campaignPlasma2Contractor)) == msg.sender
+        );
+
+        uint leftoverForContractor = PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftOverForContractor));
+
+        require(leftoverForContractor > 0);
+
+        require(
+            PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftoverWithdrawnByContractor)) == false
+        );
+
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftoverWithdrawnByContractor), true);
+
+        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+            .transfer2KEY(
+                msg.sender,
+                leftoverForContractor
+            );
+    }
+
+
+    /**
+     * @notice      Function to distribute rewards between influencers,
+     *              increment global cycle id and update value of all time
+     *              distributed rewards from this contract
+     *
+     * @param       influencers is the array of influencers
+     * @param       balances is a corresponding array of balances for influencers
+     */
+    function pushAndDIstributeRewardsBetweenInfluencers(
+        address [] influencers,
+        uint [] balances,
+        uint nonRebalancedTotalPayout,
+        uint rebalancedTotalPayout,
+        uint cycleId,
+        uint feePerReferrerIn2Key
+    )
+    public
+    onlyMaintainer
+    {
+        // Address of twoKeyPlasmaUpgradableExchange contract
+        address twoKeyPlasmaUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaUpgradableExchange);
+        // Total distributed in cycle
+        uint totalDistributed;
+        // The difference between nonRebalancedTotalPayout and rebalancedTotalPayout
+        uint difference;
+
+        //
+        if(nonRebalancedTotalPayout > rebalancedTotalPayout) {
+            difference = nonRebalancedTotalPayout.sub(rebalancedTotalPayout);
+            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).returnTokensBackToExchange(difference);
+            // Emit event
+            ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitRebalancedRewards(
+                cycleId,
+                difference,
+                "GET_TOKENS_TO_PLASMA_EXCHANGE"
+            );
+        } else if (nonRebalancedTotalPayout < rebalancedTotalPayout) {
+            difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
+            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).getMore2KeyTokensForRebalancing(difference);
+            // Emit event
+            ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+                .emitRebalancedRewards(
+                    cycleId,
+                    difference,
+                    "GET_TOKENS_FROM_PLASMA_EXCHANGE"
+                );
+        }
+
+        uint numberOfReferrers = influencers.length;
+
+        // Iterate through all influencers, distribute rewards and sum up the amount received in current cycle
+        for(uint i = 0; i < numberOfReferrers; i++) {
+            // Require that referrer's earnings are bigger than fees
+            require(balances[i] > feePerReferrerIn2Key);
+            // Sub fee per referrer from balance to pay and transfer tokens to influencer
+            uint balance = balances[i].sub(feePerReferrerIn2Key);
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transfer2KEY(influencers[i], balance);
+            // Sum up to totalDistributed to referrers
+            totalDistributed = totalDistributed.add(balance);
+        }
+
+        // Set how much is total distributed in current distribution cycle
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(cycleId, _distributionCycle2TotalDistributed), totalDistributed);
+
+    }
 }
