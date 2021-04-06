@@ -304,7 +304,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         if(rebalancingRatio < 10**18) {
             // Calculate how much tokens should be given back to exchange
             uint tokensToGiveBackToExchange = amountOfTokensToRebalance.sub(rebalancedAmount);
-            // Release tokens to liquidity pool
+            // Release the rest of tokens to liquidity pool
             ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).returnTokensBackToExchange(tokensToGiveBackToExchange);
         }
         // Otherwise we assume that price went down, which leads that ratio will be greater than 10**18
