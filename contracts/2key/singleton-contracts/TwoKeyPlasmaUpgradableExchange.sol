@@ -54,6 +54,9 @@ contract TwoKeyPlasmaUpgradableExchange is Upgradeable{
         _;
     }
 
+    /**
+     * @notice      Modifier which will restrict function calls to only PlasmaCampaignsInventory contract
+     */
     modifier onlyPlasmaCampaignsInventory {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
         _;
@@ -68,16 +71,10 @@ contract TwoKeyPlasmaUpgradableExchange is Upgradeable{
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getContractProxyAddress(contractName);
     }
 
-    function sellRate2Key()
-    public
-    view
-    returns (uint)
-    {
-        // Fetch rate for a single 2Key token
-        return sellRate2KeyInternal(10 ** 18);
-    }
-
-    function sellRate2KeyInternal(
+    /**
+     * @notice      Function for getting current 2KEY-USD rate
+     */
+    function sellRate2Key(
         uint amountToReceive
     )
     internal
@@ -89,21 +86,35 @@ contract TwoKeyPlasmaUpgradableExchange is Upgradeable{
         return amountToReceive.mul(rate2Key).div(10**18);
     }
 
+    /**
+     * @notice      Function used to return funds left after rebalancing
+     * @param       amountOfTokensToReturn is amount of funds left
+     */
     function returnTokensBackToExchange(
         uint amountOfTokensToReturn
     )
     public
     onlyPlasmaCampaignsInventory
     {
-        //ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager")).transfer2KEY();
+        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager"))
+        .transfer2KEYFromTo(
+            msg.sender,
+            address(this),
+            amountOfTokensToReturn
+        );
     }
 
+    /**
+     * @notice      Function used to get more funds for rebalancing
+     * @param       amountOfTokensRequested is amount of funds which has been requested
+     */
     function getMore2KeyTokensForRebalancing(
         uint amountOfTokensRequested
     )
     public
     onlyPlasmaCampaignsInventory
     {
-        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager")).transfer2KEY(msg.sender, amountOfTokensRequested);
+        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager"))
+            .transfer2KEY(msg.sender, amountOfTokensRequested);
     }
 }
