@@ -292,7 +292,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         address twoKeyPlasmaUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaUpgradableExchange);
 
         // Take the current usd to 2KEY rate against we're rebalancing contractor leftover and moderator rewards
-        uint usd2KEYRateWeiNow = ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).sellRate2Key();
+        uint usd2KEYRateWeiNow = ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).sellRate2Key(10**18);
 
         // Ratio is initial rate divided by new rate, so if rate went up, this will be less than 1
         uint rebalancingRatio = initial2KEYRate.mul(10**18).div(usd2KEYRateWeiNow);
@@ -334,7 +334,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2ModeratorEarnings), rebalancedModeratorRewards);
 
         // Address to transfer moderator earnings to
-        address moderatorAddress;
+        address moderatorAddress; // Needs to be set
 
         // Transfer 2KEY tokens to moderator
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEY(
