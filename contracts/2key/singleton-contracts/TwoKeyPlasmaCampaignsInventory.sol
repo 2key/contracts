@@ -76,6 +76,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         _;
     }
 
+
     /**
      * @notice      Function to get address from TwoKeyPlasmaSingletonRegistry
      *
@@ -129,6 +130,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         .setInitialParamsAndValidateCampaign(amount, rate, bountyPerConversion2KEY, true);
     }
 
+
     /**
      * @notice          Function that allocates specified amount of USDT from users balance to this contract's balance
      * @notice          Function can be called only once
@@ -170,6 +172,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         ITwoKeyCPCCampaignPlasma(campaignAddressPlasma)
         .setInitialParamsAndValidateCampaign(amount, rate, bountyPerConversion2KEY, false);
     }
+
 
     /**
      * @notice      Function that returns all information about given campaign
@@ -244,12 +247,13 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
         // We do rebalancing if campaign was not directly budgeted with 2KEY
         if(PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly)) == false) {
+            // Rebalance rates
             (amountAfterRebalancing, rebalancingRatio)
-            = rebalanceRates(
-                PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasma, _campaignPlasma2initialRate)),
-                amountToRebalance
-            );
-
+                = rebalanceRates(
+                    PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasma, _campaignPlasma2initialRate)),
+                    amountToRebalance
+                );
+            // Get rebalanced value of totalAmountForModeratorRewards
             rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
         }
 
@@ -344,6 +348,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         );
     }
 
+
     /**
      * @notice          Function where contractor can withdraw if there's any leftover on his campaign
      * @param           campaignPlasmaAddress is plasma address of campaign
@@ -406,6 +411,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         if(nonRebalancedTotalPayout > rebalancedTotalPayout) {
             // Calculate the difference
             difference = nonRebalancedTotalPayout.sub(rebalancedTotalPayout);
+            // Return 2Key tokens
             ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).returnTokensBackToExchange(difference);
             // Emit event for current cycle -> returning tokens
             ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
@@ -417,6 +423,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         } else if (nonRebalancedTotalPayout < rebalancedTotalPayout) {
             // Calculate the difference
             difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
+            // Get more 2Key tokens
             ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).getMore2KeyTokensForRebalancing(difference);
             // Emit event for current cycle -> getting more tokens
             ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
