@@ -353,20 +353,21 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     )
     public
     {
+        // Require that msg.sender is contractor who created the campaign
         require(
             PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignPlasmaAddress, _campaignPlasma2Contractor)) == msg.sender
         );
-
+        // Get leftoverForContractor
         uint leftoverForContractor = PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftOverForContractor));
-
+        // Require that there is an existing amount of leftoverForContractor
         require(leftoverForContractor > 0);
-
+        // Require that contractor has not already withdrawn the leftover
         require(
             PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftoverWithdrawnByContractor)) == false
         );
-
+        // Set value that contractor did perform the withdraw
         PROXY_STORAGE_CONTRACT.setBool(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftoverWithdrawnByContractor), true);
-
+        // Perform transfer of leftover to contractor
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
             .transfer2KEY(
                 msg.sender,
@@ -401,29 +402,32 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         // The difference between nonRebalancedTotalPayout and rebalancedTotalPayout
         uint difference;
 
-        //
+        // Checking there is difference in value between nonRebalancedTotalPayout and rebalancedTotalPayout
         if(nonRebalancedTotalPayout > rebalancedTotalPayout) {
+            // Calculate the difference
             difference = nonRebalancedTotalPayout.sub(rebalancedTotalPayout);
             ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).returnTokensBackToExchange(difference);
-            // Emit event
-            ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
-            .emitRebalancedRewards(
-                cycleId,
-                difference,
-                "GET_TOKENS_TO_PLASMA_EXCHANGE"
-            );
-        } else if (nonRebalancedTotalPayout < rebalancedTotalPayout) {
-            difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
-            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).getMore2KeyTokensForRebalancing(difference);
-            // Emit event
+            // Emit event for current cycle -> returning tokens
             ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
                 .emitRebalancedRewards(
                     cycleId,
                     difference,
-                    "GET_TOKENS_FROM_PLASMA_EXCHANGE"
+                    "RETURN_TOKENS_TO_PLASMA_EXCHANGE" // Action
+                );
+        } else if (nonRebalancedTotalPayout < rebalancedTotalPayout) {
+            // Calculate the difference
+            difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
+            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).getMore2KeyTokensForRebalancing(difference);
+            // Emit event for current cycle -> getting more tokens
+            ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+                .emitRebalancedRewards(
+                    cycleId,
+                    difference,
+                    "GET_TOKENS_FROM_PLASMA_EXCHANGE" // Action
                 );
         }
 
+        // Get number of referrers
         uint numberOfReferrers = influencers.length;
 
         // Iterate through all influencers, distribute rewards and sum up the amount received in current cycle
