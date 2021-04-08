@@ -686,6 +686,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         }
         // Set if campaign is budgeted directly with 2KEY
         isBudgetedDirectlyWith2KEY = _isBudgetedDirectlyWith2KEY;
+
         isValidated = true;
     }
 
