@@ -141,6 +141,17 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         uint epochId
     );
 
+    event EndedBudgetCampaign (
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    );
+
+    event RebalancedRewards (
+        uint cycleId,
+        uint difference,
+        string action
+    );
 
     modifier onlyTwoKeyPlasmaFactory {
         address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaFactory);
@@ -490,6 +501,41 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
 
         emit EpochFinalized(
             epochId
+        );
+    }
+
+    /**
+     * @notice          Function to emit when campaign has been ended
+     */
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+
+        emit EndedBudgetCampaign(
+            campaignPlasmaAddress,
+            contractorLeftover,
+            moderatorEarningsDistributed
+        );
+    }
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+
+        emit RebalancedRewards(
+            cycleId,
+            difference,
+            action
         );
     }
 }
