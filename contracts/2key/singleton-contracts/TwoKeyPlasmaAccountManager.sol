@@ -324,16 +324,16 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     onlyPlasmaCampaignsInventory
     {
         // Get users balance
-        uint userBalance = get2KEYBalance(user);
+        uint fromBalance = get2KEYBalance(from);
         // Get contract balance
-        uint plasmaCampaignsInventoryBalance = get2KEYBalance(msg.sender);
+        uint toBalance = get2KEYBalance(to);
 
         // Check if user has enough funds to perform this transaction
-        require(userBalance > amount);
+        require(fromBalance > amount);
 
-        setUserBalance2KEY(user, userBalance.sub(amount));
+        setUserBalance2KEY(from, fromBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
-        setUserBalance2KEY(msg.sender, plasmaCampaignsInventoryBalance.add(amount));
+        setUserBalance2KEY(to, toBalance.add(amount));
     }
 
     /**
@@ -348,16 +348,16 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     onlyPlasmaCampaignsInventory
     {
         // Get users balance
-        uint userBalance = getUSDTBalance(user);
+        uint fromBalance = getUSDTBalance(from);
         // Get contract balance
-        uint plasmaCampaignsInventoryBalance = getUSDTBalance(msg.sender);
+        uint toBalance = getUSDTBalance(to);
 
         // Check if user has enough funds for this action
-        require(userBalance > amount);
+        require(fromBalance > amount);
 
-        setUserBalanceUSDT(user, userBalance.sub(amount));
+        setUserBalanceUSDT(from, fromBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
-        setUserBalanceUSDT(msg.sender, plasmaCampaignsInventoryBalance.add(amount));
+        setUserBalanceUSDT(to, toBalance.add(amount));
     }
 
 
