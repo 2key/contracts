@@ -644,9 +644,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         ITwoKeyPlasmaCampaignsInventory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"))
         .endCampaignReserveTokensAndRebalanceRates(
-            msg.sender,
-            referrerPlasma2TotalEarnings2key[msg.sender],
-            moderatorTotalEarnings
+            msg.sender,                                             //campaignPlasma
+            numberOfPaidClicksAchieved.mul(bountyPerConversionWei), //totalAmountForReferrerRewards
+            moderatorTotalEarnings                                  //totalAmountForModeratorRewards
         );
     }
 

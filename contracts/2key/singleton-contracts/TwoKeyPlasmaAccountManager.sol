@@ -339,8 +339,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @notice    Function that allocates specified amount of USDT from users balance to PlasmaCampaignsInventory contract's balance
      */
     function transferUSDTFrom(
-     address user,
-     uint amount
+        address user,
+        uint amount
     )
     public
     onlyPlasmaCampaignsInventory
@@ -356,6 +356,33 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         setUserBalanceUSDT(user, userBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
         setUserBalanceUSDT(msg.sender, plasmaCampaignsInventoryBalance.add(amount));
+    }
+
+    /**
+     * @notice         Function that serves for performing a transfer from one user to another
+     *
+     * @param           user is address of user who's amount is being sent to beneficiary
+     * @param           beneficiary is user to which amount is sent to
+     * @param           amount is amount of funds being transfered (2KEY)
+     */
+    function transfer2KEYFromTo(
+        address user,
+        address beneficiary,
+        uint amount
+    )
+    public
+    {
+        // Users balance
+        uint userBalance = get2KEYBalance(user);
+        // Beneficiary balance
+        uint beneficiaryBalance = get2KEYBalance(beneficiary);
+
+        // Check if user has enough funds for transaction
+        require(userBalance > amount);
+
+        // Set new balances
+        setUserBalance2KEY(user, userBalance.sub(amount));
+        setUserBalance2KEY(beneficiary, beneficiaryBalance.add(amount));
     }
 
     /**
