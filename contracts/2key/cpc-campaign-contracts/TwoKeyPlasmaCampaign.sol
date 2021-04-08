@@ -643,11 +643,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         isContractLocked = true;
 
         ITwoKeyPlasmaCampaignsInventory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"))
-        .endCampaignReserveTokensAndRebalanceRates(
-            msg.sender,                                             //campaignPlasma
-            numberOfPaidClicksAchieved.mul(bountyPerConversionWei), //totalAmountForReferrerRewards
-            moderatorTotalEarnings                                  //totalAmountForModeratorRewards
-        );
+            .endCampaignReserveTokensAndRebalanceRates(
+                msg.sender,                                             //campaignPlasma
+                numberOfPaidClicksAchieved.mul(bountyPerConversionWei), //totalAmountForReferrerRewards
+                moderatorTotalEarnings                                  //totalAmountForModeratorRewards
+            );
     }
 
 

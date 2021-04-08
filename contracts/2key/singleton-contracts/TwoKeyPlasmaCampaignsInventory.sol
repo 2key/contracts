@@ -9,7 +9,6 @@ import "../interfaces/storage-contracts/ITwoKeyPlasmaCampaignsInventoryStorage.s
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 import "../interfaces/ITwoKeyPlasmaExchangeRate.sol";
 import "../interfaces/ITwoKeyCPCCampaignPlasma.sol";
-import "../interfaces/ITwoKeyPlasmaUpgradableExchange.sol";
 
 import "../libraries/SafeMath.sol";
 
@@ -31,7 +30,6 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
     string constant _twoKeyPlasmaExchangeRate = "TwoKeyPlasmaExchangeRate";
     string constant _twoKeyCPCCampaignPlasma = "TwoKeyCPCCampaignPlasma";
-    string constant _twoKeyPlasmaUpgradableExchange = "TwoKeyPlasmaUpgradableExchange";
 
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
     string constant _campaignPlasma2LeftOverForContractor = "campaignPlasma2LeftOvrForContractor";
@@ -49,6 +47,22 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
     string constant _2KEYBalance = "2KEYBalance";
     string constant _USDBalance = "USDBalance";
+
+    struct CampaignInformations {
+        address contractorAddress;
+        uint leftoverForContractor;
+        uint initialBudget2Key;
+        uint amountOfStableCoins;
+        uint initialRate;
+        uint bountyPerConversion2Key;
+        uint rebalancingRatio;
+        uint referrerRewardsTotal;
+        uint moderatorEarnings;
+        uint totalDistribution;
+        bool isBudgetedDirectly;
+        bool isCampaignEnded;
+        bool isLeftoverWithdrawn;
+    }
 
     /**
      * @notice Function for contract initialization
@@ -99,7 +113,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     {
         // Check if user has already called this function before, if so he can not call it second time
         require(
-            PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor)) == address(0)
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma)) == address(0)
         );
 
         // Get pair rate from ITwoKeyPlasmaExchangeRate contract
@@ -113,15 +127,15 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         // Set contractor user
         PROXY_STORAGE_CONTRACT.setAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma), msg.sender);
         // Set initial 2Key budget
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialBudget2Key), amount);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma), amount);
         // Set current value pair rate for 2KEY-USD
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialRate), rate);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialRate, campaignAddressPlasma), rate);
         // Set 2Key bounty per conversion value
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2bountyPerConversion2KEY), bountyPerConversion2KEY);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignAddressPlasma), bountyPerConversion2KEY);
         // Set starting rebalancing ratio
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2rebalancingRatio), 10**18);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2rebalancingRatio, campaignAddressPlasma), 10**18);
         // Set true value for 2Key directly budgeting
-        PROXY_STORAGE_CONTRACT.setBool(keccak256(campaignAddressPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignAddressPlasma), true);
 
         // Perform direct 2Key transfer
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
@@ -146,7 +160,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     {
         // Check if user has already called this function before, if so he can not call it second time
         require(
-            PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor)) == address(0)
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma)) == address(0)
         );
         // Get pair rate from ITwoKeyPlasmaExchangeRate contract
         uint rate = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaExchangeRate))
@@ -156,19 +170,19 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         uint bountyPerConversion2KEY = bountyPerConversionUSD.mul(10**18).div(rate);
 
         // Set contractor user
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor), msg.sender);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma), msg.sender);
         // Set amount of Stable coins
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2amountOfStableCoins), amount);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma), amount);
         // Set current rate for 2KEY-USD value pair
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialRate), rate);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialRate, campaignAddressPlasma), rate);
         // Set current bountyPerConversion2KEY
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2bountyPerConversion2KEY), bountyPerConversion2KEY);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignAddressPlasma), bountyPerConversion2KEY);
         // Set starting rebalancing ratio
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignAddressPlasma, _campaignPlasma2rebalancingRatio), 10**18);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2rebalancingRatio, campaignAddressPlasma), 10**18);
 
         // Perform a transfer
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-            .transferUSDTFrom(msg.sender, amount);
+            .transferUSDTFrom(msg.sender, address(this), amount);
 
         // Set initial parameters and validates campaign
         ITwoKeyCPCCampaignPlasma(campaignAddressPlasma)
@@ -194,12 +208,12 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     onlyMaintainer
     {
         // Check if campaign has not ended yet
-        require(PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasma, _campaignPlasma2isCampaignEnded)) == false);
+        require(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isCampaignEnded, campaignPlasma)) == false);
         // Setting bool that campaign is over
-        PROXY_STORAGE_CONTRACT.setBool(keccak256(campaignPlasma, _campaignPlasma2isCampaignEnded), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2isCampaignEnded, campaignPlasma), true);
 
         // Get how many tokens were inserted at the beginning
-        uint initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasma, _campaignPlasma2initialBudget2Key));
+        uint initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
         // Rebalancing everything except referrer rewards
         uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
         // Amount after rebalancing is initially amount to rebalance
@@ -210,11 +224,11 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         uint rebalancingRatio = 10**18;
 
         // We do rebalancing if campaign was not directly budgeted with 2KEY
-        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly)) == false) {
+        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == false) {
             // Rebalance rates
             (amountAfterRebalancing, rebalancingRatio)
                 = rebalanceRates(
-                    PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasma, _campaignPlasma2initialRate)),
+                    PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialRate, campaignPlasma)),
                     amountToRebalance
                 );
             // Get rebalanced value of totalAmountForModeratorRewards
@@ -227,11 +241,11 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         setAndDistributeModeratorEarnings(campaignPlasma, rebalancedModeratorRewards);
 
         // Set total amount to use for referrers
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2ReferrerRewardsTotal), totalAmountForReferrerRewards);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignPlasma), totalAmountForReferrerRewards);
         // Leftover for contractor
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2LeftOverForContractor), leftoverForContractor);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignPlasma), leftoverForContractor);
         // Set rebalancing ratio for campaign
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2rebalancingRatio), rebalancingRatio);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma), rebalancingRatio);
 
         // Emit an event to checksum all the balances per campaign
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
@@ -257,10 +271,11 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     internal
     returns (uint, uint)
     {
-        address twoKeyPlasmaUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaUpgradableExchange);
+        address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
 
         // Take the current usd to 2KEY rate against we're rebalancing contractor leftover and moderator rewards
-        uint usd2KEYRateWeiNow = ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).sellRate2Key(10**18);
+        uint usd2KEYRateWeiNow = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaExchangeRate"))
+            .getPairValue("2KEY-USD");
 
         // Ratio is initial rate divided by new rate, so if rate went up, this will be less than 1
         uint rebalancingRatio = initial2KEYRate.mul(10**18).div(usd2KEYRateWeiNow);
@@ -273,13 +288,22 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Calculate how much tokens should be given back to exchange
             uint tokensToGiveBackToExchange = amountOfTokensToRebalance.sub(rebalancedAmount);
             // Release the rest of tokens to liquidity pool
-            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).returnTokensBackToExchange(tokensToGiveBackToExchange);
+            ITwoKeyPlasmaAccountManager(twoKeyPlasmaAccountManager)
+                .transfer2KEYFrom(
+                    address(this),
+                    twoKeyPlasmaAccountManager,
+                    tokensToGiveBackToExchange
+                );
         }
         // Otherwise we assume that price went down, which leads that ratio will be greater than 10**18
         else  {
             uint tokensToTakeFromExchange = rebalancedAmount.sub(amountOfTokensToRebalance);
             // Get more 2Key tokens for rebalancing
-            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).getMore2KeyTokensForRebalancing(tokensToTakeFromExchange);
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager"))
+                .transfer2KEY(
+                    address(this),
+                    tokensToTakeFromExchange
+                );
         }
         // Return new rebalanced amount as well as ratio against which rebalancing was done.
         return (rebalancedAmount, rebalancingRatio);
@@ -299,7 +323,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     internal
     {
         // Account amount moderator earned on this campaign
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(campaignPlasma, _campaignPlasma2ModeratorEarnings), rebalancedModeratorRewards);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma), rebalancedModeratorRewards);
 
         // Address to transfer moderator earnings to
         address moderatorAddress; // Needs to be set
@@ -323,18 +347,18 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     {
         // Require that msg.sender is contractor who created the campaign
         require(
-            PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignPlasmaAddress, _campaignPlasma2Contractor)) == msg.sender
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignPlasmaAddress)) == msg.sender
         );
         // Get leftoverForContractor
-        uint leftoverForContractor = PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftOverForContractor));
+        uint leftoverForContractor = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignPlasmaAddress));
         // Require that there is an existing amount of leftoverForContractor
         require(leftoverForContractor > 0);
         // Require that contractor has not already withdrawn the leftover
         require(
-            PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftoverWithdrawnByContractor)) == false
+            PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignPlasmaAddress)) == false
         );
         // Set value that contractor did perform the withdraw
-        PROXY_STORAGE_CONTRACT.setBool(keccak256(campaignPlasmaAddress, _campaignPlasma2LeftoverWithdrawnByContractor), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignPlasmaAddress), true);
         // Perform transfer of leftover to contractor
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
             .transfer2KEY(
@@ -352,7 +376,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
      * @param       influencers is the array of influencers
      * @param       balances is a corresponding array of balances for influencers
      */
-    function pushAndDIstributeRewardsBetweenInfluencers(
+    function pushAndDistributeRewardsBetweenInfluencers(
         address [] influencers,
         uint [] balances,
         uint nonRebalancedTotalPayout,
@@ -363,8 +387,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     public
     onlyMaintainer
     {
-        // Address of twoKeyPlasmaUpgradableExchange contract
-        address twoKeyPlasmaUpgradableExchange = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaUpgradableExchange);
+        // Address of twoKeyPlasmaAccountManager contract
+        address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
         // Total distributed in cycle
         uint totalDistributed;
         // The difference between nonRebalancedTotalPayout and rebalancedTotalPayout
@@ -375,7 +399,12 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Calculate the difference
             difference = nonRebalancedTotalPayout.sub(rebalancedTotalPayout);
             // Return 2Key tokens
-            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).returnTokensBackToExchange(difference);
+            ITwoKeyPlasmaAccountManager(twoKeyPlasmaAccountManager)
+                .transfer2KEYFrom(
+                    address(this),
+                    twoKeyPlasmaAccountManager,
+                    difference
+                );
             // Emit event for current cycle -> returning tokens
             ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
                 .emitRebalancedRewards(
@@ -387,7 +416,11 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Calculate the difference
             difference = rebalancedTotalPayout.sub(nonRebalancedTotalPayout);
             // Get more 2Key tokens
-            ITwoKeyPlasmaUpgradableExchange(twoKeyPlasmaUpgradableExchange).getMore2KeyTokensForRebalancing(difference);
+            ITwoKeyPlasmaAccountManager(twoKeyPlasmaAccountManager)
+                .transfer2KEY(
+                    address(this),
+                    difference
+                );
             // Emit event for current cycle -> getting more tokens
             ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
                 .emitRebalancedRewards(
@@ -413,7 +446,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         }
 
         // Set how much is total distributed in current distribution cycle
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(cycleId, _distributionCycle2TotalDistributed), totalDistributed);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_distributionCycle2TotalDistributed, cycleId), totalDistributed);
     }
 
 
@@ -428,29 +461,48 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     view
     returns(
         address,
-        uint,
-        uint,
-        uint,
-        uint,
-        uint,
-        bool
+        uint [],
+        bool []
     )
     {
+            // Address types
+            // Gets campaigns contractor
+            address contractorAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma));
+
+            // Uint types
+            uint [] uintValues;
+            // Gets leftover for contractor
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignAddressPlasma)));
+            // Gets campaigns initial 2KEY budget
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma)));
+            // Gets campaigns amount of Stable coins
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma)));
+            // Gets the initial rate
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialRate, campaignAddressPlasma)));
+            // Gets bounty per conversion in 2KEY
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignAddressPlasma)));
+            // Gets rebalancing ratio (initial value is 10**18)
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2rebalancingRatio, campaignAddressPlasma)));
+            // Gets total referrer rewards
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignAddressPlasma)));
+            // Gets moderator earnings
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignAddressPlasma)));
+            // Gets total distributed amount
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_distributionCycle2TotalDistributed, campaignAddressPlasma)));
+
+            // Boolean types
+            bool [] booleanValues;
+            // Gets boolean value if campaign is budgeted directly with 2Key currency
+            booleanValues.push(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignAddressPlasma)));
+            // Gets is campaign ended
+            booleanValues.push(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isCampaignEnded, campaignAddressPlasma)));
+            // Gets is leftover withdrawn by contractor
+            booleanValues.push(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignAddressPlasma)));
+
         return(
-        // Gets campaigns contractor
-        PROXY_STORAGE_CONTRACT.getAddress(keccak256(campaignAddressPlasma, _campaignPlasma2Contractor)),
-        // Gets campaigns initial 2KEY budget
-        PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialBudget2Key)),
-        // Gets campaigns amount of Stable coins
-        PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2amountOfStableCoins)),
-        // Gets the initial rate
-        PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2initialRate)),
-        // Gets bounty per conversion in 2KEY
-        PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2bountyPerConversion2KEY)),
-        // Gets rebalancing ratio (initial value is 10**18)
-        PROXY_STORAGE_CONTRACT.getUint(keccak256(campaignAddressPlasma, _campaignPlasma2rebalancingRatio)),
-        // Gets boolean value if campaign is budgeted directly with 2Key currency
-        PROXY_STORAGE_CONTRACT.getBool(keccak256(campaignAddressPlasma, _campaignPlasma2isBudgetedWith2KeyDirectly))
+            contractorAddress,
+            uintValues,
+            booleanValues
         );
     }
 }
