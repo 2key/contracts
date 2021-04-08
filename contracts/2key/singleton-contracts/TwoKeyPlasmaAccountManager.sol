@@ -206,7 +206,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice          Function that adds new deposit data to arrays
+     * @notice          Function that adds new deposit data to arrays with all the information
+     *                  from the past deposits.
      */
     function saveDepositHistory(
         uint amount,
