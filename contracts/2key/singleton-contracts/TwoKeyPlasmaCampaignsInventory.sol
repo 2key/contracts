@@ -48,22 +48,6 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _2KEYBalance = "2KEYBalance";
     string constant _USDBalance = "USDBalance";
 
-    struct CampaignInformations {
-        address contractorAddress;
-        uint leftoverForContractor;
-        uint initialBudget2Key;
-        uint amountOfStableCoins;
-        uint initialRate;
-        uint bountyPerConversion2Key;
-        uint rebalancingRatio;
-        uint referrerRewardsTotal;
-        uint moderatorEarnings;
-        uint totalDistribution;
-        bool isBudgetedDirectly;
-        bool isCampaignEnded;
-        bool isLeftoverWithdrawn;
-    }
-
     /**
      * @notice Function for contract initialization
      */
@@ -80,6 +64,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
         initialized = true;
     }
+
 
     /**
      * @notice      Modifier which will be used to restrict set function calls to only maintainers
@@ -99,6 +84,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {
         return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY).getContractProxyAddress(contractName);
     }
+
 
     /**
      * @notice          Function that allocates specified amount of 2KEY from users balance to this contract's balance
@@ -123,7 +109,6 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         // Calculate the bountyPerConversion2KEY value
         uint bountyPerConversion2KEY = bountyPerConversionUSD.mul(10**18).div(rate);
 
-        //TODO: While hashing first put constant
         // Set contractor user
         PROXY_STORAGE_CONTRACT.setAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma), msg.sender);
         // Set initial 2Key budget
