@@ -314,7 +314,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice    Function that allocates specified amount of 2KEY from users balance to PlasmaCampaignsInventory contract's balance
+     * @notice    Function that allocates specified amount of 2KEY from one user's balance to another's
      */
     function transfer2KEYFrom(
         address from,
@@ -338,7 +338,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice    Function that allocates specified amount of USDT from users balance to PlasmaCampaignsInventory contract's balance
+     * @notice    Function that allocates specified amount of USDT from one users balance to another's
      */
     function transferUSDTFrom(
         address from,

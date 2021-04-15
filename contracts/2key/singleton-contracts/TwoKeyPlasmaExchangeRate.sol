@@ -93,7 +93,7 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     }
 
     /**
-     * @notice       Function tht returns multiple values for multiple given pair names
+     * @notice       Function that returns array of values for given array of pair names
      */
     function getPairValues(bytes32 [] names) external view returns (uint[]) {
         uint [] memory values = new uint[](names.length);

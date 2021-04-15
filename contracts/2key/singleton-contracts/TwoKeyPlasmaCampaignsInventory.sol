@@ -483,7 +483,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             booleanValues.push(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isCampaignEnded, campaignAddressPlasma)));
             // Gets is leftover withdrawn by contractor
             booleanValues.push(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignAddressPlasma)));
-
+        // Returns address of the contractor and two arrays (array of uint values and array of boolean values)
         return(
             contractorAddress,
             uintValues,
