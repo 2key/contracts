@@ -505,7 +505,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     }
 
     /**
-     * @notice          Function to emit when campaign has been ended
+     * @notice          Function that emits EndedBudgetCampaign when campaign has been ended
      */
     function emitEndedBudgetCampaign(
         address campaignPlasmaAddress,
@@ -523,6 +523,9 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         );
     }
 
+    /**
+     * @notice          Function that emits RebalancedRewards after reward rebalancing
+     */
     function emitRebalancedRewards(
         uint cycleId,
         uint difference,
