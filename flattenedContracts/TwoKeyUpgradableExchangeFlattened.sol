@@ -1,28 +1,912 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.13;
+
+contract ERC20 {
+    function totalSupply() public view returns (uint256);
+    function balanceOf(address _who) public view returns (uint256);
+    function transfer(address _to, uint256 _value) public returns (bool);
+    function allowance(address _ocwner, address _spender) public view returns (uint256);
+    function approve(address spender, uint tokens) public returns (bool success);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
+}
+
+contract IERC20 {
+    function balanceOf(
+        address whom
+    )
+    external
+    view
+    returns (uint);
 
 
-import "../ERC20/ERC20.sol";
-
-import "../interfaces/ITwoKeyExchangeRateContract.sol";
-import "../interfaces/ITwoKeyCampaignValidator.sol";
-import "../interfaces/IKyberNetworkProxy.sol";
-import "../interfaces/IKyberReserveInterface.sol";
-import "../interfaces/storage-contracts/ITwoKeyUpgradableExchangeStorage.sol";
-import "../interfaces/IERC20.sol";
-import "../interfaces/ITwoKeyFeeManager.sol";
-import "../interfaces/ITwoKeyReg.sol";
-import "../interfaces/ITwoKeyEventSource.sol";
-import "../interfaces/ITwoKeyFactory.sol";
-import "../interfaces/IUniswapV2Router02.sol";
-import "../upgradability/Upgradeable.sol";
+    function transfer(
+        address _to,
+        uint256 _value
+    )
+    external
+    returns (bool);
 
 
-import "../libraries/SafeMath.sol";
-import "../libraries/GetCode.sol";
-import "../libraries/PriceDiscovery.sol";
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    )
+    external
+    returns (bool);
 
-import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 
+
+    function approve(
+        address _spender,
+        uint256 _value
+    )
+    public
+    returns (bool);
+
+
+
+    function decimals()
+    external
+    view
+    returns (uint);
+
+
+    function symbol()
+    external
+    view
+    returns (string);
+
+
+    function name()
+    external
+    view
+    returns (string);
+
+
+    function freezeTransfers()
+    external;
+
+
+    function unfreezeTransfers()
+    external;
+}
+
+contract IKyberNetworkProxy {
+    function swapEtherToToken(
+        ERC20 token,
+        uint minConversionRate
+    )
+    public
+    payable
+    returns(uint);
+
+    function swapTokenToToken(
+        ERC20 src,
+        uint srcAmount,
+        ERC20 dest,
+        uint minConversionRate
+    )
+    public
+    returns (uint);
+
+    function getExpectedRate(
+        ERC20 src,
+        ERC20 dest,
+        uint srcQty
+    )
+    public
+    view
+    returns (uint expectedRate, uint slippageRate);
+}
+
+contract IKyberReserveInterface {
+
+    // Pricing contract
+    uint public collectedFeesInTwei;
+    // Pricing contract
+    function resetCollectedFees() public;
+    // Pricing contract
+    function setLiquidityParams(
+        uint _rInFp,
+        uint _pMinInFp,
+        uint _numFpBits,
+        uint _maxCapBuyInWei,
+        uint _maxCapSellInWei,
+        uint _feeInBps,
+        uint _maxTokenToEthRateInPrecision,
+        uint _minTokenToEthRateInPrecision
+    ) public;
+
+    function withdraw(ERC20 token, uint amount, address destination) public returns(bool);
+    function disableTrade() public returns (bool);
+    function enableTrade() public returns (bool);
+    function withdrawEther(uint amount, address sendTo) external;
+    function withdrawToken(ERC20 token, uint amount, address sendTo) external;
+    function setContracts(address _kyberNetwork, address _conversionRates, address _sanityRates) public;
+    function getDestQty(ERC20 src, ERC20 dest, uint srcQty, uint rate) public view returns(uint);
+}
+
+contract IStructuredStorage {
+
+    function setProxyLogicContractAndDeployer(address _proxyLogicContract, address _deployer) external;
+    function setProxyLogicContract(address _proxyLogicContract) external;
+
+    // *** Getter Methods ***
+    function getUint(bytes32 _key) external view returns(uint);
+    function getString(bytes32 _key) external view returns(string);
+    function getAddress(bytes32 _key) external view returns(address);
+    function getBytes(bytes32 _key) external view returns(bytes);
+    function getBool(bytes32 _key) external view returns(bool);
+    function getInt(bytes32 _key) external view returns(int);
+    function getBytes32(bytes32 _key) external view returns(bytes32);
+
+    // *** Getter Methods For Arrays ***
+    function getBytes32Array(bytes32 _key) external view returns (bytes32[]);
+    function getAddressArray(bytes32 _key) external view returns (address[]);
+    function getUintArray(bytes32 _key) external view returns (uint[]);
+    function getIntArray(bytes32 _key) external view returns (int[]);
+    function getBoolArray(bytes32 _key) external view returns (bool[]);
+
+    // *** Setter Methods ***
+    function setUint(bytes32 _key, uint _value) external;
+    function setString(bytes32 _key, string _value) external;
+    function setAddress(bytes32 _key, address _value) external;
+    function setBytes(bytes32 _key, bytes _value) external;
+    function setBool(bytes32 _key, bool _value) external;
+    function setInt(bytes32 _key, int _value) external;
+    function setBytes32(bytes32 _key, bytes32 _value) external;
+
+    // *** Setter Methods For Arrays ***
+    function setBytes32Array(bytes32 _key, bytes32[] _value) external;
+    function setAddressArray(bytes32 _key, address[] _value) external;
+    function setUintArray(bytes32 _key, uint[] _value) external;
+    function setIntArray(bytes32 _key, int[] _value) external;
+    function setBoolArray(bytes32 _key, bool[] _value) external;
+
+    // *** Delete Methods ***
+    function deleteUint(bytes32 _key) external;
+    function deleteString(bytes32 _key) external;
+    function deleteAddress(bytes32 _key) external;
+    function deleteBytes(bytes32 _key) external;
+    function deleteBool(bytes32 _key) external;
+    function deleteInt(bytes32 _key) external;
+    function deleteBytes32(bytes32 _key) external;
+}
+
+contract ITwoKeyCampaignValidator {
+    function isCampaignValidated(address campaign) public view returns (bool);
+    function validateAcquisitionCampaign(address campaign, string nonSingletonHash) public;
+    function validateDonationCampaign(address campaign, address donationConversionHandler, address donationLogicHandler, string nonSingletonHash) public;
+    function validateCPCCampaign(address campaign, string nonSingletonHash) public;
+}
+
+contract ITwoKeyEventSource {
+
+    function ethereumOf(address me) public view returns (address);
+    function plasmaOf(address me) public view returns (address);
+    function isAddressMaintainer(address _maintainer) public view returns (bool);
+    function getTwoKeyDefaultIntegratorFeeFromAdmin() public view returns (uint);
+    function joined(address _campaign, address _from, address _to) external;
+    function rejected(address _campaign, address _converter) external;
+
+    function convertedAcquisition(
+        address _campaign,
+        address _converterPlasma,
+        uint256 _baseTokens,
+        uint256 _bonusTokens,
+        uint256 _conversionAmount,
+        bool _isFiatConversion,
+        uint _conversionId
+    )
+    external;
+
+    function getTwoKeyDefaultNetworkTaxPercent()
+    public
+    view
+    returns (uint);
+
+    function convertedDonation(
+        address _campaign,
+        address _converterPlasma,
+        uint256 _conversionAmount,
+        uint256 _conversionId
+    )
+    external;
+
+    function executed(
+        address _campaignAddress,
+        address _converterPlasmaAddress,
+        uint _conversionId,
+        uint tokens
+    )
+    external;
+
+    function tokensWithdrawnFromPurchasesHandler(
+        address campaignAddress,
+        uint _conversionID,
+        uint _tokensAmountWithdrawn
+    )
+    external;
+
+    function emitDebtEvent(
+        address _plasmaAddress,
+        uint _amount,
+        bool _isAddition,
+        string _currency
+    )
+    external;
+
+    function emitReceivedTokensToDeepFreezeTokenPool(
+        address _campaignAddress,
+        uint _amountOfTokens
+    )
+    public;
+
+    function emitReceivedTokensAsModerator(
+        address _campaignAddress,
+        uint _amountOfTokens
+    )
+    public;
+
+    function emitDAIReleasedAsIncome(
+        address _campaignContractAddress,
+        uint _amountOfDAI
+    )
+    public;
+
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public;
+
+
+    function emitUserWithdrawnNetworkEarnings(
+        address user,
+        uint amountOfTokens
+    )
+    public;
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public;
+}
+
+contract ITwoKeyExchangeRateContract {
+    function getBaseToTargetRate(string _currency) public view returns (uint);
+    function getStableCoinTo2KEYQuota(address stableCoinAddress) public view returns (uint,uint);
+    function getStableCoinToUSDQuota(address stableCoin) public view returns (uint);
+}
+
+contract ITwoKeyFactory {
+    function addressToCampaignType(address _key) public view returns (string);
+}
+
+contract ITwoKeyFeeManager {
+    function payDebtWhenConvertingOrWithdrawingProceeds(address _plasmaAddress, uint _debtPaying) public payable;
+    function getDebtForUser(address _userPlasma) public view returns (uint);
+    function payDebtWithDAI(address _plasmaAddress, uint _totalDebt, uint _debtPaid) public;
+    function payDebtWith2Key(address _beneficiaryPublic, address _plasmaAddress, uint _amountOf2keyForRewards) public;
+    function payDebtWith2KeyV2(
+        address _beneficiaryPublic,
+        address _plasmaAddress,
+        uint _amountOf2keyForRewards,
+        address _twoKeyEconomy,
+        address _twoKeyAdmin
+    ) public;
+    function setRegistrationFeeForUser(address _plasmaAddress, uint _registrationFee) public;
+    function addDebtForUser(address _plasmaAddress, uint _debtAmount, string _debtType) public;
+    function withdrawEtherCollected() public returns (uint);
+    function withdraw2KEYCollected() public returns (uint);
+    function withdrawDAICollected(address _dai) public returns (uint);
+}
+
+contract ITwoKeyMaintainersRegistry {
+    function checkIsAddressMaintainer(address _sender) public view returns (bool);
+    function checkIsAddressCoreDev(address _sender) public view returns (bool);
+
+    function addMaintainers(address [] _maintainers) public;
+    function addCoreDevs(address [] _coreDevs) public;
+    function removeMaintainers(address [] _maintainers) public;
+    function removeCoreDevs(address [] _coreDevs) public;
+}
+
+contract ITwoKeyReg {
+    function addTwoKeyEventSource(address _twoKeyEventSource) public;
+    function changeTwoKeyEventSource(address _twoKeyEventSource) public;
+    function addWhereContractor(address _userAddress, address _contractAddress) public;
+    function addWhereModerator(address _userAddress, address _contractAddress) public;
+    function addWhereReferrer(address _userAddress, address _contractAddress) public;
+    function addWhereConverter(address _userAddress, address _contractAddress) public;
+    function getContractsWhereUserIsContractor(address _userAddress) public view returns (address[]);
+    function getContractsWhereUserIsModerator(address _userAddress) public view returns (address[]);
+    function getContractsWhereUserIsRefferer(address _userAddress) public view returns (address[]);
+    function getContractsWhereUserIsConverter(address _userAddress) public view returns (address[]);
+    function getTwoKeyEventSourceAddress() public view returns (address);
+    function addName(string _name, address _sender, string _fullName, string _email, bytes signature) public;
+    function addNameByUser(string _name) public;
+    function getName2Owner(string _name) public view returns (address);
+    function getOwner2Name(address _sender) public view returns (string);
+    function getPlasmaToEthereum(address plasma) public view returns (address);
+    function getEthereumToPlasma(address ethereum) public view returns (address);
+    function checkIfTwoKeyMaintainerExists(address _maintainer) public view returns (bool);
+    function getUserData(address _user) external view returns (bytes);
+}
+
+contract ITwoKeySingletoneRegistryFetchAddress {
+    function getContractProxyAddress(string _contractName) public view returns (address);
+    function getNonUpgradableContractAddress(string contractName) public view returns (address);
+    function getLatestCampaignApprovedVersion(string campaignType) public view returns (string);
+}
+
+interface ITwoKeySingletonesRegistry {
+
+    /**
+    * @dev This event will be emitted every time a new proxy is created
+    * @param proxy representing the address of the proxy created
+    */
+    event ProxyCreated(address proxy);
+
+
+    /**
+    * @dev This event will be emitted every time a new implementation is registered
+    * @param version representing the version name of the registered implementation
+    * @param implementation representing the address of the registered implementation
+    * @param contractName is the name of the contract we added new version
+    */
+    event VersionAdded(string version, address implementation, string contractName);
+
+    /**
+    * @dev Registers a new version with its implementation address
+    * @param version representing the version name of the new implementation to be registered
+    * @param implementation representing the address of the new implementation to be registered
+    */
+    function addVersion(string _contractName, string version, address implementation) public;
+
+    /**
+    * @dev Tells the address of the implementation for a given version
+    * @param _contractName is the name of the contract we're querying
+    * @param version to query the implementation of
+    * @return address of the implementation registered for the given version
+    */
+    function getVersion(string _contractName, string version) public view returns (address);
+}
+
+interface IUniswapV2Router01 {
+    function factory() external pure returns (address);
+
+    function WETH() external pure returns (address);
+
+    function addLiquidity(
+        address tokenA,
+        address tokenB,
+        uint amountADesired,
+        uint amountBDesired,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountA, uint amountB, uint liquidity);
+
+    function addLiquidityETH(
+        address token,
+        uint amountTokenDesired,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
+
+    function removeLiquidity(
+        address tokenA,
+        address tokenB,
+        uint liquidity,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountA, uint amountB);
+
+    function removeLiquidityETH(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountToken, uint amountETH);
+
+    function removeLiquidityWithPermit(
+        address tokenA,
+        address tokenB,
+        uint liquidity,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline,
+        bool approveMax, uint8 v, bytes32 r, bytes32 s
+    ) external returns (uint amountA, uint amountB);
+
+    function removeLiquidityETHWithPermit(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline,
+        bool approveMax, uint8 v, bytes32 r, bytes32 s
+    ) external returns (uint amountToken, uint amountETH);
+
+    function swapExactTokensForTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] path,
+        address to,
+        uint deadline
+    ) external returns (uint[] memory amounts);
+
+    function swapTokensForExactTokens(
+        uint amountOut,
+        uint amountInMax,
+        address[] path,
+        address to,
+        uint deadline
+    ) external returns (uint[] memory amounts);
+
+    function swapExactETHForTokens(uint amountOutMin, address[] path, address to, uint deadline)
+    external
+    payable
+    returns (uint[] memory amounts);
+
+    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] path, address to, uint deadline)
+    external
+    returns (uint[] memory amounts);
+
+    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] path, address to, uint deadline)
+    external
+    returns (uint[] memory amounts);
+
+    function swapETHForExactTokens(uint amountOut, address[] path, address to, uint deadline)
+    external
+    payable
+    returns (uint[] memory amounts);
+
+    function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
+
+    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
+
+    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
+
+    function getAmountsOut(uint amountIn, address[] path) external view returns (uint[] memory amounts);
+
+    function getAmountsIn(uint amountOut, address[] path) external view returns (uint[] memory amounts);
+}
+
+contract IUniswapV2Router02 is IUniswapV2Router01 {
+    function removeLiquidityETHSupportingFeeOnTransferTokens(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountETH);
+
+    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline,
+        bool approveMax, uint8 v, bytes32 r, bytes32 s
+    ) external returns (uint amountETH);
+
+    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] path,
+        address to,
+        uint deadline
+    ) external;
+
+    function swapExactETHForTokensSupportingFeeOnTransferTokens(
+        uint amountOutMin,
+        address[] path,
+        address to,
+        uint deadline
+    ) external payable;
+
+    function swapExactTokensForETHSupportingFeeOnTransferTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] path,
+        address to,
+        uint deadline
+    ) external;
+}
+
+contract ITwoKeyUpgradableExchangeStorage is IStructuredStorage{
+
+}
+
+library GetCode {
+    function at(address _addr) internal view returns (bytes o_code) {
+        assembly {
+        // retrieve the size of the code, this needs assembly
+            let size := extcodesize(_addr)
+        // allocate output byte array - this could also be done without assembly
+        // by using o_code = new bytes(size)
+            o_code := mload(0x40)
+        // new "memory end" including padding
+            mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))
+        // store length in memory
+            mstore(o_code, size)
+        // actually retrieve the code, this needs assembly
+            extcodecopy(_addr, add(o_code, 0x20), 0, size)
+        }
+    }
+}
+
+library PriceDiscovery {
+
+
+    using SafeMath for uint;
+
+
+
+    /**
+     * @notice          Function to calculate token price based on amount of tokens in the pool
+     *                  currently and initial worth of pool in USD
+     *
+     * @param           poolInitialAmountInUSD (wei) is the amount how much all tokens in pool should be worth
+     * @param           amountOfTokensLeftInPool (wei) is the amount of tokens left in the pool after somebody
+     *                  bought them
+     * @return          new token price in USD  -> in wei units
+     */
+    function recalculatePrice(
+        uint poolInitialAmountInUSD,
+        uint amountOfTokensLeftInPool
+    )
+    public
+    pure
+    returns (uint)
+    {
+        return (poolInitialAmountInUSD.mul(10**18)).div(amountOfTokensLeftInPool);
+
+    }
+
+
+    /**
+     * @notice          Function to calculate how many iterations to recompute price we need
+     *
+     * @param           amountOfUSDSpendingForBuyingTokens is the dollar amount user is spending
+     *                  to buy the tokens
+     * @param           tokenPriceBeforeBuying is the price of the token when user expressed
+     *                  a will to buy the tokens
+     * @param           totalAmountOfTokensInThePool is the amount of the tokens that are currently present in the pool
+     *
+     * @dev             All input values are in WEI units
+     *
+     * @return          tuple containing number of iterations and how many dollars will be spent per iteration
+     */
+    function calculateNumberOfIterationsNecessary(
+        uint amountOfUSDSpendingForBuyingTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool
+    )
+    public
+    pure
+    returns (uint, uint)
+    {
+        uint ONE_WEI = 10**18;
+        uint HUNDRED_WEI = 100*(10**18);
+
+        uint numberOfIterations = 1;
+
+        if(amountOfUSDSpendingForBuyingTokens > HUNDRED_WEI) {
+            uint amountOfTokensToBeBought;
+            uint percentageOfThePoolWei;
+
+            /**
+             Function to calculate how many tokens will be bought and how much percentage is that
+             out of the current pool supply
+             */
+            (amountOfTokensToBeBought, percentageOfThePoolWei) = calculatePercentageOfThePoolWei(
+                amountOfUSDSpendingForBuyingTokens,
+                tokenPriceBeforeBuying,
+                totalAmountOfTokensInThePool
+            );
+
+
+            if(percentageOfThePoolWei < ONE_WEI) {
+                // Case less than 1%
+                numberOfIterations = 5;
+
+            } else if(percentageOfThePoolWei < ONE_WEI.mul(10)) {
+                // Case between 1% and 10%
+                numberOfIterations = 10;
+            } else if(percentageOfThePoolWei < ONE_WEI.mul(30)) {
+                // Case between 10% and 30%
+                numberOfIterations = 30;
+            } else {
+                // Cases where 30% or above
+                numberOfIterations = 100;
+            }
+        }
+
+        return (numberOfIterations, amountOfUSDSpendingForBuyingTokens.div(numberOfIterations));
+    }
+
+
+    /**
+     * @notice          Function to calculate how many tokens would be bought in case the token price
+     *                  is static, and how many in percentage is that out of the pool amount
+     *
+     * @param           usdAmountSpendingToBuyTokens is the amount of dollars user is spending for
+     *                  buying tokens
+     * @param           tokenPriceBeforeBuying is the price of the token at the moment of
+     *                  purchase initialization
+     * @param           totalAmountOfTokensInThePool is the total amount of the tokens in the pool at
+     *                  the moment
+     *
+     * @dev             All input values are in WEI units
+     */
+    function calculatePercentageOfThePoolWei(
+        uint usdAmountSpendingToBuyTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool
+    )
+    public
+    pure
+    returns (uint,uint)
+    {
+        uint HUNDRED_WEI = 100*(10**18);
+
+        // Amount of tokens that user would receive in case he bought for the whole money at initial price
+        uint amountOfTokensToBeBought = usdAmountSpendingToBuyTokens.mul(10**18).div(tokenPriceBeforeBuying);
+        // Percentage of the current amount in the pool in tokens user is buying
+        uint percentageOfThePoolWei = amountOfTokensToBeBought.mul(HUNDRED_WEI).div(totalAmountOfTokensInThePool);
+
+        return (amountOfTokensToBeBought, percentageOfThePoolWei);
+    }
+
+
+    /**
+     * @notice          Function to calculate total tokens user will get and what will be the new
+     *                  price after his purchase of tokens is done
+     *
+     * @param           amountOfUSDSpendingForBuyingTokens is the dollar amount user is spending
+     * @param           tokenPriceBeforeBuying is the price of the token before purchase
+     * @param           totalAmountOfTokensInThePool is the total amount of the tokens in the pool atm
+     * @param           poolInitialWorthUSD is how much all 2KEY tokens in the pool should be worth together
+     *
+     * @dev             All input values are in WEI units
+     */
+    function calculateTotalTokensUserIsGetting(
+        uint amountOfUSDSpendingForBuyingTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool,
+        uint poolInitialWorthUSD
+    )
+    public
+    pure
+    returns (uint,uint)
+    {
+        uint totalTokensBought;
+
+        uint numberOfIterations;
+        uint amountBuyingPerIteration;
+
+        (numberOfIterations, amountBuyingPerIteration) = calculateNumberOfIterationsNecessary(
+            amountOfUSDSpendingForBuyingTokens,
+            tokenPriceBeforeBuying,
+            totalAmountOfTokensInThePool
+        );
+
+        uint index;
+        uint amountOfTokensReceived;
+        uint newPrice = tokenPriceBeforeBuying;
+
+        // We're looping here without any issues because number of iterations is limited to maximal 100
+        for(index = 0; index < numberOfIterations; index ++) {
+            // Function which will calculate the amount of tokens we got for specific iteration
+            // and also besides that what will be the new token price
+            (amountOfTokensReceived, newPrice, totalAmountOfTokensInThePool) = calculateAmountOfTokensPerIterationAndNewPrice(
+                totalAmountOfTokensInThePool,
+                newPrice,
+                amountBuyingPerIteration,
+                poolInitialWorthUSD
+            );
+            // Update total tokens which user have bought
+            totalTokensBought = totalTokensBought.add(amountOfTokensReceived);
+        }
+
+        return (totalTokensBought, newPrice);
+    }
+
+
+    /**
+     * @notice          Function which will be used always when we're buying tokens from upgradable exchange
+     *                  and will take care of calculations of tokens to be bought, average token price paid
+     *                  in this purchase, and what will be the new token price after purchase
+     *
+     * @param           amountOfUSDSpendingForBuyingTokens is the dollar amount user is spending
+     * @param           tokenPriceBeforeBuying is the price of the token before purchase
+     * @param           totalAmountOfTokensInThePool is the total amount of the tokens in the pool atm
+     * @param           poolInitialWorthUSD is how much all 2KEY tokens in the pool should be worth together
+     *
+     * @dev             All input values are in WEI units
+     */
+    function buyTokensFromExchangeRealignPrice(
+        uint amountOfUSDSpendingForBuyingTokens,
+        uint tokenPriceBeforeBuying,
+        uint totalAmountOfTokensInThePool,
+        uint poolInitialWorthUSD
+    )
+    public
+    pure
+    returns (uint,uint,uint)
+    {
+        uint totalTokensBought;
+        uint newTokenPrice;
+
+        (totalTokensBought, newTokenPrice) = calculateTotalTokensUserIsGetting(
+            amountOfUSDSpendingForBuyingTokens,
+            tokenPriceBeforeBuying,
+            totalAmountOfTokensInThePool,
+            poolInitialWorthUSD
+        );
+
+        uint averageTokenPriceForPurchase = amountOfUSDSpendingForBuyingTokens.mul(10**18).div(totalTokensBought);
+
+        return (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice);
+    }
+
+
+    /**
+     * @notice          Function to calculate amount of tokens per iteration and what will be the new price
+     * @param           totalAmountOfTokensInThePool is the total amount of tokens in the pool at the moment
+     * @param           tokenPrice is the price of the token at the moment
+     * @param           iterationAmount is the amount user is spending in this iteration
+     */
+    function calculateAmountOfTokensPerIterationAndNewPrice(
+        uint totalAmountOfTokensInThePool,
+        uint tokenPrice,
+        uint iterationAmount,
+        uint poolInitialWorthUSD
+    )
+    public
+    pure
+    returns (uint,uint,uint)
+    {
+        // Calculate amount of tokens user is getting
+        uint amountOfTokens = iterationAmount.mul(10**18).div(tokenPrice);
+        // Calculate the new price for the pool
+        uint tokensLeftInThePool = totalAmountOfTokensInThePool.sub(amountOfTokens);
+        // The new price after the tokens are being bought
+        uint newPrice = recalculatePrice(poolInitialWorthUSD, tokensLeftInThePool);
+
+        return (amountOfTokens,newPrice,tokensLeftInThePool);
+    }
+}
+
+library SafeMath {
+
+  /**
+  * @dev Multiplies two numbers, throws on overflow.
+  */
+  function mul(uint256 _a, uint256 _b) internal pure returns (uint256 c) {
+    // Gas optimization: this is cheaper than asserting 'a' not being zero, but the
+    // benefit is lost if 'b' is also tested.
+    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
+    if (_a == 0) {
+      return 0;
+    }
+
+    c = _a * _b;
+    require(c / _a == _b);
+    return c;
+  }
+
+  /**
+  * @dev Integer division of two numbers, truncating the quotient.
+  */
+  function div(uint256 _a, uint256 _b) internal pure returns (uint256) {
+    // assert(_b > 0); // Solidity automatically throws when dividing by 0
+    // uint256 c = _a / _b;
+    // assert(_a == _b * c + _a % _b); // There is no case in which this doesn't hold
+    return _a / _b;
+  }
+
+  /**
+  * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).
+  */
+  function sub(uint256 _a, uint256 _b) internal pure returns (uint256) {
+    require(_b <= _a);
+    return _a - _b;
+  }
+
+  /**
+  * @dev Adds two numbers, throws on overflow.
+  */
+  function add(uint256 _a, uint256 _b) internal pure returns (uint256 c) {
+    c = _a + _b;
+    require(c >= _a);
+    return c;
+  }
+}
+
+contract ITwoKeySingletonUtils {
+
+    address public TWO_KEY_SINGLETON_REGISTRY;
+
+    // Modifier to restrict method calls only to maintainers
+    modifier onlyMaintainer {
+        address twoKeyMaintainersRegistry = getAddressFromTwoKeySingletonRegistry("TwoKeyMaintainersRegistry");
+        require(ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).checkIsAddressMaintainer(msg.sender));
+        _;
+    }
+
+    /**
+     * @notice Function to get any singleton contract proxy address from TwoKeySingletonRegistry contract
+     * @param contractName is the name of the contract we're looking for
+     */
+    function getAddressFromTwoKeySingletonRegistry(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+            .getContractProxyAddress(contractName);
+    }
+
+    function getNonUpgradableContractAddressFromTwoKeySingletonRegistry(
+        string contractName
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY)
+            .getNonUpgradableContractAddress(contractName);
+    }
+}
+
+contract UpgradeabilityStorage {
+    // Versions registry
+    ITwoKeySingletonesRegistry internal registry;
+
+    // Address of the current implementation
+    address internal _implementation;
+
+    /**
+    * @dev Tells the address of the current implementation
+    * @return address of the current implementation
+    */
+    function implementation() public view returns (address) {
+        return _implementation;
+    }
+}
+
+contract Upgradeable is UpgradeabilityStorage {
+    /**
+     * @dev Validates the caller is the versions registry.
+     * @param sender representing the address deploying the initial behavior of the contract
+     */
+    function initialize(address sender) public payable {
+        require(msg.sender == address(registry));
+    }
+}
 
 contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
@@ -601,6 +1485,29 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
+     * @notice          Function to get amount of the tokens user will receive
+     *
+     * @param           _weiAmount Value in wei to be converted into tokens
+     *
+     * @return          Number of tokens that can be purchased with the specified _weiAmount
+     */
+    function getTokenAmountToBeSold(
+        uint256 _weiAmount
+    )
+    public
+    view
+    returns (uint256,uint256,uint256)
+    {
+        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
+
+        uint rate = ITwoKeyExchangeRateContract(twoKeyExchangeRateContract).getBaseToTargetRate("USD");
+        uint dollarAmountWei = _weiAmount.mul(rate).div(10**18);
+
+        return get2KEYTokenPriceAndAmountOfTokensReceiving(dollarAmountWei);
+    }
+
+
+    /**
      * @notice          Function to calculate how many stable coins we can get for specific amount of 2keys
      *
      * @dev             This is happening in case we're receiving (buying) 2key
@@ -663,37 +1570,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     onlyValidatedContracts
     returns (uint,uint)
     {
-        uint value = msg.value;
+        _preValidatePurchase(_beneficiary, msg.value);
 
-        _preValidatePurchase(_beneficiary, value);
+        uint totalTokensBought;
+        uint averageTokenPriceForPurchase;
+        uint newTokenPrice;
 
-        address [] memory path = new address[](2);
-
-        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
-
-        // The path is WETH -> 2KEY
-        path[0] = IUniswapV2Router02(uniswapRouter).WETH();
-        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = getTokenAmountToBeSold(msg.value);
 
 
-        // Get amount of tokens receiving
-        uint totalTokensBought = buyRate2Key(
-            uniswapRouter,
-            value,
-            path
-        );
-
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-
-        // Get the rate for eth-usd
-        uint eth_usdRate = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"))
-            .getBaseToTargetRate("USD");
-
-        // Compute input in USD
-        uint inputUSD = value.mul(eth_usdRate).div(10**18);
-
-        // Compute token price for purchase in USD
-        uint averageTokenPriceForPurchase = inputUSD.mul(10**18).div(totalTokensBought);
+        set2KEYSellRateInternal(newTokenPrice);
 
         // check if contract is first time interacting with this one
         uint contractId = getContractId(msg.sender);
@@ -706,7 +1592,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         setHedgingInformationAndContractStats(
             contractId,
             totalTokensBought,
-            value
+            msg.value
         );
 
         _processPurchase(_beneficiary, totalTokensBought);
@@ -723,32 +1609,20 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
 
+        uint totalTokensBought;
+        uint averageTokenPriceForPurchase;
+        uint newTokenPrice;
+
         // Increment amount of this stable tokens to fill reserve
         addStableCoinsAvailableToFillReserve(amountOfTokens, tokenAddress);
 
-        // Compute the exact amount in $
         uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
 
-        // Create path to go through WETH
-        address [] memory path = new address[](3);
+        // Process price discovery, buy tokens, and get new price
+        (totalTokensBought, averageTokenPriceForPurchase, newTokenPrice) = get2KEYTokenPriceAndAmountOfTokensReceiving(amountInUSDOfPurchase);
 
-        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
-
-        // The path is WETH -> 2KEY
-        path[0] = tokenAddress;
-        path[1] = IUniswapV2Router02(uniswapRouter).WETH();
-        path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-
-
-        // Get amount of tokens receiving
-        uint totalTokensBought = buyRate2Key(
-            uniswapRouter,
-            amountOfTokens,
-            path
-        );
-
-        // Compute what is the average price for the purchase
-        uint averageTokenPriceForPurchase = amountInUSDOfPurchase.mul(10**18).div(totalTokensBought);
+        // Set new token price
+        set2KEYSellRateInternal(newTokenPrice);
 
         // Transfer tokens
         _processPurchase(msg.sender, totalTokensBought);
@@ -756,7 +1630,6 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         // Return amount of tokens received and average token price for purchase
         return (totalTokensBought, averageTokenPriceForPurchase);
     }
-
 
     function computeAmountInUsd(
         uint amountInTokenDecimals,
@@ -808,6 +1681,16 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
     }
 
+    function set2KEYSellRateInternal(
+        uint newRate
+    )
+    internal
+    {
+        setUint(
+            keccak256("sellRate2key"),
+            newRate
+        );
+    }
 
     function setStableCoinsAvailableToFillReserve(
         uint amountOfStableCoins,
@@ -993,7 +1876,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
             path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
             // Get minimum received
-            uint minimumToReceive = uniswapPriceDiscoverForBuyingFromUniswap(
+            uint minimumToReceive = uniswapPriceDiscover(
                 uniswapRouter,
                 amountToSwap,
                 path
@@ -1302,6 +2185,21 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
+     * @notice          Getter to check how much is pool worth in USD
+     */
+    function poolWorthUSD(
+        uint amountOfTokensInThePool,
+        uint averagePriceFrom3MainSources
+    )
+    internal
+    view
+    returns (uint)
+    {
+        return (averagePriceFrom3MainSources.mul(amountOfTokensInThePool).div(10 ** 18));
+    }
+
+
+    /**
      * @notice          Getter to get spreadWei value
      */
     function spreadWei()
@@ -1313,24 +2211,34 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice          Represents current 2KEY sell rate, and is used only for informative purpose
-     *                  This function shouldn't be included into any buy/sell orders, since it's
-     *                  just checking what is current average rate, not including price discovery for
-     *                  bigger amounts
+     * @notice          Function to be used to fetch 2KEY-DAI rate from uniswap
+     * @notice          amountToSwap is in wei value
+     * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
      */
-    function sellRate2key()
+    function uniswapPriceDiscover(
+        address uniswapRouter,
+        uint amountToSwap,
+        address [] path
+    )
     public
     view
     returns (uint)
     {
-        // Fetch rate for 1 2KEY token
-        return sellRate2KeyInternal(10 ** 18);
+        uint[] memory amountsOut = new uint[](2);
+
+        amountsOut = IUniswapV2Router02(uniswapRouter).getAmountsOut(
+            amountToSwap,
+            path
+        );
+
+        return amountsOut[1];
     }
 
-    function sellRate2KeyInternal(
-        uint amountToReceive
-    )
-    internal
+    /**
+     * @notice          Getter for 2key sell rate
+     */
+    function sellRate2key()
+    public
     view
     returns (uint)
     {
@@ -1339,33 +2247,25 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         address [] memory path = new address[](2);
         address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
 
-        // The path is WETH -> 2KEY
-        path[0] = IUniswapV2Router02(uniswapRouter).WETH();
-        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        path[1] = IUniswapV2Router02(uniswapRouter).WETH();
 
-        // Represents how much ETH user has to put in order to get amountToReceive 2KEY token
-        uint rateFromUniswap = uniswapPriceDiscover(uniswapRouter, amountToReceive, path);
+        // Represents how much 1 2KEY is worth ETH
+        uint rateFromUniswap = uniswapPriceDiscover(uniswapRouter, 10 ** 18, path);
 
         // Rate from ETH-USD oracle
         uint eth_usdRate = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"))
-        .getBaseToTargetRate("USD");
-
-        // Return rate which will represent how many USD has to be put in for amountToReceive 2KEY tokens
-        return rateFromUniswap.mul(eth_usdRate).div(10**18);
-    }
+            .getBaseToTargetRate("USD");
 
 
-    function buyRate2Key(
-        address uniswapRouter,
-        uint input,
-        address [] path
-    )
-    public
-    view
-    returns (uint)
-    {
-        // Represents how much 2KEY's user gets for input in ETH
-        return uniswapPriceDiscoverForBuyingFromUniswap(uniswapRouter, input, path);
+        // Rate computed by combination of ChainLink oracle (ETH-USD) and Uniswap (2KEY-ETH)
+
+        // Which will represent final 2KEY-USD rate
+        uint finalRate = rateFromUniswap.mul(eth_usdRate).div(10**18);
+
+        uint rateFromContract = getUint(keccak256("sellRate2key"));
+
+        return (finalRate.add(rateFromContract)).div(2);
     }
 
 
@@ -1393,53 +2293,43 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         return amountOfDAI;
     }
 
-
     /**
-     * @notice          Function to be used to fetch rates for SELL orders
-     * @notice          amountToReceive is desired amount of 2KEY tokens to be received
-     * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
+     * @notice          Function to get amount of 2KEY receiving, new token price, and average price per token
+     *i
+     * @param           purchaseAmountUSDWei is the amount of USD user is spending to buy tokens
      */
-    function uniswapPriceDiscover(
-        address uniswapRouter,
-        uint amountToReceive,
-        address [] path
+    function get2KEYTokenPriceAndAmountOfTokensReceiving(
+        uint purchaseAmountUSDWei
     )
     public
     view
-    returns (uint)
+    returns (uint,uint,uint)
     {
-        uint[] memory amountsIn = new uint[](2);
+        uint currentPrice = sellRate2key();
 
-        amountsIn = IUniswapV2Router02(uniswapRouter).getAmountsIn(
-            amountToReceive,
-            path
+        // In case 0 USD is inputted, return 0 as bought, and current price as average and new.
+        if(purchaseAmountUSDWei == 0) {
+            return (0, currentPrice, currentPrice);
+        }
+
+        uint balanceOfTokens = getPoolBalanceOf2KeyTokens();
+
+        return PriceDiscovery.buyTokensFromExchangeRealignPrice(
+            purchaseAmountUSDWei,
+            currentPrice,
+            balanceOfTokens,
+            poolWorthUSD(balanceOfTokens, currentPrice)
         );
-
-        return amountsIn[0];
     }
 
-    /**
-     * @notice          Function to be used to fetch rates from uniswap assuming there's a buy order
-     * @notice          amountToSwap is in wei value
-     * @param           path is the path of swap (TOKEN_A - TOKEN_B) or (TOKEN_A - WETH - TOKEN_B)
-     */
-    function uniswapPriceDiscoverForBuyingFromUniswap(
-        address uniswapRouter,
-        uint amountToSwap,
-        address [] path
-    )
-    public
+
+    function getPoolBalanceOf2KeyTokens()
+    internal
     view
     returns (uint)
     {
-        uint[] memory amountsOut = new uint[](2);
-
-        amountsOut = IUniswapV2Router02(uniswapRouter).getAmountsOut(
-            amountToSwap,
-            path
-        );
-
-        return amountsOut[1];
+        address tokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyEconomy);
+        return ERC20(tokenAddress).balanceOf(address(this));
     }
 
 
@@ -1454,3 +2344,4 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 }
+

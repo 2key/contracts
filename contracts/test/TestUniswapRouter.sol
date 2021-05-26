@@ -20,4 +20,19 @@ contract TestUniswapRouter {
 
         return numbers;
     }
+
+    function getAmountsIn(
+        uint amountOut,
+        address[] path
+    )
+    external
+    view
+    returns (uint[])
+    {
+        uint [] memory numbers = new uint[](2);
+        numbers[0] = (amountOut * (10 ** 18) * 6 / 100) / (10 ** 18);
+        numbers[1] = (amountOut * (10 ** 18) * 6 / 100) / (10 ** 18);
+
+        return numbers;
+    }
 }

@@ -4,7 +4,7 @@ import ICreateCPCTest from "../../typings/ICreateCPCTest";
 import {expectEqualNumbers} from "../../helpers/numberHelpers";
 import {promisify} from "../../../src/utils/promisify";
 
-const TIMEOUT_LENGTH = 10000;
+const TIMEOUT_LENGTH = 60000;
 
 export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage, maintainerKey: string) {
   const userKey = storage.contractorKey;
@@ -57,26 +57,24 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
       let amountOfTokens = await protocol.CPCCampaign.getRequiredBudget2KEY('USD', protocol.Utils.toWei(usdTotalAmount,'ether').toString());
 
       let amountOfTokensWei = protocol.Utils.toWei(amountOfTokens,'ether').toString();
-
-
       await withBalanceProtocol.Utils.getTransactionReceiptMined(
           await withBalanceProtocol.transfer2KEYTokens(address, amountOfTokensWei, addressWithBalance)
       );
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.ERC20.erc20ApproveAddress(
-          protocol.twoKeyEconomy._address,
-          protocol.twoKeyBudgetCampaignsPaymentsHandler._address,
+          protocol.twoKeyEconomy.address,
+          protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
           amountOfTokensWei,
           address
         )
       );
 
-
       let receipt = await protocol.Utils.getTransactionReceiptMined(
           await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
       );
-
+      console.log('Transaction hash: ',receipt.transactionHash);
+      console.log('Add directly 2KEY gas used: ', receipt.gasUsed);
 
       const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
 
@@ -85,23 +83,20 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
           amountOfTokens,
       );
     } else {
-        // Ranadom case budgeting with DAI/TUSD/BUSD/...
-
+        // Random case budgeting with DAI/TUSD/BUSD/...
         let amountOfTokensRequired = await protocol.TwoKeyExchangeContract.getFiatToStableQuotes(
-            protocol.Utils.toWei(usdTotalAmount,'ether').toString(),
+            parseFloat(protocol.Utils.toWei(usdTotalAmount,'ether').toString()),
             'USD',
             ['DAI']
           );
 
         let amountOfTokensWei = await protocol.Utils.toWei(amountOfTokensRequired.DAI,'ether').toString();
-
         let daiAddress = await protocol.SingletonRegistry.getNonUpgradableContractAddress('DAI');
-
 
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.ERC20.erc20ApproveAddress(
             daiAddress,
-            protocol.twoKeyBudgetCampaignsPaymentsHandler._address,
+            protocol.twoKeyBudgetCampaignsPaymentsHandler.address,
             amountOfTokensWei,
             address
           )
@@ -118,6 +113,9 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
                 address
             )
         );
+      console.log('Transaction hash: ',receipt.transactionHash);
+      console.log('Gas used: ', receipt.gasUsed);
+
         const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
     }
   });

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-#!/usr/bin/env bash
 
 spinner() {
-    chars="/-\|"s
+    chars="/-\|"
 
     for (( j=0; j< $1; j++ )); do
       for (( i=0; i<${#chars}; i++ )); do
@@ -13,14 +12,10 @@ spinner() {
 }
 
 spinner 2
-
 echo "Generating bytecodes for changes on public network"
-echo "Destination for execution: 0x178a57d07d77bd6e2de7236d67a399e2f10c46d9"
+echo "Destination for execution of contracts patches: 0xf4797416e6b6835114390591d3ac6a531a061396"
 cd ../..
 
-
-python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.27
-
-
+python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.41
 
 

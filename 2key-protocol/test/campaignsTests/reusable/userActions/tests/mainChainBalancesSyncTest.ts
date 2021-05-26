@@ -19,21 +19,31 @@ export default function mainChainBalancesSyncTest(
 
       let earnings = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
+      console.log(earnings);
 
       let txHash = await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.methods.endCampaignReserveTokensAndRebalanceRates, [
           campaignAddress,
           protocol.Utils.toWei(earnings.totalAmountForReferrerRewards, 'ether').toString(),
           protocol.Utils.toWei(earnings.totalModeratorEarnings, 'ether').toString(),
-          {from: address}
+          {from: address, gas: 7900000}
       ]);
+
+      console.log(txHash);
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
 
+      console.log(info);
+
+      let rebalancedContractorAndModerator = (info.initialBounty - earnings.totalAmountForReferrerRewards) * (info.rebalancingRatio);
+      let contractorLeftover: number = rebalancedContractorAndModerator - info.moderatorEarnings;
+
+      console.log(contractorLeftover);
       expect(earnings.totalModeratorEarnings.toFixed(5)).to.be.equal((info.moderatorEarnings / info.rebalancingRatio).toFixed(5));
       expect(info.isLeftoverWithdrawn).to.be.equal(false);
-  }).timeout(10000);
+      expect(info.contractorLeftover.toFixed(5)).to.be.equal(contractorLeftover.toFixed(5));
+  }).timeout(60000);
 
   it('should mark campaign as done and assign to active influencers', async() => {
       const {protocol, web3:{address}} = availableUsers[userKey];
@@ -61,5 +71,5 @@ export default function mainChainBalancesSyncTest(
       expect(referrerPendingCampaigns.length).to.be.equal(referrerPendingCampaignsAfter.length - 1);
       expect(referrerPendingCampaignsAfter[referrerPendingCampaignsAfter.length-1].toLowerCase()).to.be.equal(campaignAddress.toLowerCase());
 
-  }).timeout(10000);
+  }).timeout(60000);
 }

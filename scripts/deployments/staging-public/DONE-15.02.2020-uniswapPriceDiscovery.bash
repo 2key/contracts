@@ -2,7 +2,7 @@
 #!/usr/bin/env bash
 
 spinner() {
-    chars="/-\|"s
+    chars="/-\|"
 
     for (( j=0; j< $1; j++ )); do
       for (( i=0; i<${#chars}; i++ )); do
@@ -19,7 +19,7 @@ echo "Destination for execution: 0x178a57d07d77bd6e2de7236d67a399e2f10c46d9"
 cd ../..
 
 
-python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.27
+python3 generate_bytecode.py upgradeContract TwoKeyUpgradableExchange 1.0.30
 
 
 

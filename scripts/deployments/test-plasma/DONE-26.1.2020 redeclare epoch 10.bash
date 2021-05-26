@@ -2,20 +2,16 @@
 
 spinner() {
     chars="/-\|"
-
     for (( j=0; j< $1; j++ )); do
       for (( i=0; i<${#chars}; i++ )); do
         sleep 0.5
         echo -en "${chars:$i:1}" "\r"
       done
-    doneds
+    done
 }
 
 spinner 2
-
-echo "Generating bytecodes for changes on plasma network"
-echo "Destination for execution: 0xd0043ac71897032d572580ad84359323b5719068"
 cd ../..
 
-python3 generate_bytecode.py approveNewCampaign CPC_PLASMA 1.0.4
-
+echo "Destination for execution is TwoKeyPlasmaParticipationRewards address: 0xc8f19c88c9335880d8c4a165acdb7499f444dc6d"
+python3 generate_bytecode.py redeclareEpochRewards 10 650999999999999213568

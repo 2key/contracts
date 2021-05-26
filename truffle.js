@@ -132,8 +132,8 @@ module.exports = {
           provider: createLedgerProvider(rpcs["prod-public"], ids["prod-public"]),
           skipDryRun: true,
           network_id: ids["prod-public"],
-          gas: 8000000,
-          gasPrice: 69000000000,
+          gas: 6000000,
+          gasPrice: 110000000000,
       },
 
       'public.prod-hdwallet': {

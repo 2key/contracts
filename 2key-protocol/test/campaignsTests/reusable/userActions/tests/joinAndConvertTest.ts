@@ -79,8 +79,7 @@ export default function joinAndConvertTest(
         campaignAddress,
         address
       );
-
-
+      
       const conversionIds = await protocol[campaignContract].getConverterConversionIds(
         campaignAddress, address, address,
       );
@@ -110,7 +109,9 @@ export default function joinAndConvertTest(
       } else {
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
       }
-    }).timeout(10000);
+      // TODO: for case when twoKeyEconomy is custom and KYC isn't required: add check for rewards inventory subtract
+      // @Nikola
+    }).timeout(60000);
   }
 
   if (storage.campaignType === campaignTypes.donation) {
@@ -157,7 +158,6 @@ export default function joinAndConvertTest(
           campaignAddress, conversionId, address,
         ),
       );
-
       currentUser.addConversion(conversion);
       storage.processConversion(currentUser, conversion, campaignData.incentiveModel);
 
@@ -176,7 +176,7 @@ export default function joinAndConvertTest(
           contribution,
         );
       }
-    }).timeout(10000);
+    }).timeout(60000);
   }
 
   if (storage.campaignType === campaignTypes.cpc) {
@@ -216,6 +216,6 @@ export default function joinAndConvertTest(
       );
       currentUser.addConversion(conversionObj);
       storage.processConversion(currentUser, conversionObj, campaignData.incentiveModel);
-    }).timeout(10000);
+    }).timeout(60000);
   }
 }
