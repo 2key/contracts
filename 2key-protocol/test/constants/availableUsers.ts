@@ -31,6 +31,7 @@ export const userIds = {
   nikola: 'nikola'
 };
 
+// @ts-ignore
 const availableUsers = {
   [userIds.deployer]: {
     name: 'DEPLOYER',

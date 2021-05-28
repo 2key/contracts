@@ -85,7 +85,7 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
     } else {
         // Random case budgeting with DAI/TUSD/BUSD/...
         let amountOfTokensRequired = await protocol.TwoKeyExchangeContract.getFiatToStableQuotes(
-            parseFloat(protocol.Utils.toWei(usdTotalAmount,'ether').toString()),
+            protocol.Utils.toWei(usdTotalAmount,'ether').toString(),
             'USD',
             ['DAI']
           );
