@@ -29,7 +29,9 @@ describe(
     this.timeout(10000);
 
     before(function () {
-      return createCpcCampaign(campaignData, storage);
+      const campaign = createCpcCampaign(campaignData, storage);
+      console.log(campaign)
+      return campaign
     });
 
     checkCpcCampaign(campaignData, storage, userIds.buyer);

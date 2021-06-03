@@ -70,6 +70,7 @@ export default function checkConversionPurchaseTest(
     const conversionObj = await protocol.AcquisitionCampaign.getConversion(
       campaignAddress, conversion.id, address,
     );
+
     const withdrawAmounts = calcWithdrawAmounts(
       conversionObj.baseTokenUnits,
       conversionObj.bonusTokenUnits,
@@ -79,11 +80,9 @@ export default function checkConversionPurchaseTest(
     const withdrawContractsQuantity = withBase
       ? portionsQty
       : portionsQty + 1; // added first portions with separate base amount
-
     const purchase = await protocol.AcquisitionCampaign.getPurchaseInformation(
       campaignAddress, conversion.id, address
     );
-
     expect(purchase.vestingPortions).to.be.eq(withdrawContractsQuantity);
     expect(purchase.unlockingDays.length).to.be.eq(withdrawContractsQuantity);
     expect(purchase.unlockingDays).to.deep.equal(unlockingDates);

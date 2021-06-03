@@ -13,7 +13,7 @@ require('isomorphic-fetch');
 require('isomorphic-form-data');
 
 
-const timeout = 60000;
+const timeout = 10000;
 const ONE_MONTH_UNIX = 30 * 24 * 60 * 60 + 60; // 30 days = 30 * 24 hrs = 30 * 24 * 60 minutes = 30 * 24 * 60 * 60 seconds + 1 minute
 
 describe(
@@ -127,24 +127,23 @@ describe(
         }).timeout(timeout);
 
         it('should execute proposal', async() => {
-            let txHash;
-            try {
-                txHash = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.executeProposal,[
-                    numberOfProposals,
-                    transactionBytecode,
-                    {
-                        from: twoKeyProtocol.plasmaAddress
-                    }
-                ]);
-            } catch (e) {
-                console.log('Error: ', e);
-            }
+          console.dir({
+            numberOfProposals,
+            transactionBytecode,
+            from: twoKeyProtocol.plasmaAddress,
+          })
+            let txHash: string = await promisify(twoKeyProtocol.twoKeyPlasmaCongress.methods.executeProposal,[
+                numberOfProposals,
+                transactionBytecode,
+                {
+                    from: twoKeyProtocol.plasmaAddress,
+                }
+            ]);
+            console.log('TXHASH',txHash)
 
-            if(txHash) {
                 const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
                 const status = receipt && receipt.status;
                 expect(status).to.be.equal(true);
-            }
         }).timeout(timeout);
 
 
@@ -453,7 +452,7 @@ describe(
             let totalAmountOfTokensTransferedAfterWithdrawal = await promisify(twoKeyProtocol.twoKeyParticipationMiningPool.methods.getTotalAmountOfTokensTransfered, []);
             totalAmountOfTokensTransferedAfterWithdrawal = parseFloat(twoKeyProtocol.Utils.fromWei(totalAmountOfTokensTransferedAfterWithdrawal, 'ether').toString());
 
-            expect(totalAmountOfTokensTransfered + amountInProgressOfWithdrawal).to.be.equal(parseFloat(totalAmountOfTokensTransferedAfterWithdrawal.toString()));
+            expect(parseFloat(totalAmountOfTokensTransfered + amountInProgressOfWithdrawal)).to.be.equal(parseFloat(totalAmountOfTokensTransferedAfterWithdrawal.toString()));
         }).timeout(timeout);
 
         it('should check if signature is marked as it exists on mainchain', async() => {

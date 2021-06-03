@@ -49,7 +49,7 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
     const {protocol, web3: {address}} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
-    const currency = await protocol.AcquisitionCampaign.getAcquisitionCampaignCurrency(campaignAddress);
+    const currency = await protocol.AcquisitionCampaign.getAcquisitionCampaignCurrency(campaignAddress, address);
     expect(currency).to.be.equal(campaignParams.currency);
   }).timeout(timeout);
 
@@ -61,18 +61,14 @@ export default function checkAcquisitionCampaign(campaignParams, storage: TestSt
       const {ethWorth2keys} = await protocol.AcquisitionCampaign.getRequiredRewardsInventoryAmount(
         campaignParams.isFiatOnly,
         !campaignParams.isFiatOnly,
-        parseFloat(
-          protocol.Utils.fromWei(
-            campaignParams.campaignHardCapWEI
-          ).toString()
-        ),
+        parseFloat(protocol.Utils.fromWei(campaignParams.campaignHardCapWEI).toString()),
         campaignParams.maxReferralRewardPercentWei,
       );
 
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.AcquisitionCampaign.specifyFiatConversionRewards(
           campaignAddress,
-          protocol.Utils.toWei(ethWorth2keys, 'ether').toString(),
+          parseFloat(protocol.Utils.toWei(ethWorth2keys, 'ether').toString()),
           campaignParams.amount,
           from,
         )
