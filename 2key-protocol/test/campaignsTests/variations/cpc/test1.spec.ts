@@ -30,7 +30,6 @@ describe(
 
     before(function () {
       const campaign = createCpcCampaign(campaignData, storage);
-      console.log(campaign)
       return campaign
     });
 

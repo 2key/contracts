@@ -29,7 +29,6 @@ describe(
     this.timeout(60000);
 
     before(function () {
-      console.log('THIS IS BEFORE ALL')
       return createCpcCampaign(campaignData, storage);
     });
 

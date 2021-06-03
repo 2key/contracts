@@ -54,7 +54,6 @@ export default function joinAndConvertTest(
       );
 
       if (campaignData.isFiatOnly) {
-        console.log('ONLY FIAT')
         const signature = await protocol[campaignContract].getSignatureFromLink(
           refUser.link.link, protocol.plasmaAddress, refUser.link.fSecret);
         const txHash = await protocol[campaignContract].convertOffline(
@@ -64,7 +63,6 @@ export default function joinAndConvertTest(
 
         await protocol.Utils.getTransactionReceiptMined(txHash);
       } else {
-        console.log('NOT FIAT')
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.AcquisitionCampaign.joinAndConvert(
             campaignAddress,
@@ -107,15 +105,6 @@ export default function joinAndConvertTest(
         const reward = contribution / campaignData.maxReferralRewardPercentWei / 100 / rate;
         /*const resp = protocol.CPCCampaign.getInventoryStatus(address)
         const reward = await resp || 0*/
-        console.log('amountOfTokensAfterConvert',amountOfTokensAfterConvert);
-        console.log({
-          initialAmountOfTokens,
-          amountOfTokensForPurchase,
-          reward,
-          contribution,
-          maxReferralRewardPercentWei: campaignData.maxReferralRewardPercentWei,
-          rate
-        });
         // @ts-ignore
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase - reward);
       } else {

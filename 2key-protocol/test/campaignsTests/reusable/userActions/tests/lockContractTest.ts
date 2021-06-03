@@ -22,18 +22,13 @@ export default function lockContractTest(
       await protocol.CPCCampaign.lockContractFromMaintainer(
           campaignAddress,
           protocol.plasmaAddress
-      ).catch(e => console.log('Eroror herer'))
+      )
     } catch (e) {
-      console.log('EORORORORO')
       error = true;
     }
-    console.log('THIS WORKS')
 
 
     const isContractLocked = await protocol.CPCCampaign.isContractLocked(campaignAddress,"PLASMA");
-
-    console.log(error)
-    console.log(isContractLocked)
     expect(error).to.be.eq(true);
     expect(isContractLocked).to.be.eq(false);
   }).timeout(60000);
