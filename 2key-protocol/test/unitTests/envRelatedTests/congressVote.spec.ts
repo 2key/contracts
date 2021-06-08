@@ -29,7 +29,6 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
 
     it('should get member info from congress', async() => {
         let memberInfo = await twoKeyProtocol.CongressMembersRegistry.getMemberInfo(from);
-        console.log('memberInfo', memberInfo);
         expect(memberInfo.memberName).to.be.equal('Eitan');
     }).timeout(30000);
 
@@ -83,7 +82,6 @@ describe('TwoKeyCongress contract basic proposal creation, voting, and proposal 
         let numberOfProposals = await twoKeyProtocol.Congress.getNumberOfProposals();
         numberOfProposals = parseFloat(numberOfProposals.toString());
         let data = await twoKeyProtocol.Congress.getProposalInformations(numberOfProposals-1,from);
-        console.log('DATA', data);
         expect(data.proposalIsExecuted).to.be.equal(false);
         expect(data.proposalNumberOfVotes).to.be.equal(3);
     }).timeout(10000);

@@ -60,8 +60,6 @@ describe(
                 }
             ]);
 
-            console.log(txHash);
-
             const receipt = await twoKeyProtocol.Utils.getTransactionReceiptMined(txHash,{web3: twoKeyProtocol.plasmaWeb3});
             const status = receipt && receipt.status;
             expect(status).to.be.equal(true);
