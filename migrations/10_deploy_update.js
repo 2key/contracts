@@ -38,6 +38,7 @@ const TwoKeyParticipationPaymentsManagerStorage = artifacts.require('TwoKeyParti
 const TwoKeyFeeManagerStorage = artifacts.require('TwoKeyFeeManagerStorage');
 const TwoKeyNetworkGrowthFundStorage = artifacts.require('TwoKeyNetworkGrowthFundStorage');
 const TwoKeyBudgetCampaignsPaymentsHandler = artifacts.require('TwoKeyBudgetCampaignsPaymentsHandler');
+const TwoKeyTreasuryL1 = artifacts.require('TwoKeyTreasuryL1');
 const TwoKeyPlasmaEventsStorage = artifacts.require('TwoKeyPlasmaEventsStorage');
 const TwoKeyPlasmaMaintainersRegistryStorage = artifacts.require('TwoKeyPlasmaMaintainersRegistryStorage');
 const TwoKeyPlasmaRegistryStorage = artifacts.require('TwoKeyPlasmaRegistryStorage');
@@ -131,6 +132,7 @@ let contractsArtifacts = {
     TwoKeyFeeManagerStorage,
     TwoKeyNetworkGrowthFundStorage,
     TwoKeyBudgetCampaignsPaymentsHandler,
+    TwoKeyTreasuryL1,
     TwoKeyPlasmaEvents,
     TwoKeyPlasmaMaintainersRegistry,
     TwoKeyPlasmaRegistry,

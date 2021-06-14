@@ -4,8 +4,13 @@ const TwoKeyPlasmaBudgetCampaignsPaymentsHandlerStorage = artifacts.require('Two
 const TwoKeyBudgetCampaignsPaymentsHandler = artifacts.require('TwoKeyBudgetCampaignsPaymentsHandler');
 const TwoKeyBudgetCampaignsPaymentsHandlerStorage = artifacts.require('TwoKeyBudgetCampaignsPaymentsHandlerStorage');
 
+const TwoKeyTreasuryL1 = artifacts.require('TwoKeyTreasuryL1');
+const TwoKeyTreasuryL1Storage = artifacts.require('TwoKeyTreasuryL1Storage');
+
 const TwoKeyPlasmaSingletoneRegistry = artifacts.require('TwoKeyPlasmaSingletoneRegistry');
 const TwoKeySingletonesRegistry = artifacts.require('TwoKeySingletonesRegistry');
+
+const Call = artifacts.require('Call');
 
 const fs = require('fs');
 const path = require('path');
@@ -101,6 +106,7 @@ module.exports = function deploy(deployer) {
             })
             .then(() => true);
     } else if(deployer.network.startsWith('public') || deployer.network.startsWith('dev-local')) {
+        // TwoKeyBudgetCampaignsPaymentsHandler
         console.log('Deploying public version of TwoKeyBudgetCampaignsPaymentsHandler contract');
 
         deployer.deploy(TwoKeyBudgetCampaignsPaymentsHandler)
@@ -169,6 +175,78 @@ module.exports = function deploy(deployer) {
                 })
             })
             .then(() => true);
+
+
+            // TwoKeyTreasuryL1
+            console.log('Deploying public version of TwoKeyTreasuryL1 contract');
+
+            deployer.link(Call, TwoKeyTreasuryL1)
+                .then(() => deployer.deploy(TwoKeyTreasuryL1))
+                .then(() => TwoKeyTreasuryL1.deployed())
+                .then(() => deployer.deploy(TwoKeyTreasuryL1Storage))
+                .then(() => TwoKeyTreasuryL1Storage.deployed())
+                .then(async () => {
+                    await new Promise(async (resolve, reject) => {
+                        try {
+                            let registry = await TwoKeySingletonesRegistry.at(TwoKeySingletonesRegistry.address);
+    
+                            console.log('-----------------------------------------------------------------------------------');
+                            console.log('... Adding TwoKeyTreasuryL1 to Proxy registry as valid implementation');
+                            let contractName = "TwoKeyTreasuryL1";
+                            let contractStorageName = "TwoKeyTreasuryL1Storage";
+    
+                            let txHash = await registry.addVersionDuringCreation(
+                                contractName,
+                                contractStorageName,
+                                TwoKeyTreasuryL1.address,
+                                TwoKeyTreasuryL1Storage.address,
+                                INITIAL_VERSION_OF_ALL_SINGLETONS
+                            );
+    
+                            let {logs} = await registry.createProxy(
+                                contractName,
+                                contractStorageName,
+                                INITIAL_VERSION_OF_ALL_SINGLETONS
+                            );
+    
+                            let {logicProxy, storageProxy} = logs.find(l => l.event === 'ProxiesDeployed').args;
+    
+                            proxyLogic = logicProxy;
+                            proxyStorage = storageProxy;
+    
+                            const jsonObject = fileObject[contractName] || {};
+                            jsonObject[network_id] = {
+                                'implementationAddressLogic': TwoKeyTreasuryL1.address,
+                                'Proxy': logicProxy,
+                                'implementationAddressStorage': TwoKeyTreasuryL1Storage.address,
+                                'StorageProxy': storageProxy,
+                            };
+    
+                            fileObject[contractName] = jsonObject;
+                            resolve(logicProxy);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                    fs.writeFileSync(proxyFile, JSON.stringify(fileObject, null, 4));
+                })
+                .then(async () => {
+                    await new Promise(async (resolve, reject) => {
+                        try {
+                            console.log('Setting initial params in TwoKeyTreasuryL1 contract on plasma network');
+                            let instance = await TwoKeyTreasuryL1.at(proxyLogic);
+                            let txHash = instance.setInitialParams
+                            (
+                                TwoKeySingletonesRegistry.address,
+                                proxyStorage,
+                            );
+                            resolve(txHash);
+                        } catch (e) {
+                            reject(e);
+                        }
+                    })
+                })
+                .then(() => true);
     }
 };
 
