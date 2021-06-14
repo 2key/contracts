@@ -1,42 +1,40 @@
+const { expect } = require("chai");
+const { truffleAssert, BigNumber, awaitTx, waitForSomeTime, toTokenAmountWithDecimals } = require("./utils");
+
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 
 contract("TwoKeyEconomy", async (accounts) => {
 
+    const TOKEN_NAME = 'TwoKeyEconomy';
+    const TOKEN_SYMBOL = '2KEY';
+    const TOKEN_DECIMALS = 18;
+    
+    let twoKeyEconomy;
 
-    let randomActorAddress1 = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
-    let randomActorAddress2 = '0xbEde520368f2Df7BED4dF5185101f303f6c7d4cc';
-
-    let deployerAdrress = '0xb3FA520368f2Df7BED4dF5185101f303f6c7decc';
-
-    let economyContract;
-    const tokenName = 'TwoKeyEconomy';
-    const symbol = '2KEY';
-    const decimals = 18;
-    const totalSupply = 1000000000000000000000000000;
-
-
-    it("Test: Admin and SingletonRegistry contract addresses should be properly set", async () => {
-        console.log('CAO');
-
-        economyContract = await TwoKeyEconomy.new(randomActorAddress1, randomActorAddress2);
-        //Validate admin address
-        let admin = await economyContract.methods.twoKeyAdmin().call();
-        assert.equal(randomActorAddress1, admin, 'admin address is not properly set');
+    beforeEach(async function() {
+        twoKeyEconomy = await TwoKeyEconomy.deployed();
     });
 
-    it('Test: Token name and token symbol should be properly set', async () => {
-        let name = await TwoKeyEconomy.name();
-        assert.equal(name, tokenName, 'token name is not properly assigned');
-
-        let sym = await TwoKeyEconomy.symbol();
-        assert.equal(sym, symbol, 'token symbol is not properly set');
+    it('Token name should be properly set', async () => {
+        let name = await twoKeyEconomy.name();
+        expect(name).to.equal(TOKEN_NAME);
     });
 
-    it('Test: Token decimals should be properly set', async () => {
-        let dec = await TwoKeyEconomy.decimals();
-        assert.equal(dec, decimals, 'token decimals should be properly set');
+    it('Token symbol should be properly set', async () => {
+        let symbol = await twoKeyEconomy.symbol();
+        expect(symbol).to.equal(TOKEN_SYMBOL);
     });
 
+    it('Token decimals should be properly set', async () => {
+        let decimals = await twoKeyEconomy.decimals();
+        expect(decimals.eq(new BigNumber(TOKEN_DECIMALS))).to.be.true;
+    });
 
+    it('Should not freeze transfer (by non TwoKeyAdmin)', async () => {
+        await truffleAssert.reverts(twoKeyEconomy.freezeTransfers());
+    });
+
+    it('Should not unfreeze transfer (by non TwoKeyAdmin)', async () => {
+        await truffleAssert.reverts(twoKeyEconomy.unfreezeTransfers());
+    });
 });
-

@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
 import "../interfaces/IERC20.sol";
+import "../interfaces/ITether.sol";
 import "../libraries/Call.sol";
 import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyTreasuryL1Storage.sol";
@@ -27,6 +28,11 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyTreasuryL1Storage public PROXY_STORAGE_CONTRACT;
 
+    event DepositEther(address indexed depositor, uint256 amount);
+    event DepositToken(address indexed depositor, address indexed token, uint256 amount);
+    event WithdrawToken(address indexed beneficiary, address indexed token, uint256 amount);
+
+
     function setInitialParams(
         address twoKeySingletonesRegistry,
         address _proxyStorage
@@ -39,6 +45,16 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         PROXY_STORAGE_CONTRACT = ITwoKeyTreasuryL1Storage(_proxyStorage);
 
         initialized = true;
+    }
+
+    /**
+     * @notice          Fallback function to handle deposits in ether
+     */
+    function()
+    public
+    payable
+    {
+        emit DepositEther(msg.sender, msg.value);
     }
 
     /**
@@ -70,43 +86,34 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
 
     /**
-     * @notice          Function to deposit token which is not whitelisted as supported
-     *                  out of the box in the application
-     * @param           tokenAddress is the address of the token being deposited
-     * @param           amountOfTokens is the amount of tokens user wants to deposit
+     * @notice          Function to deposit ERC20 token
+     * @param           token is the address of the token being deposited
+     * @param           amount is the amount of token to deposit
      */
     function depositToken(
-        address tokenAddress,
-        uint amountOfTokens
+        address token,
+        uint amount
     )
     public
     {
-        IUniswapV2Router02 router = IUniswapV2Router02(
-            getNonUpgradableContractAddressFromTwoKeySingletonRegistry(("UniswapV2Router02"))
-        );
+        require(address(token) != 0, "TwoKeyTreasuryL1: Invalid token address");
+        require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
 
-        address [] memory path = new address [](2);
-        path[0] = tokenAddress;
-        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        if (token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
+            // Take USDT from the user
+            require(amount <= ITether(token).allowance(msg.sender, address(this)));
+            ITether(token).transferFrom(msg.sender, address(this), amount);
+        } else {
+            // Take ERC20 token from the user
+            require(amount <= IERC20(token).allowance(msg.sender, address(this)));
+            require(IERC20(token).transferFrom(msg.sender, address(this), amount));
+        }
 
-        uint [] memory amountsOut = new uint[](2);
-
-        amountsOut = router.getAmountsOut(
-            amountOfTokens,
-            path
-        );
-
-        router.swapExactTokensForTokens(
-            amountOfTokens,
-            amountsOut[1].mul(97).div(100), // Allow 3 percent to drop
-            path,
-            address(this),
-            block.timestamp + (10 minutes)
-        );
+        emit DepositToken(msg.sender, token, amount);
     }
 
     /**
-     * @notice          Function to withdraw tokens
+     * @notice          Function to withdraw ERC20 token
      * @param           beneficiary is the address receiving the tokens
      * @param           amount is the amount of tokens to withdraw
      * @param           signature is proof that msg.sender has amount of tokens he wants to withdraw
@@ -135,18 +142,9 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
         // Transfer tokens to the user
         twoKeyEconomy.transfer(beneficiary, amount);
+
+        emit WithdrawToken(beneficiary, address(twoKeyEconomy), amount);
     }
-
-    /**
-     * @notice          Fallback function to handle deposits in ether
-     */
-    function()
-    public
-    payable
-    {
-
-    }
-
 
     /**
      * @notice          Function to check balance of specific token in Treasury

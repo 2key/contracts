@@ -26,6 +26,14 @@ contract IERC20 {
     external
     returns (bool);
 
+    
+    function allowance(
+        address _owner,
+        address _spender
+    )
+    external
+    view
+    returns (uint);
 
 
     function approve(
