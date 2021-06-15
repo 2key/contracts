@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { truffleAssert, BigNumber, awaitTx, waitForSomeTime, toTokenAmountWithDecimals } = require("./utils");
+const { truffleAssert, BigNumber, awaitTx, waitForSomeTime } = require("./utils");
 
 const TwoKeyEconomy = artifacts.require('TwoKeyEconomy');
 
@@ -27,7 +27,7 @@ contract("TwoKeyEconomy", async (accounts) => {
 
     it('Token decimals should be properly set', async () => {
         let decimals = await twoKeyEconomy.decimals();
-        expect(decimals.eq(new BigNumber(TOKEN_DECIMALS))).to.be.true;
+        expect(decimals.eq(BigNumber.from(TOKEN_DECIMALS))).to.be.true;
     });
 
     it('Should not freeze transfer (by non TwoKeyAdmin)', async () => {
