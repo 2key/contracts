@@ -96,10 +96,12 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         address campaignAddressPlasma
     )
     public
+    onlyMaintainer
     {
         // Check if user has already called this function before, if so he can not call it second time
         require(
-            PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma)) == address(0)
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma)) == address(0) || 
+            PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma)) == msg.sender
         );
 
         // Get pair rate from ITwoKeyPlasmaExchangeRate contract
