@@ -172,7 +172,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint userBalance = getUSDTBalance(beneficiary);
 
         // Allocate more funds for user
-        require(userBalance.add(amount) > userBalance);
         setUserBalanceUSDT(
             beneficiary,
             userBalance.add(amount)
@@ -199,7 +198,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint userBalance = get2KEYBalance(beneficiary);
 
         // Allocate more funds for user
-        require(userBalance.add(amount) > userBalance);
         setUserBalance2KEY(
             beneficiary,
             userBalance.add(amount)
@@ -274,14 +272,12 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         require(userBalance >= amount, "no enough tokens");
 
         // Sets modified users balance -> balance - amount
-        require(userBalance > userBalance.sub(amount));
         setUserBalance2KEY(
             msg.sender,
             userBalance.sub(amount)
         );
 
         // Sets modified beneficiary balance -> balance + amount
-        require(beneficiaryBalance < beneficiaryBalance.add(amount));
         setUserBalance2KEY(
             beneficiary,
             beneficiaryBalance.add(amount)
@@ -306,14 +302,12 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         require(userBalance >= amount, "no enough tokens");
 
         // Sets modified users balance -> balance - amount
-        require(userBalance > userBalance.sub(amount));
         setUserBalanceUSDT(
             msg.sender,
             userBalance.sub(amount)
         );
 
         // Sets modified beneficiary balance -> balance + amount
-        require(beneficiaryBalance < beneficiaryBalance.add(amount));
         setUserBalanceUSDT(
             beneficiary,
             beneficiaryBalance.add(amount)
@@ -339,10 +333,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         // Check if user has enough funds to perform this transaction
         require(fromBalance > amount);
 
-        require(fromBalance > fromBalance.sub(amount));
         setUserBalance2KEY(from, fromBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
-        require(toBalance < toBalance.add(amount));
         setUserBalance2KEY(to, toBalance.add(amount));
     }
 
@@ -365,10 +357,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         // Check if user has enough funds for this action
         require(fromBalance > amount);
 
-        require(fromBalance > fromBalance.sub(amount));
         setUserBalanceUSDT(from, fromBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
-        require(toBalance < toBalance.add(amount));
         setUserBalanceUSDT(to, toBalance.add(amount));
     }
 
