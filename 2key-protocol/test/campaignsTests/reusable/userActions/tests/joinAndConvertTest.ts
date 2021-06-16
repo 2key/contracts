@@ -102,14 +102,10 @@ export default function joinAndConvertTest(
 
       if (campaignData.isFiatOnly && !campaignData.isKYCRequired) {
         const rate = await protocol.UpgradableExchange.get2keySellRate(address);
-<<<<<<< HEAD
         const reward = contribution / campaignData.maxReferralRewardPercentWei / 100 / rate;
         /*const resp = protocol.CPCCampaign.getInventoryStatus(address)
         const reward = await resp || 0*/
         // @ts-ignore
-=======
-        const reward = contribution * campaignData.maxReferralRewardPercentWei / 100 / rate;
->>>>>>> develop
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase - reward);
       } else {
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
