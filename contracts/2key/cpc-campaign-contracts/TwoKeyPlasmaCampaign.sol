@@ -62,6 +62,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     bool isBudgetedDirectlyWith2KEY;
 
     uint public activationTimestamp;
+    uint public lastChangeTimestamp;
 
     // public available integers
     bool public isContractLocked;
@@ -656,6 +657,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *                  and how many tokens are paid per conversion for the influencers
      * @dev             This can be only called by maintainer, and only once.
      * @param           _totalBounty is the total bounty for this campaign
+     * @param           _initialRate2KEY is the initial rate for 2KEY-USD
+     * @param           _bountyPerConversion2KEY is the bounty per conversion in 2KEY
+     * @param           _isBudgetedDirectlyWith2KEY represents whether the campaign is budgeted with 2KEY or not
      */
     function setInitialParamsAndValidateCampaign(
         uint _totalBounty,
@@ -670,6 +674,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         require(isValidated == false);
         // Set the activation timestamp
         activationTimestamp = block.timestamp;
+        // Set the last change timestamp
+        lastChangeTimestamp = block.timestamp;
         // Set total bounty for campaign
         totalBountyForCampaign = _totalBounty;
         // Calculate moderator fee per every conversion
@@ -690,6 +696,34 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         isValidated = true;
     }
 
+    /**
+     * @notice          Function where maintainer will add on plasma network the total bounty amount
+     * @dev             This can be only called by maintainer, and only once.
+     * @param           _addedBounty is the bounty amount added for this campaign
+     * @param           _isBudgetedDirectlyWith2KEY represents whether the campaign is budgeted with 2KEY or not
+     */
+    function addCampaignBounty(
+        uint _addedBounty,
+        bool _isBudgetedDirectlyWith2KEY
+    )
+    public
+    onlyTwoKeyPlasmaCampaignsInventory
+    {
+        // Require that campaign is previously validated
+        require(isValidated == true);
+        // Require that token type is the same
+        require(isBudgetedDirectlyWith2KEY == _isBudgetedDirectlyWith2KEY);
+        // Set the activation timestamp
+        lastChangeTimestamp = block.timestamp;
+        // Add total bounty for campaign
+        totalBountyForCampaign = totalBountyForCampaign.add(_addedBounty);
+        // It's going to round the value.
+        if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
+            numberOfTotalPaidClicksSupported = 0;
+        } else {
+            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(_bountyPerConversion2KEY);
+        }
+    }
 
     /**
      * @notice          At the moment when we want to do payouts for influencers, we
