@@ -1,4 +1,4 @@
-import { TwoKeyProtocol } from '../../src';
+import {TwoKeyProtocol} from "../../src";
 import createWeb3 from './_web3';
 import {expectEqualNumbers} from "./numberHelpers";
 
