@@ -17,7 +17,6 @@ export default function lockContractTest(
     const {campaignAddress} = storage;
 
     let error = false;
-<<<<<<< HEAD
 
     try {
       await protocol.CPCCampaign.lockContractFromMaintainer(
@@ -27,24 +26,9 @@ export default function lockContractTest(
     } catch (e) {
       error = true;
     }
-=======
 
-    try {
-      await protocol.CPCCampaign.lockContractFromMaintainer(
-          campaignAddress,
-          protocol.plasmaAddress
-      );
-    } catch (e) {
-      error = true;
-    }
-
->>>>>>> develop
-
-
-<<<<<<< HEAD
     const isContractLocked = await protocol.CPCCampaign.isContractLocked(campaignAddress,"PLASMA");
-=======
->>>>>>> develop
+
     expect(error).to.be.eq(true);
     expect(isContractLocked).to.be.eq(false);
   }).timeout(60000);
