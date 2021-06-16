@@ -72,6 +72,11 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
       let receipt = await protocol.Utils.getTransactionReceiptMined(
           await protocol.CPCCampaign.addDirectly2KEYAsInventory(campaignAddress, amountOfTokensWei, protocol.Utils.toWei(campaignParams.bountyPerConversionUSD).toString(), address)
       );
+<<<<<<< HEAD
+=======
+      console.log('Transaction hash: ',receipt.transactionHash);
+      console.log('Add directly 2KEY gas used: ', receipt.gasUsed);
+>>>>>>> develop
 
       const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
 
@@ -110,6 +115,11 @@ export default function checkCpcCampaign(campaignParams: ICreateCPCTest, storage
                 address
             )
         );
+<<<<<<< HEAD
+=======
+      console.log('Transaction hash: ',receipt.transactionHash);
+      console.log('Gas used: ', receipt.gasUsed);
+>>>>>>> develop
 
         const inventoryAfter = await protocol.CPCCampaign.getInitialBountyAmount(campaignAddress);
     }
