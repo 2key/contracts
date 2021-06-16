@@ -104,46 +104,4 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
 
         return values;
     }
-
-    /**
-    * @notice          Represents current 2KEY sell rate, and is used only for informative purpose
-    *                  This function shouldn't be included into any buy/sell orders, since it's
-    *                  just checking what is current average rate, not including price discovery for
-    *                  bigger amounts
-    */
-    function sellRate2key()
-    public
-    view
-    returns (uint)
-    {
-        // Fetch rate for 1 2KEY token
-        return sellRate2KeyInternal(10 ** 18);
-    }
-
-    function sellRate2KeyInternal(
-        uint amountToReceive
-    )
-    internal
-    view
-    returns (uint)
-    {
-        address twoKeyExchangeRateContract = getAddressFromTwoKeySingletonRegistry(_twoKeyExchangeRateContract);
-
-        address [] memory path = new address[](2);
-        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
-
-        // The path is WETH -> 2KEY
-        path[0] = IUniswapV2Router02(uniswapRouter).WETH();
-        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
-
-        // Represents how much ETH user has to put in order to get amountToReceive 2KEY token
-        uint rateFromUniswap = uniswapPriceDiscover(uniswapRouter, amountToReceive, path);
-
-        // Rate from ETH-USD oracle
-        uint eth_usdRate = ITwoKeyExchangeRateContract(getAddressFromTwoKeySingletonRegistry("TwoKeyExchangeRateContract"))
-        .getBaseToTargetRate("USD");
-
-        // Return rate which will represent how many USD has to be put in for amountToReceive 2KEY tokens
-        return rateFromUniswap.mul(eth_usdRate).div(10**18);
-    }
 }
