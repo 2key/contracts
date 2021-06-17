@@ -4,7 +4,7 @@ contract ITwoKeyCPCCampaignPlasma {
     function getReferrers(
         address customer
     )
-    public
+    external
     view
     returns (address[]);
 
@@ -14,4 +14,10 @@ contract ITwoKeyCPCCampaignPlasma {
         uint _bountyPerConversion2KEY,
         bool _isBudgetedDirectlyWith2KEY
     ) external;
+
+    function addCampaignBounty(
+        uint _addedBounty,
+        bool _isBudgetedDirectlyWith2KEY
+    )
+    external;
 }
