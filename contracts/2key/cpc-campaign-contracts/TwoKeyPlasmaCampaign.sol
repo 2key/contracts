@@ -67,13 +67,14 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     // public available integers
     bool public isContractLocked;
     uint public moderatorTotalEarnings;             // Total rewards which are going to moderator
-    uint public initialRate2KEY;                   // Rate at which 2KEY is bought at campaign creation
+    uint public initialRate2KEY;                    // Rate at which 2KEY is bought at campaign creation
     bool public isValidated;
 
     // Internal contract values
     uint campaignStartTime;                         // Time when campaign start
     uint campaignEndTime;                           // Time when campaign ends
     uint totalBountyForCampaign;                    // Total 2key tokens amount staked for the campaign
+    uint bountyPerConversion2KEY;                   // Bounty per conversion in 2KEY
     uint bountyPerConversionWei;                    // Amount of 2key tokens which are going to be paid per conversion
 
 
@@ -678,6 +679,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         lastChangeTimestamp = block.timestamp;
         // Set total bounty for campaign
         totalBountyForCampaign = _totalBounty;
+        // Set bounty per conversion in 2KEY
+        bountyPerConversion2KEY = _bountyPerConversion2KEY;
         // Calculate moderator fee per every conversion
         moderatorFeePerConversion = _bountyPerConversion2KEY.mul(getModeratorFeePercent()).div(100);
         // Set bounty per conversion
@@ -688,6 +691,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
             numberOfTotalPaidClicksSupported = 0;
         } else {
+            require(_bountyPerConversion2KEY != 0);
             numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(_bountyPerConversion2KEY);
         }
         // Set if campaign is budgeted directly with 2KEY
@@ -721,7 +725,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
             numberOfTotalPaidClicksSupported = 0;
         } else {
-            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(_bountyPerConversion2KEY);
+            require(bountyPerConversion2KEY != 0);
+            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversion2KEY);
         }
     }
 
