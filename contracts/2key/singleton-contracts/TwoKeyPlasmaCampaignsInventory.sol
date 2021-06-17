@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../upgradability/Upgradeable.sol";
 
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaCampaignsInventoryStorage.sol";
@@ -32,7 +33,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _twoKeyCPCCampaignPlasma = "TwoKeyCPCCampaignPlasma";
 
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
-    string constant _campaignPlasma2LeftOverForContractor = "campaignPlasma2LeftOvrForContractor";
+    string constant _campaignPlasma2LeftOverForContractor = "campaignPlasma2LeftOverForContractor";
     string constant _campaignPlasma2ReferrerRewardsTotal = "campaignPlasma2ReferrerRewardsTotal";
     string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
     string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
@@ -196,7 +197,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
         } else {    // Add the budget
             // Update total stable coins
-            uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma), amount);
+            uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma));
             PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma), currentAmount.add(amount));
 
             // Perform a transfer
@@ -233,7 +234,14 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2isCampaignEnded, campaignPlasma), true);
 
         // Get how many tokens were inserted at the beginning
-        uint initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
+        uint initialBountyForCampaign;
+        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == true) {
+            // if campaign was directly budgeted with 2KEY
+            initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
+        } else {
+            // if campaign was budgeted with stable coin
+            initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma));
+        }
         // Rebalancing everything except referrer rewards
         uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
         // Amount after rebalancing is initially amount to rebalance
@@ -248,7 +256,6 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Rebalance rates
             (amountAfterRebalancing, rebalancingRatio)
                 = rebalanceRates(
-                    PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialRate, campaignPlasma)),
                     amountToRebalance
                 );
             // Get rebalanced value of totalAmountForModeratorRewards
@@ -281,11 +288,9 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     /**
      * @notice      Function to rebalance the rates
      *
-     * @param       initial2KEYRate is 2KEY rate at the moment of campaign starting
      * @param       amountOfTokensToRebalance is number of tokens left
      */
     function rebalanceRates(
-        uint initial2KEYRate,
         uint amountOfTokensToRebalance
     )
     internal
@@ -297,34 +302,12 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         uint usd2KEYRateWeiNow = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaExchangeRate"))
             .getPairValue("2KEY-USD");
 
-        // Ratio is initial rate divided by new rate, so if rate went up, this will be less than 1
-        uint rebalancingRatio = initial2KEYRate.mul(10**18).div(usd2KEYRateWeiNow);
+        // Ratio is the current one
+        uint rebalancingRatio = usd2KEYRateWeiNow;
 
         // Calculate new rebalanced amount of tokens
-        uint rebalancedAmount = amountOfTokensToRebalance.mul(rebalancingRatio).div(10**18);
-
-        // If price went up, leads to ratio is going to be less than 10**18
-        if(rebalancingRatio < 10**18) {
-            // Calculate how much tokens should be given back to exchange
-            uint tokensToGiveBackToExchange = amountOfTokensToRebalance.sub(rebalancedAmount);
-            // Release the rest of tokens to liquidity pool
-            ITwoKeyPlasmaAccountManager(twoKeyPlasmaAccountManager)
-                .transfer2KEYFrom(
-                    address(this),
-                    twoKeyPlasmaAccountManager,
-                    tokensToGiveBackToExchange
-                );
-        }
-        // Otherwise we assume that price went down, which leads that ratio will be greater than 10**18
-        else  {
-            uint tokensToTakeFromExchange = rebalancedAmount.sub(amountOfTokensToRebalance);
-            // Get more 2Key tokens for rebalancing
-            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager"))
-                .transfer2KEY(
-                    address(this),
-                    tokensToTakeFromExchange
-                );
-        }
+        uint rebalancedAmount = amountOfTokensToRebalance.div(usd2KEYRateWeiNow);
+        
         // Return new rebalanced amount as well as ratio against which rebalancing was done.
         return (rebalancedAmount, rebalancingRatio);
     }
@@ -345,14 +328,17 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         // Account amount moderator earned on this campaign
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma), rebalancedModeratorRewards);
 
-        // Address to transfer moderator earnings to
-        address moderatorAddress; // Needs to be set
+        // Address to transfer moderator (2key admin contract) earnings to
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
         // Transfer 2KEY tokens to moderator
         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEY(
-            moderatorAddress,
+            twoKeyAdmin,
             rebalancedModeratorRewards
         );
+
+        // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(rebalancedModeratorRewards, campaignPlasma);
     }
 
 
