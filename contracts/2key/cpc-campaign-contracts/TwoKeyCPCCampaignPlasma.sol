@@ -40,6 +40,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         require(isCampaignInitialized == false);                        // Requiring that method can be called only once
         isCampaignInitialized = true;                                   // Marking campaign as initialized
 
+        require(numberValues[0] < numberValues[1]);                     // Require that start date must be less than end date
+
         TWO_KEY_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;    // Assigning address of _twoKeyPlasmaSingletonRegistry
         contractor = _contractor;                                       // Assigning address of contractor
         targetUrl = _url;                                               // Set the URL being tracked for the campaign
@@ -53,6 +55,18 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
 
         counters = new uint[](7);                                       // Initialize array of counters
 
+    }
+
+    function updateCPCCampaignPlasmaEndDate(
+        uint endDate
+    )
+    public
+    {
+        require(isCampaignInitialized == true);                         // Require that the campaign was already initialized
+        require(isContractLocked == false);                             // Require that the campaign is active
+        require(campaignStartTime < endDate);                           // Require that start date must be less than end date
+        require(block.timestamp < endDate);                             // Require that the end time can not be the past
+        campaignEndTime = endDate;                                      // Update when campaign ends
     }
 
 
