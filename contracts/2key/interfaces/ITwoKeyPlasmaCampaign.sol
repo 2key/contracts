@@ -5,27 +5,41 @@ contract ITwoKeyPlasmaCampaign {
     function markReferrerReceivedPaymentForThisCampaign(
         address _referrer
     )
-    public;
+    external;
 
     function computeAndSetRebalancingRatioForReferrer(
         address _referrer,
         uint _currentRate2KEY
     )
-    public
+    external
     returns (uint,uint);
 
     function getActiveInfluencers(
         uint start,
         uint end
     )
-    public
+    external
     view
     returns (address[]);
 
     function getReferrerPlasmaBalance(
         address _referrer
     )
-    public
+    external
     view
     returns (uint);
+
+    function setInitialParamsAndValidateCampaign(
+        uint _totalBounty,
+        uint _initialRate2KEY,
+        uint _bountyPerConversion2KEY,
+        bool _isBudgetedDirectlyWith2KEY
+    )
+    external;
+
+    function addCampaignBounty(
+        uint _addedBounty,
+        bool _isBudgetedDirectlyWith2KEY
+    )
+    external;
 }
