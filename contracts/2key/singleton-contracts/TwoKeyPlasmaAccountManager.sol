@@ -131,7 +131,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalance2KEY(
+    function setUserBalance2KEY(  //on layer2 its given by L2_2KEY)
         address user,
         uint amount
     )
@@ -145,7 +145,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalanceUSDT(
+    function setUserBalanceUSDT( //on layer2 its given by the L2_USD token)
         address user,
         uint amount
     )
@@ -168,7 +168,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     public
     onlyMaintainer
     {
-        //TODO: Verify signature
+        //TODO: Verify signature either by layer1 contract address or signatory
         uint userBalance = getUSDTBalance(beneficiary);
 
         // Allocate more funds for user
@@ -282,6 +282,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             beneficiaryBalance.add(amount)
         );
+
+        //TODO emit event
     }
 
     /**
@@ -312,6 +314,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiary,
             beneficiaryBalance.add(amount)
         );
+
+        //TODO emit event
     }
 
     /**
