@@ -66,7 +66,9 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         require(isContractLocked == false);                             // Require that the campaign is active
         require(campaignStartTime < endDate);                           // Require that start date must be less than end date
         require(block.timestamp < endDate);                             // Require that the end time can not be the past
-        campaignEndTime = endDate;                                      // Update when campaign ends
+        campaignEndTime = endDate;
+        // Update when campaign ends
+        //TODO consider emitting event
     }
 
 

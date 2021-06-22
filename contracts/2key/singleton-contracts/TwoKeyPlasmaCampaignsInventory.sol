@@ -134,6 +134,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             ITwoKeyCPCCampaignPlasma(campaignAddressPlasma)
                 .setInitialParamsAndValidateCampaign(amount, rate, bountyPerConversion2KEY, true);
 
+            //TODO emit event
+
         } else {    // Add the budget
             // Update total 2Key
             uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma));
@@ -146,9 +148,12 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Change CPC campaign parameters
             ITwoKeyCPCCampaignPlasma(campaignAddressPlasma)
                 .addCampaignBounty(amount, true);
+
+            //TODO emit event
         }
     }
 
+    //TODO if campaign budgeted in L2_USD, no need to compute rates to 2KEY, and balances of rewards can be kept in USD value
 
     /**
      * @notice          Function that allocates specified amount of USDT from users balance to this contract's balance
@@ -194,6 +199,9 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Set initial parameters and validates campaign
             ITwoKeyCPCCampaignPlasma(campaignAddressPlasma)
                 .setInitialParamsAndValidateCampaign(amount, rate, bountyPerConversion2KEY, false);
+
+            //TODO emit event
+
 
         } else {    // Add the budget
             // Update total stable coins
@@ -283,7 +291,14 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             );
 
     }
-
+    //TODO
+    //1. campaign in USD budget has USD/conversion quote of rewards
+    //2. each reward given on plasma is given in such campaigns in L2_USD
+    //3. when a referrer wants to withdraw, there is the PlasmaBudgetHandler contract that can go through campaigns with pending rewards, mark all those as "withdrawn"
+    //   having the total USD value required to withdraw,
+    //   then get the current 2key-usd rate from maintainer, and compute the required total 2KEY amount to withdraw
+    //   sign on that amount by signatory, and remove balance on L2 by maintainer (in the account manager) so user can withdraw on l1.
+    //   on ending campaign, process will compute pending L2_USD (unused), and remove that balance from campaign, and back to the contractor account on the L2 account manager.
 
     /**
      * @notice      Function to rebalance the rates
