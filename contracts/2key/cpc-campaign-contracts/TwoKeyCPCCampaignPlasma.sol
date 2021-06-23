@@ -3,6 +3,7 @@ pragma solidity ^0.4.24;
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "./TwoKeyPlasmaCampaign.sol";
 import "../TwoKeyConversionStates.sol";
+import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 
 
 contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, TwoKeyConversionStates {
@@ -67,8 +68,12 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
         require(campaignStartTime < endDate);                           // Require that start date must be less than end date
         require(block.timestamp < endDate);                             // Require that the end time can not be the past
         campaignEndTime = endDate;
-        // Update when campaign ends
-        //TODO consider emitting event
+
+        // Emit an event that the campaing end date is updated
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitUpdateCPCCampaignPlasmaEndDate(
+                campaignEndTime
+            );
     }
 
 
