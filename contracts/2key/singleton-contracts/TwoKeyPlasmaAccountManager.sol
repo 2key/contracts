@@ -4,6 +4,8 @@ import "../upgradability/Upgradeable.sol";
 import "../interfaces/storage-contracts/ITwoKeyPlasmaAccountManagerStorage.sol";
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
+import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../interfaces/ITwoKeyRegistry.sol";
 import "../libraries/Call.sol";
 import "../libraries/SafeMath.sol";
 
@@ -31,10 +33,11 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     string constant _userToUSDTBalance = "userToUSDTBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
 
+    string constant _isExistingSignature = "isExistingSignature";
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
-    ITwoKeyPlasmaAccountManagerStorage PROXY_STORAGE_CONTRACT;
+    ITwoKeyPlasmaAccountManagerStorage public PROXY_STORAGE_CONTRACT;
 
     function setInitialParams(
         address _twoKeyPlasmaSingletonRegistry,
@@ -118,7 +121,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked(_messageNotes)),
-                keccak256(abi.encodePacked(userAddress, amountOfTokens, tokenAddress))
+                keccak256(abi.encodePacked(userAddress, tokenAddress, amountOfTokens))
             )
         );
 
@@ -128,10 +131,11 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
 
     /**
      * @notice          Internal function to set user balances in 2KEY
+     * @dev             On layer2 it's given by L2_2KEY token
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalance2KEY(  //on layer2 its given by L2_2KEY)
+    function setUserBalance2KEY(
         address user,
         uint amount
     )
@@ -142,10 +146,11 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
 
     /**
      * @notice          Internal function to set user balances in USDT
+     * @dev             On layer2 it's given by L2_USD token
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalanceUSDT( //on layer2 its given by the L2_USD token)
+    function setUserBalanceUSDT(
         address user,
         uint amount
     )
@@ -157,18 +162,31 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     /**
      * @notice          Function to add balance in USDT for a user
      * @param           beneficiary is user address
-     * @param           amount is the amount of the tokens user deposited
+     * @param           tokenAddress is the address of the token to add the balance on L2
+     * @param           amount is the amount of the token user deposited
      * @param           signature is message signed by signatory address proofing the deposit was verified
      */
     function addBalanceUSDT(
         address beneficiary,
+        address tokenAddress,
         uint amount,
         bytes signature
     )
     public
     onlyMaintainer
     {
-        //TODO: Verify signature either by layer1 contract address or signatory
+        bytes32 key = keccak256(_isExistingSignature, signature);
+        // Require that signature doesn't exist
+        require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
+        // Set that this signature is used and exists
+        PROXY_STORAGE_CONTRACT.setBool(key, true);
+        // Check who signed the message
+        address messageSigner = recoverSignature(msg.sender, tokenAddress, amount, signature);
+        // Get the instance of TwoKeyRegistry
+        ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        // Assert that this signature is created by signatory address
+        require(messageSigner == registry.getSignatoryAddress());
+
         uint userBalance = getUSDTBalance(beneficiary);
 
         // Allocate more funds for user
@@ -184,17 +202,30 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @notice          Function to add balance in 2KEY for a user
      * @param           beneficiary is user address
      * @param           amount is the amount of the tokens user deposited
+     * @param           tokenAddress is the address of the token to add the balance on L2
      * @param           signature is message signed by signatory address proofing the deposit was verified
      */
     function addBalance2KEY(
         address beneficiary,
+        address tokenAddress,
         uint amount,
         bytes signature
     )
     public
     onlyMaintainer
     {
-        //TODO: Verify signature
+        bytes32 key = keccak256(_isExistingSignature, signature);
+        // Require that signature doesn't exist
+        require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
+        // Set that this signature is used and exists
+        PROXY_STORAGE_CONTRACT.setBool(key, true);
+        // Check who signed the message
+        address messageSigner = recoverSignature(msg.sender, tokenAddress, amount, signature);
+        // Get the instance of TwoKeyRegistry
+        ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        // Assert that this signature is created by signatory address
+        require(messageSigner == registry.getSignatoryAddress());
+
         uint userBalance = get2KEYBalance(beneficiary);
 
         // Allocate more funds for user
@@ -214,8 +245,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount,
         string currency
     )
-    public
-    onlyMaintainer
+    internal
     {
         // Adds a new timestamp to deposit timestamps array
         uint[] memory userTimestamps = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, msg.sender));
@@ -264,6 +294,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
+    onlyPlasmaCampaignsInventory
     {
         uint userBalance = get2KEYBalance(msg.sender);
         uint beneficiaryBalance = get2KEYBalance(beneficiary);
@@ -283,7 +314,12 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiaryBalance.add(amount)
         );
 
-        //TODO emit event
+        // Emit an event that L2_2KEY token is transferred.
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitTransfer2KEYL2(
+                beneficiary,
+                amount
+            );
     }
 
     /**
@@ -296,6 +332,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
+    onlyPlasmaCampaignsInventory
     {
         uint userBalance = getUSDTBalance(msg.sender);
         uint beneficiaryBalance = getUSDTBalance(beneficiary);
@@ -315,7 +352,12 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             beneficiaryBalance.add(amount)
         );
 
-        //TODO emit event
+        // Emit an event that L2_USDT token is transferred.
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitTransferUSDTL2(
+                beneficiary,
+                amount
+            );
     }
 
     /**
@@ -397,7 +439,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     view
     returns (uint)
     {
-        return 6;
+        // L2_USDT has 18 decimals for the convenient
+        return 18;
     }
 
     /**

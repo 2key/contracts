@@ -99,12 +99,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         _;
     }
 
-    // Restricting calls only to plasma campaigns payments handler contract
-    modifier onlyPlasmaBudgetPaymentsHandler {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaBudgetCampaignsPaymentsHandler"));
-        _;
-    }
-
     // Restricting calls only to plasma campaigns inventory contract
     modifier onlyTwoKeyPlasmaCampaignsInventory {
         require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
@@ -658,8 +652,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      *                  and how many tokens are paid per conversion for the influencers
      * @dev             This can be only called by maintainer, and only once.
      * @param           _totalBounty is the total bounty for this campaign
-     * @param           _initialRate2KEY is the initial rate for 2KEY-USD
-     * @param           _bountyPerConversion2KEY is the bounty per conversion in 2KEY
+     * @param           _initialRate2KEY is 10**18 as there is no rebalance at start (_initialRateUSDT if the campaign is budgeted in stable coin)
+     * @param           _bountyPerConversion2KEY is the bounty per conversion in 2KEY (in USDT if the campaign is budgeted in stable coin)
      * @param           _isBudgetedDirectlyWith2KEY represents whether the campaign is budgeted with 2KEY or not
      */
     function setInitialParamsAndValidateCampaign(
@@ -691,7 +685,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
             numberOfTotalPaidClicksSupported = 0;
         } else {
-            require(_bountyPerConversion2KEY != 0);
             numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(_bountyPerConversion2KEY);
         }
         // Set if campaign is budgeted directly with 2KEY
@@ -725,7 +718,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
             numberOfTotalPaidClicksSupported = 0;
         } else {
-            require(bountyPerConversion2KEY != 0);
             numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversion2KEY);
         }
     }
@@ -739,7 +731,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         uint _currentRate2KEY
     )
     public
-    onlyPlasmaBudgetPaymentsHandler
+    onlyTwoKeyPlasmaCampaignsInventory
     returns (uint,uint)
     {
 
@@ -769,7 +761,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         address _referrer
     )
     public
-    onlyPlasmaBudgetPaymentsHandler
+    onlyTwoKeyPlasmaCampaignsInventory
     {
         // Take current payment structure for the referrer
         Payment memory p = referrerToPayment[_referrer];

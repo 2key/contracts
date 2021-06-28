@@ -9,6 +9,7 @@ import "../libraries/SafeMath.sol";
 import "../interfaces/storage-contracts/ITwoKeyTreasuryL1Storage.sol";
 import "../interfaces/IUniswapV2Router02.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
+import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 
 /**
  * TwoKeyTreasuryL1 contract receiving all deposits from contractors.
@@ -22,6 +23,8 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     string constant _isExistingSignature = "isExistingSignature";
     string constant _messageNotes = "binding rewards for user";
+
+    string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
 
 
     bool initialized;
@@ -86,6 +89,23 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     //TODO: there should be different deposit for 2KEY (because for 2KEY we don't compute USD worth) - if you deposit 2KEY, you get L2_2KEY
 
+    function deposit2KEY(
+        address token,
+        uint amount
+    )
+    public
+    {
+        require(token != address(0), "TwoKeyTreasuryL1: Invalid token address");
+        require(token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("2KEY"), "TwoKeyTreasuryL1: Not 2Key token");
+        require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
+
+        
+        require(amount <= IERC20(token).allowance(msg.sender, address(this)));
+        require(IERC20(token).transferFrom(msg.sender, address(this), amount));
+
+        emit DepositToken(msg.sender, token, amount);
+    }
+
     /**
      * @notice          Function to deposit ERC20 token
      * @param           token is the address of the token being deposited
@@ -97,7 +117,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     )
     public
     {
-        require(address(token) != 0, "TwoKeyTreasuryL1: Invalid token address");
+        require(token != address(0), "TwoKeyTreasuryL1: Invalid token address");
         require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
         //TODO we allow to add only specific types of tokens - USDT/BUSD/USDC/TUSD/PAX/DAI RENBTC/WBTC/ETH
         //TODO make sure the deposited tokens are only in the above set

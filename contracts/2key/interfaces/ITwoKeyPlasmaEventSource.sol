@@ -49,4 +49,30 @@ contract ITwoKeyPlasmaEventSource {
         uint difference,
         string action
     ) external;
+
+    function emitUpdateCPCCampaignPlasmaEndDate(
+        uint campaignEndTime
+    ) external;
+
+    function emitTransfer2KEYL2(
+        address beneficiary,
+        uint amount
+    ) external;
+
+    function emitTransferUSDTL2(
+        address beneficiary,
+        uint amount
+    ) external;
+
+    function emitAddInventory2KEY(
+        uint amount,
+        uint bountyPerConversionUSD,
+        address campaignAddressPlasma
+    ) external;
+
+    function emitAddInventoryUSDT(
+        uint amount,
+        uint bountyPerConversionUSD,
+        address campaignAddressPlasma
+    ) external;
 }
