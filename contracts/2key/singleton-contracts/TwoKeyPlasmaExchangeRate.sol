@@ -16,7 +16,7 @@ contract TwoKeyPlasmaExchangeRateContract is Upgradeable {
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
-    ITwoKeyPlasmaExchangeRateStorage PROXY_STORAGE_CONTRACT;
+    ITwoKeyPlasmaExchangeRateStorage public PROXY_STORAGE_CONTRACT;
 
     string constant _bytesToRate = "bytesToRate";
 

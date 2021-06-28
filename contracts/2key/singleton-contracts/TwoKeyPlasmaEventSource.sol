@@ -153,6 +153,32 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         string action
     );
 
+    event UpdateCPCCampaignPlasmaEndDate (
+        uint endDate
+    );
+
+    event Transfer2KEYL2(
+        address beneficiary,
+        uint amount
+    );
+
+    event TransferUSDTL2(
+        address beneficiary,
+        uint amount
+    );
+
+    event AddInventory2KEY(
+        uint amount,
+        uint bountyPerConversionUSD,
+        address campaignAddressPlasma
+    );
+
+    event AddInventoryUSDT(
+        uint amount,
+        uint bountyPerConversionUSD,
+        address campaignAddressPlasma
+    );
+
     modifier onlyTwoKeyPlasmaFactory {
         address twoKeyPlasmaFactory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaFactory);
         require(msg.sender == twoKeyPlasmaFactory);
@@ -539,6 +565,93 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
             cycleId,
             difference,
             action
+        );
+    }
+
+    /**
+     * @notice          Function that emits UpdateCPCCampaignPlasmaEndDate after updating the campaign end date
+     */
+    function emitUpdateCPCCampaignPlasmaEndDate(
+        uint campaignEndTime
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyCPCCampaignPlasma"));
+
+        emit UpdateCPCCampaignPlasmaEndDate(
+            campaignEndTime
+        );
+    }
+
+    /**
+     * @notice          Function that emits L2_2KEY is transferred
+     */
+    function emitTransfer2KEYL2(
+        address beneficiary,
+        uint amount
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager"));
+
+        emit Transfer2KEYL2(
+            beneficiary,
+            amount
+        );
+    }
+
+    /**
+     * @notice          Function that emits L2_USDT is transferred
+     */
+    function emitTransferUSDTL2(
+        address beneficiary,
+        uint amount
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager"));
+
+        emit TransferUSDTL2(
+            beneficiary,
+            amount
+        );
+    }
+
+    /**
+     * @notice          Function that emits the inventory is added in L2_2KEY
+     */
+    function emitAddInventory2KEY(
+        uint amount,
+        uint bountyPerConversionUSD,
+        address campaignAddressPlasma
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+
+        emit AddInventory2KEY(
+            amount,
+            bountyPerConversionUSD,
+            campaignAddressPlasma
+        );
+    }
+
+    /**
+     * @notice          Function that emits the inventory is added in L2_2KEY
+     */
+    function emitAddInventoryUSDT(
+        uint amount,
+        uint bountyPerConversionUSD,
+        address campaignAddressPlasma
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+
+        emit AddInventoryUSDT(
+            amount,
+            bountyPerConversionUSD,
+            campaignAddressPlasma
         );
     }
 }

@@ -30,6 +30,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
     string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
+    string constant _campaignPlasma2bountyPerConversionUSDT = "campaignPlasma2bountyPerConversionUSDT";
     string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
     string constant _numberOfDistributionCycles = "numberOfDistributionCycles";
     string constant _distributionCycleToTotalDistributed = "_distributionCycleToTotalDistributed";
@@ -862,6 +863,22 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     {
         return getUint(
             keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma)
+        );
+    }
+
+    /**
+     * @notice          Function to return bounty per conversion in USDT
+     * @param           campaignPlasma is plasma campaign of address requested
+     */
+    function getBountyPerConversionUSDT(
+        address campaignPlasma
+    )
+    public
+    view
+    returns (uint)
+    {
+        return getUint(
+            keccak256(_campaignPlasma2bountyPerConversionUSDT, campaignPlasma)
         );
     }
 
