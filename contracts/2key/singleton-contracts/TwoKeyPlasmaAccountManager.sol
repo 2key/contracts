@@ -65,7 +65,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     /**
      * @notice          Modifier which will be used to restrict calls to only PlasmaCampaignsInventory contract
      */
-    modifier onlyPlasmaCampaignsInventory {
+    modifier onlyTwoKeyPlasmaCampaignsInventory {
         address twoKeyPlasmaCampaignsInventory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventory);
         require(msg.sender == twoKeyPlasmaCampaignsInventory);
         _;
@@ -294,7 +294,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
-    onlyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventory
     {
         uint userBalance = get2KEYBalance(msg.sender);
         uint beneficiaryBalance = get2KEYBalance(beneficiary);
@@ -332,7 +332,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
-    onlyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventory
     {
         uint userBalance = getUSDTBalance(msg.sender);
         uint beneficiaryBalance = getUSDTBalance(beneficiary);
@@ -369,7 +369,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
-    onlyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventory
     {
         // Get users balance
         uint fromBalance = get2KEYBalance(from);
@@ -377,7 +377,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint toBalance = get2KEYBalance(to);
 
         // Check if user has enough funds to perform this transaction
-        require(fromBalance > amount);
+        require(fromBalance >= amount, "no enough tokens");
 
         setUserBalance2KEY(from, fromBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
@@ -393,7 +393,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
-    onlyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventory
     {
         // Get users balance
         uint fromBalance = getUSDTBalance(from);

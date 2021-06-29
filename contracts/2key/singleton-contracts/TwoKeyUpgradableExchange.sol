@@ -677,7 +677,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
         // Get amount of tokens receiving
-        uint totalTokensBought = buyRate2Key(
+        uint totalTokensBought = buyRate2key(
             uniswapRouter,
             value,
             path
@@ -741,7 +741,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
 
         // Get amount of tokens receiving
-        uint totalTokensBought = buyRate2Key(
+        uint totalTokensBought = buyRate2key(
             uniswapRouter,
             amountOfTokens,
             path
@@ -1134,6 +1134,73 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         payFeesToManagerAndTransferTokens(_beneficiary, contractId, stableCoinUnits, dai);
     }
 
+    /**
+     * @notice          Function which will be called by TwoKeyTreasuryL1 if user wants to deposit with ERC20 tokens
+     *
+     * @param           amountOfTokens is the amount of ERC20 token
+     * @param           tokenAddress is the token address of ERC20 token
+     */
+    function buyStableCoinWithERC20(
+        uint amountOfTokens,
+        address tokenAddress
+    )
+    public
+    returns (uint, uint)
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyTreasuryL1"));
+
+        // Compute the exact amount in $
+        uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
+
+        // Create path to go through WETH
+        address [] memory path;
+
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
+
+        if (tokenAddress == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("WETH")) {
+            // The path is WETH -> DAI
+            path = new address[](2);
+
+            path[0] = tokenAddress;
+            path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
+        } else {
+            // The path is Token -> WETH -> DAI
+            path = new address[](3);
+
+            path[0] = tokenAddress;
+            path[1] = IUniswapV2Router02(uniswapRouter).WETH();
+            path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
+        }
+
+
+        // Get amount of tokens receiving
+        uint totalTokensBought = buyRateDAI(
+            uniswapRouter,
+            amountOfTokens,
+            path
+        );
+
+        // Compute what is the average price for the purchase
+        uint averageTokenPriceForPurchase = amountInUSDOfPurchase.mul(10**18).div(totalTokensBought);
+
+        // Return amount of tokens received and average token price for purchase
+        return (totalTokensBought, averageTokenPriceForPurchase);
+    }
+
+    /**
+     * @notice          Function which will be called by TwoKeyTreasuryL1 if user wants to deposit with ERC20 tokens
+     *
+     * @param           amountOfTokens is the amount of ERC20 token
+     */
+    function buyStableCoinWithETH(
+        uint amountOfTokens
+    )
+    public
+    returns (uint, uint)
+    {
+        // set token address as WETH
+        return buyStableCoinWithERC20(amountOfTokens, getNonUpgradableContractAddressFromTwoKeySingletonRegistry("WETH"));
+    }
 
     /**
      * @notice          Function to return number of campaign contracts (different) interacted with this contract
@@ -1355,16 +1422,29 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
-    function buyRate2Key(
+    function buyRate2key(
         address uniswapRouter,
         uint input,
-        address [] path
+        address[] path
     )
     public
     view
     returns (uint)
     {
         // Represents how much 2KEY's user gets for input in ETH
+        return uniswapPriceDiscoverForBuyingFromUniswap(uniswapRouter, input, path);
+    }
+
+    function buyRateDAI(
+        address uniswapRouter,
+        uint input,
+        address[] path
+    )
+    public
+    view
+    returns (uint)
+    {
+        // Represents how much stable coin user gets for input in ERC20
         return uniswapPriceDiscoverForBuyingFromUniswap(uniswapRouter, input, path);
     }
 

@@ -9,6 +9,6 @@ pragma solidity ^0.4.24;
 contract ITwoKeyTreasuryL1 {
     function recoverSignature(address userAddress, uint amountOfTokens, bytes signature) public view returns (address);
     function depositToken(address token, uint amount) public;
-    function withdrawTokens(address beneficiary, uint amount, bytes signature) public;
+    function withdrawTokens(address beneficiary, uint amount, uint buy2keyRateL2, bytes signature) public;
     function getBalanceOf(address token) public view returns (uint);
 }

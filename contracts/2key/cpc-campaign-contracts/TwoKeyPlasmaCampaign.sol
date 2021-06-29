@@ -74,7 +74,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint campaignStartTime;                         // Time when campaign start
     uint campaignEndTime;                           // Time when campaign ends
     uint totalBountyForCampaign;                    // Total 2key tokens amount staked for the campaign
-    uint bountyPerConversion2KEY;                   // Bounty per conversion in 2KEY
     uint bountyPerConversionWei;                    // Amount of 2key tokens which are going to be paid per conversion
 
 
@@ -637,13 +636,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         require(block.timestamp >= activationTimestamp.add(86400));
         isContractLocked = true;
-
-        ITwoKeyPlasmaCampaignsInventory(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"))
-            .endCampaignReserveTokensAndRebalanceRates(
-                msg.sender,                                             //campaignPlasma
-                numberOfPaidClicksAchieved.mul(bountyPerConversionWei), //totalAmountForReferrerRewards
-                moderatorTotalEarnings                                  //totalAmountForModeratorRewards
-            );
     }
 
 
@@ -653,13 +645,13 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @dev             This can be only called by maintainer, and only once.
      * @param           _totalBounty is the total bounty for this campaign
      * @param           _initialRate2KEY is 10**18 as there is no rebalance at start (_initialRateUSDT if the campaign is budgeted in stable coin)
-     * @param           _bountyPerConversion2KEY is the bounty per conversion in 2KEY (in USDT if the campaign is budgeted in stable coin)
+     * @param           _bountyPerConversionWei is the bounty per conversion in 2KEY (in USDT if the campaign is budgeted in stable coin)
      * @param           _isBudgetedDirectlyWith2KEY represents whether the campaign is budgeted with 2KEY or not
      */
     function setInitialParamsAndValidateCampaign(
         uint _totalBounty,
         uint _initialRate2KEY,
-        uint _bountyPerConversion2KEY,
+        uint _bountyPerConversionWei,
         bool _isBudgetedDirectlyWith2KEY
     )
     public
@@ -674,18 +666,18 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         // Set total bounty for campaign
         totalBountyForCampaign = _totalBounty;
         // Set bounty per conversion in 2KEY
-        bountyPerConversion2KEY = _bountyPerConversion2KEY;
+        bountyPerConversionWei = _bountyPerConversionWei;
         // Calculate moderator fee per every conversion
-        moderatorFeePerConversion = _bountyPerConversion2KEY.mul(getModeratorFeePercent()).div(100);
+        moderatorFeePerConversion = _bountyPerConversionWei.mul(getModeratorFeePercent()).div(100);
         // Set bounty per conversion
-        bountyPerConversionWei = _bountyPerConversion2KEY.sub(moderatorFeePerConversion);
+        bountyPerConversionWei = _bountyPerConversionWei.sub(moderatorFeePerConversion);
         // Set initial rate at which tokens are purchased
         initialRate2KEY = _initialRate2KEY;
         // It's going to round the value.
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
             numberOfTotalPaidClicksSupported = 0;
         } else {
-            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(_bountyPerConversion2KEY);
+            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(_bountyPerConversionWei);
         }
         // Set if campaign is budgeted directly with 2KEY
         isBudgetedDirectlyWith2KEY = _isBudgetedDirectlyWith2KEY;
@@ -718,7 +710,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         if(bountyPerConversionWei == 0 || totalBountyForCampaign == 0) {
             numberOfTotalPaidClicksSupported = 0;
         } else {
-            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversion2KEY);
+            numberOfTotalPaidClicksSupported = totalBountyForCampaign.div(bountyPerConversionWei);
         }
     }
 

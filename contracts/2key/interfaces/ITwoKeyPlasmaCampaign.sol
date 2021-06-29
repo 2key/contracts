@@ -32,7 +32,7 @@ contract ITwoKeyPlasmaCampaign {
     function setInitialParamsAndValidateCampaign(
         uint _totalBounty,
         uint _initialRate2KEY,
-        uint _bountyPerConversion2KEY,
+        uint _bountyPerConversionWei,
         bool _isBudgetedDirectlyWith2KEY
     )
     external;
