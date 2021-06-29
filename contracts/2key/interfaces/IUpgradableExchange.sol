@@ -2,7 +2,15 @@ pragma solidity ^0.4.24;
 
 contract IUpgradableExchange {
 
-    function buyRate2key() public view returns (uint);
+    function buyRate2key(
+        address uniswapRouter,
+        uint input,
+        address[] path
+    )
+    public
+    view
+    returns (uint);
+
     function sellRate2key() public view returns (uint);
 
     function buyTokensWithERC20(
@@ -25,6 +33,19 @@ contract IUpgradableExchange {
     )
     public
     payable;
+
+    function buyStableCoinWithERC20(
+        uint amountOfTokens,
+        address tokenAddress
+    )
+    public
+    returns (uint, uint);
+
+    function buyStableCoinWithETH(
+        uint amountOfTokens
+    )
+    public
+    returns (uint, uint);
 
     function report2KEYWithdrawnFromNetwork(
         uint amountOfTokensWithdrawn

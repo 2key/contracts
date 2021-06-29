@@ -10,6 +10,7 @@ import "../interfaces/storage-contracts/ITwoKeyTreasuryL1Storage.sol";
 import "../interfaces/IUniswapV2Router02.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
+import "../interfaces/IUpgradableExchange.sol";
 
 /**
  * TwoKeyTreasuryL1 contract receiving all deposits from contractors.
@@ -31,9 +32,24 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyTreasuryL1Storage public PROXY_STORAGE_CONTRACT;
 
-    event DepositEther(address indexed depositor, uint256 amount);
-    event DepositToken(address indexed depositor, address indexed token, uint256 amount);
-    event WithdrawToken(address indexed beneficiary, address indexed token, uint256 amount);
+    mapping(address => mapping(address => uint)) public depositStatsToken;  // user => token => amount
+    mapping(address => uint) public depositStatsETH;    // user => amount
+    mapping(address => uint) public depositUserTotalBalanceUSD; // user => amount
+    mapping(address => uint) public withdrawnUserTotalBalanceUSD;   // user => amount
+
+    uint stableTokenBalanceUSD;
+    uint nonStableTokenBalanceUSD;
+    uint totalDepositedUSD; // stableTokenBalanceUSD + nonStableTokenBalanceUSD
+    uint totalDeposited2KEY;
+
+    uint totalWithdrawnUSD;
+    uint totalWithdrawn2KEY;
+
+    event Deposit2KEY(address indexed depositor, uint amount);
+    event DepositStableCoin(address indexed depositor, uint amount);
+    event DepositNon2KEYStableCoin(address indexed depositor, address indexed fromTokenAddress, uint fromAmount, address toTokenAddress, uint toTokenAmount, uint buyRate);
+    event DepositETH(address indexed depositor, uint amount, address toTokenAddress, uint toTokenAmount, uint daiBuyRate);
+    event WithdrawToken(address indexed beneficiary, address indexed token, uint amount);
 
 
     function setInitialParams(
@@ -57,18 +73,20 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     public
     payable
     {
-        emit DepositEther(msg.sender, msg.value);
+        depositETH(msg.sender, msg.value);
     }
 
     /**
      * @notice          Function to return who signed msg
      * @param           userAddress is the address of user for who we signed message
      * @param           amountOfTokens is the amount of pending rewards user wants to claim
+     * @param           buy2keyRateL2 is the 2key rate sent by maintainer
      * @param           signature is the signature created by maintainer
      */
     function recoverSignature(
         address userAddress,
         uint amountOfTokens,
+        uint buy2keyRateL2,
         bytes signature
     )
     public
@@ -79,7 +97,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked(_messageNotes)),
-                keccak256(abi.encodePacked(userAddress,amountOfTokens))
+                keccak256(abi.encodePacked(userAddress, amountOfTokens, buy2keyRateL2))
             )
         );
 
@@ -87,8 +105,11 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         return Call.recoverHash(hash,signature,0);
     }
 
-    //TODO: there should be different deposit for 2KEY (because for 2KEY we don't compute USD worth) - if you deposit 2KEY, you get L2_2KEY
-
+    /**
+     * @notice          Function to deposit 2KEY token
+     * @param           token is the address of the token being deposited
+     * @param           amount is the amount of token to deposit
+     */
     function deposit2KEY(
         address token,
         uint amount
@@ -98,20 +119,22 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         require(token != address(0), "TwoKeyTreasuryL1: Invalid token address");
         require(token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("2KEY"), "TwoKeyTreasuryL1: Not 2Key token");
         require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
-
         
         require(amount <= IERC20(token).allowance(msg.sender, address(this)));
         require(IERC20(token).transferFrom(msg.sender, address(this), amount));
 
-        emit DepositToken(msg.sender, token, amount);
+        depositStatsToken[msg.sender][token] = depositStatsToken[msg.sender][token].add(amount);
+        totalDeposited2KEY = totalDeposited2KEY.add(amount);
+
+        emit Deposit2KEY(msg.sender, amount);
     }
 
     /**
-     * @notice          Function to deposit ERC20 token
+     * @notice          Function to deposit stable coins - BUSD/USDC/TUSD/PAX/DAI
      * @param           token is the address of the token being deposited
      * @param           amount is the amount of token to deposit
      */
-    function depositToken(  //TODO whatever is deposited through here (non-2KEY) geberates a transfer of L2_USD on L2
+    function depositStableCoin(
         address token,
         uint amount
     )
@@ -119,81 +142,159 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     {
         require(token != address(0), "TwoKeyTreasuryL1: Invalid token address");
         require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
-        //TODO we allow to add only specific types of tokens - USDT/BUSD/USDC/TUSD/PAX/DAI RENBTC/WBTC/ETH
-        //TODO make sure the deposited tokens are only in the above set
-        if (token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
-            // Take USDT from the user
-            require(amount <= ITether(token).allowance(msg.sender, address(this)));
-            ITether(token).transferFrom(msg.sender, address(this), amount);
-        } else {
-            // Take ERC20 token from the user
+
+        if (token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("BUSD") ||
+            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TUSD") ||
+            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("PAX") ||
+            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI") ||
+            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDC")
+        ) {
             require(amount <= IERC20(token).allowance(msg.sender, address(this)));
             require(IERC20(token).transferFrom(msg.sender, address(this), amount));
+
+            depositStatsToken[msg.sender][token] = depositStatsToken[msg.sender][token].add(amount);
+            depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(amount);
+            stableTokenBalanceUSD = stableTokenBalanceUSD.add(amount);
+            totalDepositedUSD = totalDepositedUSD.add(amount);
+    
+            emit DepositStableCoin(msg.sender, amount);
+
+        } else if(token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
+            require(amount <= ITether(token).allowance(msg.sender, address(this)));
+            ITether(token).transferFrom(msg.sender, address(this), amount);
+
+            depositStatsToken[msg.sender][token] = depositStatsToken[msg.sender][token].add(amount);
+            depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(amount);
+            stableTokenBalanceUSD = stableTokenBalanceUSD.add(amount);
+            totalDepositedUSD = totalDepositedUSD.add(amount);
+
+            emit DepositStableCoin(msg.sender, amount);
         }
-        //TODO: add balances from erc20 address to amount of deposited tokens map<address-->uint>
-        //TOOD: updated deposited tokens amount in the above mapping
-        //TODO: add local var in this function depositUSDWorth and compute it (either 1:1 is stable, or via chainlink is eth/renbtc/wbtc)
-        //TODO: add 1 global param stableTokenBalanceUSD = add to it when deposited token is stable (no need to convert, we assume 1:1 with usd)
-        //TODO: if deposited token not stable, use chainlink to get usd amount, and update another global variable = nonStableTokenBalanceUSD
-        //TODO: add 1 global param totalDepositedUSD = add to it from both of the above
-        //TODO: compile signature by contract of depositUSDWorth
-        emit DepositToken(msg.sender, token, amount); //TODO: BE needs to pick this up from graph to validate / or from frontend by tx_hash and make sure not to deal more than once
-        //TODO: add depositUSDWorth in event
+    }
 
-        //TODO: fe sends tx, updates be with tx_hash, backend verified status on chain + verifies event + usd worth
-        //TODO: backend has signature from l1 contract attesting to deposited usd worth
-        //TODO: layer2 contract PlasmaTreasuryL2.sol (plasmaAccountManager) - when first deployed, 2 ERC20 tokens are created/minted on layer2 (L2_2KEY, L2_USD), and entire balance is assigned to PlasmaTreasuryL2
-        //TODO: PlasmaTreasureL2.sol:
-        //          1. spendingAllowance (set by congress, initialized at 100K USD, can be updated by congress)
-        //          2. initialized with the treasuryl1 proxy address (some immutable address), or the address that will be the signer of despositUSDWorth
-        //          3. maintainer only can submit transfer command, which will verify the amount in USD is equal to the signature and that signature is made by the address of treasuryl1
+    /**
+     * @notice          Function to deposit non 2key/stable coins - RENBTC/WBTC/WETH
+     * @param           token is the address of the token being deposited
+     * @param           amount is the amount of token to deposit
+     */
+    function depositNon2KEYStableCoin(
+        address token,
+        uint amount
+    )
+    public
+    {
+        require(token != address(0), "TwoKeyTreasuryL1: Invalid token address");
+        require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
 
+        if (token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("RENBTC") ||
+            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("WBTC") ||
+            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("WETH")
+        ) {
+            require(amount <= IERC20(token).allowance(msg.sender, address(this)));
+            require(IERC20(token).transferFrom(msg.sender, address(this), amount));
 
+            (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).buyStableCoinWithERC20(amount, token);
+            
+            depositStatsToken[msg.sender][token] = depositStatsToken[msg.sender][token].add(daiAmount);
+            depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(daiAmount);
+            nonStableTokenBalanceUSD = nonStableTokenBalanceUSD.add(daiAmount);
+            totalDepositedUSD = totalDepositedUSD.add(daiAmount);
+    
+            emit DepositNon2KEYStableCoin(msg.sender, token, amount, getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"), daiAmount, daiBuyRate);
+        }
+    }
+
+    /**
+     * @notice          Function to deposit non 2key/stable coins - RENBTC/WBTC/WETH
+     * @param           userAddress is the address of the token being deposited
+     * @param           amount is the amount of token to deposit
+     */
+    function depositETH(
+        address userAddress,
+        uint amount
+    )
+    internal
+    {
+        require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
+
+        (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).buyStableCoinWithETH(amount);
+
+        depositStatsETH[msg.sender] = depositStatsETH[msg.sender].add(daiAmount);
+        depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(daiAmount);
+        nonStableTokenBalanceUSD = nonStableTokenBalanceUSD.add(daiAmount);
+        totalDepositedUSD = totalDepositedUSD.add(daiAmount);
+
+        emit DepositETH(userAddress, amount, getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"), daiAmount, daiBuyRate);
     }
 
     /**
      * @notice          Function to withdraw ERC20 token
      * @param           beneficiary is the address receiving the tokens
      * @param           amount is the amount of tokens to withdraw
+     * @param           buy2keyRateL2 is the 2key price set by maintainer
      * @param           signature is proof that msg.sender has amount of tokens he wants to withdraw
      */
     function withdrawTokens(
         address beneficiary,
         uint amount,
+        uint buy2keyRateL2,
         bytes signature
-    //TODO add 2key-usd rate in params (will be supplied by client from 2key backend)
-    //TODO: on 2nd layer, maintainers (in-house oracles) will update 2key-rate
     )
     public
     {
-        //TODO: Add security safeguards = verify that signature also signed on 2key-rate
-        //TODO: checksum that 2key-rate is within 10% error buffer from curret rate from uniswap
-        //TODO: add global variable totalWithdrawnUSD - counts value in $ of all withdrawn 2KEY up till now
-        //TODO: add global variable totalWithdrawn2KEY - counts number of 2KEY withdrawn up till now
-        //TODO: checksum that amountx2key_usd rate (i.e. the value of withdraw in $) is < totalDepositedUSD-totalWithdrawnUSD)
-
-        //TODO: update value of totalWithdrawnUSD (+=) with computed amountx2key_usd value
-        //TODO: update value of totalWithdrawn2KEY (+=) with amount
-
         bytes32 key = keccak256(_isExistingSignature, signature);
         // Require that signature doesn't exist
         require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
         // Check who signed the message
-        address messageSigner = recoverSignature(msg.sender, amount, signature);
+        address messageSigner = recoverSignature(msg.sender, amount, buy2keyRateL2, signature);
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
         require(messageSigner == registry.getSignatoryAddress());
+
+        // Get the current 2key buy rate
+        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD();
+
+        // Allow 10% change of the price
+        require(uniswap2keyRate >= buy2keyRateL2.mul(9).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+        require(uniswap2keyRate <= buy2keyRateL2.mul(11).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+
+        // safeguard
+        uint withdrawBalanceUSD = amount.div(buy2keyRateL2).mul(10**18);
+        require(withdrawBalanceUSD <= depositUserTotalBalanceUSD[beneficiary].sub(withdrawnUserTotalBalanceUSD[beneficiary]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
+
+        withdrawnUserTotalBalanceUSD[beneficiary] = withdrawnUserTotalBalanceUSD[beneficiary].add(withdrawBalanceUSD);
+        totalWithdrawnUSD = totalWithdrawnUSD.add(withdrawBalanceUSD);
+        totalWithdrawn2KEY = totalWithdrawn2KEY.add(amount);
+
         // Get the instance of 2KEY token contract
         IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
         // Transfer tokens to the user
         twoKeyEconomy.transfer(beneficiary, amount);
 
         emit WithdrawToken(beneficiary, address(twoKeyEconomy), amount);
+    }
 
-        //TODO: add
+    function getUniswap2KeyBuyPriceInUSD()
+    internal
+    returns (uint256) {
+        address [] memory path = new address[](3);
+
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
+
+        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
+        path[1] = IUniswapV2Router02(uniswapRouter).WETH();
+        path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+        uint totalTokensBought = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).buyRate2key(
+            uniswapRouter,
+            10**18, // 1 DAI
+            path
+        );
+
+        return totalTokensBought;
     }
 
     /**
