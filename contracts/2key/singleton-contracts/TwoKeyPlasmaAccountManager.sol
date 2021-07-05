@@ -168,7 +168,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      */
     function addBalanceUSDT(
         address beneficiary,
-        address tokenAddress,
+        address tokenAddress, //TODO: save on contract level the USDT addresses on layer1
         uint amount,
         bytes signature
     )
@@ -180,8 +180,11 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
+
+        //TODO add checksum require that the tokenAddress passed equals the saved USDT address
+
         // Check who signed the message
-        address messageSigner = recoverSignature(msg.sender, tokenAddress, amount, signature);
+        address messageSigner = recoverSignature(msg.sender, tokenAddress, amount, signature); //TODO the signature should verify the beneficiary, not msg.sender
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
@@ -207,7 +210,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      */
     function addBalance2KEY(
         address beneficiary,
-        address tokenAddress,
+        address tokenAddress, //TODO: save on contract level the 2KEY addresses on layer1
         uint amount,
         bytes signature
     )
@@ -219,6 +222,10 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
+
+        //TODO add checksum require that the tokenAddress passed equals the saved USDT address
+
+
         // Check who signed the message
         address messageSigner = recoverSignature(msg.sender, tokenAddress, amount, signature);
         // Get the instance of TwoKeyRegistry

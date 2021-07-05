@@ -116,7 +116,6 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         address campaignAddressPlasma
     )
     public
-    onlyMaintainer
     {
         // Allow a user add the budget several times but in same token
         require(
@@ -129,7 +128,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Set contractor user
             PROXY_STORAGE_CONTRACT.setAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma), msg.sender);
             // Set the amount of 2KEY
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma), amount);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma), amount);//TODO: rename to_campaignPlasma2Budget2Key
             // Set 2Key bounty per conversion value
             PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignAddressPlasma), bountyPerConversion2KEY);
             // Set true value for 2Key directly budgeting
@@ -146,7 +145,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         } else {    // Add the budget
             // Update total 2Key
             uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma));
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma), currentAmount.add(amount));
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma), currentAmount.add(amount));//TODO: rename to_campaignPlasma2Budget2Key
 
             // Perform direct 2Key transfer
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
@@ -170,7 +169,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
      * @notice          Function that allocates specified amount of USDT from users balance to this contract's balance
      * @notice          Function can be called only once
      */
-    function addInventoryUSDT(
+    function addInventoryUSDT(  //TODO rename it everywhere USD not USDT..
         uint amount,
         uint bountyPerConversionUSDT,
         address campaignAddressPlasma
@@ -191,7 +190,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Set contractor user
             PROXY_STORAGE_CONTRACT.setAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma), msg.sender);
             // Set amount of Stable coins
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma), amount);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma), amount); //TODO: rename to _campaignPlasma2USDTBudget
             // Set current bountyPerConversionUSDT
             PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2bountyPerConversionUSDT, campaignAddressPlasma), bountyPerConversionUSDT);
             // Set false value for non-2Key budgeting
@@ -274,6 +273,13 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     /**
      * @notice          At the point when we want to do the payment
      */
+    //TODO:1. specific user wants to withdraw their earnings
+    //TODO:2. maintainer calls function, which goes over their curent earnings, cycles over all their pending campaigns (campaigns with rewards)
+    //TODO:3. if rewards in 2KEY, remain as 2KEY, if in USDT, keep in USDT
+    //TODO:4. eventually, we get the total 2KEY and total USDT payable to the referrer, and from each such campaign, we need to call transfer of the required amounts from each campaign to the balance of the referrer
+    //TODO:5. example: referrer has 10 2KEY rewards in campaign1 and 20 USDT rewards in campaign2 --> call to transfer 10 2KEY and 20USDT from the campaigns to the balance of the referer in L2
+    //TODO:6. in the end of this process - campaigns have less balance on layer2 account manager, and referrer has more
+    //TODO:7. later, in another call, the user can withdraw value back to Layer1, and it withdrawable as 2KEY - so then, if he withdraw USDT value, has to withdraw as 2KEY using rate from maintainer
     function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
         address [] referrers,
         uint currentRate2KEY
