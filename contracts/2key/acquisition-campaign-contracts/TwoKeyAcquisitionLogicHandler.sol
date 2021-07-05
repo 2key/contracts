@@ -5,11 +5,16 @@ import "../interfaces/ITwoKeyAcquisitionCampaignERC20.sol";
 import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
 import "../campaign-mutual-contracts/TwoKeyCampaignLogicHandler.sol";
 
+import "../libraries/SafeMath.sol";
+
 /**
  * @author Nikola Madjarevic
  * Created at 1/15/19
  */
 contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicHandler {
+
+    //Safe math for math operations
+    using SafeMath for *;
 
     bool public IS_CAMPAIGN_ACTIVE;
 
@@ -214,8 +219,8 @@ contract TwoKeyAcquisitionLogicHandler is UpgradeableCampaign, TwoKeyCampaignLog
             uint rate = getRateFromExchange();
             uint amountToBeSpentInFiat = (amountWillingToSpendEthWei.mul(rate)).div(10**18);
             // Adding gap 1%
-            if(leftToSpend.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18)) >= amountToBeSpentInFiat &&
-                minContributionAmountWei <= amountToBeSpentInFiat.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18))
+            if(leftToSpend.mul(100 * (10**18).add(ALLOWED_GAP)).div(100 * (10**18)) >= amountToBeSpentInFiat &&
+                minContributionAmountWei <= amountToBeSpentInFiat.mul(100 * (10**18).add(ALLOWED_GAP)).div(100 * (10**18))
             ) {
                 return (true,leftToSpend);
             } else {

@@ -641,7 +641,7 @@ contract TwoKeyPlasmaBudgetCampaignsPaymentsHandler is Upgradeable {
         // Iterate through all campaigns
         for(i = 0; i < campaigns.length; i++) {
             // Add to total pending payout referrer plasma balance
-            referrerTotalPendingPayout = referrerTotalPendingPayout + ITwoKeyPlasmaCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer);
+            referrerTotalPendingPayout = referrerTotalPendingPayout.add(ITwoKeyPlasmaCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer));
         }
 
         // Return referrer total pending
