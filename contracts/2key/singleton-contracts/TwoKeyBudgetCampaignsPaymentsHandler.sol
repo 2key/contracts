@@ -865,7 +865,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
             keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma)
         );
     }
-
+    //TODO deposit/withdraw on L1 should be just from the treasury, withdraw would be with signature from backend by signatory
+    //TODO no need for this function then, L1 does not know about campaigns and their bounties
     /**
      * @notice          Function to return bounty per conversion in USDT
      * @param           campaignPlasma is plasma campaign of address requested

@@ -1140,7 +1140,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      * @param           amountOfTokens is the amount of ERC20 token
      * @param           tokenAddress is the token address of ERC20 token
      */
-    function buyStableCoinWithERC20(
+    function buyStableCoinWithERC20(  //TODO rename to simulateBuyStableCoinWithERC20
         uint amountOfTokens,
         address tokenAddress
     )
@@ -1192,7 +1192,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
      *
      * @param           amountOfTokens is the amount of ERC20 token
      */
-    function buyStableCoinWithETH(
+    function buyStableCoinWithETH(  //TODO rename to simulateBuyStableCoinWithETH
         uint amountOfTokens
     )
     public
