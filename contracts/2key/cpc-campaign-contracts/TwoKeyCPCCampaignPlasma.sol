@@ -163,7 +163,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 // Update that conversion is being paid
                 c.paymentState = ConversionPaymentState.PAID;
                 //Increment how much bounty is paid
-                counters[6] = counters[6] + bountyPerConversionWei + moderatorFeePerConversion; // Total bounty paid including moderator fee
+                counters[6] = counters[6].add(bountyPerConversionWei).add(moderatorFeePerConversion); // Total bounty paid including moderator fee
                 // Increment number of paid clicks by 1
                 numberOfPaidClicksAchieved++;
                 // emit event that conversion is being paid
