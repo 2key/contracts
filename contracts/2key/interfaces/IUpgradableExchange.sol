@@ -34,14 +34,14 @@ contract IUpgradableExchange {
     public
     payable;
 
-    function buyStableCoinWithERC20(
+    function simulateBuyStableCoinWithERC20(
         uint amountOfTokens,
         address tokenAddress
     )
     public
     returns (uint, uint);
 
-    function buyStableCoinWithETH(
+    function simulateBuyStableCoinWithETH(
         uint amountOfTokens
     )
     public

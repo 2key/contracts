@@ -194,7 +194,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
             require(amount <= IERC20(token).allowance(msg.sender, address(this)));
             require(IERC20(token).transferFrom(msg.sender, address(this), amount));
 
-            (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).buyStableCoinWithERC20(amount, token);
+            (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).simulateBuyStableCoinWithERC20(amount, token);
             //TODO just use chainlink oracles or uniswap price discovery in upgradableexchange
             //TODO no need to actually buy the DAI, just understand how much DAO this amount is worth
 
@@ -221,7 +221,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
 
         //TODO no need to actually buy the DAI, just get the amount of DAI in price quote
-        (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).buyStableCoinWithETH(amount);
+        (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).simulateBuyStableCoinWithETH(amount);
 
         depositStatsETH[msg.sender] = depositStatsETH[msg.sender].add(daiAmount);
         depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(daiAmount);
