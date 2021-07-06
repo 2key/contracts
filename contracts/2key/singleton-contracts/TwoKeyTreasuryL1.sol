@@ -25,9 +25,6 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     string constant _isExistingSignature = "isExistingSignature";
     string constant _messageNotes = "binding rewards for user";
 
-    //TODO: what's the use of this param?
-    string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
-
 
     bool initialized;
 
@@ -48,7 +45,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     event Deposit2KEY(address indexed depositor, uint amount);
     event DepositStableCoin(address indexed depositor, uint amount);
-    event DepositNon2KEYStableCoin(address indexed depositor, address indexed fromTokenAddress, uint fromAmount, address toTokenAddress, uint toTokenAmount, uint buyRate);
+    event DepositVolatileToken(address indexed depositor, address indexed fromTokenAddress, uint fromAmount, address toTokenAddress, uint toTokenAmount, uint buyRate);
     event DepositETH(address indexed depositor, uint amount, address toTokenAddress, uint toTokenAmount, uint daiBuyRate);
     event WithdrawToken(address indexed beneficiary, address indexed token, uint amount);
 
@@ -178,7 +175,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           token is the address of the token being deposited
      * @param           amount is the amount of token to deposit
      */
-    function depositNon2KEYStableCoin( //TODO rename depositVolatileToken
+    function depositVolatileToken(
         address token,
         uint amount
     )
@@ -195,15 +192,13 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
             require(IERC20(token).transferFrom(msg.sender, address(this), amount));
 
             (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).simulateBuyStableCoinWithERC20(amount, token);
-            //TODO just use chainlink oracles or uniswap price discovery in upgradableexchange
-            //TODO no need to actually buy the DAI, just understand how much DAO this amount is worth
 
             depositStatsToken[msg.sender][token] = depositStatsToken[msg.sender][token].add(daiAmount);
             depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(daiAmount);
             nonStableTokenBalanceUSD = nonStableTokenBalanceUSD.add(daiAmount);
             totalDepositedUSD = totalDepositedUSD.add(daiAmount);
     
-            emit DepositNon2KEYStableCoin(msg.sender, token, amount, getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"), daiAmount, daiBuyRate);
+            emit DepositVolatileToken(msg.sender, token, amount, getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"), daiAmount, daiBuyRate);
         }
     }
 
@@ -220,7 +215,6 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     {
         require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
 
-        //TODO no need to actually buy the DAI, just get the amount of DAI in price quote
         (uint daiAmount, uint daiBuyRate) = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).simulateBuyStableCoinWithETH(amount);
 
         depositStatsETH[msg.sender] = depositStatsETH[msg.sender].add(daiAmount);
