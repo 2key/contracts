@@ -24,6 +24,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     string constant _isExistingSignature = "isExistingSignature";
     string constant _messageNotes = "binding rewards for user";
+    string constant _tokenAddress = "tokenAddress";
 
 
     bool initialized;
@@ -72,6 +73,36 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     payable
     {
         depositETH(msg.sender, msg.value);
+    }
+
+    /**
+     * @notice Set the avaialble token addresses
+     * @param tokenName is the token name
+     * @param tokenAddress is the token address
+     */
+    function setTokenAddress(
+        string tokenName,
+        address tokenAddress
+    )
+    public
+    onlyMaintainer
+    {
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_tokenAddress, tokenName), tokenAddress);
+    }
+
+    /**
+     * @notice Get the token address
+     * @param tokenName is the token name
+     * @return (address) is the token address
+     */
+    function getTokenAddress(
+        string tokenName
+    )
+    public
+    view
+    returns (address)
+    {
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_tokenAddress, tokenName));
     }
 
     /**
@@ -141,14 +172,19 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         require(token != address(0), "TwoKeyTreasuryL1: Invalid token address");
         require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
 
-        if (token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("BUSD") ||
-            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TUSD") ||
-            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("PAX") ||
-            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI") ||
-            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDC")
+        if (token == getTokenAddress("BUSD") ||
+            token == getTokenAddress("TUSD") ||
+            token == getTokenAddress("PAX") ||
+            token == getTokenAddress("DAI") ||
+            token == getTokenAddress("USDC")
         ) {
             require(amount <= IERC20(token).allowance(msg.sender, address(this)));
             require(IERC20(token).transferFrom(msg.sender, address(this), amount));
+
+            // adjust the decimals
+            if (token == getTokenAddress("USDC")) {
+                amount = amount.mul(10**12);
+            }
 
             depositStatsToken[msg.sender][token] = depositStatsToken[msg.sender][token].add(amount);
             depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(amount);
@@ -157,9 +193,12 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     
             emit DepositStableCoin(msg.sender, amount);
 
-        } else if(token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("USDT")) {
+        } else if(token == getTokenAddress("USDT")) {
             require(amount <= ITether(token).allowance(msg.sender, address(this)));
             ITether(token).transferFrom(msg.sender, address(this), amount);
+
+            // adjust the decimals
+            amount = amount.mul(10**12);
 
             depositStatsToken[msg.sender][token] = depositStatsToken[msg.sender][token].add(amount);
             depositUserTotalBalanceUSD[msg.sender] = depositUserTotalBalanceUSD[msg.sender].add(amount);
@@ -184,9 +223,9 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         require(token != address(0), "TwoKeyTreasuryL1: Invalid token address");
         require(amount > 0, "TwoKeyTreasuryL1: Token amount to deposit must be greater than zero");
 
-        if (token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("RENBTC") ||
-            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("WBTC") ||
-            token == getNonUpgradableContractAddressFromTwoKeySingletonRegistry("WETH")
+        if (token == getTokenAddress("RENBTC") ||
+            token == getTokenAddress("WBTC") ||
+            token == getTokenAddress("WETH")
         ) {
             require(amount <= IERC20(token).allowance(msg.sender, address(this)));
             require(IERC20(token).transferFrom(msg.sender, address(this), amount));
@@ -227,13 +266,11 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice          Function to withdraw ERC20 token
-     * @param           beneficiary is the address receiving the tokens
      * @param           amount is the amount of tokens to withdraw
      * @param           buy2keyRateL2 is the 2key price set by maintainer
      * @param           signature is proof that msg.sender has amount of tokens he wants to withdraw
      */
-    function withdrawTokens(
-        address beneficiary,
+    function withdrawToken(
         uint amount,
         uint buy2keyRateL2,
         bytes signature
@@ -261,18 +298,18 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
         // safeguard
         uint withdrawBalanceUSD = amount.div(buy2keyRateL2).mul(10**18);
-        require(withdrawBalanceUSD <= depositUserTotalBalanceUSD[beneficiary].sub(withdrawnUserTotalBalanceUSD[beneficiary]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
+        require(withdrawBalanceUSD <= depositUserTotalBalanceUSD[msg.sender].sub(withdrawnUserTotalBalanceUSD[msg.sender]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
 
-        withdrawnUserTotalBalanceUSD[beneficiary] = withdrawnUserTotalBalanceUSD[beneficiary].add(withdrawBalanceUSD);
+        withdrawnUserTotalBalanceUSD[msg.sender] = withdrawnUserTotalBalanceUSD[msg.sender].add(withdrawBalanceUSD);
         totalWithdrawnUSD = totalWithdrawnUSD.add(withdrawBalanceUSD);
         totalWithdrawn2KEY = totalWithdrawn2KEY.add(amount);
 
         // Get the instance of 2KEY token contract
         IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
         // Transfer tokens to the user
-        twoKeyEconomy.transfer(beneficiary, amount);
+        twoKeyEconomy.transfer(msg.sender, amount);
 
-        emit WithdrawToken(beneficiary, address(twoKeyEconomy), amount);
+        emit WithdrawToken(msg.sender, address(twoKeyEconomy), amount);
     }
 
     function getUniswap2KeyBuyPriceInUSD()

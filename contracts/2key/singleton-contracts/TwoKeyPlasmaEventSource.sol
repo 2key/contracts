@@ -173,7 +173,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         address campaignAddressPlasma
     );
 
-    event AddInventoryUSDT(
+    event AddInventoryUSD(
         uint amount,
         uint bountyPerConversionUSD,
         address campaignAddressPlasma
@@ -637,9 +637,9 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     }
 
     /**
-     * @notice          Function that emits the inventory is added in L2_2KEY
+     * @notice          Function that emits the inventory is added in L2_USd
      */
-    function emitAddInventoryUSDT(
+    function emitAddInventoryUSD(
         uint amount,
         uint bountyPerConversionUSD,
         address campaignAddressPlasma
@@ -648,7 +648,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     {
         require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
 
-        emit AddInventoryUSDT(
+        emit AddInventoryUSD(
             amount,
             bountyPerConversionUSD,
             campaignAddressPlasma

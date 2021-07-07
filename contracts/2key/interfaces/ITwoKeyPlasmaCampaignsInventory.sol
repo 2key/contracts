@@ -8,7 +8,7 @@ contract ITwoKeyPlasmaCampaignsInventory {
     )
     external;
 
-    function addInventoryUSDT(
+    function addInventoryUSD(
         uint amount,
         uint bountyPerConversionUSD,
         address campaignAddressPlasma

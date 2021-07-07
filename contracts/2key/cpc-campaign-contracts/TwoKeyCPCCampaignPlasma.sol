@@ -154,7 +154,7 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
             // If the conversion is not directly from the contractor and there's enough rewards for this conversion we will distribute them
             if(
                 getNumberOfUsersToContractor(converter) > 0 &&
-                counters[6].add(bountyPerConversionWei+moderatorFeePerConversion) <= totalBountyForCampaign
+                (counters[6].add(bountyPerConversionWei).add(moderatorFeePerConversion)) <= totalBountyForCampaign
             ) {
                 //Add earnings to moderator total earnings
                 moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFeePerConversion);
