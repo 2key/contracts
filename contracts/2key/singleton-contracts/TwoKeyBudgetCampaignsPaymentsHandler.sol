@@ -21,7 +21,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
      * TO BE EXPANDED
      */
 
-    string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
+    string constant _campaignPlasma2Budget2Key = "campaignPlasma2Budget2Key";
     string constant _campaignPlasma2isCampaignEnded = "campaignPlasma2isCampaignEnded";
     string constant _campaignPlasma2contractor = "campaignPlasma2contractor";
 
@@ -30,8 +30,8 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
     string constant _campaignPlasma2initialRate = "campaignPlasma2initalRate";
     string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
-    string constant _campaignPlasma2bountyPerConversionUSDT = "campaignPlasma2bountyPerConversionUSDT";
-    string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
+    string constant _campaignPlasma2bountyPerConversionUSD = "campaignPlasma2bountyPerConversionUSD";
+    string constant _campaignPlasma2USDBudget = "campaignPlasma2USDBudget";
     string constant _numberOfDistributionCycles = "numberOfDistributionCycles";
     string constant _distributionCycleToTotalDistributed = "_distributionCycleToTotalDistributed";
     string constant _campaignPlasma2ReferrerRewardsTotal = "campaignPlasma2ReferrerRewardsTotal";
@@ -184,7 +184,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
         );
 
         setUint(
-            keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma),
+            keccak256(_campaignPlasma2USDBudget, campaignPlasma),
             amountOfStableCoins
         );
 
@@ -479,7 +479,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     internal
     {
 
-        bytes32 keyHashForInitialBudget = keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma);
+        bytes32 keyHashForInitialBudget = keccak256(_campaignPlasma2Budget2Key, campaignPlasma);
         // Require that initial budget is not being added, since it can be done only once.
         require(getUint(keyHashForInitialBudget) == 0);
         // Set initial budget added
@@ -643,7 +643,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     internal
     {
         setUint(
-            keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma),
+            keccak256(_campaignPlasma2USDBudget, campaignPlasma),
             amountOfStableCoins
         );
     }
@@ -707,7 +707,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     view
     returns (uint)
     {
-        return getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
+        return getUint(keccak256(_campaignPlasma2Budget2Key, campaignPlasma));
     }
 
 
@@ -847,7 +847,7 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     view
     returns (uint)
     {
-        return getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma));
+        return getUint(keccak256(_campaignPlasma2USDBudget, campaignPlasma));
     }
 
     /**
@@ -863,23 +863,6 @@ contract TwoKeyBudgetCampaignsPaymentsHandler is Upgradeable, ITwoKeySingletonUt
     {
         return getUint(
             keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignPlasma)
-        );
-    }
-    //TODO deposit/withdraw on L1 should be just from the treasury, withdraw would be with signature from backend by signatory
-    //TODO no need for this function then, L1 does not know about campaigns and their bounties
-    /**
-     * @notice          Function to return bounty per conversion in USDT
-     * @param           campaignPlasma is plasma campaign of address requested
-     */
-    function getBountyPerConversionUSDT(
-        address campaignPlasma
-    )
-    public
-    view
-    returns (uint)
-    {
-        return getUint(
-            keccak256(_campaignPlasma2bountyPerConversionUSDT, campaignPlasma)
         );
     }
 

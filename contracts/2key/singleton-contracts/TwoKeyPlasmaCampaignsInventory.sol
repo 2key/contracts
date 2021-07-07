@@ -38,12 +38,12 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     string constant _campaignPlasma2LeftOverForContractor = "campaignPlasma2LeftOverForContractor";
     string constant _campaignPlasma2ReferrerRewardsTotal = "campaignPlasma2ReferrerRewardsTotal";
     string constant _campaignPlasma2ModeratorEarnings = "campaignPlasma2ModeratorEarnings";
-    string constant _campaignPlasma2initialBudget2Key = "campaignPlasma2initialBudget2Key";
+    string constant _campaignPlasma2Budget2Key = "campaignPlasma2Budget2Key";
     string constant _campaignPlasma2isBudgetedWith2KeyDirectly = "campaignPlasma2isBudgetedWith2KeyDirectly";
     string constant _campaignPlasma2rebalancingRatio = "campaignPlasma2rebalancingRatio";
     string constant _campaignPlasma2bountyPerConversion2KEY = "campaignPlasma2bountyPerConversion2KEY";
-    string constant _campaignPlasma2bountyPerConversionUSDT = "campaignPlasma2bountyPerConversionUSD";
-    string constant _campaignPlasma2amountOfStableCoins = "campaignPlasma2amountOfStableCoins";
+    string constant _campaignPlasma2bountyPerConversionUSD = "campaignPlasma2bountyPerConversionUSD";
+    string constant _campaignPlasma2USDBudget = "campaignPlasma2USDBudget";
     string constant _campaignPlasma2Contractor = "campaignPlasma2Contractor";   // msg.sender
     string constant _campaignPlasma2LeftoverWithdrawnByContractor = "campaignPlasma2LeftoverWithdrawnByContractor";
     string constant _distributionCycle2TotalDistributed = "distributionCycle2TotalDistributed";
@@ -108,7 +108,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
     /**
      * @notice          Function that allocates specified amount of 2KEY from users balance to this contract's balance
-     * @notice          Function can be called only once
+     * @notice          Function can be called several times
      */
     function addInventory2KEY(
         uint amount,
@@ -128,7 +128,7 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Set contractor user
             PROXY_STORAGE_CONTRACT.setAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma), msg.sender);
             // Set the amount of 2KEY
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma), amount);//TODO: rename to_campaignPlasma2Budget2Key
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2Budget2Key, campaignAddressPlasma), amount);
             // Set 2Key bounty per conversion value
             PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignAddressPlasma), bountyPerConversion2KEY);
             // Set true value for 2Key directly budgeting
@@ -144,8 +144,8 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
 
         } else {    // Add the budget
             // Update total 2Key
-            uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma));
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma), currentAmount.add(amount));//TODO: rename to_campaignPlasma2Budget2Key
+            uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2Budget2Key, campaignAddressPlasma));
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2Budget2Key, campaignAddressPlasma), currentAmount.add(amount));
 
             // Perform direct 2Key transfer
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
@@ -166,16 +166,15 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     }
 
     /**
-     * @notice          Function that allocates specified amount of USDT from users balance to this contract's balance
-     * @notice          Function can be called only once
+     * @notice          Function that allocates specified amount of USD from users balance to this contract's balance
+     * @notice          Function can be called several times
      */
-    function addInventoryUSDT(  //TODO rename it everywhere USD not USDT..
+    function addInventoryUSD(
         uint amount,
-        uint bountyPerConversionUSDT,
+        uint bountyPerConversionUSD,
         address campaignAddressPlasma
     )
     public
-    onlyMaintainer
     {
         // Allow a user add the budget several times but in same token
         require(
@@ -183,46 +182,44 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma)) == msg.sender
         );
 
-        address contractor = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma));
-
         if (PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma)) == address(0)) {    // Initialize the campaign
             uint rate = 10**18;
             // Set contractor user
             PROXY_STORAGE_CONTRACT.setAddress(keccak256(_campaignPlasma2Contractor, campaignAddressPlasma), msg.sender);
             // Set amount of Stable coins
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma), amount); //TODO: rename to _campaignPlasma2USDTBudget
-            // Set current bountyPerConversionUSDT
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2bountyPerConversionUSDT, campaignAddressPlasma), bountyPerConversionUSDT);
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2USDBudget, campaignAddressPlasma), amount);
+            // Set current bountyPerConversionUSD
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2bountyPerConversionUSD, campaignAddressPlasma), bountyPerConversionUSD);
             // Set false value for non-2Key budgeting
             PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignAddressPlasma), false);
 
             // Perform a transfer
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transferUSDTFrom(contractor, address(this), amount);
+                .transferUSDFrom(msg.sender, address(this), amount);
 
             // Set initial parameters and validates campaign
             ITwoKeyCPCCampaignPlasma(campaignAddressPlasma)
-                .setInitialParamsAndValidateCampaign(amount, rate, bountyPerConversionUSDT, false);
+                .setInitialParamsAndValidateCampaign(amount, rate, bountyPerConversionUSD, false);
 
         } else {    // Add the budget
             // Update total stable coins
-            uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma));
-            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma), currentAmount.add(amount));
+            uint currentAmount = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2USDBudget, campaignAddressPlasma));
+            PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2USDBudget, campaignAddressPlasma), currentAmount.add(amount));
 
             // Perform a transfer
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transferUSDTFrom(contractor, address(this), amount);
+                .transferUSDFrom(msg.sender, address(this), amount);
             
             // Change CPC campaign parameters
             ITwoKeyCPCCampaignPlasma(campaignAddressPlasma)
                 .addCampaignBounty(amount, false);
         }
 
-        // Emit an event that the inventory is added in L2_USDT
+        // Emit an event that the inventory is added in L2_USD
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
-            .emitAddInventoryUSDT(
+            .emitAddInventoryUSD(
                 amount,
-                bountyPerConversionUSDT,
+                bountyPerConversionUSD,
                 campaignAddressPlasma
             );
     }
@@ -280,130 +277,150 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     //TODO:5. example: referrer has 10 2KEY rewards in campaign1 and 20 USDT rewards in campaign2 --> call to transfer 10 2KEY and 20USDT from the campaigns to the balance of the referer in L2
     //TODO:6. in the end of this process - campaigns have less balance on layer2 account manager, and referrer has more
     //TODO:7. later, in another call, the user can withdraw value back to Layer1, and it withdrawable as 2KEY - so then, if he withdraw USDT value, has to withdraw as 2KEY using rate from maintainer
-    function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
-        address [] referrers,
-        uint currentRate2KEY
+    function withdrawTotalReferrerEarnings(
+        address referrer
     )
     public
     onlyMaintainer
     {
-        // Increment number of distribution cycles and get the id
-        uint cycleId = addNewDistributionCycle();
+        address[] memory referrerCampaigns = getCampaignsReferrerHasPendingBalances(referrer);
 
-        // Calculate how much total payout would be for all referrers together in case there was no rebalancing
-        uint amountToBeDistributedInCycleNoRebalanced;
-        uint amountToBeDistributedInCycleRebalanced;
+        // Iterate through campaigns
+        for(uint j = 0; j < referrerCampaigns.length; j++) {
+            // Load campaign address
+            address campaignAddress = referrerCampaigns[j];
 
-        for(uint i=0; i<referrers.length; i++) {
-            // Load current referrer
-            address referrer = referrers[i];
-            // Get all the campaigns of specific referrer
-            address[] memory referrerCampaigns = getCampaignsReferrerHasPendingBalances(referrer);
-            // Calculate how much is total payout for this referrer
-            uint referrerTotalPayoutAmount = 0;
-            // Calculate referrer total non-rebalanced amount earned
-            uint referrerTotalNonRebalancedAmountForCycle = 0;
-
-            // Iterate through campaigns
-            uint referrerTotalPayoutAmount_;
-            uint referrerTotalNonRebalancedAmountForCycle_;
-            uint amountToBeDistributedInCycleNoRebalanced_;
-
-            (referrerTotalPayoutAmount_, referrerTotalNonRebalancedAmountForCycle_, amountToBeDistributedInCycleNoRebalanced_) = 
-                updateRebalanceNonRebalanceAmount(referrerCampaigns, referrer, currentRate2KEY);
-
-            referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(referrerTotalPayoutAmount_);
-            referrerTotalNonRebalancedAmountForCycle = referrerTotalNonRebalancedAmountForCycle.add(referrerTotalNonRebalancedAmountForCycle_);
-            amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(amountToBeDistributedInCycleNoRebalanced_);
-
-            // Set non rebalanced amount referrer earned in this cycle
-            PROXY_STORAGE_CONTRACT.setUint(
-                keccak256(_referrer2cycleId2nonRebalancedAmount, referrer, cycleId),
-                referrerTotalNonRebalancedAmountForCycle
-            );
-
-            // Set inProgress campaigns
-            PROXY_STORAGE_CONTRACT.setAddressArray(
-                keccak256(_referrer2inProgressCampaignAddress, referrer),
-                referrerCampaigns
-            );
-
-            // Delete referrer campaigns which are pending rewards
-            deleteReferrerPendingCampaigns(
-                keccak256(_referrer2pendingCampaignAddresses, referrer)
-            );
-
-            // Calculate total amount to be distributed in cycle rebalanced
-            amountToBeDistributedInCycleRebalanced = amountToBeDistributedInCycleRebalanced.add(referrerTotalPayoutAmount);
-
-            // Store referrer total payout amount for this cycle
-            setReferrerToRebalancedAmountForCycle(
-                referrer,
-                cycleId,
-                referrerTotalPayoutAmount
-            );
-        }
-
-        // Store total rebalanced payout
-        setTotalRebalancedPayoutForCycle(
-            cycleId,
-            amountToBeDistributedInCycleRebalanced
-        );
-
-        // Store total non-rebalanced payout
-        setTotalNonRebalancedPayoutForCycle(
-            cycleId,
-            amountToBeDistributedInCycleNoRebalanced
-        );
-
-        // Store all influencers for this distribution cycle.
-        setReferrersPaidPerDistributionCycle(cycleId,referrers);
-    }
-
-    function finishDistributionCycle(
-        uint cycleId,
-        uint feePerReferrerIn2KEY
-    )
-    public
-    onlyMaintainer
-    {
-        address[] memory referrers = getReferrersForCycleId(cycleId);
-
-        uint i;
-
-        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
-        // Iterate through all referrers
-        for(i=0; i<referrers.length; i++) {
-            // Take referrer address
-            address referrer = referrers[i];
-
-            address [] memory referrerInProgressCampaigns = getCampaignsInProgressOfDistribution(referrer);
-            // Create array of referrer earnings per campaign
-            uint [] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
-            // Get referrer earnings for this campaign and mark referrel got paid his campaign
-            referrerEarningsPerCampaign = getReferrerEarningsAndMarkReferrerPaid(referrer, referrerInProgressCampaigns);
-
-            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(
-                referrer,
-                getReferrerEarningsNonRebalancedPerCycle(referrer, cycleId), //amount non rebalanced referrer earned
-                getReferrerToTotalRebalancedAmountForCycleId(referrer, cycleId), // amount paid to referrer
-                referrerInProgressCampaigns,
-                referrerEarningsPerCampaign,
-                feePerReferrerIn2KEY
-            );
-
-            // Move from inProgress to finished campagins
-            appendToArray(
-                keccak256(_referrer2finishedAndPaidCampaigns, referrer),
-                keccak256(_referrer2inProgressCampaignAddress, referrer)
-            );
-
-            // Delete array of inProgress campaigns
-            deleteAddressArray(
-                keccak256(_referrer2inProgressCampaignAddress, referrer)
-            );
+            ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer);
         }
     }
+
+    // /**
+    //  * @notice          At the point when we want to do the payment
+    //  */
+    // function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
+    //     address [] referrers,
+    //     uint currentRate2KEY
+    // )
+    // public
+    // onlyMaintainer
+    // {
+    //     // Increment number of distribution cycles and get the id
+    //     uint cycleId = addNewDistributionCycle();
+
+    //     // Calculate how much total payout would be for all referrers together in case there was no rebalancing
+    //     uint amountToBeDistributedInCycleNoRebalanced;
+    //     uint amountToBeDistributedInCycleRebalanced;
+
+    //     for(uint i=0; i<referrers.length; i++) {
+    //         // Load current referrer
+    //         address referrer = referrers[i];
+    //         // Get all the campaigns of specific referrer
+    //         address[] memory referrerCampaigns = getCampaignsReferrerHasPendingBalances(referrer);
+    //         // Calculate how much is total payout for this referrer
+    //         uint referrerTotalPayoutAmount = 0;
+    //         // Calculate referrer total non-rebalanced amount earned
+    //         uint referrerTotalNonRebalancedAmountForCycle = 0;
+
+    //         // Iterate through campaigns
+    //         uint referrerTotalPayoutAmount_;
+    //         uint referrerTotalNonRebalancedAmountForCycle_;
+    //         uint amountToBeDistributedInCycleNoRebalanced_;
+
+    //         (referrerTotalPayoutAmount_, referrerTotalNonRebalancedAmountForCycle_, amountToBeDistributedInCycleNoRebalanced_) = 
+    //             updateRebalanceNonRebalanceAmount(referrerCampaigns, referrer, currentRate2KEY);
+
+    //         referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(referrerTotalPayoutAmount_);
+    //         referrerTotalNonRebalancedAmountForCycle = referrerTotalNonRebalancedAmountForCycle.add(referrerTotalNonRebalancedAmountForCycle_);
+    //         amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(amountToBeDistributedInCycleNoRebalanced_);
+
+    //         // Set non rebalanced amount referrer earned in this cycle
+    //         PROXY_STORAGE_CONTRACT.setUint(
+    //             keccak256(_referrer2cycleId2nonRebalancedAmount, referrer, cycleId),
+    //             referrerTotalNonRebalancedAmountForCycle
+    //         );
+
+    //         // Set inProgress campaigns
+    //         PROXY_STORAGE_CONTRACT.setAddressArray(
+    //             keccak256(_referrer2inProgressCampaignAddress, referrer),
+    //             referrerCampaigns
+    //         );
+
+    //         // Delete referrer campaigns which are pending rewards
+    //         deleteReferrerPendingCampaigns(
+    //             keccak256(_referrer2pendingCampaignAddresses, referrer)
+    //         );
+
+    //         // Calculate total amount to be distributed in cycle rebalanced
+    //         amountToBeDistributedInCycleRebalanced = amountToBeDistributedInCycleRebalanced.add(referrerTotalPayoutAmount);
+
+    //         // Store referrer total payout amount for this cycle
+    //         setReferrerToRebalancedAmountForCycle(
+    //             referrer,
+    //             cycleId,
+    //             referrerTotalPayoutAmount
+    //         );
+    //     }
+
+    //     // Store total rebalanced payout
+    //     setTotalRebalancedPayoutForCycle(
+    //         cycleId,
+    //         amountToBeDistributedInCycleRebalanced
+    //     );
+
+    //     // Store total non-rebalanced payout
+    //     setTotalNonRebalancedPayoutForCycle(
+    //         cycleId,
+    //         amountToBeDistributedInCycleNoRebalanced
+    //     );
+
+    //     // Store all influencers for this distribution cycle.
+    //     setReferrersPaidPerDistributionCycle(cycleId,referrers);
+    // }
+
+    // function finishDistributionCycle(
+    //     uint cycleId,
+    //     uint feePerReferrerIn2KEY
+    // )
+    // public
+    // onlyMaintainer
+    // {
+    //     address[] memory referrers = getReferrersForCycleId(cycleId);
+
+    //     uint i;
+
+    //     address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+    //     // Iterate through all referrers
+    //     for(i=0; i<referrers.length; i++) {
+    //         // Take referrer address
+    //         address referrer = referrers[i];
+
+    //         address [] memory referrerInProgressCampaigns = getCampaignsInProgressOfDistribution(referrer);
+    //         // Create array of referrer earnings per campaign
+    //         uint [] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
+    //         // Get referrer earnings for this campaign and mark referrel got paid his campaign
+    //         referrerEarningsPerCampaign = getReferrerEarningsAndMarkReferrerPaid(referrer, referrerInProgressCampaigns);
+
+    //         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(
+    //             referrer,
+    //             getReferrerEarningsNonRebalancedPerCycle(referrer, cycleId), //amount non rebalanced referrer earned
+    //             getReferrerToTotalRebalancedAmountForCycleId(referrer, cycleId), // amount paid to referrer
+    //             referrerInProgressCampaigns,
+    //             referrerEarningsPerCampaign,
+    //             feePerReferrerIn2KEY
+    //         );
+
+    //         // Move from inProgress to finished campagins
+    //         appendToArray(
+    //             keccak256(_referrer2finishedAndPaidCampaigns, referrer),
+    //             keccak256(_referrer2inProgressCampaignAddress, referrer)
+    //         );
+
+    //         // Delete array of inProgress campaigns
+    //         deleteAddressArray(
+    //             keccak256(_referrer2inProgressCampaignAddress, referrer)
+    //         );
+    //     }
+    // }
 
 
 
@@ -433,10 +450,10 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         uint initialBountyForCampaign;
         if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == true) {
             // if campaign was directly budgeted with 2KEY
-            initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignPlasma));
+            initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2Budget2Key, campaignPlasma));
         } else {
             // if campaign was budgeted with stable coin
-            initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignPlasma));
+            initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2USDBudget, campaignPlasma));
         }
         // Rebalancing everything except referrer rewards
         uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
@@ -570,51 +587,51 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
     }
 
 
-    /**
-     * @notice      Function to distribute rewards between influencers,
-     *              increment global cycle id and update value of all time
-     *              distributed rewards from this contract
-     *
-     * @param       influencers is the array of influencers
-     * @param       balances is a corresponding array of balances for influencers
-     */
-    function pushAndDistributeRewardsBetweenInfluencers(
-        address[] influencers,
-        uint[] balances,
-        uint cycleId,
-        uint feePerReferrerIn2Key
-    )
-    public
-    onlyMaintainer
-    {
-        // Address of twoKeyPlasmaAccountManager contract
-        address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
-        // Total distributed in cycle
-        uint totalDistributed;
+    // /**
+    //  * @notice      Function to distribute rewards between influencers,
+    //  *              increment global cycle id and update value of all time
+    //  *              distributed rewards from this contract
+    //  *
+    //  * @param       influencers is the array of influencers
+    //  * @param       balances is a corresponding array of balances for influencers
+    //  */
+    // function pushAndDistributeRewardsBetweenInfluencers(
+    //     address[] influencers,
+    //     uint[] balances,
+    //     uint cycleId,
+    //     uint feePerReferrerIn2Key
+    // )
+    // public
+    // onlyMaintainer
+    // {
+    //     // Address of twoKeyPlasmaAccountManager contract
+    //     address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
+    //     // Total distributed in cycle
+    //     uint totalDistributed;
 
-        // Get number of referrers
-        uint numberOfReferrers = influencers.length;
+    //     // Get number of referrers
+    //     uint numberOfReferrers = influencers.length;
 
-        // Iterate through all influencers, distribute rewards and sum up the amount received in current cycle
-        for(uint i = 0; i < numberOfReferrers; i++) {
-            // Require that referrer's earnings are bigger than fees
-            require(balances[i] > feePerReferrerIn2Key);
-            // Sub fee per referrer from balance to pay and transfer tokens to influencer
-            uint balance = balances[i].sub(feePerReferrerIn2Key);
-            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transfer2KEY(influencers[i], balance);
-            // Sum up to totalDistributed to referrers
-            totalDistributed = totalDistributed.add(balance);
-        }
+    //     // Iterate through all influencers, distribute rewards and sum up the amount received in current cycle
+    //     for(uint i = 0; i < numberOfReferrers; i++) {
+    //         // Require that referrer's earnings are bigger than fees
+    //         require(balances[i] > feePerReferrerIn2Key);
+    //         // Sub fee per referrer from balance to pay and transfer tokens to influencer
+    //         uint balance = balances[i].sub(feePerReferrerIn2Key);
+    //         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+    //             .transfer2KEY(influencers[i], balance);
+    //         // Sum up to totalDistributed to referrers
+    //         totalDistributed = totalDistributed.add(balance);
+    //     }
 
-        transferFeesToAdmin(feePerReferrerIn2Key, numberOfReferrers);
+    //     transferFeesToAdmin(feePerReferrerIn2Key, numberOfReferrers);
 
-        // Set how much is total distributed per distribution cycle
-        PROXY_STORAGE_CONTRACT.setUint(
-            keccak256(_distributionCycle2TotalDistributed, cycleId),
-            totalDistributed
-        );
-    }
+    //     // Set how much is total distributed per distribution cycle
+    //     PROXY_STORAGE_CONTRACT.setUint(
+    //         keccak256(_distributionCycle2TotalDistributed, cycleId),
+    //         totalDistributed
+    //     );
+    // }
 
     /**
      * @notice          Function to transfer fees taken from referrer rewards to admin contract
@@ -639,66 +656,66 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
         ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
     }
 
-    function updateRebalanceNonRebalanceAmount(
-        address[] memory referrerCampaigns,
-        address referrer,
-        uint256 currentRate2KEY
-    )
-    internal
-    returns (uint, uint, uint)
-    {
-        uint referrerTotalPayoutAmount;
-        uint referrerTotalNonRebalancedAmountForCycle;
-        uint amountToBeDistributedInCycleNoRebalanced;
+    // function updateRebalanceNonRebalanceAmount(
+    //     address[] memory referrerCampaigns,
+    //     address referrer,
+    //     uint256 currentRate2KEY
+    // )
+    // internal
+    // returns (uint, uint, uint)
+    // {
+    //     uint referrerTotalPayoutAmount;
+    //     uint referrerTotalNonRebalancedAmountForCycle;
+    //     uint amountToBeDistributedInCycleNoRebalanced;
 
-        // Iterate through campaigns
-        for(uint j = 0; j < referrerCampaigns.length; j++) {
-            // Load campaign address
-            address campaignAddress = referrerCampaigns[j];
+    //     // Iterate through campaigns
+    //     for(uint j = 0; j < referrerCampaigns.length; j++) {
+    //         // Load campaign address
+    //         address campaignAddress = referrerCampaigns[j];
 
-            uint rebalancedAmount;
-            uint nonRebalancedAmount;
+    //         uint rebalancedAmount;
+    //         uint nonRebalancedAmount;
 
-            // Update on plasma campaign contract rebalancing ratio at this moment
-            (rebalancedAmount, nonRebalancedAmount) = ITwoKeyPlasmaCampaign(campaignAddress).computeAndSetRebalancingRatioForReferrer(
-                referrer,
-                currentRate2KEY
-            );
+    //         // Update on plasma campaign contract rebalancing ratio at this moment
+    //         (rebalancedAmount, nonRebalancedAmount) = ITwoKeyPlasmaCampaign(campaignAddress).computeAndSetRebalancingRatioForReferrer(
+    //             referrer,
+    //             currentRate2KEY
+    //         );
 
-            referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(rebalancedAmount);
+    //         referrerTotalPayoutAmount = referrerTotalPayoutAmount.add(rebalancedAmount);
 
-            // Store referrer total non-rebalanced amount
-            referrerTotalNonRebalancedAmountForCycle = referrerTotalNonRebalancedAmountForCycle.add(nonRebalancedAmount);
+    //         // Store referrer total non-rebalanced amount
+    //         referrerTotalNonRebalancedAmountForCycle = referrerTotalNonRebalancedAmountForCycle.add(nonRebalancedAmount);
 
-            // Update total payout to be paid in case there was no rebalancing
-            amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(nonRebalancedAmount);
-        }
+    //         // Update total payout to be paid in case there was no rebalancing
+    //         amountToBeDistributedInCycleNoRebalanced = amountToBeDistributedInCycleNoRebalanced.add(nonRebalancedAmount);
+    //     }
 
-        return (referrerTotalPayoutAmount, referrerTotalNonRebalancedAmountForCycle, amountToBeDistributedInCycleNoRebalanced);
-    }
+    //     return (referrerTotalPayoutAmount, referrerTotalNonRebalancedAmountForCycle, amountToBeDistributedInCycleNoRebalanced);
+    // }
 
-    function getReferrerEarningsAndMarkReferrerPaid(
-        address referrer,
-        address[] memory referrerInProgressCampaigns
-    )
-    internal
-    returns (uint[])
-    {
-        uint[] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
-        for(uint j = 0; j < referrerInProgressCampaigns.length; j++) {
-            // Load campaign address
-            address campaignAddress = referrerInProgressCampaigns[j];
+    // function getReferrerEarningsAndMarkReferrerPaid(
+    //     address referrer,
+    //     address[] memory referrerInProgressCampaigns
+    // )
+    // internal
+    // returns (uint[])
+    // {
+    //     uint[] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
+    //     for(uint j = 0; j < referrerInProgressCampaigns.length; j++) {
+    //         // Load campaign address
+    //         address campaignAddress = referrerInProgressCampaigns[j];
 
-            // Get referrer earnings for this campaign
-            referrerEarningsPerCampaign[j] = ITwoKeyPlasmaCampaign(campaignAddress).getReferrerPlasmaBalance(referrer);
+    //         // Get referrer earnings for this campaign
+    //         referrerEarningsPerCampaign[j] = ITwoKeyPlasmaCampaign(campaignAddress).getReferrerPlasmaBalance(referrer);
 
-            // Mark that referrer got paid his campaign
-            ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
+    //         // Mark that referrer got paid his campaign
+    //         ITwoKeyPlasmaCampaign(campaignAddress).markReferrerReceivedPaymentForThisCampaign(referrer);
 
-        }
+    //     }
 
-        return referrerEarningsPerCampaign;
-    }
+    //     return referrerEarningsPerCampaign;
+    // }
 
 
     function appendToArray(
@@ -1096,13 +1113,13 @@ contract TwoKeyPlasmaCampaignsInventory is Upgradeable {
             // Gets leftover for contractor
             uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignAddressPlasma)));
             // Gets campaigns total 2KEY budget
-            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2initialBudget2Key, campaignAddressPlasma)));
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2Budget2Key, campaignAddressPlasma)));
             // Gets campaigns total amount of Stable coins
-            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2amountOfStableCoins, campaignAddressPlasma)));
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2USDBudget, campaignAddressPlasma)));
             // Gets bounty per conversion in 2KEY
             uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2bountyPerConversion2KEY, campaignAddressPlasma)));
-            // Gets bounty per conversion in USDT
-            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2bountyPerConversionUSDT, campaignAddressPlasma)));
+            // Gets bounty per conversion in USD
+            uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2bountyPerConversionUSD, campaignAddressPlasma)));
             // Gets rebalancing ratio (initial value is 10**18)
             uintValues.push(PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2rebalancingRatio, campaignAddressPlasma)));
             // Gets total referrer rewards

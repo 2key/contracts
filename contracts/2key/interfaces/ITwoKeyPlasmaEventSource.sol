@@ -70,7 +70,7 @@ contract ITwoKeyPlasmaEventSource {
         address campaignAddressPlasma
     ) external;
 
-    function emitAddInventoryUSDT(
+    function emitAddInventoryUSD(
         uint amount,
         uint bountyPerConversionUSD,
         address campaignAddressPlasma

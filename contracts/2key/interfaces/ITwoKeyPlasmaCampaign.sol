@@ -2,17 +2,22 @@ pragma solidity ^0.4.24;
 
 contract ITwoKeyPlasmaCampaign {
 
-    function markReferrerReceivedPaymentForThisCampaign(
+    // function markReferrerReceivedPaymentForThisCampaign(
+    //     address _referrer
+    // )
+    // external;
+
+    function transferReferrerCampaignEarnings(
         address _referrer
     )
     external;
 
-    function computeAndSetRebalancingRatioForReferrer(
-        address _referrer,
-        uint _currentRate2KEY
-    )
-    external
-    returns (uint,uint);
+    // function computeAndSetRebalancingRatioForReferrer(
+    //     address _referrer,
+    //     uint _currentRate2KEY
+    // )
+    // external
+    // returns (uint,uint);
 
     function getActiveInfluencers(
         uint start,
