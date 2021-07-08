@@ -730,13 +730,14 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
         uint amountInUSDOfPurchase = computeAmountInUsd(amountOfTokens, tokenAddress);
 
         // Create path to go through WETH
-        address [] memory path = new address[](2);
+        address [] memory path = new address[](3);
 
         address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
 
         // The path is WETH -> 2KEY
         path[0] = tokenAddress;
-        path[1] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        path[1] = path[0] = IUniswapV2Router02(uniswapRouter).WETH();
+        path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
 
         // Get amount of tokens receiving
