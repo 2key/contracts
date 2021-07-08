@@ -736,7 +736,7 @@ contract TwoKeyUpgradableExchange is Upgradeable, ITwoKeySingletonUtils {
 
         // The path is WETH -> 2KEY
         path[0] = tokenAddress;
-        path[1] = path[0] = IUniswapV2Router02(uniswapRouter).WETH();
+        path[1] = IUniswapV2Router02(uniswapRouter).WETH();
         path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
 
