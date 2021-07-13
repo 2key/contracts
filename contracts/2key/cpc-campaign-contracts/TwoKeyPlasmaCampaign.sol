@@ -60,7 +60,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bytes) converterToSignature;             // If converter has a signature that means that he already converted
     mapping(address => uint) public converterToConversionId;    // Mapping converter to conversion ID he participated to
 
-    bool isBudgetedDirectlyWith2KEY;
+    bool isBudgetedDirectlyWith2KEY; //if this is true, referrerPlasma2TotalEarnings2key will show the referrer 2KEY balance on L2 for this campaign
+    //if the above if false, referrerPlasma2TotalEarnings2key will show the referrer USD balance on L2 for this campaign
 
     uint public activationTimestamp;
     uint public lastChangeTimestamp;
@@ -432,6 +433,14 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         checkIsActiveInfluencerAndAddToQueue(referrerPlasma);
         referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
+        //TODO if there is positive reward being added, and before adding the balance is zero, then update in the main contract that user has balance on this campaign
+        //bytes32 key = keccak256(
+        //                _referrer2pendingCampaignAddresses,
+        //                referrer
+        //            );
+        //
+        //            pushAddressToArray(key, campaignPlasma);
+        //TODO also, once referrer withdraws, set this back to zero (or delete it)
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
     }
@@ -576,26 +585,21 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     returns (uint)
     {
         return referrerPlasma2Balances2key[_referrer];
-        // return (
-        //     rebalanceValue(
-        //         referrerPlasma2Balances2key[_referrer],
-        //         getRebalancingRatioForReferrer(_referrer)
-        //     )
-        // );
+
     }
 
-    // /**
-    //  * @notice          Function to get referrer non rebalanced earnings
-    //  */
-    // function getReferrerNonRebalancedBalance(
-    //     address _referrer
-    // )
-    // public
-    // view
-    // returns (uint)
-    // {
-    //     return referrerPlasma2Balances2key[_referrer];
-    // }
+     /**
+      * @notice          Function to get referrer non rebalanced earnings
+      */
+     function getReferrerNonRebalancedBalance( //TODO getRefererrerRewardsBalance (will be in either 2KEY or USD depending on the budgeteddirectlywith2key)
+         address _referrer
+     )
+     public
+     view
+     returns (uint)
+     {
+         return referrerPlasma2Balances2key[_referrer];
+     }
 
 
     // /**
@@ -657,7 +661,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     function setInitialParamsAndValidateCampaign(
         uint _totalBounty,
         uint _initialRate2KEY,
-        uint _bountyPerConversion2KEY,
+        uint _bountyPerConversion2KEY, //TODO bounty can either be in 2KEY or USD
         bool _isBudgetedDirectlyWith2KEY
     )
     public
@@ -726,7 +730,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @param _referrer referrer address
      * @return (uint, uint) Return USD earnings and 2KEY earnings
      */
-    function transferReferrerCampaignEarnings(
+    function transferReferrerCampaignEarnings( //TODO make sure you update referrerMapping to reflect the balance has been withdrawn
         address _referrer
     )
     public
@@ -738,13 +742,22 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         // transfer token from campaign to referrer
         if (isBudgetedDirectlyWith2KEY) {
             if (amount > 0) {
+                referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].sub(amount);
+
                 ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
                     .transfer2KEYFrom(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventory), _referrer, amount);
+
+                //TODO emit some event for rewards withdrawn
             }
         } else {
             if (amount > 0) {
-                ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+
+                referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].sub(amount);
+
+                ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)) //TODO transfer from the campaign balance not the inventory
                     .transferUSDFrom(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventory), _referrer, amount);
+
+                //TODO emit some event for rewards withdrawn
             }
         }
     }
@@ -850,34 +863,34 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    // /**
-    //  * @notice          Function to get referrer balances, total earnings they have and number
-    //  *                  of conversions created from their link
-    //  *
-    //  * @param           _referrerAddress is the address of the referrer (plasma address)
-    //  * @param           _conversionIds is the array of conversion ids we want earnings for
-    //  */
-    // function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
-    //     address _referrerAddress,
-    //     uint[] _conversionIds
-    // )
-    // public
-    // view
-    // returns (uint,uint,uint,uint[])
-    // {
-    //     uint len = _conversionIds.length;
-    //     uint[] memory rebalancedEarnings = new uint[](len);
+     /**
+      * @notice          Function to get referrer balances, total earnings they have and number
+      *                  of conversions created from their link
+      *
+      * @param           _referrerAddress is the address of the referrer (plasma address)
+      * @param           _conversionIds is the array of conversion ids we want earnings for
+      */
+     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions( //TODO remove here the rebalancing logic
+         address _referrerAddress,
+         uint[] _conversionIds
+     )
+     public
+     view
+     returns (uint,uint,uint,uint[])
+     {
+         uint len = _conversionIds.length;
+         uint[] memory rebalancedEarnings = new uint[](len);
 
-    //     uint rebalancingRatioForInfluencer = getRebalancingRatioForReferrer(_referrerAddress);
+         uint rebalancingRatioForInfluencer = getRebalancingRatioForReferrer(_referrerAddress);
 
-    //     for(uint i=0; i<len; i++) {
-    //         uint conversionId = _conversionIds[i];
-    //         // Since this value is only accessible from here, we won't change it in the state but in the getter
-    //         rebalancedEarnings[i] = rebalanceValue(
-    //             referrerPlasma2EarningsPerConversion[_referrerAddress][conversionId],
-    //             rebalancingRatioForInfluencer
-    //         );
-    //     }
+         for(uint i=0; i<len; i++) {
+             uint conversionId = _conversionIds[i];
+             // Since this value is only accessible from here, we won't change it in the state but in the getter
+             rebalancedEarnings[i] = rebalanceValue(
+                 referrerPlasma2EarningsPerConversion[_referrerAddress][conversionId],
+                 rebalancingRatioForInfluencer
+             );
+         }
 
     //     return (
     //         rebalanceValue(referrerPlasma2Balances2key[_referrerAddress], rebalancingRatioForInfluencer),

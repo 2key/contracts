@@ -166,7 +166,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalanceUSDT(
+    function setUserBalanceUSDT( //rename all USDT on layer2 to USD
         address user,
         uint amount
     )
@@ -182,7 +182,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @param           amount is the amount of the token user deposited
      * @param           signature is message signed by signatory address proofing the deposit was verified
      */
-    function addBalanceUSDT(
+    function addBalanceUSDT( //TODO rename to addBalanaceUSD
         address beneficiary,
         address tokenAddress,
         uint amount,
@@ -214,7 +214,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        saveDepositHistory(amount ,"USDT");
+        saveDepositHistory(amount ,"USDT"); //TODO: change to USD
     }
 
     /**
@@ -316,7 +316,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
-    onlyTwoKeyPlasmaCampaignsInventory
     {
         uint userBalance = get2KEYBalance(msg.sender);
         uint beneficiaryBalance = get2KEYBalance(beneficiary);
@@ -349,12 +348,11 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @param           beneficiary is address to which user is sending funds
      * @param           amount is amount of USDT tokens
      */
-    function transferUSDT(
+    function transferUSDT( //TODO rename to transferUSD
         address beneficiary,
         uint amount
     )
     public
-    onlyTwoKeyPlasmaCampaignsInventory
     {
         uint userBalance = getUSDTBalance(msg.sender);
         uint beneficiaryBalance = getUSDTBalance(beneficiary);
@@ -363,20 +361,20 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         require(userBalance >= amount, "no enough tokens");
 
         // Sets modified users balance -> balance - amount
-        setUserBalanceUSDT(
+        setUserBalanceUSDT( //TODO: rename to USD
             msg.sender,
             userBalance.sub(amount)
         );
 
         // Sets modified beneficiary balance -> balance + amount
-        setUserBalanceUSDT(
+        setUserBalanceUSDT(  //TODO: rename to USD
             beneficiary,
             beneficiaryBalance.add(amount)
         );
 
         // Emit an event that L2_USDT token is transferred.
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
-            .emitTransferUSDTL2(
+            .emitTransferUSDTL2(  //TODO: rename to USD
                 beneficiary,
                 amount
             );
