@@ -549,51 +549,51 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     }
 
 
-    /**
-     * @notice      Function to distribute rewards between influencers,
-     *              increment global cycle id and update value of all time
-     *              distributed rewards from this contract
-     *
-     * @param       influencers is the array of influencers
-     * @param       balances is a corresponding array of balances for influencers
-     */
-    function pushAndDistributeRewardsBetweenInfluencers(
-        address[] influencers,
-        uint[] balances,
-        address campaignAddressPlasma,
-        uint feePerReferrerIn2Key,
-    )
-    public
-    onlyMaintainer
-    {
-        // Address of twoKeyPlasmaAccountManager contract
-        address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
-        // Total distributed in cycle
-        uint totalDistributed;
+    // /**
+    //  * @notice      Function to distribute rewards between influencers,
+    //  *              increment global cycle id and update value of all time
+    //  *              distributed rewards from this contract
+    //  *
+    //  * @param       influencers is the array of influencers
+    //  * @param       balances is a corresponding array of balances for influencers
+    //  */
+    // function pushAndDistributeRewardsBetweenInfluencers(
+    //     address[] influencers,
+    //     uint[] balances,
+    //     address campaignAddressPlasma,
+    //     uint feePerReferrerIn2Key,
+    // )
+    // public
+    // onlyMaintainer
+    // {
+    //     // Address of twoKeyPlasmaAccountManager contract
+    //     address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
+    //     // Total distributed in cycle
+    //     uint totalDistributed;
 
-        // Get number of referrers
-        uint numberOfReferrers = influencers.length;
+    //     // Get number of referrers
+    //     uint numberOfReferrers = influencers.length;
 
-        // Iterate through all influencers, distribute rewards and sum up the amount received in current cycle
-        for(uint i = 0; i < numberOfReferrers; i++) {
-            // Require that referrer's earnings are bigger than fees
-            require(balances[i] > feePerReferrerIn2Key);
-            // Sub fee per referrer from balance to pay and transfer tokens to influencer
-            uint balance = balances[i].sub(feePerReferrerIn2Key);
-            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transfer2KEYFrom(campaignAddressPlasma, influencers[i], balance);
-            // Sum up to totalDistributed to referrers
-            totalDistributed = totalDistributed.add(balance);
-        }
+    //     // Iterate through all influencers, distribute rewards and sum up the amount received in current cycle
+    //     for(uint i = 0; i < numberOfReferrers; i++) {
+    //         // Require that referrer's earnings are bigger than fees
+    //         require(balances[i] > feePerReferrerIn2Key);
+    //         // Sub fee per referrer from balance to pay and transfer tokens to influencer
+    //         uint balance = balances[i].sub(feePerReferrerIn2Key);
+    //         ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+    //             .transfer2KEYFrom(campaignAddressPlasma, influencers[i], balance);
+    //         // Sum up to totalDistributed to referrers
+    //         totalDistributed = totalDistributed.add(balance);
+    //     }
 
-        transferFeesToAdmin(campaignAddressPlasma, feePerReferrerIn2Key, numberOfReferrers);
+    //     transferFeesToAdmin(campaignAddressPlasma, feePerReferrerIn2Key, numberOfReferrers);
 
-        // Set how much is total distributed per distribution cycle
-        PROXY_STORAGE_CONTRACT.setUint(
-            keccak256(_distributionCycle2TotalDistributed),
-            totalDistributed
-        );
-    }
+    //     // Set how much is total distributed per distribution cycle
+    //     PROXY_STORAGE_CONTRACT.setUint(
+    //         keccak256(_distributionCycle2TotalDistributed),
+    //         totalDistributed
+    //     );
+    // }
 
     /**
      * @notice          Function to transfer fees taken from referrer rewards to admin contract
