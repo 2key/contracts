@@ -61,7 +61,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     // // Mapping referrer to how much USD he has in pending
     // string constant _referrer2PayoutUSD = "referrer2PayoutUSD";
     // Mapping referrer to all campaigns that are in progress of distribution
-    string constant _referrer2inProgressCampaignAddress = "referrer2inProgressCampaignAddress";
+    string constant _referrer2inProgressCampaignAddress = "referrer2inProgressCampaignAddress"; //TODO: no need for this, can delete
     // // Mapping referrer to how much rebalanced amount in progress he has
     // string constant _referrer2rebalancedTotalPayout = "referrer2rebalancedTotalPayout";
     // Mapping distribution cycle to referrers being paid in that cycle
@@ -301,7 +301,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
       */
     function withdrawReferrerPendingRewards(
         address referrer,
-        uint feePerReferrerIn2KEY
+        uint feePerReferrerIn2KEY //TODO remove fee
     )
     public
     onlyMaintainer
@@ -314,15 +314,16 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
 
         uint referrerPayoutOfCampaign;
         // Iterate through campaigns
-            for(uint j = 0; j < referrerCampaigns.length; j++) {
+        for(uint j = 0; j < referrerCampaigns.length; j++) {
             // Load campaign address
             address campaignAddress = referrerCampaigns[j];
             // Transfer plasma balance to referrer
-            ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer, feePerReferrerIn2KEY);
+            ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer, feePerReferrerIn2KEY); //TODO: remove fee
             // Transfer fee to admin
-            transferFeesToAdmin(campaignAddressPlasma, feePerReferrerIn2Key, 1);
+            transferFeesToAdmin(campaignAddressPlasma, feePerReferrerIn2Key, 1);//TODO this is l1 logic, no need for it (no fee is taken now)
         }
 
+        //TODO remove this part
         // Move from inProgress to finished campagins
         appendToArray(
             keccak256(_referrer2finishedAndPaidCampaigns, referrer),
@@ -333,8 +334,12 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
         deleteAddressArray(
             keccak256(_referrer2pendingCampaignAddresses, referrer)
         );
+
+        //TODO still missing to add the part where the balance on each campaign is updated back to zero
     }
 
+
+    //TODO can remove this
     function finishDistributionCycle(
         address referrer,
         uint feePerReferrerIn2KEY
@@ -391,7 +396,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @param           totalAmountForReferrerRewards is the total amount before rebalancing referrers earned
      * @param           totalAmountForModeratorRewards is the total amount moderator earned before rebalancing
      */
-    function endCampaignReserveTokensAndRebalanceRates(
+    function endCampaignReserveTokensAndRebalanceRates(  //TODO: rename to endCampaignAndTransferModeratorEArnings
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
         uint totalAmountForModeratorRewards
