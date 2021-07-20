@@ -8,7 +8,7 @@ import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
 import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
-import "../interfaces/ITwoKeyPlasmaCampaignsInventory.sol";
+import "../interfaces/ITwoKeyPlasmaCampaignsInventoryManager.sol";
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 
 import "../libraries/Call.sol";
@@ -84,7 +84,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => bool) isActiveInfluencer;    // Mapping which will say if influencer is active or not
 
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
-    string constant _twoKeyPlasmaCampaignsInventory = "TwoKeyPlasmaCampaignsInventory";
+    string constant _twoKeyPlasmaCampaignsInventoryManager = "TwoKeyPlasmaCampaignsInventoryManager";
 
     /**
      * ------------------------------------------------------------------------------------
@@ -105,8 +105,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
     // Restricting calls only to plasma campaigns inventory contract
-    modifier onlyTwoKeyPlasmaCampaignsInventory {
-        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+    modifier onlyTwoKeyPlasmaCampaignsInventoryManager {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventoryManager"));
         _;
     }
 
@@ -433,14 +433,15 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         checkIsActiveInfluencerAndAddToQueue(referrerPlasma);
         referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
-        //TODO if there is positive reward being added, and before adding the balance is zero, then update in the main contract that user has balance on this campaign
-        //bytes32 key = keccak256(
-        //                _referrer2pendingCampaignAddresses,
-        //                referrer
-        //            );
-        //
-        //            pushAddressToArray(key, campaignPlasma);
-        //TODO also, once referrer withdraws, set this back to zero (or delete it)
+
+        // mark that referrer has pending reward
+        bytes32 key = keccak256(
+            _referrer2pendingCampaignAddresses,
+            referrer
+        );
+
+        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).pushAddressToArray(key, campaignPlasma);
+
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
     }
@@ -572,27 +573,28 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    /**
-     * @notice          Function to get balance of influencer for his plasma address
-     * @param           _referrer is the plasma address of influencer
-     * @return          balance in 2KEY wei's units
-     */
-    function getReferrerPlasmaBalance(
-        address _referrer
-    )
-    public
-    view
-    returns (uint)
-    {
-        return referrerPlasma2Balances2key[_referrer];
+    // /**
+    //  * @notice          Function to get balance of influencer for his plasma address
+    //  * @param           _referrer is the plasma address of influencer
+    //  * @return          balance in 2KEY wei's units
+    //  */
+    // function getReferrerPlasmaBalance(
+    //     address _referrer
+    // )
+    // public
+    // view
+    // returns (uint)
+    // {
+    //     return referrerPlasma2Balances2key[_referrer];
 
-    }
+    // }
 
      /**
       * @notice          Function to get referrer non rebalanced earnings
+      * @dev             Reward will be in either 2KEY or USD depending on the isBudgetedDirectlyWith2KEY
       */
-     function getReferrerNonRebalancedBalance( //TODO getRefererrerRewardsBalance (will be in either 2KEY or USD depending on the budgeteddirectlywith2key)
-         address _referrer
+     function getRefererrerRewardsBalance(
+        address _referrer
      )
      public
      view
@@ -661,11 +663,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     function setInitialParamsAndValidateCampaign(
         uint _totalBounty,
         uint _initialRate2KEY,
-        uint _bountyPerConversion2KEY, //TODO bounty can either be in 2KEY or USD
+        uint _bountyPerConversion2KEY, // bounty can either be in 2KEY or USD
         bool _isBudgetedDirectlyWith2KEY
     )
     public
-    onlyTwoKeyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventoryManager
     {
         // Require that campaign is not previously validated
         require(isValidated == false);
@@ -706,7 +708,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         bool _isBudgetedDirectlyWith2KEY
     )
     public
-    onlyTwoKeyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventoryManager
     {
         // Require that campaign is previously validated
         require(isValidated == true);
@@ -730,35 +732,23 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @param _referrer referrer address
      * @return (uint, uint) Return USD earnings and 2KEY earnings
      */
-    function transferReferrerCampaignEarnings( //TODO make sure you update referrerMapping to reflect the balance has been withdrawn
-        address _referrer
+    function transferReferrerCampaignEarnings(
+        address _referrer,
+        uint _feePerReferrerIn2KEY
     )
     public
-    onlyTwoKeyPlasmaCampaignsInventory
-    returns (uint, uint)
+    onlyTwoKeyPlasmaCampaignsInventoryManager
     {
         uint amount = referrerPlasma2Balances2key[_referrer];
+        require(amount > feePerReferrerIn2Key);
 
         // transfer token from campaign to referrer
         if (isBudgetedDirectlyWith2KEY) {
-            if (amount > 0) {
-                referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].sub(amount);
-
-                ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                    .transfer2KEYFrom(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventory), _referrer, amount);
-
-                //TODO emit some event for rewards withdrawn
-            }
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transfer2KEYFrom(address(this), _referrer, amount);
         } else {
-            if (amount > 0) {
-
-                referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].sub(amount);
-
-                ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)) //TODO transfer from the campaign balance not the inventory
-                    .transferUSDFrom(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventory), _referrer, amount);
-
-                //TODO emit some event for rewards withdrawn
-            }
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)) //TODO transfer from the campaign balance not the inventory
+                .transferUSDFrom(address(this), _referrer, amount);
         }
     }
 
@@ -771,26 +761,30 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     //     uint _currentRate2KEY
     // )
     // public
-    // onlyTwoKeyPlasmaCampaignsInventory
-    // returns (uint,uint)
+    // onlyTwoKeyPlasmaCampaignsInventoryManager
+    // returns (uint, uint)
     // {
+    //     require(_currentRate2KEY != 0, "TwoKeyPlasmaCamapign: Invalid 2KEY rate");
 
     //     uint rebalancingRatio = 10**18;
-
     //     // This is in case inventory NOT added directly as 2KEY
     //     if(isBudgetedDirectlyWith2KEY == false) {
-    //         rebalancingRatio = initialRate2KEY.mul(10**18).div(_currentRate2KEY);
-    //          emit RebalancedValue(
+    //         rebalancingRatio = rebalancingRatio.mul(10**18).div(_currentRate2KEY);
+    //         emit RebalancedValue(
     //             _referrer,
     //             _currentRate2KEY,
     //             rebalancingRatio
-    //          );
+    //         );
     //     }
+
+    //     uint nonRebalancedAmount = referrerPlasma2Balances2key[_referrer];
+    //     uint rebalancedAmount = referrerPlasma2Balances2key[_referrer].mul(rebalancingRatio).div(10**18);
+    //     referrerPlasma2Balances2key[_referrer] = rebalancedAmount;
 
     //     Payment memory p = Payment(rebalancingRatio, block.timestamp, false);
     //     referrerToPayment[_referrer] = p;
 
-    //     return (getReferrerPlasmaBalance(_referrer), referrerPlasma2Balances2key[_referrer]);
+    //     return (rebalancedAmount, nonRebalancedAmount);
     // }
 
     // /**
@@ -801,7 +795,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     //     address _referrer
     // )
     // public
-    // onlyTwoKeyPlasmaCampaignsInventory
+    // onlyTwoKeyPlasmaCampaignsInventoryManager
     // {
     //     // Take current payment structure for the referrer
     //     Payment memory p = referrerToPayment[_referrer];
@@ -876,29 +870,24 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      )
      public
      view
-     returns (uint,uint,uint,uint[])
+     returns (uint, uint, uint, uint[])
      {
          uint len = _conversionIds.length;
-         uint[] memory rebalancedEarnings = new uint[](len);
-
-         uint rebalancingRatioForInfluencer = getRebalancingRatioForReferrer(_referrerAddress);
+         uint[] memory referrerBalances = new uint[](len);
 
          for(uint i=0; i<len; i++) {
              uint conversionId = _conversionIds[i];
              // Since this value is only accessible from here, we won't change it in the state but in the getter
-             rebalancedEarnings[i] = rebalanceValue(
-                 referrerPlasma2EarningsPerConversion[_referrerAddress][conversionId],
-                 rebalancingRatioForInfluencer
-             );
+             referrerBalances[i] = referrerPlasma2EarningsPerConversion[_referrerAddress][conversionId];
          }
 
-    //     return (
-    //         rebalanceValue(referrerPlasma2Balances2key[_referrerAddress], rebalancingRatioForInfluencer),
-    //         rebalanceValue(referrerPlasma2TotalEarnings2key[_referrerAddress], rebalancingRatioForInfluencer),
-    //         referrerPlasmaAddressToCounterOfConversions[_referrerAddress],
-    //         rebalancedEarnings
-    //     );
-    // }
+        return (
+            referrerPlasma2Balances2key[_referrerAddress],
+            referrerPlasma2TotalEarnings2key[_referrerAddress],
+            referrerPlasmaAddressToCounterOfConversions[_referrerAddress],
+            referrerBalances
+        );
+    }
 
     /**
      * @notice          Function to get available bounty at the moment

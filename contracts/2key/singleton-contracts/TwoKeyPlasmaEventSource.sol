@@ -162,10 +162,23 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
         uint amount
     );
 
-    event TransferUSDTL2(
+    event TransferUSDL2(
         address beneficiary,
         uint amount
     );
+
+    event TransferFrom2KEYL2(
+        address from,
+        address to,
+        uint amount
+    );
+
+    event TransferFromUSDL2(
+        address from,
+        address to,
+        uint amount
+    );
+
 
     event AddInventory2KEY(
         uint amount,
@@ -540,7 +553,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     )
     public
     {
-        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventoryManager"));
 
         emit EndedBudgetCampaign(
             campaignPlasmaAddress,
@@ -559,7 +572,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     )
     public
     {
-        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventoryManager"));
 
         emit RebalancedRewards(
             cycleId,
@@ -603,7 +616,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     /**
      * @notice          Function that emits L2_USDT is transferred
      */
-    function emitTransferUSDTL2(
+    function emitTransferUSDL2(
         address beneficiary,
         uint amount
     )
@@ -611,8 +624,46 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     {
         require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaAccountManager"));
 
-        emit TransferUSDTL2(
+        emit TransferUSDL2(
             beneficiary,
+            amount
+        );
+    }
+
+    /**
+     * @notice          Function that emits the L2_2KEY is transferred from
+     */
+    function emitTransferFrom2KEYL2(
+        uint from,
+        uint to,
+        address amount
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaign"));
+
+        emit TransferFrom2KEYL2(
+            from,
+            to,
+            amount
+        );
+    }
+
+    /**
+     * @notice          Function that emits the L2_USD is transferred from
+     */
+    function emitTransferFromUSDL2(
+        uint from,
+        uint to,
+        address amount
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaign"));
+
+        emit TransferFromUSDL2(
+            from,
+            to,
             amount
         );
     }
@@ -627,7 +678,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     )
     public
     {
-        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventoryManager"));
 
         emit AddInventory2KEY(
             amount,
@@ -646,7 +697,7 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
     )
     public
     {
-        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory"));
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventoryManager"));
 
         emit AddInventoryUSD(
             amount,

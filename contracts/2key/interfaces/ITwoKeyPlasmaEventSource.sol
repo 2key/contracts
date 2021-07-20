@@ -59,9 +59,21 @@ contract ITwoKeyPlasmaEventSource {
         uint amount
     ) external;
 
-    function emitTransferUSDTL2( //TODO: rename to USD
+    function emitTransferUSDL2(
         address beneficiary,
         uint amount
+    ) external;
+
+    function emitTransferFrom2KEYL2(
+        uint from,
+        uint to,
+        address amount
+    ) external;
+
+    function emitTransferFromUSDL2(
+        uint from,
+        uint to,
+        address amount
     ) external;
 
     function emitAddInventory2KEY(
