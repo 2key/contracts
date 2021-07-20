@@ -75,9 +75,9 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	    _;
 	}
 
-	modifier onlyTwoKeyPlasmaCampaignsInventory {
-		address twoKeyPlasmaCampaignsInventory = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventory");
-		require(msg.sender == twoKeyPlasmaCampaignsInventory);
+	modifier onlyTwoKeyPlasmaCampaignsInventoryManager {
+		address twoKeyPlasmaCampaignsInventoryManager = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventoryManager");
+		require(msg.sender == twoKeyPlasmaCampaignsInventoryManager);
 		_;
 	}
 
@@ -498,7 +498,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		address campaignPlasma
 	)
 	public
-	onlyTwoKeyPlasmaCampaignsInventory
+	onlyTwoKeyPlasmaCampaignsInventoryManager
 	{
 		updateTokensReceivedAsModeratorInternal(amountOfTokens, campaignPlasma);
 	}
@@ -511,7 +511,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		uint amountOfTokens
 	)
 	public
-	onlyTwoKeyPlasmaCampaignsInventory
+	onlyTwoKeyPlasmaCampaignsInventoryManager
 	{
 		uint amountCollected = getAmountOfTokensReceivedFromDistributionFees();
 

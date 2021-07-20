@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-contract ITwoKeyPlasmaCampaignsInventory {
+contract ITwoKeyPlasmaCampaignsInventoryManager {
     function addInventory2KEY(
         uint amount,
         uint bountyPerConversionUSD,
@@ -22,20 +22,45 @@ contract ITwoKeyPlasmaCampaignsInventory {
     )
     external;
 
-    function withdrawLeftoverForContractor(
-        address campaignPlasmaAddress
+    function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
+        address referrer,
+        uint currentRate2KEY
+    )
+    external;
+
+    function finishDistributionCycle(
+        address referrer,
+        uint feePerReferrerIn2KEY
     )
     external;
 
     function pushAndDistributeRewardsBetweenInfluencers(
         address [] influencers,
         uint [] balances,
-        uint nonRebalancedTotalPayout,
-        uint rebalancedTotalPayout,
-        uint cycleId,
+        address campaignAddressPlasma,
         uint feePerReferrerIn2Key
     )
     external;
+
+    function getReferrerEarningsNonRebalanced(
+        address referrer
+    )
+    external
+    view
+    returns (uint);
+
+    function getReferrerEarningsRebalanced(
+        address referrer
+    )
+    public
+    view
+    returns (uint)
+
+    function getCampaignsInProgressOfDistribution(
+        address referrer
+    )
+    external
+    returns (address[]);
 
     function getCampaignInformation(
         address campaignAddressPlasma

@@ -22,7 +22,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     bool initialized;
 
     string constant _twoKeyPlasmaMaintainersRegistry = "TwoKeyPlasmaMaintainersRegistry";
-    string constant _twoKeyPlasmaCampaignsInventory = "TwoKeyPlasmaCampaignsInventory";
+    string constant _twoKeyPlasmaCampaignsInventoryManager = "TwoKeyPlasmaCampaignsInventoryManager";
     string constant _messageNotes = "signUserDepositTokens";
 
     // Accounting
@@ -30,7 +30,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     string constant _userToDepositAmount = "userToDepositAmount"; // deposit amounts
     string constant _userToDepositCurrency = "userToDepositCurrency"; // deposit currency
 
-    string constant _userToUSDTBalance = "userToUSDTBalance";
+    string constant _userToUSDBalance = "userToUSDBalance";
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
     string constant _tokenAddress = "tokenAddress";
 
@@ -66,9 +66,9 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     /**
      * @notice          Modifier which will be used to restrict calls to only PlasmaCampaignsInventory contract
      */
-    modifier onlyTwoKeyPlasmaCampaignsInventory {
-        address twoKeyPlasmaCampaignsInventory = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventory);
-        require(msg.sender == twoKeyPlasmaCampaignsInventory);
+    modifier onlyTwoKeyPlasmaCampaignsInventoryManager {
+        address twoKeyPlasmaCampaignsInventoryManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventoryManager);
+        require(msg.sender == twoKeyPlasmaCampaignsInventoryManager);
         _;
     }
 
@@ -161,28 +161,28 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice          Internal function to set user balances in USDT
+     * @notice          Internal function to set user balances in USD
      * @dev             On layer2 it's given by L2_USD token
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalanceUSDT( //rename all USDT on layer2 to USD
+    function setUserBalanceUSD(
         address user,
         uint amount
     )
     internal
     {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToUSDTBalance, user), amount);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToUSDBalance, user), amount);
     }
 
     /**
-     * @notice          Function to add balance in USDT for a user
+     * @notice          Function to add balance in USD for a user
      * @param           beneficiary is user address
      * @param           tokenAddress is the address of the token to add the balance on L2
      * @param           amount is the amount of the token user deposited
      * @param           signature is message signed by signatory address proofing the deposit was verified
      */
-    function addBalanceUSDT( //TODO rename to addBalanaceUSD
+    function addBalanceUSD(
         address beneficiary,
         address tokenAddress,
         uint amount,
@@ -206,15 +206,15 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         // Assert that this signature is created by signatory address
         require(messageSigner == registry.getSignatoryAddress());
 
-        uint userBalance = getUSDTBalance(beneficiary);
+        uint userBalance = getUSDBalance(beneficiary);
 
         // Allocate more funds for user
-        setUserBalanceUSDT(
+        setUserBalanceUSD(
             beneficiary,
             userBalance.add(amount)
         );
 
-        saveDepositHistory(amount ,"USDT"); //TODO: change to USD
+        saveDepositHistory(amount ,"USD");
     }
 
     /**
@@ -344,37 +344,37 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice          Function that transfers USDT from users balance to beneficiary
+     * @notice          Function that transfers USD from users balance to beneficiary
      * @param           beneficiary is address to which user is sending funds
-     * @param           amount is amount of USDT tokens
+     * @param           amount is USD amount
      */
-    function transferUSDT( //TODO rename to transferUSD
+    function transferUSD(
         address beneficiary,
         uint amount
     )
     public
     {
-        uint userBalance = getUSDTBalance(msg.sender);
-        uint beneficiaryBalance = getUSDTBalance(beneficiary);
+        uint userBalance = getUSDBalance(msg.sender);
+        uint beneficiaryBalance = getUSDBalance(beneficiary);
 
         // Check if user has enough funds to perform transaction
         require(userBalance >= amount, "no enough tokens");
 
         // Sets modified users balance -> balance - amount
-        setUserBalanceUSDT( //TODO: rename to USD
+        setUserBalanceUSD(
             msg.sender,
             userBalance.sub(amount)
         );
 
         // Sets modified beneficiary balance -> balance + amount
-        setUserBalanceUSDT(  //TODO: rename to USD
+        setUserBalanceUSD(
             beneficiary,
             beneficiaryBalance.add(amount)
         );
 
-        // Emit an event that L2_USDT token is transferred.
+        // Emit an event that L2_USD token is transferred.
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
-            .emitTransferUSDTL2(  //TODO: rename to USD
+            .emitTransferUSDL2(
                 beneficiary,
                 amount
             );
@@ -389,7 +389,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
-    onlyTwoKeyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventoryManager
     {
         // Get users balance
         uint fromBalance = get2KEYBalance(from);
@@ -402,10 +402,18 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         setUserBalance2KEY(from, fromBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
         setUserBalance2KEY(to, toBalance.add(amount));
+
+        // Emit an event that L2_2KEY token is transferred.
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitTransferFrom2KEYL2(
+                from,
+                to,
+                amount
+            );
     }
 
     /**
-     * @notice    Function that allocates specified amount of USDT from one users balance to another's
+     * @notice    Function that allocates specified amount of USD from one users balance to another's
      */
     function transferUSDFrom(
         address from,
@@ -413,19 +421,26 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         uint amount
     )
     public
-    onlyTwoKeyPlasmaCampaignsInventory
+    onlyTwoKeyPlasmaCampaignsInventoryManager
     {
         // Get users balance
-        uint fromBalance = getUSDTBalance(from);
+        uint fromBalance = getUSDBalance(from);
         // Get contract balance
-        uint toBalance = getUSDTBalance(to);
+        uint toBalance = getUSDBalance(to);
 
         // Check if user has enough funds for this action
         require(fromBalance > amount);
 
-        setUserBalanceUSDT(from, fromBalance.sub(amount));
+        setUserBalanceUSD(from, fromBalance.sub(amount));
         // msg.sender is always the address of plasma campaigns inventory contract
-        setUserBalanceUSDT(to, toBalance.add(amount));
+        setUserBalanceUSD(to, toBalance.add(amount));
+
+        ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
+            .emitTransferFromUSDL2(
+                from,
+                to,
+                amount
+            );
     }
 
 
@@ -441,25 +456,25 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice          Function to get balances of user in USDT
+     * @notice          Function to get balances of user in USD
      */
-    function getUSDTBalance(address user)
+    function getUSDBalance(address user)
     public
     view
     returns (uint)
     {
-        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userToUSDTBalance, user));
+        return PROXY_STORAGE_CONTRACT.getUint(keccak256(_userToUSDBalance, user));
     }
 
     /**
-     * @notice          Function to get denomination of USDT
+     * @notice          Function to get denomination of USD
      */
-    function getUSDTDecimals()
+    function getUSDDecimals()
     public
     view
     returns (uint)
     {
-        // L2_USDT has 18 decimals for the convenient
+        // L2_USD has 18 decimals for the convenient
         return 18;
     }
 
