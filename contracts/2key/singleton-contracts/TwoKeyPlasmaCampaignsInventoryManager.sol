@@ -312,6 +312,12 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
         uint referrerTotalPayout2KEY;
 
         uint referrerPayoutOfCampaign;
+
+        // Delete array of inProgress campaigns
+        deleteAddressArray(
+            keccak256(_referrer2pendingCampaignAddresses, referrer)
+        );
+
         // Iterate through campaigns
         for(uint j = 0; j < referrerCampaigns.length; j++) {
             // Load campaign address
@@ -319,6 +325,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             // Transfer plasma balance to referrer
             ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer);
         }
+
     }
 
 
@@ -380,8 +387,8 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      */
     function endCampaignAndTransferModeratorEarnings(
         address campaignPlasma,
-        uint totalAmountForReferrerRewards,
-        uint totalAmountForModeratorRewards
+        uint totalAmountForReferrerRewards, //TODO remove from input, take directly from campaign contract
+        uint totalAmountForModeratorRewards //TODO remove from input, take directly from campaign contract
     )
     public
     onlyMaintainer
@@ -405,7 +412,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
         uint leftoverForContractor = initialBountyForCampaign.sub(totalAmountForReferrerRewards).sub(totalAmountForModeratorRewards);
 
         // Set moderator earnings for this campaign and immediately distribute them
-        setAndDistributeModeratorEarnings(campaignPlasma, totalAmountForModeratorRewards);
+        setAndDistributeModeratorEarnings(campaignPlasma, totalAmountForModeratorRewards); //TODO this function should withdraw moderator earnings from campaign contract on L2 and put it on the balance of congress on L2 on the account manager
 
         // Set total amount to use for referrers
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignPlasma), totalAmountForReferrerRewards);
@@ -420,6 +427,9 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
                 totalAmountForModeratorRewards
             );
     }
+
+    //TODO: function for contractor to withdraw their leftover budget on L2
+
 
     // /**
     //  * @notice      Function to rebalance the rates
@@ -456,7 +466,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      */
     function setAndDistributeModeratorEarnings(
         address campaignPlasma,
-        uint rebalancedModeratorRewards
+        uint rebalancedModeratorRewards //TODO: remove this we don't do rebalancing at this stage
     )
     internal
     {
@@ -464,7 +474,9 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma), rebalancedModeratorRewards);
 
         // Address to transfer moderator (2key admin contract) earnings to
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"); //should go to the balance of the plasma congress on L2 account manager
+        //TODO make sure there is a method for a maintainer to transfer funds from plasma congress on L2 and withdraw them to the admin contract on L1
+        //TODO should be some permissioned function, where funds on L1 treasury can be withdrawn to the admin contract using a maintainer + signatory.
 
         if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == true) {
             // Transfer 2KEY tokens to moderator
