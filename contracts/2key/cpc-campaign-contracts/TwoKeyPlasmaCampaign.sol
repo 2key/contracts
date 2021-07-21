@@ -432,15 +432,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     internal
     {
         referrerPlasma2Balances2key[referrerPlasma] = 0;
-
-        // mark that referrer has pending reward
-        bytes32 key = keccak256(
-            _referrer2pendingCampaignAddresses,
-            referrerPlasma
-        );
-
-        ITwoKeyPlasmaCampaignsInventoryManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventoryManager))
-            .deleteAddressArray(key);
     }
 
 
@@ -765,7 +756,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @param _referrer referrer address
      * @return (uint, uint) Return USD earnings and 2KEY earnings
      */
-    function transferReferrerCampaignEarnings(
+    function transferReferrerCampaignEarnings( //TODO: rename: withdrawReferrerCamapignEarningsL2
         address _referrer
     )
     public
