@@ -15,56 +15,47 @@ contract ITwoKeyPlasmaCampaignsInventoryManager {
     )
     external;
 
-    function endCampaignReserveTokensAndRebalanceRates(
+    function endCampaignAndTransferModeratorEarnings(
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
         uint totalAmountForModeratorRewards
     )
     external;
 
-    function rebalanceInfluencerRatesAndPrepareForRewardsDistribution(
-        address referrer,
-        uint currentRate2KEY
+    function withdrawReferrerPendingRewards(
+        address referrer
     )
     external;
 
-    function finishDistributionCycle(
-        address referrer,
-        uint feePerReferrerIn2KEY
+    function getCampaignsReferrerHasPendingBalances(
+        address referrer
     )
-    external;
+    external
+    view
+    returns (address[]);
 
-    function pushAndDistributeRewardsBetweenInfluencers(
-        address [] influencers,
-        uint [] balances,
-        address campaignAddressPlasma,
-        uint feePerReferrerIn2Key
-    )
-    external;
-
-    function getReferrerEarningsNonRebalanced(
+    function getTotalReferrerPendingAmount(
         address referrer
     )
     external
     view
     returns (uint);
 
-    function getReferrerEarningsRebalanced(
-        address referrer
+    function pushAddressToArray(
+        bytes32 key,
+        address value
     )
-    public
-    view
-    returns (uint)
+    external;
 
-    function getCampaignsInProgressOfDistribution(
-        address referrer
+    function deleteAddressArray(
+        bytes32 key
     )
-    external
-    returns (address[]);
+    external;
 
     function getCampaignInformation(
         address campaignAddressPlasma
     )
     external
-    view;
+    view
+    returns(address, uint[], bool[]);
 }
