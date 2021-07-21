@@ -20,6 +20,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     uint constant N = 2048;  //constant number
     IncentiveModel incentiveModel;  //Incentive model for rewards
 
+    // Mapping referrer to all campaigns he participated at and are having pending distribution
+    string constant _referrer2pendingCampaignAddresses = "referrer2pendingCampaignAddresses";
+
 
     // struct Payment {
     //     uint rebalancingRatio;
@@ -418,26 +421,26 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Internal function to update referrer mappings
+     * @notice          Internal function to initialize referrer mappings with 0 when the referrer withdraws his reward
      * @param           referrerPlasma is referrer plasma address
      * @param           reward is the reward referrer received
      * @param           conversionId is the id of conversion for which influencer gets rewarded
      */
     function updateReferrerMappingsOnWithdrawal(
-        address referrerPlasma,
+        address referrerPlasma
     )
     internal
     {
         referrerPlasma2Balances2key[referrerPlasma] = 0;
 
-        //TODO only add to the if isNewBalance == True
         // mark that referrer has pending reward
         bytes32 key = keccak256(
             _referrer2pendingCampaignAddresses,
-            referrer
+            referrerPlasma
         );
 
-        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).removeAddressFromArray(key, campaignPlasma);
+        ITwoKeyPlasmaCampaignsInventoryManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventoryManager))
+            .deleteAddressArray(key);
     }
 
 
@@ -456,18 +459,21 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     {
         checkIsActiveInfluencerAndAddToQueue(referrerPlasma);
 
-        //TODO mark boolean isNewBalance = True if referrerPlasma2Balances2key[referrerPlasma] == 0 (before adding)
+        bool isNewBalance = referrerPlasma2Balances2key[referrerPlasma] == 0;
+
         referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
 
-        //TODO only add to the if isNewBalance == True
-        // mark that referrer has pending reward
-        bytes32 key = keccak256(
-            _referrer2pendingCampaignAddresses,
-            referrer
-        );
+        if (isNewBalance) {
+            // mark that referrer has pending reward
+            bytes32 key = keccak256(
+                _referrer2pendingCampaignAddresses,
+                referrerPlasma
+            );
 
-        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).pushAddressToArray(key, campaignPlasma);
+            ITwoKeyPlasmaCampaignsInventoryManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventoryManager))
+                .pushAddressToArray(key, address(this));
+        }
 
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
@@ -760,24 +766,23 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @return (uint, uint) Return USD earnings and 2KEY earnings
      */
     function transferReferrerCampaignEarnings(
-        address _referrer,
-        uint _feePerReferrerIn2KEY //TODO remove fee
+        address _referrer
     )
     public
     onlyTwoKeyPlasmaCampaignsInventoryManager
     {
         uint amount = referrerPlasma2Balances2key[_referrer];
-        require(amount > feePerReferrerIn2Key); //TODO remove fee
 
         // transfer token from campaign to referrer
         if (isBudgetedDirectlyWith2KEY) {
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
                 .transfer2KEYFrom(address(this), _referrer, amount);
         } else {
-            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)) //TODO transfer from the campaign balance not the inventory
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
                 .transferUSDFrom(address(this), _referrer, amount);
         }
-        //TODO Update balance to zero in campaign mappings and also remove campaign from array of campaigns with pending rewards
+        
+        updateReferrerMappingsOnWithdrawal();
     }
 
     // /**

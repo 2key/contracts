@@ -61,7 +61,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     // // Mapping referrer to how much USD he has in pending
     // string constant _referrer2PayoutUSD = "referrer2PayoutUSD";
     // Mapping referrer to all campaigns that are in progress of distribution
-    string constant _referrer2inProgressCampaignAddress = "referrer2inProgressCampaignAddress"; //TODO: no need for this, can delete
+    // string constant _referrer2inProgressCampaignAddress = "referrer2inProgressCampaignAddress";
     // // Mapping referrer to how much rebalanced amount in progress he has
     // string constant _referrer2rebalancedTotalPayout = "referrer2rebalancedTotalPayout";
     // Mapping distribution cycle to referrers being paid in that cycle
@@ -267,7 +267,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
 
     //         pushAddressToArray(key, campaignPlasma);
     //     }
-    }
+    // }
 
     // /**
     //  * @notice          At the point when we want to do the payment
@@ -300,8 +300,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
       * @notice          At the point when we want to do the payment
       */
     function withdrawReferrerPendingRewards(
-        address referrer,
-        uint feePerReferrerIn2KEY //TODO remove fee
+        address referrer
     )
     public
     onlyMaintainer
@@ -318,72 +317,55 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             // Load campaign address
             address campaignAddress = referrerCampaigns[j];
             // Transfer plasma balance to referrer
-            ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer, feePerReferrerIn2KEY); //TODO: remove fee
-            // Transfer fee to admin
-            transferFeesToAdmin(campaignAddressPlasma, feePerReferrerIn2Key, 1);//TODO this is l1 logic, no need for it (no fee is taken now)
+            ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer);
         }
-
-        //TODO remove this part
-        // Move from inProgress to finished campagins
-        appendToArray(
-            keccak256(_referrer2finishedAndPaidCampaigns, referrer),
-            keccak256(_referrer2pendingCampaignAddresses, referrer)
-        );
-
-        // Delete array of inProgress campaigns
-        deleteAddressArray(
-            keccak256(_referrer2pendingCampaignAddresses, referrer)
-        );
-
-        //TODO still missing to add the part where the balance on each campaign is updated back to zero
     }
 
 
-    //TODO can remove this
-    function finishDistributionCycle(
-        address referrer,
-        uint feePerReferrerIn2KEY
-    )
-    public
-    onlyMaintainer
-    {
-        // address[] memory referrers = getReferrersForCycleId(cycleId);
+    // function finishDistributionCycle(
+    //     address referrer,
+    //     uint feePerReferrerIn2KEY
+    // )
+    // public
+    // onlyMaintainer
+    // {
+    //     // address[] memory referrers = getReferrersForCycleId(cycleId);
 
-        // uint i;
+    //     // uint i;
 
-        address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
-        // Iterate through all referrers
-        // for(i=0; i<referrers.length; i++) {
-        //     // Take referrer address
-        //     address referrer = referrers[i];
+    //     address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource");
+    //     // Iterate through all referrers
+    //     // for(i=0; i<referrers.length; i++) {
+    //     //     // Take referrer address
+    //     //     address referrer = referrers[i];
 
-            address [] memory referrerInProgressCampaigns = getCampaignsInProgressOfDistribution(referrer);
-            // Create array of referrer earnings per campaign
-            uint [] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
-            // Get referrer earnings for this campaign and mark referrel got paid his campaign
-            referrerEarningsPerCampaign = getReferrerEarningsAndMarkReferrerPaid(referrer, referrerInProgressCampaigns);
+    //         address [] memory referrerInProgressCampaigns = getCampaignsInProgressOfDistribution(referrer);
+    //         // Create array of referrer earnings per campaign
+    //         uint [] memory referrerEarningsPerCampaign = new uint [](referrerInProgressCampaigns.length);
+    //         // Get referrer earnings for this campaign and mark referrel got paid his campaign
+    //         referrerEarningsPerCampaign = getReferrerEarningsAndMarkReferrerPaid(referrer, referrerInProgressCampaigns);
 
-            ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(
-                referrer,
-                getReferrerEarningsNonRebalanced(referrer), //amount non rebalanced referrer earned
-                getReferrerEarningsRebalanced(referrer), // amount paid to referrer
-                referrerInProgressCampaigns,
-                referrerEarningsPerCampaign,
-                feePerReferrerIn2KEY
-            );
+    //         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPaidPendingRewards(
+    //             referrer,
+    //             getReferrerEarningsNonRebalanced(referrer), //amount non rebalanced referrer earned
+    //             getReferrerEarningsRebalanced(referrer), // amount paid to referrer
+    //             referrerInProgressCampaigns,
+    //             referrerEarningsPerCampaign,
+    //             feePerReferrerIn2KEY
+    //         );
 
-            // Move from inProgress to finished campagins
-            appendToArray(
-                keccak256(_referrer2finishedAndPaidCampaigns, referrer),
-                keccak256(_referrer2inProgressCampaignAddress, referrer)
-            );
+    //         // Move from inProgress to finished campagins
+    //         appendToArray(
+    //             keccak256(_referrer2finishedAndPaidCampaigns, referrer),
+    //             keccak256(_referrer2inProgressCampaignAddress, referrer)
+    //         );
 
-            // Delete array of inProgress campaigns
-            deleteAddressArray(
-                keccak256(_referrer2inProgressCampaignAddress, referrer)
-            );
-        // }
-    }
+    //         // Delete array of inProgress campaigns
+    //         deleteAddressArray(
+    //             keccak256(_referrer2inProgressCampaignAddress, referrer)
+    //         );
+    //     // }
+    // }
 
 
 
@@ -396,7 +378,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @param           totalAmountForReferrerRewards is the total amount before rebalancing referrers earned
      * @param           totalAmountForModeratorRewards is the total amount moderator earned before rebalancing
      */
-    function endCampaignReserveTokensAndRebalanceRates(  //TODO: rename to endCampaignAndTransferModeratorEArnings
+    function endCampaignAndTransferModeratorEarnings(
         address campaignPlasma,
         uint totalAmountForReferrerRewards,
         uint totalAmountForModeratorRewards
@@ -418,72 +400,52 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             // if campaign was budgeted with stable coin
             initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2BudgetUSD, campaignPlasma));
         }
-        // Rebalancing everything except referrer rewards
-        uint amountToRebalance = initialBountyForCampaign.sub(totalAmountForReferrerRewards);
-        // Amount after rebalancing is initially amount to rebalance
-        uint amountAfterRebalancing = amountToRebalance;
-        // Initially rebalanced moderator rewards are total moderator rewards
-        uint rebalancedModeratorRewards = totalAmountForModeratorRewards;
-        // Initial ratio is 10**18
-        uint rebalancingRatio = 10**18;
 
-        // We do rebalancing if campaign was not directly budgeted with 2KEY
-        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == false) {
-            // Rebalance rates
-            (amountAfterRebalancing, rebalancingRatio)
-                = rebalanceRates(
-                    amountToRebalance
-                );
-            // Get rebalanced value of totalAmountForModeratorRewards
-            rebalancedModeratorRewards = totalAmountForModeratorRewards.mul(rebalancingRatio).div(10**18);
-        }
-
-        uint leftoverForContractor = amountAfterRebalancing.sub(rebalancedModeratorRewards);
+        // Get leftover for the contractor
+        uint leftoverForContractor = initialBountyForCampaign.sub(totalAmountForReferrerRewards).sub(totalAmountForModeratorRewards);
 
         // Set moderator earnings for this campaign and immediately distribute them
-        setAndDistributeModeratorEarnings(campaignPlasma, rebalancedModeratorRewards);
+        setAndDistributeModeratorEarnings(campaignPlasma, totalAmountForModeratorRewards);
 
         // Set total amount to use for referrers
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignPlasma), totalAmountForReferrerRewards);
         // Leftover for contractor
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignPlasma), leftoverForContractor);
-        // Set rebalancing ratio for campaign
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2rebalancingRatio, campaignPlasma), rebalancingRatio);
 
         // Emit an event to checksum all the balances per campaign
         ITwoKeyPlasmaEventSource(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaEventSource"))
             .emitEndedBudgetCampaign(
                 campaignPlasma,
                 leftoverForContractor,
-                rebalancedModeratorRewards
+                totalAmountForModeratorRewards
             );
     }
 
-    /**
-     * @notice      Function to rebalance the rates
-     *
-     * @param       amountOfTokensToRebalance is number of tokens left
-     */
-    function rebalanceRates(
-        uint amountOfTokensToRebalance
-    )
-    internal
-    returns (uint, uint)
-    {
-        address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
+    // /**
+    //  * @notice      Function to rebalance the rates
+    //  *
+    //  * @param       amountOfTokensToRebalance is number of tokens left
+    //  */
+    // function rebalanceRates(
+    //     uint amountOfTokensToRebalance
+    // )
+    // internal
+    // returns (uint, uint)
+    // {
+    //     address twoKeyPlasmaAccountManager = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager);
 
-        // Take the current usd to 2KEY rate against we're rebalancing contractor leftover and moderator rewards
-        uint usd2KEYRateWeiNow = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaExchangeRate"))
-            .getPairValue("2KEY-USD");
+    //     // Take the current usd to 2KEY rate against we're rebalancing contractor leftover and moderator rewards
+    //     uint usd2KEYRateWeiNow = ITwoKeyPlasmaExchangeRate(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaExchangeRate"))
+    //         .getPairValue("2KEY-USD");
 
-        uint rebalancingRatio = usd2KEYRateWeiNow;
+    //     uint rebalancingRatio = usd2KEYRateWeiNow;
 
-        // Calculate rebalanced amount of tokens
-        uint rebalancedAmount = amountOfTokensToRebalance.mul(rebalancingRatio).div(10**18);
+    //     // Calculate rebalanced amount of tokens
+    //     uint rebalancedAmount = amountOfTokensToRebalance.mul(rebalancingRatio).div(10**18);
         
-        // Return rebalanced amount as well as ratio against which rebalancing was done.
-        return (rebalancedAmount, rebalancingRatio);
-    }
+    //     // Return rebalanced amount as well as ratio against which rebalancing was done.
+    //     return (rebalancedAmount, rebalancingRatio);
+    // }
 
 
     /**
@@ -504,12 +466,21 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
         // Address to transfer moderator (2key admin contract) earnings to
         address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
-        // Transfer 2KEY tokens to moderator
-        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEYFrom(
-            campaignPlasma,
-            twoKeyAdmin,
-            rebalancedModeratorRewards
-        );
+        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == true) {
+            // Transfer 2KEY tokens to moderator
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEYFrom(
+                campaignPlasma,
+                twoKeyAdmin,
+                rebalancedModeratorRewards
+            );
+        } else {
+            // Transfer USD tokens to moderator
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transferUSDFrom(
+                campaignPlasma,
+                twoKeyAdmin,
+                rebalancedModeratorRewards
+            );
+        }
 
         // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
         ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(rebalancedModeratorRewards, campaignPlasma);
@@ -540,12 +511,21 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
         // Set value that contractor did perform the withdraw
         PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignPlasmaAddress), true);
         // Perform transfer of leftover to contractor
-        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-            .transfer2KEYFrom(
-                campaignPlasmaAddress,
-                msg.sender,
-                leftoverForContractor
-            );
+        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasmaAddress)) == true) {
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transferUSDFrom(
+                    campaignPlasmaAddress,
+                    msg.sender,
+                    leftoverForContractor
+                );
+        } else {
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transfer2KEYFrom(
+                    campaignPlasmaAddress,
+                    msg.sender,
+                    leftoverForContractor
+                );
+        }
     }
 
 
@@ -595,30 +575,30 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     //     );
     // }
 
-    /**
-     * @notice          Function to transfer fees taken from referrer rewards to admin contract
-     * @param           feePerReferrer is fee taken per referrer equaling 0.5$ in 2KEY at the moment
-     * @param           numberOfReferrers is number of referrers being rewarded in this cycle
-     */
-    function transferFeesToAdmin(
-        address campaignAddressPlasma,
-        uint feePerReferrer,
-        uint numberOfReferrers
-    )
-    internal
-    {
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+    // /**
+    //  * @notice          Function to transfer fees taken from referrer rewards to admin contract
+    //  * @param           feePerReferrer is fee taken per referrer equaling 0.5$ in 2KEY at the moment
+    //  * @param           numberOfReferrers is number of referrers being rewarded in this cycle
+    //  */
+    // function transferFeesToAdmin(
+    //     address campaignAddressPlasma,
+    //     uint feePerReferrer,
+    //     uint numberOfReferrers
+    // )
+    // internal
+    // {
+    //     address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
-        // Transfer 2KEY tokens to moderator
-        ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEYFrom(
-            campaignAddressPlasma,
-            twoKeyAdmin,
-            feePerReferrer.mul(numberOfReferrers)
-        );
+    //     // Transfer 2KEY tokens to moderator
+    //     ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEYFrom(
+    //         campaignAddressPlasma,
+    //         twoKeyAdmin,
+    //         feePerReferrer.mul(numberOfReferrers)
+    //     );
 
-        // Update in admin tokens receiving from fees
-        ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
-    }
+    //     // Update in admin tokens receiving from fees
+    //     ITwoKeyAdmin(twoKeyAdmin).updateTokensReceivedFromDistributionFees(feePerReferrer.mul(numberOfReferrers));
+    // }
 
     // function updateRebalanceNonRebalanceAmount(
     //     address[] memory referrerCampaigns,
@@ -682,41 +662,41 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     // }
 
 
-    function appendToArray(
-        bytes32 keyBaseArray,
-        bytes32 keyArrayToAppend
-    )
-    internal
-    {
-        address [] memory baseArray = PROXY_STORAGE_CONTRACT.getAddressArray(keyBaseArray);
-        address [] memory arrayToAppend = PROXY_STORAGE_CONTRACT.getAddressArray(keyArrayToAppend);
+    // function appendToArray(
+    //     bytes32 keyBaseArray,
+    //     bytes32 keyArrayToAppend
+    // )
+    // internal
+    // {
+    //     address [] memory baseArray = PROXY_STORAGE_CONTRACT.getAddressArray(keyBaseArray);
+    //     address [] memory arrayToAppend = PROXY_STORAGE_CONTRACT.getAddressArray(keyArrayToAppend);
 
-        uint len = baseArray.length + arrayToAppend.length;
+    //     uint len = baseArray.length + arrayToAppend.length;
 
-        address [] memory newBaseArray = new address[](len);
+    //     address [] memory newBaseArray = new address[](len);
 
-        uint i;
-        uint j;
+    //     uint i;
+    //     uint j;
 
-        // Copy base array
-        for(i=0; i< baseArray.length; i++) {
-            newBaseArray[i] = baseArray[i];
-        }
+    //     // Copy base array
+    //     for(i=0; i< baseArray.length; i++) {
+    //         newBaseArray[i] = baseArray[i];
+    //     }
 
-        // Copy array to append
-        for(i=baseArray.length; i<len; i++) {
-            newBaseArray[i] = arrayToAppend[j];
-            j++;
-        }
+    //     // Copy array to append
+    //     for(i=baseArray.length; i<len; i++) {
+    //         newBaseArray[i] = arrayToAppend[j];
+    //         j++;
+    //     }
 
-        PROXY_STORAGE_CONTRACT.setAddressArray(keyBaseArray, newBaseArray);
-    }
+    //     PROXY_STORAGE_CONTRACT.setAddressArray(keyBaseArray, newBaseArray);
+    // }
 
     function pushAddressToArray(
         bytes32 key,
         address value
     )
-    internal
+    public
     {
         address[] memory currentArray = PROXY_STORAGE_CONTRACT.getAddressArray(key);
 
@@ -859,25 +839,25 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     //     );
     // }
 
-    /**
-     * @notice          Function to get campaign where referrer balance is rebalanced
-     *                  but still not submitted to mainchain
-     * @param           referrer is the plasma address of referrer
-     */
-    function getCampaignsInProgressOfDistribution(
-        address referrer
-    )
-    public
-    view
-    returns (address[])
-    {
-        bytes32 key = keccak256(
-            _referrer2inProgressCampaignAddress,
-            referrer
-        );
+    // /**
+    //  * @notice          Function to get campaign where referrer balance is rebalanced
+    //  *                  but still not submitted to mainchain
+    //  * @param           referrer is the plasma address of referrer
+    //  */
+    // function getCampaignsInProgressOfDistribution(
+    //     address referrer
+    // )
+    // public
+    // view
+    // returns (address[])
+    // {
+    //     bytes32 key = keccak256(
+    //         _referrer2inProgressCampaignAddress,
+    //         referrer
+    //     );
 
-        return PROXY_STORAGE_CONTRACT.getAddressArray(key);
-    }
+    //     return PROXY_STORAGE_CONTRACT.getAddressArray(key);
+    // }
 
 //    /**
 //     * @notice          Function to get referrers for cycle id
@@ -924,21 +904,21 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
 //        );
 //    }
 
-    /**
-     * @notice          Function where we can fetch finished and paid campaigns for referrer
-     * @param           referrer is the address of referrer
-     */
-    function getCampaignsFinishedAndPaidForReferrer(
-        address referrer
-    )
-    public
-    view
-    returns (address[])
-    {
-        return PROXY_STORAGE_CONTRACT.getAddressArray(
-            keccak256(_referrer2finishedAndPaidCampaigns, referrer)
-        );
-    }
+    // /**
+    //  * @notice          Function where we can fetch finished and paid campaigns for referrer
+    //  * @param           referrer is the address of referrer
+    //  */
+    // function getCampaignsFinishedAndPaidForReferrer(
+    //     address referrer
+    // )
+    // public
+    // view
+    // returns (address[])
+    // {
+    //     return PROXY_STORAGE_CONTRACT.getAddressArray(
+    //         keccak256(_referrer2finishedAndPaidCampaigns, referrer)
+    //     );
+    // }
 
 //    function getTotalDistributedInCycle(
 //        uint cycleId
@@ -966,13 +946,13 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
 //        return incrementedNumberOfCycles;
 //    }
 
-    function deleteReferrerPendingCampaigns(
-        bytes32 key
-    )
-    internal
-    {
-        deleteAddressArray(key);
-    }
+    // function deleteReferrerPendingCampaigns(
+    //     bytes32 key
+    // )
+    // internal
+    // {
+    //     deleteAddressArray(key);
+    // }
 
     /**
      * @notice          Function to delete address array for specific influencer
@@ -980,7 +960,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     function deleteAddressArray(
         bytes32 key
     )
-    internal
+    public
     {
         address [] memory emptyArray = new address[](0);
         PROXY_STORAGE_CONTRACT.setAddressArray(key, emptyArray);
