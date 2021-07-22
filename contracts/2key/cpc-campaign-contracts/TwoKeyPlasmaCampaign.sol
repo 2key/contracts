@@ -24,11 +24,11 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     string constant _referrer2pendingCampaignAddresses = "referrer2pendingCampaignAddresses";
 
 
-    // struct Payment {
-    //     uint rebalancingRatio;
-    //     uint timestamp;
-    //     bool isReferrerPaid;
-    // }
+    struct Payment {
+        uint rebalancingRatio;
+        uint timestamp;
+        bool isReferrerPaid;
+    }
 
     event RebalancedValue(
         address referrer,
@@ -56,7 +56,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     mapping(address => uint256) internal referrerPlasma2TotalEarnings2key;                              // Total earnings for referrers
     mapping(address => uint256) internal referrerPlasmaAddressToCounterOfConversions;                   // [referrer][conversionId]
     mapping(address => mapping(uint256 => uint256)) internal referrerPlasma2EarningsPerConversion;      // Earnings per conversion
-    // mapping(address => Payment) public referrerToPayment;
+    mapping(address => Payment) public referrerToPayment;
 
     // Converter necessary data
     mapping(address => bool) isApprovedConverter;               // Determinator if converter has already 1 successful conversion
@@ -88,6 +88,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     string constant _twoKeyPlasmaAccountManager = "TwoKeyPlasmaAccountManager";
     string constant _twoKeyPlasmaCampaignsInventoryManager = "TwoKeyPlasmaCampaignsInventoryManager";
+
+    uint totalAmountForReferrerRewards;             // Total referrer rewards for this campaign
 
     /**
      * ------------------------------------------------------------------------------------
@@ -454,6 +456,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         referrerPlasma2Balances2key[referrerPlasma] = referrerPlasma2Balances2key[referrerPlasma].add(reward);
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
+        totalAmountForReferrerRewards = totalAmountForReferrerRewards.add(reward);
 
         if (isNewBalance) {
             // mark that referrer has pending reward
@@ -597,21 +600,17 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    // /**
-    //  * @notice          Function to get balance of influencer for his plasma address
-    //  * @param           _referrer is the plasma address of influencer
-    //  * @return          balance in 2KEY wei's units
-    //  */
-    // function getReferrerPlasmaBalance(
-    //     address _referrer
-    // )
-    // public
-    // view
-    // returns (uint)
-    // {
-    //     return referrerPlasma2Balances2key[_referrer];
-
-    // }
+    /**
+     * @notice          Function to get total balance of influencer for his plasma address
+     * @return          balance
+     */
+    function getTotalReferrerRewardsBalance()
+    public
+    view
+    returns (uint)
+    {
+        return totalAmountForReferrerRewards;
+    }
 
      /**
       * @notice          Function to get referrer non rebalanced earnings
@@ -756,7 +755,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @param _referrer referrer address
      * @return (uint, uint) Return USD earnings and 2KEY earnings
      */
-    function transferReferrerCampaignEarnings( //TODO: rename: withdrawReferrerCamapignEarningsL2
+    function withdrawReferrerCamapignEarningsL2(
         address _referrer
     )
     public
@@ -888,7 +887,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
       * @param           _referrerAddress is the address of the referrer (plasma address)
       * @param           _conversionIds is the array of conversion ids we want earnings for
       */
-     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions( //TODO remove here the rebalancing logic
+     function getReferrerBalanceAndTotalEarningsAndNumberOfConversions(
          address _referrerAddress,
          uint[] _conversionIds
      )

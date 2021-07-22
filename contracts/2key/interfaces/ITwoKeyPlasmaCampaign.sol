@@ -6,7 +6,7 @@ contract ITwoKeyPlasmaCampaign {
     // )
     // external;
 
-    function transferReferrerCampaignEarnings(
+    function withdrawReferrerCamapignEarningsL2(
         address _referrer
     )
     external;
@@ -26,7 +26,12 @@ contract ITwoKeyPlasmaCampaign {
     view
     returns (address[]);
 
-    function getReferrerPlasmaBalance(
+    function getTotalReferrerRewardsBalance()
+    external
+    view
+    returns (uint);
+
+    function getRefererrerRewardsBalance(
         address _referrer
     )
     external

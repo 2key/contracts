@@ -292,7 +292,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     //         // Load campaign address
     //         address campaignAddress = referrerCampaigns[j];
 
-    //         ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer);
+    //         ITwoKeyPlasmaCampaign(campaignAddress).withdrawReferrerCamapignEarningsL2(referrer);
     //     }
     // }
 
@@ -323,7 +323,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             // Load campaign address
             address campaignAddress = referrerCampaigns[j];
             // Transfer plasma balance to referrer
-            ITwoKeyPlasmaCampaign(campaignAddress).transferReferrerCampaignEarnings(referrer);
+            ITwoKeyPlasmaCampaign(campaignAddress).withdrawReferrerCamapignEarningsL2(referrer);
         }
 
     }
@@ -386,9 +386,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @param           totalAmountForModeratorRewards is the total amount moderator earned before rebalancing
      */
     function endCampaignAndTransferModeratorEarnings(
-        address campaignPlasma,
-        uint totalAmountForReferrerRewards, //TODO remove from input, take directly from campaign contract
-        uint totalAmountForModeratorRewards //TODO remove from input, take directly from campaign contract
+        address campaignPlasma
     )
     public
     onlyMaintainer
@@ -408,11 +406,14 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2BudgetUSD, campaignPlasma));
         }
 
+        uint totalAmountForModeratorRewards = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsAndTotalModeratorEarnings();
+        uint totalAmountForReferrerRewards = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsBalance();
+
         // Get leftover for the contractor
         uint leftoverForContractor = initialBountyForCampaign.sub(totalAmountForReferrerRewards).sub(totalAmountForModeratorRewards);
 
         // Set moderator earnings for this campaign and immediately distribute them
-        setAndDistributeModeratorEarnings(campaignPlasma, totalAmountForModeratorRewards); //TODO this function should withdraw moderator earnings from campaign contract on L2 and put it on the balance of congress on L2 on the account manager
+        setAndDistributeModeratorEarnings(campaignPlasma, totalAmountForModeratorRewards);
 
         // Set total amount to use for referrers
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignPlasma), totalAmountForReferrerRewards);
@@ -427,9 +428,6 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
                 totalAmountForModeratorRewards
             );
     }
-
-    //TODO: function for contractor to withdraw their leftover budget on L2
-
 
     // /**
     //  * @notice      Function to rebalance the rates
@@ -462,19 +460,19 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @notice          Function to set how many tokens are being distributed to moderator
      *                  as well as distribute them.
      * @param           campaignPlasma is the plasma address of selected campaign
-     * @param           rebalancedModeratorRewards is the amount for moderator after rebalancing
+     * @param           totalAmountForModeratorRewards is the amount for moderator after rebalancing
      */
-    function setAndDistributeModeratorEarnings(
+    function setAndDistributeModeratorEarnings( //  //TODO this function should withdraw moderator earnings from campaign contract on L2 and put it on the balance of congress on L2 on the account manager
         address campaignPlasma,
-        uint rebalancedModeratorRewards //TODO: remove this we don't do rebalancing at this stage
+        uint totalAmountForModeratorRewards
     )
     internal
     {
         // Account amount moderator earned on this campaign
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma), rebalancedModeratorRewards);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma), totalAmountForModeratorRewards);
 
         // Address to transfer moderator (2key admin contract) earnings to
-        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin"); //should go to the balance of the plasma congress on L2 account manager
+        address twoKeyCongress = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress"); //should go to the balance of the plasma congress on L2 account manager
         //TODO make sure there is a method for a maintainer to transfer funds from plasma congress on L2 and withdraw them to the admin contract on L1
         //TODO should be some permissioned function, where funds on L1 treasury can be withdrawn to the admin contract using a maintainer + signatory.
 
@@ -482,22 +480,59 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             // Transfer 2KEY tokens to moderator
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transfer2KEYFrom(
                 campaignPlasma,
-                twoKeyAdmin,
-                rebalancedModeratorRewards
+                twoKeyCongress,
+                totalAmountForModeratorRewards
             );
         } else {
             // Transfer USD tokens to moderator
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).transferUSDFrom(
                 campaignPlasma,
-                twoKeyAdmin,
-                rebalancedModeratorRewards
+                twoKeyCongress,
+                totalAmountForModeratorRewards
             );
         }
 
         // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(rebalancedModeratorRewards, campaignPlasma);
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(totalAmountForModeratorRewards, campaignPlasma);
     }
 
+    /**
+     * @notice          Function where moderator can withdraw his earnings
+     * @param           campaignPlasmaAddress is plasma address of campaign
+     */
+    function withdrawModeratorEarnings(
+        address campaignPlasmaAddress
+    )
+    public
+    onlyMaintainer
+    {
+        // Get leftoverForContractor
+        uint leftoverForContractor = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignPlasmaAddress));
+        // Require that there is an existing amount of leftoverForContractor
+        require(leftoverForContractor > 0);
+        // Require that contractor has not already withdrawn the leftover
+        require(
+            PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignPlasmaAddress)) == false
+        );
+        // Set value that contractor did perform the withdraw
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignPlasmaAddress), true);
+        // Perform transfer of leftover to contractor
+        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasmaAddress)) == true) {
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transferUSDFrom(
+                    campaignPlasmaAddress,
+                    msg.sender,
+                    leftoverForContractor
+                );
+        } else {
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transfer2KEYFrom(
+                    campaignPlasmaAddress,
+                    msg.sender,
+                    leftoverForContractor
+                );
+        }
+    }
 
     /**
      * @notice          Function where contractor can withdraw if there's any leftover on his campaign
