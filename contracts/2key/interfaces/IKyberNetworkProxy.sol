@@ -11,6 +11,15 @@ contract IKyberNetworkProxy {
     payable
     returns(uint);
 
+    function swapTokenToToken(
+        ERC20 src,
+        uint srcAmount,
+        ERC20 dest,
+        uint minConversionRate
+    )
+    public
+    returns (uint);
+
     function getExpectedRate(
         ERC20 src,
         ERC20 dest,

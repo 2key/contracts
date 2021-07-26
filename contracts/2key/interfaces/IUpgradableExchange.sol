@@ -5,6 +5,13 @@ contract IUpgradableExchange {
     function buyRate2key() public view returns (uint);
     function sellRate2key() public view returns (uint);
 
+    function buyTokensWithERC20(
+        uint amountOfTokens,
+        address tokenAddress
+    )
+    public
+    returns (uint,uint);
+
     function buyTokens(
         address _beneficiary
     )
@@ -50,6 +57,7 @@ contract IUpgradableExchange {
     )
     public;
 
+
     function getMore2KeyTokensForRebalancing(
         uint amountOf2KeyRequested
     )
@@ -57,12 +65,34 @@ contract IUpgradableExchange {
     view
     returns (uint);
 
-    function withdrawERC20(
-        address _erc20TokenAddress,
-        uint _tokenAmount
+
+    function releaseAllDAIFromContractToReserve()
+    public;
+
+    function setKyberReserveInterfaceContractAddress(
+        address kyberReserveContractAddress
     )
     public;
 
-    function releaseAllDAIFromContractToReserve()
+    function setSpreadWei(
+        uint newSpreadWei
+    )
+    public;
+
+    function withdrawDAIAvailableToFill2KEYReserve(
+        uint amountOfDAI
+    )
+    public
+    returns (uint);
+
+    function returnTokensBackToExchangeV1(
+        uint amountOfTokensToReturn
+    )
+    public;
+
+
+    function getMore2KeyTokensForRebalancingV1(
+        uint amountOfTokensRequested
+    )
     public;
 }

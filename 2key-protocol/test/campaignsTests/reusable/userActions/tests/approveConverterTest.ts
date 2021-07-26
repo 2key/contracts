@@ -39,5 +39,5 @@ export default function approveConverterTest(
     expect(approved).to.have.members(approvedUsersAddresses);
     expect(pending.length).to.be.eq(pendingUsersAddresses.length);
     expect(pending).to.have.members(pendingUsersAddresses);
-  }).timeout(60000);
+  }).timeout(10000);
 }

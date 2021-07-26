@@ -64,6 +64,8 @@ export default function checkCampaignSummaryTest(
     const {campaignAddress} = storage;
 
     const summary = await protocol[campaignContract].getCampaignSummary(campaignAddress, address);
+    const bounty = await protocol[campaignContract].getTotalBountyAndBountyPerConversion(campaignAddress);
+    const bountyPerConversion = bounty.bountyPerConversion;
 
     expectEqualNumbers(
       summary.pendingConverters,
@@ -96,7 +98,7 @@ export default function checkCampaignSummaryTest(
       'executedConversions',
     );
     expectEqualNumbers(
-      summary.totalBounty,
+      summary.totalBounty*0.98,
       storage.totalBounty,
       'totalBounty',
     );
@@ -104,7 +106,7 @@ export default function checkCampaignSummaryTest(
     if (storage.campaignType === campaignTypes.cpc) {
       expectEqualNumbers(
         summary.totalBounty,
-        summary.executedConversions * campaignData.bountyPerConversionWei * (1 - feePercent),
+        summary.executedConversions * bountyPerConversion,
         'totalBounty'
       );
     } else {
@@ -124,6 +126,6 @@ export default function checkCampaignSummaryTest(
       );
 
     }
-  }).timeout(60000);
+  }).timeout(10000);
 
 }

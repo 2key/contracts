@@ -204,6 +204,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
             _contractorProceeds = _conversionAmount.sub(_maxReferralRewardETHWei.add(_moderatorFeeETHWei));
         }
 
+        updateAmountUserContributed(_converterAddress, _conversionAmount, isConversionFiat);
 
         Conversion memory c = Conversion(contractor, _contractorProceeds, _converterAddress,
             state ,_conversionAmount, _maxReferralRewardETHWei, 0, _moderatorFeeETHWei, baseTokensForConverterUnits,
@@ -232,6 +233,19 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         return numberOfConversions - 1;
     }
 
+    function updateAmountUserContributed(
+        address _converterAddress,
+        uint _conversionAmount,
+        bool isConversionFiat
+    )
+    internal
+    {
+        if(isConversionFiat) {
+            amountConverterSpentFiatWei[_converterAddress] = amountConverterSpentFiatWei[_converterAddress].add(_conversionAmount);
+        } else {
+            amountConverterSpentEthWEI[_converterAddress] = amountConverterSpentEthWEI[_converterAddress].add(_conversionAmount);
+        }
+    }
 
     /**
      * @notice Function to perform all the logic which has to be done when we're performing conversion
@@ -260,12 +274,8 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
 
             //Update raised funds FIAT once the conversion is executed
             counters[9] = counters[9].add(conversion.conversionAmount);
-
-            //Update amount converter spent in FIAT
-            amountConverterSpentFiatWei[conversion.converter] = amountConverterSpentFiatWei[conversion.converter].add(conversion.conversionAmount);
         } else {
             require(conversion.state == ConversionState.APPROVED);
-            amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
             counters[1] = counters[1].sub(1); //Decrease number of approved conversions
         }
 
@@ -278,14 +288,13 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         emitExecutedEvent(conversion.converter, _conversionId, totalUnits);
 
         // Buy tokens from campaign and distribute rewards between referrers
-        if(conversion.maxReferralRewardETHWei > 0) {
-            totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
-                conversion.maxReferralRewardETHWei,
-                conversion.converter,
-                _conversionId,
-                conversion.isConversionFiat
-            );
-        }
+        totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
+            conversion.maxReferralRewardETHWei,
+            conversion.converter,
+            _conversionId,
+            conversion.isConversionFiat
+        );
+
 
         //Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionExecutedEvent(
@@ -428,6 +437,59 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
         emitRejectedEvent(twoKeyCampaign, _converter);
     }
 
+    function rejectConversion(
+        uint conversionID
+    )
+    public
+    onlyContractor
+    {
+        Conversion c = conversions[conversionID];
+
+        // Check the conversion state and update the counters
+        if(c.state == ConversionState.PENDING_APPROVAL) {
+            counters[0] = counters[0].sub(1); //Reduce number of pending conversions
+        } else if(c.state == ConversionState.APPROVED) {
+            counters[1] = counters[1].sub(1); //Reduce number of approved conversions
+        } else {
+            revert('Conversion state is not eligible for rejection');
+        }
+
+        // Set conversion state to REJECTED
+        c.state = ConversionState.REJECTED;
+
+        //Increase number of rejected conversions
+        counters[2] = counters[2].add(1);
+
+        // Update reputation points on rejected conversion
+        ITwoKeyBaseReputationRegistry(twoKeyBaseReputationRegistry).updateOnConversionRejectedEvent(
+            c.converter,
+            contractor,
+            twoKeyCampaign
+        );
+
+        // Calculate how many tokens we have reserved for this conversion
+        uint reservedAmount = c.baseTokenUnits.add(c.bonusTokenUnits);
+
+        if(reservedAmount > 0) {
+            // Update reserved amount in campaign contract and release tokens
+            twoKeyCampaign.updateReservedAmountOfTokensIfConversionRejectedOrExecuted(reservedAmount);
+        }
+
+        // Check if we need to return back some ETH to converter
+        if(c.isConversionFiat == false) {
+            twoKeyCampaign.sendBackEthWhenConversionCancelledOrRejected(c.converter, c.conversionAmount);
+        }
+
+        // Calculate how much in campaign currency was the conversion
+        uint reservedInCampaignCurrencyAmount = conversionToCampaignCurrencyAmountAtTimeOfCreation[conversionID];
+
+        // If the conversion was > 0 then reduce total raised funds for this rejected conversion
+        if(reservedInCampaignCurrencyAmount > 0) {
+            address logicHandler = twoKeyCampaign.logicHandler();
+            ITwoKeyCampaignLogicHandler(logicHandler).reduceTotalRaisedFundsAfterConversionRejected(reservedInCampaignCurrencyAmount);
+        }
+    }
+
 
     /**
      * @notice Function to cancel conversion and get back money
@@ -440,7 +502,7 @@ contract TwoKeyConversionHandler is UpgradeableCampaign, TwoKeyCampaignConversio
     external
     {
         Conversion conversion = conversions[_conversionId];
-        require(conversion.conversionExpiresAt < block.timestamp);
+        require(conversion.conversionExpiresAt <= block.timestamp);
         require(msg.sender == conversion.converter);
 
         if(conversion.state == ConversionState.PENDING_APPROVAL) {

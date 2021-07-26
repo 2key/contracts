@@ -198,6 +198,8 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             amountOfTokens
         );
 
+        amountConverterSpentEthWEI[c.converter] = amountConverterSpentEthWEI[c.converter].add(c.conversionAmount);
+
         conversions.push(c);
         converterToHisConversions[_converterAddress].push(numberOfConversions);
         emitConvertedEvent(_converterAddress, _conversionAmount, numberOfConversions);
@@ -225,14 +227,13 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
 
         emitExecutedEvent(conversion.converter, _conversionId, conversion.tokensBought);
 
-//         Buy tokens from campaign and distribute rewards between referrers
-        if(conversion.maxReferralRewardETHWei > 0) {
-            totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
-                conversion.maxReferralRewardETHWei,
-                conversion.converter,
-                _conversionId
-            );
-        }
+
+        totalReward2keys = twoKeyCampaign.buyTokensAndDistributeReferrerRewards(
+            conversion.maxReferralRewardETHWei,
+            conversion.converter,
+            _conversionId
+        );
+
 
         // Update reputation points in registry for conversion executed event
         ITwoKeyBaseReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyBaseReputationRegistry")).updateOnConversionExecutedEvent(
@@ -241,7 +242,6 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
             twoKeyCampaign
         );
 
-        amountConverterSpentEthWEI[conversion.converter] = amountConverterSpentEthWEI[conversion.converter].add(conversion.conversionAmount);
         counters[8] = counters[8].add(totalReward2keys);
         twoKeyCampaign.buyTokensForModeratorRewards(conversion.moderatorFeeETHWei);
         twoKeyCampaign.updateContractorProceeds(conversion.contractorProceedsETHWei);
@@ -315,7 +315,7 @@ contract TwoKeyDonationConversionHandler is UpgradeableCampaign, TwoKeyCampaignC
     {
         Conversion conversion = conversions[_conversionId];
 
-        require(conversion.conversionExpiresAt < block.timestamp);
+        require(conversion.conversionExpiresAt <= block.timestamp);
         require(msg.sender == conversion.converter);
 
         if(conversion.state == ConversionState.PENDING_APPROVAL) {

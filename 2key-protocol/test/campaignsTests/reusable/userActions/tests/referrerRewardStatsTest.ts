@@ -27,5 +27,5 @@ export default function referrerRewardStatsTest(
     const {totalEarnings} = await protocol[campaignContract].getReferrerBalanceAndTotalEarningsAndNumberOfConversions(campaignAddress, signature);
 
     expectEqualNumbers(totalEarnings, user.referrerReward);
-  }).timeout(60000);
+  }).timeout(5000);
 }

@@ -21,7 +21,7 @@ const campaignData: ICreateCampaign = {
   campaignEndTime: 9884748832,
   minDonationAmount: 1,
   maxDonationAmount: 10,
-  campaignGoal: 10000000000000000000000000000000,
+  campaignGoal: 10000000000000,
   referrerQuota: 5,
   isKYCRequired: true,
   shouldConvertToRefer: false,
@@ -38,7 +38,7 @@ describe(
     const storage = new TestStorage(userIds.aydnep, campaignTypes.donation, campaignData.isKYCRequired);
 
     before(function () {
-      this.timeout(60000);
+      this.timeout(10000);
       return createDonationCampaign(campaignData, storage);
     });
 
@@ -74,8 +74,7 @@ describe(
         secondaryUserKey: userIds.gmail,
         actions: [
           campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-          campaignUserActions.checkConverterSpent,
+          campaignUserActions.joinAndConvert
         ],
         campaignData,
         storage,
@@ -90,7 +89,6 @@ describe(
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
-          campaignUserActions.checkConverterSpent,
         ],
         campaignData,
         storage,
@@ -105,7 +103,6 @@ describe(
         actions: [
           campaignUserActions.visit,
           campaignUserActions.joinAndConvert,
-          campaignUserActions.checkConverterSpent,
           campaignUserActions.cancelConvert,
         ],
         campaignData,

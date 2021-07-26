@@ -31,6 +31,7 @@ export const userIds = {
   nikola: 'nikola'
 };
 
+// @ts-ignore
 const availableUsers = {
   [userIds.deployer]: {
     name: 'DEPLOYER',
@@ -38,7 +39,7 @@ const availableUsers = {
     fullname: 'deployer account',
     walletname: 'DEPLOYER-wallet',
     web3: deployer,
-    protocol: getTwoKeyProtocol(deployer.web3, deployer.mnemonic),
+    protocol: getTwoKeyProtocol(deployer.web3, deployer.plasmaWeb3, deployer.plasmaAddress),
   },
   [userIds.aydnep]: {
     name: 'Aydnep',
@@ -46,7 +47,7 @@ const availableUsers = {
     fullname: 'aydnep account',
     walletname: 'Aydnep-wallet',
     web3: aydnep,
-    protocol: getTwoKeyProtocol(aydnep.web3, aydnep.mnemonic),
+    protocol: getTwoKeyProtocol(aydnep.web3, aydnep.plasmaWeb3, aydnep.plasmaAddress),
   },
   [userIds.gmail]: {
     name: 'gmail',
@@ -54,7 +55,7 @@ const availableUsers = {
     fullname: 'gmail account',
     walletname: 'gmail-wallet',
     web3: gmail,
-    protocol: getTwoKeyProtocol(gmail.web3, gmail.mnemonic),
+    protocol: getTwoKeyProtocol(gmail.web3, gmail.plasmaWeb3, gmail.plasmaAddress),
   },
   [userIds.test4]: {
     name: 'test4',
@@ -62,7 +63,7 @@ const availableUsers = {
     fullname: 'test4 account',
     walletname: 'test4-wallet',
     web3: test4,
-    protocol: getTwoKeyProtocol(test4.web3, test4.mnemonic),
+    protocol: getTwoKeyProtocol(test4.web3, test4.plasmaWeb3, test4.plasmaAddress),
   },
   [userIds.renata]: {
     name: 'renata',
@@ -70,7 +71,7 @@ const availableUsers = {
     fullname: 'renata account',
     walletname: 'renata-wallet',
     web3: renata,
-    protocol: getTwoKeyProtocol(renata.web3, renata.mnemonic),
+    protocol: getTwoKeyProtocol(renata.web3, renata.plasmaWeb3, renata.plasmaAddress),
   },
   [userIds.uport]: {
     name: 'uport',
@@ -78,7 +79,7 @@ const availableUsers = {
     fullname: 'uport account',
     walletname: 'uport-wallet',
     web3: uport,
-    protocol: getTwoKeyProtocol(uport.web3, uport.mnemonic),
+    protocol: getTwoKeyProtocol(uport.web3, uport.plasmaWeb3, uport.plasmaAddress),
   },
   [userIds.gmail2]: {
     name: 'gmail2',
@@ -86,7 +87,7 @@ const availableUsers = {
     fullname: 'gmail2 account',
     walletname: 'gmail2-wallet',
     web3: gmail2,
-    protocol: getTwoKeyProtocol(gmail2.web3, gmail2.mnemonic),
+    protocol: getTwoKeyProtocol(gmail2.web3, gmail2.plasmaWeb3, gmail2.plasmaAddress),
   },
   [userIds.aydnep2]: {
     name: 'aydnep2',
@@ -94,7 +95,7 @@ const availableUsers = {
     fullname: 'aydnep2 account',
     walletname: 'aydnep2-wallet',
     web3: aydnep2,
-    protocol: getTwoKeyProtocol(aydnep2.web3, aydnep2.mnemonic),
+    protocol: getTwoKeyProtocol(aydnep2.web3, aydnep2.plasmaWeb3, aydnep2.plasmaAddress),
   },
   [userIds.test]: {
     name: 'test',
@@ -102,7 +103,7 @@ const availableUsers = {
     fullname: 'test account',
     walletname: 'test-wallet',
     web3: test,
-    protocol: getTwoKeyProtocol(test.web3, test.mnemonic),
+    protocol: getTwoKeyProtocol(test.web3, test.plasmaWeb3, test.plasmaAddress),
   },
   [userIds.buyer]: {
     name: 'buyer',
@@ -110,7 +111,7 @@ const availableUsers = {
     fullname: 'buyer account',
     walletname: 'buyer-wallet',
     web3: buyer,
-    protocol: getTwoKeyProtocol(buyer.web3, buyer.mnemonic),
+    protocol: getTwoKeyProtocol(buyer.web3, buyer.plasmaWeb3, buyer.plasmaAddress),
   },
   [userIds.guest]: {
     name: 'guest',
@@ -118,7 +119,7 @@ const availableUsers = {
     fullname: 'guest account',
     walletname: 'guest-wallet',
     web3: guest,
-    protocol: getTwoKeyProtocol(guest.web3, guest.mnemonic),
+    protocol: getTwoKeyProtocol(guest.web3, guest.plasmaWeb3, guest.plasmaAddress),
   },
   [userIds.nikola]: {
     name: 'nikola',
@@ -126,7 +127,7 @@ const availableUsers = {
     fullname: 'nikola madjarevic',
     walletname: 'nikola-wallet',
     web3: nikola,
-    protocol: getTwoKeyProtocol(nikola.web3, nikola.mnemonic)
+    protocol: getTwoKeyProtocol(nikola.web3, nikola.plasmaWeb3, nikola.plasmaAddress)
   },
 };
 

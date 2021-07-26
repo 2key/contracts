@@ -17,11 +17,13 @@ export default function checkModeratorEarningsTest(
       const {protocol} = availableUsers[userKey];
       const {campaignAddress} = storage;
       const earnings = await protocol.CPCCampaign.getModeratorEarningsPerCampaign(campaignAddress);
+      const bounty = await protocol[campaignContract].getTotalBountyAndBountyPerConversion(campaignAddress);
+      const bountyPerConversion = bounty.bountyPerConversion;
       const calculatedEarnings = (storage.executedConversions.length)
-        * campaignData.bountyPerConversionWei
+        * bountyPerConversion
         * feePercent;
 
-      expect(earnings).to.be.equal(calculatedEarnings);
+      expect(earnings.toFixed(5)).to.be.equal(calculatedEarnings.toFixed(5));
     })
   }else {
     it('should check moderator earnings', async () => {

@@ -4,15 +4,10 @@ pragma solidity ^0.4.24;
 contract ITwoKeyEventSource {
 
     function ethereumOf(address me) public view returns (address);
-
     function plasmaOf(address me) public view returns (address);
-
     function isAddressMaintainer(address _maintainer) public view returns (bool);
-
     function getTwoKeyDefaultIntegratorFeeFromAdmin() public view returns (uint);
-
     function joined(address _campaign, address _from, address _to) external;
-
     function rejected(address _campaign, address _converter) external;
 
     function convertedAcquisition(
@@ -71,6 +66,33 @@ contract ITwoKeyEventSource {
     function emitReceivedTokensAsModerator(
         address _campaignAddress,
         uint _amountOfTokens
+    )
+    public;
+
+    function emitDAIReleasedAsIncome(
+        address _campaignContractAddress,
+        uint _amountOfDAI
+    )
+    public;
+
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public;
+
+
+    function emitUserWithdrawnNetworkEarnings(
+        address user,
+        uint amountOfTokens
+    )
+    public;
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
     )
     public;
 }

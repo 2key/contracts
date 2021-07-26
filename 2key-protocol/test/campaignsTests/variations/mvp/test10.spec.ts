@@ -21,7 +21,7 @@ const campaignData: ICreateCampaign = {
   campaignEndTime: 9884748832,
   minDonationAmount: 1,
   maxDonationAmount: 10,
-  campaignGoal: 10000000000000000000000000000000,
+  campaignGoal: 10000,
   referrerQuota: 5,
   isKYCRequired: false,
   shouldConvertToRefer: false,
@@ -38,7 +38,7 @@ describe(
     const storage = new TestStorage(userIds.aydnep, campaignTypes.donation, campaignData.isKYCRequired);
 
     before(function () {
-      this.timeout(60000);
+      this.timeout(10000);
       return createDonationCampaign(campaignData, storage);
     });
 
@@ -98,16 +98,6 @@ describe(
       }
     );
 
-    usersActions(
-      {
-        userKey: storage.contractorKey,
-        actions: [
-          campaignUserActions.hedgingEth,
-        ],
-        campaignData,
-        storage,
-      }
-    );
 
     usersActions(
       {

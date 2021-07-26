@@ -18,6 +18,7 @@ export default function checkERC20BalanceTest(
       const {web3: {address: secondaryUserAddress}} = availableUsers[secondaryUserKey];
       // @ts-ignore
       const {campaign: {invoiceToken}} = storage;
+
       const user = storage.getUser(secondaryUserKey);
       const conversions = user.executedConversions;
       let userSpent = conversions
@@ -38,6 +39,6 @@ export default function checkERC20BalanceTest(
         userSpent *= exchangeRates.usd;
       }
       expect(balance).to.be.equal(userSpent);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 }

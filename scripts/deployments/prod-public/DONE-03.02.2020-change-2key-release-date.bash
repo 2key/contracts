@@ -13,9 +13,9 @@ spinner() {
 
 spinner 2
 
-echo "Set 2KEY tokens release date to 20th April 2020 (UNIX = 1587340800)"
+echo "Set 2KEY tokens release date to 20th April 2020 (UNIX = 1587384000)"
 echo "TwoKeyAdmin contract proxy address on production: 0x31cf9c7847c979313fe27eadfcc847a8a0252d86"
 cd ../..
 
-python3 generate_bytecode.py setNewTwoKeyRewardsReleaseDate 1587340800
+python3 generate_bytecode.py setNewTwoKeyRewardsReleaseDate 1587384000
 

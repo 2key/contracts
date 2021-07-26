@@ -57,6 +57,11 @@ contract TwoKeyCampaignConversionHandler is TwoKeyConversionStates, TwoKeyConver
         _;
     }
 
+    modifier onlyContractor {
+        require(msg.sender == contractor);
+        _;
+    }
+
 
     // Internal function to fetch address from TwoKeySingletonRegistry
     function getAddressFromTwoKeySingletonRegistry(string contractName) internal view returns (address) {

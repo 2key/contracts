@@ -26,6 +26,8 @@ def generate_bytecode_for_transfering_tokens(deployer_address, token_amount):
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
 def generate_bytecode_for_upgrading_contracts(contract_name, contract_version):
+
+    print(f"Upgrading contract {contract_name} to version: {contract_version} \n")
     method_name_and_params = "upgradeContract(string,string)"
     types = ["string","string"]
     values = [contract_name, contract_version]
@@ -40,6 +42,7 @@ def generate_bytecode_for_changing_rewards_release_date(new_date):
 
 def generate_bytecode_for_adding_new_member(target_member, member_name, voting_power):
     voting_power = int(voting_power)
+    member_name = Web3.toBytes(text=member_name)
     method_name_and_params = "addMember(address,bytes32,uint256)"
     types=["address","bytes32","uint256"]
     values = [target_member, member_name, voting_power]
@@ -95,12 +98,127 @@ def generate_bytecode_for_taking_fees_from_manager():
     values = []
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
 
+def generate_bytecode_for_chaging_moderator_fee_on_public(moderator_fee):
+    moderator_fee = int(moderator_fee)
+    method_name_and_params = "setDefaultIntegratorFeePercent(uint256)"
+    types = ["uint256"]
+    values = [moderator_fee]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 def generate_bytecode_for_changing_moderator_fee_on_plasma(moderator_fee):
     moderator_fee = int(moderator_fee)
     method_name_and_params = "setModeratorFee(uint256)"
     types = ["uint256"]
     values = [moderator_fee]
     print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_enabling_kyber_trade(reserve_contract_address):
+    method_name_and_params = "enableTradeInKyber(address)"
+    types = ["address"]
+    values = [reserve_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_disabling_kyber_trade(reserve_contract_address):
+    method_name_and_params = "disableTradeInKyber(address)"
+    types = ["address"]
+    values = [reserve_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_withdrawing_ether_from_reserve(reserve_contract_address, amount_of_ether):
+    amount_of_ether = int(amount_of_ether)
+    method_name_and_params = "withdrawEtherFromKyberReserve(address,uint256)"
+    types = ["address","uint256"]
+    values = [reserve_contract_address, amount_of_ether]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_withdrawal_of_tokens_from_reserve(reserve_contract_address, token_address, amount, beneficiary):
+    amount = int(amount)
+    method_name_and_params = "withdrawTokensFromKyberReserve(address,address,uint256,address)"
+    types = ["address","address","uint256","address"]
+    values = [reserve_contract_address, token_address, amount, beneficiary]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_setting_kyber_reserve_contract_address(reserve_contract_address):
+    method_name_and_params = "setKyberReserveContractAddressOnUpgradableExchange(address)"
+    types = ["address"]
+    values = [reserve_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_setting_contracts_in_kyber(reserve_contract_address, kyber_network, conversion_rates, sanity_rates):
+    method_name_and_params = "setContractsKyber(address,address,address,address)"
+    types = ["address","address","address","address"]
+    values = [reserve_contract_address, kyber_network, conversion_rates, sanity_rates]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_setting_new_spread(new_spread_wei):
+    new_spread_wei = int(new_spread_wei)
+    method_name_and_params = "setNewSpreadWei(uint256)"
+    types = ["uint256"]
+    values = [new_spread_wei]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_migrating_fee_manager_state():
+    method_name_and_params = "migrateCurrentFeeManagerStateToAdminAndWithdrawFunds()"
+    types = []
+    values = []
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_kyber_fees_withdraw_from_reserve(reserve_contract_address, pricing_contract_address):
+    method_name_and_params = "withdrawFeesFromKyber(address,address)"
+    types = ["address","address"]
+    values = [reserve_contract_address, pricing_contract_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(amount_of_token):
+    amount_of_token = int(amount_of_token)
+    method_name_and_params = "withdrawDAIAvailableToFillReserveFromUpgradableExchange(uint256)"
+    types = ["uint256"]
+    values = [amount_of_token]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_contract(beneficiary, amount):
+    amount = int(amount)
+    method_name_and_params = "withdrawUpgradableExchangeDaiCollectedFromAdmin(address,uint256)"
+    types = ["address","uint256"]
+    values = [beneficiary,amount]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_adding_participation_mining_epoch(epoch_id, amount_2key):
+    epoch_id = int(epoch_id)
+    amount_2key = int(amount_2key)
+    method_name_and_params = "registerParticipationMiningEpoch(uint256,uint256)"
+    types = ["uint256","uint256"]
+    values = [epoch_id,amount_2key]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_declaring_epochs(epoch_ids,rewards):
+    list_of_ids = epoch_ids.split(',')
+    list_of_rewards = rewards.split(',')
+    ## Convert list of ids and rewards into integers
+    for i in range(0, len(list_of_ids)):
+        list_of_ids[i] = int(list_of_ids[i])
+        list_of_rewards[i] = int(list_of_rewards[i])
+
+    method_name_and_params = "declareEpochs(uint256[],uint256[])"
+    types = ["uint256[]", "uint256[]"]
+    values = [list_of_ids, list_of_rewards]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+    sys.stdout.flush()
+
+def generate_bytecode_for_adding_signatory_address(signatory_address):
+    method_name_and_params = "setSignatoryAddress(address)"
+    types = ["address"]
+    values = [signatory_address]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
+def generate_bytecode_for_redeclare_epoch_rewards(epoch_id, new_rewards_amount):
+    epoch_id = int(epoch_id)
+    new_rewards_amount = int(new_rewards_amount)
+    method_name_and_params = "redeclareRewardsAmountForEpoch(uint256,uint256)"
+    types = ["uint256","uint256"]
+    values = [epoch_id, new_rewards_amount]
+    print('Transaction bytecode: ' + generate_bytecode(method_name_and_params, types, values))
+
 
 def generate_bytecode_for_setting_liquidity_params(
         _kyberLiquidityPricing,
@@ -153,6 +271,9 @@ if __name__ == "__main__":
     if(arg1 == "setNewTwoKeyRewardsReleaseDate"):
         generate_bytecode_for_changing_rewards_release_date(int(sys.argv[2]))
     if(arg1 == "addMember"):
+        print(sys.argv[2])
+        print(sys.argv[3])
+        print(sys.argv[4])
         generate_bytecode_for_adding_new_member(sys.argv[2],sys.argv[3],sys.argv[4])
     if(arg1 == "removeMember"):
         generate_bytecode_for_removing_member(sys.argv[2])
@@ -170,6 +291,8 @@ if __name__ == "__main__":
         generate_bytecode_for_taking_fees_from_manager()
     if(arg1 == "setModeratorFeePlasma"):
         generate_bytecode_for_changing_moderator_fee_on_plasma(sys.argv[2])
+    if(arg1 == "setModeratorFeePublic"):
+        generate_bytecode_for_chaging_moderator_fee_on_public(sys.argv[2])
     if(arg1 == "setLiquidityParamsKyber"):
         generate_bytecode_for_setting_liquidity_params(
             sys.argv[2],
@@ -181,5 +304,43 @@ if __name__ == "__main__":
             sys.argv[8],
             sys.argv[9],
             sys.argv[10]
-         )
+        )
+    if(arg1 == "enableKyberTrade"):
+        generate_bytecode_for_enabling_kyber_trade(sys.argv[2])
+    if(arg1 == "disableKyberTrade"):
+        generate_bytecode_for_disabling_kyber_trade(sys.argv[2])
+    if(arg1 == "withdrawEtherFromReserve"):
+        generate_bytecode_for_withdrawing_ether_from_reserve(sys.argv[2],sys.argv[3])
+    if(arg1 == "withdrawTokensFromReserve"):
+        generate_bytecode_for_withdrawal_of_tokens_from_reserve(
+            sys.argv[2],
+            sys.argv[3],
+            int(sys.argv[4]),
+            sys.argv[5]
+        )
+    if(arg1 == "setKyberReserveContract"):
+        generate_bytecode_for_setting_kyber_reserve_contract_address(sys.argv[2])
+    if(arg1 == "setContracts"):
+        generate_bytecode_for_setting_contracts_in_kyber(
+            sys.argv[2],
+            sys.argv[3],
+            sys.argv[4],
+            sys.argv[5]
+        )
+    if(arg1 == "pullKyberFeesFromReserve"):
+        generate_bytecode_for_kyber_fees_withdraw_from_reserve(sys.argv[2],sys.argv[3])
+    if(arg1 == "setSpread"):
+        generate_bytecode_for_setting_new_spread(sys.argv[2])
+    if(arg1 == "migrateFeeManagerState"):
+        generate_bytecode_for_migrating_fee_manager_state()
+    if(arg1 == "withdrawDAIFromUpgradableExchangeToAdmin"):
+        generate_bytecode_for_withdrawal_of_dai_from_upgradable_exchange_to_admin(sys.argv[2])
+    if(arg1 == "withdrawUpgradableExchangeDAICollectedFromAdminContract"):
+        generate_bytecode_to_withdraw_upgradable_exchange_dai_collected_from_admin_contract(sys.argv[2],sys.argv[3])
+    if(arg1 == "declareEpochs"):
+        generate_bytecode_for_declaring_epochs(sys.argv[2],sys.argv[3])
+    if(arg1 == "setSignatoryAddress"):
+        generate_bytecode_for_adding_signatory_address(sys.argv[2])
+    if(arg1 == "redeclareEpochRewards"):
+        generate_bytecode_for_redeclare_epoch_rewards(sys.argv[2],sys.argv[3])
     print_line()

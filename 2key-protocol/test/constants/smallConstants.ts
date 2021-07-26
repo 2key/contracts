@@ -36,6 +36,9 @@ export const incentiveModels = {
 export const exchangeRates = {
   usd: 100,
   usdDai: 0.099,
+  usd2Key: 0.06,
+  dai: 0.99,
+  tusd: 0.97
 };
 
 export const hedgeRate = 1000;
@@ -56,3 +59,4 @@ export const campaignTypeToInstance = {
 export const feePercent = 0.02;
 
 export const rpcUrls = [env.RPC_URL];
+export const eventsUrls = [env.PLASMA_RPC_URL];

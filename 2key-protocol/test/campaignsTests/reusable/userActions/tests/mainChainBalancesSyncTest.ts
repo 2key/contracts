@@ -1,8 +1,8 @@
 import functionParamsInterface from "../typings/functionParamsInterface";
 import availableUsers from "../../../../constants/availableUsers";
 import cpcOnly from "../checks/cpcOnly";
-import {expectEqualNumbers} from "../../../../helpers/numberHelpers";
-import getTwoKeyEconomyAddress from "../../../../helpers/getTwoKeyEconomyAddress";
+import {promisify} from "../../../../../src/utils/promisify";
+import {expect} from "chai";
 
 export default function mainChainBalancesSyncTest(
   {
@@ -12,42 +12,64 @@ export default function mainChainBalancesSyncTest(
 ) {
   cpcOnly(storage.campaignType);
 
-  it(`should push and distribute balances for influencers to the mainchain from deployer`, async () => {
-    const {protocol, web3:{address}} = availableUsers[userKey];
-    const {campaignAddress, campaign} = storage;
+  it(`should end campaign, reserve tokens, and rebalance rates as well`, async () => {
+      //This is the test where maintainer ends campaign, does rates rebalancing, etc.
+      const {protocol, web3: {address}} = availableUsers[userKey];
+      const {campaignAddress, campaign} = storage;
 
-    const numberOfInfluencers = await protocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
-    const resp = await protocol.CPCCampaign.getInfluencersAndBalances(
-      campaignAddress, 0, numberOfInfluencers
-    );
-    // @ts-ignore
-    const campaignPublicAddress = campaign.campaignAddressPublic;
+      let earnings = await protocol.CPCCampaign.getTotalReferrerRewardsAndTotalModeratorEarnings(campaignAddress);
 
-    const balanceBefore =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
+      console.log(earnings);
 
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.pushBalancesForInfluencers(
-        campaignPublicAddress,
-        resp.influencers,
-        resp.balances.map(balance => protocol.Utils.toWei(balance,'ether')),
-        address
-      )
-    );
+      let txHash = await promisify(protocol.twoKeyBudgetCampaignsPaymentsHandler.methods.endCampaignReserveTokensAndRebalanceRates, [
+          campaignAddress,
+          protocol.Utils.toWei(earnings.totalAmountForReferrerRewards, 'ether').toString(),
+          protocol.Utils.toWei(earnings.totalModeratorEarnings, 'ether').toString(),
+          {from: address, gas: 7900000}
+      ]);
 
-    await protocol.Utils.getTransactionReceiptMined(
-      await protocol.CPCCampaign.distributeRewardsBetweenInfluencers(
-        campaignPublicAddress,
-        resp.influencers,
-        address,
-      )
-    );
+      console.log(txHash);
 
-    const balanceAfter =  await protocol.ERC20.getERC20Balance(getTwoKeyEconomyAddress(), campaignPublicAddress);
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      expectEqualNumbers(
-          balanceBefore,
-          balanceAfter + resp.balances.reduce((accum, num) => {accum += num; return accum;}, 0)
-      );
+      let info = await protocol.CPCCampaign.getCampaignPublicInfo(campaignAddress);
+
+      console.log(info);
+
+      let rebalancedContractorAndModerator = (info.initialBounty - earnings.totalAmountForReferrerRewards) * (info.rebalancingRatio);
+      let contractorLeftover: number = rebalancedContractorAndModerator - info.moderatorEarnings;
+
+      console.log(contractorLeftover);
+      expect(earnings.totalModeratorEarnings.toFixed(5)).to.be.equal((info.moderatorEarnings / info.rebalancingRatio).toFixed(5));
+      expect(info.isLeftoverWithdrawn).to.be.equal(false);
+      expect(info.contractorLeftover.toFixed(5)).to.be.equal(contractorLeftover.toFixed(5));
+  }).timeout(60000);
+
+  it('should mark campaign as done and assign to active influencers', async() => {
+      const {protocol, web3:{address}} = availableUsers[userKey];
+      const {campaignAddress, campaign} = storage;
+
+      let numberOfActiveInfluencers = await protocol.CPCCampaign.getNumberOfActiveInfluencers(campaignAddress);
+      let campaignInstance = await protocol.CPCCampaign._getPlasmaCampaignInstance(campaignAddress);
+      let influencers = await promisify(campaignInstance.methods.getActiveInfluencers,[0,numberOfActiveInfluencers]);
+
+      let referrerPendingCampaigns = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.methods.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
+
+        let txHash = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.methods.markCampaignAsDoneAndAssignToActiveInfluencers,[
+          campaignAddress,
+          0,
+          numberOfActiveInfluencers,
+          {
+              from: protocol.plasmaAddress,
+              gas: 7800000
+          }
+        ]);
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      let referrerPendingCampaignsAfter = await promisify(protocol.twoKeyPlasmaBudgetCampaignsPaymentsHandler.methods.getCampaignsReferrerHasPendingBalances,[influencers[0]]);
+      expect(referrerPendingCampaigns.length).to.be.equal(referrerPendingCampaignsAfter.length - 1);
+      expect(referrerPendingCampaignsAfter[referrerPendingCampaignsAfter.length-1].toLowerCase()).to.be.equal(campaignAddress.toLowerCase());
 
   }).timeout(60000);
 }

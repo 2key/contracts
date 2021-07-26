@@ -10,13 +10,12 @@ import "../upgradable-pattern-campaigns/UpgradeableCampaign.sol";
  */
 contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
 
-    bool isCampaignInitialized; // Once this is set to true can't be modified
     address assetContractERC20; // Asset contract is address of ERC20 inventory
-    bool boughtRewardsWithEther;
+    bool public boughtRewardsWithEther;
 
     uint public usd2KEYrateWei;
     uint reservedAmountOfTokens; // Reserved amount of tokens for the converters who are pending approval
-
+    bool public withdrawUnsoldTokensCalled;
 
     /**
      * @notice This function is simulation for the constructor, since we're relying on proxies
@@ -252,9 +251,9 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
     returns (uint)
     {
         //Fiat rewards = fiatamount * moderatorPercentage / 100  / 0.095
-        uint totalBounty2keys;
+        uint totalBounty2keys = 0;
         //If fiat conversion do exactly the same just send different reward and don't buy tokens, take them from contract
-        if(maxReferralRewardPercent > 0) {
+        if(_maxReferralRewardETHWei > 0) {
             if(_isConversionFiat) {
                 if(usd2KEYrateWei == 0) {
                     usd2KEYrateWei = (IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).sellRate2key());
@@ -267,12 +266,13 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
                 reservedAmount2keyForRewards = reservedAmount2keyForRewards.add(totalBounty2keys);
             }
             // Update reserved amount
-            //Handle refchain rewards
-            ITwoKeyAcquisitionLogicHandler(logicHandler).updateRefchainRewards(
-                _converter,
-                _conversionId,
-                totalBounty2keys);
         }
+        //Handle refchain rewards
+        ITwoKeyAcquisitionLogicHandler(logicHandler).updateRefchainRewards(
+            _converter,
+            _conversionId,
+            totalBounty2keys);
+
         return totalBounty2keys;
     }
 
@@ -426,6 +426,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
      */
     function withdrawUnsoldTokens() public onlyContractor {
         require(ITwoKeyAcquisitionLogicHandler(logicHandler).canContractorWithdrawUnsoldTokens() == true);
+        require(withdrawUnsoldTokensCalled == false);
         uint unsoldTokens = getAvailableAndNonReservedTokensAmount();
         IERC20(assetContractERC20).transfer(contractor, unsoldTokens);
 
@@ -440,6 +441,7 @@ contract TwoKeyAcquisitionCampaignERC20 is UpgradeableCampaign, TwoKeyCampaign {
                 }
             }
         }
+        withdrawUnsoldTokensCalled = true;
     }
 
 

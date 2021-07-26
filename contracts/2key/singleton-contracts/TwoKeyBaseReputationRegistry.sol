@@ -32,6 +32,19 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
 
     ITwoKeyBaseReputationRegistryStorage public PROXY_STORAGE_CONTRACT;
 
+
+    /**
+     * @notice          Event which will be emitted every time reputation of a user
+     *                  is getting changed. Either positive or negative.
+     */
+    event ReputationUpdated(
+        address _plasmaAddress,
+        string _role, //role in (CONTRACTOR,REFERRER,CONVERTER)
+        string _type, // type in (MONETARY,BUDGET,FEEDBACK)
+        int _points,
+        address _campaignAddress
+    );
+
     /**
      * @notice Since using singletone pattern, this is replacement for the constructor
      * @param _twoKeySingletoneRegistry is the address of registry of all singleton contracts
@@ -75,20 +88,39 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     {
         int initialRewardWei = 10*(10**18);
 
-        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, contractor);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + initialRewardWei);
+        updateContractorScore(contractor, initialRewardWei);
 
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore + initialRewardWei);
 
+        emit ReputationUpdated(
+            plasmaOf(converter),
+            "CONVERTER",
+            "MONETARY",
+            initialRewardWei,
+            msg.sender
+        );
+
         address[] memory referrers = getReferrers(converter, campaign);
 
-        for(int i=0; i<int(referrers.length); i++) {
+        int j=0;
+        int len = int(referrers.length) - 1;
+        for(int i=len; i>=0; i--) {
             bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + initialRewardWei/(i+1));
+            int reward = initialRewardWei/(j+1);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore + reward);
+
+            emit ReputationUpdated(
+                referrers[uint(i)],
+                "REFERRER",
+                "MONETARY",
+                reward,
+                msg.sender
+            );
+
+            j++;
         }
     }
 
@@ -108,22 +140,66 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
     {
         int initialRewardWei = 5*(10**18);
 
-
-        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, contractor);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
-        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore - initialRewardWei);
+        updateContractorScoreOnRejectedConversion(contractor, initialRewardWei);
 
         bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, converter);
         int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
         PROXY_STORAGE_CONTRACT.setInt(keyHashConverterScore, converterScore - initialRewardWei);
 
+        emit ReputationUpdated(
+            plasmaOf(converter),
+            "CONVERTER",
+            "MONETARY",
+            initialRewardWei * (-1),
+            msg.sender
+        );
+
         address[] memory referrers = getReferrers(converter, campaign);
 
-        for(int i=0; i<int(referrers.length); i++) {
+        int j=0;
+        for(int i=int(referrers.length)-1; i>=0; i--) {
             bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, referrers[uint(i)]);
             int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - initialRewardWei/(i+1));
+            int reward = initialRewardWei/(j+1);
+            PROXY_STORAGE_CONTRACT.setInt(keyHashReferrerScore, referrerScore - reward);
+
+            emit ReputationUpdated(
+                referrers[uint(i)],
+                "REFERRER",
+                "MONETARY",
+                reward*(-1),
+                msg.sender
+            );
+            j++;
         }
+    }
+
+    function updateContractorScoreOnRejectedConversion(
+        address contractor,
+        int reward
+    )
+    internal
+    {
+        updateContractorScore(contractor, reward*(-1));
+    }
+
+    function updateContractorScore(
+        address contractor,
+        int reward
+    )
+    internal
+    {
+        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, contractor);
+        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        PROXY_STORAGE_CONTRACT.setInt(keyHashContractorScore, contractorScore + reward);
+
+        emit ReputationUpdated(
+            plasmaOf(contractor),
+            "CONTRACTOR",
+            "MONETARY",
+            reward,
+            msg.sender
+        );
     }
 
     /**
@@ -171,37 +247,112 @@ contract TwoKeyBaseReputationRegistry is Upgradeable, ITwoKeySingletonUtils {
         return ITwoKeyAcquisitionLogicHandler(logicHandlerAddress).getReferrers(converter);
     }
 
+
     /**
-     * @notice Function to fetch reputation points per address
-     * @param _address is the address of the user we want to check points for
-     * @return encoded values in type bytes, unpackable by slices of 66,2,64,2,64,2 parsed to int / bool
+     * @notice          Function to get reputation for user in case he's an influencer or converter
      */
-    function getRewardsByAddress(
-        address _address
+    function getReputationForUser(
+        address _plasmaAddress
     )
     public
     view
-    returns (int,int,int)
+    returns (int,int)
     {
         address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress(_twoKeyRegistry);
-        address plasma = ITwoKeyReg(twoKeyRegistry).getEthereumToPlasma(_address);
+        address ethereumAddress = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_plasmaAddress);
 
-        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, _address);
-        int contractorScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+        bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, ethereumAddress);
+        int converterReputationScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
 
-        bytes32 keyHashConverterScore = keccak256(_address2converterGlobalReputationScoreWei, _address);
-        int converterScore = PROXY_STORAGE_CONTRACT.getInt(keyHashConverterScore);
+        bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, _plasmaAddress);
+        int referrerReputationScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
 
-        bytes32 keyHashReferrerScore = keccak256(_plasmaAddress2referrerGlobalReputationScoreWei, plasma);
-        int referrerScore = PROXY_STORAGE_CONTRACT.getInt(keyHashReferrerScore);
-
-
-        return (
-            contractorScore,
-            converterScore,
-            referrerScore
-        );
-
+        return (converterReputationScore, referrerReputationScore);
     }
 
+    function getGlobalReputationForUser(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (int)
+    {
+        int converterReputationScore;
+        int referrerReputationScore;
+
+        (converterReputationScore, referrerReputationScore) = getReputationForUser(_plasmaAddress);
+
+        return (converterReputationScore + referrerReputationScore);
+    }
+
+
+    function getGlobalReputationForUsers(
+        address [] plasmaAddresses
+    )
+    public
+    view
+    returns (int[])
+    {
+        uint len = plasmaAddresses.length;
+
+        int [] memory reputations = new int[](len);
+
+        uint i;
+
+        for(i=0; i<len; i++) {
+            reputations[i] = getGlobalReputationForUser(plasmaAddresses[i]);
+        }
+
+        return (reputations);
+    }
+
+    /**
+     * @notice          Function to get reputation for user in case he's contractor
+     */
+    function getReputationForContractor(
+        address _plasmaAddress
+    )
+    public
+    view
+    returns (int)
+    {
+        address twoKeyRegistry = ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_SINGLETON_REGISTRY).getContractProxyAddress(_twoKeyRegistry);
+        address ethereumAddress = ITwoKeyReg(twoKeyRegistry).getPlasmaToEthereum(_plasmaAddress);
+
+        bytes32 keyHashContractorScore = keccak256(_address2contractorGlobalReputationScoreWei, ethereumAddress);
+        int contractorReputationScore = PROXY_STORAGE_CONTRACT.getInt(keyHashContractorScore);
+
+        return (contractorReputationScore);
+    }
+
+
+    function getGlobalReputationForContractors(
+        address [] plasmaAddresses
+    )
+    public
+    view
+    returns (int[])
+    {
+        uint len = plasmaAddresses.length;
+
+        int [] memory reputations = new int[](len);
+
+        uint i;
+
+        for(i=0; i<len; i++) {
+            reputations[i] = getReputationForContractor(plasmaAddresses[i]);
+        }
+
+        return (reputations);
+    }
+
+    function plasmaOf(
+        address _address
+    )
+    internal
+    view
+    returns (address)
+    {
+        return ITwoKeyReg(getAddressFromTwoKeySingletonRegistry(_twoKeyRegistry)).getEthereumToPlasma(_address);
+    }
 }

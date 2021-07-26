@@ -3,9 +3,12 @@ pragma solidity ^0.4.24;
 import "../upgradability/Upgradeable.sol";
 
 import "../interfaces/storage-contracts/ITwoKeyPlasmaRegistryStorage.sol";
+
 import "../interfaces/ITwoKeyMaintainersRegistry.sol";
 import "../interfaces/ITwoKeySingletoneRegistryFetchAddress.sol";
 import "../interfaces/ITwoKeyPlasmaEventSource.sol";
+import "../interfaces/ITwoKeyPlasmaReputationRegistry.sol";
+
 import "../libraries/Call.sol";
 
 
@@ -66,119 +69,8 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         TWO_KEY_PLASMA_SINGLETON_REGISTRY = _twoKeyPlasmaSingletonRegistry;
         PROXY_STORAGE_CONTRACT = ITwoKeyPlasmaRegistryStorage(_proxyStorage);
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), 2);
+
         initialized = true;
-    }
-
-
-    /**
-     * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
-     *
-     * @param           contractName is the name of the contract
-     */
-    function getAddressFromTwoKeySingletonRegistry(
-        string contractName
-    )
-    internal
-    view
-    returns (address)
-    {
-        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
-            .getContractProxyAddress(contractName);
-    }
-
-
-    /**
-     * @notice          Function to link username and address once signature is validated
-     *
-     * @param           signature is the signature user created
-     * @param           plasmaAddress is the plasma address of the user
-     * @param           username is username user want to set
-     */
-    function linkUsernameAndAddress(
-        bytes signature,
-        address plasmaAddress,
-        string username
-    )
-    public
-    onlyMaintainer
-    {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
-        require (signature.length == 65);
-
-        address plasma = Call.recoverHash(hash,signature,0);
-        require(plasma == plasmaAddress);
-
-        require(getUsernameToAddress(username) == address(0));
-        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), username);
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasmaAddress);
-
-        emitPlasma2Handle(plasmaAddress, username);
-    }
-
-
-    /**
-
-     */
-    function add_plasma2ethereum(
-        address plasma_address,
-        bytes sig
-    )
-    public
-    onlyMaintainer
-    {
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasma_address))));
-        require (sig.length == 65);
-
-        address eth_address = Call.recoverHash(hash,sig,0);
-
-        address ethereum = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_plasma2ethereum, plasma_address));
-        require(ethereum == address(0) || ethereum == eth_address);
-
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_plasma2ethereum, plasma_address), eth_address);
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_ethereum2plasma,eth_address), plasma_address);
-
-        emitPlasma2Ethereum(plasma_address, eth_address);
-    }
-
-    /**
-     * @notice          Function where username can be changed
-     *
-     * @param           newUsername is the new username user wants to add
-     * @param           userPublicAddress is the ethereum address of the user
-     * @param           signature is the signature of the user
-     */
-    function changeUsername(
-        string newUsername,
-        address userPublicAddress,
-        bytes signature
-    )
-    public
-    onlyMaintainer
-    {
-        // Generate hash
-        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to name")),
-            keccak256(abi.encodePacked(newUsername))));
-
-        // Take the signer of the message
-        address messageSigner = Call.recoverHash(hash, signature, 0);
-
-        // Assert that the message signer is the _sender in the arguments
-        require(messageSigner == userPublicAddress);
-
-        address plasmaAddress = ethereum2plasma(userPublicAddress);
-
-        // Get current username for this user
-        string memory currentUsername = getAddressToUsername(plasmaAddress);
-
-        // Delete previous username mapping
-        PROXY_STORAGE_CONTRACT.deleteAddress(keccak256(_usernameToAddress, currentUsername));
-
-        require(getUsernameToAddress(newUsername) == address(0));
-
-        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), newUsername);
-        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress, newUsername), plasmaAddress);
-
-        emitUsernameChangedEvent(plasmaAddress, newUsername);
     }
 
     function emitUsernameChangedEvent(
@@ -210,6 +102,154 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     {
         address twoKeyPlasmaEventSource = getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaEventSource);
         ITwoKeyPlasmaEventSource(twoKeyPlasmaEventSource).emitPlasma2HandleEvent(plasma, handle);
+    }
+
+    /**
+     * @notice          Function to link username and address once signature is validated
+     *
+     * @param           plasmaAddress is the plasma address of the user
+     * @param           username is username user want to set
+     */
+    function linkUsernameAndAddress(
+        address plasmaAddress,
+        string username
+    )
+    public
+    onlyMaintainer
+    {
+        // Assert that this username is not pointing to any address
+        require(getUsernameToAddress(username) == address(0));
+
+        // Assert that this address is not pointing to any username
+        bytes memory currentUserNameForThisAddress = bytes(getAddressToUsername(plasmaAddress));
+        require(currentUserNameForThisAddress.length == 0);
+
+        // Store _addressToUsername and  _usernameToAddress
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), username);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasmaAddress);
+
+        // Give user registration bonus points
+        ITwoKeyPlasmaReputationRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaReputationRegistry"))
+            .updateUserReputationScoreOnSignup(plasmaAddress);
+
+        // Emit event that plasma and username are linked
+        emitPlasma2Handle(plasmaAddress, username);
+    }
+
+
+    /**
+     * @notice          Function to re-link username and address
+     *
+     * @param           plasmaAddress is the plasma address of the user
+     * @param           username is username user want to set
+     */
+    function changeLinkedUsernameForAddress(
+        address plasmaAddress,
+        string username
+    )
+    public
+    onlyMaintainer
+    {
+        // This can be called as many times as long plasma and ethereum are not linked
+        // Afterwards, only changeUsername can be called
+        require(plasma2ethereum(plasmaAddress) == address(0));
+
+        // Assert that this username is not pointing to any address
+        require(getUsernameToAddress(username) == address(0));
+
+        // Store _addressToUsername and  _usernameToAddress
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), username);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress,username), plasmaAddress);
+
+        // Emit event that plasma and username are linked
+        emitPlasma2Handle(plasmaAddress, username);
+    }
+
+
+    /**
+     * @notice          Function to map plasma2ethereum and ethereum2plasma
+     *
+     * @param           signature is the msg signed with users public address
+     * @param           plasmaAddress is the user plasma address
+     * @param           ethereumAddress is the ethereum address of user
+     */
+    function addPlasma2Ethereum(
+        bytes signature,
+        address plasmaAddress,
+        address ethereumAddress
+    )
+    public
+    onlyMaintainer
+    {
+        // Generate hash
+        bytes32 hash = keccak256(abi.encodePacked(keccak256(abi.encodePacked("bytes binding to plasma address")),keccak256(abi.encodePacked(plasmaAddress))));
+
+        // Recover ethereumAddress from signature
+        address recoveredEthereumAddress = Call.recoverHash(hash,signature,0);
+
+        // Require that recoveredEthereumAddress is same as one passed in method argument
+        require(recoveredEthereumAddress == ethereumAddress);
+
+        // Require that plasma stored in contract for this ethereum address = address(0)
+        address plasmaStoredInContract = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_ethereum2plasma,ethereumAddress));
+        require(plasmaStoredInContract == address(0));
+
+        // Require that ethereum stored in contract for this plasma address = address(0)
+        address ethereumStoredInContract = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_plasma2ethereum, plasmaAddress));
+        require(ethereumStoredInContract == address(0));
+
+        // Save to the contract state mapping _ethereum2plasma nad _plasma2ethereum
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_plasma2ethereum, plasmaAddress), ethereumAddress);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_ethereum2plasma,ethereumAddress), plasmaAddress);
+
+        // Emit event that plasma and ethereum addresses are being linked
+        emitPlasma2Ethereum(plasmaAddress, ethereumAddress);
+    }
+
+
+    /**
+     * @notice          Function where username can be changed
+     *
+     * @param           newUsername is the new username user wants to add
+     * @param           userPublicAddress is the ethereum address of the user
+     */
+    function changeUsername(
+        string newUsername,
+        address userPublicAddress
+    )
+    public
+    onlyMaintainer
+    {
+        // Get current username for this user
+        string memory currentUsername = getAddressToUsername(plasmaAddress);
+
+        // Get the plasma address for this ethereum address
+        address plasmaAddress = ethereum2plasma(userPublicAddress);
+
+        // Delete previous username mapping
+        PROXY_STORAGE_CONTRACT.deleteAddress(keccak256(_usernameToAddress, currentUsername));
+
+        require(getUsernameToAddress(newUsername) == address(0));
+
+        PROXY_STORAGE_CONTRACT.setString(keccak256(_addressToUsername, plasmaAddress), newUsername);
+        PROXY_STORAGE_CONTRACT.setAddress(keccak256(_usernameToAddress, newUsername), plasmaAddress);
+
+        emitUsernameChangedEvent(plasmaAddress, newUsername);
+    }
+
+
+    /**
+     * @notice          Function where Congress on plasma can set moderator fee
+     * @param           feePercentage is the feePercentage in uint (ether units)
+     *                  example if you want to set 1%  then feePercentage = 1
+     */
+    function setModeratorFee(
+        uint feePercentage
+    )
+    public
+    onlyTwoKeyPlasmaCongress
+    {
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), feePercentage);
     }
 
     function plasma2ethereum(
@@ -251,8 +291,8 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
     }
 
     /**
-     * @notice Function to validate if signature is valid
-     * @param signature is the signature
+     * @notice          Function to validate if signature is valid
+     * @param           signature is the signature
      */
     function recover(
         bytes signature
@@ -267,22 +307,25 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         return recoveredAddress;
     }
 
+
     /**
-     * @notice Function where Congress on plasma can set moderator fee
-     * @param feePercentage is the feePercentage in uint (ether units)
-     * example if you want to set 1%  then feePercentage = 1
+     * @notice          Function to get address from TwoKeyPlasmaSingletonRegistry
+     *
+     * @param           contractName is the name of the contract
      */
-    function setModeratorFee(
-        uint feePercentage
+    function getAddressFromTwoKeySingletonRegistry(
+        string contractName
     )
-    public
-    onlyTwoKeyPlasmaCongress
+    internal
+    view
+    returns (address)
     {
-        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorFeePercentage), feePercentage);
+        return ITwoKeySingletoneRegistryFetchAddress(TWO_KEY_PLASMA_SINGLETON_REGISTRY)
+        .getContractProxyAddress(contractName);
     }
 
     /**
-     * @notice Function to return moderator fee
+     * @notice          Function to return moderator fee
      */
     function getModeratorFee()
     public
@@ -292,8 +335,11 @@ contract TwoKeyPlasmaRegistry is Upgradeable {
         return PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorFeePercentage));
     }
 
+    /**
+     * @notice          Function to get TwoKeyPlasmaCongress address
+     */
     function getCongressAddress()
-    public
+    internal
     view
     returns (address)
     {

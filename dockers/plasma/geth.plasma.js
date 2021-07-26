@@ -68,6 +68,10 @@ async function start() {
     containerName,
     '--nodiscover',
     '--rpc',
+    '--syncmode',
+    'full',
+    '--gcmode',
+    'archive',
     '--rpcapi',
     'db,personal,eth,net,web3,debug,txpool,miner',
     // 'db,web3,eth,net,personal,parity,parity_set,traces,rpc,parity_accounts,txpool,miner',
@@ -84,13 +88,11 @@ async function start() {
     '--wsport=8546',
     '--wsorigins',
     '*',
-    '--mine',
-    '--minerthreads',
-    '1',
     '--gasprice',
     '0',
     '--targetgaslimit',
     '9000000',
+      '--dev'
   ];
   /*
   if (!fs.existsSync(datadir)) {

@@ -55,7 +55,7 @@ describe(
     storage.addUser(randomUserIds.converter);
 
     before(async function () {
-      this.timeout(600000);
+      this.timeout(100000);
 
       // @ts-ignore
       availableUsers[randomUserIds.contractor] = await registerRandomUser(randomUserIds.contractor, campaignData.campaignInventory* 2, conversionSize * 2);

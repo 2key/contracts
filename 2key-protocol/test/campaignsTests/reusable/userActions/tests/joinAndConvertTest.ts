@@ -56,13 +56,12 @@ export default function joinAndConvertTest(
       if (campaignData.isFiatOnly) {
         const signature = await protocol[campaignContract].getSignatureFromLink(
           refUser.link.link, protocol.plasmaAddress, refUser.link.fSecret);
+        const txHash = await protocol[campaignContract].convertOffline(
+          campaignAddress, signature, address, address,
+          contribution,
+        )
 
-        await protocol.Utils.getTransactionReceiptMined(
-          await protocol[campaignContract].convertOffline(
-            campaignAddress, signature, address, address,
-            contribution,
-          )
-        );
+        await protocol.Utils.getTransactionReceiptMined(txHash);
       } else {
         await protocol.Utils.getTransactionReceiptMined(
           await protocol.AcquisitionCampaign.joinAndConvert(
@@ -79,7 +78,7 @@ export default function joinAndConvertTest(
         campaignAddress,
         address
       );
-      
+
       const conversionIds = await protocol[campaignContract].getConverterConversionIds(
         campaignAddress, address, address,
       );
@@ -103,8 +102,10 @@ export default function joinAndConvertTest(
 
       if (campaignData.isFiatOnly && !campaignData.isKYCRequired) {
         const rate = await protocol.UpgradableExchange.get2keySellRate(address);
-        const reward = contribution * campaignData.maxReferralRewardPercentWei / 100 / rate;
-
+        const reward = contribution / campaignData.maxReferralRewardPercentWei / 100 / rate;
+        /*const resp = protocol.CPCCampaign.getInventoryStatus(address)
+        const reward = await resp || 0*/
+        // @ts-ignore
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase - reward);
       } else {
         expectEqualNumbers(amountOfTokensAfterConvert, initialAmountOfTokens - amountOfTokensForPurchase);
@@ -133,7 +134,7 @@ export default function joinAndConvertTest(
       await protocol.Utils.getTransactionReceiptMined(
         await protocol.DonationCampaign.joinAndConvert(
           campaignAddress,
-          protocol.Utils.toWei(contribution, 'ether'),
+          protocol.Utils.toWei(contribution, 'ether').toString(),
           refUser.link.link,
           address,
           {fSecret: refUser.link.fSecret},

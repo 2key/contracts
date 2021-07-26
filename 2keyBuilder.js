@@ -7,11 +7,10 @@ const { networks: truffleNetworks } = require('./truffle');
 const simpleGit = require('simple-git/promise');
 const moment = require('moment');
 const whitelist = require('./ContractDeploymentWhiteList.json');
-
+const readline = require('readline');
 const readdir = util.promisify(fs.readdir);
 const buildPath = path.join(__dirname, 'build');
 const contractsBuildPath = path.join(__dirname, 'build', 'contracts');
-const buildBackupPath = path.join(__dirname, 'build', 'contracts.bak');
 const twoKeyProtocolDir = path.join(__dirname, '2key-protocol', 'src');
 const twoKeyProtocolDist = path.join(__dirname, '2key-protocol', 'dist');
 const twoKeyProtocolLibDir = path.join(__dirname, '2key-protocol', 'dist');
@@ -37,9 +36,11 @@ const {
     ipfsAdd,
     ipfsGet,
     runDeployCPCCampaignMigration,
-    runDeployCPCFirstTime,
-    runTruffleCompile
+    runTruffleCompile,
+    runDeployCPCNoRewardsMigration,
+    runDeployPlasmaParticipationsMining
 } = require('./helpers');
+
 
 
 const branch_to_env = {
@@ -71,11 +72,11 @@ const getDiffBetweenLatestTags = async () => {
     let status = await contractsGit.status();
     let diffParams;
 
-    if(status.current == 'staging') {
+    if (status.current === 'staging') {
         diffParams = latestTagStaging;
-    } else if(status.current == 'develop') {
+    } else if (status.current === 'develop') {
         diffParams = latestTagDev;
-    } else if(status.current == 'master') {
+    } else if (status.current === 'master') {
         diffParams = latestTagMaster;
     }
 
@@ -86,24 +87,42 @@ const getDiffBetweenLatestTags = async () => {
     let tokenSellCampaignChanged = diffAllContracts.filter(item => item.includes('/acquisition-campaign-contracts/')|| item.includes('/campaign-mutual-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let donationCampaignChanged = diffAllContracts.filter(item => item.includes('/campaign-mutual-contracts/') || item.includes('/donation-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
     let cpcChanged = diffAllContracts.filter(item => item.includes('/cpc-campaign-contracts/')).map(item => item.split('/').pop().replace(".sol",""));
+    let cpcNoRewardsChanged = diffAllContracts.filter(item => item.includes('/cpc-campaign-no-rewards/')).map(item => item.split('/').pop().replace(".sol",""));
 
     //Restore from archive the latest build so we can check which contracts are new
     restoreFromArchive();
 
     //Check the files which have never been deployed and exclude them from script
     for(let i=0; i<singletonsChanged.length; i++) {
-        if(!checkIfFileExistsInDir(singletonsChanged[i])) {
+        if(!checkIfContractDeployedEver(singletonsChanged[i])) {
             singletonsChanged.splice(i,1);
             i = i-1; //catch when 2 contracts we're removing are one next to another
         }
     }
-    return [singletonsChanged, tokenSellCampaignChanged, donationCampaignChanged, cpcChanged];
+    return [
+        singletonsChanged,
+        tokenSellCampaignChanged.length > 0,
+        donationCampaignChanged.length > 0,
+        cpcChanged.length > 0,
+        cpcNoRewardsChanged.length > 0
+    ];
 };
 
-const checkIfFileExistsInDir = (contractName) => {
+const checkIfContractDeployedEver = (contractName) => {
     let artifactPath = `./build/contracts/${contractName}.json`
-    return fs.existsSync(artifactPath);
+    let build = {};
+    if (fs.existsSync(artifactPath)) {
+        build = JSON.parse(fs.readFileSync(artifactPath, { encoding: 'utf-8' }));
+        return Object.keys(build.networks).length > 0;
+    } else {
+        return false;
+    }
+
 }
+
+const generateChangelog = async () => {
+    await runProcess('git-chglog',['-o','CHANGELOG.md'])
+};
 
 const getBuildArchPath = () => {
     if(contractsStatus && contractsStatus.current) {
@@ -123,6 +142,14 @@ const pullTenderlyConfiguration = async () => {
         if (err) throw err;
     });
 };
+
+const tenderlyPush = async (npmVersionTag) => {
+    try {
+        await runProcess('tenderly', ['push', '--tag', npmVersionTag]);
+    } catch (e) {
+        console.log('Error caught during tenderly push.');
+    }
+}
 
 const getContractsDeployedPath = () => {
     const result = path.join(twoKeyProtocolDir,'contracts_deployed{branch}.json');
@@ -155,7 +182,6 @@ const getVersionsPath = (branch = true) => {
 const archiveBuild = () => tar.c({ gzip: true, file: getBuildArchPath(), cwd: __dirname }, ['build']);
 
 const restoreFromArchive = () => {
-    console.log("restore",__dirname);
     // Restore file only if exists
     if(fs.existsSync(getBuildArchPath())) {
         return tar.x({file: getBuildArchPath(), gzip: true, cwd: __dirname});
@@ -163,7 +189,6 @@ const restoreFromArchive = () => {
 };
 
 const generateSOLInterface = () => new Promise((resolve, reject) => {
-    console.log('Generating abi', deployedTo);
     if (fs.existsSync(buildPath)) {
         let contracts = {
             'contracts': {},
@@ -244,7 +269,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 
                 contracts.contracts.singletons = Object.assign(obj, contracts.contracts.singletons);
-                console.log('Writing contracts for submodules...');
                 if(!fs.existsSync(path.join(twoKeyProtocolDir, 'contracts'))) {
                     fs.mkdirSync(path.join(twoKeyProtocolDir, 'contracts'));
                 }
@@ -267,9 +291,6 @@ const generateSOLInterface = () => new Promise((resolve, reject) => {
 
 const updateIPFSHashes = async(contracts) => {
     const nonSingletonHash = contracts.contracts.singletons.NonSingletonsHash;
-    console.log(nonSingletonHash);
-
-
     let versionsList = {};
 
     let existingVersionHandlerFile = {};
@@ -277,7 +298,6 @@ const updateIPFSHashes = async(contracts) => {
     // if(!process.argv.includes('--reset')) {
     try {
         existingVersionHandlerFile = JSON.parse(fs.readFileSync(getVersionsPath()), { encoding: 'utf8' });
-        console.log('EXISTING VERSIONS', existingVersionHandlerFile);
     } catch (e) {
         console.log('VERSIONS ERROR', e);
     }
@@ -286,7 +306,6 @@ const updateIPFSHashes = async(contracts) => {
 
     if (currentVersionHandler) {
         versionsList = JSON.parse((await ipfsGet(currentVersionHandler)).toString());
-        console.log('VERSION LIST', versionsList);
     }
     // }
 
@@ -294,18 +313,14 @@ const updateIPFSHashes = async(contracts) => {
     const files = (await readdir(twoKeyProtocolSubmodulesDir)).filter(file => file.endsWith('.js'));
     for (let i = 0, l = files.length; i < l; i++) {
         const js = fs.readFileSync(path.join(twoKeyProtocolSubmodulesDir, files[i]), { encoding: 'utf-8' });
-        console.log(files[i], (js.length / 1024).toFixed(3));
         console.time('Upload');
         const [{ hash }] = await ipfsAdd(js, deployment);
         console.timeEnd('Upload');
-        console.log('ipfs hashes',files[i], hash);
         versionsList[nonSingletonHash][files[i].replace('.js', '')] = hash;
     }
-    console.log(versionsList);
     const [{ hash: newTwoKeyVersionHandler }] = await ipfsAdd(JSON.stringify(versionsList), deployment);
     fs.writeFileSync(getVersionsPath(), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
     fs.writeFileSync(getVersionsPath(false), JSON.stringify({ TwoKeyVersionHandler: newTwoKeyVersionHandler }, null, 4));
-    console.log('TwoKeyVersionHandler', newTwoKeyVersionHandler);
 };
 
 /**
@@ -360,66 +375,96 @@ const pushTagsToGithub = (async (npmVersionTag) => {
 
 
 const checkIfContractIsPlasma = (contractName) => {
-    if(contractName.includes('Plasma')) {
-        return true;
-    }
-    return false;
+    return !!contractName.includes('Plasma');
+
 };
 
-async function deployUpgrade(networks, args) {
-    console.log(networks);
+const getContractsFromFile = () => {
+    return JSON.parse(fs.readFileSync('./scripts/deployments/manualDeploy.json', 'utf8'));
+};
+
+/**
+ *  TODO: Improve and change this script to handle following by hierarchy:
+ *  - if deployment is protocol only or there're contracts to be deployed.
+ *  - if protocol deployment, skip whole contracts process, and proceed to submodule generation
+ *  - if contracts deployment, check if we're deploying contracts by getting diff between latest tags,
+ *  - or we're deplpoying them by specifying in file which contracts we want to deploy
+ *
+ *  TODO: Improvement for fetching contracts to be deployed:
+ *  - if singletons, we need list of contracts
+ *  - if campaign contracts, we only need flag with campaign type and if it has to be deployed
+ *
+ */
+
+
+async function deployUpgrade(networks) {
     const l = networks.length;
 
     await runTruffleCompile();
-    let [singletonsToBeUpgraded, tokenSellToBePatched, donationToBePatched, cpcChanged] = await getDiffBetweenLatestTags();
+
+    let deployment = {};
+
+    // Deploy from file
+    if(process.argv.includes('deploy-from-file')) {
+        let contracts = getContractsFromFile();
+        deployment.singletons = contracts.singletons;
+        deployment.tokenSell = contracts.tokenSell;
+        deployment.donation = contracts.donation;
+        deployment.ppc = contracts.ppc;
+        deployment.cpcNoRewards = contracts.cpcNoRewards;
+    } else {
+        [
+            deployment.singletons,
+            deployment.tokenSell,
+            deployment.donation,
+            deployment.ppc,
+            deployment.cpcNoRewards
+        ] = await getDiffBetweenLatestTags();
+    }
+
 
     for (let i = 0; i < l; i += 1) {
         /* eslint-disable no-await-in-loop */
-        console.log('Singletons to be upgraded: ', singletonsToBeUpgraded);
-        console.log('TOKEN_SELL to be upgraded: ', tokenSellToBePatched);
-        console.log('DONATION to be upgraded: ', donationToBePatched);
-        console.log('CPC contracts changed: ', cpcChanged);
-
 
         // Deploy the CPC contracts
-        if(process.argv.includes('cpc-deploy')) {
-            console.log("Deploying CPC campaign for the first time to the network");
-            await runDeployCPCFirstTime(networks[i]);
+        if (process.argv.includes('plasma-participation')) {
+            await runDeployPlasmaParticipationsMining(networks[i]);
         }
 
-        if(singletonsToBeUpgraded.length > 0) {
-            for(let j=0; j<singletonsToBeUpgraded.length; j++) {
+        if (deployment.singletons.length > 0) {
+            for (let j = 0; j < deployment.singletons.length; j++) {
                 /* eslint-disable no-await-in-loop */
-                console.log(networks[i], singletonsToBeUpgraded[j]);
-                if(checkIfContractIsPlasma(singletonsToBeUpgraded[j])) {
-                    console.log('Contract is plasma: ' + singletonsToBeUpgraded[j]);
-                    if(networks[i].includes('private') || networks[i].includes('plasma')) {
-                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                if (checkIfContractIsPlasma(deployment.singletons[j])) {
+                    if (networks[i].includes('private') || networks[i].includes('plasma')) {
+                        await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 } else {
                     if(networks[i].includes('public')) {
-                        await runUpdateMigration(networks[i], singletonsToBeUpgraded[j]);
+                        await runUpdateMigration(networks[i], deployment.singletons[j]);
                     }
                 }
             }
         }
 
-        if(tokenSellToBePatched.length > 0) {
+        if(deployment.tokenSell) {
             if(networks[i].includes('public')) {
                 await runDeployTokenSellCampaignMigration(networks[i]);
             }
         }
 
-        if(donationToBePatched.length > 0) {
+        if(deployment.donation) {
             if(networks[i].includes('public')) {
                 await runDeployDonationCampaignMigration(networks[i]);
             }
         }
 
-        if(cpcChanged.length > 0) {
+        if(deployment.ppc) {
             await runDeployCPCCampaignMigration(networks[i]);
         }
 
+        if(deployment.cpcNoRewards) {
+            await runDeployCPCNoRewardsMigration(networks[i]);
+        }
 
         /* eslint-enable no-await-in-loop */
     }
@@ -429,8 +474,9 @@ async function deployUpgrade(networks, args) {
 async function deploy() {
     try {
         deployment = true;
-        console.log("Removing truffle build, the whole folder will be deleted: ", buildPath);
-        rmDir(buildPath);
+        //Removing truffle build, the whole folder will be deleted
+        await rmDir(buildPath);
+        // Load tenderly configuration
         await pullTenderlyConfiguration();
         await contractsGit.fetch();
         await contractsGit.submoduleUpdate();
@@ -451,7 +497,6 @@ async function deploy() {
             console.log('You have unsynced changes!', localChanges);
             process.exit(1);
         }
-        console.log(process.argv);
 
         const local = process.argv[2].includes('local'); //If we're deploying to local network
 
@@ -473,7 +518,7 @@ async function deploy() {
 
         if(!process.argv.includes('protocol-only')) {
             if(process.argv.includes('update')) {
-                await deployUpgrade(networks, process.argv);
+                await deployUpgrade(networks);
             }
             if(process.argv.includes('--reset')) {
                 await deployContracts(networks, true);
@@ -485,7 +530,6 @@ async function deploy() {
 
         await commitAndPushContractsFolder(`Contracts deployed to ${network} ${now.format('lll')}`);
         await commitAndPush2KeyProtocolSrc(`Contracts deployed to ${network} ${now.format('lll')}`);
-        console.log('Changes commited');
         await buildSubmodules(contracts);
         if (!local) {
             await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'));
@@ -532,7 +576,6 @@ async function deploy() {
             }
             const json = JSON.parse(fs.readFileSync('package.json', 'utf8'));
             let npmVersionTag = json.version;
-            console.log(npmVersionTag);
             process.chdir('../../');
             // Push tags
             await pushTagsToGithub(npmVersionTag);
@@ -547,8 +590,19 @@ async function deploy() {
             process.chdir('../../');
             //Run slack message
             await slack_message('v'+npmVersionTag.toString(), 'v'+oldVersion.toString(), branch_to_env[contractsStatus.current]);
-            // Add tenderly to CI/CD
-            await runProcess('tenderly',['push', '--tag', npmVersionTag]);
+            if(!process.argv.includes('skip-tenderly')) {
+                // Add tenderly to CI/CD only in case there have been contracts updated.
+                await tenderlyPush(npmVersionTag);
+            }
+            // Generate the latest changelog for contracts repo
+            await generateChangelog();
+            // Go to 2key-protocol/src
+            process.chdir(twoKeyProtocolDir);
+            // Generate the changelog for this repository
+            await generateChangelog();
+            // Push final commit for the deployment
+            await commitAndPush2KeyProtocolSrc(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
+            await commitAndPushContractsFolder(`Version: ${npmVersionTag}. Deployment finished, changelog generated, submodules synced.`);
         } else {
             process.exit(0);
         }
@@ -566,15 +620,6 @@ async function deploy() {
     }
 }
 
-const test = () => new Promise(async (resolve, reject) => {
-    try {
-        await runProcess('node', ['-r', 'dotenv/config', './node_modules/.bin/mocha', '--exit', '--bail', '-r', 'ts-node/register', '2key-protocol/test/index.spec.ts']);
-        resolve();
-    } catch (err) {
-        reject(err);
-    }
-
-});
 
 const buildSubmodules = async(contracts) => {
     await runProcess(path.join(__dirname, 'node_modules/.bin/webpack'), ['--config', './webpack.config.submodules.js', '--mode production', '--colors']);
@@ -628,6 +673,7 @@ const deployContracts = async (networks, updateArchive) => {
     }
 };
 
+
 async function main() {
     contractsStatus = await contractsGit.status(); // Fetching branch
     const mode = process.argv[2];
@@ -662,16 +708,40 @@ async function main() {
         case '--diff':
             console.log(await getDiffBetweenLatestTags());
             process.exit(0);
-
+            break;
         case '--tenderly':
             await pullTenderlyConfiguration();
             process.exit(0);
-
-        default:
-            await deploy();
+            break;
+        case '--tenderlyPush':
+            let tag = process.argv[3].toString();
+            await tenderlyPush(tag);
             process.exit(0);
+            break;
+        default:
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+
+            const answer = await new Promise(resolve => {
+                rl.question("This will start deployment process. Proceed? [Y/N] ", answer => resolve(answer))
+            })
+            rl.close();
+            if(answer.toUpperCase() === 'Y' || answer.toUpperCase() === 'YES') {
+                await deploy();
+                process.exit(0);
+            } else if(answer.toUpperCase() === 'N' || answer.toUpperCase() === 'NO') {
+                console.log('Bye bye 👋👋')
+            } else {
+                console.log('Wrong answer! Bye bye 👋👋');
+            }
+            process.exit(0);
+            break;
     }
 }
+
+
 
 main().catch((e) => {
     console.log(e);

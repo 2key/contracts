@@ -2,8 +2,6 @@
 require('babel-register');
 require('regenerator-runtime/runtime');
 
-const LedgerWalletProvider = require('truffle-ledger-provider');
-
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const LedgerProvider = require('./LedgerProvider');
 
@@ -11,15 +9,16 @@ const config = require('./configurationFiles/accountsConfig.json');
 
 const mnemonic =  process.env.MNEMONIC || config.mnemonic;
 
+
 const rpcs = {
-    'test-public' : 'https://rpc-dev.public.test.k8s.2key.net',
-    'test-private' : 'https://rpc-dev.private.test.k8s.2key.net',
-    'staging-public' : 'https://rpc-staging.public.test.k8s.2key.net',
-    'staging-private' : 'https://rpc-staging.private.test.k8s.2key.net',
-    'prod-public' : 'https://rpc.public.prod.k8s.2key.net',
-    'prod-private' : 'https://rpc.private.prod.k8s.2key.net',
-    'dev-ganache': 'https://localhost:7545',
-    'infura-ropsten' : `https://ropsten.infura.io/v3/${config.infura_id}`
+    'test-public' : config["test-public"],
+    'test-private' : config["test-private"],
+    'staging-public' : config["staging-public"],
+    'staging-private' : config["staging-private"],
+    'prod-public' : config["prod-public"],
+    'prod-private' : config["prod-private"],
+    'dev-local': config["dev-local"],
+    'plasma-test-local': config["plasma-test-local"]
 };
 
 const ids = {
@@ -29,8 +28,8 @@ const ids = {
     'staging-private' : 182,
     'prod-public' : 1,
     'prod-private' : 180,
-    'dev-ganache': 5777,
-    'infura-ropsten': 3
+    'dev-local': 8086,
+    'plasma-test-local': 8087
 };
 
 const createLedgerProvider = (rpc, id) => () =>
@@ -51,31 +50,16 @@ module.exports = {
   plugins: ["truffle-security"],
 
   networks: {
-      'dev-ganache': {
-          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-ganache"]),
-          skipDryRun: true,
-          network_id: ids["dev-ganache"],
-          gas: 8000000,
-          gasPrice: 120000000000,
-      },
-      'plasma-ganache': {
-          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-ganache"]),
-          skipDryRun: true,
-          network_id: ids["dev-ganache"],
-          gas: 8000000,
-          gasPrice: 120000000000,
-      },
-
       'dev-local': {
-          provider: () => new HDWalletProvider(mnemonic, 'http://localhost:8545'),
-          network_id: 8086, // Match any network id
+          provider: () => new HDWalletProvider(mnemonic, rpcs["dev-local"]),
+          network_id: ids["dev-local"], // Match any network id
           gas: 8000000,
-          gasPrice: 15500000000
+          gasPrice: 5000000000
       },
 
       'plasma-test-local': {
-          provider: () => new HDWalletProvider(mnemonic, 'http://localhost:18545'),
-          network_id: 8087, // Match any network id
+          provider: () => new HDWalletProvider(mnemonic, rpcs["plasma-test-local"]),
+          network_id: ids["plasma-test-local"], // Match any network id
           gas: 8000000,
           gasPrice: 0
       },
@@ -116,7 +100,7 @@ module.exports = {
           provider: createLedgerProvider(rpcs["staging-public"], ids["staging-public"]),
           skipDryRun: true,
           network_id: ids["staging-public"],
-          gas: 7900000,
+          gas: 8000000,
           gasPrice: 120000000000,
       },
 
@@ -124,8 +108,8 @@ module.exports = {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
           skipDryRun: true,
           network_id: ids["staging-public"],
-          gas: 7900000,
-          gasPrice: 120000000000,
+          gas: 7800000,
+          gasPrice: 20000000000,
       },
 
       'private.staging-hdwallet': {
@@ -148,23 +132,23 @@ module.exports = {
           provider: createLedgerProvider(rpcs["prod-public"], ids["prod-public"]),
           skipDryRun: true,
           network_id: ids["prod-public"],
-          gas: 7900000,
-          gasPrice: 9000000000,
+          gas: 6000000,
+          gasPrice: 110000000000,
       },
 
       'public.prod-hdwallet': {
           provider: () => new HDWalletProvider(mnemonic, rpcs["prod-public"]),
           skipDryRun: true,
           network_id: ids["prod-public"],
-          gas: 7900000,
-          gasPrice: 8000000000,
+          gas: 9000000,
+          gasPrice: 40000000000,
       },
 
       'private.prod-hdwallet': {
           provider: () => new HDWalletProvider(mnemonic, rpcs["prod-private"]),
           skipDryRun: true,
           network_id: ids["prod-private"],
-          gas: 7900000,
+          gas: 8000000,
           gasPrice: 0,
       },
 
@@ -172,17 +156,9 @@ module.exports = {
           provider: createLedgerProvider(rpcs["prod-private"], ids["prod-private"]),
           skipDryRun: true,
           network_id: ids["prod-private"],
-          gas: 7900000,
+          gas: 9000000,
           gasPrice: 0,
       },
-
-      // 'plasma-test-local': {
-      //     provider: () => new HDWalletProvider(mnemonic, 'https://rpc-staging.private.test.k8s.2key.net'),
-      //     network_id: 182,
-      //     gas: 7900000,
-      //     gasPrice: '0x0',
-      //     skipDryRun: true
-      // },
 
       'public.prod-ropsten-hdwallet': {
           provider: () => new HDWalletProvider(mnemonic, rpcs["staging-public"]),
@@ -200,11 +176,12 @@ module.exports = {
               build: "commit.e67f0147",
               settings: {
                   optimizer: {
-                      enabled: true,
+                      enabled: false,
                       runs: 200,
                       evmVersion: "byzantium"
                   }
               }
           }
     }
+
 };

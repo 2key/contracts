@@ -50,40 +50,27 @@ export default function cancelConversionTest(
       const conversionObj = await protocol[campaignContract].getConversion(
         campaignAddress, storedConversion.id, address,
       );
+
       const resultCampaignInventory = await protocol.AcquisitionCampaign.getCurrentAvailableAmountOfTokens(
         campaignAddress,
         address
       );
+
       const balanceAfter = await protocol.getBalance(address, campaignData.assetContractERC20);
 
-      /**
-       * TODO: recheck why so strange diff sometimes
-       * For conversion amount `5`
-       * diff is `4.999842805999206` - it is BigNumber calc
-       * in some cases it  is `4.988210449999725` - it is BigNumber calc, in this case assertion fails
-      expectEqualNumbers(
-        conversionObj.conversionAmount,
-        parseFloat(
-          protocol.Utils.fromWei(
-            parseFloat(balanceAfter.balance.ETH.toString())
-            - parseFloat(balanceBefore.balance.ETH.toString())
-          )
-            .toString()
-        ),
-      );
-       */
-      console.log({
-        conversionObj,
-        diff: resultCampaignInventory - initialCampaignInventory,
-        sum: conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits,
-        balanceDiff: parseFloat(
-          protocol.Utils.fromWei(
-            parseFloat(balanceAfter.balance.ETH.toString())
-            - parseFloat(balanceBefore.balance.ETH.toString())
-          )
-            .toString()
-        ),
-      });
+
+      // console.log({
+      //   conversionObj,
+      //   diff: resultCampaignInventory - initialCampaignInventory,
+      //   sum: conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits,
+      //   balanceDiff: parseFloat(
+      //     protocol.Utils.fromWei(
+      //         (parseFloat(balanceAfter.balance.ETH.toString())
+      //       - parseFloat(balanceBefore.balance.ETH.toString())).toString()
+      //     )
+      //       .toString()
+      //   ),
+      // });
       expectEqualNumbers(
         resultCampaignInventory - initialCampaignInventory,
         conversionObj.baseTokenUnits + conversionObj.bonusTokenUnits
@@ -92,7 +79,7 @@ export default function cancelConversionTest(
       storedConversion.data = conversionObj;
 
       storage.processConversion(user, storedConversion, campaignData.incentiveModel);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 
   if (storage.campaignType === campaignTypes.donation) {
@@ -127,6 +114,6 @@ export default function cancelConversionTest(
       storedConversion.data = conversionObj;
 
       storage.processConversion(user, storedConversion, campaignData.incentiveModel);
-    }).timeout(60000);
+    }).timeout(10000);
   }
 }

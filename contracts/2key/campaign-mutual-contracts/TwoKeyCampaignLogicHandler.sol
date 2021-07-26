@@ -21,12 +21,10 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
      */
     bool initialized;
 
-    IncentiveModel incentiveModel; //Incentive model for rewards address twoKeyMaintainersRegistry;
+    IncentiveModel incentiveModel; //Incentive model for rewards;
 
-    address twoKeyMaintainersRegistry;
     address twoKeyRegistry;
     address twoKeySingletonRegistry;
-    address twoKeyEventSource;
 
     address public twoKeyCampaign;
     address public conversionHandler;
@@ -40,7 +38,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     uint campaignStartTime; // Time when campaign start
     uint campaignEndTime; // Time when campaign ends
 
-    uint public ALLOWED_GAP;
+    uint public constant ALLOWED_GAP = 1000000000000000000; //1% allowed GAP for ETH conversions in case FIAT is campaign currency
     string public currency; // Currency campaign is currently in
 
     uint public campaignRaisedIncludingPendingConversions;
@@ -179,7 +177,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
     returns (uint256[], uint256[])
     {
         require(
-            ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry)
+            ITwoKeyMaintainersRegistry(getAddressFromRegistry("TwoKeyMaintainersRegistry"))
                 .checkIsAddressMaintainer(msg.sender)
         );
 
@@ -218,7 +216,6 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
             _referrerAddress = recover(_sig);
         }
         else {
-//            require(msg.sender == _referrerAddress || msg.sender == contractor || ITwoKeyMaintainersRegistry(twoKeyMaintainersRegistry).onlyMaintainer(msg.sender));
             _referrerAddress = plasmaOf(_referrerAddress);
         }
 
@@ -369,7 +366,7 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
         referrerPlasma2TotalEarnings2key[referrerPlasma] = referrerPlasma2TotalEarnings2key[referrerPlasma].add(reward);
         referrerPlasma2EarningsPerConversion[referrerPlasma][conversionId] = reward;
         referrerPlasmaAddressToCounterOfConversions[referrerPlasma] = referrerPlasmaAddressToCounterOfConversions[referrerPlasma].add(1);
-        ITwoKeyEventSourceEvents(twoKeyEventSource).rewarded(twoKeyCampaign, referrerPlasma, reward);
+        ITwoKeyEventSourceEvents(getAddressFromRegistry("TwoKeyEventSource")).rewarded(twoKeyCampaign, referrerPlasma, reward);
     }
 
     /**
@@ -437,6 +434,10 @@ contract TwoKeyCampaignLogicHandler is TwoKeyCampaignIncentiveModels {
                 updateReferrerMappings(influencers[i], b, _conversionId);
                 //Decrease bounty for distributed
                 totalBounty2keys = totalBounty2keys.sub(b);
+            }
+        } else if(incentiveModel == IncentiveModel.NO_REFERRAL_REWARD) {
+            for(i=0; i<numberOfInfluencers; i++) {
+                referrerPlasmaAddressToCounterOfConversions[influencers[i]] = referrerPlasmaAddressToCounterOfConversions[influencers[i]].add(1);
             }
         }
     }

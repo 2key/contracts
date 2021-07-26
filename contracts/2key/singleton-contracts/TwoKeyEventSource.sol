@@ -168,11 +168,8 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     );
 
     event UserRegistered(
-        string _name,
-        address _address,
-        string _fullName,
-        string _email,
-        string _username_walletName
+        string _handle,
+        address _address
     );
 
     event Executed(
@@ -210,6 +207,35 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         string newHandle
     );
 
+    event DaiReleased(
+        address contractSenderAddress,
+        uint amountOfDAI
+    );
+
+    event RebalancedRatesEvent (
+        uint priceAtBeginning,
+        uint priceAtRebalancingTime,
+        uint ratio,
+        uint amountOfTokensTransferedInAction,
+        string actionPerformedWithUpgradableExchange
+    );
+
+    event EndedBudgetCampaign (
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    );
+
+    event RebalancedRewards(
+        uint cycleId,
+        uint amountOfTokens,
+        string action
+    );
+
+    event UserWithdrawnNetworkEarnings(
+        address user,
+        uint amountOfTokens
+    );
 
     /**
      * @notice Function to emit created event every time campaign is created
@@ -477,26 +503,19 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice Function to emit event every time user is registered
-     * @param _name is the name of the user
+     * @param _handle is the handle of the user
      * @param _address is the address of the user
-     * @param _fullName is the full user name
-     * @param _email is users email
-     * @param _username_walletName is = concat(username,'_',walletName)
      */
     function userRegistered(
-        string _name,
+        string _handle,
         address _address,
-        string _fullName,
-        string _email,
-        string _username_walletName,
         uint _registrationFee
     )
     external
     {
         require(isAddressMaintainer(msg.sender) == true);
-
         ITwoKeyFeeManager(getAddressFromTwoKeySingletonRegistry("TwoKeyFeeManager")).setRegistrationFeeForUser(_address, _registrationFee);
-        emit UserRegistered(_name, _address, _fullName, _email, _username_walletName);
+        emit UserRegistered(_handle, _address);
         emit Debt(_address, _registrationFee, true, "ETH");
     }
 
@@ -593,6 +612,25 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
     }
 
 
+    function emitRebalancedRatesEvent(
+        uint priceAtBeginning,
+        uint priceAtRebalancingTime,
+        uint ratio,
+        uint amountOfTokensTransferedInAction,
+        string actionPerformedWithUpgradableExchange
+    )
+    external
+    onlyAllowedContracts
+    {
+        emit RebalancedRatesEvent(
+            priceAtBeginning,
+            priceAtRebalancingTime,
+            ratio,
+            amountOfTokensTransferedInAction,
+            actionPerformedWithUpgradableExchange
+        );
+    }
+
     function emitHandleChangedEvent(
         address _userPlasmaAddress,
         string _newHandle
@@ -604,6 +642,80 @@ contract TwoKeyEventSource is Upgradeable, ITwoKeySingletonUtils {
         emit HandleChanged(
             _userPlasmaAddress,
             _newHandle
+        );
+    }
+
+
+    /**
+     * @notice          Function to emit an event whenever DAI is released as an income
+     *
+     * @param           _campaignContractAddress is campaign contract address
+     * @param           _amountOfDAI is the amount of DAI being released
+     */
+    function emitDAIReleasedAsIncome(
+        address _campaignContractAddress,
+        uint _amountOfDAI
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange"));
+
+        emit DaiReleased(
+            _campaignContractAddress,
+            _amountOfDAI
+        );
+    }
+
+    function emitEndedBudgetCampaign(
+        address campaignPlasmaAddress,
+        uint contractorLeftover,
+        uint moderatorEarningsDistributed
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
+        emit EndedBudgetCampaign(
+            campaignPlasmaAddress,
+            contractorLeftover,
+            moderatorEarningsDistributed
+        );
+    }
+
+
+    function emitRebalancedRewards(
+        uint cycleId,
+        uint difference,
+        string action
+    )
+    public
+    {
+        require (msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyBudgetCampaignsPaymentsHandler"));
+
+        emit RebalancedRewards(
+            cycleId,
+            difference,
+            action
+        );
+    }
+
+
+    /**
+     * @notice          Function which will emit event that user have withdrawn network earnings
+     * @param           user is the address of the user
+     * @param           amountOfTokens is the amount of tokens user withdrawn as network earnings
+     */
+    function emitUserWithdrawnNetworkEarnings(
+        address user,
+        uint amountOfTokens
+    )
+    public
+    {
+        require(msg.sender == getAddressFromTwoKeySingletonRegistry("TwoKeyParticipationMiningPool"));
+
+        emit UserWithdrawnNetworkEarnings(
+            user,
+            amountOfTokens
         );
     }
 

@@ -103,8 +103,8 @@
   },
   "TwoKeyAcquisitionCampaignERC20": {
     "singleton": false,
-    "bytecode": false,
-    "networks": false,
+    "bytecode":  false,
+    "networks":  false,
     "file": "acquisition"
   },
   "TwoKeyConversionHandler": {
@@ -251,16 +251,52 @@
     "networks":  true,
     "file": "singletons"
   },
+  "TwoKeyPlasmaReputationRegistry": {
+    "singleton": true,
+    "bytecode":  false,
+    "networks":  true,
+    "file": "singletons"
+  },
+  "TwoKeyBudgetCampaignsPaymentsHandler": {
+    "singleton": true,
+    "bytecode":  false,
+    "networks":  true,
+    "file": "singletons"
+  },
+  "TwoKeyPlasmaBudgetCampaignsPaymentsHandler": {
+    "singleton": true,
+    "bytecode":  false,
+    "networks":  true,
+    "file": "singletons"
+  },
+  "TwoKeyPlasmaParticipationRewards": {
+    "singleton": true,
+    "bytecode":  false,
+    "networks":  true,
+    "file": "singletons"
+  },
   "TwoKeyCPCCampaignPlasma": {
     "singleton": false,
     "bytecode": false,
     "networks": false,
     "file": "cpc"
   },
-  "TwoKeyCPCCampaign": {
+  "TwoKeyCPCCampaignPlasmaNoReward": {
     "singleton": false,
     "bytecode": false,
     "networks": false,
-    "file": "cpc"
+    "file": "cpcNoRewards"
+  },
+  "MockChainLinkOracle" : {
+    "singleton": true,
+    "bytecode": true,
+    "networks": false,
+    "file": "singletons"
+  },
+  "MockOraclesManager" : {
+    "singleton": true,
+    "bytecode": true,
+    "networks": false,
+    "file": "singletons"
   }
 }

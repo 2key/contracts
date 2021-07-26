@@ -36,6 +36,9 @@ export default function checkManualCutsChainTest(
     const initialPercent = storage.campaignType === campaignTypes.donation
       ? campaignData.maxReferralRewardPercent
       : campaignData.maxReferralRewardPercentWei;
+    console.log(maxReward)
+    console.dir({initialPercent, cutChain})
+    console.log(rewardCalc(initialPercent, cutChain))
 
     expectEqualNumbers(maxReward, rewardCalc(initialPercent, cutChain));
   }).timeout(60000);

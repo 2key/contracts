@@ -461,6 +461,7 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
     }
 
 
+
 	/**
 	 * @notice Function to get balance of influencer for his plasma address
 	 * @param _influencer is the plasma address of influencer
@@ -498,11 +499,10 @@ contract TwoKeyCampaign is TwoKeyCampaignAbstract {
 	function withdrawContractorInternal()
 	internal
 	{
+		require(contractorBalance > 0);
 		uint balance = contractorBalance;
 		contractorBalance = 0;
-		uint debtPaid;
-		(balance, debtPaid) = payFeesForUser(msg.sender, balance);
-
+		(balance,) = payFeesForUser(msg.sender, balance);
 		/**
          * In general transfer by itself prevents against reentrancy attack since it will throw if more than 2300 gas
          * but however it's not bad to practice this pattern of firstly reducing balance and then doing transfer

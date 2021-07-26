@@ -12,16 +12,40 @@ export default function lockContractTest(
 ) {
   cpcOnly(storage.campaignType);
 
-  it(`should lock contract (end campaign) from maintainer`, async () => {
+  it(`should try to lock contract (end campaign) from maintainer, and expect error (24hrs req)`, async () => {
     const {protocol} = availableUsers[userKey];
     const {campaignAddress} = storage;
 
-    await protocol.CPCCampaign.lockContractFromMaintainer(campaignAddress, protocol.plasmaAddress);
+    let error = false;
+<<<<<<< HEAD
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      await protocol.CPCCampaign.lockContractFromMaintainer(
+          campaignAddress,
+          protocol.plasmaAddress
+      )
+    } catch (e) {
+      error = true;
+    }
+=======
 
-    const merkleRoot = Number(await protocol.CPCCampaign.getMerkleRootFromPlasma(campaignAddress));
+    try {
+      await protocol.CPCCampaign.lockContractFromMaintainer(
+          campaignAddress,
+          protocol.plasmaAddress
+      );
+    } catch (e) {
+      error = true;
+    }
 
-    expect(merkleRoot).to.be.gt(0);
+>>>>>>> develop
+
+
+<<<<<<< HEAD
+    const isContractLocked = await protocol.CPCCampaign.isContractLocked(campaignAddress,"PLASMA");
+=======
+>>>>>>> develop
+    expect(error).to.be.eq(true);
+    expect(isContractLocked).to.be.eq(false);
   }).timeout(60000);
 }

@@ -103,6 +103,36 @@ const runDeployCPCCampaignMigration = (network) => new Promise(async(resolve, re
     }
 });
 
+const runDeployCPCNoRewardsMigration = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '14', '--to', '14', '--network', network, 'update_cpc']);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+const runDeployPaymentHandlersMigration = (network) => new Promise(async (resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '15', '--to', '15', '--network', network, 'update_cpc']);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
+const runDeployPlasmaParticipationsMining = (network) => new Promise(async (resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '16', '--to', '16', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+
 /**
  * This is function to run when we want to update our campaigns
  * @param network
@@ -156,6 +186,24 @@ const runDeployPlasmaEventSourceMigration = (network) => new Promise(async(resol
 const runDeployFeeManagerMigration = (network) => new Promise(async(resolve, reject) => {
     try {
         await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '12', '--to', '12', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+const runDeployPlasmaReputation = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '13', '--to', '13', '--network', network]);
+        resolve(true);
+    } catch (e) {
+        reject(e);
+    }
+});
+
+const runDeployPPCNoRewards = (network) => new Promise(async(resolve, reject) => {
+    try {
+        await runProcess(path.join(__dirname, 'node_modules/.bin/truffle'), ['migrate', '--f', '14', '--to', '14', '--network', network]);
         resolve(true);
     } catch (e) {
         reject(e);
@@ -433,5 +481,10 @@ module.exports = {
     runDeployCPCCampaignMigration,
     runDeployFeeManagerMigration,
     runDeployCPCFirstTime,
-    runTruffleCompile
+    runTruffleCompile,
+    runDeployPlasmaReputation,
+    runDeployPPCNoRewards,
+    runDeployCPCNoRewardsMigration,
+    runDeployPaymentHandlersMigration,
+    runDeployPlasmaParticipationsMining
 };

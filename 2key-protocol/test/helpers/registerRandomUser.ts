@@ -1,5 +1,5 @@
 import createWeb3 from "./_web3";
-import {registrationDebt, rpcUrls} from "../constants/smallConstants";
+import {registrationDebt, rpcUrls, eventsUrls} from "../constants/smallConstants";
 import getTwoKeyProtocol from "./twoKeyProtocol";
 import registerUserFromBackend, {IRegistryData} from "./_registerUserFromBackend";
 import availableUsers, {userIds} from "../constants/availableUsers";
@@ -19,8 +19,8 @@ export default async function registerRandomUser(
   const {protocol: protocolAydnep, web3: web3Aydnep} = availableUsers[userIds.aydnep];
   const {protocol: protocolDeployer, web3: web3Deployer} = availableUsers[userIds.deployer];
 
-  const web3 = createWeb3('', rpcUrls);
-  const protocol = getTwoKeyProtocol(web3.web3, web3.mnemonic);
+  const web3 = createWeb3('', rpcUrls, eventsUrls);
+  const protocol = getTwoKeyProtocol(web3.web3, web3.plasmaWeb3, web3.plasmaAddress);
   const deptWei = Number.parseInt(protocol.Utils.toWei(registrationDebt, 'ether').toString(), 10);
   const user = {
     name: id,

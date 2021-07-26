@@ -15,7 +15,7 @@ const  campaignData: ICreateCPCTest = {
   campaignStartTime : 0,
   campaignEndTime : 9884748832,
   // will be reduced to fee amount, for now it is 2%, so it will be 3*0.98 = 2.94 per conversion
-  bountyPerConversionWei: 5,
+    bountyPerConversionUSD: 5,
   // Should fail on conversion stage
   // referrerQuota: 1,
   // etherForRewards: 3,
@@ -142,8 +142,7 @@ describe(
       {
         userKey: userIds.buyer,
         actions: [
-          campaignUserActions.lockContract,
-          campaignUserActions.merkleCopyTest,
+          campaignUserActions.lockContract
         ],
         campaignData,
         storage,
@@ -151,34 +150,10 @@ describe(
       }
     );
 
-    usersActions(
-      {
-        userKey: userIds.aydnep,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-        ],
-        campaignData,
-        storage,
-        expectError: true,
-      }
-    );
 
     usersActions(
       {
-        userKey: userIds.test,
-        actions: [
-          // campaignUserActions.checkMerkleProof,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: storage.contractorKey,
+        userKey: userIds.buyer,
         actions: [
           campaignUserActions.checkMainChainBalancesSync,
           campaignUserActions.checkCampaignSummary,

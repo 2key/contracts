@@ -15,7 +15,7 @@ const  campaignData: ICreateCPCTest = {
   campaignStartTime : 0,
   campaignEndTime : 9884748832,
   // will be reduced to fee amount, for now it is 2%, so it will be 3*0.98 = 2.94 per conversion
-  bountyPerConversionWei: 4,
+  bountyPerConversionUSD: 6,
   // Should fail on conversion stage
   // referrerQuota: 1,
   // etherForRewards: 3,
@@ -26,13 +26,15 @@ describe(
   '2 clicks target, growing incentive model, end campaign when goal reached, 4 tokens pay per click',
   function() {
     const storage = new TestStorage(userIds.deployer, campaignTypes.cpc, true);
-    this.timeout(60000);
+    this.timeout(10000);
 
     before(function () {
-      return createCpcCampaign(campaignData, storage);
+      const campaign = createCpcCampaign(campaignData, storage);
+      return campaign
     });
 
     checkCpcCampaign(campaignData, storage, userIds.buyer);
+
 
     usersActions(
       {
@@ -138,8 +140,7 @@ describe(
       {
         userKey: userIds.buyer,
         actions: [
-          campaignUserActions.lockContract,
-          campaignUserActions.merkleCopyTest,
+          campaignUserActions.lockContract
         ],
         campaignData,
         storage,
@@ -148,32 +149,7 @@ describe(
 
     usersActions(
       {
-        userKey: userIds.aydnep,
-        secondaryUserKey: userIds.gmail,
-        actions: [
-          campaignUserActions.visit,
-          campaignUserActions.joinAndConvert,
-        ],
-        campaignData,
-        storage,
-        expectError: true,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: userIds.test,
-        actions: [
-          // campaignUserActions.checkMerkleProof,
-        ],
-        campaignData,
-        storage,
-      }
-    );
-
-    usersActions(
-      {
-        userKey: storage.contractorKey,
+        userKey: userIds.buyer,
         actions: [
           campaignUserActions.checkMainChainBalancesSync,
           campaignUserActions.checkCampaignSummary,

@@ -19,5 +19,5 @@ export default function converterSpentTest(
 
     let amountSpent = await protocol.DonationCampaign.getAmountConverterSpent(campaignAddress, address);
     expect(amountSpent).to.be.equal(user.executedConversionsTotal);
-  }).timeout(60000);
+  }).timeout(10000);
 }

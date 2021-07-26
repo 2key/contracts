@@ -62,11 +62,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         }
 
         twoKeySingletonRegistry = _twoKeySingletonRegistry;
-        twoKeyEventSource = getAddressFromRegistry("TwoKeyEventSource");
-        twoKeyMaintainersRegistry = getAddressFromRegistry("TwoKeyMaintainersRegistry");
         twoKeyRegistry = getAddressFromRegistry("TwoKeyRegistry");
-
-        ALLOWED_GAP = 1000000000000000000; //1 USD allowed GAP for ETH conversions in case FIAT is campaign currency
 
         ownerPlasma = plasmaOf(contractor);
         initialized = true;
@@ -90,13 +86,16 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         } else {
             uint rate = getRateFromExchange();
             uint conversionAmountCampaignCurrency = (conversionAmountEthWEI.mul(rate)).div(10**18);
-            if(leftToSpendInCampaignCurrency.add(ALLOWED_GAP) >= conversionAmountCampaignCurrency && minContributionAmountWei <= conversionAmountCampaignCurrency.add(ALLOWED_GAP)) {
+            if(leftToSpendInCampaignCurrency.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18)) >= conversionAmountCampaignCurrency &&
+                minContributionAmountWei <= conversionAmountCampaignCurrency.mul(100 * (10**18) + ALLOWED_GAP).div(100 * (10**18))
+            ) {
                 return true;
             }
         }
         return false;
     }
 
+    // Updated
     function checkHowMuchUserCanSpend(
         address _converter
     )
@@ -169,7 +168,7 @@ contract TwoKeyDonationLogicHandler is UpgradeableCampaign, TwoKeyCampaignLogicH
         address plasma_address = plasmaOf(_address);
 
         if(_address == contractor) {
-            abi.encodePacked(0, 0, 0, false, false);
+            return abi.encodePacked(0, 0, 0, false, false);
         } else {
             bool isConverter;
             bool isReferrer;

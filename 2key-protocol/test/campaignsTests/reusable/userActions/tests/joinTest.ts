@@ -41,7 +41,7 @@ export default function joinTest(
     currentUser.refUserKey = secondaryUserKey;
 
     expect(ipfsRegex.test(linkObject.link)).to.be.eq(true);
-  }).timeout(60000);
+  }).timeout(10000);
 
   it(`should check is ${userKey} joined by ${secondaryUserKey} link`, async () => {
     const {protocol} = availableUsers[userKey];
@@ -56,5 +56,5 @@ export default function joinTest(
     );
 
     expect(joinedFrom).to.eq(refProtocol.plasmaAddress)
-  }).timeout(60000);
+  }).timeout(10000);
 }

@@ -1,23 +1,22 @@
-import {BigNumber} from "bignumber.js";
+import {expect} from 'chai';
+import 'mocha';
+import {promisify} from "../../../src/utils/promisify";
+import web3Switcher from "../../helpers/web3Switcher";
 
 require('es6-promise').polyfill();
 require('isomorphic-fetch');
 require('isomorphic-form-data');
 
-import {expect} from 'chai';
-import 'mocha';
-import createWeb3 from '../../helpers/_web3';
-import {promisify} from "../../../src/utils/promisify";
-
-const { env } = process;
+const {env} = process;
 
 const rpcUrls = [env.RPC_URL];
+const plasmaUrls = [env.PLASMA_RPC_URL];
 
 let web3: any;
 let from: string;
 let config = require('../../../../configurationFiles/accountsConfig.json');
 
-const getReceipt = (txHash: string, { web3, timeout = 60000, interval = 500}) => new Promise(async (resolve, reject) => {
+const getReceipt = (txHash: string, { web3, timeout = 10000, interval = 500}) => new Promise(async (resolve, reject) => {
     let txInterval;
     let fallbackTimeout = setTimeout(() => {
         if (txInterval) {
@@ -57,13 +56,11 @@ const getReceipt = (txHash: string, { web3, timeout = 60000, interval = 500}) =>
 const sendETH: any = (recipient) => new Promise(async (resolve, reject) => {
     try {
         if (!web3) {
-            const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls);
+            const {web3: web3Instance, address} = await createWeb3(env.MNEMONIC_DEPLOYER, rpcUrls, plasmaUrls);
             from = address;
-            web3 = web3Instance;
         }
 
-        const txHash = await promisify(web3.eth.sendTransaction, [{ to: recipient, value: web3.toWei(100, 'ether'), from }]);
-
+        const txHash = await promisify(web3.eth.sendTransaction, [{ to: recipient, value: web3.utils.toWei('100', 'ether'), from, gas: 21000 }]);
         const receipt = await getReceipt(txHash, { web3 });
         resolve(receipt);
     } catch (err) {
@@ -85,12 +82,12 @@ describe('TwoKeyProtocol LOCAL', () => {
         await sendETH('0x11e9Ce4382fF83BD1222D1EB519D5663C2DC1374'); //Ledger address
         for (let i = 0; i < l; i++) {
             const receipt = await sendETH(addresses[i]);
-            if (!receipt || receipt.status !== '0x1') {
+            if (!receipt || !receipt.status) {
                 error = true;
             }
         }
         expect(error).to.be.false;
-    }).timeout(600000);
+    }).timeout(100000);
 
     // it('should print referrers per layer', async() => {
     //     let arcsForContractor = 1000;
