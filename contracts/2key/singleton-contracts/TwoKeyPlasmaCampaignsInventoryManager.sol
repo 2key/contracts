@@ -300,10 +300,10 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
       * @notice          At the point when we want to do the payment
       */
     function withdrawReferrerPendingRewards(
-        address referrer
+        address referrer //TODO: remove this param, and get the msg.sender as the requesting referrer
     )
     public
-    onlyMaintainer
+    onlyMaintainer //TODO: remove this
     {
         // Get all the campaigns of specific referrer
         address[] memory referrerCampaigns = getCampaignsReferrerHasPendingBalances(referrer);
@@ -374,7 +374,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     //     // }
     // }
 
-
+    //TODO: add function withdrawModeratorEarnings - gets an array of campaign addresses, iterates over them, and withdraws the moderator balance to the moderator earnings balances on this contract, so this can be called periodically
 
     /**
      * @notice          Function to end selected budget campaign by maintainer, and perform
@@ -385,7 +385,8 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @param           totalAmountForReferrerRewards is the total amount before rebalancing referrers earned
      * @param           totalAmountForModeratorRewards is the total amount moderator earned before rebalancing
      */
-    function endCampaignAndTransferModeratorEarnings(
+    //TODO: endCampaign also transfers moderator earnings to the moderator balancer
+    function endCampaignAndTransferModeratorEarnings( //TODO: rename: endCampaignWithdrawContractorLeftOverAndModeratorEarningsBalance
         address campaignPlasma
     )
     public
@@ -406,7 +407,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2BudgetUSD, campaignPlasma));
         }
 
-        uint totalAmountForModeratorRewards = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsAndTotalModeratorEarnings();
+        uint totalAmountForModeratorRewards = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsAndTotalModeratorEarnings(); //TODO this returns uint,uint
         uint totalAmountForReferrerRewards = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsBalance();
 
         // Get leftover for the contractor
@@ -414,6 +415,8 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
 
         // Set moderator earnings for this campaign and immediately distribute them
         setAndDistributeModeratorEarnings(campaignPlasma, totalAmountForModeratorRewards);
+
+        //TODO: call this as well withdrawLeftoverForContractor
 
         // Set total amount to use for referrers
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ReferrerRewardsTotal, campaignPlasma), totalAmountForReferrerRewards);
@@ -462,6 +465,8 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @param           campaignPlasma is the plasma address of selected campaign
      * @param           totalAmountForModeratorRewards is the amount for moderator after rebalancing
      */
+    //1. whenever moderator wants to withdraw for a specific campaign, cal lthis function just to move the funds on l2 to the moderator earnings variables
+    //2. check that moderator rewards has also a total and balance params on the campaign contracts themselves, since we need to do similar to updateMappingsOnWithdrawal for moderator as well
     function setAndDistributeModeratorEarnings( //  //TODO this function should withdraw moderator earnings from campaign contract on L2 and put it on the balance of congress on L2 on the account manager
         address campaignPlasma,
         uint totalAmountForModeratorRewards
@@ -470,6 +475,14 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     {
         // Account amount moderator earned on this campaign
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma), totalAmountForModeratorRewards);
+
+        //TODO: the moderator earnings should go into a special balance on the accoutn manager contract on l2  (the inventory manager) that's called moderatorEarningsBalance2KEY or moderatorEarningsBalanceUSD
+        //TODO: add another function callable only by maintainer to withdraw moderator earnings to L1 - same as users withdraw from l2 to l1, just in case of moderator earnings, these can only be withdrawn on l1 to the admin contract address, has also to have some bookeeping on layer1
+        //TODO: add special function on the plasma account manager contract to withdrawModeratorBalance2KEY / withdrawModeratorBalanceUSD (which will move the balance to zero), and change var withdrawModerator2KEYinProgress or withdrawModeratorUSDinProgress to true
+        //TODO: on L1 add function to withdrawModeratorEArnings2KEY callable by maitainer, but which only accepts a uint argument, and transfers only to admin that amount
+        //TODO: on L1 add function to withdrawModeratorEarningsUSD callable by maintainer, but which only accepts a uint usdValue and denonimation ETH/USDT/USDC, and uses chainlink oracles to transfer the required amount, only to admin contract
+        //TODO: on L2 maintainer can call the account manager markModeratorEarningsWithdrawalFinished
+
 
         // Address to transfer moderator (2key admin contract) earnings to
         address twoKeyCongress = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress"); //should go to the balance of the plasma congress on L2 account manager
@@ -492,6 +505,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             );
         }
 
+        //TODO: twokeyadmin is on layer1 - we should have a maintaineronly function to withdraw to layer1 the balances on the
         // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
         ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(totalAmountForModeratorRewards, campaignPlasma);
     }
@@ -500,7 +514,7 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @notice          Function where moderator can withdraw his earnings
      * @param           campaignPlasmaAddress is plasma address of campaign
      */
-    function withdrawModeratorEarnings(
+    function withdrawLeftoverForContractor( //TODO rename to withdrawLeftoverForContractor
         address campaignPlasmaAddress
     )
     public

@@ -23,7 +23,8 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     // Mapping referrer to all campaigns he participated at and are having pending distribution
     string constant _referrer2pendingCampaignAddresses = "referrer2pendingCampaignAddresses";
 
-
+    //TODO: campaign contracts are new per campaign, so probably no need to have this, as we're not upgrading existing campaigns, just creating new contracts for new campaigns.
+    //TODO: we can delete this and related logic/structs - checksum with nikola
     struct Payment {
         uint rebalancingRatio;
         uint timestamp;
@@ -602,9 +603,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     /**
      * @notice          Function to get total balance of influencer for his plasma address
-     * @return          balance
+     * @return          balance //TODO: this does not return balance, balance=total-withdrawn, this is just total
      */
-    function getTotalReferrerRewardsBalance()
+    function getTotalReferrerRewardsBalance() //TODO: rename to getTotalReferrerRewardsEarned
     public
     view
     returns (uint)

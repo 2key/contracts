@@ -175,6 +175,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToUSDBalance, user), amount);
     }
 
+    //TODO: add removeBalanceUSD and removeBAlance2KEY functions, same as add balance
+
     /**
      * @notice          Function to add balance in USD for a user
      * @param           beneficiary is user address
