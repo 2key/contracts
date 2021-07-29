@@ -8,12 +8,14 @@ pragma solidity ^0.4.24;
 
 contract ITwoKeyTreasuryL1 {
     function setTokenAddress(string tokenName, address tokenAddress) external;
-    function getTokenAddress(string tokenName) external view;
+    function getTokenAddress(string tokenName) external returns (address);
     function recoverSignature(address userAddress, uint amountOfTokens, bytes signature) external view returns (address);
     function deposit2KEY(address token, uint amount) external;
     function depositStableCoin(address token, uint amount) external;
     function depositVolatileToken(address token, uint amount) external;
-    function withdrawModeratorEarnings(address beneficiary, uint amount, uint buy2keyRateL2, bytes signature, bool is2KEYWithdraw) external;
-    function withdrawToken(uint amount, uint buy2keyRateL2, bytes signature, bool is2KEYWithdraw) external;
+    function withdrawModeratorBalanceUSD(uint amount, uint buy2keyRateL2, bytes signature) external;
+    function withdrawModeratorBalance2KEY(uint amount, bytes signature) external;
+    function withdrawReferrerBalanceUSD(uint amount, uint buy2keyRateL2, bytes signature) external;
+    function withdrawReferrerBalance2KEY(uint amount, bytes signature) external;
     function getBalanceOf(address token) external view returns (uint);
 }

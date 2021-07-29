@@ -26,12 +26,12 @@ contract ITwoKeyPlasmaCampaign {
     view
     returns (address[]);
 
-    function getTotalReferrerRewardsBalance()
+    function getTotalReferrerRewardsEarned()
     external
     view
     returns (uint);
 
-    function getRefererrerRewardsBalance(
+    function getReferrerPlasmaBalance(
         address _referrer
     )
     external

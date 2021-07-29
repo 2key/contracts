@@ -22,6 +22,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
     // Mapping referrer to all campaigns he participated at and are having pending distribution
     string constant _referrer2pendingCampaignAddresses = "referrer2pendingCampaignAddresses";
+    string constant _moderator2pendingCampaignAddresses = "moderator2pendingCampaignAddresses";
 
     //TODO: campaign contracts are new per campaign, so probably no need to have this, as we're not upgrading existing campaigns, just creating new contracts for new campaigns.
     //TODO: we can delete this and related logic/structs - checksum with nikola
@@ -73,6 +74,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     // public available integers
     bool public isContractLocked;
     uint public moderatorTotalEarnings;             // Total rewards which are going to moderator
+    uint public moderatorEarningsBalance;           // Moderator earnings to be able to withdraw
     uint public initialRate2KEY;                    // Rate at which 2KEY is bought at campaign creation
     bool public isValidated;
 
@@ -372,6 +374,42 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
     /**
+     * @notice          Internal function to initialize moderator balance when the moderator withdraws his balance
+     * @param           referrerPlasma is referrer plasma address
+     */
+    function initializeModeratorEarningsBalanceOnWithdrawal()
+    internal
+    {
+        moderatorEarningsBalance = 0;
+    }
+
+    /**
+     * @notice          Function to update moderater total earnings and balance
+     * @param           _moderatorFeePerConversion is the moderator earnings per converesion
+     */
+    function updateModeratorTotalEarningsAndBalance(
+        uint _moderatorFeePerConversion
+    )
+    internal
+    {
+        bool isNewBalance = moderatorEarningsBalance == 0;
+
+        moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFeePerConversion);
+        moderatorEarningsBalance = moderatorEarningsBalance.add(moderatorFeePerConversion);
+
+        if (isNewBalance) {
+            // mark that moderator has pending reward
+            bytes32 key = keccak256(
+                _moderator2pendingCampaignAddresses,
+                address(this)
+            );
+
+            ITwoKeyPlasmaCampaignsInventoryManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventoryManager))
+                .pushAddressToArray(key, address(this));
+        }
+    }
+
+    /**
      * @notice          Function to update rewards between influencers when conversion gets executed
      *
      * @param           _converter is the address of converter
@@ -424,12 +462,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Internal function to initialize referrer mappings with 0 when the referrer withdraws his reward
+     * @notice          Internal function to initialize referrer balance when the referrer withdraws his balance
      * @param           referrerPlasma is referrer plasma address
-     * @param           reward is the reward referrer received
-     * @param           conversionId is the id of conversion for which influencer gets rewarded
      */
-    function updateReferrerMappingsOnWithdrawal(
+    function initializeReferrerBalanceOnWithdrawal(
         address referrerPlasma
     )
     internal
@@ -519,23 +555,23 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
 
-    /**
-     * @notice          Function to rebalance selected value, assuming both
-     *                  input parameters are in wei units
-     *
-     * @param           value to be rebalanced
-     * @param           ratio is the ratio by which we rebalance
-     */
-    function rebalanceValue(
-        uint value,
-        uint ratio
-    )
-    internal
-    pure
-    returns (uint)
-    {
-        return value.mul(ratio).div(10**18);
-    }
+    // /**
+    //  * @notice          Function to rebalance selected value, assuming both
+    //  *                  input parameters are in wei units
+    //  *
+    //  * @param           value to be rebalanced
+    //  * @param           ratio is the ratio by which we rebalance
+    //  */
+    // function rebalanceValue(
+    //     uint value,
+    //     uint ratio
+    // )
+    // internal
+    // pure
+    // returns (uint)
+    // {
+    //     return value.mul(ratio).div(10**18);
+    // }
 
     // /**
     //  * @notice          Function to get rebalancing ratio for selected referrer
@@ -602,10 +638,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
 
     /**
-     * @notice          Function to get total balance of influencer for his plasma address
-     * @return          balance //TODO: this does not return balance, balance=total-withdrawn, this is just total
+     * @notice          Function to get total referrer rewards earned on this campaign
+     * @return          total referrer rewards earned on this camapign
      */
-    function getTotalReferrerRewardsBalance() //TODO: rename to getTotalReferrerRewardsEarned
+    function getTotalReferrerRewardsEarned()
     public
     view
     returns (uint)
@@ -614,10 +650,10 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     }
 
      /**
-      * @notice          Function to get referrer non rebalanced earnings
-      * @dev             Reward will be in either 2KEY or USD depending on the isBudgetedDirectlyWith2KEY
+      * @notice          Function to get referrer balance to be able to withdraw
+      * @dev             Balance will be in either 2KEY or USD depending on the isBudgetedDirectlyWith2KEY
       */
-     function getRefererrerRewardsBalance(
+     function getReferrerPlasmaBalance(
         address _referrer
      )
      public
@@ -754,7 +790,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @notice          At the moment when we want to do payouts for referrers, we
      *                  transfer their earnings
      * @param _referrer referrer address
-     * @return (uint, uint) Return USD earnings and 2KEY earnings
      */
     function withdrawReferrerCamapignEarningsL2(
         address _referrer
@@ -763,6 +798,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     onlyTwoKeyPlasmaCampaignsInventoryManager
     {
         uint amount = referrerPlasma2Balances2key[_referrer];
+        require(amount > 0);
 
         // transfer token from campaign to referrer
         if (isBudgetedDirectlyWith2KEY) {
@@ -773,7 +809,32 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
                 .transferUSDFrom(address(this), _referrer, amount);
         }
         
-        updateReferrerMappingsOnWithdrawal();
+        initializeReferrerBalanceOnWithdrawal(_referrer);
+    }
+
+    /**
+     * @notice          At the moment when we want to do payouts for moderator, we
+     *                  transfer his earnings
+     * @param _referrer referrer address
+     */
+    function withdrawModeratorCamapignEarningsL2(
+        address _moderator
+    )
+    public
+    onlyTwoKeyPlasmaCampaignsInventoryManager
+    {
+        uint amount = referrerPlasma2Balances2key[_moderator];
+
+        // transfer token from campaign to referrer
+        if (isBudgetedDirectlyWith2KEY) {
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transfer2KEYFrom(address(this), _moderator, amount);
+        } else {
+            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
+                .transferUSDFrom(address(this), _moderator, amount);
+        }
+        
+        initializeModeratorEarningsBalanceOnWithdrawal();
     }
 
     // /**

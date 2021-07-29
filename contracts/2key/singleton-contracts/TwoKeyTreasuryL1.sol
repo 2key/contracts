@@ -95,18 +95,18 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     view
     returns (address)
     {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_tokenAddress, tokenName));
+        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(tokenName));
     }
 
     /**
      * @notice          Function to return who signed msg
-     * @param           userAddress is the address of user for who we signed message
+     * @param           campaignPlasma is the plasma address of the campaign
      * @param           amountOfTokens is the amount of pending rewards user wants to claim
      * @param           buy2keyRateL2 is the 2key rate sent by maintainer
      * @param           signature is the signature created by maintainer
      */
-    function recoverSignature(
-        address userAddress,
+    function recoverSignatureForModeratorUSD(
+        address campaignPlasma,
         uint amountOfTokens,
         uint buy2keyRateL2,
         bytes signature
@@ -119,7 +119,88 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked(_messageNotes)),
-                keccak256(abi.encodePacked(userAddress, amountOfTokens, buy2keyRateL2))
+                keccak256(abi.encodePacked(campaignPlasma, amountOfTokens, buy2keyRateL2))
+            )
+        );
+
+        // Recover signer message from signature
+        return Call.recoverHash(hash, signature, 0);
+    }
+
+    /**
+     * @notice          Function to return who signed msg
+     * @param           campaignPlasma is the plasma address of the campaign
+     * @param           amountOfTokens is the amount of pending rewards user wants to claim
+     * @param           signature is the signature created by maintainer
+     */
+    function recoverSignatureForModerator2KEY(
+        address campaignPlasma,
+        uint amountOfTokens,
+        bytes signature
+    )
+    public
+    view
+    returns (address)
+    {
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked(_messageNotes)),
+                keccak256(abi.encodePacked(campaignPlasma, amountOfTokens))
+            )
+        );
+
+        // Recover signer message from signature
+        return Call.recoverHash(hash,signature,0);
+    }
+
+    /**
+     * @notice          Function to return who signed msg
+     * @param           amountOfTokens is the amount of pending rewards user wants to claim
+     * @param           buy2keyRateL2 is the 2key rate sent by maintainer
+     * @param           signature is the signature created by maintainer
+     */
+    function recoverSignatureForReferrerUSD(
+        address beneficiary,
+        uint amountOfTokens,
+        uint buy2keyRateL2,
+        bytes signature
+    )
+    public
+    view
+    returns (address)
+    {
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked(_messageNotes)),
+                keccak256(abi.encodePacked(beneficiary, amountOfTokens, buy2keyRateL2))
+            )
+        );
+
+        // Recover signer message from signature
+        return Call.recoverHash(hash, signature, 0);
+    }
+
+    /**
+     * @notice          Function to return who signed msg
+     * @param           amountOfTokens is the amount of pending rewards user wants to claim
+     * @param           signature is the signature created by maintainer
+     */
+    function recoverSignatureForReferrer2KEY(
+        address beneficiary,
+        uint amountOfTokens,
+        bytes signature
+    )
+    public
+    view
+    returns (address)
+    {
+        // Generate hash
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                keccak256(abi.encodePacked(_messageNotes)),
+                keccak256(abi.encodePacked(beneficiary, amountOfTokens))
             )
         );
 
@@ -183,7 +264,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     
             emit DepositStableCoin(msg.sender, amount);
 
-        } else if(token == getTokenAddress("USDT")) {
+        } else if (token == getTokenAddress("USDT")) {
             require(amount <= ITether(token).allowance(msg.sender, address(this)));
             ITether(token).transferFrom(msg.sender, address(this), amount);
 
@@ -249,19 +330,17 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     }
 
     /**
-     * @notice          Function to withdraw ERC20 token to
-     * @param           beneficiary is the address to receive tokens
-     * @param           amount is the amount of tokens to withdraw
+     * @notice          Function to withdraw moderator USD balance
+     * @param           campaignPlasma is the plasma address of the campaign to withdraw moderator earnings
+     * @param           amount is USD amount
      * @param           buy2keyRateL2 is the 2key price set by maintainer
      * @param           signature is proof that beneficiary has amount of tokens he wants to withdraw
-     * @param           is2KEYWithdraw determines if the 2KEY token is withdrawn
      */
-    function withdrawModeratorEarnings(
-        address beneficiary,
+    function withdrawModeratorBalanceUSD(
+        address campaignPlasma,
         uint amount,
         uint buy2keyRateL2,
-        bytes signature,
-        bool is2KEYWithdraw
+        bytes signature
     )
     public
     onlyMaintainer
@@ -272,33 +351,76 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
         // Check who signed the message
-        address messageSigner = recoverSignature(beneficiary, amount, buy2keyRateL2, signature);
+        address messageSigner = recoverSignatureForModeratorUSD(campaignPlasma, amount, buy2keyRateL2, signature);
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
         require(messageSigner == registry.getSignatoryAddress());
 
-        require(beneficiary != address(0));
+        address beneficiary = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
+        
         uint withdrawBalanceUSD;
         uint withdrawBalance2KEY;
-        if (!is2KEYWithdraw) {
-            // Get the current 2key buy rate
-            uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD();
 
-            // Allow 10% change of the price
-            require(uniswap2keyRate >= buy2keyRateL2.mul(9).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
-            require(uniswap2keyRate <= buy2keyRateL2.mul(11).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+        // Get the current 2key buy rate
+        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD();
 
-            withdrawBalanceUSD = amount;
-            withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
+        // Allow 10% change of the price
+        require(uniswap2keyRate >= buy2keyRateL2.mul(9).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+        require(uniswap2keyRate <= buy2keyRateL2.mul(11).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
 
-            userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(withdrawBalanceUSD);
-        } else {
-            withdrawBalance2KEY = amount;
+        withdrawBalanceUSD = amount;
+        withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
 
-            user2KEYWithdrawBalance[beneficiary] = user2KEYWithdrawBalance[beneficiary].add(withdrawBalance2KEY);
-        }
+        userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(withdrawBalanceUSD);
+
+
+        // Get the instance of 2KEY token contract
+        IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
+        // Transfer tokens to the user
+        twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
+
+        // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(withdrawBalance2KEY, campaignPlasma);
+
+        emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
+
+    }
+
+    /**
+     * @notice          Function to withdraw moderator 2KEY balance
+     * @param           campaignPlasma is the plasma address of the campaign to withdraw moderator earnings
+     * @param           amount is the amount of tokens to withdraw
+     * @param           signature is proof that beneficiary has amount of tokens he wants to withdraw
+     */
+    function withdrawModeratorBalance2KEY(
+        address campaignPlasma,
+        uint amount,
+        bytes signature,
+    )
+    public
+    onlyMaintainer
+    {
+        bytes32 key = keccak256(_isExistingSignature, signature);
+        // Require that signature doesn't exist
+        require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
+        // Set that this signature is used and exists
+        PROXY_STORAGE_CONTRACT.setBool(key, true);
+        // Check who signed the message
+        address messageSigner = recoverSignatureForModerator2KEY(campaignPlasma, amount, signature);
+        // Get the instance of TwoKeyRegistry
+        ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        // Assert that this signature is created by signatory address
+        require(messageSigner == registry.getSignatoryAddress());
+
+        address beneficiary = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+
+
+        uint withdrawBalance2KEY;      
+        
+        withdrawBalance2KEY = amount;
+        user2KEYWithdrawBalance[beneficiary] = user2KEYWithdrawBalance[beneficiary].add(withdrawBalance2KEY);
 
         // Get the instance of 2KEY token contract
         IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
@@ -310,17 +432,19 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice          Function to withdraw ERC20 token
+     * @param           beneficiary is the user to withdraw token
      * @param           amount is the amount of tokens to withdraw
      * @param           buy2keyRateL2 is the 2key price set by maintainer
-     * @param           signature is proof that msg.sender has amount of tokens he wants to withdraw
+     * @param           signature is proof that maintainer is the message signer
      */
-    function withdrawToken(
+    function withdrawReferrerBalanceUSD(
+        address beneficiary,
         uint amount,
         uint buy2keyRateL2,
-        bytes signature,
-        bool is2KEYWithdraw
+        bytes signature
     )
     public
+    onlyMaintainer
     {
         bytes32 key = keccak256(_isExistingSignature, signature);
         // Require that signature doesn't exist
@@ -328,7 +452,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
         // Check who signed the message
-        address messageSigner = recoverSignature(msg.sender, amount, buy2keyRateL2, signature);
+        address messageSigner = recoverSignatureForReferrerUSD(beneficiary, amount, buy2keyRateL2, signature);
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
@@ -336,36 +460,77 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     
         twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
+
         uint withdrawBalanceUSD;
         uint withdrawBalance2KEY;
-        if (!is2KEYWithdraw) {
-            // Get the current 2key buy rate
-            uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD();
 
-            // Allow 10% change of the price
-            require(uniswap2keyRate >= buy2keyRateL2.mul(9).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
-            require(uniswap2keyRate <= buy2keyRateL2.mul(11).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+        // Get the current 2key buy rate
+        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD();
 
-            withdrawBalanceUSD = amount;
-            withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
-            // safeguard
-            require(withdrawBalanceUSD <= userUSDDepositBalance[msg.sender].sub(userUSDWithdrawBalance[msg.sender]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
+        // Allow 10% change of the price
+        require(uniswap2keyRate >= buy2keyRateL2.mul(9).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+        require(uniswap2keyRate <= buy2keyRateL2.mul(11).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
 
-            userUSDWithdrawBalance[msg.sender] = userUSDWithdrawBalance[msg.sender].add(withdrawBalanceUSD);
-        } else {
-            uint withdrawBalance2KEY = amount;
-            // safeguard
-            require(withdrawBalance2KEY <= userTokenDepositAmount[msg.sender][twoKeyTokenAddress].sub(user2KEYWithdrawBalance[msg.sender]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
+        withdrawBalanceUSD = amount;
+        withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
+        // safeguard
+        require(withdrawBalanceUSD <= userUSDDepositBalance[beneficiary].sub(userUSDWithdrawBalance[beneficiary]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
 
-            user2KEYWithdrawBalance[msg.sender] = user2KEYWithdrawBalance[msg.sender].add(withdrawBalance2KEY);
-        }
+        userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(withdrawBalanceUSD);
+        
 
         // Get the instance of 2KEY token contract
         IERC20 twoKeyEconomy = IERC20(twoKeyTokenAddress);
         // Transfer tokens to the user
-        twoKeyEconomy.transfer(msg.sender, withdrawBalance2KEY);
+        twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
 
-        emit WithdrawToken(msg.sender, address(twoKeyEconomy), withdrawBalance2KEY);
+        emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
+    }
+
+    /**
+     * @notice          Function to withdraw ERC20 token
+     * @param           beneficiary is the user to withdraw token
+     * @param           amount is the amount of tokens to withdraw
+     * @param           signature is proof that maintainer is the message signer
+     */
+    function withdrawReferrerBalance2KEY(
+        address beneficiary,
+        uint amount,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        bytes32 key = keccak256(_isExistingSignature, signature);
+        // Require that signature doesn't exist
+        require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
+        // Set that this signature is used and exists
+        PROXY_STORAGE_CONTRACT.setBool(key, true);
+        // Check who signed the message
+        address messageSigner = recoverSignatureForReferrer2KEY(beneficiary, amount, signature);
+        // Get the instance of TwoKeyRegistry
+        ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        // Assert that this signature is created by signatory address
+        require(messageSigner == registry.getSignatoryAddress());
+    
+        twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+
+
+        uint withdrawBalance2KEY;
+        
+        uint withdrawBalance2KEY = amount;
+        // safeguard
+        require(withdrawBalance2KEY <= userTokenDepositAmount[beneficiary][twoKeyTokenAddress].sub(user2KEYWithdrawBalance[beneficiary]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
+
+        user2KEYWithdrawBalance[beneficiary] = user2KEYWithdrawBalance[beneficiary].add(withdrawBalance2KEY);
+        
+
+        // Get the instance of 2KEY token contract
+        IERC20 twoKeyEconomy = IERC20(twoKeyTokenAddress);
+        // Transfer tokens to the user
+        twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
+
+        emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
     }
 
     function getUniswap2KeyBuyPriceInUSD()

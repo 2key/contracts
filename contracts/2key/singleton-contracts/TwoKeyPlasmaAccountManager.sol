@@ -34,7 +34,8 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     string constant _userTo2KEYBalance = "userTo2KEYBalance";
     string constant _tokenAddress = "tokenAddress";
 
-    string constant _isExistingSignature = "isExistingSignature";
+    string constant _isExistingSignatureForAddBalance = "isExistingSignatureForAddBalance";
+    string constant _isExistingSignatureForRemoveBalance = "isExistingSignatureForRemoveBalance";
 
     address public TWO_KEY_PLASMA_SINGLETON_REGISTRY;
 
@@ -102,21 +103,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     }
 
     /**
-     * @notice Get the token address
-     * @param tokenName is the token name
-     * @return (address) is the token address
-     */
-    function getTokenAddress(
-        string tokenName
-    )
-    public
-    view
-    returns (address)
-    {
-        return PROXY_STORAGE_CONTRACT.getAddress(keccak256(_tokenAddress, tokenName));
-    }
-
-    /**
      * @notice          Function to return who signed msg
      * @param           userAddress is the address of user for who we signed message
      * @param           tokenAddress is the token in which user is doing deposit
@@ -125,7 +111,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      */
     function recoverSignature(
         address userAddress,
-        address tokenAddress,
         uint amountOfTokens,
         bytes signature
     )
@@ -137,7 +122,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked(_messageNotes)),
-                keccak256(abi.encodePacked(userAddress, tokenAddress, amountOfTokens))
+                keccak256(abi.encodePacked(userAddress, amountOfTokens))
             )
         );
 
@@ -175,34 +160,127 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_userToUSDBalance, user), amount);
     }
 
-    //TODO: add removeBalanceUSD and removeBAlance2KEY functions, same as add balance
+    /**
+     * @notice          Function to withdraw moderator USD earnings
+     */
+    function withdrawModeratorEarningsUSD()
+    public
+    onlyMaintainer
+    {
+        address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        address moderatorBalance = setUSDBalance(moderator, 0);
+    }
 
     /**
-     * @notice          Function to add balance in USD for a user
+     * @notice          Function to withdraw moderator 2KEY earnings
+     */
+    function withdrawModeratorEarnings2KEY()
+    public
+    onlyMaintainer
+    {
+        address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        address moderatorBalance = setUserBalance2KEY(moderator, 0);
+    }
+
+    /**
+     * @notice          Function to remove USD balance
      * @param           beneficiary is user address
-     * @param           tokenAddress is the address of the token to add the balance on L2
-     * @param           amount is the amount of the token user deposited
+     * @param           amount is the amount to remove
      * @param           signature is message signed by signatory address proofing the deposit was verified
      */
-    function addBalanceUSD(
+    function removeBalanceUSD(
         address beneficiary,
-        address tokenAddress,
         uint amount,
         bytes signature
     )
     public
     onlyMaintainer
     {
-        bytes32 key = keccak256(_isExistingSignature, signature);
+        bytes32 key = keccak256(_isExistingSignatureForRemoveBalance, signature);
         // Require that signature doesn't exist
         require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
 
-        require(tokenAddress == getTokenAddress("USDT"), "TwoKeyPlasmaAccountManager: Not USDT token");
+        // Check who signed the message
+        address messageSigner = recoverSignature(beneficiary, amount, signature);
+        // Get the instance of TwoKeyRegistry
+        ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        // Assert that this signature is created by signatory address
+        require(messageSigner == registry.getSignatoryAddress());
+
+        uint userBalance = getUSDBalance(beneficiary);
+
+        // Remove USD
+        setUserBalanceUSD(
+            beneficiary,
+            userBalance.sub(amount)
+        );
+
+        saveDepositAndWithdrawHistory(amount ,"USD", false);
+    }
+
+    /**
+     * @notice          Function to remove 2KEY balance
+     * @param           beneficiary is user address
+     * @param           amount is the amount to remove
+     * @param           signature is message signed by signatory address proofing the deposit was verified
+     */
+    function removeBalance2KEY(
+        address beneficiary,
+        uint amount,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        bytes32 key = keccak256(_isExistingSignatureForRemoveBalance, signature);
+        // Require that signature doesn't exist
+        require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
+        // Set that this signature is used and exists
+        PROXY_STORAGE_CONTRACT.setBool(key, true);
 
         // Check who signed the message
-        address messageSigner = recoverSignature(msg.sender, tokenAddress, amount, signature); //TODO the signature should verify the beneficiary, not msg.sender
+        address messageSigner = recoverSignature(beneficiary, amount, signature);
+        // Get the instance of TwoKeyRegistry
+        ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
+        // Assert that this signature is created by signatory address
+        require(messageSigner == registry.getSignatoryAddress());
+
+        uint userBalance = get2KEYBalance(beneficiary);
+
+        // Remove 2KEY
+        setUserBalance2KEY(
+            beneficiary,
+            userBalance.sub(amount)
+        );
+
+        saveDepositHistory(amount, "2KEY", false);
+    }
+
+    /**
+     * @notice          Function to add USD balance
+     * @param           beneficiary is user address
+     * @param           amount is the amount of the token user deposited
+     * @param           signature is message signed by signatory address proofing the deposit was verified
+     */
+    function addBalanceUSD(
+        address beneficiary,
+        uint amount,
+        bytes signature
+    )
+    public
+    onlyMaintainer
+    {
+        bytes32 key = keccak256(_isExistingSignatureForAddBalance, signature);
+        // Require that signature doesn't exist
+        require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
+        // Set that this signature is used and exists
+        PROXY_STORAGE_CONTRACT.setBool(key, true);
+
+
+        // Check who signed the message
+        address messageSigner = recoverSignature(beneficiary, amount, signature);
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
@@ -216,35 +294,31 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        saveDepositHistory(amount ,"USD");
+        saveDepositHistory(amount ,"USD", true);
     }
 
     /**
-     * @notice          Function to add balance in 2KEY for a user
+     * @notice          Function to add 2KEY balance
      * @param           beneficiary is user address
      * @param           amount is the amount of the tokens user deposited
-     * @param           tokenAddress is the address of the token to add the balance on L2
      * @param           signature is message signed by signatory address proofing the deposit was verified
      */
     function addBalance2KEY(
         address beneficiary,
-        address tokenAddress,
         uint amount,
         bytes signature
     )
     public
     onlyMaintainer
     {
-        bytes32 key = keccak256(_isExistingSignature, signature);
+        bytes32 key = keccak256(_isExistingSignatureForAddBalance, signature);
         // Require that signature doesn't exist
         require(PROXY_STORAGE_CONTRACT.getBool(key) == false);
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
 
-        require(tokenAddress == getTokenAddress("2KEY"), "TwoKeyPlasmaAccountManager: Not 2Key token");
-
         // Check who signed the message
-        address messageSigner = recoverSignature(msg.sender, tokenAddress, amount, signature);
+        address messageSigner = recoverSignature(beneficiary, amount, signature);
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
@@ -258,16 +332,17 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        saveDepositHistory(amount, "2KEY");
+        saveDepositHistory(amount, "2KEY", true);
     }
 
     /**
      * @notice          Function that adds new deposit data to arrays with all the information
      *                  from the past deposits.
      */
-    function saveDepositHistory(
+    function saveDepositAndWithdrawHistory(
         uint amount,
-        string currency
+        string currency,
+        bool isDeposit
     )
     internal
     {
@@ -281,19 +356,19 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         // Add new element to an array of timestamps
         newUserTimestamps[i] = block.timestamp;
         // Set new array with one more element
-        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositTimestamp, msg.sender), newUserTimestamps);
+        PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, msg.sender), newUserTimestamps);
 
         // Adds a new amount to deposit amounts array
-        uint[] memory userAmounts = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, msg.sender));
+        uint[] memory userAmounts = PROXY_STORAGE_CONTRACT.getIntArray(keccak256(_userToDepositAmount, msg.sender));
         uint[] memory newUserAmounts = new uint[](userAmounts.length + 1);
         // For loop that is getting array from storage
         for(i = 0; i < userAmounts.length; i++){
             newUserAmounts[i] = userAmounts[i];
         }
         // Add new element to an array of amounts
-        newUserAmounts[i] = amount;
+        newUserAmounts[i] = isDeposit ? amount : newUserAmounts[i].sub(amount);
         // Set new array with one more element
-        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositAmount, msg.sender), newUserAmounts);
+        PROXY_STORAGE_CONTRACT.getIntArray(keccak256(_userToDepositAmount, msg.sender), newUserAmounts);
 
         // Adds a new currency to deposit currencies array
         bytes32[] memory userCurrencies = PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, msg.sender));

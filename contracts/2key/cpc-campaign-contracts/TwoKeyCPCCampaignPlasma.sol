@@ -156,8 +156,8 @@ contract TwoKeyCPCCampaignPlasma is UpgradeableCampaign, TwoKeyPlasmaCampaign, T
                 getNumberOfUsersToContractor(converter) > 0 &&
                 (counters[6].add(bountyPerConversionWei).add(moderatorFeePerConversion)) <= totalBountyForCampaign
             ) {
-                //Add earnings to moderator total earnings
-                moderatorTotalEarnings = moderatorTotalEarnings.add(moderatorFeePerConversion);
+                //Add earnings to moderator total earnings and balance
+                updateModeratorTotalEarningsAndBalance(moderatorFeePerConversion);
                 //Update paid bounty for influencers
                 c.bountyPaid = bountyPerConversionWei;
                 // Update that conversion is being paid

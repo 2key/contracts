@@ -39,7 +39,7 @@ contract ITwoKeyPlasmaCampaignsInventoryManager {
     )
     external
     view
-    returns (uint);
+    returns (uint, uint);
 
     function pushAddressToArray(
         bytes32 key,
