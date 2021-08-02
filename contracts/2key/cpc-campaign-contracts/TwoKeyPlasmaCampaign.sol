@@ -818,7 +818,9 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
      * @param _referrer referrer address
      */
     function withdrawModeratorCamapignEarningsL2(
-        address _moderator
+        //TODO when withdrawing from campaigns on L2, update balanace + total earned for moderator on inventory monager
+            //TODO, then when we will withdraw moderator earnings from L2 to L1 (to admin contract), then we'll update balances to zero and total withdrawn
+        address _moderator //TODO no need for address, just make 2 accounting params on the inventory manager moderator_balance_2KEY, moderator_balnace_usd, moderatorTotalEarningsWithdrawn2KEY, moderatorTotalEarningsWithdrawnUSD, moderatorTotalEarnings2KEY, moderatorTotalEarningsUSD, make sure to update the inventorymanager on these params when withdrawing moderator earnings from campaigns
     )
     public
     onlyTwoKeyPlasmaCampaignsInventoryManager

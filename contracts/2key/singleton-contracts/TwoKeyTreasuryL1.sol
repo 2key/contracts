@@ -44,6 +44,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     event WithdrawToken(address indexed beneficiary, address indexed token, uint amount);
 
 
+
     function setInitialParams(
         address twoKeySingletonesRegistry,
         address _proxyStorage
@@ -494,11 +495,12 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           signature is proof that maintainer is the message signer
      */
     function withdrawReferrerBalance2KEY(
-        address beneficiary,
+        address beneficiary, //TODO remove this, the msg.sender is the beneficiary
         uint amount,
         bytes signature
     )
     public
+    //TODO: make this public, anyone can call
     onlyMaintainer
     {
         bytes32 key = keccak256(_isExistingSignature, signature);
@@ -520,6 +522,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         
         uint withdrawBalance2KEY = amount;
         // safeguard
+        //TODO: modify safeguard to make sure the withdrawn amount is not worth more than the non-2KEY usd worth on contract, and we'll put some safeguards on maximal withdraw per day
         require(withdrawBalance2KEY <= userTokenDepositAmount[beneficiary][twoKeyTokenAddress].sub(user2KEYWithdrawBalance[beneficiary]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
 
         user2KEYWithdrawBalance[beneficiary] = user2KEYWithdrawBalance[beneficiary].add(withdrawBalance2KEY);
