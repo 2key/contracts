@@ -438,14 +438,14 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           buy2keyRateL2 is the 2key price set by maintainer
      * @param           signature is proof that maintainer is the message signer
      */
-    function withdrawReferrerBalanceUSD(
+    function withdrawReferrerBalanceUSD( //TODO: rename to withdrawL2BalanceUSD
         address beneficiary,
         uint amount,
-        uint buy2keyRateL2,
+        uint buy2keyRateL2, //TODO: maintainer should call this in current rate
         bytes signature
     )
     public
-    onlyMaintainer
+    onlyMaintainer //TODO should not be called by maintainer , should be called by users
     {
         bytes32 key = keccak256(_isExistingSignature, signature);
         // Require that signature doesn't exist
@@ -458,9 +458,10 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
         require(messageSigner == registry.getSignatoryAddress());
-    
+        //TODO require that beneficiary is msg.sender
         twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
+        //TODO: get current rate for amount USD to 2KEY from uniswap, and make sure that there is no more than 5% drift from the maintainer provided rate.
 
         uint withdrawBalanceUSD;
         uint withdrawBalance2KEY;

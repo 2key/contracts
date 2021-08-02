@@ -151,7 +151,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalanceUSD(
+    function setUserBalaanceUSD(
         address user,
         uint amount
     )
