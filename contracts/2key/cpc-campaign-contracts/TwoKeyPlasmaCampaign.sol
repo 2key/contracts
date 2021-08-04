@@ -564,43 +564,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         return ITwoKeyPlasmaRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaRegistry")).getModeratorFee();
     }
 
-
-    // /**
-    //  * @notice          Function to rebalance selected value, assuming both
-    //  *                  input parameters are in wei units
-    //  *
-    //  * @param           value to be rebalanced
-    //  * @param           ratio is the ratio by which we rebalance
-    //  */
-    // function rebalanceValue(
-    //     uint value,
-    //     uint ratio
-    // )
-    // internal
-    // pure
-    // returns (uint)
-    // {
-    //     return value.mul(ratio).div(10**18);
-    // }
-
-    // /**
-    //  * @notice          Function to get rebalancing ratio for selected referrer
-    //  *                  If the rebalancing ratio is not submitted yet, it will
-    //  *                  default to 1 ETH
-    //  *
-    //  * @param           _referrerPlasma is referrer plasma address
-    //  */
-    // function getRebalancingRatioForReferrer(
-    //     address _referrerPlasma
-    // )
-    // internal
-    // view
-    // returns (uint)
-    // {
-    //     Payment memory p = referrerToPayment[_referrerPlasma];
-    //     return p.rebalancingRatio != 0 ? p.rebalancingRatio : 10**18;
-    // }
-
     /**
      * ------------------------------------------------------------------------------------
      *                          Public getters
@@ -663,50 +626,15 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
       * @notice          Function to get referrer balance to be able to withdraw
       * @dev             Balance will be in either 2KEY or USD depending on the isBudgetedDirectlyWith2KEY
       */
-     function getReferrerPlasmaBalance(
-        address _referrer
-     )
-     public
-     view
-     returns (uint)
-     {
-         return referrerPlasma2Balances2key[_referrer];
-     }
-
-
-    // /**
-    //  * @notice          Function to get referrers balances and total earnings
-    //  * @param           _referrerPlasmaList the list of referrers
-    //  */
-    // function getReferrersBalancesAndTotalEarnings(
-    //     address[] _referrerPlasmaList
-    // )
-    // public
-    // view
-    // returns (uint256[], uint256[])
-    // {
-    //     uint numberOfAddresses = _referrerPlasmaList.length;
-    //     uint256[] memory referrersPendingPlasmaBalance = new uint256[](numberOfAddresses);
-    //     uint256[] memory referrersTotalEarningsPlasmaBalance = new uint256[](numberOfAddresses);
-
-    //     for (uint i=0; i<numberOfAddresses; i++){
-    //         address referrer = _referrerPlasmaList[i];
-
-    //         uint referrerRebalancingRatio = getRebalancingRatioForReferrer(referrer);
-
-    //         referrersPendingPlasmaBalance[i] = rebalanceValue(
-    //             referrerPlasma2Balances2key[referrer],
-    //             referrerRebalancingRatio
-    //         );
-
-    //         referrersTotalEarningsPlasmaBalance[i] = rebalanceValue(
-    //             referrerPlasma2TotalEarnings2key[referrer],
-    //             referrerRebalancingRatio
-    //         );
-    //     }
-
-    //     return (referrersPendingPlasmaBalance, referrersTotalEarningsPlasmaBalance);
-    // }
+    function getReferrerPlasmaBalance(
+    address _referrer
+    )
+    public
+    view
+    returns (uint)
+    {
+        return referrerPlasma2Balances2key[_referrer];
+    }
 
 
     /**
@@ -844,85 +772,6 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
 
         initializeModeratorEarningsBalanceOnWithdrawal();
     }
-
-    // /**
-    //  * @notice          At the moment when we want to do payouts for influencers, we
-    //  *                  rebalance their values against price at which tokens were bought.
-    //  */
-    // function computeAndSetRebalancingRatioForReferrer(
-    //     address _referrer,
-    //     uint _currentRate2KEY
-    // )
-    // public
-    // onlyTwoKeyPlasmaCampaignsInventoryManager
-    // returns (uint, uint)
-    // {
-    //     require(_currentRate2KEY != 0, "TwoKeyPlasmaCamapign: Invalid 2KEY rate");
-
-    //     uint rebalancingRatio = 10**18;
-    //     // This is in case inventory NOT added directly as 2KEY
-    //     if(isBudgetedDirectlyWith2KEY == false) {
-    //         rebalancingRatio = rebalancingRatio.mul(10**18).div(_currentRate2KEY);
-    //         emit RebalancedValue(
-    //             _referrer,
-    //             _currentRate2KEY,
-    //             rebalancingRatio
-    //         );
-    //     }
-
-    //     uint nonRebalancedAmount = referrerPlasma2Balances2key[_referrer];
-    //     uint rebalancedAmount = referrerPlasma2Balances2key[_referrer].mul(rebalancingRatio).div(10**18);
-    //     referrerPlasma2Balances2key[_referrer] = rebalancedAmount;
-
-    //     Payment memory p = Payment(rebalancingRatio, block.timestamp, false);
-    //     referrerToPayment[_referrer] = p;
-
-    //     return (rebalancedAmount, nonRebalancedAmount);
-    // }
-
-    // /**
-    //  * @notice          Function which will mark that referrer received payment for this campaign
-    //  * @param           _referrer is the referrer address being receiving funds
-    //  */
-    // function markReferrerReceivedPaymentForThisCampaign(
-    //     address _referrer
-    // )
-    // public
-    // onlyTwoKeyPlasmaCampaignsInventoryManager
-    // {
-    //     // Take current payment structure for the referrer
-    //     Payment memory p = referrerToPayment[_referrer];
-
-    //     // Require that referrer is not already paid since he can't get paid twice
-    //     require(p.isReferrerPaid == false);
-
-    //     // Set that referrer is paid
-    //     p.isReferrerPaid = true;
-
-    //     // Store in mapping
-    //     referrerToPayment[_referrer] = p;
-    // }
-
-    // /**
-    //  * @notice          Function to get total referrer rewards and current balance for that campaign
-    //  *                  Which can be either same or 0.
-    //  * @param           _referrer is the plasma address of referrer
-    //  */
-    // function getReferrerRebalancedRewardsAndPaymentStatus(
-    //     address _referrer
-    // )
-    // public
-    // view
-    // returns (uint,bool)
-    // {
-    //     Payment memory p = referrerToPayment[_referrer];
-
-    //     return (
-    //         getReferrerPlasmaBalance(_referrer),
-    //         p.isReferrerPaid
-    //     );
-    // }
-
 
     /**
      * @notice          Function to return referrers participated in the referral chain
