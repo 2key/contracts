@@ -27,19 +27,33 @@ contract ITwoKeyPlasmaCampaignsInventoryManager {
     )
     external;
 
+    function withdrawModeratorEarnings()
+    external;
+
+    function getModeratorTotalPlasmaBalance()
+    external
+    returns (uint, uint);
+
     function getCampaignsReferrerHasPendingBalances(
         address referrer
     )
     external
     view
-    returns (address[]);
+    returns (address[] memory);
 
-    function getTotalReferrerPendingAmount(
+    function getTotalReferrerBalanceOnL2PPCCampaigns2KEY(
         address referrer
     )
     external
     view
-    returns (uint, uint);
+    returns (uint, address[] memory, uint[] memory);
+
+    function getTotalReferrerBalanceOnL2PPCCampaignsUSD(
+        address referrer
+    )
+    external
+    view
+    returns (uint, address[] memory, uint[] memory);
 
     function pushAddressToArray(
         bytes32 key,

@@ -65,15 +65,15 @@ contract ITwoKeyPlasmaEventSource {
     ) external;
 
     function emitTransferFrom2KEYL2(
-        uint from,
-        uint to,
-        address amount
+        address from,
+        address to,
+        uint amount
     ) external;
 
     function emitTransferFromUSDL2(
-        uint from,
-        uint to,
-        address amount
+        address from,
+        address to,
+        uint amount
     ) external;
 
     function emitAddInventory2KEY(

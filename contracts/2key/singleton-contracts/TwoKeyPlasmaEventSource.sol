@@ -634,9 +634,9 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
      * @notice          Function that emits the L2_2KEY is transferred from
      */
     function emitTransferFrom2KEYL2(
-        uint from,
-        uint to,
-        address amount
+        address from,
+        address to,
+        uint amount
     )
     public
     {
@@ -653,9 +653,9 @@ contract TwoKeyPlasmaEventSource is Upgradeable {
      * @notice          Function that emits the L2_USD is transferred from
      */
     function emitTransferFromUSDL2(
-        uint from,
-        uint to,
-        address amount
+        address from,
+        address to,
+        uint amount
     )
     public
     {

@@ -51,4 +51,17 @@ contract ITwoKeyPlasmaCampaign {
         bool _isBudgetedDirectlyWith2KEY
     )
     external;
+
+    function getModeratorTotalEarningsAndBalance()
+    external
+    view
+    returns (uint, uint);
+
+    function withdrawModeratorCamapignEarningsL2()
+    external;
+
+    function getTotalReferrerRewardsAndTotalModeratorEarnings()
+    external
+    view
+    returns (uint,uint);
 }

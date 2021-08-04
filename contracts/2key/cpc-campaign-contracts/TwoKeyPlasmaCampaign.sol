@@ -373,9 +373,20 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         .updateReputationPointsForRejectedConversions(converter, contractor);
     }
 
+
+    /**
+     * @notice Returns moderator total earnings and balance available
+     */
+    function getModeratorTotalEarningsAndBalance()
+    public
+    view
+    returns (uint, uint)
+    {
+        return (moderatorTotalEarnings, moderatorEarningsBalance);
+    }
+
     /**
      * @notice          Internal function to initialize moderator balance when the moderator withdraws his balance
-     * @param           referrerPlasma is referrer plasma address
      */
     function initializeModeratorEarningsBalanceOnWithdrawal()
     internal
@@ -400,8 +411,7 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
         if (isNewBalance) {
             // mark that moderator has pending reward
             bytes32 key = keccak256(
-                _moderator2pendingCampaignAddresses,
-                address(this)
+                _moderator2pendingCampaignAddresses
             );
 
             ITwoKeyPlasmaCampaignsInventoryManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaCampaignsInventoryManager))
@@ -815,27 +825,23 @@ contract TwoKeyPlasmaCampaign is TwoKeyCampaignIncentiveModels, TwoKeyCampaignAb
     /**
      * @notice          At the moment when we want to do payouts for moderator, we
      *                  transfer his earnings
-     * @param _referrer referrer address
      */
-    function withdrawModeratorCamapignEarningsL2(
-        //TODO when withdrawing from campaigns on L2, update balanace + total earned for moderator on inventory monager
-            //TODO, then when we will withdraw moderator earnings from L2 to L1 (to admin contract), then we'll update balances to zero and total withdrawn
-        address _moderator //TODO no need for address, just make 2 accounting params on the inventory manager moderator_balance_2KEY, moderator_balnace_usd, moderatorTotalEarningsWithdrawn2KEY, moderatorTotalEarningsWithdrawnUSD, moderatorTotalEarnings2KEY, moderatorTotalEarningsUSD, make sure to update the inventorymanager on these params when withdrawing moderator earnings from campaigns
-    )
+    function withdrawModeratorCamapignEarningsL2()
     public
     onlyTwoKeyPlasmaCampaignsInventoryManager
     {
-        uint amount = referrerPlasma2Balances2key[_moderator];
+        address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        uint amount = moderatorEarningsBalance;
 
         // transfer token from campaign to referrer
         if (isBudgetedDirectlyWith2KEY) {
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transfer2KEYFrom(address(this), _moderator, amount);
+                .transfer2KEYFrom(address(this), moderator, amount);
         } else {
             ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transferUSDFrom(address(this), _moderator, amount);
+                .transferUSDFrom(address(this), moderator, amount);
         }
-        
+
         initializeModeratorEarningsBalanceOnWithdrawal();
     }
 

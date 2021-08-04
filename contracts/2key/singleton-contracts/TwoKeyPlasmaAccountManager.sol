@@ -105,7 +105,6 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     /**
      * @notice          Function to return who signed msg
      * @param           userAddress is the address of user for who we signed message
-     * @param           tokenAddress is the token in which user is doing deposit
      * @param           amountOfTokens is the amount of tokens being deposited
      * @param           signature is the signature created by maintainer
      */
@@ -151,7 +150,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
      * @param           user is the address of the user for whom we're allocating the funds
      * @param           amount is the amount of the tokens user has
      */
-    function setUserBalaanceUSD(
+    function setUserBalanceUSD(
         address user,
         uint amount
     )
@@ -168,7 +167,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     onlyMaintainer
     {
         address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
-        address moderatorBalance = setUSDBalance(moderator, 0);
+        setUserBalanceUSD(moderator, 0);
     }
 
     /**
@@ -179,7 +178,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
     onlyMaintainer
     {
         address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
-        address moderatorBalance = setUserBalance2KEY(moderator, 0);
+        setUserBalance2KEY(moderator, 0);
     }
 
     /**
@@ -255,7 +254,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.sub(amount)
         );
 
-        saveDepositHistory(amount, "2KEY", false);
+        saveDepositAndWithdrawHistory(amount, "2KEY", false);
     }
 
     /**
@@ -294,7 +293,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        saveDepositHistory(amount ,"USD", true);
+        saveDepositAndWithdrawHistory(amount ,"USD", true);
     }
 
     /**
@@ -332,7 +331,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
             userBalance.add(amount)
         );
 
-        saveDepositHistory(amount, "2KEY", true);
+        saveDepositAndWithdrawHistory(amount, "2KEY", true);
     }
 
     /**
@@ -356,10 +355,10 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         // Add new element to an array of timestamps
         newUserTimestamps[i] = block.timestamp;
         // Set new array with one more element
-        PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositTimestamp, msg.sender), newUserTimestamps);
+        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositTimestamp, msg.sender), newUserTimestamps);
 
         // Adds a new amount to deposit amounts array
-        uint[] memory userAmounts = PROXY_STORAGE_CONTRACT.getIntArray(keccak256(_userToDepositAmount, msg.sender));
+        uint[] memory userAmounts = PROXY_STORAGE_CONTRACT.getUintArray(keccak256(_userToDepositAmount, msg.sender));
         uint[] memory newUserAmounts = new uint[](userAmounts.length + 1);
         // For loop that is getting array from storage
         for(i = 0; i < userAmounts.length; i++){
@@ -368,7 +367,7 @@ contract TwoKeyPlasmaAccountManager is Upgradeable {
         // Add new element to an array of amounts
         newUserAmounts[i] = isDeposit ? amount : newUserAmounts[i].sub(amount);
         // Set new array with one more element
-        PROXY_STORAGE_CONTRACT.getIntArray(keccak256(_userToDepositAmount, msg.sender), newUserAmounts);
+        PROXY_STORAGE_CONTRACT.setUintArray(keccak256(_userToDepositAmount, msg.sender), newUserAmounts);
 
         // Adds a new currency to deposit currencies array
         bytes32[] memory userCurrencies = PROXY_STORAGE_CONTRACT.getBytes32Array(keccak256(_userToDepositCurrency, msg.sender));

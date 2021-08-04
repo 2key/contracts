@@ -11,6 +11,7 @@ import "../interfaces/IUniswapV2Router02.sol";
 import "../interfaces/ITwoKeyRegistry.sol";
 import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 import "../interfaces/IUpgradableExchange.sol";
+import "../interfaces/ITwoKeyAdmin.sol";
 
 /**
  * TwoKeyTreasuryL1 contract receiving all deposits from contractors.
@@ -36,13 +37,14 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     mapping(address => uint) public userUSDDepositBalance; // user => amount
     mapping(address => uint) public userUSDWithdrawBalance;   // user => amount
     mapping(address => uint) public user2KEYWithdrawBalance;   // user => amount
+    mapping(bytes32 => bool) public isSignatureRateValid; // signature => bool
 
     event Deposit2KEY(address indexed depositor, uint amount);
     event DepositStableCoin(address indexed depositor, uint amount);
     event DepositVolatileToken(address indexed depositor, address indexed fromTokenAddress, uint fromAmount, address toTokenAddress, uint toTokenAmount, uint buyRate);
     event DepositETH(address indexed depositor, uint amount, address toTokenAddress, uint toTokenAmount, uint daiBuyRate);
     event WithdrawToken(address indexed beneficiary, address indexed token, uint amount);
-
+    event ReportSignatureValidation(bytes signature, bool indexed isValidSignature);
 
 
     function setInitialParams(
@@ -253,7 +255,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
             token == getTokenAddress("USDC")
         ) {
             require(amount <= IERC20(token).allowance(msg.sender, address(this)));
-            require(IERC20(token).transferFrom(mfvsg.sender, address(this), amount));
+            require(IERC20(token).transferFrom(msg.sender, address(this), amount));
 
             // adjust the decimals
             if (token == getTokenAddress("USDC")) {
@@ -305,7 +307,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
             userTokenDepositAmount[msg.sender][token] = userTokenDepositAmount[msg.sender][token].add(amount);
             userUSDDepositBalance[msg.sender] = userUSDDepositBalance[msg.sender].add(daiAmount);
     
-            emit DepositVolatileToken(msg.sender, token, amount, getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"), daiAmount, daiBuyRate);
+            emit DepositVolatileToken(msg.sender, token, amount, getTokenAddress("DAI"), daiAmount, daiBuyRate);
         }
     }
 
@@ -327,7 +329,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         userETHDepositAmount[msg.sender] = userETHDepositAmount[msg.sender].add(amount);
         userUSDDepositBalance[msg.sender] = userUSDDepositBalance[msg.sender].add(daiAmount);
 
-        emit DepositETH(userAddress, amount, getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI"), daiAmount, daiBuyRate);
+        emit DepositETH(userAddress, amount, getTokenAddress("DAI"), daiAmount, daiBuyRate);
     }
 
     /**
@@ -360,33 +362,30 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
         address beneficiary = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
-        
-        uint withdrawBalanceUSD;
-        uint withdrawBalance2KEY;
-
         // Get the current 2key buy rate
-        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD();
+        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(getTokenAddress("DAI"));
 
-        // Allow 10% change of the price
-        require(uniswap2keyRate >= buy2keyRateL2.mul(9).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
-        require(uniswap2keyRate <= buy2keyRateL2.mul(11).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+        // Allow 5% change of the price
+        if (uniswap2keyRate >= buy2keyRateL2.mul(95).div(100) && uniswap2keyRate <= buy2keyRateL2.mul(105).div(100)) {
+            isSignatureRateValid[keccak256(signature)] = true;
 
-        withdrawBalanceUSD = amount;
-        withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
+            uint withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
 
-        userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(withdrawBalanceUSD);
+            userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(amount);
+            // Get the instance of 2KEY token contract
+            IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
+            // Transfer tokens to the user
+            twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
 
+            // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
+            address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+            ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(withdrawBalance2KEY, campaignPlasma);
 
-        // Get the instance of 2KEY token contract
-        IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
-        // Transfer tokens to the user
-        twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
-
-        // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-        ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(withdrawBalance2KEY, campaignPlasma);
-
-        emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
-
+            emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
+            emit ReportSignatureValidation(signature, true);
+        } else {
+            emit ReportSignatureValidation(signature, false);
+        }
     }
 
     /**
@@ -398,7 +397,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     function withdrawModeratorBalance2KEY(
         address campaignPlasma,
         uint amount,
-        bytes signature,
+        bytes signature
     )
     public
     onlyMaintainer
@@ -416,7 +415,6 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         require(messageSigner == registry.getSignatoryAddress());
 
         address beneficiary = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-
 
         uint withdrawBalance2KEY;      
         
@@ -438,14 +436,13 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           buy2keyRateL2 is the 2key price set by maintainer
      * @param           signature is proof that maintainer is the message signer
      */
-    function withdrawReferrerBalanceUSD( //TODO: rename to withdrawL2BalanceUSD
+    function withdrawL2BalanceUSD(
         address beneficiary,
         uint amount,
-        uint buy2keyRateL2, //TODO: maintainer should call this in current rate
+        uint buy2keyRateL2,
         bytes signature
     )
     public
-    onlyMaintainer //TODO should not be called by maintainer , should be called by users
     {
         bytes32 key = keccak256(_isExistingSignature, signature);
         // Require that signature doesn't exist
@@ -458,35 +455,31 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
         require(messageSigner == registry.getSignatoryAddress());
-        //TODO require that beneficiary is msg.sender
-        twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        // Require that beneficiary is msg.sender
+        require(beneficiary == msg.sender);
 
-        //TODO: get current rate for amount USD to 2KEY from uniswap, and make sure that there is no more than 5% drift from the maintainer provided rate.
-
-        uint withdrawBalanceUSD;
-        uint withdrawBalance2KEY;
+        address twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
         // Get the current 2key buy rate
-        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD();
+        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(getTokenAddress("DAI"));
 
-        // Allow 10% change of the price
-        require(uniswap2keyRate >= buy2keyRateL2.mul(9).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
-        require(uniswap2keyRate <= buy2keyRateL2.mul(11).div(10), "TwoKeyTreasuryL1: Invalid 2key price");
+        // Allow 5% change of the price
+        if (uniswap2keyRate >= buy2keyRateL2.mul(95).div(100) && uniswap2keyRate <= buy2keyRateL2.mul(105).div(100)) {
+            isSignatureRateValid[keccak256(signature)] = true;
 
-        withdrawBalanceUSD = amount;
-        withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
-        // safeguard
-        require(withdrawBalanceUSD <= userUSDDepositBalance[beneficiary].sub(userUSDWithdrawBalance[beneficiary]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
+            uint withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
+            // safeguard
+            require(amount <= getTotalUSDBalanceOfNon2KEYTokens());
 
-        userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(withdrawBalanceUSD);
-        
+            userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(amount);
+            // Transfer tokens to the user
+            IERC20(twoKeyTokenAddress).transfer(beneficiary, withdrawBalance2KEY);
 
-        // Get the instance of 2KEY token contract
-        IERC20 twoKeyEconomy = IERC20(twoKeyTokenAddress);
-        // Transfer tokens to the user
-        twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
-
-        emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
+            emit WithdrawToken(beneficiary, twoKeyTokenAddress, withdrawBalance2KEY);
+            emit ReportSignatureValidation(signature, true);
+        } else {
+            emit ReportSignatureValidation(signature, false);
+        }
     }
 
     /**
@@ -495,14 +488,12 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           amount is the amount of tokens to withdraw
      * @param           signature is proof that maintainer is the message signer
      */
-    function withdrawReferrerBalance2KEY(
-        address beneficiary, //TODO remove this, the msg.sender is the beneficiary
+    function withdrawL2Balance2KEY(
+        address beneficiary,
         uint amount,
         bytes signature
     )
     public
-    //TODO: make this public, anyone can call
-    onlyMaintainer
     {
         bytes32 key = keccak256(_isExistingSignature, signature);
         // Require that signature doesn't exist
@@ -515,36 +506,34 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
         require(messageSigner == registry.getSignatoryAddress());
-    
-        twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
+        // Require that beneficiary is msg.sender
+        require(beneficiary == msg.sender);
 
+        address twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
-        uint withdrawBalance2KEY;
-        
         uint withdrawBalance2KEY = amount;
         // safeguard
-        //TODO: modify safeguard to make sure the withdrawn amount is not worth more than the non-2KEY usd worth on contract, and we'll put some safeguards on maximal withdraw per day
-        require(withdrawBalance2KEY <= userTokenDepositAmount[beneficiary][twoKeyTokenAddress].sub(user2KEYWithdrawBalance[beneficiary]), "TwoKeyTreasuryL1: Exceeds witdraw amount");
+        uint usdValue = getUniswap2KeyBuyPriceInUSD(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy")).mul(withdrawBalance2KEY).div(10**18);
+        require(usdValue <=  getTotalUSDBalanceOfNon2KEYTokens());
 
         user2KEYWithdrawBalance[beneficiary] = user2KEYWithdrawBalance[beneficiary].add(withdrawBalance2KEY);
         
-
-        // Get the instance of 2KEY token contract
-        IERC20 twoKeyEconomy = IERC20(twoKeyTokenAddress);
         // Transfer tokens to the user
-        twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
+        IERC20(twoKeyTokenAddress).transfer(beneficiary, withdrawBalance2KEY);
 
-        emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
+        emit WithdrawToken(beneficiary, twoKeyTokenAddress, withdrawBalance2KEY);
     }
 
-    function getUniswap2KeyBuyPriceInUSD()
+    function getUniswap2KeyBuyPriceInUSD(
+        address tokenAddress
+    )
     internal
     returns (uint256) {
         address [] memory path = new address[](3);
 
         address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
 
-        path[0] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("DAI");
+        path[0] = tokenAddress;
         path[1] = IUniswapV2Router02(uniswapRouter).WETH();
         path[2] = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
@@ -571,4 +560,49 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         return IERC20(token).balanceOf(address(this));
     }
 
+    /**
+     * @notice          Function to get USD value of non-2key tokens on contract
+     * @return          Returns USD value
+     */
+    function getTotalUSDBalanceOfNon2KEYTokens()
+    internal
+    view
+    returns (uint)
+    {
+        uint usdBalance;
+        address tokenAddress;
+        
+        // BUSD
+        tokenAddress = getTokenAddress("BUSD");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // TUSD
+        tokenAddress = getTokenAddress("TUSD");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // PAX
+        tokenAddress = getTokenAddress("PAX");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // DAI
+        tokenAddress = getTokenAddress("DAI");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // USDC
+        tokenAddress = getTokenAddress("USDC");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // USDT
+        tokenAddress = getTokenAddress("USDT");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // RENBTC
+        tokenAddress = getTokenAddress("RENBTC");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // WBTC
+        tokenAddress = getTokenAddress("WBTC");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // WETH
+        tokenAddress = getTokenAddress("WETH");
+        usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+        // ETH
+        tokenAddress = getTokenAddress("WETH");
+        usdBalance = usdBalance.add(address(this).balance.mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
+
+        return usdBalance;
+    }
 }

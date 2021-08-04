@@ -48,6 +48,8 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     string constant _campaignPlasma2LeftoverWithdrawnByContractor = "campaignPlasma2LeftoverWithdrawnByContractor";
     string constant _campaignPlasma2EarningsByModerator = "campaignPlasma2EarningsByModerator";
     string constant _distributionCycle2TotalDistributed = "distributionCycle2TotalDistributed";
+    string constant _moderatorTotalEarningWithdrawn2KEY = "moderatorTotalEarningWithdrawn2KEY";
+    string constant _moderatorTotalEarningWithdrawnUSD = "moderatorTotalEarningWithdrawnUSD";
 
     string constant _numberOfCycles = "numberOfCycles";
 
@@ -63,8 +65,8 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     // string constant _referrer2PayoutUSD = "referrer2PayoutUSD";
     // Mapping referrer to all campaigns that are in progress of distribution
     //string constant _referrer2inProgressCampaignAddress = "referrer2inProgressCampaignAddress";
-    // Mapping moderator to all campaigns that are in progress of distribution
-    //string constant _moderator2inProgressCampaignAddress = "moderator2inProgressCampaignAddress";
+    // Mapping moderator to all campaigns that are in pending of distribution
+    string constant _moderator2pendingCampaignAddresses = "moderator2pendingCampaignAddresses";
     // // Mapping referrer to how much rebalanced amount in progress he has
     // string constant _referrer2rebalancedTotalPayout = "referrer2rebalancedTotalPayout";
     // Mapping distribution cycle to referrers being paid in that cycle
@@ -386,61 +388,124 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     function withdrawModeratorEarnings()
     public
     {
-        address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        uint moderatorTotalEarningWithdrawn2KEY = PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorTotalEarningWithdrawn2KEY));
+        uint moderatorTotalEarningWithdrawnUSD = PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorTotalEarningWithdrawnUSD));
 
-        // Get all the campaigns of moderator
-        address[] memory moderatorCampaigns = getCampaignsModeratorHasPendingBalances(moderator);
+        uint moderatorTotalBalance2KEY;
+        uint moderatorTotalBalanceUSD;
+
+        // Get all the plasma campaigns of moderator
+        address[] memory moderatorCampaignsPlasma = getCampaignsModeratorHasPendingBalances();
 
         // Delete array of inProgress campaigns
         deleteAddressArray(
-            keccak256(_moderator2pendingCampaignAddresses, moderator)
+            keccak256(_moderator2pendingCampaignAddresses)
         );
 
-        // Iterate through campaigns
-        for(uint j = 0; j < moderatorCampaigns.length; j++) {
+        (moderatorTotalBalance2KEY, moderatorTotalBalanceUSD) = getModeratorTotalPlasmaBalance();
+
+        moderatorTotalEarningWithdrawn2KEY = moderatorTotalEarningWithdrawn2KEY.add(moderatorTotalBalance2KEY);
+        moderatorTotalEarningWithdrawnUSD = moderatorTotalEarningWithdrawnUSD.add(moderatorTotalBalanceUSD);
+
+        // Iterate through campaigns and initialize moderator balance
+        for(uint j = 0; j < moderatorCampaignsPlasma.length; j++) {
             // Load campaign address
-            address campaignAddress = moderatorCampaigns[j];
+            address campaignPlasma = moderatorCampaignsPlasma[j];
+
             // Transfer plasma balance to moderator
-            ITwoKeyPlasmaCampaign(campaignAddress).withdrawModeratorCamapignEarningsL2(moderator);
+            ITwoKeyPlasmaCampaign(campaignPlasma).withdrawModeratorCamapignEarningsL2();
         }
 
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorTotalEarningWithdrawn2KEY), moderatorTotalEarningWithdrawn2KEY);
+        PROXY_STORAGE_CONTRACT.setUint(keccak256(_moderatorTotalEarningWithdrawnUSD), moderatorTotalEarningWithdrawnUSD);
     }
 
     /**
-     * @notice          Mark the referrer withdrawal is finished
+     * @notice Returns moderator balance
+     * @return (uint, uint) 2KEY balance, USD balance
      */
-    function markRefererEarningsWithdrawalFinished(
-        address referrer
-    )
+    function getModeratorTotalPlasmaBalance()
     public
-    onlyMaintainer
+    returns (uint, uint)
     {
-        // Get all the campaigns of specific referrer
-        address[] memory referrerCampaigns = getCampaignsReferrerHasInProgressBalances(referrer);
+        uint moderatorTotalBalance2KEY;
+        uint moderatorTotalBalanceUSD;
 
-        // Delete array of inProgress campaigns
-        deleteAddressArray(
-            keccak256(_referrer2inProgressCampaignAddress, referrer)
-        );
+        uint moderatorBalance;
+
+        // Get all the plasma campaigns of moderator
+        address[] memory moderatorCampaignsPlasma = getCampaignsModeratorHasPendingBalances();
+
+        // Iterate through campaigns
+        for(uint j = 0; j < moderatorCampaignsPlasma.length; j++) {
+            // Load campaign address
+            address campaignPlasma = moderatorCampaignsPlasma[j];
+
+            // get moderator balance
+            (, moderatorBalance) = ITwoKeyPlasmaCampaign(campaignPlasma).getModeratorTotalEarningsAndBalance();
+
+            if (PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == true) {
+                moderatorTotalBalance2KEY = moderatorTotalBalance2KEY.add(moderatorBalance);
+            } else {
+                moderatorTotalBalanceUSD = moderatorTotalBalanceUSD.add(moderatorBalance);
+            }
+        }
+
+        return (moderatorTotalBalance2KEY, moderatorTotalBalanceUSD);
     }
 
     /**
-     * @notice          Mark the moderator withdrawal is finished
+     * @notice Returns moderator total withdrawn earnings
+     * @return (uint, uint) 2KEY earnings, USD earnings
      */
-    function markModeratorEarningsWithdrawalFinished()
+    function getModeratorTotalPlasmaWithdrawn()
     public
-    onlyMaintainer
+    returns (uint, uint)
     {
-        address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+        uint moderatorTotalWithdrawn2KEY;
+        uint moderatorTotalWithdrawnUSD;
 
-        // Get all the campaigns of moderator
-        address[] memory referrerCampaigns = getCampaignsModeratorHasInProgressBalances(moderator);
+        moderatorTotalWithdrawn2KEY = PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorTotalEarningWithdrawn2KEY));
+        moderatorTotalWithdrawnUSD = PROXY_STORAGE_CONTRACT.getUint(keccak256(_moderatorTotalEarningWithdrawnUSD));
 
-        // Delete array of inProgress campaigns
-        deleteAddressArray(
-            keccak256(_moderator2inProgressCampaignAddress, moderator)
-        );
+        return (moderatorTotalWithdrawn2KEY, moderatorTotalWithdrawnUSD);
     }
+
+    // /**
+    //  * @notice          Mark the referrer withdrawal is finished
+    //  */
+    // function markRefererEarningsWithdrawalFinished(
+    //     address referrer
+    // )
+    // public
+    // onlyMaintainer
+    // {
+    //     // Get all the campaigns of specific referrer
+    //     address[] memory referrerCampaigns = getCampaignsReferrerHasInProgressBalances(referrer);
+
+    //     // Delete array of inProgress campaigns
+    //     deleteAddressArray(
+    //         keccak256(_referrer2inProgressCampaignAddress, referrer)
+    //     );
+    // }
+
+    // /**
+    //  * @notice          Mark the moderator withdrawal is finished
+    //  */
+    // function markModeratorEarningsWithdrawalFinished()
+    // public
+    // onlyMaintainer
+    // {
+    //     address moderator = getAddressFromTwoKeySingletonRegistry("TwoKeyCongress");
+
+    //     // Get all the campaigns of moderator
+    //     address[] memory referrerCampaigns = getCampaignsModeratorHasInProgressBalances(moderator);
+
+    //     // Delete array of inProgress campaigns
+    //     deleteAddressArray(
+    //         keccak256(_moderator2inProgressCampaignAddress, moderator)
+    //     );
+    // }
 
     /**
      * @notice          Function to end selected budget campaign by maintainer, and perform
@@ -448,8 +513,6 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      *                  moderator earnings, as well as calculating leftover for contractor
      *
      * @param           campaignPlasma is the plasma address of the campaign
-     * @param           totalAmountForReferrerRewards is the total amount before rebalancing referrers earned
-     * @param           totalAmountForModeratorRewards is the total amount moderator earned before rebalancing
      */
     function endCampaignWithdrawContractorLeftOverAndModeratorEarningsBalance(
         address campaignPlasma
@@ -472,16 +535,16 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
             initialBountyForCampaign = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2BudgetUSD, campaignPlasma));
         }
 
-        (, uint totalAmountForModeratorRewards) = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsAndTotalModeratorEarnings(); //TODO this returns uint,uint
+        (, uint totalAmountForModeratorRewards) = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsAndTotalModeratorEarnings();
         uint totalAmountForReferrerRewards = ITwoKeyPlasmaCampaign(campaignPlasma).getTotalReferrerRewardsEarned();
 
         // Get leftover for the contractor
         uint leftoverForContractor = initialBountyForCampaign.sub(totalAmountForReferrerRewards).sub(totalAmountForModeratorRewards);
-        withdrawCampaignLeftoverForContractor(campainPlasma);
+        withdrawCampaignLeftoverForContractor(campaignPlasma);
 
         // Set moderator earnings for this campaign and immediately distribute them
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2ModeratorEarnings, campaignPlasma), totalAmountForModeratorRewards);
-        withdrawCampaignModeratorEarnings(campainPlasma);
+        withdrawCampaignModeratorEarnings(campaignPlasma);
 
         // Leftover for contractor
         PROXY_STORAGE_CONTRACT.setUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignPlasma), leftoverForContractor);
@@ -528,7 +591,6 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
      * @notice          Function to set how many tokens are being distributed to moderator
      *                  as well as distribute them.
      * @param           campaignPlasma is the plasma address of selected campaign
-     * @param           totalAmountForModeratorRewards is the amount for moderator after rebalancing
      */
     function withdrawCampaignModeratorEarnings(
         address campaignPlasma
@@ -543,10 +605,10 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
         require(moderatorBalance > 0);
         // Require that moderator has not already withdrawn the earnings
         require(
-            PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2EarningsByModerator, campaignPlasmaAddress)) == false
+            PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2EarningsByModerator, campaignPlasma)) == false
         );
         // Set value that moderator did perform the withdraw
-        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2EarningsByModerator, campaignPlasmaAddress), true);
+        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2EarningsByModerator, campaignPlasma), true);
         // Perform transfer of moderator earnings
         if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == true) {
             // Transfer 2KEY tokens to moderator
@@ -566,55 +628,17 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     }
 
     /**
-     * @notice          Function where moderator can withdraw his earnings
-     * @param           campaignPlasmaAddress is plasma address of campaign
-     */
-    function withdrawLeftoverForContractor(
-        address campaignPlasmaAddress //TODO: delete this function
-    )
-    public
-    onlyMaintainer //TODO: remove this
-    {
-        //TODO: add require that the msg.sender is the contractor of this campaign
-        // Get leftoverForContractor
-        uint leftoverForContractor = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignPlasmaAddress));
-        // Require that there is an existing amount of leftoverForContractor
-        require(leftoverForContractor > 0);
-        // Require that contractor has not already withdrawn the leftover
-        require(
-            PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignPlasmaAddress)) == false
-        );
-        // Set value that contractor did perform the withdraw
-        PROXY_STORAGE_CONTRACT.setBool(keccak256(_campaignPlasma2LeftoverWithdrawnByContractor, campaignPlasmaAddress), true);
-        // Perform transfer of leftover to contractor
-        if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasmaAddress)) == true) {
-            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transferUSDFrom(
-                    campaignPlasmaAddress,
-                    msg.sender, //TODO: send this to contractor address account as specified in contract, don't take it as param
-                    leftoverForContractor
-                );
-        } else {
-            ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager))
-                .transfer2KEYFrom(
-                    campaignPlasmaAddress,
-                    msg.sender, //TODO: send this to contractor address account as specified in contract, don't take it as param
-                    leftoverForContractor
-                );
-        }
-    }
-
-    /**
      * @notice          Function where contractor can withdraw if there's any leftover on his campaign
      * @param           campaignPlasmaAddress is plasma address of campaign
      */
-    function withdrawCampaignLeftoverForContractor( //TODO: make this public,
+    function withdrawCampaignLeftoverForContractor(
         address campaignPlasmaAddress
     )
-    internal
+    public
     {
         address contractorAddress = PROXY_STORAGE_CONTRACT.getAddress(keccak256(_campaignPlasma2Contractor, campaignPlasmaAddress));
-        //TODO require that the caller is the contractor
+        // Require that the caller is the contractor
+        require(msg.sender == contractorAddress);
         // Get leftoverForContractor
         uint leftoverForContractor = PROXY_STORAGE_CONTRACT.getUint(keccak256(_campaignPlasma2LeftOverForContractor, campaignPlasmaAddress));
         // Require that there is an existing amount of leftoverForContractor
@@ -855,100 +879,126 @@ contract TwoKeyPlasmaCampaignsInventoryManager is Upgradeable {
     }
 
     /**
-     * @notice          Function to get campaign where referrer is having pending
+     * @notice          Function to get campaign where moderator is having pending
      *                  balance. If empty array, means all rewards are already being
      *                  distributed.
-     * @param           moderator is the plasma address of moderator
      */
-    function getCampaignsModeratorHasPendingBalances(
-        address moderator
-    )
+    function getCampaignsModeratorHasPendingBalances()
     public
     view
     returns (address[])
     {
         bytes32 key = keccak256(
-            _moderator2pendingCampaignAddresses,
-            moderator
+            _moderator2pendingCampaignAddresses
         );
 
         return PROXY_STORAGE_CONTRACT.getAddressArray(key);
     }
 
+    // /**
+    //  * @notice          Function to get campaign where referrer is having inProgress
+    //  *                  balance. If empty array, means all rewards are already being
+    //  *                  distributed.
+    //  * @param           referrer is the plasma address of referrer
+    //  */
+    // function getCampaignsReferrerHasInProgressBalances(
+    //     address referrer
+    // )
+    // public
+    // view
+    // returns (address[])
+    // {
+    //     bytes32 key = keccak256(
+    //         _referrer2inProgressCampaignAddress,
+    //         referrer
+    //     );
+
+    //     return PROXY_STORAGE_CONTRACT.getAddressArray(key);
+    // }
+
+    // /**
+    //  * @notice          Function to get campaign where referrer is having inProgress
+    //  *                  balance. If empty array, means all rewards are already being
+    //  *                  distributed.
+    //  * @param           moderator is the plasma address of moderator
+    //  */
+    // function getCampaignsModeratorHasInProgressBalances(
+    //     address moderator
+    // )
+    // public
+    // view
+    // returns (address[])
+    // {
+    //     bytes32 key = keccak256(
+    //         _moderator2inProgressCampaignAddress,
+    //         moderator
+    //     );
+
+    //     return PROXY_STORAGE_CONTRACT.getAddressArray(key);
+    // }
+
     /**
-     * @notice          Function to get campaign where referrer is having inProgress
-     *                  balance. If empty array, means all rewards are already being
-     *                  distributed.
-     * @param           referrer is the plasma address of referrer
-     */
-    function getCampaignsReferrerHasInProgressBalances(
-        address referrer
-    )
-    public
-    view
-    returns (address[])
-    {
-        bytes32 key = keccak256(
-            _referrer2inProgressCampaignAddress,
-            referrer
-        );
-
-        return PROXY_STORAGE_CONTRACT.getAddressArray(key);
-    }
-
-    /**
-     * @notice          Function to get campaign where referrer is having inProgress
-     *                  balance. If empty array, means all rewards are already being
-     *                  distributed.
-     * @param           moderator is the plasma address of moderator
-     */
-    function getCampaignsModeratorHasInProgressBalances(
-        address moderator
-    )
-    public
-    view
-    returns (address[])
-    {
-        bytes32 key = keccak256(
-            _moderator2inProgressCampaignAddress,
-            moderator
-        );
-
-        return PROXY_STORAGE_CONTRACT.getAddressArray(key);
-    }
-
-    /**
-     * @notice          Function to fetch total pending payout on all campaigns that
-     *                  are inProgress of payment yet for influencer
+     * @notice          Returns total claimable 2KEY rewards on all curent campaigns with balance for this referrer
      * @param           referrer is the address of referrer
-     * @return          (uint, uint) Returns USD and 2KEY balances
+     * @return          (uint, address[], uint[]) total claimable 2KEY rewards, campaign array with claimable rewards, balance array of campaigns with claimable rewards
      */
-    function getTotalReferrerPendingAmount(
+    function getTotalReferrerBalanceOnL2PPCCampaigns2KEY(
         address referrer
     )
     public
     view
-    returns (uint, uint)
+    returns (uint, address[] memory, uint[] memory)
     {
         // Get all pending campaigns for this referrer
         address[] memory campaigns = getCampaignsReferrerHasPendingBalances(referrer);
 
-        uint i;
-        uint referrerTotalPendingPayoutUSD;
         uint referrerTotalPendingPayout2KEY;
+        address[] campaigns2KEY;
+        uint[] campaignBalanes2KEY;
 
         // Iterate through all campaigns
-        for(i = 0; i < campaigns.length; i++) {
+        for(uint i = 0; i < campaigns.length; i++) {
             // Add to total pending payout referrer plasma balance
-            if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaignPlasma)) == true) {
+            if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaigns[i])) == true) {
+                campaigns2KEY.push(campaigns[i]);
+                campaignBalanes2KEY.push(ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).get2KEYBalance(campaigns[i]));
                 referrerTotalPendingPayout2KEY = referrerTotalPendingPayout2KEY.add(ITwoKeyPlasmaCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer));
-            } else {
-                referrerTotalPendingPayoutUSD = referrerTotalPendingPayoutUSD.add(ITwoKeyPlasmaCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer));
-            }
+            } 
         }
 
-        // Return referrer total pending
-        return (referrerTotalPendingPayoutUSD, referrerTotalPendingPayout2KEY);
+        return (referrerTotalPendingPayout2KEY, campaigns2KEY, campaignBalanes2KEY);
+    }
+
+    /**
+     * @notice          Returns total claimable USD rewards on all curent campaigns with balance for this referrer
+     * @param           referrer is the address of referrer
+     * @return          (uint, address[], uint[]) total claimable USD rewards, campaign array with claimable rewards, balance array of campaigns with claimable rewards
+     */
+    function getTotalReferrerBalanceOnL2PPCCampaignsUSD(
+        address referrer
+    )
+    public
+    view
+    returns (uint, address[] memory, uint[] memory)
+    {
+        // Get all pending campaigns for this referrer
+        address[] memory campaigns = getCampaignsReferrerHasPendingBalances(referrer);
+
+        uint referrerTotalPendingPayoutUSD;
+        address[] campaignsUSD;
+        uint[] campaignBalanesUSD;
+
+        // Iterate through all campaigns
+        for(uint i = 0; i < campaigns.length; i++) {
+            // Add to total pending payout referrer plasma balance
+            if(PROXY_STORAGE_CONTRACT.getBool(keccak256(_campaignPlasma2isBudgetedWith2KeyDirectly, campaigns[i])) == false) {
+                campaignsUSD.push(campaigns[i]);
+                campaignBalanesUSD.push(ITwoKeyPlasmaAccountManager(getAddressFromTwoKeySingletonRegistry(_twoKeyPlasmaAccountManager)).getUSDBalance(campaigns[i]));
+                referrerTotalPendingPayoutUSD = referrerTotalPendingPayoutUSD.add(ITwoKeyPlasmaCampaign(campaigns[i]).getReferrerPlasmaBalance(referrer));
+            } 
+        }
+
+        return (referrerTotalPendingPayoutUSD, campaignsUSD, campaignBalanesUSD);
     }
 
 //    /**
