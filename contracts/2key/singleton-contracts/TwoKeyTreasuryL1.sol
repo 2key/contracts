@@ -332,6 +332,11 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         emit DepositETH(userAddress, amount, getTokenAddress("DAI"), daiAmount, daiBuyRate);
     }
 
+    //TODO: add global var settable by the congress TargetPegToken (init as USDT)
+    //TODO: add a function pegAllAssets() callable by maintainer only - which will go over all non-2KEY assets which are not the TargetPegToken and EXECUTE **swap via uniswap**  to the targetpegtoken
+    //TODO: add a function pegAssets(string[]) callable by maintainer only - which will be like above, but with specific input tokens, to iterate on and peg
+    //TODO you can add the last 2 functions to the upgradable exchange contract
+
     /**
      * @notice          Function to withdraw moderator USD balance
      * @param           campaignPlasma is the plasma address of the campaign to withdraw moderator earnings
@@ -340,7 +345,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           signature is proof that beneficiary has amount of tokens he wants to withdraw
      */
     function withdrawModeratorBalanceUSD(
-        address campaignPlasma,
+        address campaignPlasma,//TODO remove
         uint amount,
         uint buy2keyRateL2,
         bytes signature
@@ -363,7 +368,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         address beneficiary = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
         // Get the current 2key buy rate
-        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(getTokenAddress("DAI"));
+        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(getTokenAddress("DAI")); //TODO always use the targetPegToken
 
         // Allow 5% change of the price
         if (uniswap2keyRate >= buy2keyRateL2.mul(95).div(100) && uniswap2keyRate <= buy2keyRateL2.mul(105).div(100)) {
@@ -395,7 +400,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           signature is proof that beneficiary has amount of tokens he wants to withdraw
      */
     function withdrawModeratorBalance2KEY(
-        address campaignPlasma,
+        address campaignPlasma,//TODO remove
         uint amount,
         bytes signature
     )
@@ -517,7 +522,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         require(usdValue <=  getTotalUSDBalanceOfNon2KEYTokens());
 
         user2KEYWithdrawBalance[beneficiary] = user2KEYWithdrawBalance[beneficiary].add(withdrawBalance2KEY);
-        
+
         // Transfer tokens to the user
         IERC20(twoKeyTokenAddress).transfer(beneficiary, withdrawBalance2KEY);
 
@@ -571,7 +576,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     {
         uint usdBalance;
         address tokenAddress;
-        
+
         // BUSD
         tokenAddress = getTokenAddress("BUSD");
         usdBalance = usdBalance.add(getBalanceOf(tokenAddress).mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
