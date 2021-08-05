@@ -345,7 +345,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
      * @param           signature is proof that beneficiary has amount of tokens he wants to withdraw
      */
     function withdrawModeratorBalanceUSD(
-        address campaignPlasma,//TODO remove
+        address campaignPlasma,//TODO remove,
         uint amount,
         uint buy2keyRateL2,
         bytes signature
