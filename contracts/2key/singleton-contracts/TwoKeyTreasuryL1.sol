@@ -367,6 +367,8 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
         address beneficiary = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
 
+        //TODO withdraw the targetPegToken directly, not 2KEY
+
         // Get the current 2key buy rate
         uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(getTokenAddress("DAI")); //TODO always use the targetPegToken
 
