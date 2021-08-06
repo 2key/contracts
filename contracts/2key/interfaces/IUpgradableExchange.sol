@@ -116,4 +116,13 @@ contract IUpgradableExchange {
         uint amountOfTokensRequested
     )
     public;
+
+    function uniswapPriceDiscoverForBuyingFromUniswap(
+        address uniswapRouter,
+        uint amountToSwap,
+        address [] path
+    )
+    public
+    view
+    returns (uint);
 }

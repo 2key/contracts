@@ -39,6 +39,7 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	string constant _feesCollectedFromKyber = "feesCollectedFromKyber";
 	string constant _daiCollectedFromUpgradableExchange = "daiCollectedFromUpgradableExchange";
 	string constant _feesCollectedFromDistributionRewards = "feesCollectedFromDistributionRewards";
+	string constant _usdWithdrawnAsModerator = "usdWithdrawnAsModerator";
 
 
 	// Withdrawals from ADMIN
@@ -78,6 +79,12 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 	modifier onlyTwoKeyPlasmaCampaignsInventoryManager {
 		address twoKeyPlasmaCampaignsInventoryManager = getAddressFromTwoKeySingletonRegistry("TwoKeyPlasmaCampaignsInventoryManager");
 		require(msg.sender == twoKeyPlasmaCampaignsInventoryManager);
+		_;
+	}
+
+	modifier onlyTwoKeyTreasuryL1 {
+		address twoKeyTreasuryL1 = getAddressFromTwoKeySingletonRegistry("TreasuryL1");
+		require(msg.sender == twoKeyTreasuryL1);
 		_;
 	}
 
@@ -779,6 +786,30 @@ contract TwoKeyAdmin is Upgradeable, ITwoKeySingletonUtils {
 		PROXY_STORAGE_CONTRACT.setUint(keccak256(key), value);
 	}
 
+	/**
+	 * @notice Add USD balance withdrawan as a moderator
+	 * @param amount is USD amount withdrawn
+	 */
+	function addUSDWithdrawnAsModerator(
+		uint256 amount
+	)
+	public
+	onlyTwoKeyTreasuryL1
+	{
+		uint usdAmount = getUint(_usdWithdrawnAsModerator);
+		setUint(_usdWithdrawnAsModerator, usdAmount.add(amount));
+	}
+
+	/**
+	 * @notice Returns total USD balance withdrawn as a moderator
+	 * @return (uint256) total USD balance withdrawn
+	 */
+	function getUSDWithdrawnAsModerator()
+	public
+	returns (uint256)
+	{
+		return getUint(_usdWithdrawnAsModerator);
+	}
 
 	/**
 	 * @notice 			Getter for moderator earnings per campaign

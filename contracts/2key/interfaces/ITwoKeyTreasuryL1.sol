@@ -18,4 +18,5 @@ contract ITwoKeyTreasuryL1 {
     function withdrawL2BalanceUSD(address beneficiary, uint amount, uint buy2keyRateL2, bytes signature) external;
     function withdrawL2Balance2KEY(address beneficiary, uint amount, bytes signature) external;
     function getBalanceOf(address token) external view returns (uint);
+    function targetPegToken() external view returns (address);
 }

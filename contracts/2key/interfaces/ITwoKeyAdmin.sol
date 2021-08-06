@@ -9,5 +9,7 @@ contract ITwoKeyAdmin {
     function addFeesCollectedInCurrency(string currency, uint amount) public payable;
 
     function updateTokensReceivedFromDistributionFees(uint amountOfTokens) public;
+    function addUSDWithdrawnAsModerator(uint amount) external;
+    function getUSDWithdrawnAsModerator() external returns (uint256);
 }
 

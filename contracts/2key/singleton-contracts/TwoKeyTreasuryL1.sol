@@ -1,4 +1,5 @@
 pragma solidity ^0.4.24;
+pragma experimental ABIEncoderV2;
 
 import "../upgradability/Upgradeable.sol";
 import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
@@ -13,6 +14,8 @@ import "../interfaces/ITwoKeyPlasmaAccountManager.sol";
 import "../interfaces/IUpgradableExchange.sol";
 import "../interfaces/ITwoKeyAdmin.sol";
 
+import "../non-upgradable-singletons/ITwoKeySingletonUtils.sol";
+
 /**
  * TwoKeyTreasuryL1 contract receiving all deposits from contractors.
  * @author Nikola Madjarevic
@@ -26,7 +29,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     string constant _isExistingSignature = "isExistingSignature";
     string constant _messageNotes = "binding rewards for user";
     string constant _tokenAddress = "tokenAddress";
-
+    string constant _twoKeyCongress = "TwoKeyCongress";
 
     bool initialized;
 
@@ -38,6 +41,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     mapping(address => uint) public userUSDWithdrawBalance;   // user => amount
     mapping(address => uint) public user2KEYWithdrawBalance;   // user => amount
     mapping(bytes32 => bool) public isSignatureRateValid; // signature => bool
+    address public targetPegToken;  // target peg token address
 
     event Deposit2KEY(address indexed depositor, uint amount);
     event DepositStableCoin(address indexed depositor, uint amount);
@@ -46,6 +50,13 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
     event WithdrawToken(address indexed beneficiary, address indexed token, uint amount);
     event ReportSignatureValidation(bytes signature, bool indexed isValidSignature);
 
+    /**
+	 * @notice 			Modifier which throws if caller is not TwoKeyCongress
+	 */
+	modifier onlyTwoKeyCongress {
+		require(msg.sender == getNonUpgradableContractAddressFromTwoKeySingletonRegistry(_twoKeyCongress));
+	    _;
+	}
 
     function setInitialParams(
         address twoKeySingletonesRegistry,
@@ -103,15 +114,11 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice          Function to return who signed msg
-     * @param           campaignPlasma is the plasma address of the campaign
      * @param           amountOfTokens is the amount of pending rewards user wants to claim
-     * @param           buy2keyRateL2 is the 2key rate sent by maintainer
      * @param           signature is the signature created by maintainer
      */
     function recoverSignatureForModeratorUSD(
-        address campaignPlasma,
         uint amountOfTokens,
-        uint buy2keyRateL2,
         bytes signature
     )
     public
@@ -122,7 +129,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked(_messageNotes)),
-                keccak256(abi.encodePacked(campaignPlasma, amountOfTokens, buy2keyRateL2))
+                keccak256(abi.encodePacked(amountOfTokens))
             )
         );
 
@@ -132,12 +139,10 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
 
     /**
      * @notice          Function to return who signed msg
-     * @param           campaignPlasma is the plasma address of the campaign
      * @param           amountOfTokens is the amount of pending rewards user wants to claim
      * @param           signature is the signature created by maintainer
      */
     function recoverSignatureForModerator2KEY(
-        address campaignPlasma,
         uint amountOfTokens,
         bytes signature
     )
@@ -149,7 +154,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         bytes32 hash = keccak256(
             abi.encodePacked(
                 keccak256(abi.encodePacked(_messageNotes)),
-                keccak256(abi.encodePacked(campaignPlasma, amountOfTokens))
+                keccak256(abi.encodePacked(amountOfTokens))
             )
         );
 
@@ -332,22 +337,23 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         emit DepositETH(userAddress, amount, getTokenAddress("DAI"), daiAmount, daiBuyRate);
     }
 
-    //TODO: add global var settable by the congress TargetPegToken (init as USDT)
-    //TODO: add a function pegAllAssets() callable by maintainer only - which will go over all non-2KEY assets which are not the TargetPegToken and EXECUTE **swap via uniswap**  to the targetpegtoken
-    //TODO: add a function pegAssets(string[]) callable by maintainer only - which will be like above, but with specific input tokens, to iterate on and peg
-    //TODO you can add the last 2 functions to the upgradable exchange contract
+    /**
+     * @notice set target peg token
+     */
+    function setTargetPegToken(address tokenAddress)
+    public
+    onlyTwoKeyCongress
+    {
+        targetPegToken = tokenAddress;
+    }
 
     /**
      * @notice          Function to withdraw moderator USD balance
-     * @param           campaignPlasma is the plasma address of the campaign to withdraw moderator earnings
      * @param           amount is USD amount
-     * @param           buy2keyRateL2 is the 2key price set by maintainer
      * @param           signature is proof that beneficiary has amount of tokens he wants to withdraw
      */
     function withdrawModeratorBalanceUSD(
-        address campaignPlasma,//TODO remove,
         uint amount,
-        uint buy2keyRateL2,
         bytes signature
     )
     public
@@ -359,50 +365,27 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
         // Check who signed the message
-        address messageSigner = recoverSignatureForModeratorUSD(campaignPlasma, amount, buy2keyRateL2, signature);
+        address messageSigner = recoverSignatureForModeratorUSD(amount, signature);
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
         require(messageSigner == registry.getSignatoryAddress());
 
-        address beneficiary = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
+        
+        ITwoKeyAdmin(twoKeyAdmin).addUSDWithdrawnAsModerator(amount);
 
-        //TODO withdraw the targetPegToken directly, not 2KEY
+        require(IERC20(targetPegToken).transfer(twoKeyAdmin, amount));
 
-        // Get the current 2key buy rate
-        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(getTokenAddress("DAI")); //TODO always use the targetPegToken
-
-        // Allow 5% change of the price
-        if (uniswap2keyRate >= buy2keyRateL2.mul(95).div(100) && uniswap2keyRate <= buy2keyRateL2.mul(105).div(100)) {
-            isSignatureRateValid[keccak256(signature)] = true;
-
-            uint withdrawBalance2KEY = amount.div(buy2keyRateL2).mul(10**18);
-
-            userUSDWithdrawBalance[beneficiary] = userUSDWithdrawBalance[beneficiary].add(amount);
-            // Get the instance of 2KEY token contract
-            IERC20 twoKeyEconomy = IERC20(getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy"));
-            // Transfer tokens to the user
-            twoKeyEconomy.transfer(beneficiary, withdrawBalance2KEY);
-
-            // Update moderator on received tokens so it can proceed distribution to TwoKeyDeepFreezeTokenPool
-            address twoKeyAdmin = getAddressFromTwoKeySingletonRegistry("TwoKeyAdmin");
-            ITwoKeyAdmin(twoKeyAdmin).updateReceivedTokensAsModeratorPPC(withdrawBalance2KEY, campaignPlasma);
-
-            emit WithdrawToken(beneficiary, address(twoKeyEconomy), withdrawBalance2KEY);
-            emit ReportSignatureValidation(signature, true);
-        } else {
-            emit ReportSignatureValidation(signature, false);
-        }
+        emit WithdrawToken(twoKeyAdmin, targetPegToken, amount);
     }
 
     /**
      * @notice          Function to withdraw moderator 2KEY balance
-     * @param           campaignPlasma is the plasma address of the campaign to withdraw moderator earnings
      * @param           amount is the amount of tokens to withdraw
      * @param           signature is proof that beneficiary has amount of tokens he wants to withdraw
      */
     function withdrawModeratorBalance2KEY(
-        address campaignPlasma,//TODO remove
         uint amount,
         bytes signature
     )
@@ -415,7 +398,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         // Set that this signature is used and exists
         PROXY_STORAGE_CONTRACT.setBool(key, true);
         // Check who signed the message
-        address messageSigner = recoverSignatureForModerator2KEY(campaignPlasma, amount, signature);
+        address messageSigner = recoverSignatureForModerator2KEY(amount, signature);
         // Get the instance of TwoKeyRegistry
         ITwoKeyRegistry registry = ITwoKeyRegistry(getAddressFromTwoKeySingletonRegistry("TwoKeyRegistry"));
         // Assert that this signature is created by signatory address
@@ -468,7 +451,7 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         address twoKeyTokenAddress = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("TwoKeyEconomy");
 
         // Get the current 2key buy rate
-        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(getTokenAddress("DAI"));
+        uint uniswap2keyRate = getUniswap2KeyBuyPriceInUSD(targetPegToken);
 
         // Allow 5% change of the price
         if (uniswap2keyRate >= buy2keyRateL2.mul(95).div(100) && uniswap2keyRate <= buy2keyRateL2.mul(105).div(100)) {
@@ -611,5 +594,154 @@ contract TwoKeyTreasuryL1 is Upgradeable, ITwoKeySingletonUtils {
         usdBalance = usdBalance.add(address(this).balance.mul(getUniswap2KeyBuyPriceInUSD(tokenAddress)).div(10**18));
 
         return usdBalance;
+    }
+
+    /**
+     * @notice Swap all non-2KEY tokens for targetPegToken
+     */
+    function pegAllAssets()
+    public
+    onlyMaintainer
+    {
+        address[] memory tokenList = new address[](9);
+        address tokenAddress;
+
+        // BUSD
+        tokenList[0] = getTokenAddress("BUSD");
+        // TUSD
+        tokenList[1] = getTokenAddress("TUSD");
+        // PAX
+        tokenList[2] = getTokenAddress("PAX");
+        // DAI
+        tokenList[3] = getTokenAddress("DAI");
+        // USDC
+        tokenList[4] = getTokenAddress("USDC");
+        // USDT
+        tokenList[5] = getTokenAddress("USDT");
+        // RENBTC
+        tokenList[6] = getTokenAddress("RENBTC");
+        // WBTC
+        tokenList[7] = getTokenAddress("WBTC");
+        // WETH
+        tokenList[8] = getTokenAddress("WETH");
+
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
+
+        // create a path array
+        address[] memory path = new address[](2);
+
+        for (uint i; i < tokenList.length; i++) {
+            // Load the token address
+            tokenAddress = tokenList[i];
+
+            // Require that token address is not the same as targtPegToken
+            if (tokenAddress != targetPegToken) {
+                uint amountToSwap = IERC20(tokenAddress).balanceOf(address(this));
+
+                if (amountToSwap > 0 ) {
+                    // Approve uniswap router to take tokens form the contract
+                    IERC20(tokenAddress).approve(
+                        uniswapRouter,
+                        amountToSwap
+                    );
+
+                    // Set path array
+                    path[0] = tokenAddress;
+                    path[1] = targetPegToken;
+
+                    // Get minimum received
+                    uint minimumToReceive = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).uniswapPriceDiscoverForBuyingFromUniswap(
+                        uniswapRouter,
+                        amountToSwap,
+                        path
+                    );
+
+                    // Execute swap
+                    IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
+                        amountToSwap,
+                        minimumToReceive.mul(97).div(100), // Allow 3 percent to drop
+                        path,
+                        address(this),
+                        block.timestamp + (10 minutes)
+                    );
+                }
+            }
+        }
+
+        // swap ETH
+        path[0] = IUniswapV2Router02(uniswapRouter).WETH();
+        path[1] = targetPegToken;
+        amountToSwap = address(this).balance;
+
+        // Get minimum received
+        minimumToReceive = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).uniswapPriceDiscoverForBuyingFromUniswap(
+            uniswapRouter,
+            amountToSwap,
+            path
+        );
+
+        // Execute swap
+        IUniswapV2Router01(uniswapRouter).swapExactETHForTokens(
+            minimumToReceive.mul(97).div(100), // Allow 3 percent to drop
+            path,
+            address(this),
+            block.timestamp + (10 minutes)
+        );
+    }
+
+    /**
+     * @notice Swap all non-2KEY tokens for targetPegToken
+     */
+    function pegAssets(
+        string[] symbolList
+    )
+    public
+    onlyMaintainer
+    {
+        address[] memory tokenList;
+        address tokenAddress;
+
+        address uniswapRouter = getNonUpgradableContractAddressFromTwoKeySingletonRegistry("UniswapV2Router02");
+
+        // create a path array
+        address[] memory path = new address[](2);
+
+        for (uint i; i < symbolList.length; i++) {
+            // Load the token address
+            tokenAddress = getTokenAddress(symbolList[i]);
+
+            // Require that token address is not the same as targtPegToken
+            if (tokenAddress != targetPegToken) {
+                uint amountToSwap = IERC20(tokenAddress).balanceOf(address(this));
+
+                if (amountToSwap > 0) {
+                    // Approve uniswap router to take tokens form the contract
+                    IERC20(tokenAddress).approve(
+                        uniswapRouter,
+                        amountToSwap
+                    );
+
+                    // Set path array
+                    path[0] = tokenAddress;
+                    path[1] = targetPegToken;
+
+                    // Get minimum received
+                    uint minimumToReceive = IUpgradableExchange(getAddressFromTwoKeySingletonRegistry("TwoKeyUpgradableExchange")).uniswapPriceDiscoverForBuyingFromUniswap(
+                        uniswapRouter,
+                        amountToSwap,
+                        path
+                    );
+
+                    // Execute swap
+                    IUniswapV2Router01(uniswapRouter).swapExactTokensForTokens(
+                        amountToSwap,
+                        minimumToReceive.mul(97).div(100), // Allow 3 percent to drop
+                        path,
+                        address(this),
+                        block.timestamp + (10 minutes)
+                    );
+                }
+            }
+        }
     }
 }
